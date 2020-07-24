@@ -5,7 +5,6 @@ import subprocess
 import nibabel
 import numpy
 from bids import BIDSLayout
-from bids.layout import Config
 from glob import glob
 
 __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -25,6 +24,9 @@ def run(command, env={}):
             break
     if process.returncode != 0:
         raise Exception("Non zero return code: %d"%process.returncode)
+
+
+#-----
 
 parser = argparse.ArgumentParser(description='Hippocampal AutoTop BIDS App')
 parser.add_argument('bids_dir', help='The directory with the input dataset '
@@ -114,7 +116,9 @@ if args.analysis_level == "participant":
             
             
     for in_img, out_dir in zip(in_imgs,out_dirs):
-        print(f'/src/mcr_v97/run_singleSubject.sh /opt/mcr/v97 {in_img} {out_dir}')
+        run_cmd = f'/src/mcr_v97/run_singleSubject.sh /opt/mcr/v97 {in_img} {out_dir}'
+        print(run_cmd)
+        run(run_cmd)
 
 # running group level
 elif args.analysis_level == "group":

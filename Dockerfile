@@ -2,7 +2,9 @@ FROM khanlab/hippocampal_autotop:latest
 
 MAINTAINER alik@robarts.ca
 
-# base directory for Hippocampal_AutoTop
+
+RUN pip install pybids
+
 RUN mkdir -p /app
 COPY . /app
 
