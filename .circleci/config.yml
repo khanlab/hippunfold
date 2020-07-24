@@ -1,0 +1,232 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Building Docker container
+          no_output_timeout: 1h
+          command: |
+              if [ "$CIRCLE_BRANCH" = "master" -o "$CIRCLE_BRANCH" = "" ]; then MY_TAG=latest; else MY_TAG=$CIRCLE_BRANCH; fi
+              export DOCKER_NAME=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$MY_TAG
+              docker build -t $DOCKER_NAME .
+              docker save $DOCKER_NAME -o /tmp/docker_image.tar
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - docker_image.tar
+            
+  build_sif:
+    docker:
+      - image: singularityware/singularity:3.2.1-slim
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Building singularity image from docker tar
+          no_output_timeout: 1h
+          command: |
+              singularity build /tmp/singularity_image.sif docker-archive:///tmp/workspace/docker_image.tar
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - singularity_image.sif
+
+  test:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - setup_remote_docker            
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Install dependencies 
+          command: |
+            apk add --update make wget
+      - run: 
+          name: Load docker image
+          no_output_timeout: 1h
+          command: |
+            docker load -i /tmp/workspace/docker_image.tar
+      - run:
+          name: Running Tests
+          command: |
+              if [ "$CIRCLE_BRANCH" = "master" -o "$CIRCLE_BRANCH" = "" ]; then MY_TAG=latest; else MY_TAG=$CIRCLE_BRANCH; fi
+              export DOCKER_NAME=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$MY_TAG
+              # put tests here
+              echo "no tests implemented yet"
+              #docker run -it $DOCKER_NAME ls
+  test_sif:
+    docker:
+      - image: singularityware/singularity:3.2.1-slim
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Install dependencies 
+          command: |
+            apk add --update make wget
+      - run:
+          name: Running Tests
+          command: |
+              # put tests here -- note singularity exec doesn't seem to work right now..
+              #singularity exec /tmp/workspace/singularity_image.sif ls
+              echo "no tests implemented yet"
+
+  deploy_dev_cc:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "5a:4b:ef:15:70:14:a6:a1:0d:ca:4c:b8:e0:dd:a4:7d"
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: 
+          name: Push singularity image to compute canada
+          no_output_timeout: 1h
+          command: |
+            ssh-keyscan $CC_HOST >> ~/.ssh/known_hosts
+            if [ "$CIRCLE_BRANCH" = "master" ]; then MY_TAG=latest; else MY_TAG=$CIRCLE_BRANCH; fi
+            scp /tmp/workspace/singularity_image.sif ${CC_USER}@${CC_HOST}:${CC_PATH}/${CIRCLE_PROJECT_USERNAME}_${CIRCLE_PROJECT_REPONAME}_${MY_TAG}.sif
+           
+  deploy_dev_sif:
+    docker:
+      - image: singularityware/singularity:3.2.1-slim
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: 
+          name: Login to sylabs cloud
+          no_output_timeout: 1h
+          command: |
+            mkdir /root/.singularity
+            echo $SYLABS_TOKEN > /root/.singularity/sylabs-token
+            singularity remote list
+      - run:
+          name: Pushing build to sylabs cloud
+          command: |
+            if [ "$CIRCLE_BRANCH" = "master" ]; then MY_TAG=latest; else MY_TAG=$CIRCLE_BRANCH; fi
+            singularity push --allow-unsigned /tmp/workspace/singularity_image.sif library://${SYLABS_USER}/circleci/${CIRCLE_PROJECT_REPONAME}:$MY_TAG
+
+  deploy_dev:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - setup_remote_docker            
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+         name: Load docker image
+         no_output_timeout: 1h
+         command: |
+            docker load -i /tmp/workspace/docker_image.tar
+      - run:
+          name: Pushing build to docker hub
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            if [ "$CIRCLE_BRANCH" = "master" ]; then MY_TAG=latest; else MY_TAG=$CIRCLE_BRANCH; fi
+            export DOCKER_NAME=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$MY_TAG
+            # tag and push here:
+            echo docker push $DOCKER_NAME
+            docker push $DOCKER_NAME
+
+  deploy_release:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - setup_remote_docker            
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: 
+          name: Load docker image
+          no_output_timeout: 1h
+          command: |
+            docker load -i /tmp/workspace/docker_image.tar
+      - run:
+          name: Pushing build to docker hub
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            export DOCKER_NAME=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:latest
+            export DOCKER_RELEASE=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
+            # tag and push here:
+            echo docker tag $DOCKER_NAME $DOCKER_RELEASE
+            docker tag $DOCKER_NAME $DOCKER_RELEASE
+            docker push $DOCKER_RELEASE
+            docker push $DOCKER_NAME
+
+  deploy_release_cc:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "5a:4b:ef:15:70:14:a6:a1:0d:ca:4c:b8:e0:dd:a4:7d"
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: 
+          name: Push singularity image to compute canada
+          no_output_timeout: 1h
+          command: |
+            ssh-keyscan $CC_HOST >> ~/.ssh/known_hosts
+            scp /tmp/workspace/singularity_image.sif ${CC_USER}@${CC_HOST}:${CC_PATH}/${CIRCLE_PROJECT_USERNAME}_${CIRCLE_PROJECT_REPONAME}_${CIRCLE_TAG}.sif
+           
+  deploy_release_sif:
+    docker:
+      - image: singularityware/singularity:3.2.1-slim
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run: 
+          name: Login to sylabs cloud
+          no_output_timeout: 1h
+          command: |
+            mkdir /root/.singularity
+            echo $SYLABS_TOKEN > /root/.singularity/sylabs-token
+            singularity remote list
+      - run:
+          name: Pushing release to sylabs cloud
+          command: |
+            singularity push --allow-unsigned /tmp/workspace/singularity_image.sif library://${SYLABS_USER}/circleci/${CIRCLE_PROJECT_REPONAME}:$CIRCLE_TAG
+
+
+workflows:
+  version: 2.0
+  commit:
+    jobs: 
+      - build:
+          context: org-global
+          filters:
+            tags:
+              only: /.*/
+      - test:
+          requires:
+            - build
+          context: org-global
+          filters:
+            tags:
+              only: /.*/
+      - deploy_dev:
+          requires:
+            - build
+            - test
+          context: org-global
+          filters:
+            tags:
+              ignore: /^v.*/
+      - deploy_release:
+          requires:
+            - build
+            - test
+          context: org-global
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+
