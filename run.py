@@ -5,10 +5,13 @@ import subprocess
 import nibabel
 import numpy
 from bids import BIDSLayout
+import bids
 from glob import glob
 
 __version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'version')).read()
+
+bids.config.set_option('extension_initial_dot', True)
 
 def run(command, env={}):
     merged_env = os.environ
@@ -97,9 +100,10 @@ if args.analysis_level == "participant":
 
     for subject in sorted(subjects_to_analyze):
 
-        t2w_list = layout.get(subject=subject,extension='nii.gz',return_type='filename',**search_terms)
+        t2w_list = layout.get(subject=subject,extension='nii.gz',**search_terms)
+    
         if args.search and len(t2w_list)>0:
-            t2w_list = [t2w for t2w in t2w_list if args.search in t2w ]
+            t2w_list = [t2w for t2w in t2w_list if args.search in t2w.filename ]
 
         if len(t2w_list) == 0:
             print(f'WARNING: Unable to find any matching images for sub-{subject}!')
@@ -109,18 +113,26 @@ if args.analysis_level == "participant":
             print(t2w_list)
             continue
         elif len(t2w_list) == 1:
-#            print(f'Found image file for sub-{subject}')
-#            print(t2w_list)
-            in_imgs = in_imgs + t2w_list #in_img
-            out_dirs = out_dirs + [os.path.join(args.output_dir,f'sub-{subject}')]
-            
+            in_img = t2w_list[0].path
+            entities = t2w_list[0].get_entities()
+
+            if 'session' in entities.keys():
+                session = entities['session']
+                out_dir = os.path.join(args.output_dir,f'sub-{subject}/ses-{session}')
+            else:
+                out_dir = os.path.join(args.output_dir,f'sub-{subject}')
+        
+            in_imgs = in_imgs + [in_img] 
+            out_dirs = out_dirs + [out_dir]
+
+        print(f'Adding to run list, input: {in_img}, output: {out_dir}')
             
     for in_img, out_dir in zip(in_imgs,out_dirs):
         run_cmd = f'/src/mcr_v97/run_singleSubject.sh /opt/mcr/v97 {in_img} {out_dir}'
-        print(run_cmd)
+        print(f'Executing: {run_cmd}')
         run(run_cmd)
 
 # running group level
 elif args.analysis_level == "group":
-    print('insert myousif report generation here!')
+    print('insert report generation here!')
 
