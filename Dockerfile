@@ -1,4 +1,4 @@
-FROM khanlab/hippocampal_autotop:v0.1
+FROM khanlab/hippocampal_autotop:reg-fix
 
 MAINTAINER alik@robarts.ca
 
