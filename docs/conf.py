@@ -31,6 +31,7 @@ author = 'Jordan DeKraker and Ali R. Khan'
 # ones.
 extensions = [
     "sphinx_rtd_theme",
+    "sphinxarg.ext",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
