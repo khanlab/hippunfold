@@ -1,4 +1,1 @@
 sphinx-argparse
-nibabel
-numpy
-pybids
