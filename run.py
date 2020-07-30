@@ -8,8 +8,6 @@ from bids import BIDSLayout
 import bids
 from glob import glob
 
-__version__ = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                'version')).read()
 
 bids.config.set_option('extension_initial_dot', True)
 
@@ -58,8 +56,6 @@ def get_parser():
 
     #parser.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
     #                   action='store_true')
-    parser.add_argument('-v', '--version', action='version',
-                        version='Hippocampal AutoTop BIDS App version {}'.format(__version__))
 
 
     return parser
