@@ -10,8 +10,8 @@ def get_parser():
                         'this folder should be prepopulated with the results of the'
                         'participant level analysis.')
     parser.add_argument('analysis_level', help='Level of the analysis that will be performed. '
-                        'Multiple participant level analyses can be run independently '
-                        '(in parallel) using the same output_dir.',
+                        'participant: Hippocampal unfolding and segmentation pipeline, '
+                        'group: Reports and statistics (not implemented yet)',
                         choices=['participant', 'group'])
     parser.add_argument('--participant_label', help='The label(s) of the participant(s) that should be analyzed. The label '
                        'corresponds to sub-<participant_label> from the BIDS spec '
@@ -23,7 +23,8 @@ def get_parser():
                         default='T2w')
     parser.add_argument('--acq', help='Only use images with the specified acq entity in the filename')
     parser.add_argument('--run', help='Only use images with the specified run entity in the filename')
-    parser.add_argument('--search', help='Wildcard search term to locate in image, use when multiple T2w images match for a subject')
+    parser.add_argument('--search', help='Wildcard search term to locate in image filename. Use this option '
+                        'when multiple T2w images match for a subject')
 
     #parser.add_argument('--skip_bids_validator', help='Whether or not to perform BIDS dataset validation',
     #                   action='store_true')
