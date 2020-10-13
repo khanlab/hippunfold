@@ -127,6 +127,7 @@ jobs:
             docker load -i /tmp/workspace/docker_image.tar
       - run:
           name: Pushing build to docker hub
+          no_output_timeout: 1h
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             if [ "$CIRCLE_BRANCH" = "master" ]; then MY_TAG=latest; else MY_TAG=$CIRCLE_BRANCH; fi
@@ -149,6 +150,7 @@ jobs:
             docker load -i /tmp/workspace/docker_image.tar
       - run:
           name: Pushing build to docker hub
+          no_output_timeout: 1h
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             export DOCKER_NAME=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:latest
