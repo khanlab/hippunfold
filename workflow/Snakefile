@@ -1,0 +1,46 @@
+#---- snakebids boilerplate
+
+import snakebids
+from snakebids import bids
+
+configfile: 'config/snakebids.yml'
+
+#writes inputs_config.yml and updates config dict
+snakebids.generate_inputs_config(config)
+
+#this adds constraints to the bids naming
+wildcard_constraints:  **snakebids.get_wildcard_constraints(config)
+
+#----
+wildcard_constraints:
+    desc='[a-zA-Z0-9]+',
+    template='[a-zA-Z0-9]+',
+    space='[a-zA-Z0-9]+',
+
+
+
+
+rule all:
+    input: 
+#        autotop_dir = expand(expand(
+#            bids(root='work/autotop',**config['subj_wildcards'],suffix='autotop',
+#                desc='cropped',space='{{template}}corobl',hemi='{{hemi}}'),
+#                zip, **config['input_zip_lists']['T2w']),
+#            template=config['template'], hemi=['Lflip','R'])
+#        autotop_dir = expand(
+#            bids(root='work/autotop',**config['subj_wildcards'],suffix='autotop',
+#                desc='cropped',space='{template}corobl',hemi='{hemi}',modality='{modality}'),
+#                    subject=config['subjects'], session=config['sessions'],
+#                    template=config['template'], hemi=['Lflip','R'],modality=config['suffix'])
+        subfields = expand(bids(root='results',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',modality='{modality}', **config['subj_wildcards'], template='{template}'),
+                    subject=config['subjects'], session=config['sessions'],
+                    template=config['template'], modality=config['suffix'])
+
+
+
+include: 'rules/common.smk'
+include: 'rules/preproc_t1.smk'
+include: 'rules/preproc_t2.smk'
+include: 'rules/preproc_dwi.smk'
+include: 'rules/autotop.smk'
+
