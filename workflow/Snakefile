@@ -5,8 +5,20 @@ from snakebids import bids
 
 configfile: 'config/snakebids.yml'
 
+#get list of inputs to limit to (T1w + modalities)
+limit_to_list = set()
+limit_to_list.add('T1w') #always need T1w
+
+for modality in config['modality']:
+    if modality[:3] == 'seg': #if modality is segT2w, then add seg and T2w
+        limit_to_list.add('seg')
+        limit_to_list.add(modality[3:])
+    else:
+        limit_to_list.add(modality)
+
+
 #writes inputs_config.yml and updates config dict
-snakebids.generate_inputs_config(config)
+snakebids.generate_inputs_config(config,limit_to=list(limit_to_list))
 
 #this adds constraints to the bids naming
 wildcard_constraints:  **snakebids.get_wildcard_constraints(config)
@@ -19,28 +31,51 @@ wildcard_constraints:
 
 
 
+#this function gets the list of final outputs (L+R combined segs)
+def get_final_segs():
+    subfields = []
+    for modality in config['modality']:
+        if modality[:3] == 'seg': #if modality is segT1w, then seg is used as the pybids index 
+            mod_index = 'seg'
+        else:
+            mod_index = modality
+
+        subfields = subfields + \
+            expand(
+                bids(root='results',
+                    datatype='anat',
+                    suffix='dseg.nii.gz',
+                    desc='subfields',
+                    space='T1w',
+                    modality=modality,
+                    template=config['template'],
+                    **config['subj_wildcards']),
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions']
+            )
+
+    return subfields
+        
+    
+                
+
+
 
 rule all:
-    input: 
-#        autotop_dir = expand(expand(
-#            bids(root='work/autotop',**config['subj_wildcards'],suffix='autotop',
-#                desc='cropped',space='{{template}}corobl',hemi='{{hemi}}'),
-#                zip, **config['input_zip_lists']['T2w']),
-#            template=config['template'], hemi=['Lflip','R'])
-#        autotop_dir = expand(
-#            bids(root='work/autotop',**config['subj_wildcards'],suffix='autotop',
-#                desc='cropped',space='{template}corobl',hemi='{hemi}',modality='{modality}'),
-#                    subject=config['subjects'], session=config['sessions'],
-#                    template=config['template'], hemi=['Lflip','R'],modality=config['suffix'])
-        subfields = expand(bids(root='results',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',modality='{modality}', **config['subj_wildcards'], template='{template}'),
-                    subject=config['subjects'], session=config['sessions'],
-                    template=config['template'], modality=config['suffix'])
-
+    input: get_final_segs()
 
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
-include: 'rules/preproc_t2.smk'
-include: 'rules/preproc_dwi.smk'
+
+if 'segT1w' in config['modality'] or 'segT2w' in config['modality']:
+    include: 'rules/preproc_seg.smk'
+
+if 'segT2w' in config['modality'] or 'T2w' in config['modality']:
+    include: 'rules/preproc_t2.smk'
+
+if 'b500' in config['modality'] or 'b1000' in config['modality']:
+    include: 'rules/preproc_dwi.smk'
+
 include: 'rules/autotop.smk'
 
