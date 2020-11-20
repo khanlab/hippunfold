@@ -22,8 +22,8 @@ setuptools.setup(
         'hippunfold=run:main'
     ]},
     install_requires=[
-        "snakebids",
-        "snakemake==5.28.0",
+        "snakebids>=0.1.4",
+        "snakemake>=5.28.0",
         "pandas",
         "nibabel",
         "numpy"
