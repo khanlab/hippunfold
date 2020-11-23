@@ -93,4 +93,5 @@ net_segment -c newmodeldir/config.ini train
 net_segment -c newmodeldir/config.ini inference
 net_segment -c newmodeldir/config.ini evaluation
 
-
+# need to rename this file before AutoTops_transformAndRollOut.m
+os.rename(newmodeldir + '/dataset_split.csv', newmodeldir + '/dataset_split_training.csv')
