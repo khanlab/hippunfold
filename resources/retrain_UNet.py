@@ -75,7 +75,7 @@ config['INFERENCE'] = {'border': '(16,16,16)',
 		'output_interp_order': '0'}
 
 config['SEGMENTATION'] = {'image': 'IMG',
-		'label': 'lbl',
+		'label': 'LBL',
 		'label_normalisation': 'False',
 		'output_prob': 'False',
 		'num_classes': '9'}
