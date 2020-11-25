@@ -1,7 +1,7 @@
 rule import_t2:
     input: config['input_path']['T2w']
     output: bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz')
-    group: 'preproc'
+    group: 'subj'
     shell: 'cp {input} {output}'
 
 rule n4_t2:
@@ -9,7 +9,7 @@ rule n4_t2:
     output:  bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz',desc='n4')
     threads: 8
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         'N4BiasFieldCorrection -d 3 -i {input} -o {output}'
@@ -37,7 +37,7 @@ rule reg_t2_to_ref:
         xfm_itk = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w{idx}',to='T2w0',desc='rigid',type_='itk'),
         warped = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='aligned',floating='{idx}')
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac && '
         'c3d_affine_tool  {output.xfm_ras} -oitk {output.xfm_itk}'
@@ -67,7 +67,7 @@ rule avg_aligned_or_cp_t2:
     output:
         bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc')
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell: '{params.cmd}'
         
 
@@ -82,7 +82,7 @@ rule reg_t2_to_t1:
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='ras'),
         xfm_itk = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk')
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac && '
         'c3d_affine_tool  {output.xfm_ras} -oitk {output.xfm_itk}'
@@ -95,7 +95,7 @@ rule compose_t2_xfm_corobl:
     output:
         t2_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='{template}corobl',desc='affine',type_='itk')
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'c3d_affine_tool -itk {input[0]} -itk {input[1]} -mult -oitk {output}'
 
@@ -108,7 +108,7 @@ rule warp_t2_to_corobl_crop:
     output: 
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}'),
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         'antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref}  -t {input.xfm}' 
@@ -121,7 +121,7 @@ rule lr_flip_t2:
     output:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi,L}flip'),
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'c3d {input} -flip x -o  {output}'
 

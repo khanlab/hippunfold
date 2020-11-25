@@ -5,7 +5,7 @@ ruleorder:  compose_template_xfm_corobl > convert_template_xfm_ras2itk
 rule import_t1:
     input: lambda wildcards: expand(config['input_path']['T1w'],zip,**snakebids.filter_list(config['input_zip_lists']['T1w'],wildcards))[0]
     output: bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
-    group: 'preproc'
+    group: 'subj'
     shell: 'cp {input} {output}'
 
 rule n4_t1:
@@ -15,7 +15,7 @@ rule n4_t1:
         t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4', suffix='T1w.nii.gz'),
     threads: 8
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         'N4BiasFieldCorrection -d 3 -i {input.t1} -o {output}'
@@ -30,7 +30,7 @@ rule affine_aladin:
         warped_subj = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',space='{template}',desc='affine'),
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}',desc='affine',type_='ras'),
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras}'
 
@@ -40,7 +40,7 @@ rule convert_template_xfm_ras2itk:
     output:
         bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}',desc='affine',type_='itk'),
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'c3d_affine_tool {input}  -oitk {output}'
 
@@ -53,7 +53,7 @@ rule compose_template_xfm_corobl:
     output:
         sub_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affine',type_='itk'),
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'c3d_affine_tool -itk {input.sub_to_std} -itk {input.std_to_cor} -mult -oitk {output}'
 
@@ -65,7 +65,7 @@ rule invert_t1w_intensity:
     output:
         t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4', suffix='InvT1w.nii.gz'),
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell: 'c3d {input}  -scale -1 -stretch 0% 100% 0 1000 -o {output}'
 
 #apply transform to get subject in corobl cropped space
@@ -78,7 +78,7 @@ rule warp_t1_to_corobl_crop:
     output: 
         t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='cropped', suffix='InvT1w.nii.gz',space='{template}corobl',hemi='{hemi,L|R}'),
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         'antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {input.ref}  -t {input.xfm}' 
@@ -90,7 +90,7 @@ rule lr_flip_t1:
     output:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi,L}flip'),
     container: config['singularity']['prepdwi']
-    group: 'preproc'
+    group: 'subj'
     shell:
         'c3d {input} -flip x -o  {output}'
 
