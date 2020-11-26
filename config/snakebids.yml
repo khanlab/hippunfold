@@ -139,6 +139,8 @@ singularity:
   ants: '/project/6050199/akhanf/singularity/ants-v2.3.1.sif'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif' 
   autotop: '/project/6050199/akhanf/singularity/bids-apps/khanlab_hippocampal_autotop_bids_latest.sif'
+  connectome_workbench: '/project/6007967/software/transparentsingularity/connectome-workbench_1.4.1_20191117.simg/connectome-workbench_1.4.1_20191117.simg'
+  freesurfer: '/project/6050199/akhanf/singularity/bids-apps/pwighton_freesurfer_7.1.0.sif'
 
 
 templates:

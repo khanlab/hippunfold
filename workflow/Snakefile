@@ -78,4 +78,5 @@ if 'b500' in config['modality'] or 'b1000' in config['modality']:
     include: 'rules/preproc_dwi.smk'
 
 include: 'rules/autotop.smk'
+include: 'rules/gifti.smk'
 

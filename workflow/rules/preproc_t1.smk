@@ -34,6 +34,8 @@ rule affine_aladin:
     shell:
         'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras}'
 
+
+
 rule convert_template_xfm_ras2itk:
     input:
         bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}',desc='affine',type_='ras'),
@@ -56,6 +58,16 @@ rule compose_template_xfm_corobl:
     group: 'subj'
     shell:
         'c3d_affine_tool -itk {input.sub_to_std} -itk {input.std_to_cor} -mult -oitk {output}'
+
+rule invert_template_xfm_itk2ras:
+    input:
+        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affine',type_='itk'),
+    output:
+        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affineInverse',type_='ras'),
+    container: config['singularity']['prepdwi']
+    group: 'subj'
+    shell:
+        'c3d_affine_tool -itk {input} -inv -o {output}'
 
 
 #create inverted T1w image (to fool autotop trained on T2w):
