@@ -12,10 +12,11 @@ def get_autotop_cmd (wildcards, input, output):
     else:
         set_matlab_lic = f"SINGULARITYENV_MLM_LICENSE_FILE={config['mlm_license_file']}"
         set_java_home = f"SINGULARITYENV_JAVA_HOME={config['java_home']}"
+        set_autotop_dir = f"SINGULARITYENV_AUTOTOP_DIR={autotop_dir}"
 
-        cmd = f"{set_matlab_lic} {set_java_home} {singularity_cmd} "\
+        cmd = f"{set_matlab_lic} {set_java_home} {set_autotop_dir} {singularity_cmd} "\
                 f"{config['matlab_bin']} -batch \"addpath(genpath('{autotop_dir}')); "\
-                f"AutoTops_TransformAndRollOut('{input.nii}','{output.out_dir}',[],'{config['cnn_model'][wildcards.modality]}')\""
+                f"AutoTops_TransformAndRollOut('{input.nii}','{output.out_dir}','{config['cnn_model'][wildcards.modality]}')\""
     return cmd   
 
 
@@ -63,10 +64,11 @@ def get_autotop_inputseg_cmd (wildcards, input, output):
     else:
         set_matlab_lic = f"SINGULARITYENV_MLM_LICENSE_FILE={config['mlm_license_file']}"
         set_java_home = f"SINGULARITYENV_JAVA_HOME={config['java_home']}"
+        set_autotop_dir = f"SINGULARITYENV_AUTOTOP_DIR={autotop_dir}"
 
-        cmd = f"{set_matlab_lic} {set_java_home} {singularity_cmd} "\
+        cmd = f"{set_matlab_lic} {set_java_home} {set_autotop_dir} {singularity_cmd} "\
                 f"{config['matlab_bin']} -batch \"addpath(genpath('{autotop_dir}')); "\
-                f"AutoTops_TransformAndRollOut('{input.nii}','{output.out_dir}','{input.seg}','{config['cnn_model'][wildcards.modality]}')\""
+                f"AutoTops_TransformAndRollOut('{input.nii}','{output.out_dir}','{config['cnn_model'][wildcards.modality]},'{input.seg}'')\""
     return cmd   
 
 rule run_autotop_inputseg:
