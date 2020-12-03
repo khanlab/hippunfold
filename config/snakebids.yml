@@ -138,7 +138,7 @@ singularity:
   prepdwi: '/project/6050199/akhanf/singularity/bids-apps/khanlab_prepdwi_latest.sif'  
   ants: '/project/6050199/akhanf/singularity/ants-v2.3.1.sif'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif' 
-  autotop: '/project/6050199/akhanf/singularity/bids-apps/khanlab_hippocampal_autotop_bids_latest.sif'
+  autotop: '/project/6050199/akhanf/singularity/bids-apps/khanlab_autotop_deps_latest.sif'
   connectome_workbench: '/project/6007967/software/transparentsingularity/connectome-workbench_1.4.1_20191117.simg/connectome-workbench_1.4.1_20191117.simg'
   freesurfer: '/project/6050199/akhanf/singularity/bids-apps/pwighton_freesurfer_7.1.0.sif'
 
@@ -170,10 +170,11 @@ modality:
 
 #CNN model - mapping from image type to model
 cnn_model:
-  T2w: 'highres3dnet_large_v0.4'
-  T1w: 'highres3dnet_large_v0.4'
-  b500: 'highres3dnet_large_v0.6_b1000'
-  b1000: 'highres3dnet_large_v0.6_b1000'
+  T2w: 'HCP1200-T2'
+  T1w: 'HCP1200-T1'
+  b500: 'HCP1200-b1000'
+  b1000: 'HCP1200-b1000'
+
 
 #MATLAB vs MCR
 
