@@ -131,7 +131,18 @@ parse_args:
     help: 'Path to the derivatives folder (e.g. for finding manual segs) (default: %(default)s) '
     default: False
 
+  --skip_preproc:
+    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed (default: %(default)s'
+    default: False
+    action: 'store_true'
 
+ 
+  --skip_coreg:
+    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s'
+    default: False
+    action: 'store_true'
+
+  
 #--- workflow specific configuration -- 
 
 singularity:

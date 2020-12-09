@@ -55,21 +55,30 @@ def get_aligned_n4_t2 (wildcards):
                         **wildcards, idx=range(1,num_scans))
     return t2_imgs
 
+if config['skip_preproc']:
+    #grabs the first t2w only 
+    rule import_preproc_t2:
+        input: lambda wildcards: expand(config['input_path']['T2w'],zip,**snakebids.filter_list(config['input_zip_lists']['T2w'],wildcards))[0]
+        output: bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz', desc='preproc')
+        group: 'subj'
+        shell: 'cp {input} {output}'
 
+else:
 
-#average aligned n4 images to get preproc T2w (or if single scan, just copy it)
-rule avg_aligned_or_cp_t2:
-    input:
-        ref = get_ref_n4_t2,
-        flo = get_aligned_n4_t2,
-    params:
-        cmd = get_avg_or_cp_scans_cmd
-    output:
-        bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc')
-    container: config['singularity']['prepdwi']
-    group: 'subj'
-    shell: '{params.cmd}'
-        
+    #average aligned n4 images to get preproc T2w (or if single scan, just copy it)
+    rule avg_aligned_or_cp_t2:
+        input:
+            ref = get_ref_n4_t2,
+            flo = get_aligned_n4_t2,
+        params:
+            cmd = get_avg_or_cp_scans_cmd
+        output:
+            bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc')
+        container: config['singularity']['prepdwi']
+        group: 'subj'
+        shell: '{params.cmd}'
+            
+
 
 
 #register to t1 
@@ -99,11 +108,20 @@ rule compose_t2_xfm_corobl:
     shell:
         'c3d_affine_tool -itk {input[0]} -itk {input[1]} -mult -oitk {output}'
 
+
+#if already have t2w in T1w space, then we don't need to use composed xfm:
+def get_xfm_to_corobl():
+    if config['skip_coreg']:
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk')
+    else:
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk'),
+    return xfm
+
 #apply transform to get subject in corobl cropped space -- note that this could be marginally improved if we xfm each T2 to the cropped space in single resample (instead of avgT2w first)
 rule warp_t2_to_corobl_crop:
     input:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc'),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk'),
+        xfm = get_xfm_to_corobl(),
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref'])
     output: 
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
@@ -112,6 +130,9 @@ rule warp_t2_to_corobl_crop:
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         'antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref}  -t {input.xfm}' 
+
+
+
 
 
 
