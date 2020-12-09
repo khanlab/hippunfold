@@ -23,13 +23,13 @@ def get_autotop_cmd (wildcards, input, output):
 
 def get_autotop_input (wildcards):
     if wildcards.modality == 'T2w':
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     elif wildcards.modality == 'T1w':
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     elif wildcards.modality == 'b500':
-        nii = bids(root='work/preproc_dwi',suffix='b500.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='{template}corobl',hemi='{hemi}'),
+        nii = bids(root='work/preproc_dwi',suffix='b500.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi}'),
     elif wildcards.modality == 'b1000':
-        nii = bids(root='work/preproc_dwi',suffix='b1000.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='{template}corobl',hemi='{hemi}'),
+        nii = bids(root='work/preproc_dwi',suffix='b1000.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi}'),
     else:
         nii = ''
 
@@ -43,13 +43,13 @@ rule run_autotop:
     params:
         autotop_cmd = get_autotop_cmd
     output:
-        out_dir = directory(bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='{template}corobl',hemi='{hemi,Lflip|R}',modality='{modality}')),
-        subfields = bids(root='work',**config['subj_wildcards'],suffix='autotop/subfields-BigBrain.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='{template}corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_native2unfold.nii',desc='cropped',space='{template}corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
+        out_dir = directory(bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')),
+        subfields = bids(root='work',**config['subj_wildcards'],suffix='autotop/subfields-BigBrain.nii.gz',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
     threads: 8
     group: 'subj'
-    log: bids(root='logs',**config['subj_wildcards'],space='{template}corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='autotop.txt')
+    log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='autotop.txt')
     shell:
         'SINGULARITYENV_ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         "{params.autotop_cmd} &> {log}"
@@ -74,30 +74,44 @@ def get_autotop_inputseg_cmd (wildcards, input, output):
 rule run_autotop_inputseg:
     input:
         nii = get_autotop_input,
-        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}',from_='{modality}'),
+        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality}'),
     params:
         autotop_cmd = get_autotop_inputseg_cmd
     output:
-        out_dir = directory(bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='{template}corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}')),
-        subfields = bids(root='work',**config['subj_wildcards'],suffix='autotop/subfields-BigBrain.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}'),
-        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='{template}corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}'),
-        warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_native2unfold.nii',desc='cropped',space='{template}corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}')
+        out_dir = directory(bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}')),
+        subfields = bids(root='work',**config['subj_wildcards'],suffix='autotop/subfields-BigBrain.nii.gz',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}'),
+        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}'),
+        warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}'),
+        gii = expand(bids(root='work',suffix='autotop/{surfname}.unfoldedtemplate.surf.gii',desc='cropped', space='corobl',hemi='{{hemi}}',modality='{{modality}}', **config['subj_wildcards']),surfname=['inner','outer','midthickness'],allow_missing=True)
     threads: 8
     group: 'subj'
-    log: bids(root='logs',**config['subj_wildcards'],space='{template}corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}',suffix='autotop.txt')
+    log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}',suffix='autotop.txt')
     shell:
         'SINGULARITYENV_ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         "{params.autotop_cmd} &> {log}"
 
 
 
+#full-grid correction of unfolded space
+rule map_to_full_grid:
+    input: 
+        autotop_dir = bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+    params:
+        script = os.path.join(config['snakemake_dir'],'hippocampal_autotop','tools','warps_gifti','mapUnfoldToFullGrid.sh')
+    output:
+        warp_unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+    container: config['singularity']['autotop']
+    shell:
+        '{params.script} {input.autotop_dir} {input.autotop_dir}'
+
 
 #rule to unflip a nifti
 rule unflip_autotop_nii:
     input:
-        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/{filename}.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}flip',modality='{modality}')
+        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/{filename}.nii.gz',desc='cropped',space='corobl',hemi='{hemi}flip',modality='{modality}')
     output:
-        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/{filename}.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi,L}',modality='{modality}')
+        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/{filename}.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}',modality='{modality}')
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'
@@ -106,11 +120,11 @@ rule unflip_autotop_nii:
 
 rule resample_subfields_to_T1w:
     input:
-        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/subfields-BigBrain.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}',modality='{modality}'),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affine',type_='itk'),
+        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/subfields-BigBrain.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
         ref = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     output:
-        nii = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}',modality='{modality}', **config['subj_wildcards'],template='{template}')
+        nii = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}',modality='{modality}', **config['subj_wildcards'])
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -121,10 +135,10 @@ rule resample_subfields_to_T1w:
 #right now this uses same labels for each, need to change this to a new lut
 rule combine_lr_subfields:
     input:
-        left = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='L',modality='{modality}', **config['subj_wildcards'],template='{template}'),
-        right = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='R',modality='{modality}', **config['subj_wildcards'],template='{template}')
+        left = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='L',modality='{modality}', **config['subj_wildcards']),
+        right = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='R',modality='{modality}', **config['subj_wildcards'])
     output:
-        combined = bids(root='results',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',modality='{modality}', **config['subj_wildcards'],template='{template}')
+        combined = bids(root='results',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',modality='{modality}', **config['subj_wildcards'])
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell: 'c3d {input} -add -o {output}'
@@ -137,13 +151,16 @@ rule combine_lr_subfields:
 
 def get_autotop_outputs (wildcards):
 
-    out_dir = bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='{template}corobl',hemi='{hemi}',modality='{modality}')
+    out_dir = bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}')
     return { key: os.path.join(out_dir,val) for (key,val) in config['autotop_outputs']}
 
 
 rule resample_to_native:
     input: unpack(get_autotop_outputs)
 
-{directory(bids(root='work',**config['input_wildcards']['T2w'],suffix='autotop',desc='cropped',space='{template}corobl',hemi='{hemi}',modality='{modality}'))
+{directory(bids(root='work',**config['input_wildcards']['T2w'],suffix='autotop',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'))
 
 """
+
+
+
