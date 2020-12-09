@@ -72,7 +72,7 @@ rule cp_to_unflip_unfolded:
 rule warp_gii_to_T1w:
     input:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affineInverse',type_='ras'),
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='ras'),
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['connectome_workbench']

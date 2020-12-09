@@ -57,18 +57,54 @@ def get_final_segs():
 
     return subfields
         
-    
-                
+def get_modality_key(modality):
+    if modality[:3] == 'seg': #if modality is segT1w, then seg is used as the pybids index
+        mod_index = 'seg'
+    else:
+        mod_index = modality
+    return mod_index
 
+#this function gets the list of final outputs (L+R combined segs)
+def get_final_segs():
+    subfields = []
+    for modality in config['modality']:
+        mod_index = get_modality_key(modality)
+        subfields = subfields + \
+            expand(
+                bids(root='results',
+                    datatype='anat',
+                    suffix='dseg.nii.gz',
+                    desc='subfields',
+                    space='T1w',
+                    modality=modality,
+                    **config['subj_wildcards']),
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions']
+            )
+
+    return subfields
+                       
+
+#this function gets the list of final surf spec files
+def get_final_specs():
+    specs = []
+    for modality in config['modality']:
+        mod_index = get_modality_key(modality)
+        specs = specs + \
+            expand(bids(root='work',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards']),
+                modality=modality,
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
+
+    return specs
+          
 
 
 rule all:
     input: get_final_segs()
 
-rule all_surf:
-    input: 
-        expand(bids(root='work',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards']),
-                    modality=config['modality'],subject=config['subjects'],session=config['sessions'])
+rule all_specs:
+    input: get_final_specs()
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'

@@ -59,6 +59,7 @@ rule compose_template_xfm_corobl:
     shell:
         'c3d_affine_tool -itk {input.sub_to_std} -itk {input.std_to_cor} -mult -oitk {output}'
 
+
 rule invert_template_xfm_itk2ras:
     input:
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
@@ -68,6 +69,17 @@ rule invert_template_xfm_itk2ras:
     group: 'subj'
     shell:
         'c3d_affine_tool -itk {input} -inv -o {output}'
+
+rule template_xfm_itk2ras:
+    input:
+        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
+    output:
+        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='ras'),
+    container: config['singularity']['prepdwi']
+    group: 'subj'
+    shell:
+        'c3d_affine_tool -itk {input} -o {output}'
+
 
 
 #create inverted T1w image (to fool autotop trained on T2w):
