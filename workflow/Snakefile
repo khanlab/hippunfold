@@ -26,8 +26,10 @@ wildcard_constraints:  **snakebids.get_wildcard_constraints(config)
 #----
 wildcard_constraints:
     desc='[a-zA-Z0-9]+',
-    template='[a-zA-Z0-9]+',
     space='[a-zA-Z0-9]+',
+    hemi='[a-zA-Z0-9]+',
+    surfname='[a-zA-Z0-9]+',
+    modality='[a-zA-Z0-9]+',
 
 
 
@@ -48,7 +50,6 @@ def get_final_segs():
                     desc='subfields',
                     space='T1w',
                     modality=modality,
-                    template=config['template'],
                     **config['subj_wildcards']),
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions']
@@ -64,6 +65,10 @@ def get_final_segs():
 rule all:
     input: get_final_segs()
 
+rule all_surf:
+    input: 
+        expand(bids(root='work',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards']),
+                    modality=config['modality'],subject=config['subjects'],session=config['sessions'])
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
