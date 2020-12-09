@@ -402,15 +402,15 @@ ruleorder: rigid_reg_with_init > get_shell_avg
 
 rule rigid_reg_with_init:
     input:
-        ref = bids(root='work/preproc_t1',**config['subj_wildcards'],desc='cropped', suffix='T1w.nii.gz',space='{template}corobl',hemi='{hemi}'),
+        ref = bids(root='work/preproc_t1',**config['subj_wildcards'],desc='cropped', suffix='T1w.nii.gz',space='corobl',hemi='{hemi}'),
         flo = bids(root='work',suffix='b0.nii.gz',desc='eddy',datatype='dwi',**config['subj_wildcards']),
-        init_xfm = bids(root='work/preproc_t1',**config['subj_wildcards'],suffix='xfm.txt',from_='subject',to='{template}corobl',desc='affine',type_='itk'),
+        init_xfm = bids(root='work/preproc_t1',**config['subj_wildcards'],suffix='xfm.txt',from_='subject',to='corobl',desc='affine',type_='itk'),
     params:
-        out_prefix = bids(root='work',**config['subj_wildcards'],from_='dwi',to='{template}corobl',desc='affine',type_='itk',suffix='',hemi='{hemi}'),
+        out_prefix = bids(root='work',**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='',hemi='{hemi}'),
         multires = '--convergence [40x20x10,1e-6,10]  --shrink-factors 8x4x2  --smoothing-sigmas 8x4x2vox'
     output:
-        warped = bids(root='work',**config['subj_wildcards'],hemi='{hemi}',space='{template}corobl',suffix='b0.nii.gz',desc='cropped'),
-        xfm = bids(root='work',**config['subj_wildcards'],from_='dwi',to='{template}corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
+        warped = bids(root='work',**config['subj_wildcards'],hemi='{hemi}',space='corobl',suffix='b0.nii.gz',desc='cropped'),
+        xfm = bids(root='work',**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
     container: config['singularity']['ants']
     threads: 8
     group: 'subj'
@@ -423,10 +423,10 @@ rule rigid_reg_with_init:
 rule warp_mean_dwi_corobl:
     input:
         nii = bids(root='work',suffix='{meandwi}.nii.gz',desc='eddy',datatype='dwi',**config['subj_wildcards']),
-        xfm = bids(root='work',**config['subj_wildcards'],from_='dwi',to='{template}corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
-        ref = lambda wildcards: config['template_files'][wildcards.template]['crop_ref']
+        xfm = bids(root='work',**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
+        ref = config['template_files'][config['template']]['crop_ref']
     output: 
-        nii = bids(root='work',suffix='{meandwi,b[0-9]+}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='{template}corobl',hemi='{hemi,L|R}'),
+        nii = bids(root='work',suffix='{meandwi,b[0-9]+}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi,L|R}'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -437,9 +437,9 @@ rule warp_mean_dwi_corobl:
 
 rule lr_flip_dwi:
     input:
-        nii = bids(root='work',suffix='{meandwi}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='{template}corobl',hemi='{hemi}'),
+        nii = bids(root='work',suffix='{meandwi}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi}'),
     output:
-        nii = bids(root='work',suffix='{meandwi,b[0-9]+}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='{template}corobl',hemi='{hemi,L}flip'),
+        nii = bids(root='work',suffix='{meandwi,b[0-9]+}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi,L}flip'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:

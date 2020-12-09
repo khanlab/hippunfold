@@ -91,9 +91,9 @@ rule reg_t2_to_t1:
 rule compose_t2_xfm_corobl:
     input:
         t2_to_t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk'),
-        t1_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affine',type_='itk'),
+        t1_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output:
-        t2_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='{template}corobl',desc='affine',type_='itk')
+        t2_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk')
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -103,10 +103,10 @@ rule compose_t2_xfm_corobl:
 rule warp_t2_to_corobl_crop:
     input:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc'),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='{template}corobl',desc='affine',type_='itk'),
-        ref = lambda wildcards: os.path.join(config['snakemake_dir'],config['template_files'][wildcards.template]['crop_ref'])
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk'),
+        ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref'])
     output: 
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -117,9 +117,9 @@ rule warp_t2_to_corobl_crop:
 
 rule lr_flip_t2:
     input:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     output:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi,L}flip'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:

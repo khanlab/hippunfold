@@ -8,10 +8,10 @@ rule import_seg:
 rule warp_seg_to_corobl_crop:
     input:
         nii = bids(root='work',datatype='anat',**config['input_wildcards']['seg'],suffix='dseg.nii.gz'),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='{space}',to='{template}corobl',desc='affine',type_='itk'),
-        ref = lambda wildcards: os.path.join(config['snakemake_dir'],config['template_files'][wildcards.template]['crop_ref'])
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='{space}',to='corobl',desc='affine',type_='itk'),
+        ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref'])
     output:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}',from_='{space}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{space}'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -21,9 +21,9 @@ rule warp_seg_to_corobl_crop:
 
 rule lr_flip_seg:
     input:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}',from_='{space}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{space}'),
     output:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi,L}flip',from_='{space}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip',from_='{space}'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:

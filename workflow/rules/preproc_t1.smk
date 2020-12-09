@@ -25,10 +25,10 @@ rule n4_t1:
 rule affine_aladin:
     input: 
         flo = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4',suffix='T1w.nii.gz'),
-        ref = lambda wildcards: os.path.join(config['snakemake_dir'],config['template_files'][wildcards.template]['T1w']),
+        ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['T1w']),
     output: 
-        warped_subj = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',space='{template}',desc='affine'),
-        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}',desc='affine',type_='ras'),
+        warped_subj = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',space=config['template'],desc='affine'),
+        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='ras'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -38,9 +38,9 @@ rule affine_aladin:
 
 rule convert_template_xfm_ras2itk:
     input:
-        bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}',desc='affine',type_='ras'),
+        bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='ras'),
     output:
-        bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}',desc='affine',type_='itk'),
+        bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='itk'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -50,10 +50,10 @@ rule convert_template_xfm_ras2itk:
 #now have subject -> template transform, can compose that with template -> corobl to get subject -> corobl
 rule compose_template_xfm_corobl:
     input:
-        sub_to_std = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}',desc='affine',type_='itk'),
-        std_to_cor = lambda wildcards: os.path.join(config['snakemake_dir'],config['template_files'][wildcards.template]['xfm_corobl'])
+        sub_to_std = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='itk'),
+        std_to_cor = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['xfm_corobl'])
     output:
-        sub_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affine',type_='itk'),
+        sub_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -61,9 +61,9 @@ rule compose_template_xfm_corobl:
 
 rule invert_template_xfm_itk2ras:
     input:
-        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affine',type_='itk'),
+        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output:
-        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affineInverse',type_='ras'),
+        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affineInverse',type_='ras'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -84,11 +84,11 @@ rule invert_t1w_intensity:
 rule warp_t1_to_corobl_crop:
     input:
         t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4', suffix='InvT1w.nii.gz'),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='{template}corobl',desc='affine',type_='itk'),
-        ref = lambda wildcards: os.path.join(config['snakemake_dir'],config['template_files'][wildcards.template]['crop_ref']),
-        std_to_cor = lambda wildcards: os.path.join(config['snakemake_dir'],config['template_files'][wildcards.template]['xfm_corobl'])
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
+        ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref']),
+        std_to_cor = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['xfm_corobl'])
     output: 
-        t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='cropped', suffix='InvT1w.nii.gz',space='{template}corobl',hemi='{hemi,L|R}'),
+        t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='cropped', suffix='InvT1w.nii.gz',space='corobl',hemi='{hemi,L|R}'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -98,9 +98,9 @@ rule warp_t1_to_corobl_crop:
 
 rule lr_flip_t1:
     input:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     output:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='{template}corobl',hemi='{hemi,L}flip'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
