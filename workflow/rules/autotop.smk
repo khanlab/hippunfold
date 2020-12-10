@@ -51,6 +51,8 @@ rule run_autotop:
         gii = expand(bids(root='work',suffix='autotop/{surfname}.unfoldedtemplate.surf.gii',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),surfname=['inner','outer','midthickness'],allow_missing=True),
         coords = expand(bids(root='work',suffix='autotop/coords-{dir}.nii.gz',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),dir=['AP','PD','IO'],allow_missing=True)
     threads: 8
+    resources:
+        time = 60*60 #1 hr
     group: 'subj'
     log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='autotop.txt')
     shell:
@@ -87,6 +89,8 @@ rule run_autotop_inputseg:
         warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}'),
         gii = expand(bids(root='work',suffix='autotop/{surfname}.unfoldedtemplate.surf.gii',desc='cropped', space='corobl',hemi='{{hemi}}',modality='seg{{modality}}', **config['subj_wildcards']),surfname=['inner','outer','midthickness'],allow_missing=True)
     threads: 8
+    resources:
+        time = 60*60 #1 hr
     group: 'subj'
     log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}',suffix='autotop.txt')
     shell:
@@ -106,7 +110,12 @@ rule map_to_full_grid:
         warp_unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
     container: config['singularity']['autotop']
     group: 'subj'
+    threads: 8
+    resources:
+        time = 15*60 #15min
+    log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}',suffix='mapUnfoldToFullGrid.txt')
     shell:
+        'SINGULARITYENV_ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         '{params.script} {input.autotop_dir} {input.autotop_dir}'
 
 
@@ -141,12 +150,15 @@ rule resample_subfields_to_T1w:
 rule create_native_crop_ref:
     input:
         seg = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+    params:
+        resample = '400%',
+        pad_to = '192x256x256vox'
     output:
         ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
-        'c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample 400% -pad-to 160x320x160vox 0 {output}'
+        'c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample {params.resample} -pad-to {params.pad_to} 0 {output}'
   
 rule resample_subfields_native_crop:
     input:
@@ -176,6 +188,37 @@ rule resample_coords_native_crop:
         'antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]' 
 
 
+#create gm ribbon from coords-IO:
+rule create_gm_ribbon:
+    input:
+        io_coords = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+    output:
+        ribbon = bids(root='work',datatype='seg_{modality}',desc='ribbon',suffix='mask.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+    container: config['singularity']['prepdwi']
+    group: 'subj'
+    shell:
+        'c3d {input} -binarize {output}'
+
+rule import_subfield_labels:
+    input: os.path.join(config['snakemake_dir'],'resources','bigbrain','sub-bigbrain_hemi-{hemi}_subfields.label.gii')
+    output: bids(root='work',datatype='surf_{modality}',desc='bigbrain',suffix='subfields.labels.gii', hemi='{hemi}', **config['subj_wildcards']),
+    group: 'subj'
+    shell: 'cp {input} {output}'
+    
+#map bigbrain subfields to volume
+rule subfields_to_volume:
+    input:
+        label = bids(root='work',datatype='surf_{modality}',desc='bigbrain',suffix='subfields.labels.gii', hemi='{hemi}', **config['subj_wildcards']),
+        midthickness = bids(root='work',datatype='surf_{modality}',suffix='midthickness.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+        ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+        inner = bids(root='work',datatype='surf_{modality}',suffix='inner.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+        outer = bids(root='work',datatype='surf_{modality}',suffix='outer.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+    output:
+        vol = bids(root='work',datatype='seg_{modality}',desc='subfields',from_='surface',suffix='dseg.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+    container: config['singularity']['connectome_workbench']
+    group: 'subj'
+    shell:
+        'wb_command -label-to-volume-mapping {input.label} {input.midthickness} {input.ref} {output.vol} -ribbon-constrained {input.inner} {input.outer}'
 
 
 #right now this uses same labels for each, need to change this to a new lut

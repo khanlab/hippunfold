@@ -81,7 +81,9 @@ rule all:
         segs = get_final_segs(),
         specs = get_final_specs(),
         coords = expand(bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
-            dir=['AP','PD','IO'],hemi=['L','R'],modality=config['modality'],subject=config['subjects'],session=config['sessions'])
+            dir=['AP','PD','IO'],hemi=['L','R'],modality=config['modality'],subject=config['subjects'],session=config['sessions']),
+        subfields = expand(bids(root='work',datatype='seg_{modality}',desc='subfields',from_='surface',suffix='dseg.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+            hemi=['L','R'],modality=config['modality'],subject=config['subjects'],session=config['sessions'])
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
