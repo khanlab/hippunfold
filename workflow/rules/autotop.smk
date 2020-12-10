@@ -119,6 +119,7 @@ rule unflip_autotop_nii:
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'
 
+
    
 
 rule resample_subfields_to_T1w:
@@ -127,43 +128,66 @@ rule resample_subfields_to_T1w:
         xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
         ref = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     output:
-        nii = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}',modality='{modality}', **config['subj_wildcards'])
+        nii = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         'antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]' 
 
-   
+#create ref space for hires crop in native space
+# TODO:  expose the resampling factor and size as cmd line args
+rule create_native_crop_ref:
+    input:
+        seg = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+    output:
+        ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+    container: config['singularity']['autotop']
+    group: 'subj'
+    shell:
+        'c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample 400% -pad-to 160x320x160vox 0 {output}'
+  
+rule resample_subfields_native_crop:
+    input:
+        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/subfields-BigBrain.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
+        ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+    output:
+        nii = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+    container: config['singularity']['prepdwi']
+    group: 'subj'
+    shell:
+        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
+        'antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]' 
+
+
+rule resample_coords_native_crop:
+    input:
+        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/coords-{dir}.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
+        ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+    output:
+        nii = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+    container: config['singularity']['prepdwi']
+    group: 'subj'
+    shell:
+        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
+        'antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]' 
+
+
+
+
 #right now this uses same labels for each, need to change this to a new lut
 rule combine_lr_subfields:
     input:
-        left = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='L',modality='{modality}', **config['subj_wildcards']),
-        right = bids(root='work',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='R',modality='{modality}', **config['subj_wildcards'])
+        left = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='L', **config['subj_wildcards']),
+        right = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='R', **config['subj_wildcards'])
     output:
-        combined = bids(root='results',datatype='anat',suffix='dseg.nii.gz', desc='subfields',space='T1w',modality='{modality}', **config['subj_wildcards'])
+        combined = bids(root='results',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w', **config['subj_wildcards'])
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell: 'c3d {input} -add -o {output}'
  
-
-        
-"""
-
-
-
-def get_autotop_outputs (wildcards):
-
-    out_dir = bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}')
-    return { key: os.path.join(out_dir,val) for (key,val) in config['autotop_outputs']}
-
-
-rule resample_to_native:
-    input: unpack(get_autotop_outputs)
-
-{directory(bids(root='work',**config['input_wildcards']['T2w'],suffix='autotop',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'))
-
-"""
 
 
 

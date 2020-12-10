@@ -33,30 +33,7 @@ wildcard_constraints:
 
 
 
-#this function gets the list of final outputs (L+R combined segs)
-def get_final_segs():
-    subfields = []
-    for modality in config['modality']:
-        if modality[:3] == 'seg': #if modality is segT1w, then seg is used as the pybids index 
-            mod_index = 'seg'
-        else:
-            mod_index = modality
-
-        subfields = subfields + \
-            expand(
-                bids(root='results',
-                    datatype='anat',
-                    suffix='dseg.nii.gz',
-                    desc='subfields',
-                    space='T1w',
-                    modality=modality,
-                    **config['subj_wildcards']),
-                subject=config['input_lists'][mod_index]['subject'],
-                session=config['sessions']
-            )
-
-    return subfields
-        
+       
 def get_modality_key(modality):
     if modality[:3] == 'seg': #if modality is segT1w, then seg is used as the pybids index
         mod_index = 'seg'
@@ -72,11 +49,10 @@ def get_final_segs():
         subfields = subfields + \
             expand(
                 bids(root='results',
-                    datatype='anat',
+                    datatype=f'seg_{modality}',
                     suffix='dseg.nii.gz',
                     desc='subfields',
                     space='T1w',
-                    modality=modality,
                     **config['subj_wildcards']),
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions']
@@ -105,6 +81,11 @@ rule all:
 
 rule all_specs:
     input: get_final_specs()
+
+rule all_coords:
+    input:
+        coords = expand(bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+            dir=['AP','PD','IO'],hemi=['L','R'],modality=config['modality'],subject=config['subjects'],session=config['sessions'])
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
