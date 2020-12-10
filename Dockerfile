@@ -1,12 +1,13 @@
-FROM khanlab/hippocampal_autotop:latest
+FROM khanlab/autotop_deps:v0.1
 
 MAINTAINER alik@robarts.ca
 
 
-RUN pip install pybids
+COPY . /src/
 
-RUN mkdir -p /app
-COPY . /app
+RUN pip install /src
 
-ENTRYPOINT ["/app/run.py"]
+ENV AUTOTOP_DIR /src
+
+ENTRYPOINT [ "hippunfold" ]
 
