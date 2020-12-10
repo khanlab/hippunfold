@@ -77,13 +77,9 @@ def get_final_specs():
 
 
 rule all:
-    input: get_final_segs()
-
-rule all_specs:
-    input: get_final_specs()
-
-rule all_coords:
-    input:
+    input: 
+        segs = get_final_segs(),
+        specs = get_final_specs(),
         coords = expand(bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
             dir=['AP','PD','IO'],hemi=['L','R'],modality=config['modality'],subject=config['subjects'],session=config['sessions'])
 
