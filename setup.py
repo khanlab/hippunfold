@@ -26,7 +26,8 @@ setuptools.setup(
         "snakemake>=5.28.0",
         "pandas",
         "nibabel",
-        "numpy"
+        "numpy",
+        "scipy"
     ],
     python_requires='>=3.7'
 )
