@@ -187,7 +187,7 @@ cnn_model:
 
 #MATLAB vs MCR
 
-use_mcr: False
+use_mcr: True
 
 #if no mcr, then need to define the following:
 

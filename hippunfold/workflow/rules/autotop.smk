@@ -4,12 +4,12 @@ import os
 #creates command based on mcr or matlab
 def get_autotop_cmd (wildcards, input, output):
     autotop_dir = os.path.join(config['snakemake_dir'],'hippocampal_autotop')
-    singularity_cmd = f"singularity exec -B {autotop_dir}:/src -e {config['singularity']['autotop']}" 
 
     if config['use_mcr'] == True:
-        cmd = f"{singularity_cmd} /src/mcr_v97/run_AutoTops_TransformAndRollOut.sh /opt/mcr/v97 "\
+        cmd = f"AUTOTOP_DIR={autotop_dir} {autotop_dir}/mcr_v97/run_AutoTops_TransformAndRollOut.sh /opt/mcr/v97 "\
                 f"{input.nii} {output.out_dir} '' {config['cnn_model'][wildcards.modality]}"
     else:
+        singularity_cmd = f"singularity exec -B {autotop_dir}:/src -e {config['singularity']['autotop']}" 
         set_matlab_lic = f"SINGULARITYENV_MLM_LICENSE_FILE={config['mlm_license_file']}"
         set_java_home = f"SINGULARITYENV_JAVA_HOME={config['java_home']}"
         set_autotop_dir = f"SINGULARITYENV_AUTOTOP_DIR={autotop_dir}"

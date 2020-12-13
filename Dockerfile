@@ -1,4 +1,4 @@
-FROM khanlab/autotop_deps:v0.1
+FROM khanlab/autotop_deps:v0.2
 
 MAINTAINER alik@robarts.ca
 
