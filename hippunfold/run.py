@@ -2,7 +2,6 @@
 import os
 from snakebids.app import SnakeBidsApp
 
-
 def main():
 
     pwd = os.path.abspath(os.path.dirname(__file__))

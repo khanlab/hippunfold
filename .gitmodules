@@ -1,4 +1,4 @@
 [submodule "hippocampal_autotop"]
-	path = hippocampal_autotop
+	path = hippunfold/hippocampal_autotop
 	url = https://github.com/jordandekraker/hippocampal_autotop
 	branch = master

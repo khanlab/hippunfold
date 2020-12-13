@@ -13,16 +13,17 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/khanlab/hippunfold",
     packages=setuptools.find_packages(),
+    include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     entry_points={'console_scripts': [
-        'hippunfold=run:main'
+        'hippunfold=hippunfold.run:main'
     ]},
     install_requires=[
-        "snakebids>=0.1.4",
+        "snakebids>=0.1.5",
         "snakemake>=5.28.0",
         "pandas",
         "nibabel",
