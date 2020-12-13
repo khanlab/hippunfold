@@ -8,7 +8,7 @@ rule n4_t2:
     input:  bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz')
     output:  bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz',desc='n4')
     threads: 8
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -74,7 +74,7 @@ else:
             cmd = get_avg_or_cp_scans_cmd
         output:
             bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc')
-        container: config['singularity']['prepdwi']
+        container: config['singularity']['autotop']
         group: 'subj'
         shell: '{params.cmd}'
             
@@ -90,7 +90,7 @@ rule reg_t2_to_t1:
         warped = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='n4',space='T1w'),
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='ras'),
         xfm_itk = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk')
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac && '
@@ -103,7 +103,7 @@ rule compose_t2_xfm_corobl:
         t1_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output:
         t2_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk')
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d_affine_tool -itk {input[0]} -itk {input[1]} -mult -oitk {output}'
@@ -125,7 +125,7 @@ rule warp_t2_to_corobl_crop:
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref'])
     output: 
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -141,7 +141,7 @@ rule lr_flip_t2:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     output:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d {input} -flip x -o  {output}'

@@ -126,7 +126,7 @@ rule unflip_autotop_nii:
         nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/{filename}.nii.gz',desc='cropped',space='corobl',hemi='{hemi}flip',modality='{modality}')
     output:
         nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/{filename}.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}',modality='{modality}')
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'
 
@@ -140,7 +140,7 @@ rule resample_subfields_to_T1w:
         ref = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     output:
         nii = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -169,7 +169,7 @@ rule resample_matlab_subfields_native_crop:
         ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         nii = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfieldsfrommatlab',space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -183,7 +183,7 @@ rule resample_subfields_native_crop:
         ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         nii = bids(root='work',datatype='seg_{modality}',desc='subfields',suffix='dseg.nii.gz', space='cropT1w',from_='volume',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -198,7 +198,7 @@ rule resample_niftynet_native_crop:
         ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         nii = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='niftynet',space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -212,7 +212,7 @@ rule resample_labelpostproc_native_crop:
         ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         nii = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='niftynetpostproc',space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -228,7 +228,7 @@ rule resample_coords_native_crop:
         ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         nii = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -294,7 +294,7 @@ rule create_gm_ribbon:
         io_coords = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         ribbon = bids(root='work',datatype='seg_{modality}',desc='ribbon',suffix='mask.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d {input} {params.remap_dg} {params.remap_srlm} {params.remap_cyst} -threshold {params.in_dg} {params.in_dg} {params.out_dg} 0   {output}'
@@ -315,7 +315,7 @@ rule subfields_to_volume:
         outer = bids(root='work',datatype='surf_{modality}',suffix='outer.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
     output:
         vol = bids(root='work',datatype='seg_{modality}',desc='subfields',from_='surface',suffix='dseg.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'wb_command -label-to-volume-mapping {input.label} {input.midthickness} {input.ref} {output.vol} -ribbon-constrained {input.inner} {input.outer}'
@@ -328,7 +328,7 @@ rule combine_lr_subfields:
         right = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='R', **config['subj_wildcards'])
     output:
         combined = bids(root='results',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='T1w', **config['subj_wildcards'])
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell: 'c3d {input} -add -o {output}'
  

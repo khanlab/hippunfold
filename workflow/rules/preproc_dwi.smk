@@ -411,7 +411,7 @@ rule rigid_reg_with_init:
     output:
         warped = bids(root='work',**config['subj_wildcards'],hemi='{hemi}',space='corobl',suffix='b0.nii.gz',desc='cropped'),
         xfm = bids(root='work',**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
-    container: config['singularity']['ants']
+    container: config['singularity']['prepdwi']
     threads: 8
     group: 'subj'
     shell:
