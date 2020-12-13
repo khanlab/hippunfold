@@ -7,7 +7,7 @@ def get_autotop_cmd (wildcards, input, output):
 
     if config['use_mcr'] == True:
         cmd = f"AUTOTOP_DIR={autotop_dir} {autotop_dir}/mcr_v97/run_AutoTops_TransformAndRollOut.sh /opt/mcr/v97 "\
-                f"{input.nii} {output.out_dir} '' {config['cnn_model'][wildcards.modality]}"
+                f"{input.nii} {output.out_dir} {config['cnn_model'][wildcards.modality]}"
     else:
         singularity_cmd = f"singularity exec -B {autotop_dir}:/src -e {config['singularity']['autotop']}" 
         set_matlab_lic = f"SINGULARITYENV_MLM_LICENSE_FILE={config['mlm_license_file']}"
@@ -54,6 +54,7 @@ rule run_autotop:
     resources:
         time = 60*60 #1 hr
     group: 'subj'
+    container: config['singularity']['autotop']
     log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='autotop.txt')
     shell:
         'SINGULARITYENV_ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
