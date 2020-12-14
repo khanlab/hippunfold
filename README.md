@@ -6,7 +6,9 @@ BIDS App for Hippocampal AutoTop (automated hippocampal unfolding and subfield s
 Docker (Mac/Windows/Linux) or Singularity (Linux)
 
 BIDS dataset with T1w and T2w images. Highly recommend using 0.8mm isotropic or higher 3D T2w TSE. 
-Note: T1w only is available too with `--modality T1w`, however, this is discouraged unless you have high resolution (~0.7mm or better) T1w data, and performance will likely be sub-optimal. This is currently being evaluated.
+
+Note 1: T1w only workflow is available too with `--modality T1w`, however, this is discouraged unless you have high resolution (~0.7mm or better) T1w data, and performance will likely be sub-optimal. This is currently being evaluated.
+
 Note 2: dwi workflows are also available but currently experimental
 
 ## How to run
