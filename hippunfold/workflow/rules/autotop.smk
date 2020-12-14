@@ -58,17 +58,17 @@ rule run_autotop:
     container: config['singularity']['autotop']
     log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='autotop.txt')
     shell:
-        'SINGULARITYENV_ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
+        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         "{params.autotop_cmd} &> {log}"
 
 def get_autotop_inputseg_cmd (wildcards, input, output):
     autotop_dir = os.path.join(config['snakemake_dir'],'hippocampal_autotop')
-    singularity_cmd = f"singularity exec -B {autotop_dir}:/src -e {config['singularity']['autotop']}" 
 
     if config['use_mcr'] == True:
-        cmd = f"{singularity_cmd} /src/mcr_v97/run_AutoTops_TransformAndRollOut.sh /opt/mcr/v97 "\
+        cmd = f"AUTOTOP_DIR={autotop_dir} {autotop_dir}/mcr_v97/run_AutoTops_TransformAndRollOut.sh /opt/mcr/v97 "\
                 f"{input.nii} {output.out_dir} '{input.seg}' {config['cnn_model'][wildcards.modality]}"
     else:
+        singularity_cmd = f"singularity exec -B {autotop_dir}:/src -e {config['singularity']['autotop']}" 
         set_matlab_lic = f"SINGULARITYENV_MLM_LICENSE_FILE={config['mlm_license_file']}"
         set_java_home = f"SINGULARITYENV_JAVA_HOME={config['java_home']}"
         set_autotop_dir = f"SINGULARITYENV_AUTOTOP_DIR={autotop_dir}"
@@ -94,9 +94,10 @@ rule run_autotop_inputseg:
     resources:
         time = 60 #1 hr
     group: 'subj'
+    container: config['singularity']['autotop']
     log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}',suffix='autotop.txt')
     shell:
-        'SINGULARITYENV_ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
+        'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         "{params.autotop_cmd} &> {log}"
 
 
