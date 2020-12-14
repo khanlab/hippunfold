@@ -19,7 +19,7 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 
-project = 'hippocampal_autotop_bids'
+project = 'hippunfold'
 copyright = '2020, Jordan DeKraker and Ali R. Khan'
 author = 'Jordan DeKraker and Ali R. Khan'
 
