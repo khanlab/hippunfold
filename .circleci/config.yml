@@ -203,6 +203,9 @@ workflows:
       - build:
           context: org-global
           filters:
+            branches:
+              only: 
+                - master
             tags:
               only: /.*/
       - test:
