@@ -42,7 +42,6 @@ run it with maximum number of cores:
 This BIDS app makes use of [snakebids](https://github.com/akhanf/snakebids) to create a BIDS App from a [Snakemake](https://snakemake.github.io/) workflow. Thus, it can take any command-line arguments that snakemake can take, please see [here](https://snakemake.readthedocs.io/en/stable/executing/cli.html), e.g. the `--dry-run, -n` and `--cores,-j` options are snakemake options. You can use a snakemake execution profile to submit jobs on a cluster as well (e.g. one for Compute Canada is [here](https://github.com/khanlab/cc-slurm))
 
 ## Setting up a dev environment:
-```
 
 Here are some instructions to get your python environment set-up on graham to run hippunfold:
 
@@ -77,7 +76,6 @@ git pull
 ```
 
 or if you need a branch, can: `git checkout <name of branch>`
-```
 
 ### running on graham:
 
