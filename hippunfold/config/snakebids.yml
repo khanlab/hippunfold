@@ -186,10 +186,9 @@ cnn_model:
 
 #MATLAB vs MCR
 
-use_mcr: False
+use_mcr: True
 
-#if no mcr, then need to define the following:
-
+#if no mcr, then need to define the following (this will be deprecated soon..)
 matlab_bin: '/cvmfs/restricted.computecanada.ca/easybuild/software/2017/Core/matlab/2019b/bin/matlab'
 mlm_license_file: '/cvmfs/restricted.computecanada.ca/config/licenses/matlab/inst_uwo/graham.lic'
 java_home: '/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/java/1.8.0_192/'

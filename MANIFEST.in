@@ -1,0 +1,8 @@
+recursive-include hippunfold/resources *
+recursive-include hippunfold/config *
+recursive-include hippunfold/workflow *
+recursive-include hippunfold/hippocampal_autotop/tools *
+recursive-include hippunfold/hippocampal_autotop/mcr_v97 *
+recursive-include hippunfold/hippocampal_autotop/misc *
+recursive-include hippunfold/hippocampal_autotop/atlases *
+recursive-include hippunfold/hippocampal_autotop/CNNmodels *
