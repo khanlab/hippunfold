@@ -12,11 +12,11 @@ rule warp_seg_to_corobl_crop:
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref'])
     output:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{space}'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
-        'antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t {input.xfm}' 
+        'antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t {input.xfm}' 
 
 
 rule lr_flip_seg:
@@ -24,7 +24,7 @@ rule lr_flip_seg:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{space}'),
     output:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip',from_='{space}'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d {input} -flip x -o  {output}'

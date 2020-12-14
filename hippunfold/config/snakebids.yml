@@ -146,10 +146,9 @@ parse_args:
 #--- workflow specific configuration -- 
 
 singularity:
-  prepdwi: 'docker://khanlab/prepdwi:latest'
+  prepdwi: '/project/6050199/akhanf/singularity/bids-apps/khanlab_prepdwi_latest.sif'  
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif' 
-  autotop: 'docker://khanlab/autotop_deps:latest'
-  connectome_workbench: 'docker://khanlab/autotop_deps:latest'
+  autotop: '/project/6050199/akhanf/singularity/bids-apps/khanlab_autotop_deps_latest.sif'
 
 
 templates:

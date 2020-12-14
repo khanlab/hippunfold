@@ -17,7 +17,7 @@ rule warp_gii_unfoldtemplate2unfold:
         surface_type = 'FLAT'
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl', hemi='{hemi,R|Lflip}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'wb_command -surface-apply-warpfield {input.gii} {input.warp} {output.gii} && '
@@ -36,7 +36,7 @@ rule warp_gii_unfold2native:
         surface_type = 'ANATOMICAL'
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='corobl',hemi='{hemi,R|Lflip}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'wb_command -surface-apply-warpfield {input.gii} {input.warp} {output.gii} && '
@@ -49,7 +49,7 @@ rule unflip_gii:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='corobl',hemi='{hemi}flip', **config['subj_wildcards'])
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='corobl',hemi='{hemi,L}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'wb_command -surface-flip-lr {input.gii} {output.gii}'
@@ -60,7 +60,7 @@ rule cp_to_unflip_unfolded:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl',hemi='{hemi}flip', **config['subj_wildcards'])
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl',hemi='{hemi,L}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'cp {input.gii} {output.gii}'
@@ -75,7 +75,7 @@ rule warp_gii_to_T1w:
         xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='ras'),
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}'
@@ -87,7 +87,7 @@ rule calculate_gyrification_from_surface:
         gii = bids(root='work',datatype='surf_{modality}',suffix='midthickness.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='gyrification.native.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj' 
     shell:
         "wb_command -surface-vertex-areas {input} {output}"    
@@ -98,7 +98,7 @@ rule calculate_curvature_from_surface:
         gii = bids(root='work',datatype='surf_{modality}',suffix='midthickness.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='curvature.native.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj' 
     shell:
         "wb_command -surface-curvature {input} -mean {output}"    
@@ -110,7 +110,7 @@ rule calculate_thickness_from_surface:
         outer = bids(root='work',datatype='surf_{modality}',suffix='outer.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='thickness.native.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj' 
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"    
@@ -138,7 +138,7 @@ rule create_spec_file:
         cmds = get_cmd_spec_file
     output: 
         spec_file = bids(root='work',datatype='surf_{modality}',suffix='hippunfold.spec', hemi='{hemi,L|R}',**config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj' 
     shell: '{params.cmds}'
 
@@ -148,7 +148,7 @@ rule merge_lr_spec_file:
                         hemi=['L','R'], allow_missing=True)
     output: 
         spec_file = bids(root='work',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards'])
-    container: config['singularity']['connectome_workbench']
+    container: config['singularity']['autotop']
     group: 'subj' 
     shell: 'wb_command -spec-file-merge {input.spec_files} {output}'
 

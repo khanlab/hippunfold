@@ -24,7 +24,7 @@ else:
         output:
             t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4', suffix='T1w.nii.gz'),
         threads: 8
-        container: config['singularity']['prepdwi']
+        container: config['singularity']['autotop']
         group: 'subj'
         shell:
             'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -51,7 +51,7 @@ rule convert_template_xfm_ras2itk:
         bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='ras'),
     output:
         bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='itk'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d_affine_tool {input}  -oitk {output}'
@@ -64,7 +64,7 @@ rule compose_template_xfm_corobl:
         std_to_cor = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['xfm_corobl'])
     output:
         sub_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d_affine_tool -itk {input.sub_to_std} -itk {input.std_to_cor} -mult -oitk {output}'
@@ -75,7 +75,7 @@ rule invert_template_xfm_itk2ras:
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output:
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affineInverse',type_='ras'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d_affine_tool -itk {input} -inv -o {output}'
@@ -85,7 +85,7 @@ rule template_xfm_itk2ras:
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output:
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='ras'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d_affine_tool -itk {input} -o {output}'
@@ -98,7 +98,7 @@ rule invert_t1w_intensity:
         t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4', suffix='T1w.nii.gz'),
     output:
         t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4', suffix='InvT1w.nii.gz'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell: 'c3d {input}  -scale -1 -stretch 0% 100% 0 1000 -o {output}'
 
@@ -111,7 +111,7 @@ rule warp_t1_to_corobl_crop:
         std_to_cor = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['xfm_corobl'])
     output: 
         t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='cropped', suffix='InvT1w.nii.gz',space='corobl',hemi='{hemi,L|R}'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
@@ -123,7 +123,7 @@ rule lr_flip_t1:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     output:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='InvT1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'c3d {input} -flip x -o  {output}'
