@@ -65,7 +65,7 @@ pip install -e ./hippunfold
 
 Now hippunfold will be installed for you and can run with:
 
-hippunfold  <args here> 
+    hippunfold  <args here> 
 
 Any containers used are included in the hippunfold workflow, and if in khanlab group on graham, will already be good to go..  If you log out, you just need to re-activate the virtualenv to start again 
 
