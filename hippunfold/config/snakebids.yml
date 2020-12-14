@@ -148,7 +148,7 @@ parse_args:
 singularity:
   prepdwi: '/project/6050199/akhanf/singularity/bids-apps/khanlab_prepdwi_latest.sif'  
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif' 
-  autotop: '/project/6050199/akhanf/singularity/bids-apps/khanlab_autotop_deps_latest.sif'
+  autotop: '/project/6050199/akhanf/singularity/bids-apps/khanlab_autotop_deps_v0.2.sif'
 
 
 templates:
