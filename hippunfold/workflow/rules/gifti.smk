@@ -24,12 +24,21 @@ rule warp_gii_unfoldtemplate2unfold:
         'wb_command -set-structure {output.gii} {params.structure_type} -surface-type {params.surface_type}'
             ' -surface-secondary-type {params.secondary_type}'
 
+#subj unfolded surf might have a few vertices outside the bounding box.. this constrains all the vertices to the warp bounding box
+rule constrain_surf_to_bbox:
+    input:
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        ref_nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/unfold_ref_256x128x16.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+    output:
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii',desc='constrainbbox', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+    group: 'subj'
+    script: '../scripts/constrain_surf_to_bbox.py'
 
 #warp from subj unfolded to corobl
 rule warp_gii_unfold2native: 
     input: 
         warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
-        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', desc='constrainbbox',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type = lambda wildcards: surf_to_secondary_type[wildcards.surfname],
