@@ -4,7 +4,7 @@ jobs:
     docker:
       - image: docker:17.05.0-ce-git
     steps:
-      - run: git clone --recursive "$CIRCLE_REPOSITORY_URL" 
+      - run: git clone --recursive http://github.com/khanlab/hippunfold
       - setup_remote_docker
       - run:
           name: Building Docker container
