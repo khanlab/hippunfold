@@ -107,4 +107,4 @@ if 'b500' in config['modality'] or 'b1000' in config['modality']:
 
 include: 'rules/autotop.smk'
 include: 'rules/gifti.smk'
-
+include: 'rules/nnunet.smk'

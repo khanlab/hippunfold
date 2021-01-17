@@ -35,6 +35,7 @@ setuptools.setup(
     install_requires=[
         "snakebids>=0.2.0",
         "snakemake>=5.28.0",
+        "nnunet>=1.6.6",
         "pandas",
         "nibabel",
         "numpy",

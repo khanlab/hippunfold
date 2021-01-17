@@ -7,7 +7,7 @@ def get_autotop_cmd (wildcards, input, output):
 
     if config['use_mcr'] == True:
         cmd = f"AUTOTOP_DIR={autotop_dir} {autotop_dir}/mcr_v97/run_AutoTops_TransformAndRollOut.sh /opt/mcr/v97 "\
-                f"{input.nii} {output.out_dir} {config['cnn_model'][wildcards.modality]}"
+                f"{input.nii} {output.out_dir} {config['cnn_model'][wildcards.modality]} {input.nnunet_seg}"
     else:
         singularity_cmd = f"singularity exec -B {autotop_dir}:/src -e {config['singularity']['autotop']}" 
         set_matlab_lic = f"SINGULARITYENV_MLM_LICENSE_FILE={config['mlm_license_file']}"
@@ -16,7 +16,7 @@ def get_autotop_cmd (wildcards, input, output):
 
         cmd = f"{set_matlab_lic} {set_java_home} {set_autotop_dir} {singularity_cmd} "\
                 f"{config['matlab_bin']} -batch \"addpath(genpath('{autotop_dir}')); "\
-                f"AutoTops_TransformAndRollOut('{input.nii}','{output.out_dir}','{config['cnn_model'][wildcards.modality]}')\""
+                f"AutoTops_TransformAndRollOut('{input.nii}','{output.out_dir}','{config['cnn_model'][wildcards.modality]}','{input.nnunet_seg}')\""
     return cmd   
 
 
@@ -41,7 +41,8 @@ def get_autotop_input (wildcards):
 
 rule run_autotop:
     input:
-        nii = get_autotop_input
+        nii = get_autotop_input,
+        nnunet_seg = bids(root='work',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
     params:
         autotop_cmd = get_autotop_cmd
     output:
