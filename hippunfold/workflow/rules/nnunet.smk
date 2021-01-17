@@ -48,6 +48,7 @@ rule run_inference:
         time = 30,
     group: 'subj'
     shell: 'mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && ' #create temp folders
+           'cp -v {input.in_img} {params.temp_img} && ' #cp input image to temp folder
            'tar -xvf {input.model_tar} -C {params.model_dir} && ' #extract model
            'export RESULTS_FOLDER={params.model_dir} && ' #set nnunet env var to point to model
            'export nnUNet_n_proc_DA={threads} && ' #set threads
