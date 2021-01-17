@@ -13,27 +13,16 @@ def get_nnunet_input (wildcards):
         raise ValueError('modality not supported for nnunet!')
     return nii
 
-temp_img_dir = bids(root='temp',suffix='img',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}')
-temp_lbl_dir = bids(root='temp',suffix='lbl',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}')
-temp_img =  'temp_0000.nii.gz'
-temp_lbl =  'temp.nii.gz'
-
-nnunet_seg = bids(root='work',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
-
-print(f'temp_img_dir: {temp_img_dir}')
-print(f'temp_lbl_dir: {temp_lbl_dir}')
-print(f'temp_img: {temp_img}')
-print(f'temp_lbl: {temp_lbl}')
 
 rule copy_img_to_temp:
     input: get_nnunet_input
     params:
-        temp_dir = temp_img_dir
+        temp_img_dir = bids(root='work',suffix='tempimg',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}')
     output: 
-        temp_img = os.path.join(temp_img_dir,temp_img)
+        temp_img = bids(root='work',suffix='tempimg/temp_0000.nii.gz',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}')
     threads: 32
     group: 'subj'
-    shell: 'mkdir -p {params.temp_dir} &&  cp {input} {output.temp_img}'
+    shell: 'mkdir -p {params.temp_img_dir} &&  cp {input} {output.temp_img}'
 
 def parse_task_from_tar (wildcards, input):
     import re
@@ -57,16 +46,16 @@ def parse_chkpnt_from_tar (wildcards, input):
 
 rule run_inference:
     input: 
-        in_img = os.path.join(temp_img_dir,temp_img),
+        in_img = bids(root='work',suffix='tempimg/temp_0000.nii.gz',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}'),
         model_dir = 'nnunet_models/{modality}',
         model_tar = lambda wildcards: config['nnunet_model'][wildcards.modality]
     params:
-        in_folder = temp_img_dir,
-        out_folder = temp_lbl_dir,
+        in_folder = bids(root='work',suffix='tempimg',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}'),
+        out_folder = bids(root='work',suffix='templbl',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}'),
         task = parse_task_from_tar,
         chkpnt = parse_chkpnt_from_tar,
     output: 
-        tmp_lbl = os.path.join(temp_lbl_dir,temp_lbl), 
+        tmp_lbl = bids(root='work',suffix='templbl/temp.nii.gz',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}')
     threads: 8 
     resources:
         gpus = 1,
@@ -79,9 +68,9 @@ rule run_inference:
 
 rule copy_temp_to_lbl:
     input:
-        tmp_lbl = os.path.join(temp_lbl_dir,temp_lbl)
+        tmp_lbl = bids(root='work',suffix='templbl/temp.nii.gz',hemi='{hemi}',**config['subj_wildcards'],modality='{modality}')
     output:
-        lbl = nnunet_seg,
+        nnunet_seg = bids(root='work',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
     threads: 32
     group: 'subj'
     shell: 'cp {input} {output}'

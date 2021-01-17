@@ -83,7 +83,7 @@ def get_final_specs():
 
 rule all:
     input: 
-        segs = get_final_segs(),
+   #     segs = get_final_segs(),
         specs = get_final_specs(),
         coords = expand(bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
             dir=['AP','PD','IO'],hemi=['L','R'],modality=config['modality'],subject=config['subjects'],session=config['sessions']),
@@ -108,3 +108,5 @@ if 'b500' in config['modality'] or 'b1000' in config['modality']:
 include: 'rules/autotop.smk'
 include: 'rules/gifti.smk'
 include: 'rules/nnunet.smk'
+include: 'rules/subfields_vol.smk'
+include: 'rules/subfields_surf.smk'
