@@ -39,9 +39,9 @@ rule run_inference:
         task = parse_task_from_tar,
         chkpnt = parse_chkpnt_from_tar,
     output: 
-        nnunet_seg = bids(root='work',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
+        nnunet_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,Lflip|R}')
     shadow: 'minimal' 
-    threads: 8 
+    threads: 16 
     resources:
         gpus = 1,
         mem_mb = 32000,

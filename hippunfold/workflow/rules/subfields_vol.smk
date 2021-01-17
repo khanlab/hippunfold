@@ -42,7 +42,7 @@ rule resample_postproc_to_T1w:
   
 rule resample_unet_to_T1w:
     input:
-        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/manual_lbl.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        nii = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}'),
         xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
         ref = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     output:
@@ -72,9 +72,8 @@ rule create_native_crop_ref:
  
 
 rule resample_unet_native_crop:
-    """ This is either nnUnet or manual seg, since currently nnUnet is passed to autotop with the manual seg param"""
     input:
-        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/manual_lbl.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        nii = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}'),
         xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
         ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:

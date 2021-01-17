@@ -42,7 +42,7 @@ def get_autotop_input (wildcards):
 rule run_autotop:
     input:
         nii = get_autotop_input,
-        nnunet_seg = bids(root='work',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}',modality='{modality}')
+        nnunet_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}')
     params:
         autotop_cmd = get_autotop_cmd
     output:
