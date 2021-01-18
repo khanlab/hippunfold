@@ -56,7 +56,7 @@ rule run_autotop:
         coords = expand(bids(root='work',suffix='autotop/coords-{dir}.nii.gz',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),dir=['AP','PD','IO'],allow_missing=True)
     threads: 8
     resources:
-        time = 60 #1 hr
+        time = 180 #3 hrs (so grouped job is set at 3hrs, since snakemake grouped resources not summed, but takes the max)
     group: 'subj'
     container: config['singularity']['autotop']
     log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='autotop.txt')
@@ -95,7 +95,7 @@ rule run_autotop_inputseg:
         gii = expand(bids(root='work',suffix='autotop/{surfname}.unfoldedtemplate.surf.gii',desc='cropped', space='corobl',hemi='{{hemi}}',modality='seg{{modality}}', **config['subj_wildcards']),surfname=['inner','outer','midthickness'],allow_missing=True)
     threads: 8
     resources:
-        time = 60 #1 hr
+        time = 180 #3 hrs (so grouped job is set at 3hrs, since snakemake grouped resources not summed, but takes the max)
     group: 'subj'
     container: config['singularity']['autotop']
     log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}',suffix='autotop.txt')
