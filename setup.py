@@ -30,12 +30,14 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     entry_points={'console_scripts': [
-        'hippunfold=hippunfold.run:main'
+        'hippunfold=hippunfold.run:main',
+        'hippunfold_download_models=hippunfold.download_models:main'
     ]},
     install_requires=[
         "snakebids>=0.2.0",
         "snakemake>=5.28.0",
         "nnunet>=1.6.6",
+        "appdirs",
         "pandas",
         "nibabel",
         "numpy",

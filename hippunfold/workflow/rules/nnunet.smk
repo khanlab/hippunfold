@@ -1,4 +1,5 @@
 import re
+from appdirs import AppDirs
 
 def get_nnunet_input (wildcards):
     if wildcards.modality == 'T2w':
@@ -7,6 +8,15 @@ def get_nnunet_input (wildcards):
         raise ValueError('modality not supported for nnunet!')
     return nii
 
+def get_model_tar (wildcards):
+    download_dir = AppDirs('hippunfold','khanlab').user_cache_dir
+    local_tar = config['nnunet_model'][wildcards.modality]
+    dl_path = os.path.abspath(os.path.join(download_dir,local_tar))
+    if os.path.exists(dl_path):
+        return dl_path
+    else:
+        raise Exception(f'Cannot find downloaded model at {dl_path}, run this first: hippunfold_download_models')
+    
 
 def parse_task_from_tar (wildcards, input):
     match = re.search('Task[0-9]{3}_[a-zA-Z0-9]+',input.model_tar)
@@ -29,7 +39,7 @@ rule run_inference:
         It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
     input: 
         in_img = get_nnunet_input,
-        model_tar = lambda wildcards: config['nnunet_model'][wildcards.modality]
+        model_tar = get_model_tar,
     params:
         temp_img = 'tempimg/temp_0000.nii.gz',
         temp_lbl = 'templbl/temp.nii.gz',
