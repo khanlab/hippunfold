@@ -143,7 +143,11 @@ parse_args:
     default: False
     action: 'store_true'
 
-  
+  --rigid_reg_template:
+    help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
 #--- workflow specific configuration -- 
 
 singularity:
@@ -171,6 +175,9 @@ template_files:
     T1w: hippocampal_autotop/atlases/CITI/CIT168_T1w_head_700um.nii.gz
     xfm_corobl: hippocampal_autotop/atlases/CITI/CoronalOblique_rigid.txt
     crop_ref: hippocampal_autotop/atlases/CITI/img_300umCoronalOblique_hemi-{hemi}.nii.gz
+
+
+rigid_reg_template: False
 
 modality:
   - T2w

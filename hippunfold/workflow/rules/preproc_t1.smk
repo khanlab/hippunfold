@@ -32,17 +32,19 @@ else:
 
 
 
-rule affine_aladin:
+rule reg_to_template:
     input: 
         flo = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4',suffix='T1w.nii.gz'),
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['T1w']),
+    params:
+        rigid = '-rigOnly' if config['rigid_reg_template'] else ''
     output: 
         warped_subj = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',space=config['template'],desc='affine'),
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='ras'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
-        'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras}'
+        'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras} {params.rigid}'
 
 
 
