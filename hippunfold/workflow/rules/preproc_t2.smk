@@ -85,9 +85,9 @@ else:
 rule reg_t2_to_t1:
     input: 
         flo = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc'),
-        ref = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4',suffix='T1w.nii.gz')
+        ref = bids(root='results',datatype='anat',**config['subj_wildcards'],desc='preproc',suffix='T1w.nii.gz')
     output: 
-        warped = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='n4',space='T1w'),
+        warped = bids(root='results',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc',space='T1w'),
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='ras'),
         xfm_itk = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk')
     container: config['singularity']['autotop']

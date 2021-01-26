@@ -4,6 +4,8 @@ from appdirs import AppDirs
 def get_nnunet_input (wildcards):
     if wildcards.modality == 'T2w':
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
+    elif wildcards.modality == 'T1w':
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     else:
         raise ValueError('modality not supported for nnunet!')
     return nii
@@ -64,4 +66,17 @@ rule run_inference:
            'export nnUNet_n_proc_DA={threads} && ' #set threads
            'nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} && ' # run inference
            'cp -v {params.temp_lbl} {output.nnunet_seg}' #copy from temp output folder to final output
+
+
+rule unflip_nnunet_nii:
+    """Unflip the Lflip nnunet seg"""
+    input:
+        nnunet_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}flip')
+    output:
+        nnunet_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,L}')
+    container: config['singularity']['autotop']
+    group: 'subj'
+    shell: 'c3d {input} -flip x {output}'
+
+
 

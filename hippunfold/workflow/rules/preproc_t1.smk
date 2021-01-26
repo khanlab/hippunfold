@@ -1,19 +1,19 @@
 ruleorder:  compose_template_xfm_corobl > convert_template_xfm_ras2itk
 
 
-#just grab the first T1w for now:
 rule import_t1:
+    """Note: this rule only grabs the first T1w
+        TODO: add motion-corrected averaging, like we do for T2w"""
     input: lambda wildcards: expand(config['input_path']['T1w'],zip,**snakebids.filter_list(config['input_zip_lists']['T1w'],wildcards))[0]
     output: bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     group: 'subj'
     shell: 'cp {input} {output}'
 
-#right now, only preproc for T1w is n4 -- if we add more, then should make a desc-preproc T1w
 
 if config['skip_preproc']:
     rule import_preproc_t1:
         input: lambda wildcards: expand(config['input_path']['T1w'],zip,**snakebids.filter_list(config['input_zip_lists']['T1w'],wildcards))[0]
-        output: bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',desc='n4')
+        output: bids(root='results',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',desc='preproc')
         group: 'subj'
         shell: 'cp {input} {output}'
 else:
@@ -22,7 +22,7 @@ else:
         input: 
             t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz'),
         output:
-            t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4', suffix='T1w.nii.gz'),
+            t1 = bids(root='results',datatype='anat',**config['subj_wildcards'],desc='preproc', suffix='T1w.nii.gz'),
         threads: 8
         container: config['singularity']['autotop']
         group: 'subj'
@@ -34,7 +34,7 @@ else:
 
 rule reg_to_template:
     input: 
-        flo = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4',suffix='T1w.nii.gz'),
+        flo = bids(root='results',datatype='anat',**config['subj_wildcards'],desc='preproc',suffix='T1w.nii.gz'),
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['T1w']),
     params:
         rigid = '-rigOnly' if config['rigid_reg_template'] else ''
@@ -96,7 +96,7 @@ rule template_xfm_itk2ras:
 #apply transform to get subject in corobl cropped space
 rule warp_t1_to_corobl_crop:
     input:
-        t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],desc='n4', suffix='T1w.nii.gz'),
+        t1 = bids(root='results',datatype='anat',**config['subj_wildcards'],desc='preproc', suffix='T1w.nii.gz'),
         xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref']),
         std_to_cor = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['xfm_corobl'])

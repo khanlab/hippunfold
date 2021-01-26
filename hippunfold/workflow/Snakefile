@@ -46,56 +46,73 @@ def get_modality_key(modality):
         mod_index = modality
     return mod_index
 
-#this function gets the list of final outputs (L+R combined segs)
-def get_final_segs():
-    subfields = []
-    for modality in config['modality']:
-        mod_index = get_modality_key(modality)
-        subfields = subfields + \
-            expand(
-                bids(root='results',
-                    datatype=f'seg_{modality}',
-                    suffix='dseg.nii.gz',
-                    desc='subfields',
-                    space='T1w',
-                    **config['subj_wildcards']),
-                subject=config['input_lists'][mod_index]['subject'],
-                session=config['sessions']
-            )
+                      
 
-    return subfields
-                       
-
-#this function gets the list of final surf spec files
+#this function gets the list of final surf spec files - we use input_lists indexed by modality just in
+# case not all subjects possess the same modalities
 def get_final_specs():
     specs = []
     for modality in config['modality']:
         mod_index = get_modality_key(modality)
         specs = specs + \
-            expand(bids(root='work',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards']),
+            expand(bids(root='results',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards']),
                 modality=modality,
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions'])
 
     return specs
           
+def get_final_subfields():
+    subfields = []
+    for modality in config['modality']:
+        mod_index = get_modality_key(modality)
+        subfields = subfields + \
+            expand(bids(root='results',datatype='seg_{modality}',desc='subfields',suffix='dseg.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+                modality=modality,
+                hemi=['L','R'],
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
 
+    return subfields
+      
+def get_final_coords():
+    coords = []
+    for modality in config['modality']:
+        mod_index = get_modality_key(modality)
+        coords = coords + \
+            expand(bids(root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+                modality=modality,
+                dir=['AP','PD','IO'],
+                hemi=['L','R'],
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
 
+    return coords
+ 
+def get_final_anat():
+    subfields = []
+    for modality in list(set(config['modality']+['T1w'])):
+        mod_index = get_modality_key(modality)
+        subfields = subfields + \
+            expand(bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+                modality=modality,
+                hemi=['L','R'],
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
+
+    return subfields
+ 
 rule all:
     input: 
-   #     segs = get_final_segs(),
-        specs = get_final_specs(),
-        coords = expand(bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
-            dir=['AP','PD','IO'],hemi=['L','R'],modality=config['modality'],subject=config['subjects'],session=config['sessions']),
-        subfields = expand(bids(root='work',datatype='seg_{modality}',desc='subfields',from_='{volsurf}',suffix='dseg.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
-            hemi=['L','R'],volsurf=['volume','surface'],modality=config['modality'],subject=config['subjects'],session=config['sessions']),
-        subfieldswithtissue = expand(bids(root='work',datatype='seg_{modality}',desc='subfieldswithtissue',from_='volume',suffix='dseg.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
-            hemi=['L','R'],modality=config['modality'],subject=config['subjects'],session=config['sessions'])
-
+        get_final_specs(),
+        get_final_subfields(),
+        get_final_coords(),
+        get_final_anat()
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
 
+#include rules only as they are needed..
 if 'segT1w' in config['modality'] or 'segT2w' in config['modality']:
     include: 'rules/preproc_seg.smk'
 
@@ -108,5 +125,5 @@ if 'b500' in config['modality'] or 'b1000' in config['modality']:
 include: 'rules/autotop.smk'
 include: 'rules/gifti.smk'
 include: 'rules/nnunet.smk'
-include: 'rules/subfields_vol.smk'
-include: 'rules/subfields_surf.smk'
+include: 'rules/subfields.smk'
+include: 'rules/resample_final_to_crop_t1.smk'
