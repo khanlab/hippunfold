@@ -119,7 +119,6 @@ parse_args:
     nargs: '+'
     choices:
       - T1w
-      - 1mmT1w
       - T2w
       - b500
       - segT1w
@@ -177,7 +176,6 @@ modality:
 cnn_model:
   T2w: 'HCP1200-T2'
   T1w: 'HCP1200-T1'
-  1mmT1w: 'HCP1200-T1_ds'
   b500: 'HCP1200-b1000'
   b1000: 'HCP1200-b1000'
 
