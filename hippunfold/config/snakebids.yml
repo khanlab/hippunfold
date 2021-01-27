@@ -186,7 +186,7 @@ cnn_model:
 #these will be downloaded to ~/.cache/hippunfold
 nnunet_model:
     T2w: trained_model.3d_fullres.Task100_hcp1200hippT2w.nnUNetTrainerV2.model_best.tar
-    T1w: trained_model.3d_fullres.Task100_hcp1200hippT2w.nnUNetTrainerV2.model_best.tar
+    T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
 
 
 #-------
