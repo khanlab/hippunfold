@@ -85,17 +85,17 @@ def get_final_coords():
     return coords
  
 def get_final_anat():
-    subfields = []
-    for modality in list(set(config['modality']+['T1w'])):
+    anat = []
+    for modality in config['modality']:
         mod_index = get_modality_key(modality)
-        subfields = subfields + \
+        anat = anat + \
             expand(bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 modality=modality,
                 hemi=['L','R'],
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions'])
 
-    return subfields
+    return anat
  
 rule all:
     input: 
