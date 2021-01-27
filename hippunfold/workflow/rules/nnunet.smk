@@ -21,7 +21,7 @@ def get_model_tar (wildcards):
     
 
 def parse_task_from_tar (wildcards, input):
-    match = re.search('Task[0-9]{3}_[a-zA-Z0-9]+',input.model_tar)
+    match = re.search('Task[0-9]{3}_[\w]+',input.model_tar)
     if match:
         task = match.group(0)
     else:
