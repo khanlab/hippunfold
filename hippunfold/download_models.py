@@ -44,7 +44,7 @@ def main():
             print(f'Downloading {modality} model...')
             print(f'   url = {url}')
             print(f'   dest = {local_path}')
-            r = requests.get(url, allow_redirects=True) 
+            r = requests.get(url, allow_redirects=True, stream=True) 
             with open(local_path,'wb') as f:
                 f.write(r.content)
             print('   Download complete')
