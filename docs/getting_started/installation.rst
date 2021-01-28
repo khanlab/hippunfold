@@ -21,6 +21,7 @@ Notes:
 #. dwi workflows are also available but currently experimental
 
 
+
 Running with Docker
 -------------------
 
@@ -40,6 +41,21 @@ run it with maximum number of cores::
 Running with Singularity
 ------------------------
 
+
+If you are using singularity, there are two different ways to run ``hippunfold``. 
+
+1. Pull the fully-contained BIDS app container from ``docker://khanlab/hippunfold:latest`` and run it
+
+2. Clone the github repo, pip install, and run ``hippunfold``, which will pull the required singularity containers as needed.
+
+If you want to modify the workflow at all or run a development branch, then option 2 is required. 
+
+Furthermore, if you want to run the workflow on a Cloud system that Snakemake supports, or with a Cluster Execution profile, you should use Option 2 (see https://github.com/snakemake-profiles/doc and https://snakemake.readthedocs.io/en/stable/executing/cloud.html for more details on cluster profiles and cloud execution respectively).
+
+
+Option 1:
+^^^^^^^^^
+
 Pull the container::
    
    singularity pull khanlab_hippunfold_latest.sif docker://khanlab/hippunfold:latest
@@ -53,15 +69,43 @@ run it with maximum number of cores::
    singularity run -e khanlab_hippunfold_latest.sif khanlab/hippunfold:latest PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant  -p --cores all
 
 
-Additional instructions for specific Khan Lab / Compute Canada environments
----------------------------------------------------------------------------
+Option 2:
+^^^^^^^^^
+
+This assumes you have created and activated a virtualenv or conda environment first.
+
+#. Clone the repository::
+   
+    git clone --recursive http://github.com/khanlab/hippunfold
+
+#. Install hippunfold using pip, with the -e option (for development mode)::
+
+    pip install -e ./hippunfold
+
+#. Run the following to download the U-net models::
+
+    hippunfold_download_models
+
+#. Now hippunfold will be installed for you and can perform a dry-run with::
+
+    hippunfold  PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant -np
+
+#. To run on all cores, and have snakemake pull any required containers, use::
+    
+    hippunfold  PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant --cores all --use-singularity
+
+
+
+
+Additional instructions for Compute Canada 
+------------------------------------------
 
 Setting up a dev environment on graham:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Here are some instructions to get your python environment set-up on graham to run hippunfold:
 
-#. create a virtualenv and activate it::
+#. Create a virtualenv and activate it::
 
       mkdir $SCRATCH/hippdev
       cd $SCRATCH/hippdev
@@ -69,52 +113,29 @@ Here are some instructions to get your python environment set-up on graham to ru
       virtualenv venv
       source venv/bin/activate
 
-#. 
-   clone the source repos (so you can make/pull changes easily, or change to branch)::
-
-      git clone --recursive http://github.com/khanlab/hippunfold
-
-#. 
-   install snakebids using pip, with the -e option (for development mode)::
-
-      pip install -e ./hippunfold
-
-Now hippunfold will be installed for you and can run with::
-
-   hippunfold  <args here> 
-
-
-Any containers used are included in the hippunfold workflow, and if in khanlab group on graham, will already be good to go..  If you log out, you just need to re-activate the virtualenv to start again. 
-
-If you ever want the latest code, can just pull it::
-
-   cd hippunfold
-   git pull
-
-or if you need a branch, can: ``git checkout <name of branch>``
+#. Follow the steps above to install from github repository
 
 Running hippunfold jobs on graham:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In an interactive job (for testing)::
-
-   regularInteractive -n 8
-   hippunfold bids_dir out_dir participant --participant_label CC110037 -j 8
+    
+    regularInteractive -n 8
+    hippunfold bids_dir out_dir participant --participant_label CC110037 -j 8
 
 
 Submitting a job (for larger cores, more subjects), still single job, but snakemake will parallelize over the 32 cores::
 
-   regularSubmit -j Fat hippunfold bids_dir out_dir participant  -j 32
+    regularSubmit -j Fat hippunfold bids_dir out_dir participant  -j 32
 
 
 Scaling up to ~hundred subjects (needs cc-slurm snakemake profile installed), submits 1 16core job per subject::
-
-   hippunfold bids_dir out_dir participant  --profile cc-slurm
+    
+    hippunfold bids_dir out_dir participant  --profile cc-slurm
 
 
 Scaling up to even more subjects (uses group-components to bundle multiple subjects in each job), 1 32core job for N subjects (e.g. 10)::
+    
+    hippunfold bids_dir out_dir participant  --profile cc-slurm --group-components subj=10
 
-   hippunfold bids_dir out_dir participant  --profile cc-slurm --group-components subj=10
-
-Note that this requires `neuroglia-helpers <https://github.com/khanlab/neuroglia-helpers>`_ for regularSubmit or regularInteractive wrappers, and the `cc-slurm <https://github.com/khanlab/cc-slurm>`_ snakemake profile for graham cluster execution with slurm. You can use the same command with any other execution profile to run hippunfold on any cluster or cloud platform supported by snakemake (see https://github.com/snakemake-profiles/doc and https://snakemake.readthedocs.io/en/stable/executing/cloud.html for more details on cluster profiles and cloud execution respectively).
-
+Note that this requires `neuroglia-helpers <https://github.com/khanlab/neuroglia-helpers>`_ for regularSubmit or regularInteractive wrappers, and the `cc-slurm <https://github.com/khanlab/cc-slurm>`_ snakemake profile for graham cluster execution with slurm. 
