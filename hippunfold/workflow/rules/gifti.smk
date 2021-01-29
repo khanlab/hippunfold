@@ -6,8 +6,8 @@ surf_to_secondary_type = {'midthickness': 'MIDTHICKNESS', 'inner': 'PIAL', 'oute
 
 
 
-#warp from template space to subj unfolded
 rule warp_gii_unfoldtemplate2unfold: 
+    """warp from template space to subj unfolded"""
     input: 
         warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
         gii = bids(root='work',suffix='autotop/{surfname}.unfoldedtemplate.surf.gii',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards'])
@@ -16,7 +16,7 @@ rule warp_gii_unfoldtemplate2unfold:
         secondary_type = lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type = 'FLAT'
     output:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl', hemi='{hemi,R|Lflip}', **config['subj_wildcards'])
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='unfolded', hemi='{hemi,R|Lflip}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -27,10 +27,10 @@ rule warp_gii_unfoldtemplate2unfold:
 #subj unfolded surf might have a few vertices outside the bounding box.. this constrains all the vertices to the warp bounding box
 rule constrain_surf_to_bbox:
     input:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi}', **config['subj_wildcards']),
         ref_nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/unfold_ref_256x128x16.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
     output:
-        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii',desc='constrainbbox', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii',desc='constrainbbox', space='unfolded',hemi='{hemi}', **config['subj_wildcards'])
     group: 'subj'
     script: '../scripts/constrain_surf_to_bbox.py'
 
@@ -38,13 +38,13 @@ rule constrain_surf_to_bbox:
 rule warp_gii_unfold2native: 
     input: 
         warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
-        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', desc='constrainbbox',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', desc='constrainbbox',space='unfolded',hemi='{hemi}', **config['subj_wildcards'])
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type = lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type = 'ANATOMICAL'
     output:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='corobl',hemi='{hemi,R|Lflip}', **config['subj_wildcards'])
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi,R|Lflip}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -55,20 +55,29 @@ rule warp_gii_unfold2native:
 #unflip surface
 rule unflip_gii:
     input:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='corobl',hemi='{hemi}flip', **config['subj_wildcards'])
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi}flip', **config['subj_wildcards'])
     output:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='corobl',hemi='{hemi,L}', **config['subj_wildcards'])
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi,L}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'wb_command -surface-flip-lr {input.gii} {output.gii}'
 
-#for Lflip to L unfolded, we just copy as is without moving vertices: 
-rule cp_to_unflip_unfolded:
+
+
+def get_unfolded_surf_R_Lflip (wildcards):
+    if wildcards.hemi == 'R':
+        return  bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi}', **config['subj_wildcards']).format(**wildcards)
+    elif wildcards.hemi == 'L':
+        return  bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi}flip', **config['subj_wildcards']).format(**wildcards)
+
+
+rule cp_unfolded_to_results:
+    """copy unfolded surf to results folder, from Lflip/R to L/R"""
     input:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl',hemi='{hemi}flip', **config['subj_wildcards'])
+        gii = get_unfolded_surf_R_Lflip
     output:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl',hemi='{hemi,L}', **config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi,L|R}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -80,10 +89,10 @@ rule cp_to_unflip_unfolded:
 #warp from corobl to T1w
 rule warp_gii_to_T1w:
     input:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='ras'),
     output:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -93,9 +102,9 @@ rule warp_gii_to_T1w:
 #morphological features, calculated in T1w space:
 rule calculate_gyrification_from_surface:
     input: 
-        gii = bids(root='results',datatype='surf_{modality}',suffix='midthickness.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='gyrification.native.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',suffix='gyrification.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell:
@@ -104,9 +113,9 @@ rule calculate_gyrification_from_surface:
 
 rule calculate_curvature_from_surface:
     input: 
-        gii = bids(root='results',datatype='surf_{modality}',suffix='midthickness.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='curvature.native.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',suffix='curvature.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell:
@@ -115,10 +124,10 @@ rule calculate_curvature_from_surface:
         
 rule calculate_thickness_from_surface:
     input: 
-        inner = bids(root='results',datatype='surf_{modality}',suffix='inner.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
-        outer = bids(root='results',datatype='surf_{modality}',suffix='outer.native.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        inner = bids(root='results',datatype='surf_{modality}',suffix='inner.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+        outer = bids(root='results',datatype='surf_{modality}',suffix='outer.surf.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
-        gii = bids(root='results',datatype='surf_{modality}',suffix='thickness.native.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',suffix='thickness.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell:
@@ -137,12 +146,10 @@ def get_cmd_spec_file(wildcards, input, output):
 #add surfs and metrics to a spec file
 rule create_spec_file:
     input:
-        shapes = expand(bids(root='results',datatype='surf_{modality}',suffix='{shape}.native.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+        shapes = expand(bids(root='results',datatype='surf_{modality}',suffix='{shape}.shape.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
                     shape=['gyrification','curvature','thickness'], allow_missing=True),
-        surfs = expand(bids(root='results',datatype='surf_{modality}',suffix='{surfname}.native.surf.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
-                    surfname=['midthickness','inner','outer'], space=['T1w','corobl'], allow_missing=True), 
-        unfolded = expand(bids(root='results',datatype='surf_{modality}',suffix='{surfname}.unfolded.surf.gii', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-                    surfname=['midthickness','inner','outer'],  allow_missing=True), 
+        surfs = expand(bids(root='results',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='{space}', hemi='{hemi}', **config['subj_wildcards']),
+                    surfname=['midthickness','inner','outer'], space=['T1w','unfolded'], allow_missing=True), 
     params:
         cmds = get_cmd_spec_file
     output: 

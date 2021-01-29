@@ -147,12 +147,14 @@ parse_args:
     default: False
     action: 'store_true'
 
+
+    
 #--- workflow specific configuration -- 
 
 singularity:
-  prepdwi: '/project/6050199/akhanf/singularity/bids-apps/khanlab_prepdwi_latest.sif'  
-  fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif' 
-  autotop: '/project/6050199/akhanf/singularity/bids-apps/khanlab_autotop_deps_v0.2.sif'
+  prepdwi: 'docker://khanlab/prepdwi:latest'  
+  autotop: 'docker://khanlab/autotop_deps:v0.2'
+  fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
 
 
 template: CITI168
@@ -167,19 +169,11 @@ template_files:
 
 rigid_reg_template: False
 
+
 modality:
   - T2w
 
 
-
-#CNN model - mapping from image type to model
-cnn_model:
-  T2w: 'HCP1200-T2'
-  T1w: 'HCP1200-T1'
-  b500: 'HCP1200-b1000'
-  b1000: 'HCP1200-b1000'
-
-#--- nnunet
 
 #these will be downloaded to ~/.cache/hippunfold
 nnunet_model:
@@ -187,31 +181,23 @@ nnunet_model:
     T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
 
 
-#-------
-
-#MATLAB vs MCR
-
 use_mcr: True
-
-#if no mcr, then need to define the following (this will be deprecated soon..)
 matlab_bin: '/cvmfs/restricted.computecanada.ca/easybuild/software/2017/Core/matlab/2019b/bin/matlab'
 mlm_license_file: '/cvmfs/restricted.computecanada.ca/config/licenses/matlab/inst_uwo/graham.lic'
 java_home: '/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/java/1.8.0_192/'
 
 
-autotop_outputs:
-  img: img.nii.gz
-  coord_ap: coords-AP.nii.gz
-  coord_io: coords-IO.nii.gz
-  coord_pd: coords-PD.nii.gz
-  label_niftynet: niftynet_lbl.nii.gz
-  label_postproc: labelmap-postProcess.nii.gz
-  midsurf_vtk: midSurf.vtk
-  label_subfields: subfields-BigBrain.nii.gz
-  surf_mat: surf.mat
-  unfold_mat: unfold.mat
+#niftynet models -- this will be deprecated soon:
+cnn_model:
+  T2w: 'HCP1200-T2'
+  T1w: 'HCP1200-T1'
+  b500: 'HCP1200-b1000'
+  b1000: 'HCP1200-b1000'
 
 
+#---- dwi options below, not used in the default workflow ----
+
+#eddy options only used for experimental dwi workflow
 eddy:
   flags:
     verbose: True
