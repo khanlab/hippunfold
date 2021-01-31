@@ -96,13 +96,21 @@ def get_final_anat():
                 session=config['sessions'])
 
     return anat
+
  
+def get_final_qc():
+    qc = []
+    qc = qc + expand(bids(root='work',**config['subj_wildcards'],suffix='regqc.png',
+                from_='subject', to=config['template']),**config['input_lists']['T1w'])
+    return qc
+
 rule all:
     input: 
         get_final_specs(),
         get_final_subfields(),
         get_final_coords(),
-        get_final_anat()
+        get_final_anat(),
+        get_final_qc(),
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
