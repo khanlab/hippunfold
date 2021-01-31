@@ -41,7 +41,8 @@ setuptools.setup(
         "pandas",
         "nibabel",
         "numpy",
-        "scipy"
+        "scipy",
+        "seaborn"
     ],
     python_requires='>=3.7'
 )
