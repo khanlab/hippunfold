@@ -147,8 +147,17 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --use_gpu:
+    help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
+    default: False
+    action: 'store_true'
 
-    
+  --nnunet_disable_tta:
+    help: 'Disable test-time augmentation for nnU-net inference, speeds up inference by 8x, at expense of accuracy (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
+   
 #--- workflow specific configuration -- 
 
 singularity:
