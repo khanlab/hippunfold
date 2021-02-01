@@ -53,11 +53,11 @@ rule run_inference:
     output: 
         nnunet_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,Lflip|R}')
     shadow: 'minimal' 
-    threads: 16 
+    threads: 16
     resources:
-        gpus = 1,
+        gpus = 1 if config['use_gpu'] else 0,
         mem_mb = 32000,
-        time = 30,
+        time = 30 if config['use_gpu'] else 60,
     group: 'subj'
     shell: 'mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && ' #create temp folders
            'cp -v {input.in_img} {params.temp_img} && ' #cp input image to temp folder

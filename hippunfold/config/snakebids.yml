@@ -147,8 +147,12 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --use_gpu:
+    help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
+    default: False
+    action: 'store_true'
 
-    
+   
 #--- workflow specific configuration -- 
 
 singularity:
