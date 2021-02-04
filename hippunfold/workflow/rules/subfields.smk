@@ -122,4 +122,16 @@ rule qc_subfield_t2:
     script: '../scripts/vis_qc_dseg.py'
 
 
+rule concat_subj_vols_tsv:
+    """Concatenate all subject tsv files into a single tsv"""
+    input: 
+        tsv = lambda wildcards: expand(bids(root='results',datatype=f'seg_{wildcards.modality}',desc='subfields',suffix='volumes.tsv',**config['subj_wildcards']),
+                    subject=config['input_lists'][get_modality_key(wildcards.modality)]['subject'],
+                    session=config['sessions'])
+    group: 'aggregate'
+    output: 
+        tsv = bids(root='results',prefix='group',from_='{modality}',desc='subfields',suffix='volumes.tsv'),
+    run: 
+        import pandas as pd
+        pd.concat([pd.read_table(in_tsv) for in_tsv in input ]).to_csv(output.tsv,sep='\t',index=False)
 
