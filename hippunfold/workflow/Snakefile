@@ -127,6 +127,11 @@ rule all:
         get_final_anat(),
         get_final_qc(),
 
+rule all_group_tsv:
+    input: 
+        tsv = expand(bids(root='results',prefix='group',from_='{modality}',desc='subfields',suffix='volumes.tsv'),
+                    modality=config['modality'])
+
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
 
