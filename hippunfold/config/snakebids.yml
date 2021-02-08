@@ -51,6 +51,16 @@ pybids_inputs:
       - run
       - dir
 
+  hippb500:
+    filters:
+      suffix: 'b500'
+      extension: '.nii.gz'
+      invalid_filters: 'allow'
+      datatype: 'dwi'
+    wildcards:
+      - subject
+      - session
+
   T1w:
     filters:
       suffix: 'T1w'
@@ -120,7 +130,8 @@ parse_args:
     choices:
       - T1w
       - T2w
-      - b500
+      - hippb500
+      - dwi
       - segT1w
       - segT2w
     default: 
@@ -157,7 +168,14 @@ parse_args:
     default: False
     action: 'store_true'
 
-   
+  --output_spaces:
+    choices: 
+      - 'cropT1w'
+      - 'corobl'
+    default: cropT1w
+    nargs: '+'
+    help: 'Sets the output space for results (default: %(default)s)'
+
 #--- workflow specific configuration -- 
 
 singularity:
@@ -186,8 +204,9 @@ modality:
 
 #these will be downloaded to ~/.cache/hippunfold
 nnunet_model:
-    T2w: trained_model.3d_fullres.Task100_hcp1200hippT2w.nnUNetTrainerV2.model_best.tar
-    T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
+  T2w: trained_model.3d_fullres.Task100_hcp1200hippT2w.nnUNetTrainerV2.model_best.tar
+  T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
+  hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
 
 
 use_mcr: True
@@ -200,8 +219,16 @@ java_home: '/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/java/1.8.0
 cnn_model:
   T2w: 'HCP1200-T2'
   T1w: 'HCP1200-T1'
-  b500: 'HCP1200-b1000'
+  hippb500: 'HCP1200-b1000'
   b1000: 'HCP1200-b1000'
+
+
+hippdwi_opts:
+  resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm
+  bbox_x:
+    R: '383 510'
+    L: '224 351'
+  bbox_y: '198 453'
 
 
 #---- dwi options below, not used in the default workflow ----

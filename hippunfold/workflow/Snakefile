@@ -5,9 +5,15 @@ from snakebids import bids
 
 configfile: 'config/snakebids.yml'
 
+#make adjustments to input params:
+if 'hippb500' in config['modality']: #right now hippb500 cannot use T1w output space
+    config['output_spaces'] = ['corobl']
+
+
 #get list of inputs to limit to (T1w + modalities)
 limit_to_list = set()
-limit_to_list.add('T1w') #always need T1w
+if 'cropT1w' in config['output_spaces']:
+    limit_to_list.add('T1w') 
 
 for modality in config['modality']:
     if modality[:3] == 'seg': #if modality is segT2w, then add seg and T2w
@@ -47,24 +53,26 @@ def get_modality_key(modality):
 # case not all subjects possess the same modalities
 def get_final_specs():
     specs = []
-    for modality in config['modality']:
-        mod_index = get_modality_key(modality)
-        specs = specs + \
-            expand(bids(root='results',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards']),
-                modality=modality,
-                subject=config['input_lists'][mod_index]['subject'],
-                session=config['sessions'])
+    if 'cropT1w' in  config['output_spaces']:
+        for modality in config['modality']:
+            mod_index = get_modality_key(modality)
+            specs = specs + \
+                expand(bids(root='results',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards']),
+                    modality=modality,
+                    subject=config['input_lists'][mod_index]['subject'],
+                    session=config['sessions'])
 
     return specs
-          
+
 def get_final_subfields():
     subfields = []
     for modality in config['modality']:
         mod_index = get_modality_key(modality)
         subfields = subfields + \
-            expand(bids(root='results',datatype='seg_{modality}',desc='subfields',suffix='dseg.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+            expand(bids(root='results',datatype='seg_{modality}',desc='subfields',suffix='dseg.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
                 modality=modality,
                 hemi=['L','R'],
+                space=config['output_spaces'],
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions'])
 
@@ -75,10 +83,11 @@ def get_final_coords():
     for modality in config['modality']:
         mod_index = get_modality_key(modality)
         coords = coords + \
-            expand(bids(root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+            expand(bids(root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
                 modality=modality,
                 dir=['AP','PD','IO'],
                 hemi=['L','R'],
+                space=config['output_spaces'],
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions'])
 
@@ -87,22 +96,29 @@ def get_final_coords():
 def get_final_anat():
     anat = []
     for modality in config['modality']:
+        if modality == 'hippb500':
+            continue
         mod_index = get_modality_key(modality)
         anat = anat + \
-            expand(bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+            expand(bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
                 modality=modality,
                 hemi=['L','R'],
+                space=config['output_spaces'],
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions'])
 
     return anat
- 
+           
+     
+
 rule all:
     input: 
         get_final_specs(),
         get_final_subfields(),
         get_final_coords(),
         get_final_anat()
+
+
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
@@ -114,8 +130,11 @@ if 'segT1w' in config['modality'] or 'segT2w' in config['modality']:
 if 'segT2w' in config['modality'] or 'T2w' in config['modality']:
     include: 'rules/preproc_t2.smk'
 
-if 'b500' in config['modality'] or 'b1000' in config['modality']:
+if 'dwi' in config['modality']:
     include: 'rules/preproc_dwi.smk'
+
+if 'hippb500' in config['modality']:
+    include: 'rules/preproc_hippb500.smk'
 
 include: 'rules/autotop.smk'
 include: 'rules/gifti.smk'

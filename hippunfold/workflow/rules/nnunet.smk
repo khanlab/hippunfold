@@ -6,6 +6,8 @@ def get_nnunet_input (wildcards):
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     elif wildcards.modality == 'T1w':
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
+    elif wildcards.modality == 'hippb500':
+        nii = bids(root='work',datatype='dwi',hemi='{hemi}',desc='cropped',space='corobl',suffix='b500.nii.gz',**config['subj_wildcards'] )
     else:
         raise ValueError('modality not supported for nnunet!')
     return nii
@@ -13,10 +15,8 @@ def get_nnunet_input (wildcards):
 def get_model_tar (wildcards):
 
     if 'HIPPUNFOLD_CACHE_DIR' in os.environ.keys():
-        print(f"HIPPUNFOLD_CACHE_DIR defined, using: {os.environ['HIPPUNFOLD_CACHE_DIR']}")
         download_dir = os.environ['HIPPUNFOLD_CACHE_DIR']
     else:
-        print(f'HIPPUNFOLD_CACHE_DIR not defined, using default location')
         #create local download dir if it doesn't exist
         dirs = AppDirs('hippunfold','khanlab')
         download_dir = dirs.user_cache_dir
