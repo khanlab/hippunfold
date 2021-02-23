@@ -96,13 +96,41 @@ def get_final_anat():
                 session=config['sessions'])
 
     return anat
+
  
+def get_final_qc():
+    qc = []
+    qc = qc + expand(bids(root='work',datatype='qc',**config['subj_wildcards'],suffix='regqc.png',
+                from_='subject', to=config['template']),**config['input_lists']['T1w'])
+
+    for modality in config['modality']:
+        mod_index = get_modality_key(modality)
+        qc = qc + \
+            expand(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+                modality=modality,
+                hemi=['L','R'],
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
+        qc = qc + \
+            expand(bids(root='work',datatype='qc',desc='subfields',from_='{modality}',suffix='volumes.png',**config['subj_wildcards']),
+                modality=modality,
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
+
+    return qc
+
 rule all:
     input: 
         get_final_specs(),
         get_final_subfields(),
         get_final_coords(),
-        get_final_anat()
+        get_final_anat(),
+        get_final_qc(),
+
+rule all_group_tsv:
+    input: 
+        tsv = expand(bids(root='results',prefix='group',from_='{modality}',desc='subfields',suffix='volumes.tsv'),
+                    modality=config['modality'])
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'

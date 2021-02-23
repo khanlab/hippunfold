@@ -46,6 +46,17 @@ rule reg_to_template:
     shell:
         'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras} {params.rigid}'
 
+rule qc_reg_to_template:
+    input:
+        ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['T1w']),
+        flo = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',space=config['template'],desc='affine'),
+    output:
+        png = report(bids(root='work',datatype='qc',**config['subj_wildcards'],suffix='regqc.png',from_='subject', to=config['template']),
+                caption='../report/t1w_template_regqc.rst',
+                category='Registration QC')
+    group: 'subj'
+    script: '../scripts/vis_regqc.py'
+
 
 
 rule convert_template_xfm_ras2itk:
