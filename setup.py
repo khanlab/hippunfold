@@ -41,7 +41,12 @@ setuptools.setup(
         "pandas",
         "nibabel",
         "numpy",
-        "scipy"
+        "scipy",
+        "nilearn",
+        "seaborn",
+        "jinja2",
+        "pygraphviz",
+        "pygments"
     ],
     python_requires='>=3.7'
 )

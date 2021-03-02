@@ -11,12 +11,15 @@ derivatives: False #will search in bids/derivatives if True; can also be path(s)
 #list of analysis levels in the bids app 
 analysis_levels: &analysis_levels
  - participant
+ - group
   
 
 #mapping from analysis_level to set of target rules or files
 targets_by_analysis_level:
   participant:
-    - ''  # if '', then the first rule is run
+    - 'all'  # if '', then the first rule is run
+  group:
+    - 'all_group_tsv'
 
 #this configures the pybids grabber - create an entry for each type of input you want to grab
 # indexed by name of input
@@ -182,6 +185,7 @@ singularity:
   prepdwi: 'docker://khanlab/prepdwi:latest'  
   autotop: 'docker://khanlab/autotop_deps:v0.2'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
+  ants: 'docker://kaczmarj/ants:2.3.4'
 
 
 template: CITI168
@@ -204,8 +208,11 @@ modality:
 
 #these will be downloaded to ~/.cache/hippunfold
 nnunet_model:
-  T2w: trained_model.3d_fullres.Task100_hcp1200hippT2w.nnUNetTrainerV2.model_best.tar
   T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
+  T2w: trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
+  T1T2w: trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar
+  b1000: trained_model.3d_fullres.Task104_hcp1200_b1000.nnUNetTrainerV2.model_best.tar
+  trimodal: trained_model.3d_fullres.Task105_hcp1200_trimodal.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
 
 
