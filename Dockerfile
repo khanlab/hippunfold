@@ -1,10 +1,9 @@
-FROM khanlab/autotop_deps:v0.2
+FROM khanlab/autotop_deps:v0.3
 
 MAINTAINER alik@robarts.ca
 
 COPY . /src/
 
-RUN apt-get install -y libgraphviz-dev
 RUN pip install /src
 
 #pre-download the models here:
