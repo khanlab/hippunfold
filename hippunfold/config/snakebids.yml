@@ -175,7 +175,9 @@ parse_args:
     choices: 
       - 'cropT1w'
       - 'corobl'
-    default: cropT1w
+    default:
+      - 'cropT1w'
+      - 'unfold'
     nargs: '+'
     help: 'Sets the output space for results (default: %(default)s)'
 
