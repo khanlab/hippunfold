@@ -4,7 +4,7 @@ MAINTAINER alik@robarts.ca
 
 COPY . /src/
 
-RUN apt-get install -y graphviz-dev
+RUN apt-get install -y libgraphviz-dev
 RUN pip install /src
 
 #pre-download the models here:
