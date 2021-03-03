@@ -177,7 +177,6 @@ parse_args:
       - 'corobl'
     default:
       - 'cropT1w'
-      - 'unfold'
     nargs: '+'
     help: 'Sets the output space for results (default: %(default)s)'
 
