@@ -30,9 +30,23 @@ Segmentations are derived from the U-net segmentation, which is by default perfo
      └── seg_T2w
          ├── sub-{subject}_dir-{AP,PD,IO}_hemi-{L,R}_space-cropT1w_coords.nii.gz
          ├── sub-{subject}_hemi-{L,R}_space-cropT1w_desc-preproc_T2w.nii.gz
-         └── sub-{subject}_hemi-{L,R}_space-{T1w,cropT1w}_desc-subfields_dseg.nii.gz
+         └── sub-{subject}_hemi-{L,R}_space-{T1w,cropT1w,unfold}_desc-subfields_dseg.nii.gz
 
-Image in this folder are provided in the ``T1w`` space (same resolution and FOV as the ``T1w`` image, as well as in a 0.2mm upsampled FOV cropped around each hippocampus, but still aligned to the ``T1w`` image, which is denoted as the ``cropT1w`` space.
+Images in this folder are provided in the ``T1w`` space (same resolution and FOV as the ``T1w`` image, as well as in a 0.3mm upsampled FOV cropped around each hippocampus, but still aligned to the ``T1w`` image, which is denoted as the ``cropT1w`` space. 
+
+Image Transforms
+^^^^^^^^^^^^^^^^
+
+ITK transforms to warp images from the ``T1w`` space to the ``unfold`` space are provided for each hippocampus::
+
+    sub-{subject}
+     └── seg_T2w
+         └── sub-{subject}_hemi-{L,R}_from-corobl_to-unfold_mode-image_xfm.nii.gz
+
+This is an ITK transform that can transform any image that is in ``T1w`` space (can be any resolution and FOV, as long as aligned to ``T1w``), to the ``unfold`` hippocampal volume space. You can use the warp itself as a reference image, e.g.::
+
+    antsApplyTransforms -i sub-001_space-T1w_FA.nii.gz -o sub-001_hemi-L_space-unfold_FA.nii.gz -t sub-001_hemi-L_from-corobl_to-unfold_mode-image_xfm.nii.gz -r sub-001_hemi-L_from-corobl_to-unfold_mode-image_xfm.nii.gz -v
+
 
 Subfield segmentations
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -72,7 +86,7 @@ Surface meshes (geometry files) are in ``.surf.gii`` format, and are provided in
      └── surf_T2w
          └── sub-{subject}_hemi-{L,R}_space-{T1w,unfolded}_{inner,midthickness,outer}.surf.gii
  
-All surfaces, both ``T1w`` and ``unfolded``, share the same mesh topology and have corresponding vertices with each other. The vertex locations for unfolded surfaces are identical for all subjects as well (note that this of course is not the case for the ``T1w`` surfaces). 
+All surfaces, both ``space-T1w`` and ``space-unfolded``, share the same mesh topology and have corresponding vertices with each other. The vertex locations for unfolded surfaces are identical for all subjects as well (note that this of course is not the case for the ``space-T1w`` surfaces). 
 
 In addition to the geometry files, surface-based shape metrics are provided in ``.shape.gii`` format. The thickness, curvature and gyrification are computed using the same methods as cortical surfaces, based on the surface geometry files, and are provided in the ``T1w`` space::
 
@@ -93,10 +107,6 @@ CIFTI outputs
 
 **Coming soon:** functionality to create CIFTI data based on functional imaging data
         
-Transforms
-----------
-
-ITK transforms between the various native and unfolded spaces are currently only provided the ``work/`` folder, and are not yet fully supported for end-users. Composite transforms in the results folder will be coming in the near future.
 
 
 Additional Files
