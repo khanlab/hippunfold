@@ -11,7 +11,7 @@ rule create_native_crop_ref:
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
-        'c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample {params.resample} -pad-to {params.pad_to} 0 {output}'
+        'c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample {params.resample} -pad-to {params.pad_to} 0 -type uchar {output}'
   
  
 
@@ -94,5 +94,6 @@ rule resample_t2_to_crop:
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         'antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} -t {input.xfm}' 
+
 
 
