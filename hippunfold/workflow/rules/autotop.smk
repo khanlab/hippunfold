@@ -157,4 +157,14 @@ rule compose_warps_t1_to_unfold:
     shell: 'ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.t1w2corobl}'
 
 
+  
+rule compute_jacobian:
+    input:
+        bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image')
+    output:
+        bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='jacobian.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image')
+    group: 'subj'
+    script: '../scripts/compute_jacobian.py'
+
+
 
