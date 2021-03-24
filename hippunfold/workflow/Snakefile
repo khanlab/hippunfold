@@ -95,13 +95,13 @@ def get_final_transforms():
                 modality=modality,
                 hemi=['L','R'],
                 subject=config['input_lists'][mod_index]['subject'],
-                session=config['sessions']),
+                session=config['sessions'])
         transforms = transforms + \
             expand(bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='unfold',to='corobl',mode='image'),
                 modality=modality,
                 hemi=['L','R'],
                 subject=config['input_lists'][mod_index]['subject'],
-                session=config['sessions']),
+                session=config['sessions'])
         transforms = transforms + \
             expand(bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='unfold',to='cropT1w',mode='image'),
                 modality=modality,
