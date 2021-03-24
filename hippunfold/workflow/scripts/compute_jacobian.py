@@ -14,6 +14,18 @@ print(warp_data.shape)
 #remove the singleton dimension to make easier to work with
 warp_data = np.squeeze(warp_data)
 
+#Make a nan mask for each partial derivative variable
+gx_u = np.copy(warp_data)
+gx_u[:] = np.NaN
+gx_v = np.copy(gx_u)
+gx_w = np.copy(gx_u)
+gy_u = np.copy(gx_u)
+gy_v = np.copy(gx_u)
+gy_w = np.copy(gx_u)
+gz_u = np.copy(gx_u)
+gz_v = np.copy(gx_u)
+gz_w = np.copy(gx_u)
+
 # for u, v, w compute gradient
 gx_u, gx_v, gx_w = np.gradient(warp_data[:,:,:,0])
 gy_u, gy_v, gy_w = np.gradient(warp_data[:,:,:,1])
