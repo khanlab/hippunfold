@@ -113,6 +113,17 @@ rule copy_unfold_ref_to_autotop:
     group: 'subj'
     shell: 'cp {input.unfold_ref} {output.unfold_ref}'
 
+
+rule fix_unfold2native_orient:
+    """Fix orientation issue with WarpITK_unfold2native.nii.gz (LPS to RPI)
+        TODO: fix this at the source (autotop)"""
+    input:
+        bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+    output:
+        bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2native_RPI.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+    group: 'subj'
+    shell: 'c3d -mcs {input} -orient RPI -omc {output}'
+
 #full-grid correction of unfolded space
 rule map_to_full_grid:
     input: 
@@ -146,57 +157,5 @@ rule unflip_autotop_nii:
     container: config['singularity']['autotop']
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'
-
-
-rule compose_warps_corobl2unfold_rhemi:
-    """ Compose corobl to unfold (unfold-template), for right hemi (ie no flip)"""
-    input:
-        native2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
-        unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
-        ref = os.path.join(config['snakemake_dir'],'hippocampal_autotop','misc','unfold_ref_256x128x16.nii.gz'),
-    output:
-        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='R',from_='corobl',to='unfold',mode='image')
-    container: config['singularity']['ants']
-    group: 'subj'
-    shell: 'ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.unfold2unfoldtemplate} {input.native2unfold}'
-
-
-rule compose_warps_corobl2unfold_lhemi:
-    """ Compose corobl to unfold (unfold-template), for left hemi (ie with flip)"""
-    input:
-        native2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
-        unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
-        ref = os.path.join(config['snakemake_dir'],'hippocampal_autotop','misc','unfold_ref_256x128x16.nii.gz'),
-        flipLR_xfm = os.path.join(config['snakemake_dir'],'resources','desc-flipLR_type-itk_xfm.txt')
-    output:
-        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='L',from_='corobl',to='unfold',mode='image')
-    container: config['singularity']['ants']
-    group: 'subj'
-    shell: 'ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.unfold2unfoldtemplate} {input.native2unfold} {input.flipLR_xfm}'
-
-
- 
-rule compose_warps_t1_to_unfold:
-    """ Compose warps from T1w to unfold """
-    input:
-        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='corobl',to='unfold',mode='image'),
-        ref = os.path.join(config['snakemake_dir'],'hippocampal_autotop','misc','unfold_ref_256x128x16.nii.gz'),
-        t1w2corobl = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
-    output: 
-        bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image')
-    container: config['singularity']['ants']
-    group: 'subj'
-    shell: 'ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.t1w2corobl}'
-
-
-  
-rule compute_jacobian:
-    input:
-        bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image')
-    output:
-        bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='jacobian.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image')
-    group: 'subj'
-    script: '../scripts/compute_jacobian.py'
-
 
 
