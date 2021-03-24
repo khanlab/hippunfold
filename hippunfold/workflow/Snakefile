@@ -42,7 +42,6 @@ wildcard_constraints:
     surfname='[a-zA-Z0-9]+',
     modality='[a-zA-Z0-9]+',
 
-
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
 
