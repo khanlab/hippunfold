@@ -86,6 +86,19 @@ def get_final_coords():
 
     return coords
  
+def get_final_transforms():
+    transforms = []
+    for modality in config['modality']:
+        mod_index = get_modality_key(modality)
+        transforms = transforms + \
+            expand(bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image'),
+                modality=modality,
+                hemi=['L','R'],
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
+
+    return transforms
+ 
 def get_final_anat():
     anat = []
     for modality in config['modality']:
@@ -129,6 +142,7 @@ rule all:
     input: 
         get_final_specs(),
         get_final_subfields(),
+        get_final_transforms(),
         get_final_coords(),
         get_final_anat(),
         get_final_qc(),
