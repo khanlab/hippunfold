@@ -83,7 +83,6 @@ rule compose_warps_unfold_to_cropt1:
     shell: 'antsApplyTransforms -o [{output.unfold2cropt1},1] -r {input.ref} -t [{input.t1w2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v'
 
 
-  
 rule compute_warp_jacobian:
     """ Generic rule for computing warp jacobian 
         
@@ -93,4 +92,11 @@ rule compute_warp_jacobian:
     group: 'subj'
     script: '../scripts/compute_jacobian.py'
 
+rule compute_graddev:
+    """ Generic rule for computing graddev from jacobian"""
+
+    input: '{prefix}_jacobian.nii.gz'
+    output: '{prefix}_grad_dev.nii.gz'
+    group: 'subj'
+    script: '../scripts/compute_graddev.py'
 
