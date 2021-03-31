@@ -96,7 +96,7 @@ rule compute_graddev:
     """ Generic rule for computing graddev from jacobian"""
 
     input: '{prefix}_jacobian.nii.gz'
-    output: '{prefix}_grad_dev.nii.gz'
+    output: '{prefix}_graddev.nii.gz'
     group: 'subj'
     script: '../scripts/compute_graddev.py'
 
