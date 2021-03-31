@@ -15,6 +15,7 @@ limit_to_list = set()
 if 'cropT1w' in config['output_spaces']:
     limit_to_list.add('T1w') 
 
+
 for modality in config['modality']:
     if modality[:3] == 'seg': #if modality is segT2w, then add seg and T2w
         limit_to_list.add('seg')
@@ -93,15 +94,33 @@ def get_final_coords():
 
     return coords
  
+def get_final_transforms():
+    transforms = []
+    for modality in config['modality']:
+        mod_index = get_modality_key(modality)
+        transforms = transforms + \
+            expand(bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image'),
+                modality=modality,
+                hemi=['L','R'],
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
+
+    return transforms
+ 
 def get_final_anat():
     anat = []
     for modality in config['modality']:
         if modality == 'hippb500':
             continue
         mod_index = get_modality_key(modality)
+        if mod_index == 'seg':
+            modality_suffix = modality[3:]
+        else:
+            modality_suffix = modality
         anat = anat + \
-            expand(bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+            expand(bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality_suffix}.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
                 modality=modality,
+                modality_suffix=modality_suffix,
                 hemi=['L','R'],
                 space=config['output_spaces'],
                 subject=config['input_lists'][mod_index]['subject'],
@@ -139,6 +158,7 @@ rule all:
     input: 
         get_final_specs(),
         get_final_subfields(),
+        get_final_transforms(),
         get_final_coords(),
         get_final_anat(),
         get_final_qc(),
@@ -156,7 +176,10 @@ include: 'rules/preproc_t1.smk'
 #include rules only as they are needed..
 if 'segT1w' in config['modality'] or 'segT2w' in config['modality']:
     include: 'rules/preproc_seg.smk'
+else: 
+    include: 'rules/nnunet.smk'
 
+#if using manual segs, then don't use nnunet
 if 'segT2w' in config['modality'] or 'T2w' in config['modality']:
     include: 'rules/preproc_t2.smk'
 
@@ -168,6 +191,5 @@ if 'hippb500' in config['modality']:
 
 include: 'rules/autotop.smk'
 include: 'rules/gifti.smk'
-include: 'rules/nnunet.smk'
 include: 'rules/subfields.smk'
 include: 'rules/resample_final_to_crop_t1.smk'
