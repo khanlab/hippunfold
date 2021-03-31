@@ -9,7 +9,6 @@ configfile: 'config/snakebids.yml'
 if 'hippb500' in config['modality']: #right now hippb500 cannot use T1w output space
     config['output_spaces'] = ['corobl']
 
-
 #get list of inputs to limit to (T1w + modalities)
 limit_to_list = set()
 if 'cropT1w' in config['output_spaces']:
@@ -96,12 +95,19 @@ def get_final_coords():
  
 def get_final_transforms():
     transforms = []
+
+    if 'cropT1w' in  config['output_spaces']: 
+        output_ref = 'T1w'
+    else:
+        output_ref = 'corobl'
+
     for modality in config['modality']:
         mod_index = get_modality_key(modality)
         transforms = transforms + \
-            expand(bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image'),
+            expand(bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='{space}',to='unfold',mode='image'),
                 modality=modality,
                 hemi=['L','R'],
+                space=output_ref,
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions'])
 
