@@ -19,10 +19,17 @@ for modality in config['modality']:
 
 
 #writes inputs_config.yml and updates config dict
-snakebids.generate_inputs_config(config,limit_to=list(limit_to_list))
+config.update(snakebids.generate_inputs(bids_dir=config['bids_dir'],
+                            pybids_inputs=config['pybids_inputs'],
+                            derivatives=config['derivatives'],
+                            participant_label=config['participant_label'],
+                            exclude_participant_label=config['exclude_participant_label']),
+                            limit_to=list(limit_to_list))
 
 #this adds constraints to the bids naming
-wildcard_constraints:  **snakebids.get_wildcard_constraints(config)
+wildcard_constraints:  **snakebids.get_wildcard_constraints(
+    config['pybids_inputs']
+)
 
 #----
 wildcard_constraints:
