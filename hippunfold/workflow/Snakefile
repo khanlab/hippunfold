@@ -27,9 +27,7 @@ config.update(snakebids.generate_inputs(bids_dir=config['bids_dir'],
                             limit_to=list(limit_to_list)))
 
 #this adds constraints to the bids naming
-wildcard_constraints:  **snakebids.get_wildcard_constraints(
-    config['pybids_inputs']
-)
+wildcard_constraints:  **snakebids.get_wildcard_constraints(config['pybids_inputs'])
 
 #----
 wildcard_constraints:
