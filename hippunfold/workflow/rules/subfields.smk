@@ -110,9 +110,20 @@ rule plot_subj_subfields:
     script: '../scripts/plot_subj_subfields.py'
 
 
+
+def get_bg_img_for_subfield_qc(wildcards):
+
+    if wildcards.modality[:3] == 'seg':
+        bg_modality = wildcards.modality[3:] 
+    else:
+        bg_modality = wildcards.modality
+
+    return  bids(root='results',datatype='seg_{modality}',desc='preproc',suffix=f'{bg_modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+
 rule qc_subfield:
     input:
-        img = bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+        img = get_bg_img_for_subfield_qc,
+        #bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
         seg = bids(root='results',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
         png = report(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
