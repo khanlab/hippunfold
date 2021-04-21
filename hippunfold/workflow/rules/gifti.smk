@@ -56,12 +56,18 @@ rule warp_gii_unfold2native:
 rule unflip_gii:
     input:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi}flip', **config['subj_wildcards'])
+    params:
+        structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
+        secondary_type = lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type = 'ANATOMICAL'
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi,L}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
-        'wb_command -surface-flip-lr {input.gii} {output.gii}'
+        'wb_command -surface-flip-lr {input.gii} {output.gii} && '
+        'wb_command -set-structure {output.gii} {params.structure_type} -surface-type {params.surface_type}'
+        ' -surface-secondary-type {params.secondary_type}'
 
 
 
@@ -133,9 +139,49 @@ rule calculate_thickness_from_surface:
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"    
 
+
+rule get_bigbrain_subfield_label_gii:
+    input:
+        gii = os.path.join(config['snakemake_dir'],'resources','bigbrain','sub-bigbrain_hemi-{hemi}_subfields.label.gii')
+    output:
+        gii = bids(root='results',datatype='surf_{modality}',suffix='subfields.label.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+    group: 'subj'
+    shell: 'cp {input} {output}'
+
+rule create_dscalar_metric_cifti:
+    input:
+        left_metric = bids(root='results',datatype='surf_{modality}',suffix='{metric}.shape.gii', space='T1w',hemi='L', **config['subj_wildcards']),
+        right_metric = bids(root='results',datatype='surf_{modality}',suffix='{metric}.shape.gii', space='T1w',hemi='R', **config['subj_wildcards'])
+    output:
+        cifti = bids(root='results',datatype='surf_{modality}',suffix='{metric}.dscalar.nii', space='T1w', **config['subj_wildcards'])
+    container: config['singularity']['autotop']
+    group: 'subj' 
+    shell:
+        'wb_command  -cifti-create-dense-scalar {output}'
+        ' -left-metric {input.left_metric} -right-metric {input.right_metric}'
+
+
+rule create_dlabel_cifti_subfields:
+    input:
+        left_label = bids(root='results',datatype='surf_{modality}',suffix='subfields.label.gii', space='T1w',hemi='L', **config['subj_wildcards']),
+        right_label = bids(root='results',datatype='surf_{modality}',suffix='subfields.label.gii', space='T1w',hemi='R', **config['subj_wildcards'])
+    output:
+        cifti = bids(root='results',datatype='surf_{modality}',suffix='subfields.dlabel.nii', space='T1w', **config['subj_wildcards'])
+    container: config['singularity']['autotop']
+    group: 'subj' 
+    shell:
+        'wb_command  -cifti-create-label {output}'
+        ' -left-label {input.left_label} -right-label {input.right_label}'
+
+
+
+
 def get_cmd_spec_file(wildcards, input, output):
     specfile = output.spec_file
-    structure = hemi_to_structure[wildcards.hemi]
+    if 'hemi' in wildcards:
+        structure = hemi_to_structure[wildcards.hemi]
+    else:
+        structure = 'INVALID'
     cmds = list()
     for infile in input:
         cmds.append(' '.join(['wb_command','-add-to-spec-file',specfile, structure, infile]))
@@ -150,6 +196,10 @@ rule create_spec_file:
                     shape=['gyrification','curvature','thickness'], allow_missing=True),
         surfs = expand(bids(root='results',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='{space}', hemi='{hemi}', **config['subj_wildcards']),
                     surfname=['midthickness','inner','outer'], space=['T1w','unfolded'], allow_missing=True), 
+        subfields = bids(root='results',datatype='surf_{modality}',suffix='subfields.label.gii', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+        cifti = expand(bids(root='results',datatype='surf_{modality}',suffix='{cifti}.nii', space='T1w', **config['subj_wildcards']),
+                    cifti=['gyrification.dscalar','curvature.dscalar','thickness.dscalar','subfields.dlabel'], allow_missing=True),
+
     params:
         cmds = get_cmd_spec_file
     output: 
@@ -167,5 +217,8 @@ rule merge_lr_spec_file:
     container: config['singularity']['autotop']
     group: 'subj' 
     shell: 'wb_command -spec-file-merge {input.spec_files} {output}'
+
+
+
 
 
