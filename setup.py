@@ -34,7 +34,7 @@ setuptools.setup(
         'hippunfold_download_models=hippunfold.download_models:main'
     ]},
     install_requires=[
-        "snakebids>=0.3.7",
+        "snakebids>=0.3.9",
         "snakemake>=6",
         "nnunet @ git+https://github.com/ylugithub/nnUNet.git@v1.6.6",
         "appdirs",
