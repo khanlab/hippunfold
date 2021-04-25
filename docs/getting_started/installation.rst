@@ -8,9 +8,9 @@ Requirements
 
 * Docker (Mac/Windows/Linux) or Singularity (Linux)
 
-* BIDS dataset with T1w and T2w images. 3D T2w TSE images with 0.8mm isotropic or higher resolution images are highly recommended. The T1w images are only used for linear registration in the default workflow, with the T2w images used for the convolutional neural network segmentation.
+* For the T2w (default) workflow: BIDS dataset with T1w and T2w images. 3D T2w TSE images with 0.8mm isotropic or higher resolution images are highly recommended. The T1w images are only used for linear registration, with the T2w images used for the convolutional neural network segmentation.
 
-* GPU is now required (since moving to nnUnet CNN implementation) - however, we plan to support a CPU-only version in the near future.
+* GPU not required
 
 
 Notes:
