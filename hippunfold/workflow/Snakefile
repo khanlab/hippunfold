@@ -125,7 +125,7 @@ def get_final_qc():
     for modality in config['modality']:
         mod_index = get_modality_key(modality)
         qc = qc + \
-            expand(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+            expand(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',slice_='2',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 modality=modality,
                 hemi=['L','R'],
                 subject=config['input_lists'][mod_index]['subject'],

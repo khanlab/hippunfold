@@ -125,7 +125,7 @@ rule qc_subfield:
         img = get_bg_img_for_subfield_qc,
         #bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
         seg = bids(root='results',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
-	surf = bids(root='results',datatype='surf_{modality}',suffix='_midthickness.surf.gii',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+	surf = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
     output:
         png1 = report(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',slice_='1',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
