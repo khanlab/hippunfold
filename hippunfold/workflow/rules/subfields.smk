@@ -139,7 +139,7 @@ rule qc_subfield:
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC',
                 subcategory='Subfields from {modality}'),
-        png4 = report(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',slice_='4',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+        png4 = report(bids(root='work',datatype='qc',suffix='surf-midthickness.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC',
                 subcategory='Subfields from {modality}'),
