@@ -123,9 +123,7 @@ def get_bg_img_for_subfield_qc(wildcards):
 rule qc_subfield:
     input:
         img = get_bg_img_for_subfield_qc,
-        #bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
         seg = bids(root='results',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
-	surf = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
     output:
         png1 = report(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',slice_='1',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
@@ -139,12 +137,19 @@ rule qc_subfield:
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC',
                 subcategory='Subfields from {modality}'),
-        png4 = report(bids(root='work',datatype='qc',suffix='surf-midthickness.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+    group: 'subj'
+    script: '../scripts/vis_qc_dseg.py'
+
+rule qc_subfield_surf:
+    input:
+    	surf = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+    output:
+        png = report(bids(root='work',datatype='qc',suffix='midthickness.surf.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC',
                 subcategory='Subfields from {modality}'),
     group: 'subj'
-    script: '../scripts/vis_qc_dseg.py'
+    script: '../scripts/vis_qc_surf.py'
 
 
 rule concat_subj_vols_tsv:
