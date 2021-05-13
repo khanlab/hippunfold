@@ -178,7 +178,7 @@ rule create_dlabel_cifti_subfields:
 
 def get_cmd_spec_file(wildcards, input, output):
     specfile = output.spec_file
-    if 'hemi' in wildcards:
+    if 'hemi' in wildcards._names:
         structure = hemi_to_structure[wildcards.hemi]
     else:
         structure = 'INVALID'
