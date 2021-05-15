@@ -151,11 +151,19 @@ def get_final_qc():
             continue
         mod_index = get_modality_key(modality)
         qc = qc + \
-            expand(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+            expand(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',slice_='{slice}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+                modality=modality,
+                hemi=['L','R'],
+                slice=['1','2','3'],
+                subject=config['input_lists'][mod_index]['subject'],
+                session=config['sessions'])
+        qc = qc + \
+            expand(bids(root='work',datatype='qc',suffix='midthickness.surf.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 modality=modality,
                 hemi=['L','R'],
                 subject=config['input_lists'][mod_index]['subject'],
                 session=config['sessions'])
+ 
         qc = qc + \
             expand(bids(root='work',datatype='qc',desc='subfields',from_='{modality}',suffix='volumes.png',**config['subj_wildcards']),
                 modality=modality,
