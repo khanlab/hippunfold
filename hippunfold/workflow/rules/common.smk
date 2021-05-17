@@ -205,8 +205,8 @@ def get_final_work_tar():
 
 
 def get_work_dir(wildcards):
-    folder_with_file = bids(root='work',**config['subj_wildcards'])
-    folder_without_file = '/'.join(folder_with_file.split('/')[:-1])
+    folder_with_file = expand(bids(root='work',**config['subj_wildcards']),**wildcards)
+    folder_without_file = os.path.dirname(folder_with_file[0])
     return folder_without_file
 
 
