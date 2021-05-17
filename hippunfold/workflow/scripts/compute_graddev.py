@@ -2,6 +2,8 @@ import os
 import numpy as np
 import nibabel as nib
 from scipy.linalg import polar
+from scipy.interpolate import Rbf
+
 
 in_jac = snakemake.input[0] 
 out_graddev = snakemake.output[0]
@@ -12,7 +14,11 @@ jac_data = jac_nib.get_fdata()
 #shape of Jacobian is (256, 128, 16, 9)
 
 #Reshape to 3x3 for decomposition
-graddev = jac_data.reshape(-1,3,3,order='F')
+grads = jac_data.reshape(-1,3,3,order='F')
+
+graddev = grads[:,:,:]/jac_nib.affine[0][0]
+
+#graddev = jac_data.reshape(-1,3,3,order='F')
 
 temp_graddev=np.copy(graddev)
 graddev[:]=np.NaN
