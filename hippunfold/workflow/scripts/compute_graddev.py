@@ -2,8 +2,6 @@ import os
 import numpy as np
 import nibabel as nib
 from scipy.linalg import polar
-from scipy.interpolate import Rbf
-
 
 in_jac = snakemake.input[0] 
 out_graddev = snakemake.output[0]
