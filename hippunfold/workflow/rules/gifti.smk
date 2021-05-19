@@ -28,7 +28,7 @@ rule warp_gii_unfoldtemplate2unfold:
 rule constrain_surf_to_bbox:
     input:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi}', **config['subj_wildcards']),
-        ref_nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/unfold_ref_256x128x16.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        unfold_ref = os.path.join(config['snakemake_dir'],'hippocampal_autotop','misc','unfold_ref_256x128x16.nii.gz'),
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii',desc='constrainbbox', space='unfolded',hemi='{hemi}', **config['subj_wildcards'])
     group: 'subj'
