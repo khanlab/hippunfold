@@ -3,8 +3,8 @@ rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and bigbrain labels"""
     input:  
         subfields_mat = os.path.join(config['snakemake_dir'],'hippocampal_autotop','misc','BigBrain_ManualSubfieldsUnfolded.mat'),
-        nii_ap = bids(root='work',**config['subj_wildcards'],suffix='autotop/coords-AP.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
-        nii_pd = bids(root='work',**config['subj_wildcards'],suffix='autotop/coords-PD.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        nii_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        nii_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     params:
         mat_name = 'subfields_avg' #avg bigbrain over L/R hemis
     output:
@@ -110,17 +110,46 @@ rule plot_subj_subfields:
     script: '../scripts/plot_subj_subfields.py'
 
 
+
+def get_bg_img_for_subfield_qc(wildcards):
+
+    if wildcards.modality[:3] == 'seg':
+        bg_modality = wildcards.modality[3:] 
+    else:
+        bg_modality = wildcards.modality
+
+    return  bids(root='results',datatype='seg_{modality}',desc='preproc',suffix=f'{bg_modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+
 rule qc_subfield:
     input:
-        img = bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='{modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
-        seg = bids(root='results',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+        img = get_bg_img_for_subfield_qc,
+        seg = bids(root='results',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
     output:
-        png = report(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+        png1 = report(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',slice_='1',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+                caption='../report/subfield_qc.rst',
+                category='Segmentation QC',
+                subcategory='Subfields from {modality}'),
+        png2 = report(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',slice_='2',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+                caption='../report/subfield_qc.rst',
+                category='Segmentation QC',
+                subcategory='Subfields from {modality}'),
+        png3 = report(bids(root='work',datatype='qc',suffix='dseg.png', desc='subfields',from_='{modality}',slice_='3',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC',
                 subcategory='Subfields from {modality}'),
     group: 'subj'
     script: '../scripts/vis_qc_dseg.py'
+
+rule qc_subfield_surf:
+    input:
+    	surf = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+    output:
+        png = report(bids(root='work',datatype='qc',suffix='midthickness.surf.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+                caption='../report/subfield_qc.rst',
+                category='Segmentation QC',
+                subcategory='Subfields from {modality}'),
+    group: 'subj'
+    script: '../scripts/vis_qc_surf.py'
 
 
 rule concat_subj_vols_tsv:
