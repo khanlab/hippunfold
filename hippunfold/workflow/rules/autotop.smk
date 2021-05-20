@@ -1,5 +1,5 @@
 import os
-    
+import numpy as np    
 
 def get_input_for_shape_inject(wildcards):
     if get_modality_key(wildcards.modality) == 'seg':
@@ -56,9 +56,9 @@ rule laplace_coords:
     input:
         lbl = bids(root='work',**config['subj_wildcards'],suffix='autotop/labelmap-postProcess.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
     params:
-        iters_ap = 1000, #10000
-        iters_pd = 500, #5000
-        iters_io = 100, #1000
+        iters_ap = 10000,
+        iters_pd = 5000, 
+        iters_io = 1000,
     output:
         coords_ap = bids(root='work',suffix='autotop/coords-AP.nii.gz',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),
         coords_pd = bids(root='work',suffix='autotop/coords-PD.nii.gz',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),
@@ -77,6 +77,8 @@ rule create_unfold_ref:
         orient = config['unfold_vol_ref']['orient']
     output: 
         nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
+    group: 'subj'
+    container: config['singularity']['autotop'] 
     shell:
         'c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}'
 
@@ -86,26 +88,35 @@ rule create_unfold_coord_map:
         nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
     output:
         nii = bids(root='work',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards'])
+    group: 'subj'
+    container: config['singularity']['autotop'] 
     shell:
         'c3d {input.nii} -cmp -omc {output.nii}'
 
-rule warps_gifti:
+        
+rule create_warps:
     input:
         unfold_ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
         unfold_phys_coords_nii = bids(root='work',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards']),
         coord_ap = bids(root='work',suffix='autotop/coords-AP.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
         coord_pd = bids(root='work',suffix='autotop/coords-PD.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
         coord_io = bids(root='work',suffix='autotop/coords-IO.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
+    params:
+        interp_fill_value = np.nan,
+        interp_method =  'linear'
     output:
-        warp_unfold2native_extrap = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
         warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
         warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
         warpitk_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
         warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        gii = expand(bids(root='work',suffix='autotop/{surfname}.unfoldedtemplate.surf.gii',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),surfname=['inner','outer','midthickness'],allow_missing=True),
+        #warp_unfold2native_extrap = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
     group: 'subj'
     script: '../scripts/create_warps.py'
 
+# TODO: add this extrapolation of the warp file, extrapolate_warp_unfold2native.m
+#  .. for now just using original warp
+#rule extrapolate_warp_unfold2nii:
+    
 
 #full-grid correction of unfolded space
 rule map_to_full_grid:
