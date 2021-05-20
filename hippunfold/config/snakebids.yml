@@ -244,7 +244,22 @@ hippdwi_opts:
     L: '224 351'
   bbox_y: '198 453'
 
+unfold_vol_ref:
+  dims:
+    - '256'
+    - '128'
+    - '16'
+  voxdims:
+    - '0.15625'
+    - '0.15625'
+    - '0.15625'
+  origin:
+    - '0'
+    - '200'
+    - '0'
+  orient: RPI
 
+ 
 #---- dwi options below, not used in the default workflow ----
 
 #eddy options only used for experimental dwi workflow

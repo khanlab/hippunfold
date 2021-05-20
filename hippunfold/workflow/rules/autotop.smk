@@ -2,13 +2,13 @@ import os
     
 
 def get_input_for_shape_inject(wildcards):
-    if get_modality_key(wildcards.modality) == 'seg':
         modality_suffix = get_modality_suffix(wildcards.modality)
         seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(
                     **wildcards, modality_suffix=modality_suffix),
     else:
         seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
     return seg
+
 
 rule template_shape_inject:
     """should refactor into snakemake so it doesn't require fsl+ants in container"""
@@ -26,10 +26,10 @@ rule template_shape_inject:
         time = 180 #3 hrs (so grouped job is set at 3hrs, since snakemake grouped resources not summed, but takes the max)
     group: 'subj'
     container: config['singularity']['autotop'] #currently requires fsl and ants
-    log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='templateshapereg.txt')
+#    log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='templateshapereg.txt')
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
-        '{params.script} {input.template_seg} {input.seg} {output.postproc} {output.postproc_tmpdir} -L {params.preserve_labels} &> {log}' 
+        '{params.script} {input.template_seg} {input.seg} {output.postproc} {output.postproc_tmpdir} -L {params.preserve_labels}' 
 
 
 
@@ -54,6 +54,10 @@ rule transform_init_coords:
 rule laplace_coords:
     input:
         lbl = bids(root='work',**config['subj_wildcards'],suffix='autotop/labelmap-postProcess.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+    params:
+        iters_ap = 1000, #10000
+        iters_pd = 500, #5000
+        iters_io = 100, #1000
     output:
         coords_ap = bids(root='work',suffix='autotop/coords-AP.nii.gz',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),
         coords_pd = bids(root='work',suffix='autotop/coords-PD.nii.gz',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),
@@ -62,11 +66,35 @@ rule laplace_coords:
     script: '../scripts/laplace_coords.py'
 
 
-rule placeholder_warps_gifti:
+
+#unfold ref nifti
+rule create_unfold_ref:
+    params:
+        dims = 'x'.join(config['unfold_vol_ref']['dims']),
+        voxdims = 'x'.join(config['unfold_vol_ref']['voxdims']),
+        origin = 'x'.join(config['unfold_vol_ref']['origin']),
+        orient = config['unfold_vol_ref']['orient']
+    output: 
+        nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
+    shell:
+        'c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}'
+
+#this was unfold_phys_coords.nii in matlab implementation
+rule create_unfold_coord_map:
     input:
-        coords_ap = bids(root='work',suffix='autotop/coords-AP.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
-        coords_pd = bids(root='work',suffix='autotop/coords-PD.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
-        coords_io = bids(root='work',suffix='autotop/coords-IO.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
+        nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
+    output:
+        nii = bids(root='work',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards'])
+    shell:
+        'c3d {input.nii} -cmp {output.nii}'
+
+rule warps_gifti:
+    input:
+        unfold_ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        unfold_phys_coords_nii = bids(root='work',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards']),
+        coord_ap = bids(root='work',suffix='autotop/coords-AP.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
+        coord_pd = bids(root='work',suffix='autotop/coords-PD.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
+        coord_io = bids(root='work',suffix='autotop/coords-IO.nii.gz',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards']),
     output:
         warp_unfold2native_extrap = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
         warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
@@ -75,7 +103,7 @@ rule placeholder_warps_gifti:
         warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
         gii = expand(bids(root='work',suffix='autotop/{surfname}.unfoldedtemplate.surf.gii',desc='cropped', space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}', **config['subj_wildcards']),surfname=['inner','outer','midthickness'],allow_missing=True),
     group: 'subj'
-    shell: 'echo placeholder only'
+    script: '../scripts/create_warps.py'
 
 
 #full-grid correction of unfolded space
