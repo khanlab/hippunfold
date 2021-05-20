@@ -87,7 +87,7 @@ rule create_unfold_coord_map:
     output:
         nii = bids(root='work',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards'])
     shell:
-        'c3d {input.nii} -cmp {output.nii}'
+        'c3d {input.nii} -cmp -omc {output.nii}'
 
 rule warps_gifti:
     input:
