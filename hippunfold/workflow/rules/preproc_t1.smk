@@ -41,7 +41,7 @@ rule reg_to_template:
     output: 
         warped_subj = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',space=config['template'],desc='affine'),
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='ras'),
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras} {params.rigid}'

@@ -114,7 +114,7 @@ rule compose_warps_corobl2unfold_rhemi:
         ref = os.path.join(config['snakemake_dir'],'hippocampal_autotop','misc','unfold_ref_256x128x16.nii.gz'),
     output:
         corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='R',from_='corobl',to='unfold',mode='image')
-    container: config['singularity']['ants']
+    container: config['singularity']['autotop'] 
     group: 'subj'
     shell: 'ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.unfold2unfoldtemplate} {input.native2unfold}'
 
@@ -128,7 +128,7 @@ rule compose_warps_corobl2unfold_lhemi:
         flipLR_xfm = os.path.join(config['snakemake_dir'],'resources','desc-flipLR_type-itk_xfm.txt')
     output:
         corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='L',from_='corobl',to='unfold',mode='image')
-    container: config['singularity']['ants']
+    container: config['singularity']['autotop'] 
     group: 'subj'
     shell: 'ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.unfold2unfoldtemplate} {input.native2unfold} {input.flipLR_xfm}'
 
@@ -142,7 +142,7 @@ rule compose_warps_t1_to_unfold:
         t1w2corobl = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output: 
         bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image')
-    container: config['singularity']['ants']
+    container: config['singularity']['autotop'] 
     group: 'subj'
     shell: 'ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.t1w2corobl}'
 

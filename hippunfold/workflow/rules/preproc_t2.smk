@@ -36,7 +36,7 @@ rule reg_t2_to_ref:
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w{idx}',to='T2w0',desc='rigid',type_='ras'),
         xfm_itk = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w{idx}',to='T2w0',desc='rigid',type_='itk'),
         warped = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='aligned',floating='{idx}')
-    container: config['singularity']['prepdwi']
+    container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac && '
