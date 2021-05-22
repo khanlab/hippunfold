@@ -26,7 +26,7 @@ rule combine_tissue_subfield_labels_corobl:
         then, we just need to add those in, using max(old,new) to override old with new in case of conflict
     """
     input:
-        tissue = bids(root='work',**config['subj_wildcards'],suffix='autotop/labelmap-postProcess.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        tissue = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
         subfields = bids(root='work',datatype='seg_{modality}',desc='subfieldsnotissue',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     params:
         remap_dg = '-threshold 8 8 6 0 -popas dg',
@@ -60,7 +60,7 @@ rule resample_subfields_to_T1w:
 rule resample_postproc_to_T1w:
     """Resample post-processed tissue seg to T1w"""
     input:
-        nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/labelmap-postProcess.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        nii = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
         xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
         ref = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     output:

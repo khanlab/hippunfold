@@ -259,7 +259,46 @@ unfold_vol_ref:
     - '0'
   orient: RPI
 
- 
+shape_inject:
+  labels_reg: 
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+  labels_reinsert:
+    - 7
+  label_smoothing_stdev: '0.5x0.5x0.5mm'
+
+laplace_labels:
+  AP: 
+    gm:
+      - 1
+      - 8
+    src:
+      - 5
+    sink:
+      - 6
+  PD:
+    gm:
+      - 1
+      - 8
+    src:
+      - 3
+    sink:
+      - 8   
+  IO:
+    gm:
+      - 1
+      - 8
+    src:
+      - 2
+      - 4
+      - 7
+    sink:
+      - 0 
+
 #---- dwi options below, not used in the default workflow ----
 
 #eddy options only used for experimental dwi workflow

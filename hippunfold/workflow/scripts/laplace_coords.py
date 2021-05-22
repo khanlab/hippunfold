@@ -1,87 +1,85 @@
 import nibabel as nib
 import numpy as np
-import scipy.ndimage
+from astropy.convolution import convolve as nan_convolve
 
 
-def laplace_iters(idxgm,source,sink,iters=100):
-    # set up filter (18NN)
-    hl=np.zeros([3,3,3])
-    hl[1,:,:] = 1
-    hl[:,1,:] = 1
-    hl[:,:,1] = 1
-    hl[1,1,1] = 0
-    hl = hl/np.sum(hl)
-    bg = 1-idxgm
-    bg[source==1] = 0
-    bg[sink==1] = 0
-    bgCorrection = scipy.ndimage.convolve(bg,hl)
-    coords = np.zeros(lbl.shape)
-    coords[idxgm==1] = 0.5
-    coords[sink==1] = 1
-        
-    for i in range(iters): 
-        coords = scipy.ndimage.convolve(coords,hl)
-#        coords = coords/bgCorrection  #this is causing a divide by zero
-        coords[bg==1] = 0
-        coords[source==1] = 0
-        coords[sink==1] = 1
-
-    coords[idxgm==0] = 0
-
-    return coords
+logfile = open(snakemake.log[0], 'w')
 
 
 # this function solves the Laplace equation for Anterior-Posterior, Proximal-distal, and Inner-Outer axes of the hippocamps
-nii_labelmap = snakemake.input.lbl
+convergence_threshold = snakemake.params.convergence_threshold
+max_iters = snakemake.params.max_iters
 
-iters_ap = snakemake.params.iters_ap
-iters_pd = snakemake.params.iters_pd
-iters_io = snakemake.params.iters_io
 
-nii_ap = snakemake.output.coords_ap
-nii_pd = snakemake.output.coords_pd
-nii_io = snakemake.output.coords_io
+# initialize foreground (gm), source, and sink
 
-# TODO: initialize with fast marching for faster solver
-# TODO: make iters a parameter or choose stopping contitions or both (these values should be fine for 0.3mm resolution)
+lbl_nib = nib.load(snakemake.input.lbl)
+lbl = lbl_nib.get_fdata()
 
-# load labelmap
-print('loading labelmap')
-labelmap = nib.load(nii_labelmap)
-lbl = labelmap.get_fdata()
 idxgm = np.zeros(lbl.shape)
-idxgm[lbl==1] = 1
-idxgm[lbl==8] = 1
+for i in snakemake.params.gm_labels:
+    idxgm[lbl==i] = 1
 
-# AP solution
 source = np.zeros(lbl.shape)
-source[lbl==5] = 1
+for i in snakemake.params.src_labels:
+    source[lbl==i] = 1
+
 sink = np.zeros(lbl.shape)
-sink[lbl==6] = 1
-print('performing laplace on AP')
-AP = laplace_iters(idxgm,source,sink,iters=iters_ap)
-print('done performing laplace on AP')
-coordsAP = nib.Nifti1Image(AP,labelmap.affine,labelmap.header)
-nib.save(coordsAP,nii_ap)
-
-# PD solution
-source = np.zeros(lbl.shape)
-source[lbl==3] = 1
-sink = np.zeros(lbl.shape)
-sink[lbl==8] = 1
-PD = laplace_iters(idxgm,source,sink,iters=iters_pd)
-coordsPD = nib.Nifti1Image(PD,labelmap.affine,labelmap.header)
-nib.save(coordsPD,nii_pd)
-
-# IO solution
-source = np.zeros(lbl.shape)
-source[lbl==2] = 1
-source[lbl==4] = 1
-source[lbl==7] = 1
-sink = np.zeros(lbl.shape)
-sink[lbl==0] = 1
-IO = laplace_iters(idxgm,source,sink,iters=iters_io)
-coordsIO = nib.Nifti1Image(IO,labelmap.affine,labelmap.header)
-nib.save(coordsIO,nii_io)
+for i in snakemake.params.sink_labels:
+    sink[lbl==i] = 1
 
 
+# set up filter (18NN)
+hl=np.zeros([3,3,3])
+hl[1,:,:] = 1
+hl[:,1,:] = 1
+hl[:,:,1] = 1
+hl[1,1,1] = 0
+hl = hl/np.sum(hl)
+
+# initialize coords, setting outside domain to nan
+bg = 1-idxgm
+bg[source==1] = 0
+bg[sink==1] = 0
+coords = np.zeros(lbl.shape)
+coords[bg==1] = np.nan
+coords[idxgm==1] = 0.5
+coords[sink==1] = 1
+
+upd_coords = coords.copy()
+
+# iterate until the solution doesn't change anymore (or reach max iters)
+for i in range(max_iters): 
+
+ # debug: save niftis to check progress 
+ #   if (i % 100 == 0):
+ #       tonii = coords.copy()
+ #       tonii[np.isnan(tonii)] = -1
+ #       nib.Nifti1Image(tonii,lbl_nib.affine,lbl_nib.header).to_filename(f'debug_iter-{i:02d}.nii')
+
+
+    upd_coords = nan_convolve(coords,hl,preserve_nan=True)
+    
+    upd_coords[source==1] = 0
+    upd_coords[sink==1] = 1
+
+    #check difference between last
+    diff_coords = coords - upd_coords
+    diff_coords[np.isnan(diff_coords)] = 0
+    ssd = (diff_coords * diff_coords).sum(axis=None)
+
+    print(f'i: {i}, ssd: {ssd}', file=logfile, flush=True)
+    if ssd < convergence_threshold:
+        print(f'ssd less than {convergence_threshold}, stopping..', file=logfile, flush=True)
+        break
+   
+    coords = upd_coords
+
+coords[idxgm==0] = np.nan #setting outside GM to nan -- this was zero before.. 
+
+
+#save file
+coords_nib = nib.Nifti1Image(coords,lbl_nib.affine,lbl_nib.header)
+nib.save(coords_nib,snakemake.output.coords)
+
+logfile.close()

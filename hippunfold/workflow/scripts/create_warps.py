@@ -18,7 +18,6 @@ def summary(name, array):
     return
 
 #params:
-interp_fill_value = snakemake.params.interp_fill_value
 interp_method = snakemake.params.interp_method
 
 #load unfolded coordinate map
@@ -116,20 +115,21 @@ summary('unfold_gz',unfold_gz)
 interp_ap = griddata(points,
                         values=native_coords_phys[:,0],
                         xi=unfold_xi,
-                        method=interp_method,
-                        fill_value=interp_fill_value)
+                        method=interp_method)
+
+
+summary('interp_ap',interp_ap)
 interp_pd = griddata(points,
                         values=native_coords_phys[:,1],
                         xi=unfold_xi,
-                        method=interp_method,
-                        fill_value=interp_fill_value)
+                        method=interp_method)
+summary('interp_pd',interp_pd)
 interp_io = griddata(points,
                         values=native_coords_phys[:,2],
                         xi=unfold_xi,
-                        method=interp_method,
-                        fill_value=interp_fill_value)
+                        method=interp_method)
 
-summary('interp_ap',interp_ap)
+summary('interp_io',interp_ap)
 
 
 # prepare maps for writing as warp file:
