@@ -25,6 +25,7 @@ rule prep_segs_for_greedy:
         smoothing_stdev = config['shape_inject']['label_smoothing_stdev']
     output: directory('{prefix}_dsegsplit')
     group: 'subj'
+    container: config['singularity']['autotop'] 
     shell: 
         'mkdir -p {output} && '
         'c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz'
