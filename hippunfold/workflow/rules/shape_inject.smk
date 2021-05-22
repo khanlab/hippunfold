@@ -97,7 +97,7 @@ rule reinsert_subject_labels:
     group: 'subj'
     container: config['singularity']['autotop']
     shell: 
-        'c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}'
+        'c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -push LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}'
 
 
 rule unflip_postproc:

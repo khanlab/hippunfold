@@ -121,20 +121,20 @@ def get_final_qc():
                     slice=['1','2','3'],
                     allow_missing=True)
             )
-        qc.extend(
-            expand(
-                bids(
-                        root='work',
-                        datatype='qc',
-                        suffix='midthickness.surf.png', 
-                        desc='subfields',
-                        from_='{modality}',
-                        space='cropT1w',
-                        hemi='{hemi}',
-                        **config['subj_wildcards']),
-                    hemi=['L','R'],
-                    allow_missing=True)
-            ) 
+#        qc.extend(
+#            expand(
+#                bids(
+#                        root='work',
+#                        datatype='qc',
+#                        suffix='midthickness.surf.png', 
+#                        desc='subfields',
+#                        from_='{modality}',
+#                        space='cropT1w',
+#                        hemi='{hemi}',
+#                        **config['subj_wildcards']),
+#                    hemi=['L','R'],
+#                    allow_missing=True)
+#            ) 
         qc.extend(
             expand(
                 bids(

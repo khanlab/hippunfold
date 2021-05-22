@@ -25,9 +25,9 @@ interp_method = snakemake.params.interp_method
 unfold_phys_coords_nib = nib.load(snakemake.input.unfold_phys_coords_nii)
 
 #load laplace coords
-coord_ap_nib = nib.load(snakemake.input.coord_ap)
-coord_pd_nib = nib.load(snakemake.input.coord_pd)
-coord_io_nib = nib.load(snakemake.input.coord_io)
+coord_ap_nib = nib.load(snakemake.input.coords_ap)
+coord_pd_nib = nib.load(snakemake.input.coords_pd)
+coord_io_nib = nib.load(snakemake.input.coords_io)
 
 coord_ap = coord_ap_nib.get_fdata()
 coord_pd = coord_pd_nib.get_fdata()
