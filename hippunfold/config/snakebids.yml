@@ -200,9 +200,9 @@ template: CITI168
 
 template_files:
   CITI168:
-    T1w: resources/CIT168/T1w_head_700um.nii.gz
-    xfm_corobl: resources/CIT168/CoronalOblique_rigid.txt
-    crop_ref: resources/CIT168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    T1w: resources/CITI168/T1w_head_700um.nii.gz
+    xfm_corobl: resources/CITI168/CoronalOblique_rigid.txt
+    crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
 
 
 rigid_reg_template: False
