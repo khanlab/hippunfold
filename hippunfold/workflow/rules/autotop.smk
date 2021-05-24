@@ -1,10 +1,10 @@
 import os
 import numpy as np    
 
-
 rule laplace_coords:
     input:
         lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
+        init_coords = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],dir='{dir}',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
     params:
         gm_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['gm'],
         src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
@@ -15,7 +15,7 @@ rule laplace_coords:
         coords = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     group: 'subj'
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplace.txt')
-    script: '../scripts/laplace_coords.py'
+    script: '../scripts/laplace_coords_withinit.py'
 
 rule unflip_coords:
     input:
