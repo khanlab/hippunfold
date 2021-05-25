@@ -88,7 +88,7 @@ rule template_shape_inject:
 
 rule inject_init_laplace_coords:
     input:
-        coords = os.path.join(config['snakemake_dir'],'resources','tpl-upenn','tpl-upenn_dir-{dir}_level-0_coords.nii.gz'),
+        coords = os.path.join(config['snakemake_dir'],'resources','tpl-upenn','tpl-upenn_dir-{dir}_coords.nii.gz'),
         subject_seg = get_input_for_shape_inject,
         matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg_{modality}',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi}'),
         warp = bids(root='work',**config['subj_wildcards'],suffix='xfm.nii.gz',datatype='seg_{modality}',desc='greedy',from_='template',to='subject',space='corobl',hemi='{hemi}'),
