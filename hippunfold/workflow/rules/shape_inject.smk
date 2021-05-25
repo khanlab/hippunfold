@@ -111,17 +111,18 @@ rule reinsert_subject_labels:
     params:
         labels = ' '.join(str(label) for label in config['shape_inject']['labels_reinsert']),
     output:
-        postproc_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='reinsert',space='corobl',hemi='{hemi,Lflip|R}'),
+        postproc_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi,Lflip|R}'),
     group: 'subj'
     container: config['singularity']['autotop']
     shell: 
         'c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -push LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}'
 
 rule create_PD_sink:
+    """ this rule is a WIP and shouldn't be used yet"""
     input:
         lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='reinsert',space='corobl',hemi='{hemi}'),
     output:
-        lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
+        lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='withPDsink',space='corobl',hemi='{hemi}'),
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
