@@ -287,10 +287,7 @@ laplace_labels:
     src:
       - 3
     sink:
-      - 10
-      - 12
-      - 14
-      - 17
+      - 8   
   IO:
     gm:
       - 1
@@ -300,8 +297,7 @@ laplace_labels:
       - 4
       - 7
     sink:
-      - 0
-      - 10
+      - 0 
 
 #---- dwi options below, not used in the default workflow ----
 
