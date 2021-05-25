@@ -12,8 +12,7 @@ def get_input_for_shape_inject(wildcards):
 def get_input_splitseg_for_shape_inject(wildcards):
     if get_modality_key(wildcards.modality) == 'seg':
         modality_suffix = get_modality_suffix(wildcards.modality)
-        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dsegsplit',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(
-                    **wildcards, modality_suffix=modality_suffix),
+        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dsegsplit',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(**wildcards, modality_suffix=modality_suffix)
     else:
         seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dsegsplit',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
     return seg
@@ -41,13 +40,26 @@ rule import_template_shape:
         
 
 def get_image_pairs(wildcards, input):
+    """ This rule requires snakemake 6.4.0, since it uses the new feature to execute if input files are not found"""
+    subject_ts = open(input.subject_seg)
+    template_ts = open(input.template_seg)
+
     args = []
     for label in config['shape_inject']['labels_reg']:
-        args.append('-i')
-        args.append(f'{input.subject_seg}/label_{label:02d}.nii.gz') #subject is fixed
-        args.append(f'{input.template_seg}/label_{label:02d}.nii.gz') #template is moving
-    return ' '.join(args)
+        subject_label = f'{input.subject_seg}/label_{label:02d}.nii.gz'
+        template_label = f'{input.template_seg}/label_{label:02d}.nii.gz'
 
+        if not os.path.exists(subject_label):
+            print(f'Warning: {subject_label} does not exist, not using in registration')
+            continue
+        if not os.path.exists(template_label):
+            print(f'Warning: {template_label} does not exist, not using in registration')
+            continue
+
+        args.append('-i')
+        args.append(subject_label) #subject is fixed
+        args.append(template_label) #template is moving
+    return ' '.join(args)
 
 rule template_shape_reg:
     input:
