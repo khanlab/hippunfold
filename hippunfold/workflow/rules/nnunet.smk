@@ -66,7 +66,7 @@ rule run_inference:
     threads: 16
     resources:
         gpus = 1 if config['use_gpu'] else 0,
-        mem_mb = 32000,
+        mem_mb = 16000,
         time = 30 if config['use_gpu'] else 60,
     group: 'subj'
     shell: 'mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && ' #create temp folders
