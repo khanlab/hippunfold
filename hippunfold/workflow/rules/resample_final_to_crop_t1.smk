@@ -82,16 +82,26 @@ rule resample_t1_to_crop:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         'antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} ' 
 
+def get_xfm_t2_to_t1():
+    if config['skip_coreg']:
+        xfm = []
+    else:
+        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk')
+    return xfm
+
+
 rule resample_t2_to_crop:
     input:
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc'),
         ref = bids(root='work',datatype='seg_{modality}',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk')
+        xfm = get_xfm_t2_to_t1()
+    params:
+        xfm_opt = lambda wildcards, input:  '' if len(input.xfm) == 0  else f'-t {input.xfm}'
     output:
         nii = bids(root='results',datatype='seg_{modality}',desc='preproc',suffix='T2w.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
         'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
-        'antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} -t {input.xfm}' 
+        'antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} {params.xfm_opt}' 
         
