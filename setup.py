@@ -37,6 +37,7 @@ setuptools.setup(
         "snakebids>=0.3.10",
         "snakemake>=6.4.0",
         "nnunet @ git+https://github.com/ylugithub/nnUNet.git@v1.6.6",
+        "astropy",
         "appdirs",
         "pandas",
         "nibabel",
