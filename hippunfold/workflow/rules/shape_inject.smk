@@ -1,13 +1,4 @@
 
-def get_input_for_shape_inject(wildcards):
-    if get_modality_key(wildcards.modality) == 'seg':
-        modality_suffix = get_modality_suffix(wildcards.modality)
-        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(
-                    **wildcards, modality_suffix=modality_suffix),
-    else:
-        seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
-    return seg
-
 
 def get_input_splitseg_for_shape_inject(wildcards):
     if get_modality_key(wildcards.modality) == 'seg':
