@@ -41,8 +41,8 @@ rule import_template_shape:
 
 def get_image_pairs(wildcards, input):
     """ This rule requires snakemake 6.4.0, since it uses the new feature to execute if input files are not found"""
-    subject_ts = open(input.subject_seg)
-    template_ts = open(input.template_seg)
+    subject_ts = open(os.path.join(input.subject_seg,'.snakemake_timestamp'))
+    template_ts = open(os.path.join(input.template_seg,'.snakemake_timestamp'))
 
     args = []
     for label in config['shape_inject']['labels_reg']:
