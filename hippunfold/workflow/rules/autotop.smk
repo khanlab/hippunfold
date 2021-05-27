@@ -10,10 +10,12 @@ rule laplace_coords:
         src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
         sink_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['sink'],
         convergence_threshold = 1e-5,
-        max_iters = 100000
+        max_iters = 10000
     output:
         coords = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     group: 'subj'
+    resources:
+        time = 30
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplace.txt')
     script: '../scripts/laplace_coords_withinit.py'
 
