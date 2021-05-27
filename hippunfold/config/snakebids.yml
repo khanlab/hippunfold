@@ -155,6 +155,13 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --skip_inject_template_labels:
+    help: 'Set this flag to skip post-processing template injection into CNN segmentation (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
+   
+
   --rigid_reg_template:
     help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
     default: False
