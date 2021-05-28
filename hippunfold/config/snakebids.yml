@@ -155,6 +155,13 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --skip_inject_template_labels:
+    help: 'Set this flag to skip post-processing template injection into CNN segmentation (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
+   
+
   --rigid_reg_template:
     help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
     default: False
@@ -180,8 +187,8 @@ parse_args:
     help: 'Sets the output space for results (default: %(default)s)'
 
 
-  --archive_work:
-    help: 'Archive work folder for each subject after completion, saving space/files (default: %(default)s)'
+  --keep_work:
+    help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -190,7 +197,7 @@ parse_args:
 
 singularity:
   prepdwi: 'docker://khanlab/prepdwi:latest'  
-  autotop: 'docker://khanlab/autotop_deps:v0.2'
+  autotop: 'docker://khanlab/autotop_deps:v0.4.0'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
   ants: 'docker://kaczmarj/ants:2.3.4'
 
@@ -200,9 +207,9 @@ template: CITI168
 
 template_files:
   CITI168:
-    T1w: hippocampal_autotop/atlases/CITI/CIT168_T1w_head_700um.nii.gz
-    xfm_corobl: hippocampal_autotop/atlases/CITI/CoronalOblique_rigid.txt
-    crop_ref: hippocampal_autotop/atlases/CITI/img_300umCoronalOblique_hemi-{hemi}.nii.gz
+    T1w: resources/CITI168/T1w_head_700um.nii.gz
+    xfm_corobl: resources/CITI168/CoronalOblique_rigid.txt
+    crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
 
 
 rigid_reg_template: False
@@ -244,6 +251,60 @@ hippdwi_opts:
     L: '224 351'
   bbox_y: '198 453'
 
+unfold_vol_ref:
+  dims:
+    - '256'
+    - '128'
+    - '16'
+  voxdims:
+    - '0.15625'
+    - '0.15625'
+    - '0.15625'
+  origin:
+    - '0'
+    - '200'
+    - '0'
+  orient: RPI
+
+shape_inject:
+  labels_reg: 
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+  labels_reinsert:
+    - 7
+  label_smoothing_stdev: '0.5x0.5x0.5mm'
+
+laplace_labels:
+  AP: 
+    gm:
+      - 1
+      - 8
+    src:
+      - 5
+    sink:
+      - 6
+  PD:
+    gm:
+      - 1
+      - 8
+    src:
+      - 3
+    sink:
+      - 8   
+  IO:
+    gm:
+      - 1
+      - 8
+    src:
+      - 2
+      - 4
+      - 7
+    sink:
+      - 0 
 
 #---- dwi options below, not used in the default workflow ----
 
@@ -275,4 +336,4 @@ masking:
     #'0015': 'bet_from-b0_frac-4'
     '0015': 'b0SyN_from-MNI152NLin2009cSym'
 
-
+archive_work: False

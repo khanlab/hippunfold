@@ -6,12 +6,15 @@ execpath=`realpath $execpath`
 #this script performs registration between unfolded subj coords, and the full reference grid coords
 # it creates the ref grid coords, and pads all the images for the registration 
 
-autotop_dir=$1
-warps_dir=$2
+coords_AP=$1
+coords_PD=$2
+coords_IO=$3
+in_unfold_ref=$4
+warps_dir=$5
 
-if [ "$#" -lt 2 ]
+if [ "$#" -lt 5 ]
 then
-    echo "Usage: $0 autotop_dir warps_dir"
+    echo "Usage: $0 coords_ap coords_pd coords_io unfold_ref out_warps_dir"
     exit 1
 fi
 
@@ -26,7 +29,6 @@ N_PD=128
 N_IO=16
 
 
-in_unfold_ref=${warps_dir}/unfold_ref_256x128x16.nii.gz
 in_warpitk_native2unfold=${warps_dir}/WarpITK_native2unfold.nii
 out_norm_coords=${warps_dir}/unfold_norm_coords.nii
 
@@ -50,11 +52,17 @@ echo c3d $in_unfold_ref -cmv -popas IO -popas PD -popas AP -push AP -scale $norm
 c3d $in_unfold_ref -cmv -popas IO -popas PD -popas AP -push AP -scale $norm_AP -push PD -scale $norm_PD -push IO -scale $norm_IO -omc $out_norm_coords
 
 #unfold the coords
-for C in AP PD IO
-do 
- echo antsApplyTransforms -d 3 -r ${in_warpitk_native2unfold} -i ${autotop_dir}/coords-$C.nii.gz -t ${in_warpitk_native2unfold} -n NearestNeighbor -o ${warps_dir}/coords-${C}_unfold.nii
- antsApplyTransforms -d 3 -r ${in_warpitk_native2unfold} -i ${autotop_dir}/coords-$C.nii.gz -t ${in_warpitk_native2unfold} -n NearestNeighbor -o ${warps_dir}/coords-${C}_unfold.nii
-done
+echo antsApplyTransforms -d 3 -r ${in_warpitk_native2unfold} -i ${coords_AP} -t ${in_warpitk_native2unfold} -n NearestNeighbor -o ${warps_dir}/coords-AP_unfold.nii
+antsApplyTransforms -d 3 -r ${in_warpitk_native2unfold} -i ${coords_AP} -t ${in_warpitk_native2unfold} -n NearestNeighbor -o ${warps_dir}/coords-AP_unfold.nii
+
+echo antsApplyTransforms -d 3 -r ${in_warpitk_native2unfold} -i ${coords_PD} -t ${in_warpitk_native2unfold} -n NearestNeighbor -o ${warps_dir}/coords-PD_unfold.nii
+antsApplyTransforms -d 3 -r ${in_warpitk_native2unfold} -i ${coords_PD} -t ${in_warpitk_native2unfold} -n NearestNeighbor -o ${warps_dir}/coords-PD_unfold.nii
+
+echo antsApplyTransforms -d 3 -r ${in_warpitk_native2unfold} -i ${coords_IO} -t ${in_warpitk_native2unfold} -n NearestNeighbor -o ${warps_dir}/coords-IO_unfold.nii
+antsApplyTransforms -d 3 -r ${in_warpitk_native2unfold} -i ${coords_IO} -t ${in_warpitk_native2unfold} -n NearestNeighbor -o ${warps_dir}/coords-IO_unfold.nii
+
+
+
 
 #pad the unfolded images
 for  C in AP PD IO

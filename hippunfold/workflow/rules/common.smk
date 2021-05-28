@@ -96,7 +96,7 @@ def get_final_qc():
         qc.extend(
             expand(
                 bids(
-                        root='work',
+                        root='results',
                         datatype='qc',
                         suffix='regqc.png',
                         from_='subject', 
@@ -108,7 +108,7 @@ def get_final_qc():
         qc.extend(
             expand(
                 bids(
-                        root='work',
+                        root='results',
                         datatype='qc',
                         suffix='dseg.png',
                         desc='subfields',
@@ -121,24 +121,24 @@ def get_final_qc():
                     slice=['1','2','3'],
                     allow_missing=True)
             )
+#        qc.extend(
+#            expand(
+#                bids(
+#                        root='results',
+#                        datatype='qc',
+#                        suffix='midthickness.surf.png', 
+#                        desc='subfields',
+#                        from_='{modality}',
+#                        space='cropT1w',
+#                        hemi='{hemi}',
+#                        **config['subj_wildcards']),
+#                    hemi=['L','R'],
+#                    allow_missing=True)
+#            ) 
         qc.extend(
             expand(
                 bids(
-                        root='work',
-                        datatype='qc',
-                        suffix='midthickness.surf.png', 
-                        desc='subfields',
-                        from_='{modality}',
-                        space='cropT1w',
-                        hemi='{hemi}',
-                        **config['subj_wildcards']),
-                    hemi=['L','R'],
-                    allow_missing=True)
-            ) 
-        qc.extend(
-            expand(
-                bids(
-                        root='work',
+                        root='results',
                         datatype='qc',
                         desc='subfields',
                         from_='{modality}',
@@ -163,14 +163,10 @@ def get_final_subj_output():
 
 def get_final_output():
 
-    # skip --archive_work if multiple modalities are used 
-    if config['archive_work'] and len(config['modality']) == 1:
-        subj_output = get_final_work_tar()
-    elif config['archive_work'] and len(config['modality']) > 1:
-        print('Skipping --archive_work, as does not work with more than one modality')
+    if config['keep_work'] or len(config['modality']) > 1:
         subj_output = get_final_subj_output()
     else:
-        subj_output = get_final_subj_output()
+        subj_output = get_final_work_tar()
 
     final_output = []
     for modality in config['modality']:
@@ -218,5 +214,14 @@ rule archive_work_after_final:
     group: 'subj'
     shell: 'tar -cvzf {output} {params.work_dir} && rm -rf {params.work_dir}'
 
+
+def get_input_for_shape_inject(wildcards):
+    if get_modality_key(wildcards.modality) == 'seg':
+        modality_suffix = get_modality_suffix(wildcards.modality)
+        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(
+                    **wildcards, modality_suffix=modality_suffix),
+    else:
+        seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
+    return seg
 
 

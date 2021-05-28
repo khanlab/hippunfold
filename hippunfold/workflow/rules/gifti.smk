@@ -5,12 +5,11 @@ surf_to_secondary_type = {'midthickness': 'MIDTHICKNESS', 'inner': 'PIAL', 'oute
 
 
 
-
 rule warp_gii_unfoldtemplate2unfold: 
     """warp from template space to subj unfolded"""
     input: 
         warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
-        gii = bids(root='work',suffix='autotop/{surfname}.unfoldedtemplate.surf.gii',desc='cropped', space='corobl',hemi='{hemi}',modality='{modality}', **config['subj_wildcards'])
+        gii = os.path.join(config['snakemake_dir'],'resources','unfold_template','{surfname}.unfoldedtemplate.surf.gii')
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type = lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -28,7 +27,7 @@ rule warp_gii_unfoldtemplate2unfold:
 rule constrain_surf_to_bbox:
     input:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi}', **config['subj_wildcards']),
-        ref_nii = bids(root='work',**config['subj_wildcards'],suffix='autotop/unfold_ref_256x128x16.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
     output:
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii',desc='constrainbbox', space='unfolded',hemi='{hemi}', **config['subj_wildcards'])
     group: 'subj'
@@ -37,7 +36,7 @@ rule constrain_surf_to_bbox:
 #warp from subj unfolded to corobl
 rule warp_gii_unfold2native: 
     input: 
-        warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
         gii = bids(root='work',datatype='surf_{modality}',suffix='{surfname}.surf.gii', desc='constrainbbox',space='unfolded',hemi='{hemi}', **config['subj_wildcards'])
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
