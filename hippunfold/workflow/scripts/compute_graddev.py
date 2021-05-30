@@ -14,8 +14,8 @@ jac_data = jac_nib.get_fdata()
 #Reshape to 3x3 for decomposition
 grads = jac_data.reshape(-1,3,3,order='F')
 
-graddev = grads[:,:,:]/jac_nib.affine[0][0]
-
+#graddev = grads[:,:,:]/jac_nib.affine[0][0]
+graddev = grads
 #graddev = jac_data.reshape(-1,3,3,order='F')
 
 temp_graddev=np.copy(graddev)
