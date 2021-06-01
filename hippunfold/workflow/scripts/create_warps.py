@@ -155,16 +155,12 @@ warp_unfold2native_nib = nib.Nifti1Image(displacementToNative,
                                         unfold_phys_coords_nib.header)
 warp_unfold2native_nib.to_filename(snakemake.output.warp_unfold2native)
 
-#write ITK transform (flip x and y)
-displacementToNative_itk = displacementToNative.copy()
-displacementToNative_itk[:,:,:,0,0] = -displacementToNative_itk[:,:,:,0,0]
-displacementToNative_itk[:,:,:,0,1] = -displacementToNative_itk[:,:,:,0,1]
-
-warpitk_unfold2native_nib = nib.Nifti1Image(displacementToNative,
+# write itk transform to file
+warpitk_native2unfold_nib = nib.Nifti1Image(convert_warp_to_itk(displacementToNative),
                                         unfold_phys_coords_nib.affine,
                                         unfold_phys_coords_nib.header)
 
-warpitk_unfold2native_nib.to_filename(snakemake.output.warpitk_unfold2native)
+warpitk_native2unfold_nib.to_filename(snakemake.output.warpitk_native2unfold)
 
 
 
@@ -234,9 +230,9 @@ warp_native2unfold_nib = nib.Nifti1Image(native_to_unfold,
 warp_native2unfold_nib.to_filename(snakemake.output.warp_native2unfold)
 
 #and save ITK warp too
-warpitk_native2unfold_nib = nib.Nifti1Image(convert_warp_to_itk(native_to_unfold),
+warpitk_unfold2native_nib = nib.Nifti1Image(convert_warp_to_itk(native_to_unfold),
                                         coord_ap_nib.affine,
                                         coord_ap_nib.header)
-warpitk_native2unfold_nib.to_filename(snakemake.output.warpitk_native2unfold)
+warpitk_unfold2native_nib.to_filename(snakemake.output.warpitk_unfold2native)
 
 
