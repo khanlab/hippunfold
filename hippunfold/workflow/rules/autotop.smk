@@ -95,7 +95,7 @@ rule map_to_full_grid:
         coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
         unfold_ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
     params:
         script = os.path.join(config['snakemake_dir'],'workflow','scripts','mapUnfoldToFullGrid.sh'),
