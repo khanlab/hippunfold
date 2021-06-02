@@ -56,7 +56,7 @@ for i in range(warp_data.shape[0]):
             if mask[i,j,k] != 0: 
                 nan_warp[i,j,k,:] = warp_data[i,j,k,:]
             else:
-                nan_warp[i,j,k:] = np.nan
+                nan_warp[i,j,k,:] = np.nan
 
 #take derivative while considering nan border cases
 hold = []
