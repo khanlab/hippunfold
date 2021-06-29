@@ -188,13 +188,13 @@ parse_args:
 
   --output_density:
     choices:
-      - '11k'
+      - '32k'
+      - '7k'
       - '2k'
-      - '1k'
-      - '500'
-      - '300'
+      - '400'
     default:
-      - '11k'
+      - '7k'
+      - '2k'
     nargs: '+'
     help: 'Sets the output vertex density for results (default: %(default)s)'
 

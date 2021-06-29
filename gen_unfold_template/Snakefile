@@ -24,6 +24,19 @@ rule all_area:
                     surfname=config['surf_to_io'].keys(),
                     nbins=nbins)
 
+rule all_example:
+    input:
+        gii = expand(bids(root='example_transformed',
+                        include_subject_dir=False,
+                        subject='{subject}',
+                        hemi='{hemi}',
+                        space='corobl',
+                        suffix='{surfname}.surf.gii',den='{density}'),
+                    subject='0001',
+                    hemi='R',
+                    density=config['density_to_area'].keys(),
+                    surfname=config['surf_to_io'].keys())
+ 
 
 rule all_subjsurf:
     input:
@@ -119,6 +132,20 @@ rule surf_to_final_name:
     shell:
         'cp {input} {output}'
 
+rule examplesurf_to_final_name:
+    input:
+        gii = lambda wildcards: bids(root='results',
+                    subject=f'{wildcards.subject}',
+                    hemi=f'{wildcards.hemi}',
+                    space='corobl',
+                    suffix=f'{wildcards.surfname}.surf.gii',
+                    targetarea=config['density_to_area'][wildcards.density],
+                    nbins=config['num_bins']),
+    output:
+        gii = bids(root='example_transformed',include_subject_dir=False,subject='{subject}',hemi='{hemi,R|Lflip}',space='corobl',
+                suffix='{surfname}.surf.gii',den='{density}'),
+    shell:
+        'cp {input} {output}'
 
 rule warp_gii_unfoldtemplate2unfold: 
     """warp from template space to subj unfolded"""
