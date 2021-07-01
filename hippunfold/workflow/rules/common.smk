@@ -28,7 +28,8 @@ def get_modality_suffix (modality):
 def get_final_spec():
     if 'cropT1w' in  config['output_spaces']:
         return expand(
-            bids(root='results',datatype='surf_{modality}',suffix='hippunfold.spec', **config['subj_wildcards']),
+            bids(root='results',datatype='surf_{modality}',den='{density}',suffix='hippunfold.spec', **config['subj_wildcards']),
+            density=config['output_density'],
             allow_missing=True)
     else:
         return []
