@@ -90,3 +90,43 @@ rule unflip_nnunet_nii:
 
 
 
+
+def get_f3d_ref (wildcards):
+    if wildcards.modality == 'T2w':
+        nii = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref']),
+    elif wildcards.modality == 'T1w':
+        nii = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_refT1w']),
+    else:
+        raise ValueError('modality not supported for nnunet!')
+    return nii
+
+rule qc_nnunet_f3d:
+    input:
+        img = get_nnunet_input,
+        seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}'),
+        ref = get_f3d_ref,
+    output:
+        cpp = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='cpp.nii.gz',desc='f3d',space='corobl',hemi='{hemi}'),
+        res = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='{modality}.nii.gz',desc='f3d',space='template',hemi='{hemi}'),
+        res_mask = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='mask.nii.gz',desc='f3d',space='template',hemi='{hemi}')
+    container: config['singularity']['autotop']
+    group: 'subj'
+    shell:
+        'reg_f3d -flo {input.img} -ref {input.ref} -res {output.res} -cpp {output.cpp} && '
+        'reg_resample -flo {input.seg} -cpp {output.cpp} -ref {input.ref} -res {output.res_mask} -inter 0'
+
+rule qc_nnunet_dice:
+    input:
+        res_mask = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='mask.nii.gz',desc='f3d',space='template',hemi='{hemi}'),
+        ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['Mask_crop'])
+    params:
+        hipp_lbls = [1,2,7,8]
+    output: 
+        dice = report(bids(root='results',datatype='qc',suffix='dice.tsv', desc='unetf3d',from_='{modality}',hemi='{hemi}', **config['subj_wildcards']),
+                caption='../report/nnunet_qc.rst',
+                category='Segmentation QC',
+                subcategory='nnunet from {modality}')
+    group: 'subj'
+    script: '../scripts/dice.py'
+
+
