@@ -31,3 +31,8 @@ def test_dry_runs(script_runner):
         ret = script_runner.run('hippunfold', 'test_data/bids_segT2w',output_dir,'participant','-np','--modality','segT2w')
         assert ret.success
 
+    #test case for cropseg, uses --path_cropseg instead of bids, since pybids (or at least how we use it in snakebids) doesn't like hemi wildcards
+    with tempfile.TemporaryDirectory() as output_dir:
+        ret = script_runner.run('hippunfold', '-',output_dir,'participant','-np','--modality','cropseg','--path_cropseg','test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz')
+        assert ret.success
+
