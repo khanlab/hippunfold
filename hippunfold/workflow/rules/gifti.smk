@@ -179,11 +179,16 @@ def get_cmd_cifti_metric(wildcards,input, output):
         cmd = cmd + f' -right-metric {input.right_metric}'
     return cmd
 
+def get_inputs_cifti_metric(wildcards):
+    files = dict()
+    if 'L' in config['hemi']:
+        files['left_metric'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.shape.gii', space='{space}',hemi='L', **config['subj_wildcards']).format(**wildcards),
+    if 'R' in config['hemi']:
+        files['right_metric'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.shape.gii', space='{space}',hemi='R', **config['subj_wildcards']).format(**wildcards),
+    return files
 
 rule create_dscalar_metric_cifti:
-    input:
-        left_metric = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.shape.gii', space='{space}',hemi='L', **config['subj_wildcards']),
-        right_metric = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.shape.gii', space='{space}',hemi='R', **config['subj_wildcards'])
+    input: unpack(get_inputs_cifti_metric)
     params:
         cmd = get_cmd_cifti_metric
     output:
@@ -191,6 +196,15 @@ rule create_dscalar_metric_cifti:
     container: config['singularity']['autotop']
     group: 'subj' 
     shell: '{params.cmd}'
+
+def get_inputs_cifti_label(wildcards):
+    files = dict()
+    if 'L' in config['hemi']:
+        files['left_label'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='L', **config['subj_wildcards']).format(**wildcards),
+    if 'R' in config['hemi']:
+        files['right_label'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='R', **config['subj_wildcards']).format(**wildcards),
+    return files
+
 
 def get_cmd_cifti_label(wildcards,input, output):
     cmd = f'wb_command  -cifti-create-label {output}'
@@ -201,12 +215,8 @@ def get_cmd_cifti_label(wildcards,input, output):
     return cmd
 
 
-       
-
 rule create_dlabel_cifti_subfields:
-    input:
-        left_label = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='L', **config['subj_wildcards']),
-        right_label = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='R', **config['subj_wildcards'])
+    input: unpack(get_inputs_cifti_label)
     params:
         cmd = get_cmd_cifti_label
     output:
