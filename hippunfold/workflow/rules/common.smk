@@ -240,4 +240,10 @@ def get_input_for_shape_inject(wildcards):
         seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
     return seg
 
+def get_labels_for_laplace(wildcards):
+    if config['skip_inject_template_labels']:
+        seg = get_input_for_shape_inject(wildcards)
+    else:
+        seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}').format(**wildcards)
+    return seg
 
