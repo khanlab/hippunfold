@@ -26,13 +26,18 @@ def get_modality_suffix (modality):
 
 
 def get_final_spec():
-    if 'cropT1w' in  config['output_spaces']:
-        return expand(
-            bids(root='results',datatype='surf_{modality}',den='{density}',suffix='hippunfold.spec', **config['subj_wildcards']),
+    surf_spaces = []
+    if 'cropT1w' in config['output_spaces']:
+        surf_spaces.append('T1w')
+    if 'corobl' in config['output_spaces']:
+        surf_spaces.append('corobl')
+
+    specs = expand(
+        bids(root='results',datatype='surf_{modality}',den='{density}',space='{space}',suffix='hippunfold.spec', **config['subj_wildcards']),
             density=config['output_density'],
+            space=surf_spaces,
             allow_missing=True)
-    else:
-        return []
+    return specs
 
 def get_final_subfields():
     return expand(
@@ -76,18 +81,23 @@ def get_final_transforms():
 
 
 def get_final_anat():
-    return expand(
-        bids(
-                root='results',
-                datatype='seg_{modality}',
-                desc='preproc',
-                suffix='{modality_suffix}.nii.gz',
-                space='{space}',
-                hemi='{hemi}',
-                **config['subj_wildcards']),
-            space=config['output_spaces'],
-            hemi=['L','R'],
-            allow_missing=True)
+    anat = []
+    
+    if 'cropT1w' in config['output_spaces']:
+        anat.extend(
+            expand(
+                bids(
+                        root='results',
+                        datatype='seg_{modality}',
+                        desc='preproc',
+                        suffix='{modality_suffix}.nii.gz',
+                        space='{space}',
+                        hemi='{hemi}',
+                        **config['subj_wildcards']),
+                    space=config['output_spaces'],
+                    hemi=['L','R'],
+                    allow_missing=True))
+    return anat
 
 
 def get_final_qc():
@@ -232,7 +242,9 @@ rule archive_work_after_final:
 
 
 def get_input_for_shape_inject(wildcards):
-    if get_modality_key(wildcards.modality) == 'seg':
+    if wildcards.modality == 'cropseg':
+        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}').format(**wildcards)
+    elif get_modality_key(wildcards.modality) == 'seg':
         modality_suffix = get_modality_suffix(wildcards.modality)
         seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(
                     **wildcards, modality_suffix=modality_suffix),
