@@ -6,8 +6,10 @@ from snakebids import bids
 configfile: 'config/snakebids.yml'
 
 #make adjustments to input params:
-if 'hippb500' in config['modality']: #right now hippb500 cannot use T1w output space
+# right now hippb500 or cropseg cannot use T1w output space
+if ('hippb500' in config['modality']) or ('cropseg' in config['modality']): 
     config['output_spaces'] = ['corobl']
+
 
 #get list of inputs to limit to (T1w + modalities)
 limit_to_list = set()
@@ -49,8 +51,11 @@ include: 'rules/preproc_t1.smk'
 #include rules only as they are needed..
 if 'segT1w' in config['modality'] or 'segT2w' in config['modality']:
     include: 'rules/preproc_seg.smk'
+elif 'cropseg' in config['modality']:
+    include: 'rules/preproc_cropseg.smk'
 else: 
     include: 'rules/nnunet.smk'
+
 
 #if using manual segs, then don't use nnunet
 if 'segT2w' in config['modality'] or 'T2w' in config['modality']:

@@ -87,6 +87,17 @@ pybids_inputs:
       - subject
       - session
 
+  cropseg:
+    filters:
+      suffix: 'dseg'
+      extension: '.nii.gz'
+      datatype: 'anat'
+      invalid_filters: 'allow'
+    wildcards:
+      - subject
+      - session
+      - hemi
+
 
 
 #configuration for the command-line parameters to make available
@@ -136,6 +147,7 @@ parse_args:
       - dwi
       - segT1w
       - segT2w
+      - cropseg
     default: 
       - T2w
  # custom command-line parameters can then be added, these will get added to the config
