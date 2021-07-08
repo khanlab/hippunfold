@@ -32,11 +32,20 @@ def get_final_spec():
     if 'corobl' in config['output_spaces']:
         surf_spaces.append('corobl')
 
-    specs = expand(
-        bids(root='results',datatype='surf_{modality}',den='{density}',space='{space}',suffix='hippunfold.spec', **config['subj_wildcards']),
-            density=config['output_density'],
-            space=surf_spaces,
-            allow_missing=True)
+    if len(config['hemi']) == 2:
+        specs = expand(
+            bids(root='results',datatype='surf_{modality}',den='{density}',space='{space}',suffix='hippunfold.spec', **config['subj_wildcards']),
+                density=config['output_density'],
+                space=surf_spaces,
+                allow_missing=True)
+    else:
+         specs = expand(
+            bids(root='results',datatype='surf_{modality}',den='{density}',space='{space}',hemi='{hemi}',suffix='hippunfold.spec', **config['subj_wildcards']),
+                density=config['output_density'],
+                space=surf_spaces,
+                hemi=config['hemi'],
+                allow_missing=True)
+       
     return specs
 
 def get_final_subfields():
@@ -45,7 +54,7 @@ def get_final_subfields():
                 root='results',datatype='seg_{modality}',
                 desc='subfields',suffix='dseg.nii.gz',
                 space='{space}',hemi='{hemi}', **config['subj_wildcards']),
-            hemi=['L','R'],
+            hemi=config['hemi'],
             space=config['output_spaces'],
             allow_missing=True)
 
@@ -54,7 +63,7 @@ def get_final_coords():
         bids(
             root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
                 dir=['AP','PD','IO'],
-                hemi=['L','R'],
+                hemi=config['hemi'],
                 space=config['output_spaces'],
                 allow_missing=True)
 
@@ -76,7 +85,7 @@ def get_final_transforms():
                 to='unfold',
                 mode='image'),
             space=output_ref,
-            hemi=['L','R'],
+            hemi=config['hemi'],
             allow_missing=True)
 
 
@@ -95,7 +104,7 @@ def get_final_anat():
                         hemi='{hemi}',
                         **config['subj_wildcards']),
                     space=config['output_spaces'],
-                    hemi=['L','R'],
+                    hemi=config['hemi'],
                     allow_missing=True))
     return anat
 
@@ -128,7 +137,7 @@ def get_final_qc():
                         space='cropT1w',
                         hemi='{hemi}',
                         **config['subj_wildcards']),
-                    hemi=['L','R'],
+                    hemi=config['hemi'],
                     slice=['1','2','3'],
                     allow_missing=True)
             )
@@ -143,20 +152,21 @@ def get_final_qc():
 #                        space='cropT1w',
 #                        hemi='{hemi}',
 #                        **config['subj_wildcards']),
-#                    hemi=['L','R'],
+#                    hemi=config['hemi'],
 #                    allow_missing=True)
 #            ) 
-        qc.extend(
-            expand(
-                bids(
-                        root='results',
-                        datatype='qc',
-                        desc='subfields',
-                        from_='{modality}',
-                        suffix='volumes.png',
-                        **config['subj_wildcards']),
-                    allow_missing=True)
-            )
+        if len(config['hemi']) == 2:
+            qc.extend(
+                expand(
+                    bids(
+                            root='results',
+                            datatype='qc',
+                            desc='subfields',
+                            from_='{modality}',
+                            suffix='volumes.png',
+                            **config['subj_wildcards']),
+                        allow_missing=True)
+                )
 
         if ('T1w' in config['modality']) or ('T2w' in config['modality']):
             qc.extend(
@@ -169,7 +179,7 @@ def get_final_qc():
                             from_='{modality}',
                             hemi='{hemi}',
                             **config['subj_wildcards']),
-                        hemi=['L','R'],
+                        hemi=config['hemi'],
                         allow_missing=True)
                 )
     return qc
