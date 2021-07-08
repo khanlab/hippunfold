@@ -1,7 +1,10 @@
 
 
 def get_input_splitseg_for_shape_inject(wildcards):
-    if get_modality_key(wildcards.modality) == 'seg':
+    if wildcards.modality == 'cropseg':
+        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dsegsplit',desc='cropped',space='corobl',hemi='{hemi}').format(**wildcards)
+ 
+    elif get_modality_key(wildcards.modality) == 'seg':
         modality_suffix = get_modality_suffix(wildcards.modality)
         seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dsegsplit',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(**wildcards, modality_suffix=modality_suffix)
     else:
