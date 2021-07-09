@@ -210,6 +210,18 @@ parse_args:
     nargs: '+'
     help: 'Sets the output vertex density for results (default: %(default)s)'
 
+
+  --hemi:
+    choices:
+      - 'L'
+      - 'R'
+    default:
+      - 'L'
+      - 'R'
+    nargs: '+'
+    help: 'Hemisphere(s) to process (default: %(default)s)'
+
+
   --keep_work:
     help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
     default: False

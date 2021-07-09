@@ -171,31 +171,59 @@ rule metric_to_label_gii:
     shell: 'wb_command -metric-label-import {input.metric_gii} {input.label_list} {output.label_gii}'
 
 
+def get_cmd_cifti_metric(wildcards,input, output):
+    cmd = f'wb_command  -cifti-create-dense-scalar {output}'
+    if 'L' in config['hemi']:
+        cmd = cmd + f' -left-metric {input.left_metric}'
+    if 'R' in config['hemi']:
+        cmd = cmd + f' -right-metric {input.right_metric}'
+    return cmd
+
+def get_inputs_cifti_metric(wildcards):
+    files = dict()
+    if 'L' in config['hemi']:
+        files['left_metric'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.shape.gii', space='{space}',hemi='L', **config['subj_wildcards']).format(**wildcards),
+    if 'R' in config['hemi']:
+        files['right_metric'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.shape.gii', space='{space}',hemi='R', **config['subj_wildcards']).format(**wildcards),
+    return files
+
 rule create_dscalar_metric_cifti:
-    input:
-        left_metric = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.shape.gii', space='{space}',hemi='L', **config['subj_wildcards']),
-        right_metric = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.shape.gii', space='{space}',hemi='R', **config['subj_wildcards'])
+    input: unpack(get_inputs_cifti_metric)
+    params:
+        cmd = get_cmd_cifti_metric
     output:
         cifti = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{metric}.dscalar.nii', space='{space}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
-    shell:
-        'wb_command  -cifti-create-dense-scalar {output}'
-        ' -left-metric {input.left_metric} -right-metric {input.right_metric}'
+    shell: '{params.cmd}'
+
+def get_inputs_cifti_label(wildcards):
+    files = dict()
+    if 'L' in config['hemi']:
+        files['left_label'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='L', **config['subj_wildcards']).format(**wildcards),
+    if 'R' in config['hemi']:
+        files['right_label'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='R', **config['subj_wildcards']).format(**wildcards),
+    return files
+
+
+def get_cmd_cifti_label(wildcards,input, output):
+    cmd = f'wb_command  -cifti-create-label {output}'
+    if 'L' in config['hemi']:
+        cmd = cmd + f' -left-label {input.left_label}'
+    if 'R' in config['hemi']:
+        cmd = cmd + f' -right-label {input.right_label}'
+    return cmd
 
 
 rule create_dlabel_cifti_subfields:
-    input:
-        left_label = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='L', **config['subj_wildcards']),
-        right_label = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='R', **config['subj_wildcards'])
+    input: unpack(get_inputs_cifti_label)
+    params:
+        cmd = get_cmd_cifti_label
     output:
         cifti = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.dlabel.nii', space='{space}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
-    shell:
-        'wb_command  -cifti-create-label {output}'
-        ' -left-label {input.left_label} -right-label {input.right_label}'
-
+    shell: '{params.cmd}'
 
 
 
@@ -222,7 +250,7 @@ rule create_spec_file:
         subfields = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
         cifti = expand(bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{cifti}.nii', space='{space}', **config['subj_wildcards']),
                     cifti=['gyrification.dscalar','curvature.dscalar','thickness.dscalar','subfields.dlabel'], allow_missing=True),
-
+ 
     params:
         cmds = get_cmd_spec_file
     output: 
@@ -231,14 +259,16 @@ rule create_spec_file:
     group: 'subj' 
     shell: '{params.cmds}'
 
+
+
 rule merge_lr_spec_file:
     input:
         spec_files = expand(bids(root='results',datatype='surf_{modality}',den='{density}',suffix='hippunfold.spec', hemi='{hemi}',space='{space}',**config['subj_wildcards']),
                         hemi=['L','R'], allow_missing=True)
-    output: 
-        spec_file = bids(root='results',datatype='surf_{modality}',den='{density}',space='{space}',suffix='hippunfold.spec', **config['subj_wildcards'])
+    output:
+        spec_file = bids(root='work',datatype='surf_{modality}',den='{density}',space='{space}',suffix='hippunfold.spec', **config['subj_wildcards'])
     container: config['singularity']['autotop']
-    group: 'subj' 
+    group: 'subj'
     shell: 'wb_command -spec-file-merge {input.spec_files} {output}'
 
 
