@@ -11,7 +11,7 @@ def get_cmd_laplace_coords(wildcards):
 
 def get_inputs_laplace(wildcards):
     files = dict()
-    files['lbl'] = get_labels_for_laplace
+    files['lbl'] = get_labels_for_laplace(wildcards)
     if not config['skip_inject_template_labels']:
         files['init_coords'] = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],dir='{dir}',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
     return files
