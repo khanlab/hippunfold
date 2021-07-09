@@ -9,17 +9,15 @@ def get_cmd_laplace_coords(wildcards):
         cmd = '../scripts/laplace_coords_withinit.py'
     return cmd
 
-def get_init_laplace(wildcards):
+def get_inputs_laplace(wildcards):
+    files = dict()
+    files['lbl'] = get_labels_for_laplace
     if not config['skip_inject_template_labels']:
-        init_coords = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],dir='{dir}',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
-    else:
-        init_coords = get_labels_for_laplace(wildcards)
-    return init_coords
+        files['init_coords'] = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],dir='{dir}',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
+    return files
 
 rule laplace_coords:
-    input:
-        lbl = get_labels_for_laplace,
-        init_coords = get_init_laplace
+    input: unpack(get_inputs_laplace)
     params:
         cmd = get_cmd_laplace_coords,
         gm_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['gm'],
