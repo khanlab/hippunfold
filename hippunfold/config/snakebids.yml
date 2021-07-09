@@ -200,15 +200,15 @@ parse_args:
 
   --output_density:
     choices:
-      - '32k'
       - '7k'
       - '2k'
       - '400'
+      - '32k'
     default:
       - '7k'
       - '2k'
     nargs: '+'
-    help: 'Sets the output vertex density for results (default: %(default)s)'
+    help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the 32k vertices option having unequal vertex spacing. (default: %(default)s)'
 
 
   --hemi:
