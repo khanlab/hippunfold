@@ -52,6 +52,7 @@ backward = backward.data
 # combine
 forward = forward/np.max(forward)
 backward = backward/np.max(backward)
+backward = -backward +1
 init_coords = (forward + backward)/2
 init_coords = init_coords/np.max(init_coords)
 init_coords[idxgm==0] = 0
