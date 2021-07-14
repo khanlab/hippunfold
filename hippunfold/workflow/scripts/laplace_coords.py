@@ -1,5 +1,6 @@
 import nibabel as nib
 import numpy as np
+import skfmm
 from astropy.convolution import convolve as nan_convolve
 
 
@@ -28,6 +29,33 @@ sink = np.zeros(lbl.shape)
 for i in snakemake.params.sink_labels:
     sink[lbl==i] = 1
 
+# initialize solution with fast marching
+print(f'Setting up fast-marching initialization', file=logfile, flush=True)
+# fast march forward
+phi = np.ones_like(lbl)
+phi[source==1] = 0
+mask = np.ones_like(lbl)
+mask[idxgm==1] = 0
+mask[source==1] = 0
+phi = np.ma.MaskedArray(phi,mask)
+forward = skfmm.travel_time(phi,np.ones_like(lbl))
+forward = forward.data
+# fast match backward
+phi = np.ones_like(lbl)
+phi[sink==1] = 0
+mask = np.ones_like(lbl)
+mask[idxgm==1] = 0
+mask[sink==1] = 0
+phi = np.ma.MaskedArray(phi,mask)
+backward = skfmm.travel_time(phi,np.ones_like(lbl))
+backward = backward.data
+# combine
+forward = forward/np.max(forward)
+backward = backward/np.max(backward)
+backward = -backward +1
+init_coords = (forward + backward)/2
+init_coords = init_coords/np.max(init_coords)
+init_coords[idxgm==0] = 0
 
 # set up filter (18NN)
 hl=np.zeros([3,3,3])
@@ -41,9 +69,8 @@ hl = hl/np.sum(hl)
 bg = 1-idxgm
 bg[source==1] = 0
 bg[sink==1] = 0
-coords = np.zeros(lbl.shape)
+coords = init_coords
 coords[bg==1] = np.nan
-coords[idxgm==1] = 0.5
 coords[sink==1] = 1
 
 upd_coords = coords.copy()
