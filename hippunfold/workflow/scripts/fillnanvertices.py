@@ -1,9 +1,7 @@
 import nibabel as nib
 import numpy as np
 
-gii = nib.load('/data/mica3/jordand/testinground/test_vertexcorrect2/work/sub-01/surf_T1w/sub-01_hemi-Lflip_space-corobl_den-7k_desc-nonancorrect_outer.surf.gii')
-
-#gii = nib.load(snakemake.input.gii)
+gii = nib.load(snakemake.input.gii)
 varr = gii.get_arrays_from_intent('NIFTI_INTENT_POINTSET')[0]
 V = varr.data
 farr = gii.get_arrays_from_intent('NIFTI_INTENT_TRIANGLE')[0]
