@@ -58,7 +58,6 @@ rule correct_nan_vertices:
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', desc='nonancorrect', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     output:
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi,R|Lflip}', **config['subj_wildcards'])
-    container: config['singularity']['autotop']
     group: 'subj'
     script: '../scripts/fillnanvertices.py'
 
