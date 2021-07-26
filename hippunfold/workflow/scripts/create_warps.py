@@ -112,40 +112,38 @@ summary('unfold_gz',unfold_gz)
 #perform the interpolation, filling in outside values as 0
 #  TODO: linear vs cubic?  we were using "natural" interpolation in matlab
 #         so far, linear seems close enough..
+
+# combine and reshape interpolated map to 5d (4th dim singleton)
+mapToNative = np.zeros(unfold_grid_phys.shape)
+
 interp_ap = griddata(points,
                         values=native_coords_phys[:,0],
                         xi=unfold_xi,
                         method=interp_method)
-
-
 summary('interp_ap',interp_ap)
+mapToNative[:,:,:,0,0] = interp_ap
+del interp_ap # save memory as this can get intense at high resolution!
+
 interp_pd = griddata(points,
                         values=native_coords_phys[:,1],
                         xi=unfold_xi,
                         method=interp_method)
 summary('interp_pd',interp_pd)
+mapToNative[:,:,:,0,1] = interp_pd
+del interp_pd
+
 interp_io = griddata(points,
                         values=native_coords_phys[:,2],
                         xi=unfold_xi,
                         method=interp_method)
-
-summary('interp_io',interp_ap)
-
-
-# prepare maps for writing as warp file:
-
-# combine and reshape interpolated map to 5d (4th dim singleton)
-mapToNative = np.zeros(unfold_grid_phys.shape)
-mapToNative[:,:,:,0,0] = interp_ap
-mapToNative[:,:,:,0,1] = interp_pd
+summary('interp_io',interp_io)
 mapToNative[:,:,:,0,2] = interp_io
+del interp_io
 
-summary('mapToNative',mapToNative)
 
 # mapToNative has the absolute coordinates, but we want them relative to the 
 # unfolded grid, so we subtract it out:
 displacementToNative = mapToNative - unfold_grid_phys
-
 summary('dispacementToNative',displacementToNative)
 
 
