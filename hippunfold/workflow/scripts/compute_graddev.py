@@ -11,23 +11,47 @@ jac_data = jac_nib.get_fdata()
 
 #shape of Jacobian is (256, 128, 16, 9)
 
+print(jac_data.shape)
+
 #Reshape to 3x3 for decomposition
 grads = jac_data.reshape(-1,3,3,order='F')
+
+print(grads.shape)
+
+test_indices = [1000,2000]
+
 
 #graddev = grads[:,:,:]/jac_nib.affine[0][0]
 graddev = grads
 #graddev = jac_data.reshape(-1,3,3,order='F')
 
+
+
 temp_graddev=np.copy(graddev)
 graddev[:]=np.NaN
 
+
+
 #Polar decomposition of jacobian where we only take rotation
-for g in range(0,graddev.shape[0]):
+for g in test_indices:  #range(0,graddev.shape[0]):
+    print(f'index: {g}')    
     m=temp_graddev[g,:,:]
+    print(f'm: {m}')
     x = ~np.isnan(m)
+    print(f'x: {x}')
     if x.all(): 
         rot, deform = polar(m)
+        print(f'rot:')
+        print(f'{rot}')
+        print(f'deform:')
+        print(f'{deform}')
         graddev[g,:,:]= rot
+        print('eye:')
+        print(f'{np.identity(3)}')
+        print('rot - eye:')
+        sub_eye = rot-np.identity(3)
+        print(f'{sub_eye}')
+
 
 grad_hold = graddev - np.identity(3)
 

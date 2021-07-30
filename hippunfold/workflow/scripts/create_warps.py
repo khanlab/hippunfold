@@ -225,14 +225,14 @@ summary('native_to_unfold',native_to_unfold)
 
 #now, can write it to file
 warp_native2unfold_nib = nib.Nifti1Image(native_to_unfold,
-                                        coord_ap_nib.affine,
-                                        coord_ap_nib.header)
+                                        coord_ap_nib.affine) #,
+#                                        coord_ap_nib.header)
 warp_native2unfold_nib.to_filename(snakemake.output.warp_native2unfold)
 
 #and save ITK warp too
 warpitk_unfold2native_nib = nib.Nifti1Image(convert_warp_to_itk(native_to_unfold),
-                                        coord_ap_nib.affine,
-                                        coord_ap_nib.header)
+                                        coord_ap_nib.affine) #,
+#                                        coord_ap_nib.header)
 warpitk_unfold2native_nib.to_filename(snakemake.output.warpitk_unfold2native)
 
 

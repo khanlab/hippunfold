@@ -31,25 +31,25 @@ rule compose_warps_corobl2unfold_lhemi:
 rule compose_warps_unfold2corobl_rhemi:
     """ Compose unfold (unfold-template) to corobl, for right hemi (ie no flip)"""
     input:
-        unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2native_RPI.nii',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
+        unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2native.nii',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
         unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2unfoldtemplate_0InverseWarp.nii.gz',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
         unfold_ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
-        ref = bids(root='work',**config['subj_wildcards'],suffix='autotop/coords-AP.nii.gz',desc='cropped',space='corobl',hemi='R',modality='{modality}')
+        ref = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',space='corobl',hemi='R', **config['subj_wildcards']),
     output:
         unfold2corobl = bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='R',from_='unfold',to='corobl',mode='image')
     container: config['singularity']['ants']
     group: 'subj'
-    shell: 'antsApplyTransforms -o [{output.unfold2corobl},1] -r {input.unfold2native} -t {input.unfold2native} -t {input.unfoldtemplate2unfold} -i {input.unfold_ref} -v'
+    shell: 'antsApplyTransforms -o [{output.unfold2corobl},1] -r {input.ref} -t {input.unfold2native} -t {input.unfoldtemplate2unfold} -i {input.unfold_ref} -v'
 
 
 rule compose_warps_unfold2corobl_lhemi:
     """ Compose unfold (unfold-template) to corobl, for left hemi (ie with flip)"""
     input:
-        unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2native_RPI.nii',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
+        unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2native.nii',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
         unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2unfoldtemplate_0InverseWarp.nii.gz',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
         flipLR_xfm = os.path.join(config['snakemake_dir'],'resources','desc-flipLR_type-itk_xfm.txt'),
         unfold_ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
-        ref = bids(root='work',**config['subj_wildcards'],suffix='autotop/coords-AP.nii.gz',desc='cropped',space='corobl',hemi='L',modality='{modality}') #use unflipped ref here
+        ref = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',space='corobl',hemi='L', **config['subj_wildcards']),
     output:
         unfold2corobl = bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='L',from_='unfold',to='corobl',mode='image')
     container: config['singularity']['ants']
@@ -92,7 +92,7 @@ rule compute_warp_jacobian:
     input: '{prefix}_xfm.nii.gz'
     output: '{prefix}_jacobian.nii.gz'
     group: 'subj'
-    script: '../scripts/compute_jacobian.py'
+    script: '../scripts/compute_jacobian_simple.py'
 
 rule compute_graddev:
     """ Generic rule for computing graddev from jacobian"""

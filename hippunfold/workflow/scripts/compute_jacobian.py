@@ -35,7 +35,7 @@ else:
 
 #find which mask to use based on warp
 if 'to-corobl' in in_warp:
-    mask = f'work/{subnum}/{subnum}_hemi-{hemi}_space-corobl_desc-cropped_modality-T2w_autotop/coords-AP.nii.gz'
+    mask = f'work/{subnum}/seg_T2w/{subnum}_dir-AP_hemi-{hemi}_space-corobl_coords.nii.gz'
     masker = nib.load(mask)
     mask = masker.get_fdata()
     
