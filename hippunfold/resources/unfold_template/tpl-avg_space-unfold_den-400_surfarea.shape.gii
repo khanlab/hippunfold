@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GIFTI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="http://brainvis.wustl.edu/caret6/xml_schemas/GIFTI_Caret.xsd"
+       Version="1"
+       NumberOfDataArrays="1">
+   <MetaData>
+      <MD>
+         <Name><![CDATA[AnatomicalStructurePrimary]]></Name>
+         <Value><![CDATA[Invalid]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[ProgramProvenance]]></Name>
+         <Value><![CDATA[Connectome Workbench
+Type: Command Line Application
+Version: 1.4.1
+Qt Compiled Version: 5.7.1
+Qt Runtime Version: 5.7.1
+Commit: unknown
+Commit Date: unknown
+Compiled with OpenMP: YES
+Compiler: c++ (/usr/bin)
+Compiler Version: 6.3.0
+Compiled Debug: NO
+Operating System: Linux
+]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[Provenance]]></Name>
+         <Value><![CDATA[/usr/bin/wb_command -surface-vertex-areas tpl-avg_space-unfold_den-400_midthickness.surf.gii tpl-avg_space-unfold_den-400_midthickness.surf.gii.surfarea.shape.gii]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[WorkingDirectory]]></Name>
+         <Value><![CDATA[/scratch/akhanf/1_dev/hippunfold_v0.5.4/hippunfold/resources/unfold_template]]></Value>
+      </MD>
+   </MetaData>
+   <LabelTable>
+      <Label Key="0" Red="1" Green="1" Blue="1" Alpha="0"><![CDATA[???]]></Label>
+   </LabelTable>
+<DataArray Intent="NIFTI_INTENT_NORMAL"
+           DataType="NIFTI_TYPE_FLOAT32"
+           ArrayIndexingOrder="RowMajorOrder"
+           Dimensionality="1"
+           Dim0="419"
+           Encoding="GZipBase64Binary"
+           Endian="LittleEndian"
+           ExternalFileName=""
+           ExternalFileOffset="0">
+   <MetaData>
+      <MD>
+         <Name><![CDATA[Name]]></Name>
+         <Value><![CDATA[vertex areas]]></Value>
+      </MD>
+   </MetaData>
+   <Data>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</Data>
+</DataArray>
+</GIFTI>

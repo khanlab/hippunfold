@@ -116,15 +116,29 @@ rule warp_gii_to_T1w:
 
 
 #morphological features, calculated in T1w space:
-rule calculate_gyrification_from_surface:
+rule calculate_surface_area:
     input: 
         gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='midthickness.surf.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards'])
+    output:
+        gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='surfarea.shape.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards'])
+    container: config['singularity']['autotop']
+    group: 'subj' 
+    shell:
+        "wb_command -surface-vertex-areas {input} {output}"    
+
+rule calculate_gyrification:
+    """new gyrification is ratio of nativearea to unfoldarea (e.g. surface scaling or distortion factor.
+    this should be proportional by a constant, to the earlier gyrification on 32k surfaces."""
+    input: 
+        native_surfarea = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='surfarea.shape.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+        unfold_surfarea = os.path.join(config['snakemake_dir'],'resources','unfold_template','tpl-avg_space-unfold_den-{density}_surfarea.shape.gii')
     output:
         gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='gyrification.shape.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell:
-        "wb_command -surface-vertex-areas {input} {output}"    
+        'wb_command -metric-math "nativearea/unfoldarea" {output.gii}'
+            ' -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea}'
 
 
 rule calculate_curvature_from_surface:
