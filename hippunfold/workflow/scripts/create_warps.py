@@ -42,7 +42,8 @@ if np.prod(sz) > max_mat_size:
     coord_ap = zoom(coord_ap,(ds,ds,ds),order=0) # 0 order is nearest
     coord_pd = zoom(coord_pd,(ds,ds,ds),order=0)
     coord_io = zoom(coord_io,(ds,ds,ds),order=0)
-    sz_downsamp = coord_ap.shape
+
+sz_downsamp = coord_ap.shape
 
 #get mask of coords  (note: this leaves out coord=0)
 mask = (coord_ap > 0) & (coord_pd > 0) & (coord_io > 0) # matlab: mask = (coord_ap>0 & coord_pd>0 & coord_io>0);
