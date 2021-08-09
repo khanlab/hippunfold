@@ -78,7 +78,8 @@ rule create_warps:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     params:
-        interp_method =  'linear'
+        interp_method =  'linear',
+        max_mat_size = np.prod([200,200,200])
     resources:
         mem_mb = 200000
     output:
@@ -88,6 +89,7 @@ rule create_warps:
         warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
         #warp_unfold2native_extrap = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
     group: 'subj'
+    log: bids(root='logs',**config['subj_wildcards'],hemi='{hemi,Lflip|R}',modality='seg-{modality}',suffix='create_warps.txt')
     script: '../scripts/create_warps.py'
 
 # TODO: add this extrapolation of the warp file, extrapolate_warp_unfold2native.m

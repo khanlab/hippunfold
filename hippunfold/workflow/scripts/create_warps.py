@@ -1,6 +1,9 @@
 import nibabel as nib
 import numpy as np
 from  scipy.interpolate import griddata
+from scipy.ndimage import zoom
+
+logfile = open(snakemake.log[0], 'w')
 
 def convert_warp_to_itk(warp):
     """ Convert warp to ITK convention by negating X and Y"""
@@ -9,16 +12,14 @@ def convert_warp_to_itk(warp):
     warp_itk[:,:,:,0,1] = -warp_itk[:,:,:,0,1]
     return warp_itk
 
-
-
-
 def summary(name, array):
     """simple function to print stats on an array"""
-    print(f'{name}: shape={array.shape} mean={array.mean()} max={array.max()} min={array.min()}')
+    print(f'{name}: shape={array.shape} mean={np.nanmean(array)} max={np.nanmax(array)} min={np.nanmin(array)}, numNaNs={np.count_nonzero(np.isnan(array))}', file=logfile, flush=True)
     return
 
 #params:
 interp_method = snakemake.params.interp_method
+max_mat_size = snakemake.params.max_mat_size
 
 #load unfolded coordinate map
 #unfold_ref_nib = nib.load(snakemake.input.unfold_ref_nii)
@@ -33,17 +34,26 @@ coord_ap = coord_ap_nib.get_fdata()
 coord_pd = coord_pd_nib.get_fdata()
 coord_io = coord_io_nib.get_fdata()
 
+# if the data is too large, downsample to half (1/8th total data)
+sz = coord_ap.shape
+if np.prod(sz) > max_mat_size:
+    ds = (max_mat_size/np.prod(sz))**(1/3)
+    print(f'Data too large for griddata interpolation. Downsampling by a factor of {ds}', file=logfile, flush=True)
+    coord_ap = zoom(coord_ap,(ds,ds,ds),order=0) # 0 order is nearest
+    coord_pd = zoom(coord_pd,(ds,ds,ds),order=0)
+    coord_io = zoom(coord_io,(ds,ds,ds),order=0)
+    sz_downsamp = coord_ap.shape
+
 #get mask of coords  (note: this leaves out coord=0)
 mask = (coord_ap > 0) & (coord_pd > 0) & (coord_io > 0) # matlab: mask = (coord_ap>0 & coord_pd>0 & coord_io>0);
 num_mask_voxels = np.sum(mask>0)
-print(f'num_mask_voxels {num_mask_voxels}')
+print(f'num_mask_voxels {num_mask_voxels}', file=logfile, flush=True)
 
 #get indices of mask voxels
 idxgm = np.flatnonzero(mask) #matlab: idxgm = find(mask ==1);
 summary('idxgm',idxgm)
 
-print(f'idxgm shape: {idxgm.shape}')
-sz = mask.shape
+print(f'idxgm shape: {idxgm.shape}', file=logfile, flush=True)
 
 # Part 1: unfold2native warps
 
@@ -61,7 +71,7 @@ coord_flat_io = coord_io[mask==True]
 summary('coord_flat_ap',coord_flat_ap)
 
 #unravel indices of mask voxels into subscripts...
-(i_L,j_L,k_L) = np.unravel_index(idxgm,sz)  # matlab: [i_L,j_L,k_L]=ind2sub(sz,idxgm);
+(i_L,j_L,k_L) = np.unravel_index(idxgm,sz_downsamp)  # matlab: [i_L,j_L,k_L]=ind2sub(sz,idxgm);
 
 summary('i_L',i_L)
 
@@ -72,8 +82,7 @@ summary('native_coords_mat',native_coords_mat)
 
 
 #... then,apply native image affine to get world coords ...
-
-print(f'affine: {coord_ap_nib.affine}, affine shape: {coord_ap_nib.affine.shape}')
+print(f'affine: {coord_ap_nib.affine}, affine shape: {coord_ap_nib.affine.shape}', file=logfile, flush=True)
 
 native_coords_phys = coord_ap_nib.affine @ native_coords_mat
 native_coords_phys = np.transpose(native_coords_phys[:3,:])
@@ -115,7 +124,7 @@ summary('unfold_gz',unfold_gz)
 
 # combine and reshape interpolated map to 5d (4th dim singleton)
 mapToNative = np.zeros(unfold_grid_phys.shape)
-
+print(f'starting interpolation AP', file=logfile, flush=True)
 interp_ap = griddata(points,
                         values=native_coords_phys[:,0],
                         xi=unfold_xi,
@@ -123,23 +132,29 @@ interp_ap = griddata(points,
 summary('interp_ap',interp_ap)
 mapToNative[:,:,:,0,0] = interp_ap
 del interp_ap # save memory as this can get intense at high resolution!
+print(f'interpolation AP complete', file=logfile, flush=True)
 
+print(f'starting interpolation PD', file=logfile, flush=True)
 interp_pd = griddata(points,
                         values=native_coords_phys[:,1],
                         xi=unfold_xi,
-                        method=interp_method)
+                        method=interp_method,
+                        rescale=True)
 summary('interp_pd',interp_pd)
 mapToNative[:,:,:,0,1] = interp_pd
 del interp_pd
+print(f'interpolation PD complete', file=logfile, flush=True)
 
+print(f'starting interpolation IO', file=logfile, flush=True)
 interp_io = griddata(points,
                         values=native_coords_phys[:,2],
                         xi=unfold_xi,
-                        method=interp_method)
+                        method=interp_method,
+                        rescale=True)
 summary('interp_io',interp_io)
 mapToNative[:,:,:,0,2] = interp_io
 del interp_io
-
+print(f'interpolation IO complete', file=logfile, flush=True)
 
 # mapToNative has the absolute coordinates, but we want them relative to the 
 # unfolded grid, so we subtract it out:
@@ -208,7 +223,7 @@ summary('displace_to_unfold_vec',displace_to_unfold_vec)
 
 #create new shape as 5d vector image in native space
 native_map_shape = np.ones(5,)
-native_map_shape[:3] = mask.shape
+native_map_shape[:3] = sz_downsamp
 native_map_shape[-1] = 3
 
 
@@ -218,6 +233,10 @@ for d in range(3):
     temp_coords_img = np.zeros(mask.shape)
     temp_coords_img[mask==True] = displace_to_unfold_vec[:,d]
     native_to_unfold[:,:,:,0,d] = temp_coords_img
+
+# resample back to full resolution
+if np.prod(sz) > max_mat_size:
+    native_to_unfold = zoom(native_to_unfold,(sz[0],sz[1],sz[2],1,1),order=0)
 
 summary('native_to_unfold',native_to_unfold)
 
@@ -233,4 +252,4 @@ warpitk_unfold2native_nib = nib.Nifti1Image(convert_warp_to_itk(native_to_unfold
                                         coord_ap_nib.header)
 warpitk_unfold2native_nib.to_filename(snakemake.output.warpitk_unfold2native)
 
-
+logfile.close()
