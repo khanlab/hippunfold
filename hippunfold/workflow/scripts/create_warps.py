@@ -231,13 +231,13 @@ native_map_shape[-1] = 3
 #create and populate it
 native_to_unfold = np.zeros(native_map_shape.astype('int'))
 for d in range(3):
-    temp_coords_img = np.zeros(mask.shape)
+    temp_coords_img = np.zeros(sz_downsamp)
     temp_coords_img[mask==True] = displace_to_unfold_vec[:,d]
     native_to_unfold[:,:,:,0,d] = temp_coords_img
 
 # resample back to full resolution
 if np.prod(sz) > max_mat_size:
-    native_to_unfold = zoom(native_to_unfold,(sz[0],sz[1],sz[2],1,1),order=0)
+    native_to_unfold = native_to_unfold = zoom(native_to_unfold,(sz[0]/sz_downsamp[0],sz[1]/sz_downsamp[1],sz[2]/sz_downsamp[2],1,1),order=0) # need exact ratio for each dim, using 'ds' will not reproduce the exact size due to rounding
 
 summary('native_to_unfold',native_to_unfold)
 
