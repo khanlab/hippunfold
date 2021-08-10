@@ -81,7 +81,7 @@ rule create_warps:
         interp_method =  'linear',
         max_mat_size = np.prod([200,200,200])
     resources:
-        mem_mb = 200000
+        mem_mb = 16000
     output:
         warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
         warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
