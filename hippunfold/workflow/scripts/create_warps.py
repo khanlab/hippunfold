@@ -96,7 +96,11 @@ summary('unfold_grid_phys',unfold_grid_phys)
 # we have points defined by coord_flat_{ap,pd,io}, and corresponding value as native_coords_phys[:,i]
 # and we want to interpolate on a grid in the unfolded space
 
-points = (coord_flat_ap,coord_flat_pd,coord_flat_io)
+# add some noise to avoid perfectly overlapping datapoints!
+points = (coord_flat_ap + (np.random.rand(coord_flat_ap.shape[0])-0.5)*1e-6,
+    coord_flat_pd + (np.random.rand(coord_flat_ap.shape[0])-0.5)*1e-6,
+    coord_flat_io + (np.random.rand(coord_flat_ap.shape[0])-0.5)*1e-6)
+
 # get unfolded grid (from 0 to 1, not world coords), using meshgrid:
 #  note: indexing='ij' to swap the ordering of x and y 
 (unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(np.linspace(0,1,unfold_dims[0]),
