@@ -112,19 +112,19 @@ summary('unfold_gz',unfold_gz)
 interp_ap = griddata(points,
                         values=native_coords_phys[:,0],
                         xi=unfold_xi,
-                        method=interp_method)
+                        method=interp_method,fill_value=0)
 
 
 summary('interp_ap',interp_ap)
 interp_pd = griddata(points,
                         values=native_coords_phys[:,1],
                         xi=unfold_xi,
-                        method=interp_method)
+                        method=interp_method,fill_value=0)
 summary('interp_pd',interp_pd)
 interp_io = griddata(points,
                         values=native_coords_phys[:,2],
                         xi=unfold_xi,
-                        method=interp_method)
+                        method=interp_method,fill_value=0)
 
 summary('interp_io',interp_ap)
 
@@ -145,13 +145,16 @@ summary('dispacementToNative',displacementToNative)
 
 
 # write to file
-warp_unfold2native_nib = nib.Nifti1Image(displacementToNative,
+dt = unfold_phys_coords_nib.get_fdata()
+dt = dt.dtype.name
+warp_unfold2native_nib = nib.Nifti1Image(displacementToNative.astype(dt),
                                         unfold_phys_coords_nib.affine,
                                         unfold_phys_coords_nib.header)
 warp_unfold2native_nib.to_filename(snakemake.output.warp_unfold2native)
 
 # write itk transform to file
-warpitk_native2unfold_nib = nib.Nifti1Image(convert_warp_to_itk(displacementToNative),
+f = convert_warp_to_itk(displacementToNative)
+warpitk_native2unfold_nib = nib.Nifti1Image(f.astype(dt),
                                         unfold_phys_coords_nib.affine,
                                         unfold_phys_coords_nib.header)
 
@@ -219,13 +222,16 @@ for d in range(3):
 summary('native_to_unfold',native_to_unfold)
 
 #now, can write it to file
-warp_native2unfold_nib = nib.Nifti1Image(native_to_unfold,
+dt = coord_ap_nib.get_fdata()
+dt = dt.dtype.name
+warp_native2unfold_nib = nib.Nifti1Image(native_to_unfold.astype(dt),
                                         coord_ap_nib.affine,
                                         coord_ap_nib.header)
 warp_native2unfold_nib.to_filename(snakemake.output.warp_native2unfold)
 
 #and save ITK warp too
-warpitk_unfold2native_nib = nib.Nifti1Image(convert_warp_to_itk(native_to_unfold),
+f = convert_warp_to_itk(native_to_unfold)
+warpitk_unfold2native_nib = nib.Nifti1Image(f.astype(dt),
                                         coord_ap_nib.affine,
                                         coord_ap_nib.header)
 warpitk_unfold2native_nib.to_filename(snakemake.output.warpitk_unfold2native)
