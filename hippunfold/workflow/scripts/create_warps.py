@@ -68,9 +68,9 @@ summary('native_coords_mat',native_coords_mat)
 
 
 #... then,apply native image affine to get world coords ...
-
+aff = coord_ap_nib.affine
 print(f'affine: {aff}, affine shape: {aff.shape}', file=logfile, flush=True)
-native_coords_phys = coord_ap_nib.affine @ native_coords_mat
+native_coords_phys = aff @ native_coords_mat
 native_coords_phys = np.transpose(native_coords_phys[:3,:])
 summary('native_coords_phys',native_coords_phys)
 
