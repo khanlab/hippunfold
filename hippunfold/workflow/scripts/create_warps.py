@@ -1,9 +1,11 @@
 import nibabel as nib
 import numpy as np
-from  scipy.interpolate import griddata
+from scipy.interpolate import griddata
 from scipy.ndimage import zoom
 
 logfile = open(snakemake.log[0], 'w')
+
+print(f'Start', file=logfile, flush=True)
 
 def convert_warp_to_itk(warp):
     """ Convert warp to ITK convention by negating X and Y"""
@@ -14,12 +16,18 @@ def convert_warp_to_itk(warp):
 
 def summary(name, array):
     """simple function to print stats on an array"""
-    print(f'{name}: shape={array.shape} mean={np.nanmean(array)} max={np.nanmax(array)} min={np.nanmin(array)}, numNaNs={np.count_nonzero(np.isnan(array))}', file=logfile, flush=True)
+    print(f'{name}: shape={array.shape} mean={np.nanmean(array)} max={np.nanmax(array)} min={np.nanmin(array)}, numNaNs={np.count_nonzero(np.isnan(array))}, type={array.dtype.name}', file=logfile, flush=True)
     return
 
 #params:
 interp_method = snakemake.params.interp_method
 max_mat_size = snakemake.params.max_mat_size
+out1 = snakemake.output.warp_unfold2native
+out2 = snakemake.output.warpitk_native2unfold
+out3 = snakemake.output.warp_native2unfold
+out4 = snakemake.output.warpitk_unfold2native
+
+print(f'params loaded', file=logfile, flush=True)
 
 #load unfolded coordinate map
 #unfold_ref_nib = nib.load(snakemake.input.unfold_ref_nii)
@@ -34,7 +42,9 @@ coord_ap = coord_ap_nib.get_fdata()
 coord_pd = coord_pd_nib.get_fdata()
 coord_io = coord_io_nib.get_fdata()
 
-# if the data is too large, downsample to half (1/8th total data)
+print(f'laplace coords loaded', file=logfile, flush=True)
+
+# if the data is too large, downsample
 sz = coord_ap.shape
 if np.prod(sz) > max_mat_size:
     ds = (max_mat_size/np.prod(sz))**(1/3)
@@ -42,11 +52,12 @@ if np.prod(sz) > max_mat_size:
     coord_ap = zoom(coord_ap,(ds,ds,ds),order=0) # 0 order is nearest
     coord_pd = zoom(coord_pd,(ds,ds,ds),order=0)
     coord_io = zoom(coord_io,(ds,ds,ds),order=0)
-
 sz_downsamp = coord_ap.shape
+actual_ds = np.array([sz[0]/sz_downsamp[0], sz[1]/sz_downsamp[1], sz[2]/sz_downsamp[2]])
+print(f'Actual downsampling: {actual_ds}', file=logfile, flush=True)
 
 #get mask of coords  (note: this leaves out coord=0)
-mask = (coord_ap > 0) & (coord_pd > 0) & (coord_io > 0) # matlab: mask = (coord_ap>0 & coord_pd>0 & coord_io>0);
+mask = (coord_ap > 0) | (coord_pd > 0) | (coord_io > 0) # matlab: mask = (coord_ap>0 & coord_pd>0 & coord_io>0);
 num_mask_voxels = np.sum(mask>0)
 print(f'num_mask_voxels {num_mask_voxels}', file=logfile, flush=True)
 
@@ -83,9 +94,18 @@ summary('native_coords_mat',native_coords_mat)
 
 
 #... then,apply native image affine to get world coords ...
-print(f'affine: {coord_ap_nib.affine}, affine shape: {coord_ap_nib.affine.shape}', file=logfile, flush=True)
+# NOTE this needs to accound for downsampling
+aff = coord_ap_nib.affine
+print(f'affine: {aff}, affine shape: {aff.shape}', file=logfile, flush=True)
+if np.prod(sz) > max_mat_size:
+    print(f'downsampling affine', file=logfile, flush=True)
+    new_diag = [aff[0,0], aff[1,1], aff[2,2]] * actual_ds
+    print(f'aff new diag: {new_diag}', file=logfile, flush=True)
+    np.fill_diagonal(aff,new_diag)
+    aff[:3,3] = aff[:3,3] * actual_ds
+    print(f'downsampled affine: {aff}, affine shape: {aff.shape}', file=logfile, flush=True)
 
-native_coords_phys = coord_ap_nib.affine @ native_coords_mat
+native_coords_phys = aff @ native_coords_mat
 native_coords_phys = np.transpose(native_coords_phys[:3,:])
 
 summary('native_coords_phys',native_coords_phys)
@@ -129,7 +149,7 @@ print(f'starting interpolation AP', file=logfile, flush=True)
 interp_ap = griddata(points,
                         values=native_coords_phys[:,0],
                         xi=unfold_xi,
-                        method=interp_method)
+                        method=interp_method,fill_value=0)
 summary('interp_ap',interp_ap)
 mapToNative[:,:,:,0,0] = interp_ap
 del interp_ap # save memory as this can get intense at high resolution!
@@ -139,8 +159,7 @@ print(f'starting interpolation PD', file=logfile, flush=True)
 interp_pd = griddata(points,
                         values=native_coords_phys[:,1],
                         xi=unfold_xi,
-                        method=interp_method,
-                        rescale=True)
+                        method=interp_method,fill_value=0)
 summary('interp_pd',interp_pd)
 mapToNative[:,:,:,0,1] = interp_pd
 del interp_pd
@@ -150,8 +169,7 @@ print(f'starting interpolation IO', file=logfile, flush=True)
 interp_io = griddata(points,
                         values=native_coords_phys[:,2],
                         xi=unfold_xi,
-                        method=interp_method,
-                        rescale=True)
+                        method=interp_method,fill_value=0)
 summary('interp_io',interp_io)
 mapToNative[:,:,:,0,2] = interp_io
 del interp_io
@@ -161,20 +179,23 @@ print(f'interpolation IO complete', file=logfile, flush=True)
 # unfolded grid, so we subtract it out:
 displacementToNative = mapToNative - unfold_grid_phys
 summary('dispacementToNative',displacementToNative)
-
+displacementToNative[np.isnan(displacementToNative)] = 0
+summary('dispacementToNative',displacementToNative)
 
 # write to file
-warp_unfold2native_nib = nib.Nifti1Image(displacementToNative,
+dt = unfold_phys_coords_nib.get_fdata()
+dt = dt.dtype.name
+warp_unfold2native_nib = nib.Nifti1Image(displacementToNative.astype(dt),
                                         unfold_phys_coords_nib.affine,
                                         unfold_phys_coords_nib.header)
-warp_unfold2native_nib.to_filename(snakemake.output.warp_unfold2native)
+warp_unfold2native_nib.to_filename(out1)
 
 # write itk transform to file
-warpitk_native2unfold_nib = nib.Nifti1Image(convert_warp_to_itk(displacementToNative),
+f = convert_warp_to_itk(displacementToNative)
+warpitk_native2unfold_nib = nib.Nifti1Image(f.astype(dt),
                                         unfold_phys_coords_nib.affine,
                                         unfold_phys_coords_nib.header)
-
-warpitk_native2unfold_nib.to_filename(snakemake.output.warpitk_native2unfold)
+warpitk_native2unfold_nib.to_filename(out2)
 
 
 
@@ -237,20 +258,22 @@ for d in range(3):
 
 # resample back to full resolution
 if np.prod(sz) > max_mat_size:
-    native_to_unfold = native_to_unfold = zoom(native_to_unfold,(sz[0]/sz_downsamp[0],sz[1]/sz_downsamp[1],sz[2]/sz_downsamp[2],1,1),order=0) # need exact ratio for each dim, using 'ds' will not reproduce the exact size due to rounding
+    native_to_unfold = native_to_unfold = zoom(native_to_unfold,np.append(actual_ds,[1,1]),order=0) # need exact ratio for each dim, using 'ds' will not reproduce the exact size due to rounding
 
 summary('native_to_unfold',native_to_unfold)
 
 #now, can write it to file
-warp_native2unfold_nib = nib.Nifti1Image(native_to_unfold,
+dt = coord_ap_nib.get_fdata()
+dt = dt.dtype.name
+warp_native2unfold_nib = nib.Nifti1Image(native_to_unfold.astype(dt),
                                         coord_ap_nib.affine,
                                         coord_ap_nib.header)
-warp_native2unfold_nib.to_filename(snakemake.output.warp_native2unfold)
+warp_native2unfold_nib.to_filename(out3)
 
 #and save ITK warp too
-warpitk_unfold2native_nib = nib.Nifti1Image(convert_warp_to_itk(native_to_unfold),
+warpitk_unfold2native_nib = nib.Nifti1Image(convert_warp_to_itk(native_to_unfold.astype(dt)),
                                         coord_ap_nib.affine,
                                         coord_ap_nib.header)
-warpitk_unfold2native_nib.to_filename(snakemake.output.warpitk_unfold2native)
+warpitk_unfold2native_nib.to_filename(out4)
 
 logfile.close()
