@@ -2,6 +2,9 @@ import nibabel as nib
 import numpy as np
 from  scipy.interpolate import griddata
 
+logfile = open(snakemake.log[0], 'w')
+print(f'Start', file=logfile, flush=True)
+
 def convert_warp_to_itk(warp):
     """ Convert warp to ITK convention by negating X and Y"""
     warp_itk = warp.copy()
@@ -9,12 +12,9 @@ def convert_warp_to_itk(warp):
     warp_itk[:,:,:,0,1] = -warp_itk[:,:,:,0,1]
     return warp_itk
 
-
-
-
 def summary(name, array):
     """simple function to print stats on an array"""
-    print(f'{name}: shape={array.shape} mean={array.mean()} max={array.max()} min={array.min()}')
+    print(f'{name}: shape={array.shape} mean={np.nanmean(array)} max={np.nanmax(array)} min={np.nanmin(array)}, numNaNs={np.count_nonzero(np.isnan(array))}, type={array.dtype.name}', file=logfile, flush=True)
     return
 
 #params:
@@ -36,13 +36,11 @@ coord_io = coord_io_nib.get_fdata()
 #get mask of coords  (note: this leaves out coord=0)
 mask = (coord_ap > 0) | (coord_pd > 0) | (coord_io > 0) # some points were lost, especially IO
 num_mask_voxels = np.sum(mask>0)
-print(f'num_mask_voxels {num_mask_voxels}')
+print(f'num_mask_voxels {num_mask_voxels}', file=logfile, flush=True)
 
 #get indices of mask voxels
 idxgm = np.flatnonzero(mask) #matlab: idxgm = find(mask ==1);
 summary('idxgm',idxgm)
-
-print(f'idxgm shape: {idxgm.shape}')
 sz = mask.shape
 
 # Part 1: unfold2native warps
@@ -62,22 +60,18 @@ summary('coord_flat_ap',coord_flat_ap)
 
 #unravel indices of mask voxels into subscripts...
 (i_L,j_L,k_L) = np.unravel_index(idxgm,sz)  # matlab: [i_L,j_L,k_L]=ind2sub(sz,idxgm);
-
 summary('i_L',i_L)
 
 #... and stack into vectors ...
 native_coords_mat = np.vstack((i_L,j_L,k_L,np.ones(i_L.shape))) #matlab: native_coords_mat = [i_L-1, j_L-1, k_L-1,ones(size(i_L))]';
-
 summary('native_coords_mat',native_coords_mat)
 
 
 #... then,apply native image affine to get world coords ...
 
-print(f'affine: {coord_ap_nib.affine}, affine shape: {coord_ap_nib.affine.shape}')
-
+print(f'affine: {aff}, affine shape: {aff.shape}', file=logfile, flush=True)
 native_coords_phys = coord_ap_nib.affine @ native_coords_mat
 native_coords_phys = np.transpose(native_coords_phys[:3,:])
-
 summary('native_coords_phys',native_coords_phys)
 
 # get unfolded grid from file:
@@ -85,7 +79,6 @@ unfold_grid_phys = unfold_phys_coords_nib.get_fdata()
 
 #unfolded space dims
 unfold_dims = unfold_grid_phys.shape[:3]
-
 summary('unfold_grid_phys',unfold_grid_phys)
 
 
@@ -143,13 +136,11 @@ mapToNative = np.zeros(unfold_grid_phys.shape)
 mapToNative[:,:,:,0,0] = interp_ap
 mapToNative[:,:,:,0,1] = interp_pd
 mapToNative[:,:,:,0,2] = interp_io
-
 summary('mapToNative',mapToNative)
 
 # mapToNative has the absolute coordinates, but we want them relative to the 
 # unfolded grid, so we subtract it out:
 displacementToNative = mapToNative - unfold_grid_phys
-
 summary('dispacementToNative',displacementToNative)
 
 
