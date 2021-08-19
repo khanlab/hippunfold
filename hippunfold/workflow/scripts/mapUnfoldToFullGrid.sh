@@ -23,10 +23,9 @@ fill_val=-1
 
 pad_cmd="-pad 32x32x32vox 32x32x32vox $fill_val"
 
-
-N_AP=256
-N_PD=128
-N_IO=16
+N_AP=$6
+N_PD=$7
+N_IO=$8
 
 
 in_warpitk_native2unfold=${warps_dir}/WarpITK_native2unfold.nii
