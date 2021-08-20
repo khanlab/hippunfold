@@ -34,7 +34,7 @@ coord_pd = coord_pd_nib.get_fdata()
 coord_io = coord_io_nib.get_fdata()
 
 #get mask of coords  (note: this leaves out coord=0)
-mask = (coord_ap > 0) | (coord_pd > 0) | (coord_io > 0) # some points were lost, especially IO
+mask = (coord_ap > 0) | (coord_pd > 0) # some points were lost, especially IO
 num_mask_voxels = np.sum(mask>0)
 print(f'num_mask_voxels {num_mask_voxels}', file=logfile, flush=True)
 
@@ -112,20 +112,17 @@ summary('unfold_gz',unfold_gz)
 interp_ap = griddata(points,
                         values=native_coords_phys[:,0],
                         xi=unfold_xi,
-                        method=interp_method,fill_value=0)
-
-
+                        method=interp_method)
 summary('interp_ap',interp_ap)
 interp_pd = griddata(points,
                         values=native_coords_phys[:,1],
                         xi=unfold_xi,
-                        method=interp_method,fill_value=0)
+                        method=interp_method)
 summary('interp_pd',interp_pd)
 interp_io = griddata(points,
                         values=native_coords_phys[:,2],
                         xi=unfold_xi,
-                        method=interp_method,fill_value=0)
-
+                        method=interp_method)
 summary('interp_io',interp_ap)
 
 
@@ -136,6 +133,8 @@ mapToNative = np.zeros(unfold_grid_phys.shape)
 mapToNative[:,:,:,0,0] = interp_ap
 mapToNative[:,:,:,0,1] = interp_pd
 mapToNative[:,:,:,0,2] = interp_io
+# TODO: interpolate nans more better
+mapToNative[np.isnan(mapToNative)] = 0
 summary('mapToNative',mapToNative)
 
 # mapToNative has the absolute coordinates, but we want them relative to the 
