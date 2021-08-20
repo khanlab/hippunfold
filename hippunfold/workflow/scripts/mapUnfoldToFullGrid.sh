@@ -11,10 +11,13 @@ coords_PD=$2
 coords_IO=$3
 in_unfold_ref=$4
 warps_dir=$5
+N_AP=$6
+N_PD=$7
+N_IO=$8
 
-if [ "$#" -lt 5 ]
+if [ "$#" -lt 8 ]
 then
-    echo "Usage: $0 coords_ap coords_pd coords_io unfold_ref out_warps_dir"
+    echo "Usage: $0 coords_ap coords_pd coords_io unfold_ref out_warps_dir N_AP N_PD N_IO"
     exit 1
 fi
 
@@ -22,11 +25,6 @@ fi
 fill_val=-1
 
 pad_cmd="-pad 32x32x32vox 32x32x32vox $fill_val"
-
-
-N_AP=256
-N_PD=128
-N_IO=16
 
 
 in_warpitk_native2unfold=${warps_dir}/WarpITK_native2unfold.nii
