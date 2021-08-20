@@ -3,7 +3,7 @@
 import snakebids
 from snakebids import bids
 
-configfile: 'config/snakebids.yml'
+configfile: 'config/snakebids_valentine.yml'
 
 #make adjustments to input params:
 # right now hippb500 or cropseg cannot use T1w output space

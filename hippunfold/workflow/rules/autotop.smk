@@ -33,6 +33,19 @@ rule laplace_coords:
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplace.txt')
     script: '{params.cmd}'
 
+rule isovolume_coords:
+    input: unpack(get_inputs_laplace)
+    params:
+        src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
+    output:
+        coords = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='isovol.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+    group: 'subj'
+    resources:
+        time = 30
+    log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='isovolume.txt')
+    container: config['singularity']['nighres'] 
+    script: '../scripts/isovolume_coords.py'
+
 rule unflip_coords:
     input:
         nii = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='corobl',hemi='{hemi}flip', **config['subj_wildcards']),
@@ -76,7 +89,7 @@ rule create_warps:
         unfold_phys_coords_nii = bids(root='work',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards']),
         coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='isovol.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     params:
         interp_method =  'linear'
     resources:
@@ -100,7 +113,7 @@ rule map_to_full_grid:
     input:
         coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='isovol.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
         unfold_ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
     params:
