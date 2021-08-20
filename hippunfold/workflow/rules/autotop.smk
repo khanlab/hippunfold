@@ -33,8 +33,20 @@ rule laplace_coords:
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplace.txt')
     script: '{params.cmd}'
 
+rule prep_isovolume_coords:
+    input: get_labels_for_laplace,
+    params:
+        src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
+    output:
+        outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='outerbin.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='innerbin.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+    log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='binarize.txt')
+    script: '../scripts/prep_isovolume_coords.py'
+
 rule isovolume_coords:
-    input: unpack(get_inputs_laplace)
+    input: 
+        outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='outerbin.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='innerbin.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     params:
         src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
     output:
@@ -55,7 +67,14 @@ rule unflip_coords:
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'
 
-
+rule unflip_isovols:
+    input:
+        nii = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='isovol.nii.gz', space='corobl',hemi='{hemi}flip', **config['subj_wildcards']),
+    output:
+        nii = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='isovol.nii.gz', space='corobl',hemi='{hemi,L}', **config['subj_wildcards']),
+    container: config['singularity']['autotop']
+    group: 'subj'
+    shell: 'c3d {input} -flip x {output}'
 
 #unfold ref nifti
 rule create_unfold_ref:

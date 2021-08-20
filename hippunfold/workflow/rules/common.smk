@@ -62,7 +62,15 @@ def get_final_coords():
     return expand(
         bids(
             root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
-                dir=['AP','PD','IO'],
+                dir=['AP','PD'],
+                hemi=config['hemi'],
+                space=config['output_spaces'],
+                allow_missing=True)
+
+def get_final_isovol():
+    return expand(
+        bids(
+            root='results',datatype='seg_{modality}',dir='IO',suffix='isovol.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
                 hemi=config['hemi'],
                 space=config['output_spaces'],
                 allow_missing=True)
@@ -190,6 +198,7 @@ def get_final_subj_output():
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
     subj_output.extend(get_final_coords())
+#    subj_output.extend(get_final_isovol())
     subj_output.extend(get_final_transforms())
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
