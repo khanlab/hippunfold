@@ -28,6 +28,13 @@
   usage/app_cli
   usage/snakemake_cli
 
+.. toctree::
+   :caption: Tutorials
+   :name: tutorials
+   :hidden:
+   :maxdepth: 1
 
+   tutorials/standardBIDS
+   tutorials/specializedScans
  
 
