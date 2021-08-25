@@ -32,8 +32,7 @@ else:
 
 def reg_to_template_cmd(wildcards,input,output):
     if config['no_reg_template']:
-        xfm = os.path.join(config['snakemake_dir'], config['xfm_identity'])
-        cmd = f'reg_resample -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {xfm}; cp {xfm} {output.xfm_ras}'
+        cmd = f'reg_resample -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {input.xfm_identity}; cp {input.xfm_identity} {output.xfm_ras}'
     elif config['rigid_reg_template']:
         cmd = f'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras} -rigOnly'
     else:
@@ -44,6 +43,7 @@ rule reg_to_template:
     input: 
         flo = bids(root='results',datatype='anat',**config['subj_wildcards'],desc='preproc',suffix='T1w.nii.gz'),
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['T1w']),
+        xfm_identity = os.path.join(config['snakemake_dir'], config['xfm_identity'])
     params:
         cmd = reg_to_template_cmd,
     output: 
