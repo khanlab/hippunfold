@@ -30,21 +30,28 @@ else:
             'ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
             'N4BiasFieldCorrection -d 3 -i {input.t1} -o {output}'
 
-
+def reg_to_template_cmd(wildcards,input,output):
+    if config['no_reg_template']:
+        xfm = os.path.join(config['snakemake_dir'], config['xfm_identity'])
+        cmd = f'reg_resample -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {xfm}; cp {xfm} {output.xfm_ras}'
+    elif config['rigid_reg_template']:
+        cmd = f'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras} -rigOnly'
+    else:
+        cmd = f'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras}'
+    return cmd
 
 rule reg_to_template:
     input: 
         flo = bids(root='results',datatype='anat',**config['subj_wildcards'],desc='preproc',suffix='T1w.nii.gz'),
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['T1w']),
     params:
-        rigid = '-rigOnly' if config['rigid_reg_template'] else ''
+        cmd = reg_to_template_cmd,
     output: 
         warped_subj = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',space=config['template'],desc='affine'),
         xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to=config['template'],desc='affine',type_='ras'),
     container: config['singularity']['autotop']
     group: 'subj'
-    shell:
-        'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras} {params.rigid}'
+    shell: '{params.cmd}'
 
 rule qc_reg_to_template:
     input:
