@@ -179,6 +179,11 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --no_reg_template:
+    help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
   --use_gpu:
     help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
     default: False
@@ -236,10 +241,8 @@ singularity:
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
   ants: 'docker://kaczmarj/ants:2.3.4'
 
-
+xfm_identity: resources/identity_xfm.txt
 template: CITI168
-
-
 template_files:
   CITI168:
     T1w: resources/CITI168/T1w_head_700um.nii.gz
@@ -250,7 +253,7 @@ template_files:
 
 
 rigid_reg_template: False
-
+no_reg_template: False
 
 modality:
   - T2w
