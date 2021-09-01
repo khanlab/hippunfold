@@ -55,7 +55,7 @@ rule isovolume_coords:
     resources:
         time = 30
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='isovolume.txt')
-    container: config['singularity']['nighres'] 
+    container: config['singularity']['autotop'] 
     script: '../scripts/isovolume_coords.py'
 
 rule unflip_coords:
@@ -101,7 +101,13 @@ rule create_unfold_coord_map:
     shell:
         'c3d {input.nii} -cmp -omc {output.nii}'
 
-        
+def get_io(wildcards):
+    if config['NoIsovolume']:
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    else:
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='isovol.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    return coords_io
+
 rule create_warps:
     input:
         unfold_ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),

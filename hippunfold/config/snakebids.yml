@@ -221,6 +221,10 @@ parse_args:
     nargs: '+'
     help: 'Hemisphere(s) to process (default: %(default)s)'
 
+  --NoIsovolume:
+    help: 'Do not use isovolume model (Waehnert et al 2014) for generating laminar or IO gradient (default: %(default)s)'
+    default: False
+    action: 'store_true'
 
   --keep_work:
     help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
@@ -235,7 +239,6 @@ singularity:
   autotop: 'docker://khanlab/autotop_deps:v0.4.0'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
   ants: 'docker://kaczmarj/ants:2.3.4'
-  nighres: 'docker://rhaast/nighres'
 
 
 template: CITI168

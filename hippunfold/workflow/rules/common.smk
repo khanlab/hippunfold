@@ -62,7 +62,7 @@ def get_final_coords():
     return expand(
         bids(
             root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
-                dir=['AP','PD'],
+                dir=['AP','PD','IO'],
                 hemi=config['hemi'],
                 space=config['output_spaces'],
                 allow_missing=True)
