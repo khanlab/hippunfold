@@ -221,10 +221,13 @@ parse_args:
     nargs: '+'
     help: 'Hemisphere(s) to process (default: %(default)s)'
 
-  --NoIsovolume:
-    help: 'Do not use isovolume model (Waehnert et al 2014) for generating laminar or IO gradient (default: %(default)s)'
-    default: False
-    action: 'store_true'
+  --laminar_coords_method:
+    choices:
+      - 'laplace'
+      - 'isovolume'
+    default:
+      - 'isovolume'
+    help: 'Method to use for laminar coordinates. Isovolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default))' 
 
   --keep_work:
     help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
@@ -359,6 +362,7 @@ laplace_labels:
       - 7
     sink:
       - 0 
+
 
 #---- dwi options below, not used in the default workflow ----
 

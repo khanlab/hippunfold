@@ -59,22 +59,31 @@ def get_final_subfields():
             allow_missing=True)
 
 def get_final_coords():
-    return expand(
-        bids(
-            root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
-                dir=['AP','PD','IO'],
-                hemi=config['hemi'],
-                space=config['output_spaces'],
-                allow_missing=True)
+    if 'laplace' in config['laminar_coords_method']:
+        desc_io = 'laplace'
+    elif 'isovolume' in config['laminar_coords_method']:
+        desc_io = 'isovol'
 
-def get_final_isovol():
-    return expand(
-        bids(
-            root='results',datatype='seg_{modality}',dir='{dir}',suffix='isovol.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
-                dir=['IO'],
-                hemi=config['hemi'],
-                space=config['output_spaces'],
-                allow_missing=True)
+    coords = []
+    coords.extend(
+                expand(
+                    bids(
+                        root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+                            desc='laplace',
+                            dir=['AP','PD'],
+                            hemi=config['hemi'],
+                            space=config['output_spaces'],
+                            allow_missing=True))
+    coords.extend(
+                expand(
+                    bids(
+                        root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+                            desc=[desc_io],
+                            dir=['IO'],
+                            hemi=config['hemi'],
+                            space=config['output_spaces'],
+                            allow_missing=True))
+    return coords
 
 
 def get_final_transforms():
@@ -199,7 +208,6 @@ def get_final_subj_output():
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
     subj_output.extend(get_final_coords())
-    subj_output.extend(get_final_isovol())
     subj_output.extend(get_final_transforms())
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
