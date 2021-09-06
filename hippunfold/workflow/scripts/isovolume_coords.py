@@ -1,16 +1,16 @@
 import os
 import nighres
 from shutil import copyfile
-
+import sys
 
 with open(snakemake.log[0], "w") as f:
     sys.stderr = sys.stdout = f
 
     print('start')
 
+    tmpdir = snakemake.resources.tmpdir
     nighres_args = {'save_data': True, 'output_dir': tmpdir, 'overwrite': True}
 
-    tmpdir = snakemake.resources.tmpdir
 
     ## convert binarized edges to levelset surfaces
     levelset_inner = nighres.surface.probability_to_levelset(snakemake.input.innerbin, **nighres_args)
