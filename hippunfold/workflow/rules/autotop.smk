@@ -97,9 +97,9 @@ rule create_unfold_coord_map:
 def get_laminar_coords(wildcards):
         
     if 'laplace' in config['laminar_coords_method']:
-        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     elif 'isovolume' in config['laminar_coords_method']:
-        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='isovol',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='isovol',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     return coords_io
 
 rule create_warps:
