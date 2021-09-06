@@ -41,6 +41,7 @@ rule prep_isovolume_coords:
         outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='outerbin.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
         innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='innerbin.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='binarize.txt')
+    group: 'subj'
     script: '../scripts/prep_isovolume_coords.py'
 
 rule isovolume_coords:
