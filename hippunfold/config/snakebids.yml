@@ -226,6 +226,13 @@ parse_args:
     nargs: '+'
     help: 'Hemisphere(s) to process (default: %(default)s)'
 
+  --laminar_coords_method:
+    choices:
+      - 'laplace'
+      - 'equivolume'
+    default:
+      - 'equivolume'
+    help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default))' 
 
   --keep_work:
     help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
@@ -237,7 +244,7 @@ parse_args:
 
 singularity:
   prepdwi: 'docker://khanlab/prepdwi:latest'  
-  autotop: 'docker://khanlab/autotop_deps:v0.4.0'
+  autotop: 'docker://khanlab/autotop_deps:nighres'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
   ants: 'docker://kaczmarj/ants:2.3.4'
 
@@ -358,6 +365,7 @@ laplace_labels:
       - 7
     sink:
       - 0 
+
 
 #---- dwi options below, not used in the default workflow ----
 

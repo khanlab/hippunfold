@@ -59,13 +59,32 @@ def get_final_subfields():
             allow_missing=True)
 
 def get_final_coords():
-    return expand(
-        bids(
-            root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
-                dir=['AP','PD','IO'],
-                hemi=config['hemi'],
-                space=config['output_spaces'],
-                allow_missing=True)
+    if 'laplace' in config['laminar_coords_method']:
+        desc_io = 'laplace'
+    elif 'equivolume' in config['laminar_coords_method']:
+        desc_io = 'equivol'
+
+    coords = []
+    #compute all laplace coords by default (incl IO)
+    coords.extend(
+                expand(
+                    bids(
+                        root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+                            desc='laplace',
+                            dir=['AP','PD','IO'],
+                            hemi=config['hemi'],
+                            space=config['output_spaces'],
+                            allow_missing=True))
+    coords.extend(
+                expand(
+                    bids(
+                        root='results',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+                            desc=[desc_io],
+                            dir=['IO'],
+                            hemi=config['hemi'],
+                            space=config['output_spaces'],
+                            allow_missing=True))
+    return coords
 
 
 def get_final_transforms():
@@ -248,7 +267,11 @@ rule archive_work_after_final:
         work_dir = get_work_dir
     output: get_final_work_tar()
     group: 'subj'
-    shell: 'tar -cvzf {output} {params.work_dir} && rm -rf {params.work_dir}'
+    shell: 'tar -cvzf {output} {params.work_dir}; '
+           'if [ $? -le 1 ]; then ' #exit code 0 or 1 is acceptable (2 is fatal)
+           '  rm -rf {params.work_dir}; '
+           'else exit 1; '
+           'fi'
 
 
 def get_input_for_shape_inject(wildcards):

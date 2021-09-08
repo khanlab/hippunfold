@@ -1,6 +1,7 @@
 import nibabel as nib
 import numpy as np
 from  scipy.interpolate import griddata
+from  scipy.interpolate import NearestNDInterpolator
 
 logfile = open(snakemake.log[0], 'w')
 print(f'Start', file=logfile, flush=True)
@@ -125,6 +126,24 @@ interp_io = griddata(points,
                         method=interp_method)
 summary('interp_io',interp_ap)
 
+# fill NaNs (NN interpolater allows for extrapolation!)
+[x,y,z] = np.where(np.invert(np.isnan(interp_ap)))
+interp = NearestNDInterpolator(np.c_[x,y,z],interp_ap[np.invert(np.isnan(interp_ap))])
+[qx,qy,qz] = np.where(np.isnan(interp_ap))
+fill = interp(qx,qy,qz)
+interp_ap[np.isnan(interp_ap)] = fill
+
+[x,y,z] = np.where(np.invert(np.isnan(interp_pd)))
+interp = NearestNDInterpolator(np.c_[x,y,z],interp_pd[np.invert(np.isnan(interp_pd))])
+[qx,qy,qz] = np.where(np.isnan(interp_pd))
+fill = interp(qx,qy,qz)
+interp_pd[np.isnan(interp_pd)] = fill
+
+[x,y,z] = np.where(np.invert(np.isnan(interp_io)))
+interp = NearestNDInterpolator(np.c_[x,y,z],interp_io[np.invert(np.isnan(interp_io))])
+[qx,qy,qz] = np.where(np.isnan(interp_io))
+fill = interp(qx,qy,qz)
+interp_io[np.isnan(interp_io)] = fill
 
 # prepare maps for writing as warp file:
 
