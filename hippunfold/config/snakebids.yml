@@ -224,10 +224,10 @@ parse_args:
   --laminar_coords_method:
     choices:
       - 'laplace'
-      - 'isovolume'
+      - 'equivolume'
     default:
-      - 'isovolume'
-    help: 'Method to use for laminar coordinates. Isovolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default))' 
+      - 'equivolume'
+    help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default))' 
 
   --keep_work:
     help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'

@@ -33,37 +33,37 @@ rule laplace_coords:
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplace.txt')
     script: '{params.cmd}'
 
-rule prep_isovolume_coords:
+rule prep_equivolume_coords:
     input: get_labels_for_laplace,
     params:
         src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
     output:
-        outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='outerbin.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
-        innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='innerbin.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',desc='all',suffix='mask.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',desc='SRLM',suffix='mask.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='binarize.txt')
     group: 'subj'
-    script: '../scripts/prep_isovolume_coords.py'
+    script: '../scripts/prep_equivolume_coords.py'
 
-rule isovolume_coords:
+rule equivolume_coords:
     input: 
-        outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='outerbin.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='innerbin.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',desc='all',suffix='mask.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',desc='SRLM',suffix='mask.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     params:
         src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
     output:
-        coords = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz',desc='isovol',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        coords = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz',desc='equivol',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     group: 'subj'
     resources:
         time = 30
-    log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='isovolume.txt')
+    log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='equivolume.txt')
     container: config['singularity']['autotop'] 
-    script: '../scripts/isovolume_coords.py'
+    script: '../scripts/equivolume_coords.py'
 
 rule unflip_coords:
     input:
         nii = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='corobl',desc='{desc}',hemi='{hemi}flip', **config['subj_wildcards']),
     output:
-        nii = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='corobl',desc='{desc,laplace|isovol}',hemi='{hemi,L}', **config['subj_wildcards']),
+        nii = bids(root='work',datatype='seg_{modality}',dir='{dir}',suffix='coords.nii.gz', space='corobl',desc='{desc,laplace|equivol}',hemi='{hemi,L}', **config['subj_wildcards']),
     container: config['singularity']['autotop']
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'
@@ -98,8 +98,8 @@ def get_laminar_coords(wildcards):
         
     if 'laplace' in config['laminar_coords_method']:
         coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
-    elif 'isovolume' in config['laminar_coords_method']:
-        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='isovol',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+    elif 'equivolume' in config['laminar_coords_method']:
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='equivol',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     return coords_io
 
 rule create_warps:
