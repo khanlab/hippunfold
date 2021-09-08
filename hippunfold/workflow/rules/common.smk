@@ -61,8 +61,8 @@ def get_final_subfields():
 def get_final_coords():
     if 'laplace' in config['laminar_coords_method']:
         desc_io = 'laplace'
-    elif 'isovolume' in config['laminar_coords_method']:
-        desc_io = 'isovol'
+    elif 'equivolume' in config['laminar_coords_method']:
+        desc_io = 'equivol'
 
     coords = []
     #compute all laplace coords by default (incl IO)
