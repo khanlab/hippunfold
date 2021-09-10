@@ -1,6 +1,6 @@
 Specialized scans
 =====================
-This tutorial will cover how HippUnfold can be applied to nonstandard data including ex-vivo scans, super high resolution data (eg. <0.3mm isotropic), non-MRI 3D imaging data, or scans where a corresponding whole-brain T1w image is not available. 
+This tutorial will cover how HippUnfold can be applied to non-standard data including ex-vivo scans, super-high resolution data (eg. <0.3mm isotropic), non-MRI 3D imaging data, or scans where a corresponding whole-brain T1w image is not available. 
 
 We will show how the available flags can be adapted for these use-cases with several worked examples.
 
@@ -13,16 +13,16 @@ This will require manual segmentation of hippocampal grey matter, SRLM, and neig
 
 Here is an example of what the input directory might look like::
 
-  PATH_TO_EXVIVO_DIR/
+  exvivo/
   └── sub-001/
       ├── sub-001_hemi-R_desc-hippo_T2w.nii.gz
       └── sub-001_hemi-R_desc-hippo_dseg.nii.gz
 
 This can be unfolded with the command::
 
-  hippunfold PATH_TO_EXVIVO_DIR PATH_TO_OUTPUT_DIR participant --modality cropseg --hemi R --skip_inject_template_labels
+  hippunfold - PATH_TO_OUTPUT_DIR participant --modality cropseg --path_cropseg exvivo/sub-{subject}/sub-{subject}_hemi-{hemi}_desc-hippo_dseg.nii.gz --hemi R --skip_inject_template_labels
   
-Explanation: ``--modality cropseg`` informs HippUnfold that the input manual segmentation should not be resampled and UNet does not need to be run. Output files will be named with ``space-corobl`` because HippUnfold is coded to effectively treat all files as already being in this space. We need the ``--hemi R`` to prevent HippUnfold looking for both hemispheres. Finally, because this segmentation was performed manually on very high resolution data, we can optionally consider skipping the template shape injection step with ``--skip_inject_template_labels``. Template shape injection can fix minor errors in segmentation from UNet or from an imperfect manual rater, at the cost of smoothing out some details of the hippocampus due to the fact that it uses deformable registration with inherent smoothness contraints. 
+Explanation: ``--modality cropseg`` informs HippUnfold that the input manual segmentation should not be resampled and UNet does not need to be run. Because of a limitation in bids parsing for the `hemi` entity, we need to use the generic path input, `--path_cropseg` in this case, making sure we use the `{subject}` and `{hemi}` wildcards in the filename. Output files will be named with ``space-corobl`` because HippUnfold is coded to effectively treat all files as already being in this space. We need the ``--hemi R`` to prevent HippUnfold looking for both hemispheres. Finally, because this segmentation was performed manually on very high resolution data, we can optionally consider skipping the template shape injection step with ``--skip_inject_template_labels``. Template shape injection can fix minor errors in segmentation from UNet or from an imperfect manual rater, at the cost of smoothing out some details of the hippocampus due to the fact that it uses deformable registration with inherent smoothness contraints. 
 
 Note that because we are not resampling to the CITI168 template or using UNet, the T2w image in this example is effectively not being used at all. Instead, the provided manual segmentation makes up the basis for unfolding. 
 
