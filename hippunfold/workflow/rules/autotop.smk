@@ -46,8 +46,8 @@ rule prep_equivolume_coords:
 
 rule equivolume_coords:
     input: 
-        outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',desc='all',suffix='mask.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
-        innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',desc='SRLM',suffix='mask.nii.gz',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        outerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',desc='all',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        innerbin = bids(root='work',datatype='seg_{modality}',dir='{dir}',desc='SRLM',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     params:
         src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
     output:
