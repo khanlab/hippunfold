@@ -39,7 +39,7 @@ Operating System: Linux
       <Label Key="2" Red="0.521569" Green="0.870588" Blue="1" Alpha="1"><![CDATA[CA1]]></Label>
       <Label Key="3" Red="0" Green="1" Blue="0.666667" Alpha="1"><![CDATA[CA2]]></Label>
       <Label Key="4" Red="1" Green="0.635294" Blue="0" Alpha="1"><![CDATA[CA3]]></Label>
-      <Label Key="5" Red="1" Green="0" Blue="0" Alpha="1"><![CDATA[Dentate gyrus]]></Label>
+      <Label Key="5" Red="1" Green="0" Blue="0" Alpha="1"><![CDATA[CA4]]></Label>
    </LabelTable>
 <DataArray Intent="NIFTI_INTENT_LABEL"
            DataType="NIFTI_TYPE_INT32"

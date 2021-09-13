@@ -9214,7 +9214,7 @@ Operating System: Linux
 </Weights>
             </BorderPart>
         </Border>
-        <Border Name="Dentate gyrus" Red="1" Green="0" Blue="0">
+        <Border Name="CA4" Red="1" Green="0" Blue="0">
             <BorderPart Closed="False">
                 <Vertices>31930 31929 31676
 31930 31676 31677
