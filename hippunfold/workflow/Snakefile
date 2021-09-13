@@ -43,6 +43,7 @@ wildcard_constraints:
     hemi='[a-zA-Z0-9]+',
     surfname='[a-zA-Z0-9]+',
     modality='[a-zA-Z0-9]+',
+    density='[a-zA-Z0-9]+',
 
 
 include: 'rules/common.smk'

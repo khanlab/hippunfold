@@ -1,7 +1,7 @@
 rule import_cropseg:
     input: config['input_path']['cropseg']
     output:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
+        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L|R}'),
     group: 'subj'
     shell: 'cp {input} {output}'
 

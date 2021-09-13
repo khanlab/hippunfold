@@ -49,3 +49,9 @@ def test_dry_runs(script_runner):
         ret = script_runner.run('hippunfold', '-',output_dir,'participant','-np','--modality','cropseg','--path_cropseg','test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz')
         assert ret.success
 
+    #cropseg with single hemi -- requires user to specify --hemi
+    with tempfile.TemporaryDirectory() as output_dir:
+        ret = script_runner.run('hippunfold', '-',output_dir,'participant','-np','--modality','cropseg','--path_cropseg','test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz','--hemi','L')
+        assert ret.success
+
+
