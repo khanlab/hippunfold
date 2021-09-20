@@ -244,7 +244,7 @@ parse_args:
 
 singularity:
   prepdwi: 'docker://khanlab/prepdwi:latest'  
-  autotop: 'docker://khanlab/autotop_deps:nighres'
+  autotop: 'docker://khanlab/autotop_deps:v0.4.1'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
   ants: 'docker://kaczmarj/ants:2.3.4'
 
@@ -275,12 +275,6 @@ nnunet_model:
   b1000: trained_model.3d_fullres.Task104_hcp1200_b1000.nnUNetTrainerV2.model_best.tar
   trimodal: trained_model.3d_fullres.Task105_hcp1200_trimodal.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
-
-
-use_mcr: True
-matlab_bin: '/cvmfs/restricted.computecanada.ca/easybuild/software/2017/Core/matlab/2019b/bin/matlab'
-mlm_license_file: '/cvmfs/restricted.computecanada.ca/config/licenses/matlab/inst_uwo/graham.lic'
-java_home: '/cvmfs/soft.computecanada.ca/easybuild/software/2017/Core/java/1.8.0_192/'
 
 
 #niftynet models -- this will be deprecated soon:
