@@ -17,7 +17,7 @@ analysis_levels: &analysis_levels
 #mapping from analysis_level to set of target rules or files
 targets_by_analysis_level:
   participant:
-    - 'all'  # if '', then the first rule is run
+    - ''  # if '', then the first rule is run
   group:
     - 'all_group_tsv'
 
@@ -305,6 +305,10 @@ unfold_vol_ref:
     - '0'
     - '200'
     - '0'
+  extent:
+    - '40'
+    - '20'
+    - '2.5'
   orient: RPI
 
 #space for uniform unfolded grid 
