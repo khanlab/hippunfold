@@ -37,6 +37,7 @@ rule calc_unfold_template_coords:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
     output:
         coords_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='coords.shape.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+    container: config['singularity']['autotop']
     shadow: 'minimal' #this is required to use the temporary files defined as params
     shell:
         "wb_command -surface-coordinates-to-metric {input.midthickness_gii} {params.coords_xyz} && "
