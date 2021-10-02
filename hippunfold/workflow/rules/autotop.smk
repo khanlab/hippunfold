@@ -33,6 +33,7 @@ rule laplace_coords:
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplace.txt')
     script: '{params.cmd}'
 
+
 rule prep_equivolume_coords:
     input: get_labels_for_laplace,
     params:
@@ -114,14 +115,71 @@ rule create_warps:
     resources:
         mem_mb = 16000
     output:
-        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        warpitk_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        #warp_unfold2native_extrap = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/Warp_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warpitk_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/WarpITK_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        #warp_unfold2native_extrap = bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/Warp_unfold2native_extrapolateNearest.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
     group: 'subj'
     log: bids(root='logs',**config['subj_wildcards'],hemi='{hemi,Lflip|R}',modality='seg-{modality}',suffix='create_warps.txt')
     script: '../scripts/create_warps.py'
+
+
+rule create_dentate_io:
+    """ PD = 0.9-1.0, AP = 0-1.0, IO = 0-1.0
+    """
+    input:
+        coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    params:
+        pd_min = config['dentate_coords']['start_pd']
+    output:
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    shell:
+        'c3d {input.coords_pd} -clip {params.pd_min} 1 -stretch {params.pd_min} 1 0 1 {output.coords_io}'
+        
+  
+rule create_dentate_pd:
+    input:
+        coords_io = get_laminar_coords,
+        dentate_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    output:
+        coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    shell:
+        'c3d {input.dentate_io} -binarize {input.coords_io} -multiply {output.coords_pd}'
+  
+rule create_dentate_ap:
+    input:
+        coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        dentate_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    output:
+        coords_pd = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    shell:
+        'c3d {input.dentate_io} -binarize {input.coords_ap} -multiply {output.coords_pd}'
+
+
+       
+
+rule create_warps_dentate:
+    input: 
+        unfold_ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        unfold_phys_coords_nii = bids(root='work',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards']),
+        coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    params:
+        interp_method =  'linear'
+    resources:
+        mem_mb = 16000
+    output:
+        warp_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotopDG/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warp_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotopDG/Warp_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warpitk_unfold2native = bids(root='work',**config['subj_wildcards'],suffix='autotopDG/WarpITK_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotopDG/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+    group: 'subj'
+    log: bids(root='logs',**config['subj_wildcards'],hemi='{hemi,Lflip|R}',modality='seg-{modality}',suffix='create_warps_dentate.txt')
+    script: '../scripts/create_warps.py'
+
+       
 
 # TODO: add this extrapolation of the warp file, extrapolate_warp_unfold2native.m
 #  .. for now just using original warp
@@ -134,17 +192,17 @@ rule map_to_full_grid:
         coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_io = get_laminar_coords,
-        warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
         unfold_ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
     params:
         dims = config['unfold_vol_ref']['dims'],
         script = os.path.join(config['snakemake_dir'],'workflow','scripts','mapUnfoldToFullGrid.sh'),
-        warp_dir = bids(root='work',**config['subj_wildcards'],suffix='autotop',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
+        warp_dir = bids(root='work',**config['subj_wildcards'],suffix='autotopHipp',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
     output:
-        warp_unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        warp_unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2unfoldtemplate.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        warpitk_unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2unfoldtemplate_0InverseWarp.nii.gz',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
-        warpitk_unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warp_unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warp_unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/Warp_unfold2unfoldtemplate.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warpitk_unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/WarpITK_unfold2unfoldtemplate_0InverseWarp.nii.gz',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warpitk_unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotopHipp/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
     container: config['singularity']['autotop']
     group: 'subj'
     threads: 8
@@ -155,15 +213,43 @@ rule map_to_full_grid:
         'SINGULARITYENV_ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
         '{params.script} {input.coords_ap} {input.coords_pd} {input.coords_io} {input.unfold_ref} {params.warp_dir} {params.dims} &> {log}'
 
+#full-grid correction of unfolded space
+rule map_to_full_grid_dentate:
+    input:
+        coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        warpitk_native2unfold= bids(root='work',**config['subj_wildcards'],suffix='autotopDG/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
+        unfold_ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
+    params:
+        dims = config['unfold_vol_ref']['dims'],
+        script = os.path.join(config['snakemake_dir'],'workflow','scripts','mapUnfoldToFullGrid.sh'),
+        warp_dir = bids(root='work',**config['subj_wildcards'],suffix='autotopDG',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}')
+    output:
+        warp_unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotopDG/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warp_unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotopDG/Warp_unfold2unfoldtemplate.nii',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warpitk_unfoldtemplate2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotopDG/WarpITK_unfold2unfoldtemplate_0InverseWarp.nii.gz',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+        warpitk_unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotopDG/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}'),
+    container: config['singularity']['autotop']
+    group: 'subj'
+    threads: 8
+    resources:
+        time = 15 #15min
+    log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='seg{modality}',suffix='mapUnfoldToFullGridDG.txt')
+    shell:
+        'SINGULARITYENV_ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} '
+        '{params.script} {input.coords_ap} {input.coords_pd} {input.coords_io} {input.unfold_ref} {params.warp_dir} {params.dims} &> {log}'
+
+
 
 rule compose_warps_corobl2unfold_rhemi:
     """ Compose corobl to unfold (unfold-template), for right hemi (ie no flip)"""
     input:
-        native2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
-        unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
+        native2unfold = bids(root='work',**config['subj_wildcards'],suffix='{autotop}/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
+        unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='{autotop}/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='R',modality='{modality}'),
         ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
     output:
-        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='R',from_='corobl',to='unfold',mode='image')
+        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='R',from_='corobl',to='unfold',mode='image',desc='{autotop}')
     container: config['singularity']['autotop'] 
     group: 'subj'
     shell: 'ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.unfold2unfoldtemplate} {input.native2unfold}'
@@ -172,12 +258,12 @@ rule compose_warps_corobl2unfold_rhemi:
 rule compose_warps_corobl2unfold_lhemi:
     """ Compose corobl to unfold (unfold-template), for left hemi (ie with flip)"""
     input:
-        native2unfold = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
-        unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='autotop/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
+        native2unfold = bids(root='work',**config['subj_wildcards'],suffix='{autotop}/WarpITK_native2unfold.nii',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
+        unfold2unfoldtemplate = bids(root='work',**config['subj_wildcards'],suffix='{autotop}/WarpITK_unfold2unfoldtemplate_0Warp.nii.gz',desc='cropped',space='corobl',hemi='Lflip',modality='{modality}'),
         ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
         flipLR_xfm = os.path.join(config['snakemake_dir'],'resources','desc-flipLR_type-itk_xfm.txt')
     output:
-        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='L',from_='corobl',to='unfold',mode='image')
+        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='L',from_='corobl',to='unfold',mode='image',desc='{autotop}')
     container: config['singularity']['autotop'] 
     group: 'subj'
     shell: 'ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.unfold2unfoldtemplate} {input.native2unfold} {input.flipLR_xfm}'
@@ -187,14 +273,15 @@ rule compose_warps_corobl2unfold_lhemi:
 rule compose_warps_t1_to_unfold:
     """ Compose warps from T1w to unfold """
     input:
-        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='corobl',to='unfold',mode='image'),
+        corobl2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='corobl',to='unfold',mode='image',desc='{autotop}'),
         ref = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
         t1w2corobl = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output: 
-        bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image')
+        bids(root='results',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image',desc='{autotop}')
     container: config['singularity']['autotop'] 
     group: 'subj'
     shell: 'ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.t1w2corobl}'
+
 
 
 
