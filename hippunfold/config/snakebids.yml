@@ -17,7 +17,7 @@ analysis_levels: &analysis_levels
 #mapping from analysis_level to set of target rules or files
 targets_by_analysis_level:
   participant:
-    - 'all'  # if '', then the first rule is run
+    - ''  # if '', then the first rule is run
   group:
     - 'all_group_tsv'
 
@@ -360,6 +360,13 @@ laplace_labels:
     sink:
       - 0 
 
+
+autotop_labels:
+  - 'autotopHipp'
+  - 'autotopDG'
+
+dentate_coords:
+  start_pd: 0.97
 
 #---- dwi options below, not used in the default workflow ----
 
