@@ -125,40 +125,71 @@ rule create_warps:
     script: '../scripts/create_warps.py'
 
 
-rule create_dentate_io:
-    """ PD = 0.9-1.0, AP = 0-1.0, IO = 0-1.0
+rule create_dentate_mask:
+    """ threshold hipp P-D to get dentate mask
     """
     input:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     params:
         pd_min = config['dentate_coords']['start_pd']
     output:
-        coords_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        mask = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     shell:
-        'c3d {input.coords_pd} -clip {params.pd_min} 1 -stretch {params.pd_min} 1 0 1 {output.coords_io}'
+        'c3d {input.coords_pd} -threshold {params.pd_min} 1 1 0 {output.mask}'
+
+
+rule create_dentate_laplace_labels:
+    """ Create gm/src/sink for dentate IO by incorporating the DG mask as label 9 (higher than others)
+    """
+    input: 
+        autotop_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
+        dentate = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    output:
+        autotop_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postprocWithDG',space='corobl',hemi='{hemi}'),
+    shell:
+        'c3d {input.dentate} -scale 9 {input.autotop_seg} -max {output.autotop_seg}'
         
+
+
+rule laplace_dentate_io:
+    input: 
+        lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postprocWithDG',space='corobl',hemi='{hemi}'),
+    params:
+        gm_labels = lambda wildcards: config['laplace_labels']['DG_IO']['gm'],
+        src_labels = lambda wildcards: config['laplace_labels']['DG_IO']['src'],
+        sink_labels = lambda wildcards: config['laplace_labels']['DG_IO']['sink'],
+        convergence_threshold = 1e-5, 
+        max_iters = 10000 
+    output:
+        coords = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+    group: 'subj'
+    resources:
+        time = 30
+    log: bids(root='logs',**config['subj_wildcards'],dir='IO',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplaceDG.txt')
+    script: '../scripts/laplace_coords.py'
+
+
   
 rule create_dentate_pd:
     input:
         coords_io = get_laminar_coords,
-        dentate_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        mask = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     output:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     shell:
-        'c3d {input.dentate_io} -binarize {input.coords_io} -multiply {output.coords_pd}'
+        'c3d {input.coords_io} {input.mask} -multiply {output.coords_pd}'
   
 rule create_dentate_ap:
     input:
         coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        dentate_io = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        mask = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     output:
-        coords_pd = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     shell:
-        'c3d {input.dentate_io} -binarize {input.coords_ap} -multiply {output.coords_pd}'
+        'c3d {input.coords_ap} {input.mask} -multiply {output.coords_ap}'
 
 
        
-
 rule create_warps_dentate:
     input: 
         unfold_ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),

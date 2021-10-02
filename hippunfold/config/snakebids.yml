@@ -359,6 +359,14 @@ laplace_labels:
       - 7
     sink:
       - 0 
+  DG_IO:
+    gm:
+     - 9
+    src:
+     - 1
+    sink:
+     - 2
+     - 7
 
 
 autotop_labels:
