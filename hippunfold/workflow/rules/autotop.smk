@@ -134,6 +134,8 @@ rule create_dentate_mask:
         pd_min = config['dentate_coords']['start_pd']
     output:
         mask = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    group: 'subj'
+    container: config['singularity']['autotop'] 
     shell:
         'c3d {input.coords_pd} -threshold {params.pd_min} 1 1 0 {output.mask}'
 
@@ -146,6 +148,8 @@ rule create_dentate_laplace_labels:
         dentate = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     output:
         autotop_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postprocWithDG',space='corobl',hemi='{hemi}'),
+    group: 'subj'
+    container: config['singularity']['autotop'] 
     shell:
         'c3d {input.dentate} -scale 9 {input.autotop_seg} -max {output.autotop_seg}'
         
@@ -176,6 +180,8 @@ rule create_dentate_pd:
         mask = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     output:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    group: 'subj'
+    container: config['singularity']['autotop'] 
     shell:
         'c3d {input.coords_io} {input.mask} -multiply {output.coords_pd}'
   
@@ -185,6 +191,8 @@ rule create_dentate_ap:
         mask = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     output:
         coords_ap = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+    group: 'subj'
+    container: config['singularity']['autotop'] 
     shell:
         'c3d {input.coords_ap} {input.mask} -multiply {output.coords_ap}'
 
