@@ -9,7 +9,7 @@ rule warp_gii_unfoldtemplate2unfold:
     """warp from template space to subj unfolded"""
     input: 
         warp = bids(root='work',**config['subj_wildcards'],suffix='{autotop}/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
-        gii = os.path.join(config['snakemake_dir'],'resources','unfold_template','tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii')
+        gii = os.path.join(config['snakemake_dir'],'resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii')
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type = lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -132,7 +132,7 @@ rule calculate_gyrification:
     this should be proportional by a constant, to the earlier gyrification on 32k surfaces."""
     input: 
         native_surfarea = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='surfarea.shape.gii', space='{space}',hemi='{hemi}',label='{autotop}', **config['subj_wildcards']),
-        unfold_surfarea = os.path.join(config['snakemake_dir'],'resources','unfold_template','tpl-avg_space-unfold_den-{density}_surfarea.shape.gii')
+        unfold_surfarea = os.path.join(config['snakemake_dir'],'resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_surfarea.shape.gii')
     output:
         gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='gyrification.shape.gii', space='{space}',hemi='{hemi}',label='{autotop}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
@@ -170,7 +170,7 @@ rule resample_bigbrain_subfield_label_gii:
          using wb_command""" 
     input:
         label = os.path.join(config['snakemake_dir'],'resources','bigbrain','sub-bigbrain_hemi-{hemi}_subfields.label.gii'),
-        new_surf = os.path.join(config['snakemake_dir'],'resources','unfold_template','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
+        new_surf = os.path.join(config['snakemake_dir'],'resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
     output:
         label_nii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.nii', space='{space}',hemi='{hemi}',label='autotopHipp', **config['subj_wildcards'])
     group: 'subj'
@@ -179,7 +179,7 @@ rule resample_bigbrain_subfield_label_gii:
 rule label_nii_to_metric_gii:
     input:
         label_nii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.nii', space='{space}',hemi='{hemi}',label='autotopHipp', **config['subj_wildcards']),
-        surf = os.path.join(config['snakemake_dir'],'resources','unfold_template','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
+        surf = os.path.join(config['snakemake_dir'],'resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
     output:
         metric_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.func.gii', space='{space}',hemi='{hemi}',label='autotopHipp',  **config['subj_wildcards'])
     group: 'subj'
@@ -275,7 +275,7 @@ rule create_spec_file_hipp:
                     surfname=['midthickness','inner','outer'], space=['{space}','unfolded'], allow_missing=True), 
         subfields = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='{hemi}',label='autotopHipp',  **config['subj_wildcards']),
         cifti = expand(bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{cifti}.nii', space='{space}',label='autotopHipp',  **config['subj_wildcards']),
-                    cifti=['gyrification.dscalar','curvature.dscalar','thickness.dscalar','subfields.dlabel'], allow_missing=True),
+                    cifti=['gyrification.dscalar','surfarea.dscalar','curvature.dscalar','thickness.dscalar','subfields.dlabel'], allow_missing=True),
     params:
         cmds = get_cmd_spec_file
     output: 
@@ -292,7 +292,7 @@ rule create_spec_file_dentate:
         surfs = expand(bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', space='{space}', hemi='{hemi}',label='autotopDG',  **config['subj_wildcards']),
                     surfname=['midthickness','inner','outer'], space=['{space}','unfolded'], allow_missing=True), 
         cifti = expand(bids(root='results',datatype='surf_{modality}',den='{density}',suffix='{cifti}.nii', space='{space}',label='autotopDG',  **config['subj_wildcards']),
-                    cifti=['gyrification.dscalar','curvature.dscalar','thickness.dscalar'], allow_missing=True),
+                    cifti=['gyrification.dscalar','surfarea.dscalar','curvature.dscalar','thickness.dscalar'], allow_missing=True),
     params:
         cmds = get_cmd_spec_file
     output: 
