@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GIFTI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="http://brainvis.wustl.edu/caret6/xml_schemas/GIFTI_Caret.xsd"
+       Version="1"
+       NumberOfDataArrays="1">
+   <MetaData>
+      <MD>
+         <Name><![CDATA[AnatomicalStructurePrimary]]></Name>
+         <Value><![CDATA[Invalid]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[ProgramProvenance]]></Name>
+         <Value><![CDATA[Connectome Workbench
+Type: Command Line Application
+Version: 1.4.1
+Qt Compiled Version: 5.7.1
+Qt Runtime Version: 5.7.1
+Commit: unknown
+Commit Date: unknown
+Compiled with OpenMP: YES
+Compiler: c++ (/usr/bin)
+Compiler Version: 6.3.0
+Compiled Debug: NO
+Operating System: Linux
+]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[Provenance]]></Name>
+         <Value><![CDATA[/usr/bin/wb_command -surface-vertex-areas results/unfold_template_autotopDG/tpl-avg_space-unfold_den-400_midthickness.surf.gii results/unfold_template_autotopDG/tpl-avg_space-unfold_den-400_surfarea.shape.gii]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[WorkingDirectory]]></Name>
+         <Value><![CDATA[/scratch/akhanf/1_dev/hippunfold_isovol/gen_unfold_template]]></Value>
+      </MD>
+   </MetaData>
+   <LabelTable>
+      <Label Key="0" Red="1" Green="1" Blue="1" Alpha="0"><![CDATA[???]]></Label>
+   </LabelTable>
+<DataArray Intent="NIFTI_INTENT_NORMAL"
+           DataType="NIFTI_TYPE_FLOAT32"
+           ArrayIndexingOrder="RowMajorOrder"
+           Dimensionality="1"
+           Dim0="240"
+           Encoding="GZipBase64Binary"
+           Endian="LittleEndian"
+           ExternalFileName=""
+           ExternalFileOffset="0">
+   <MetaData>
+      <MD>
+         <Name><![CDATA[Name]]></Name>
+         <Value><![CDATA[vertex areas]]></Value>
+      </MD>
+   </MetaData>
+   <Data>eJwNyX841HccAHBs6civLY1HiZhbMUfRXNn3/X5/nhLn1rXHRKw9yXMzzuxp1t16GKbzmF/ZjX4ow+NHz7mcCREaj+eR7Dlb6ljtSefhOcmjnI3CLXm2178vi+EQNmdqYoqS86zyKxd2/SMZe0/ZSbuXx1m8eyH752kEk24tob5lByY4qaLGkg1sfosdk79Mpsvq02zm/++teo7mk0rmo3RlPuM7GD9xnLZOVpH/aDedvfEWu9TVTH3HP2SDD6cpNecU9Va5s7gcZ/Zw2pFN3pbS2L4CMuiqiZMVEUZ5sMWOYbpj4JOnZIGWIu3Y3eFDrEudQXtDiH356g2WtOZDUTXlhN+p8I79NTokLybhEJ9Z8W/RoqOINkhSSRUwRcm5etJwKaQPaqUH3q7M9lg6WdaHMVulkQqkAzhiYcGOpSSxxeIWEkwE0c1/h1Ff0EkX3bNoas6amo/k08cdwRRt/JNO9O+hpB1fMMmFbpS1n8OY34rITthFYUOfkyBLTbNbGGmF8bhdJqJ7shHkxzpTq2AEez1lzKC/T0lmG3w864Khmcm0y2Yf0fdXcftKMx7YrMb9lnk0klGOeoMes8U7MdNNgmkmS4wcDcaoK16YWSfD5272lCLpp0/inMn6tgLzWCtOVzqgU44KfWvbyHb6Olb/qkGe4SCGZ5vwRXsp6PldGHJCS7nmMtzW1oKzT+wo8fU5zG3YhkG6N/HgwjXolVvj28JIcpSbSKHhIdc6CK5pMvzGyMPAnjFc33kf1C85bCjX48pUN2eVW4+rMWZsHPwFxgO9sKoxlB7PJeC90Adga8fDootpsDS/CT+rG4PEq0dx//pPeOkDD3T5yw+zm6rRq70UU5/MgKcHD59GrHCPdGnwvv/XQMPxqGhUgXb5Cpb3GzF3uRs87taDQ4Uf6mx/ROHfSnDqqIWEJn+szeCjk+hn6Hn2O+yVt0GKjxWCwBfjFBtxwrUHov0CINXtBpTmW6CuLgWLzQpMiBrnTmEcaMPexSPh6WC9qQxWRWVgP8pDYV8tOFYWgXj9FsCZEHyhq4CGwTicGXsHzlZYAQV0cxuP/gHi+RZYq/GFBqMabPK9QBoTC1Emf6i5IAKV1BvkY4dBs6sQbj5bAK23GfYEb8bdq4UofjUEAkMWSGut0T89j1vSMwi0D4BJ7QHu084Rjv2g4cRiE3dcNAGXD1dzYWcSYC0pHL517YLTovNg1CghIHoAtCs6kE22g+wRQqylBCJeD8B/iaGceA==</Data>
+</DataArray>
+</GIFTI>
