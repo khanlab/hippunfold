@@ -172,26 +172,26 @@ rule resample_bigbrain_subfield_label_gii:
         label = os.path.join(config['snakemake_dir'],'resources','bigbrain','sub-bigbrain_hemi-{hemi}_subfields.label.gii'),
         new_surf = os.path.join(config['snakemake_dir'],'resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
     output:
-        label_nii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.nii', space='{space}',hemi='{hemi}',label='autotopHipp', **config['subj_wildcards'])
+        label_nii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.nii', space='{space}',hemi='{hemi}',label='{autotop}', **config['subj_wildcards'])
     group: 'subj'
     script: '../scripts/resample_unfolded_label.py'
 
 rule label_nii_to_metric_gii:
     input:
-        label_nii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.nii', space='{space}',hemi='{hemi}',label='autotopHipp', **config['subj_wildcards']),
+        label_nii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.nii', space='{space}',hemi='{hemi}',label='{autotop}', **config['subj_wildcards']),
         surf = os.path.join(config['snakemake_dir'],'resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
     output:
-        metric_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.func.gii', space='{space}',hemi='{hemi}',label='autotopHipp',  **config['subj_wildcards'])
+        metric_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.func.gii', space='{space}',hemi='{hemi}',label='{autotop}',  **config['subj_wildcards'])
     group: 'subj'
     container: config['singularity']['autotop']
     shell: 'wb_command -metric-convert -from-nifti {input.label_nii} {input.surf} {output.metric_gii}'
 
 rule metric_to_label_gii:
     input:
-        metric_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.func.gii', space='{space}',hemi='{hemi}',label='autotopHipp',  **config['subj_wildcards']),
+        metric_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='subfields.label.func.gii', space='{space}',hemi='{hemi}',label='{autotop}',  **config['subj_wildcards']),
         label_list = os.path.join(config['snakemake_dir'],'resources','bigbrain','sub-bigbrain_labellist.txt')
     output:
-        label_gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='{hemi}',label='autotopHipp',  **config['subj_wildcards'])
+        label_gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='{hemi}',label='{autotop}',  **config['subj_wildcards'])
     group: 'subj'
     container: config['singularity']['autotop']
     shell: 'wb_command -metric-label-import {input.metric_gii} {input.label_list} {output.label_gii}'
@@ -226,9 +226,9 @@ rule create_dscalar_metric_cifti:
 def get_inputs_cifti_label(wildcards):
     files = dict()
     if 'L' in config['hemi']:
-        files['left_label'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='L',label='autotopHipp',  **config['subj_wildcards']).format(**wildcards),
+        files['left_label'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='L',label='{autotop}',  **config['subj_wildcards']).format(**wildcards),
     if 'R' in config['hemi']:
-        files['right_label'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='R',label='autotopHipp',  **config['subj_wildcards']).format(**wildcards),
+        files['right_label'] = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='R',label='{autotop}',  **config['subj_wildcards']).format(**wildcards),
     return files
 
 
@@ -246,7 +246,7 @@ rule create_dlabel_cifti_subfields:
     params:
         cmd = get_cmd_cifti_label
     output:
-        cifti = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.dlabel.nii', space='{space}',label='autotopHipp',  **config['subj_wildcards'])
+        cifti = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='subfields.dlabel.nii', space='{space}',label='{autotop}',  **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell: '{params.cmd}'
