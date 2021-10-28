@@ -129,35 +129,21 @@ rule create_dentate_mask:
     """ threshold hipp P-D to get dentate mask
     """
     input:
-        coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}')
     params:
-        pd_min = config['dentate_coords']['start_pd']
+        gm_labels = lambda wildcards: config['laplace_labels']['DG_IO']['gm'],
     output:
         mask = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     group: 'subj'
     container: config['singularity']['autotop'] 
     shell:
-        'c3d {input.coords_pd} -threshold {params.pd_min} 1 1 0 {output.mask}'
-
-
-rule create_dentate_laplace_labels:
-    """ Create gm/src/sink for dentate IO by incorporating the DG mask as label 9 (higher than others)
-    """
-    input: 
-        autotop_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
-        dentate = bids(root='work',datatype='seg_{modality}',label='dentate',suffix='mask.nii.gz',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-    output:
-        autotop_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postprocWithDG',space='corobl',hemi='{hemi}'),
-    group: 'subj'
-    container: config['singularity']['autotop'] 
-    shell:
-        'c3d {input.dentate} -scale 9 {input.autotop_seg} -max {output.autotop_seg}'
+        'c3d {input.lbl} -threshold {params.gm_labels} {params.gm_labels} 1 0 {output.mask}'
         
 
 
 rule laplace_dentate_io:
     input: 
-        lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postprocWithDG',space='corobl',hemi='{hemi}'),
+        lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}')
     params:
         gm_labels = lambda wildcards: config['laplace_labels']['DG_IO']['gm'],
         src_labels = lambda wildcards: config['laplace_labels']['DG_IO']['src'],

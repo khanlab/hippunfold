@@ -361,7 +361,7 @@ laplace_labels:
       - 0 
   DG_IO:
     gm:
-     - 9
+     - 8
     src:
      - 1
     sink:
