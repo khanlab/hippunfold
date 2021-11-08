@@ -305,6 +305,10 @@ unfold_vol_ref:
     - '0'
     - '200'
     - '0'
+  extent:
+    - '40'
+    - '20'
+    - '2.5'
   orient: RPI
 
 #space for uniform unfolded grid 
