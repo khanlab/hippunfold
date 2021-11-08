@@ -2,7 +2,6 @@ import numpy as np
 import nibabel as nib
 from astropy.convolution import convolve as nan_convolve
 from scipy.interpolate import NearestNDInterpolator
-from astropy.convolution import convolve as nan_convolve
 
 # test inputs
 #lbl_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_hemi-R_space-corobl_desc-postproc_dseg.nii.gz')
@@ -99,15 +98,14 @@ for i in range(len(x)):
     intPD[vox] = dxintegral[vox] + dyintegral[vox] + dzintegral[vox]
 
 # smooth
+out_smooth = intPD
 hl=np.ones([3,3,3])
 hl = hl/np.sum(hl)
-out_smooth = intPD
 out_smooth[idxgm==0] = np.nan
 out_smooth = nan_convolve(out_smooth,hl,preserve_nan=True)
 out_smooth[idxgm==0] = 0.
 
-
-# normalize (per AP slice)
+# rescale (per AP slice)
 nslices = 20
 out_norm = np.zeros(intPD.shape)
 ap = np.linspace(0,1,nslices)
@@ -122,18 +120,16 @@ for i in range(len(ap-1)):
     else:
         out_norm[slice] = out_smooth[slice]
 
-
 # smooth again?
+out_smooth = out_norm
 hl=np.ones([3,3,3])
 hl = hl/np.sum(hl)
-out_smooth = out_norm
 out_smooth[idxgm==0] = np.nan
 out_smooth = nan_convolve(out_smooth,hl,preserve_nan=True)
 out_smooth[idxgm==0] = 0.
 
-
 # save
-out = out_norm
+out = out_smooth
 sv = nib.Nifti1Image(out,AP_nib.affine,AP_nib.header)
 nib.save(sv,snakemake.output.coords_pd)
 #nib.save(sv,'test')
