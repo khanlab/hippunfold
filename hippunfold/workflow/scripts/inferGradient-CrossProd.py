@@ -3,6 +3,8 @@ import nibabel as nib
 from astropy.convolution import convolve as nan_convolve
 from scipy.interpolate import NearestNDInterpolator
 
+logfile = open(snakemake.log[0], 'w')
+
 # test inputs
 #lbl_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_hemi-R_space-corobl_desc-postproc_dseg.nii.gz')
 #lbl = lbl_nib.get_fdata()
@@ -28,6 +30,8 @@ IO_nib = nib.load(snakemake.input.IOcoords)
 IO = IO_nib.get_fdata()
 IOsrc = snakemake.input.IOsrc_labels
 IOsnk = snakemake.input.IOsink_labels
+
+print(f'data loaded', file=logfile, flush=True)
 
 # pad with src/snk and NN interpolation so gradients dont jump at boundary
 idxgm = np.zeros(lbl.shape)
@@ -97,6 +101,8 @@ for i in range(len(x)):
     vox = x[i], y[i], z[i]
     intPD[vox] = dxintegral[vox] + dyintegral[vox] + dzintegral[vox]
 
+print(f'inference complete', file=logfile, flush=True)
+
 # smooth
 out_smooth = intPD
 hl=np.ones([3,3,3])
@@ -134,4 +140,5 @@ sv = nib.Nifti1Image(out,AP_nib.affine,AP_nib.header)
 nib.save(sv,snakemake.output.coords_pd)
 #nib.save(sv,'test')
 
-
+print(f'smoothed, scaled, saved', file=logfile, flush=True)
+logfile.close()

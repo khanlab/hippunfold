@@ -36,7 +36,7 @@ rule calc_unfold_template_coords:
         extent = config['unfold_vol_ref']['extent'],
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
     output:
-        coords_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='coords.shape.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+        coords_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='coords.shape.gii', space='{space}',hemi='{hemi}',label='{autotop}', **config['subj_wildcards']),
     container: config['singularity']['autotop']
     shadow: 'minimal' #this is required to use the temporary files defined as params
     group: 'subj'
@@ -179,12 +179,12 @@ rule calculate_gyrification:
 
 rule smooth_surface:
     input:
-        gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='midthickness.surf.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='midthickness.surf.gii', space='{space}',hemi='{hemi}',label='{autotop}', **config['subj_wildcards'])
     params:
         strength = 0.6,
         iterations = 100
     output:
-        gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='midthickness.surf.gii', space='{space}',hemi='{hemi}', desc='smoothed',**config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='midthickness.surf.gii', space='{space}',hemi='{hemi}',label='{autotop}', desc='smoothed',**config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell:
@@ -194,7 +194,7 @@ rule smooth_surface:
 
 rule calculate_curvature_from_surface:
     input: 
-        gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='midthickness.surf.gii', space='{space}',hemi='{hemi}', desc='smoothed',**config['subj_wildcards'])
+        gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='midthickness.surf.gii', space='{space}',hemi='{hemi}',label='{autotop}', desc='smoothed',**config['subj_wildcards'])
     output:
         gii = bids(root='results',datatype='surf_{modality}',den='{density}',suffix='curvature.shape.gii', space='{space}',hemi='{hemi}',label='{autotop}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
