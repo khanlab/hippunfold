@@ -173,7 +173,7 @@ rule create_dentate_pd:
     output:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     group: 'subj'
-    container: config['singularity']['autotop'] 
+    log: bids(root='logs',**config['subj_wildcards'],dir='PD',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplaceDG.txt')
     shell: '../scripts/inferGradient-CrossProd.py'
 
 
