@@ -163,18 +163,19 @@ rule laplace_dentate_io:
 rule create_dentate_pd:
     input:
         lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
-        lbl_gm = lambda wildcards: config['laplace_labels']['DG_IO']['gm'],
         APcoords = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        IOcoords = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+    params:
+        lbl_gm = lambda wildcards: config['laplace_labels']['DG_IO']['gm'],
         APsrc_labels = lambda wildcards: config['laplace_labels'][AP]['src'],
         APsink_labels = lambda wildcards: config['laplace_labels'][AP]['sink'],
-        IOcoords = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         IOsrc_labels = lambda wildcards: config['laplace_labels'][IO]['src'],
         IOsink_labels = lambda wildcards: config['laplace_labels'][IO]['sink'],
     output:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     group: 'subj'
     log: bids(root='logs',**config['subj_wildcards'],dir='PD',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplaceDG.txt')
-    shell: '../scripts/inferGradient-CrossProd.py'
+    script: '../scripts/inferGradient_CrossProd.py'
 
 
   

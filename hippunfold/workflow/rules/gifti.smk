@@ -52,10 +52,6 @@ rule calc_unfold_template_coords:
         "wb_command -metric-merge {output.coords_gii}  -metric {params.coord_AP} -metric {params.coord_PD} -metric {params.coord_IO} && "
         "wb_command -set-structure {output.coords_gii} {params.structure_type}"
 
-       
-        
-   
-
     
 
 #subj unfolded surf might have a few vertices outside the bounding box.. this constrains all the vertices to the warp bounding box
@@ -67,6 +63,8 @@ rule constrain_surf_to_bbox:
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii',desc='constrainbbox', space='unfolded',hemi='{hemi}', label='{autotop}',**config['subj_wildcards'])
     group: 'subj'
     script: '../scripts/constrain_surf_to_bbox.py'
+
+
 
 #warp from subj unfolded to corobl
 rule warp_gii_unfold2native: 
@@ -93,7 +91,7 @@ rule correct_nan_vertices:
     input: 
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', desc='nonancorrect', space='corobl',hemi='{hemi}', label='{autotop}',**config['subj_wildcards'])
     output:
-        gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi,R|Lflip}',label='{autotop}', **config['subj_wildcards'])
+        gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', space='corobl',hemi='{hemi,R|Lflip}',label='{autotop,autotopHipp|autotopDG}', **config['subj_wildcards'])
     group: 'subj'
     script: '../scripts/fillnanvertices.py'
 
