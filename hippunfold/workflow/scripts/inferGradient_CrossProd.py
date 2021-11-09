@@ -16,20 +16,20 @@ logfile = open(snakemake.log[0], 'w')
 #IO_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_dir-IO_hemi-R_space-corobl_desc-dentate_coords.nii.gz')
 #IO = IO_nib.get_fdata()
 #IOsrc = [1]
-#IOsnk = [2, 7]
+#IOsnk = [2, 4, 7]
 
 # real inputs
 lbl_nib = nib.load(snakemake.input.lbl)
 lbl = lbl_nib.get_fdata()
-gmlbl = snakemake.input.lblgm
+gmlbl = snakemake.params.lblgm
 AP_nib = nib.load(snakemake.input.APcoords)
 AP = AP_nib.get_fdata()
-APsrc = snakemake.input.APsrc_labels
-APsnk = snakemake.input.APsink_labels
+APsrc = snakemake.params.APsrc_labels
+APsnk = snakemake.params.APsink_labels
 IO_nib = nib.load(snakemake.input.IOcoords)
 IO = IO_nib.get_fdata()
-IOsrc = snakemake.input.IOsrc_labels
-IOsnk = snakemake.input.IOsink_labels
+IOsrc = snakemake.params.IOsrc_labels
+IOsnk = snakemake.params.IOsink_labels
 
 print(f'data loaded', file=logfile, flush=True)
 
