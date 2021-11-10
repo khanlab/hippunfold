@@ -166,11 +166,11 @@ rule create_dentate_pd:
         APcoords = bids(root='work',datatype='seg_{modality}',dir='AP',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         IOcoords = bids(root='work',datatype='seg_{modality}',dir='IO',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     params:
-        lbl_gm = lambda wildcards: config['laplace_labels']['DG_IO']['gm'],
-        APsrc_labels = lambda wildcards: config['laplace_labels'][AP]['src'],
-        APsink_labels = lambda wildcards: config['laplace_labels'][AP]['sink'],
-        IOsrc_labels = lambda wildcards: config['laplace_labels'][IO]['src'],
-        IOsink_labels = lambda wildcards: config['laplace_labels'][IO]['sink'],
+        gm_labels = lambda wildcards: config['laplace_labels']['DG_IO']['gm'],
+        APsrc_labels = lambda wildcards: config['laplace_labels']['AP']['src'],
+        APsink_labels = lambda wildcards: config['laplace_labels']['AP']['sink'],
+        IOsrc_labels = lambda wildcards: config['laplace_labels']['IO']['src'],
+        IOsink_labels = lambda wildcards: config['laplace_labels']['IO']['sink'],
     output:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     group: 'subj'
