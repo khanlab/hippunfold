@@ -21,7 +21,7 @@ logfile = open(snakemake.log[0], 'w')
 # real inputs
 lbl_nib = nib.load(snakemake.input.lbl)
 lbl = lbl_nib.get_fdata()
-gmlbl = snakemake.params.lblgm
+gmlbl = snakemake.params.gm_labels
 AP_nib = nib.load(snakemake.input.APcoords)
 AP = AP_nib.get_fdata()
 APsrc = snakemake.params.APsrc_labels
@@ -116,7 +116,7 @@ nslices = 20
 out_norm = np.zeros(intPD.shape)
 ap = np.linspace(0,1,nslices)
 for i in range(len(ap-1)):
-    sl = np.logical_and(AP<ap[i-1], AP>ap[i])
+    sl = np.logical_and(AP>ap[i-1], AP<ap[i])
     slice = np.logical_and(sl, idxgm)
     if np.sum(slice) > 10:
         s = out_smooth[slice]
