@@ -5,37 +5,35 @@ from scipy.interpolate import NearestNDInterpolator
 import skfmm
 #logfile = open(snakemake.log[0], 'w')
 
-# This script will get approximate Laplace_PD within the DG by fast marching edge-to-edge within small AP slices. Start in the middle of the hippocmapus and then NN copy to next slice and rerun fast marching both directions (to ensure the march goes in the same direction between slices!). Note that this requires endpoints to be most distant from eachother in each slice, as in a 'U' shape, but this isn't always the case if there is more of a 'V' shape!
+# This script will get approximate Laplace_PD within the DG by fast marching edge-to-edge within small AP slices. Most distant voxels are used as endpoints. Start in the middle of the hippocmapus and then NN copy to next slice and rerun fast marching both directions (to ensure the march goes in the same direction between slices!). Note that this requires endpoints to be most distant from eachother in each slice, as in a 'U' shape, but this isn't always the case if there is more of a 'V' shape!
 
 # test inputs
-lbl_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_hemi-R_space-corobl_desc-postproc_dseg.nii.gz')
-lbl = lbl_nib.get_fdata()
-gmlbl = [8]
-AP_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_dir-AP_hemi-R_space-corobl_desc-laplace_coords.nii.gz')
-AP = AP_nib.get_fdata()
+#lbl_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_hemi-R_space-corobl_desc-postproc_dseg.nii.gz')
+#lbl = lbl_nib.get_fdata()
+#gmlbl = [8]
+#AP_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_dir-AP_hemi-R_space-corobl_desc-laplace_coords.nii.gz')
+#AP = AP_nib.get_fdata()
 
 # real inputs
-#lbl_nib = nib.load(snakemake.input.lbl)
-#lbl = lbl_nib.get_fdata()
-#gmlbl = snakemake.params.lblgm
-#AP_nib = nib.load(snakemake.input.APcoords)
-#AP = AP_nib.get_fdata()
-#APsrc = snakemake.params.APsrc_labels
-#APsnk = snakemake.params.APsink_labels
+lbl_nib = nib.load(snakemake.input.lbl)
+lbl = lbl_nib.get_fdata()
+gmlbl = snakemake.params.gm_labels
+AP_nib = nib.load(snakemake.input.APcoords)
+AP = AP_nib.get_fdata()
 
 # params
-nslices = 30
-smooth_iters = 5
+nslices = snakemake.params.nslices # 30 seems to work well for standard iamges
+smooth_iters = snakemake.params.smooth_iters # still testing. 5 seems fine.
 ap = np.linspace(0,1,nslices)
 speed = np.zeros_like(lbl) + 0.01 # allow slow travel outside DG
-speed[lbl==8] = 1
+speed[lbl==gmlbl] = 1
 PD = np.zeros_like(AP)
 PD[:] = np.nan
 
 # start with middle AP slice
 i = nslices//2
 sl = np.logical_and(AP>ap[i-1], AP<ap[i])
-APslice_mid = np.logical_and(sl,lbl==8)
+APslice_mid = np.logical_and(sl,lbl==gmlbl)
 [x,y,z] = np.where(APslice_mid)
 med = np.median(x) # sagittally the middle
 # march outward (both laterally and medially)
@@ -59,7 +57,7 @@ print('fastmarch for middle AP slice done')
 APslice_prev = APslice_mid
 for ii in range(i-1,0,-1):
     sl = np.logical_and(AP>ap[ii-1], AP<ap[ii])
-    APslice = np.logical_and(sl,lbl==8)
+    APslice = np.logical_and(sl,lblgmlbl)
     if np.sum(APslice) > 0:
         # interpolate this slice
         [x,y,z] = np.where(APslice_prev)
@@ -87,7 +85,7 @@ for ii in range(i-1,0,-1):
 APslice_prev = APslice_mid
 for ii in range(i+1,nslices,1):
     sl = np.logical_and(AP>ap[ii-1], AP<ap[ii])
-    APslice = np.logical_and(sl,lbl==8)
+    APslice = np.logical_and(sl,lblgmlbl)
     if np.sum(APslice) > 0:
         # interpolate this slice
         [x,y,z] = np.where(APslice_prev)
@@ -123,6 +121,6 @@ for n in range(smooth_iters):
     PD_smooth = nan_convolve(PD_smooth,hl,preserve_nan=True)
 
 sv = nib.Nifti1Image(PD_smooth,AP_nib.affine,AP_nib.header)
-nib.save(sv,'test')
+nib.save(sv,snakemake.output.coords_pd)
 
 
