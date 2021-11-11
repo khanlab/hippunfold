@@ -3,6 +3,8 @@ import nibabel as nib
 from astropy.convolution import convolve as nan_convolve
 from scipy.interpolate import NearestNDInterpolator
 import skfmm
+
+
 logfile = open(snakemake.log[0], 'w')
 
 # This script will get approximate Laplace_PD within the DG by fast marching edge-to-edge within small AP slices. Most distant voxels are used as endpoints. Start in the middle of the hippocmapus and then NN copy to next slice and rerun fast marching both directions (to ensure the march goes in the same direction between slices!). Note that this requires endpoints to be most distant from eachother in each slice, as in a 'U' shape, but this isn't always the case if there is more of a 'V' shape!
@@ -77,9 +79,9 @@ for ii in range(i-1,0,-1):
         phi[x[v], y[v], z[v]] = 0
         forward = skfmm.travel_time(phi,speed)
         PD[APslice] = forward[APslice]/np.max(forward[APslice])
-        print('fastmarch for AP slice ' + str(ii) + ' done', file=logfile, flush=True)
+        print('fastmarch for AP slice {ii} done', file=logfile, flush=True)
     else:
-        print('skipping AP slice ' + str(ii) + ' not enough voxels', file=logfile, flush=True)
+        print('skipping AP slice {ii} not enough voxels', file=logfile, flush=True)
     APslice_prev = APslice
 
 # move to new slices (towards posterior)
@@ -105,9 +107,9 @@ for ii in range(i+1,nslices,1):
         phi[x[v], y[v], z[v]] = 0
         forward = skfmm.travel_time(phi,speed)
         PD[APslice] = forward[APslice]/np.max(forward[APslice])
-        print('fastmarch for AP slice ' + str(ii) + ' done')
+        print(f'fastmarch for AP slice {ii} done', file=logfile, flush=True)
     else:
-        print('skipping AP slice ' + str(ii) + ' not enough voxels'), file=logfile, flush=True
+        print(f'skipping AP slice {ii} not enough voxels', file=logfile, flush=True)
     APslice_prev = APslice
 
 # smooth to clean up space between slices
@@ -125,5 +127,6 @@ print(f'smoothing done', file=logfile, flush=True)
 
 sv = nib.Nifti1Image(PD_smooth,AP_nib.affine,AP_nib.header)
 nib.save(sv,snakemake.output.coords_pd)
+logfile.close()
 
 
