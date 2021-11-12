@@ -10,10 +10,10 @@ logfile = open(snakemake.log[0], 'w')
 # This script will get approximate Laplace_PD within the DG by fast marching edge-to-edge within small AP slices. Most distant voxels are used as endpoints. Start in the middle of the hippocmapus and then NN copy to next slice and rerun fast marching both directions (to ensure the march goes in the same direction between slices!). Note that this requires endpoints to be most distant from eachother in each slice, as in a 'U' shape, but this isn't always the case if there is more of a 'V' shape!
 
 # test inputs
-#lbl_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_hemi-R_space-corobl_desc-postproc_dseg.nii.gz')
+#lbl_nib = nib.load('test_T1w_dentate-noCA4_inferPD-march2/work/sub-01/seg_T1w/sub-01_hemi-Lflip_space-corobl_desc-postproc_dseg.nii.gz')
 #lbl = lbl_nib.get_fdata()
 #gmlbl = [8]
-#AP_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_dir-AP_hemi-R_space-corobl_desc-laplace_coords.nii.gz')
+#AP_nib = nib.load('test_T1w_dentate-noCA4_inferPD-march2/work/sub-01/seg_T1w/sub-01_dir-AP_hemi-Lflip_space-corobl_desc-laplace_coords.nii.gz')
 #AP = AP_nib.get_fdata()
 
 # real inputs
@@ -60,8 +60,8 @@ print(f'fastmarch for middle AP slice done', file=logfile, flush=True)
 APslice_prev = APslice_mid
 for ii in range(i-1,0,-1):
     sl = np.logical_and(AP>ap[ii-1], AP<ap[ii])
-    APslice = np.logical_and(sl,lblgmlbl)
-    if np.sum(APslice) > 0:
+    APslice = np.logical_and(sl,lbl==gmlbl)
+    if np.sum(APslice) > 1:
         # interpolate this slice
         [x,y,z] = np.where(APslice_prev)
         interp = NearestNDInterpolator(np.c_[x,y,z],PD[APslice_prev])
@@ -78,18 +78,23 @@ for ii in range(i-1,0,-1):
         phi = np.ones_like(lbl)
         phi[x[v], y[v], z[v]] = 0
         forward = skfmm.travel_time(phi,speed)
-        PD[APslice] = forward[APslice]/np.max(forward[APslice])
+        m = np.max(forward[APslice]) # this can be 0 if all voxels are source
+        if m==0:
+            PD[APslice] = interp(x,y,z)
+        else:
+            PD[APslice] = forward[APslice]/m
+
+        APslice_prev = APslice
         print('fastmarch for AP slice {ii} done', file=logfile, flush=True)
     else:
         print('skipping AP slice {ii} not enough voxels', file=logfile, flush=True)
-    APslice_prev = APslice
 
 # move to new slices (towards posterior)
 APslice_prev = APslice_mid
 for ii in range(i+1,nslices,1):
     sl = np.logical_and(AP>ap[ii-1], AP<ap[ii])
-    APslice = np.logical_and(sl,lblgmlbl)
-    if np.sum(APslice) > 0:
+    APslice = np.logical_and(sl,lbl==gmlbl)
+    if np.sum(APslice) > 1:
         # interpolate this slice
         [x,y,z] = np.where(APslice_prev)
         interp = NearestNDInterpolator(np.c_[x,y,z],PD[APslice_prev])
@@ -106,11 +111,17 @@ for ii in range(i+1,nslices,1):
         phi = np.ones_like(lbl)
         phi[x[v], y[v], z[v]] = 0
         forward = skfmm.travel_time(phi,speed)
-        PD[APslice] = forward[APslice]/np.max(forward[APslice])
+        m = np.max(forward[APslice]) # this can be 0 if all voxels are source
+        if m==0:
+            PD[APslice] = interp(x,y,z)
+        else:
+            PD[APslice] = forward[APslice]/m
+
+        APslice_prev = APslice
         print(f'fastmarch for AP slice {ii} done', file=logfile, flush=True)
     else:
         print(f'skipping AP slice {ii} not enough voxels', file=logfile, flush=True)
-    APslice_prev = APslice
+
 
 # smooth to clean up space between slices
 hl=np.zeros([3,3,3])
