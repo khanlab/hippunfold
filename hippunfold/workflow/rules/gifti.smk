@@ -32,8 +32,8 @@ rule calc_unfold_template_coords:
         coord_AP = 'coord-AP.shape.gii',
         coord_PD = 'coord-PD.shape.gii',
         coord_IO = 'coord-IO.shape.gii',
-        origin = config['unfold_vol_ref']['origin'],
-        extent = config['unfold_vol_ref']['extent'],
+        origin = lambda wildcards: config['unfold_vol_ref']['{autotop}']['origin'],
+        extent = lambda wildcards: config['unfold_vol_ref']['{autotop}']['extent'],
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
     output:
         coords_gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='coords.shape.gii', space='{space}',hemi='{hemi}',label='{autotop}', **config['subj_wildcards']),
@@ -58,7 +58,7 @@ rule calc_unfold_template_coords:
 rule constrain_surf_to_bbox:
     input:
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi}', label='{autotop}',**config['subj_wildcards']),
-        ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        ref_nii = bids(root='work',space='unfold',suffix='refvol-{autotop}.nii.gz',**config['subj_wildcards']),
     output:
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii',desc='constrainbbox', space='unfolded',hemi='{hemi}', label='{autotop}',**config['subj_wildcards'])
     group: 'subj'
