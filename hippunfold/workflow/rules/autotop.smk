@@ -168,7 +168,7 @@ rule create_dentate_pd:
     params:
         gm_labels = lambda wildcards: config['laplace_labels']['DG_IO']['gm'],
         nslices = 30,
-        smooth_iters = 5,
+        smooth_iters = 10,
     output:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     group: 'subj'
