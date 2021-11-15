@@ -63,49 +63,62 @@ APslice_prev = APslice_mid
 for ii in range(i-1,0,-1):
     sl = np.logical_and(AP>ap[ii-1], AP<ap[ii])
     APslice = np.logical_and(sl,lbl==gmlbl)
-    # interpolate this slice
-    [x,y,z] = np.where(APslice_prev)
-    interp = NearestNDInterpolator(np.c_[x,y,z],PD[APslice_prev])
-    [x,y,z] = np.where(APslice)
-    out = np.zeros_like(lbl)
-    out[:] = np.nan
-    out[x,y,z] = interp(x,y,z)
-    # smooth
-    for n in range(smooth_iters):
-        out = nan_convolve(out,hl,preserve_nan=True)
+    if np.sum(APslice) > 0:
+        # interpolate this slice
+        [x,y,z] = np.where(APslice_prev)
+        interp = NearestNDInterpolator(np.c_[x,y,z],PD[APslice_prev])
+        [x,y,z] = np.where(APslice)
+        out = np.zeros_like(lbl)
+        out[:] = np.nan
+        out[x,y,z] = interp(x,y,z)
+        # smooth
+        for n in range(smooth_iters):
+            out = nan_convolve(out,hl,preserve_nan=True)
 
-    # rescale
-    out = out-np.min(out)
-    out = out/np.max(out)
-    # keep
-    PD[APslice] = out[APslice]
-    APslice_prev = APslice
-    print(f'fastmarch for AP slice {ii} done', file=logfile, flush=True)
+        # rescale
+        out = out-np.min(out)
+        m = np.max(out[APslice]) # this can be 0 if all voxels are source
+        if m==0:
+            PD[APslice] = out[APslice]
+        else:
+            PD[APslice] = out[APslice]/m
+        # keep
+        PD[APslice] = out[APslice]
+        APslice_prev = APslice
+        print(f'fastmarch for AP slice {ii} done', file=logfile, flush=True)
+    else:
+        print(f'skipping AP slice {ii} not enough voxels', file=logfile, flush=True)
 
 # move to new slices (towards posterior)
 APslice_prev = APslice_mid
 for ii in range(i+1,nslices,1):
     sl = np.logical_and(AP>ap[ii-1], AP<ap[ii])
     APslice = np.logical_and(sl,lbl==gmlbl)
-    # interpolate this slice
-    [x,y,z] = np.where(APslice_prev)
-    interp = NearestNDInterpolator(np.c_[x,y,z],PD[APslice_prev])
-    [x,y,z] = np.where(APslice)
-    out = np.zeros_like(lbl)
-    out[:] = np.nan
-    out[x,y,z] = interp(x,y,z)
-    # smooth
-    for n in range(smooth_iters):
-        out = nan_convolve(out,hl,preserve_nan=True)
+    if np.sum(APslice) > 0:
+        # interpolate this slice
+        [x,y,z] = np.where(APslice_prev)
+        interp = NearestNDInterpolator(np.c_[x,y,z],PD[APslice_prev])
+        [x,y,z] = np.where(APslice)
+        out = np.zeros_like(lbl)
+        out[:] = np.nan
+        out[x,y,z] = interp(x,y,z)
+        # smooth
+        for n in range(smooth_iters):
+            out = nan_convolve(out,hl,preserve_nan=True)
 
-    # rescale
-    out = out-np.min(out)
-    out = out/np.max(out)
-    # keep
-    PD[APslice] = out[APslice]
-    APslice_prev = APslice
-    print(f'fastmarch for AP slice {ii} done', file=logfile, flush=True)
-
+        # rescale
+        out = out-np.min(out)
+        m = np.max(out[APslice]) # this can be 0 if all voxels are source
+        if m==0:
+            PD[APslice] = out[APslice]
+        else:
+            PD[APslice] = out[APslice]/m
+        # keep
+        PD[APslice] = out[APslice]
+        APslice_prev = APslice
+        print(f'fastmarch for AP slice {ii} done', file=logfile, flush=True)
+    else:
+        print(f'skipping AP slice {ii} not enough voxels', file=logfile, flush=True)
 
 # smooth to clean up space between slices
 PD_smooth = PD
