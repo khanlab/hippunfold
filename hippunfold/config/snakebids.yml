@@ -293,23 +293,42 @@ hippdwi_opts:
   bbox_y: '198 453'
 
 unfold_vol_ref:
-  dims:
-    - '256'
-    - '128'
-    - '16'
-  voxdims:
-    - '0.15625'
-    - '0.15625'
-    - '0.15625'
-  origin:
-    - '0'
-    - '200'
-    - '0'
-  extent:
-    - '40'
-    - '20'
-    - '2.5'
-  orient: RPI
+   autotopHipp:
+      dims:
+        - '256'
+        - '128'
+        - '16'
+      voxdims:
+        - '0.15625'
+        - '0.15625'
+        - '0.15625'
+      origin:
+        - '0'
+        - '200'
+        - '0'
+      extent:
+        - '40'
+        - '20'
+        - '2.5'
+      orient: RPI
+   autotopDG:
+      dims:
+        - '256'
+        - '32'
+        - '16'
+      voxdims:
+        - '0.15625'
+        - '0.15625'
+        - '0.15625'
+      origin:
+        - '0'
+        - '200'
+        - '0'
+      extent:
+        - '40'
+        - '5'
+        - '2.5'
+      orient: RPI
 
 #space for uniform unfolded grid 
 unfold_mesh_ref:
