@@ -40,7 +40,7 @@ APslice_mid = np.logical_and(sl,lbl==gmlbl)
 [x,y,z] = np.where(APslice_mid)
 med = np.median(x) # sagittally the middle
 # march outward (both laterally and medially)
-v = np.where(x==med)[0]
+v = np.where(x==med.astype('int'))[0]
 phi = np.ones_like(lbl)
 phi[x[v], y[v], z[v]] = 0
 forward = skfmm.travel_time(phi,speed)
