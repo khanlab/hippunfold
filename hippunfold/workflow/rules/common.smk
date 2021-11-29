@@ -132,17 +132,18 @@ def get_final_qc():
     qc = []
     #right now can only do qc from cropT1w space 
     if 'cropT1w' in config['output_spaces']:
-        qc.extend(
-            expand(
-                bids(
-                        root='results',
-                        datatype='qc',
-                        suffix='regqc.png',
-                        from_='subject', 
-                        to=config['template'],
-                        **config['subj_wildcards']),
-                    allow_missing=True)
-            )
+
+    #    qc.extend(
+    #        expand(
+    #            bids(
+    #                    root='results',
+    #                    datatype='qc',
+    #                    suffix='regqc.png',
+    #                    from_='subject', 
+    #                    to=config['template'],
+    #                    **config['subj_wildcards']),
+    #                allow_missing=True)
+    #        )
 
         qc.extend(
             expand(
@@ -152,12 +153,10 @@ def get_final_qc():
                         suffix='dseg.png',
                         desc='subfields',
                         from_='{modality}',
-                        slice_='{slice}',
                         space='cropT1w',
                         hemi='{hemi}',
                         **config['subj_wildcards']),
                     hemi=config['hemi'],
-                    slice=['1','2','3'],
                     allow_missing=True)
             )
 #        qc.extend(
