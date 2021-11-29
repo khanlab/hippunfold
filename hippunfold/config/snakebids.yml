@@ -193,8 +193,7 @@ parse_args:
     choices:
       - 'CITI168'
       - 'dHCP'
-    default:
-      - 'CITI168'
+    default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique. (default: %(default)s)'
 
 
