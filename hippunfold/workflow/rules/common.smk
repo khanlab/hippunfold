@@ -152,12 +152,10 @@ def get_final_qc():
                         suffix='dseg.png',
                         desc='subfields',
                         from_='{modality}',
-                        slice_='{slice}',
                         space='cropT1w',
                         hemi='{hemi}',
                         **config['subj_wildcards']),
                     hemi=config['hemi'],
-                    slice=['1','2','3'],
                     allow_missing=True)
             )
 #        qc.extend(
