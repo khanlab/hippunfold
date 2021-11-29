@@ -19,10 +19,9 @@
    </DataArray>
    <DataArray  ArrayIndexingOrder="ColumnMajorOrder"
                DataType="NIFTI_TYPE_FLOAT32"
-               Dim0="254"
-               Dim1="30"
-               Dim2="3"
-               Dimensionality="3"
+               Dim0="7620"
+               Dim1="3"
+               Dimensionality="2"
                Encoding="GZipBase64Binary"
                Endian="LittleEndian"
                ExternalFileName=""
