@@ -5,3 +5,4 @@ T1T2w: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103
 b1000: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task104_hcp1200_b1000.nnUNetTrainerV2.model_best.tar'
 trimodal: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task105_hcp1200_trimodal.nnUNetTrainerV2.model_best.tar'
 hippb500: 'https://www.dropbox.com/s/y827qqkuj1ey1jb/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
+neonateT1w: 'https://zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar

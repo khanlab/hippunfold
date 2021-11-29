@@ -310,7 +310,7 @@ nnunet_model:
   b1000: trained_model.3d_fullres.Task104_hcp1200_b1000.nnUNetTrainerV2.model_best.tar
   trimodal: trained_model.3d_fullres.Task105_hcp1200_trimodal.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
-  neonateT1w: trained_model.3d_fullres.Task205_neonate_dhcp_T1w.nnUNetTrainerV2.model_best.tar  
+  neonateT1w: trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
 
 #niftynet models -- this will be deprecated soon:
 cnn_model:
