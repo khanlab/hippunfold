@@ -40,7 +40,7 @@ i = nslices//2
 sl = np.logical_and(AP>ap[i-1], AP<ap[i])
 APslice_mid = np.logical_and(sl,lbl==gmlbl)
 [x,y,z] = np.where(APslice_mid)
-med = np.median(x) # sagittally the middle
+med = np.median(x).astype('int') # sagittally the middle
 # march outward (both laterally and medially)
 v = np.where(x==med)[0]
 phi = np.ones_like(lbl)
@@ -120,8 +120,13 @@ for ii in range(i+1,nslices,1):
     else:
         print(f'skipping AP slice {ii} not enough voxels', file=logfile, flush=True)
 
+# remove any remaining NaNS
+PDnonan = np.zeros_like(PD)
+PDnonan[lbl==gmlbl] = PD[lbl==gmlbl]
+PDnonan = np.nan_to_num(PDnonan)
+
 # smooth to clean up space between slices
-PD_smooth = PD
+PD_smooth = PDnonan
 for n in range(smooth_iters):
     PD_smooth = nan_convolve(PD_smooth,hl,preserve_nan=True)
 

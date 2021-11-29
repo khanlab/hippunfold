@@ -174,7 +174,7 @@ rule create_dentate_pd:
         coords_pd = bids(root='work',datatype='seg_{modality}',dir='PD',suffix='coords.nii.gz',desc='dentate',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
     group: 'subj'
     log: bids(root='logs',**config['subj_wildcards'],dir='PD',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='laplaceDG.txt')
-    script: '../scripts/inferLaplacePD_DG.py'
+    script: '../scripts/inferLaplacePD_DG-smoothrescale.py'
 
 
   
