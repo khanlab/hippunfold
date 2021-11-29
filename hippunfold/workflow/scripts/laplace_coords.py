@@ -102,11 +102,13 @@ for i in range(max_iters):
    
     coords = upd_coords
 
-coords[idxgm==0] = np.nan #setting outside GM to nan -- this was zero before.. 
-
+# remove any remaining NaNS
+coordsnonan = np.zeros_like(coords)
+coordsnonan[idxgm==1] = coords[idxgm==1]
+coordsnonan = np.nan_to_num(coordsnonan)
 
 #save file
-coords_nib = nib.Nifti1Image(coords,lbl_nib.affine,lbl_nib.header)
+coords_nib = nib.Nifti1Image(coordsnonan,lbl_nib.affine,lbl_nib.header)
 nib.save(coords_nib,snakemake.output.coords)
 
 logfile.close()
