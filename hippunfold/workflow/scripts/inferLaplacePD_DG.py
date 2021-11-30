@@ -130,18 +130,18 @@ hl[:,1,:] = 1
 hl[:,:,1] = 1
 hl[1,1,1] = 0
 hl = hl/np.sum(hl)
-PD_smooth = PDnonan
+PD_smooth = PD
 for n in range(smooth_iters):
     PD_smooth = nan_convolve(PD_smooth,hl,preserve_nan=True)
 
 print(f'smoothing done', file=logfile, flush=True)
 
 # remove any remaining NaNS
-PDnonan = np.zeros_like(PD)
-PDnonan[lbl==gmlbl] = PD[lbl==gmlbl]
+PDnonan = np.zeros_like(PD_smooth)
+PDnonan[lbl==gmlbl] = PD_smooth[lbl==gmlbl]
 PDnonan = np.nan_to_num(PDnonan)
 
-sv = nib.Nifti1Image(PD_smooth,AP_nib.affine,AP_nib.header)
+sv = nib.Nifti1Image(PDnonan,AP_nib.affine,AP_nib.header)
 nib.save(sv,snakemake.output.coords_pd)
 logfile.close()
 
