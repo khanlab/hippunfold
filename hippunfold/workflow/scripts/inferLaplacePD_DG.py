@@ -122,10 +122,6 @@ for ii in range(i+1,nslices,1):
     else:
         print(f'skipping AP slice {ii} not enough voxels', file=logfile, flush=True)
 
-# remove any remaining NaNS
-PDnonan = np.zeros_like(PD)
-PDnonan[lbl==gmlbl] = PD[lbl==gmlbl]
-PDnonan = np.nan_to_num(PDnonan)
 
 # smooth to clean up space between slices
 hl=np.zeros([3,3,3])
@@ -139,6 +135,11 @@ for n in range(smooth_iters):
     PD_smooth = nan_convolve(PD_smooth,hl,preserve_nan=True)
 
 print(f'smoothing done', file=logfile, flush=True)
+
+# remove any remaining NaNS
+PDnonan = np.zeros_like(PD)
+PDnonan[lbl==gmlbl] = PD[lbl==gmlbl]
+PDnonan = np.nan_to_num(PDnonan)
 
 sv = nib.Nifti1Image(PD_smooth,AP_nib.affine,AP_nib.header)
 nib.save(sv,snakemake.output.coords_pd)
