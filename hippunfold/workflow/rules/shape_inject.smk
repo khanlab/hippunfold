@@ -44,7 +44,9 @@ def get_image_pairs(wildcards, input):
 
 
     args = []
-    for label in config['shape_inject']['labels_reg']:
+    #prep_segs_for_greedy creates label_{i} images for each entry in labels_reg, 
+    # but the numbering will be from 1 to N (not the numbers in the list)
+    for label in range(1,len(config['shape_inject']['labels_reg'])+1): 
         subject_label = f'{input.subject_seg}/label_{label:02d}.nii.gz'
         template_label = f'{input.template_seg}/label_{label:02d}.nii.gz'
 
