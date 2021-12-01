@@ -132,9 +132,7 @@ rule qc_subfield:
     group: 'subj'
     script: '../scripts/vis_qc_dseg.py'
 
-    	
-print(bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii',density='{density}',space='T1w',hemi='{hemi}', **config['subj_wildcards']))
-print(bids(root='results',datatype='surf_{modality}',den='{density}',suffix='midthickness.surf.gii', space='{space}',hemi='{hemi}', **config['subj_wildcards']))
+  
 rule qc_subfield_surf:
     input:
     	surf = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii',den='{density}',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
