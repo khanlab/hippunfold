@@ -390,6 +390,7 @@ laplace_labels:
     sink:
      - 2
      - 7
+     - 0
 
 
 autotop_labels:

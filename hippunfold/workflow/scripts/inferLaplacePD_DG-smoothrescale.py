@@ -3,17 +3,17 @@ import nibabel as nib
 from astropy.convolution import convolve as nan_convolve
 from scipy.interpolate import NearestNDInterpolator
 import skfmm
-
+from scipy.ndimage.morphology import binary_dilation
 
 logfile = open(snakemake.log[0], 'w')
 
 # This script will get approximate Laplace_PD within the DG by fast marching edge-to-edge within small AP slices. Most distant voxels are used as endpoints. Start in the middle of the hippocmapus and then NN copy to next slice and rerun fast marching both directions (to ensure the march goes in the same direction between slices!). Note that this requires endpoints to be most distant from eachother in each slice, as in a 'U' shape, but this isn't always the case if there is more of a 'V' shape!
 
 # test inputs
-#lbl_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_hemi-Lflip_space-corobl_desc-postproc_dseg.nii.gz')
+#lbl_nib = nib.load('test_hippunfold_dentate3/work/sub-100307/seg_T2w/sub-100307_hemi-Lflip_space-corobl_desc-postproc_dseg.nii.gz')
 #lbl = lbl_nib.get_fdata()
 #gmlbl = [8]
-#AP_nib = nib.load('test_T1w_dentate-noCA4/work/work/sub-01/seg_T1w/sub-01_dir-AP_hemi-Lflip_space-corobl_desc-laplace_coords.nii.gz')
+#AP_nib = nib.load('test_hippunfold_dentate3/work/sub-100307/seg_T2w/sub-100307_dir-AP_hemi-Lflip_space-corobl_desc-laplace_coords.nii.gz')
 #AP = AP_nib.get_fdata()
 
 # real inputs
@@ -34,6 +34,11 @@ PD = np.zeros_like(AP)
 PD[:] = np.nan
 hl=np.ones([3,3,3])
 hl = hl/np.sum(hl)
+
+# first dilate DG to hopefully avoid errors caused by missing voxels!
+origdomain = np.zeros_like(lbl)
+origdomain[lbl==gmlbl] = 1
+lbl[binary_dilation(lbl==gmlbl,hl)] = gmlbl
 
 # start with middle AP slice
 i = nslices//2
@@ -74,16 +79,13 @@ for ii in range(i-1,0,-1):
         # smooth
         for n in range(smooth_iters):
             out = nan_convolve(out,hl,preserve_nan=True)
-
         # rescale
-        out = out-np.min(out)
-        m = np.max(out[APslice]) # this can be 0 if all voxels are source
+        out = out-np.nanmin(out)
+        m = np.nanmax(out) # this can be 0 if all voxels are source
         if m==0:
             PD[APslice] = out[APslice]
         else:
             PD[APslice] = out[APslice]/m
-        # keep
-        PD[APslice] = out[APslice]
         APslice_prev = APslice
         print(f'fastmarch for AP slice {ii} done', file=logfile, flush=True)
     else:
@@ -105,16 +107,13 @@ for ii in range(i+1,nslices,1):
         # smooth
         for n in range(smooth_iters):
             out = nan_convolve(out,hl,preserve_nan=True)
-
         # rescale
-        out = out-np.min(out)
-        m = np.max(out[APslice]) # this can be 0 if all voxels are source
+        out = out-np.nanmin(out)
+        m = np.nanmax(out) # this can be 0 if all voxels are source
         if m==0:
             PD[APslice] = out[APslice]
         else:
             PD[APslice] = out[APslice]/m
-        # keep
-        PD[APslice] = out[APslice]
         APslice_prev = APslice
         print(f'fastmarch for AP slice {ii} done', file=logfile, flush=True)
     else:
@@ -133,7 +132,11 @@ PDnonan = np.zeros_like(PD_smooth)
 PDnonan[lbl==gmlbl] = PD_smooth[lbl==gmlbl]
 PDnonan = np.nan_to_num(PDnonan)
 
-sv = nib.Nifti1Image(PDnonan,AP_nib.affine,AP_nib.header)
+# remove initial dilation
+PDout = np.zeros_like(PDnonan)
+PDout[origdomain==1] = PDnonan[origdomain==1]
+
+sv = nib.Nifti1Image(PDout,AP_nib.affine,AP_nib.header)
 nib.save(sv,snakemake.output.coords_pd)
 logfile.close()
 
