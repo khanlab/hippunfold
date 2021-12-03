@@ -28,6 +28,11 @@ flake8 = "^4.0.1"
 pytest-console-scripts = "^1.2.1"
 pytest = "^6.2.5"
 
+
+[tool.poetry.scripts]
+hippunfold = "hippunfold.run:main"
+
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
