@@ -24,6 +24,7 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 python-dateutil = ">=2.7.0"
+typing-extensions = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "astor"
@@ -35,24 +36,21 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 
 [[package]]
 name = "astropy"
-version = "5.0"
+version = "4.3.1"
 description = "Astronomy and astrophysics core library"
 category = "main"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.7"
 
 [package.dependencies]
-numpy = ">=1.18"
-packaging = ">=19.0"
-pyerfa = ">=2.0"
-PyYAML = ">=3.13"
+importlib-metadata = {version = "*", markers = "python_version == \"3.7\""}
+numpy = ">=1.17"
+pyerfa = ">=1.7.3"
 
 [package.extras]
-all = ["scipy (>=1.3)", "matplotlib (>=3.1,!=3.4.0)", "certifi", "dask", "h5py", "pyarrow (>=5.0.0)", "beautifulsoup4", "html5lib", "bleach", "pandas", "sortedcontainers", "pytz", "jplephem", "mpmath", "asdf (>=2.6)", "bottleneck", "ipython (>=4.2)", "pytest", "typing-extensions"]
-docs = ["sphinx (<4)", "sphinx-astropy (>=1.6)", "pytest", "scipy (>=1.3)", "matplotlib (>=3.1,!=3.4.0)", "sphinx-changelog (>=1.1.0)"]
-recommended = ["scipy (>=1.3)", "matplotlib (>=3.1,!=3.4.0)"]
-test = ["pytest-astropy (>=0.9)", "pytest-xdist"]
-test_all = ["pytest-astropy (>=0.9)", "pytest-xdist", "objgraph", "ipython (>=4.2)", "coverage", "skyfield (>=1.20)", "sgp4 (>=2.3)"]
+all = ["scipy (>=1.1)", "certifi", "dask", "h5py", "beautifulsoup4", "html5lib", "bleach", "PyYAML (>=3.13)", "pandas", "sortedcontainers", "pytz", "jplephem", "matplotlib (>=3.0,!=3.4.0)", "mpmath", "asdf (>=2.6)", "bottleneck", "ipython (>=4.2)", "pytest"]
+docs = ["sphinx (<4)", "sphinx-astropy (>=1.3)", "pytest", "PyYAML (>=3.13)", "scipy (>=1.1)", "matplotlib (>=3.1,!=3.4.0)", "sphinx-changelog (>=1.1.0)", "packaging"]
+test = ["pytest-astropy (>=0.8)", "pytest-xdist", "objgraph", "ipython (>=4.2)", "coverage", "skyfield (>=1.20)", "sgp4 (>=2.3)", "packaging"]
 
 [[package]]
 name = "atomicwrites"
@@ -96,7 +94,7 @@ unittest2 = "*"
 
 [[package]]
 name = "bids-validator"
-version = "1.8.6"
+version = "1.8.8"
 description = "Validator for the Brain Imaging Data Structure"
 category = "main"
 optional = false
@@ -150,6 +148,7 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
+importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [[package]]
 name = "colorama"
@@ -264,6 +263,7 @@ optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
+importlib-metadata = {version = "<4.3", markers = "python_version < \"3.8\""}
 mccabe = ">=0.6.0,<0.7.0"
 pycodestyle = ">=2.8.0,<2.9.0"
 pyflakes = ">=2.4.0,<2.5.0"
@@ -377,6 +377,22 @@ test = ["invoke", "pytest", "pytest-cov"]
 tifffile = ["tifffile"]
 
 [[package]]
+name = "importlib-metadata"
+version = "4.2.0"
+description = "Read metadata from Python packages"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+typing-extensions = {version = ">=3.6.4", markers = "python_version < \"3.8\""}
+zipp = ">=0.5"
+
+[package.extras]
+docs = ["sphinx", "jaraco.packaging (>=8.2)", "rst.linker (>=1.9)"]
+testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "packaging", "pep517", "pyfakefs", "flufl.flake8", "pytest-black (>=0.3.7)", "pytest-mypy", "importlib-resources (>=1.3)"]
+
+[[package]]
 name = "importlib-resources"
 version = "5.4.0"
 description = "Read resources from Python packages"
@@ -459,6 +475,7 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 attrs = ">=17.4.0"
+importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 importlib-resources = {version = ">=1.4.0", markers = "python_version < \"3.9\""}
 pyrsistent = ">=0.14.0,<0.17.0 || >0.17.0,<0.17.1 || >0.17.1,<0.17.2 || >0.17.2"
 
@@ -719,6 +736,9 @@ category = "dev"
 optional = false
 python-versions = ">=3.6"
 
+[package.dependencies]
+importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
+
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
@@ -882,6 +902,7 @@ python-versions = ">=3.6"
 atomicwrites = {version = ">=1.0", markers = "sys_platform == \"win32\""}
 attrs = ">=19.2.0"
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
+importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 iniconfig = "*"
 packaging = "*"
 pluggy = ">=0.12,<2.0"
@@ -1396,8 +1417,8 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.8,<3.11"
-content-hash = "24cb973528dd168903661ac66e51a6f0b8f6d6324ef548de573c82670a647287"
+python-versions = ">=3.7.1,<3.11"
+content-hash = "13c0ecd4a58e037904a6b804399696a16bd778426e003375e39652414784efa0"
 
 [metadata.files]
 appdirs = [
@@ -1417,24 +1438,22 @@ astor = [
     {file = "astor-0.8.1.tar.gz", hash = "sha256:6a6effda93f4e1ce9f618779b2dd1d9d84f1e32812c23a29b3fff6fd7f63fa5e"},
 ]
 astropy = [
-    {file = "astropy-5.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:ff8ecc820029b4487e96d273be6f54e17bc81311b98c9a09f40c6ea4eeb7db45"},
-    {file = "astropy-5.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:ed011a191e6b90ecc21d5f6f6ca49d5deb9d65770a089d93df5312bd83d8b73a"},
-    {file = "astropy-5.0-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:d62c10d9d42f6952823549d9d796b125d90142847d4bfb7394542b6292cb56a1"},
-    {file = "astropy-5.0-cp310-cp310-win32.whl", hash = "sha256:f509ff97f7781510d4a6e28a9b6d5748f0a375fbd8600c4385a1ed82940f59e3"},
-    {file = "astropy-5.0-cp310-cp310-win_amd64.whl", hash = "sha256:7b634e71dc2a852253173dfbb3788b9b428f242e6209e7d6e45aa508f261ae17"},
-    {file = "astropy-5.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:25e1d2d7119d0c2f21dc072ae344eb071ef79dbe6cc5c33b1114d92014cb82cc"},
-    {file = "astropy-5.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:553bfbcde6076f8014fa31262724ba71cf5206cc94b9e49b3ef61f827151a5e2"},
-    {file = "astropy-5.0-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:237995e8073b51f923b2ae2f8e7aad967a1bfa08faf9d6a040828b7213585ab5"},
-    {file = "astropy-5.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:c896a96994e557201edbf5483a2c22b7cf3232a3363751fcfce942a3f6fb56ae"},
-    {file = "astropy-5.0-cp38-cp38-win32.whl", hash = "sha256:5f13c96c66d5defa205708730f4f5d3b3af1ef53d1dfe61f083816b3b8077690"},
-    {file = "astropy-5.0-cp38-cp38-win_amd64.whl", hash = "sha256:5c032d4cc19cc2df1295b0c10106e0b9c9c04757c1f1a245d408e0a99fb35409"},
-    {file = "astropy-5.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:0e314ae6e1c55482b37a3b0a8891634ea5b23381beb5a08deb2d48b145c507ab"},
-    {file = "astropy-5.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:8493a82f75601ebe9e74b9e5fdd128c83fc083ba4ccd494cd6cbd4dc2a581f76"},
-    {file = "astropy-5.0-cp39-cp39-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:39e462d2969a6ea339329e3ee247ba44c994f22adc95d8b2283045ea74cbb417"},
-    {file = "astropy-5.0-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:70236d6fbe7a43217fcf6cea90788114a8607aebb23c30f46ac939d52a007c30"},
-    {file = "astropy-5.0-cp39-cp39-win32.whl", hash = "sha256:1a636904379b64ec39dd1970db7e318a9b3c462f9692e0b822dda4e4ee43b6c4"},
-    {file = "astropy-5.0-cp39-cp39-win_amd64.whl", hash = "sha256:8569f218f4b0f9a07d0248d53bd2dd8b163bed973a8e7b6fd6294c462b28d269"},
-    {file = "astropy-5.0.tar.gz", hash = "sha256:70203e151e13292586a817b4069ce1aad4643567aff38b1d191c173bc54f3927"},
+    {file = "astropy-4.3.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:a0764d7f68034c584dda8d1c9cc4357ade05cec4c1134db43bce804fcf656ff1"},
+    {file = "astropy-4.3.1-cp37-cp37m-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:ce1095e385ec74c655866eacd1853535fbc2dd2c42a8188503fe9a68b8a98ea0"},
+    {file = "astropy-4.3.1-cp37-cp37m-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:9a01cc7b9d50f265d5d77e1f7206cda22c62720f5bed63158ee56440708848ea"},
+    {file = "astropy-4.3.1-cp37-cp37m-win32.whl", hash = "sha256:98bba44f60bb3584b3ad24d1ffad1763138d4d18fc7ca31921732d2449419dd9"},
+    {file = "astropy-4.3.1-cp37-cp37m-win_amd64.whl", hash = "sha256:aae1e9e6b2c7811070e4a3373c54eac603f882dc381a796b981a25c02e7fafe2"},
+    {file = "astropy-4.3.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:6a5fb4ce4c964f02d7ac2b755f80f5210157a413cbfcdccbc25ad6e7586c258f"},
+    {file = "astropy-4.3.1-cp38-cp38-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:9e5613e897cb6da64330c5969981f576385491ff5ea61435218117d717a71ff2"},
+    {file = "astropy-4.3.1-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:0b4576d9bc2ab8359f2c4b87d0496c5ad768c7a14d1b16dc634ec24d22147c79"},
+    {file = "astropy-4.3.1-cp38-cp38-win32.whl", hash = "sha256:26f8dce66d3de8aa761508d76b99627ed745d99ec7c5e10289566c2082fa7dc3"},
+    {file = "astropy-4.3.1-cp38-cp38-win_amd64.whl", hash = "sha256:bcedff7bad0fbc70209751e8eb98eec7c0bd3f0e202f4ee7ff65b8ddf19d5e53"},
+    {file = "astropy-4.3.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:beddc4a365d696214e13ff9aa9362d418ecc112f1dba6338f8ac4218fe475e25"},
+    {file = "astropy-4.3.1-cp39-cp39-manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:4b0ff70baee2a2c768cfc5f7966a371fa0741c93a7283d7e99d6a668f2606851"},
+    {file = "astropy-4.3.1-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:34992c0ac1da577d7a1b13171cd8097cdb4544f09687bbd27e433806d3fd2e9f"},
+    {file = "astropy-4.3.1-cp39-cp39-win32.whl", hash = "sha256:dcb6d7e6631d92d5d15b7ae4e0a994829609b09a4e3af2055995187edb8989e3"},
+    {file = "astropy-4.3.1-cp39-cp39-win_amd64.whl", hash = "sha256:434ab46e85f5406acc9f2d2084e5e36890abeaf615c8aa71178e835134b64726"},
+    {file = "astropy-4.3.1.tar.gz", hash = "sha256:2d3951223b4eb7f368fcad8c8340d27374c5d8e3b635a636275acdb38f35cd51"},
 ]
 atomicwrites = [
     {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},
@@ -1449,8 +1468,8 @@ batchgenerators = [
     {file = "batchgenerators-0.21.tar.gz", hash = "sha256:7d75e52b709660bca41bdbbeda3758f707a03d254392d2bde3e36f183a559179"},
 ]
 bids-validator = [
-    {file = "bids-validator-1.8.6.tar.gz", hash = "sha256:6ae3709da2960aafae154f5d9a254aea86c62d5c8a4cabd3a46052bebdb6083a"},
-    {file = "bids_validator-1.8.6-py2.py3-none-any.whl", hash = "sha256:cdf2e8c8ccd6af88989e3ae665d426c315b422716a8cbe87c2366938f7c93b4c"},
+    {file = "bids-validator-1.8.8.tar.gz", hash = "sha256:e9ebc4cf1004bd343bbb56105b1eb2be833200e466dbaff7dfd267fca044d55e"},
+    {file = "bids_validator-1.8.8-py2.py3-none-any.whl", hash = "sha256:0e7b9eddaeba6772685ac05fdbd1fb58bd9fdb6b337baac40b68abf8da575e02"},
 ]
 binaryornot = [
     {file = "binaryornot-0.4.4-py2.py3-none-any.whl", hash = "sha256:b8b71173c917bddcd2c16070412e369c3ed7f0528926f70cac18a6c97fd563e4"},
@@ -1562,6 +1581,10 @@ idna = [
 imageio = [
     {file = "imageio-2.13.1-py3-none-any.whl", hash = "sha256:2b45f8275bf3f513f80512da540d60268417021d217cac7c384783be0acb42fe"},
     {file = "imageio-2.13.1.tar.gz", hash = "sha256:d3672d6a676f284c13a89d632b07b441f234caf0748e59271a18464a84172040"},
+]
+importlib-metadata = [
+    {file = "importlib_metadata-4.2.0-py3-none-any.whl", hash = "sha256:057e92c15bc8d9e8109738a48db0ccb31b4d9d5cfbee5a8670879a30be66304b"},
+    {file = "importlib_metadata-4.2.0.tar.gz", hash = "sha256:b7e52a1f8dec14a75ea73e0891f3060099ca1d8e6a462a4dff11c3e119ea1b31"},
 ]
 importlib-resources = [
     {file = "importlib_resources-5.4.0-py3-none-any.whl", hash = "sha256:33a95faed5fc19b4bc16b29a6eeae248a3fe69dd55d4d229d2b480e23eeaad45"},
