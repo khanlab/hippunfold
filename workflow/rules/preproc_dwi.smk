@@ -9,16 +9,16 @@ rule import_dwi:
     input: 
         nii = [re.sub('.nii.gz',ext,config['input_path']['dwi']) for ext in ['.nii.gz','.bval','.bvec','.json']]
     output:
-        nii = multiext(bids(root='work',suffix='dwi', datatype='dwi',**config['input_wildcards']['dwi']),'.nii.gz','.bval','.bvec','.json')
+        nii = multiext(bids(root=work,suffix='dwi', datatype='dwi',**config['input_wildcards']['dwi']),'.nii.gz','.bval','.bvec','.json')
     group: 'subj'
     run:
         for in_file,out_file in zip(input,output):
             shell('cp -v {in_file} {out_file}')
 
 rule dwidenoise:
-    input: multiext(bids(root='work',suffix='dwi',datatype='dwi',**config['input_wildcards']['dwi']),\
+    input: multiext(bids(root=work,suffix='dwi',datatype='dwi',**config['input_wildcards']['dwi']),\
                     '.nii.gz','.bvec','.bval','.json')
-    output: multiext(bids(root='work',suffix='dwi',desc='denoise',datatype='dwi',**config['input_wildcards']['dwi']),\
+    output: multiext(bids(root=work,suffix='dwi',desc='denoise',datatype='dwi',**config['input_wildcards']['dwi']),\
                     '.nii.gz','.bvec','.bval','.json')
     container: config['singularity']['prepdwi']
     log: bids(root='logs',suffix='denoise.log',**config['input_wildcards']['dwi'])
@@ -36,14 +36,14 @@ def get_degibbs_inputs (wildcards):
     in_dwi_bval = re.sub('.nii.gz','.bval',config['input_path']['dwi'].format(**wildcards))
     bvals = np.loadtxt(in_dwi_bval)
     if bvals.size < 30:
-        prefix = bids(root='work',suffix='dwi',datatype='dwi',**wildcards)
+        prefix = bids(root=work,suffix='dwi',datatype='dwi',**wildcards)
     else:
-        prefix = bids(root='work',suffix='dwi',datatype='dwi',desc='denoise',**wildcards)
+        prefix = bids(root=work,suffix='dwi',datatype='dwi',desc='denoise',**wildcards)
     return multiext(prefix,'.nii.gz','.bvec','.bval','.json')
  
 rule mrdegibbs:
     input: get_degibbs_inputs
-    output: multiext(bids(root='work',suffix='dwi',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),\
+    output: multiext(bids(root=work,suffix='dwi',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),\
                     '.nii.gz','.bvec','.bval','.json')
     container: config['singularity']['prepdwi']
 #    log: bids(root='logs',suffix='degibbs.log',**config['input_wildcards']['dwi'])
@@ -57,10 +57,10 @@ rule mrdegibbs:
 #now have nii with just the b0's, want to create the topup phase-encoding text files for each one:
 rule get_phase_encode_txt:
     input:
-        bzero_nii = bids(root='work',suffix='b0.nii.gz',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),
-        json = bids(root='work',suffix='dwi.json',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi'])
+        bzero_nii = bids(root=work,suffix='b0.nii.gz',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),
+        json = bids(root=work,suffix='dwi.json',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi'])
     output:
-        phenc_txt = bids(root='work',suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),
+        phenc_txt = bids(root=work,suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),
     group: 'subj'
     script: '../scripts/preproc_dwi/get_phase_encode_txt.py'
         
@@ -68,19 +68,19 @@ rule get_phase_encode_txt:
 
 rule concat_phase_encode_txt:
     input:
-        phenc_txts = lambda wildcards: expand(bids(root='work',suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),\
+        phenc_txts = lambda wildcards: expand(bids(root=work,suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),\
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
     output:
-        phenc_concat = bids(root='work',suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['subj_wildcards'])
+        phenc_concat = bids(root=work,suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['subj_wildcards'])
     group: 'subj'
     shell: 'cat {input} > {output}'
 
 rule concat_bzeros:
     input:
-        bzero_niis = lambda wildcards: expand(bids(root='work',suffix='b0.nii.gz',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),\
+        bzero_niis = lambda wildcards: expand(bids(root=work,suffix='b0.nii.gz',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),\
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
     output:
-        bzero_concat = bids(root='work',suffix='concatb0.nii.gz',datatype='dwi',desc='degibbs',**config['subj_wildcards'])
+        bzero_concat = bids(root=work,suffix='concatb0.nii.gz',datatype='dwi',desc='degibbs',**config['subj_wildcards'])
     container: config['singularity']['prepdwi']
     log: bids(root='logs',suffix='concat_bzeros.log',**config['subj_wildcards'])
     group: 'subj'
@@ -89,16 +89,16 @@ rule concat_bzeros:
 
 rule run_topup:
     input:
-        bzero_concat = bids(root='work',suffix='concatb0.nii.gz',datatype='dwi',desc='degibbs',**config['subj_wildcards']),
-        phenc_concat = bids(root='work',suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['subj_wildcards'])
+        bzero_concat = bids(root=work,suffix='concatb0.nii.gz',datatype='dwi',desc='degibbs',**config['subj_wildcards']),
+        phenc_concat = bids(root=work,suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['subj_wildcards'])
     params:
-        out_prefix = bids(root='work',suffix='topup',datatype='dwi',**config['subj_wildcards']),
+        out_prefix = bids(root=work,suffix='topup',datatype='dwi',**config['subj_wildcards']),
         config = 'b02b0.cnf' #this config sets the multi-res schedule and other params..
     output:
-        bzero_corrected = bids(root='work',suffix='concatb0.nii.gz',desc='topup',datatype='dwi',**config['subj_wildcards']),
-        fieldmap = bids(root='work',suffix='fmap.nii.gz',desc='topup',datatype='dwi',**config['subj_wildcards']),
-        topup_fieldcoef = bids(root='work',suffix='topup_fieldcoef.nii.gz',datatype='dwi',**config['subj_wildcards']),
-        topup_movpar = bids(root='work',suffix='topup_movpar.txt',datatype='dwi',**config['subj_wildcards']),
+        bzero_corrected = bids(root=work,suffix='concatb0.nii.gz',desc='topup',datatype='dwi',**config['subj_wildcards']),
+        fieldmap = bids(root=work,suffix='fmap.nii.gz',desc='topup',datatype='dwi',**config['subj_wildcards']),
+        topup_fieldcoef = bids(root=work,suffix='topup_fieldcoef.nii.gz',datatype='dwi',**config['subj_wildcards']),
+        topup_movpar = bids(root=work,suffix='topup_movpar.txt',datatype='dwi',**config['subj_wildcards']),
     container: config['singularity']['prepdwi']
     log: bids(root='logs',suffix='topup.log',**config['subj_wildcards'])
     group: 'subj'
@@ -109,20 +109,20 @@ rule run_topup:
 #this is for equal positive and negative blipped data - method=lsr
 rule apply_topup_lsr:
     input:
-        dwi_niis = lambda wildcards: expand(bids(root='work',suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']),\
+        dwi_niis = lambda wildcards: expand(bids(root=work,suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']),\
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards)),
-        phenc_concat = bids(root='work',suffix='phenc.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        topup_fieldcoef = bids(root='work',suffix='topup_fieldcoef.nii.gz',datatype='dwi',**config['subj_wildcards']),
-        topup_movpar = bids(root='work',suffix='topup_movpar.txt',datatype='dwi',**config['subj_wildcards']),
+        phenc_concat = bids(root=work,suffix='phenc.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        topup_fieldcoef = bids(root=work,suffix='topup_fieldcoef.nii.gz',datatype='dwi',**config['subj_wildcards']),
+        topup_movpar = bids(root=work,suffix='topup_movpar.txt',datatype='dwi',**config['subj_wildcards']),
     params:
         #create comma-seperated list of dwi nii
         imain = lambda wildcards, input: ','.join(input.dwi_niis), 
         # create comma-sep list of indices 1-N
         inindex = lambda wildcards, input: ','.join([str(i) for i in range(1,len(input.dwi_niis)+1)]), 
-        topup_prefix = bids(root='work',suffix='topup',datatype='dwi',**config['subj_wildcards']),
+        topup_prefix = bids(root=work,suffix='topup',datatype='dwi',**config['subj_wildcards']),
         out_prefix = 'dwi_topup',
     output: 
-        dwi_topup = bids(root='work',suffix='dwi.nii.gz',desc='topup',method='lsr',datatype='dwi',**config['subj_wildcards'])
+        dwi_topup = bids(root=work,suffix='dwi.nii.gz',desc='topup',method='lsr',datatype='dwi',**config['subj_wildcards'])
     container: config['singularity']['prepdwi']
     shadow: 'minimal'
     group: 'subj'
@@ -134,15 +134,15 @@ rule apply_topup_lsr:
 
 rule apply_topup_jac:
     input:
-        nii = bids(root='work',suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']), 
-        phenc_scan = bids(root='work',suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),
-        phenc_concat = bids(root='work',suffix='phenc.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        topup_fieldcoef = bids(root='work',suffix='topup_fieldcoef.nii.gz',datatype='dwi',**config['subj_wildcards']),
-        topup_movpar = bids(root='work',suffix='topup_movpar.txt',datatype='dwi',**config['subj_wildcards']),
+        nii = bids(root=work,suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']), 
+        phenc_scan = bids(root=work,suffix='phenc.txt',datatype='dwi',desc='degibbs',**config['input_wildcards']['dwi']),
+        phenc_concat = bids(root=work,suffix='phenc.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        topup_fieldcoef = bids(root=work,suffix='topup_fieldcoef.nii.gz',datatype='dwi',**config['subj_wildcards']),
+        topup_movpar = bids(root=work,suffix='topup_movpar.txt',datatype='dwi',**config['subj_wildcards']),
     params:
-        topup_prefix = bids(root='work',suffix='topup',datatype='dwi',**config['subj_wildcards']),
+        topup_prefix = bids(root=work,suffix='topup',datatype='dwi',**config['subj_wildcards']),
     output: 
-        nii = bids(root='work',suffix='dwi.nii.gz',desc='topup',method='jac',datatype='dwi',**config['input_wildcards']['dwi']), 
+        nii = bids(root=work,suffix='dwi.nii.gz',desc='topup',method='jac',datatype='dwi',**config['input_wildcards']['dwi']), 
     container: config['singularity']['prepdwi']
     shadow: 'minimal'
     group: 'subj'
@@ -159,9 +159,9 @@ rule apply_topup_jac:
 """
 rule cp_sidecars_topup_lsr:
     #TODO: BEST WAY TO TO EXEMPLAR DWI? 
-    input: multiext(bids(root='work',suffix='dwi',desc='degibbs',datatype='dwi',**config['subj_wildcards'],**dwi_exemplar_dict),\
+    input: multiext(bids(root=work,suffix='dwi',desc='degibbs',datatype='dwi',**config['subj_wildcards'],**dwi_exemplar_dict),\
                 '.bvec','.bval','.json')
-    output: multiext(bids(root='work',suffix='dwi',desc='topup',method='lsr',datatype='dwi',**config['subj_wildcards']),\
+    output: multiext(bids(root=work,suffix='dwi',desc='topup',method='lsr',datatype='dwi',**config['subj_wildcards']),\
                 '.bvec','.bval','.json')
     run:
         for in_file,out_file in zip(input,output):
@@ -169,9 +169,9 @@ rule cp_sidecars_topup_lsr:
 """
 
 rule cp_sidecars_topup_jac:
-    input: multiext(bids(root='work',suffix='dwi',desc='degibbs',datatype='dwi',**config['subj_wildcards']),\
+    input: multiext(bids(root=work,suffix='dwi',desc='degibbs',datatype='dwi',**config['subj_wildcards']),\
                 '.bvec','.bval','.json')
-    output: multiext(bids(root='work',suffix='dwi',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards']),\
+    output: multiext(bids(root=work,suffix='dwi',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards']),\
                 '.bvec','.bval','.json')
     group: 'subj'
     run:
@@ -180,10 +180,10 @@ rule cp_sidecars_topup_jac:
 
 rule concat_dwi_topup_jac:
     input:
-        dwi_niis = lambda wildcards: expand(bids(root='work',suffix='dwi.nii.gz',desc='topup',method='jac',datatype='dwi',**config['input_wildcards']['dwi']),\
+        dwi_niis = lambda wildcards: expand(bids(root=work,suffix='dwi.nii.gz',desc='topup',method='jac',datatype='dwi',**config['input_wildcards']['dwi']),\
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
     output:
-        dwi_concat = bids(root='work',suffix='dwi.nii.gz',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards'])
+        dwi_concat = bids(root=work,suffix='dwi.nii.gz',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards'])
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell: 'mrcat {input} {output}' 
@@ -191,19 +191,19 @@ rule concat_dwi_topup_jac:
 
 rule get_eddy_index_txt:
     input:
-        dwi_niis = lambda wildcards: expand(bids(root='work',suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']),\
+        dwi_niis = lambda wildcards: expand(bids(root=work,suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']),\
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
     output:
-        eddy_index_txt = bids(root='work',suffix='dwi.eddy_index.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        eddy_index_txt = bids(root=work,suffix='dwi.eddy_index.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
     group: 'subj'
     script: '../scripts/preproc_dwi/get_eddy_index_txt.py'
  
 rule concat_degibbs_dwi:
     input:
-        dwi_niis = lambda wildcards: expand(bids(root='work',suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']),\
+        dwi_niis = lambda wildcards: expand(bids(root=work,suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']),\
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
     output:
-        dwi_concat = bids(root='work',suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['subj_wildcards'])
+        dwi_concat = bids(root=work,suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['subj_wildcards'])
     container: config['singularity']['prepdwi']
     log: bids(root='logs',suffix='concat_degibbs_dwi.log',**config['subj_wildcards'])
     group: 'subj'
@@ -211,26 +211,26 @@ rule concat_degibbs_dwi:
 
 rule concat_runs_bvec:
     input:
-        lambda wildcards: expand(bids(root='work',suffix='dwi.bvec',desc='{{desc}}',datatype='dwi',**config['input_wildcards']['dwi']),
+        lambda wildcards: expand(bids(root=work,suffix='dwi.bvec',desc='{{desc}}',datatype='dwi',**config['input_wildcards']['dwi']),
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
-    output: bids(root='work',suffix='dwi.bvec',desc='{desc}',datatype='dwi',**config['subj_wildcards'])
+    output: bids(root=work,suffix='dwi.bvec',desc='{desc}',datatype='dwi',**config['subj_wildcards'])
     group: 'subj'
     script: '../scripts/preproc_dwi/concat_bv.py' 
 
 rule concat_runs_bval:
     input:
-        lambda wildcards: expand(bids(root='work',suffix='dwi.bval',desc='{{desc}}',datatype='dwi',**config['input_wildcards']['dwi']),
+        lambda wildcards: expand(bids(root=work,suffix='dwi.bval',desc='{{desc}}',datatype='dwi',**config['input_wildcards']['dwi']),
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
-    output: bids(root='work',suffix='dwi.bval',desc='{desc}',datatype='dwi',**config['subj_wildcards'])
+    output: bids(root=work,suffix='dwi.bval',desc='{desc}',datatype='dwi',**config['subj_wildcards'])
     group: 'subj'
     script: '../scripts/preproc_dwi/concat_bv.py' 
 
 #combines json files from multiple scans -- for now as a hack just copying first json over..
 rule concat_runs_json:
     input:
-        lambda wildcards: expand(bids(root='work',suffix='dwi.json',desc='{{desc}}',datatype='dwi',**config['input_wildcards']['dwi']),
+        lambda wildcards: expand(bids(root=work,suffix='dwi.json',desc='{{desc}}',datatype='dwi',**config['input_wildcards']['dwi']),
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
-    output: bids(root='work',suffix='dwi.json',desc='{desc}',datatype='dwi',**config['subj_wildcards'])
+    output: bids(root=work,suffix='dwi.json',desc='{desc}',datatype='dwi',**config['subj_wildcards'])
     group: 'subj'
     shell: 'cp {input[0]} {output}'
 #    script: '../scripts/preproc_dwi/concat_json.py' 
@@ -277,13 +277,13 @@ def get_mask_for_eddy(wildcards):
         method = config['masking']['default_method']
 
     #then get bids name of file 
-    return bids(root='work',suffix='mask.nii.gz',desc='brain',method=method,datatype='dwi',**config['subj_wildcards'])
+    return bids(root=work,suffix='mask.nii.gz',desc='brain',method=method,datatype='dwi',**config['subj_wildcards'])
 
 
 #generate qc snapshot for brain  mask 
 rule qc_brainmask_for_eddy:
     input:
-        img = bids(root='work',suffix='b0.nii.gz',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards']),
+        img = bids(root=work,suffix='b0.nii.gz',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards']),
         seg = get_mask_for_eddy
     output:
 #        png = bids(root='qc',subject='{subject}',suffix='mask.png',desc='brain'),
@@ -302,35 +302,35 @@ rule qc_brainmask_for_eddy:
     
 rule get_slspec_txt:
     input:
-        dwi_jsons = lambda wildcards: expand(bids(root='work',suffix='dwi.json',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']),
+        dwi_jsons = lambda wildcards: expand(bids(root=work,suffix='dwi.json',desc='degibbs',datatype='dwi',**config['input_wildcards']['dwi']),
                             zip,**snakebids.filter_list(config['input_zip_lists']['dwi'], wildcards))
     output:
-        eddy_slspec_txt = bids(root='work',suffix='dwi.eddy_slspec.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        eddy_slspec_txt = bids(root=work,suffix='dwi.eddy_slspec.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
     group: 'subj'
     script: '../scripts/preproc_dwi/get_slspec_txt.py'
          
  
 rule run_eddy:
     input:        
-        dwi_concat = bids(root='work',suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        phenc_concat = bids(root='work',suffix='phenc.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        eddy_index_txt = bids(root='work',suffix='dwi.eddy_index.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        eddy_slspec_txt = bids(root='work',suffix='dwi.eddy_slspec.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        dwi_concat = bids(root=work,suffix='dwi.nii.gz',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        phenc_concat = bids(root=work,suffix='phenc.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        eddy_index_txt = bids(root=work,suffix='dwi.eddy_index.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        eddy_slspec_txt = bids(root=work,suffix='dwi.eddy_slspec.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
         brainmask = get_mask_for_eddy,
-        bvals = bids(root='work',suffix='dwi.bval',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        bvecs = bids(root='work',suffix='dwi.bvec',desc='degibbs',datatype='dwi',**config['subj_wildcards'])
+        bvals = bids(root=work,suffix='dwi.bval',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        bvecs = bids(root=work,suffix='dwi.bvec',desc='degibbs',datatype='dwi',**config['subj_wildcards'])
     params:
         #set eddy output prefix to 'dwi' inside the output folder
         out_prefix = lambda wildcards, output: os.path.join(output.out_folder,'dwi'),
-        topup_prefix = bids(root='work',suffix='topup',datatype='dwi',**config['subj_wildcards']),
+        topup_prefix = bids(root=work,suffix='topup',datatype='dwi',**config['subj_wildcards']),
         flags = ' '.join([f'--{key}' for (key,value) in config['eddy']['flags'].items() if value == True ] ),
         options = ' '.join([f'--{key}={value}' for (key,value) in config['eddy']['opts'].items() if value is not None ] ),
         container = config['singularity']['fsl']
     output:
         #eddy creates many files, so write them to a eddy subfolder instead
-        out_folder = directory(bids(root='work',suffix='eddy',datatype='dwi',**config['subj_wildcards'])),
-        dwi = os.path.join(bids(root='work',suffix='eddy',datatype='dwi',**config['subj_wildcards']),'dwi.nii.gz'),
-        bvec = os.path.join(bids(root='work',suffix='eddy',datatype='dwi',**config['subj_wildcards']),'dwi.eddy_rotated_bvecs')
+        out_folder = directory(bids(root=work,suffix='eddy',datatype='dwi',**config['subj_wildcards'])),
+        dwi = os.path.join(bids(root=work,suffix='eddy',datatype='dwi',**config['subj_wildcards']),'dwi.nii.gz'),
+        bvec = os.path.join(bids(root=work,suffix='eddy',datatype='dwi',**config['subj_wildcards']),'dwi.eddy_rotated_bvecs')
 #    container: config['singularity']['fsl']
     threads: 1
     resources:
@@ -350,11 +350,11 @@ rule run_eddy:
 rule cp_eddy_outputs:
     input:
         #get nii.gz, bvec, and bval from eddy output
-        dwi = os.path.join(bids(root='work',suffix='eddy',datatype='dwi',**config['subj_wildcards']),'dwi.nii.gz'),
-        bvec = os.path.join(bids(root='work',suffix='eddy',datatype='dwi',**config['subj_wildcards']),'dwi.eddy_rotated_bvecs'),
-        bval = bids(root='work',suffix='dwi.bval',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        dwi = os.path.join(bids(root=work,suffix='eddy',datatype='dwi',**config['subj_wildcards']),'dwi.nii.gz'),
+        bvec = os.path.join(bids(root=work,suffix='eddy',datatype='dwi',**config['subj_wildcards']),'dwi.eddy_rotated_bvecs'),
+        bval = bids(root=work,suffix='dwi.bval',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
     output:
-        multiext(bids(root='work',suffix='dwi',desc='eddy',datatype='dwi',**config['subj_wildcards']),'.nii.gz','.bvec','.bval')
+        multiext(bids(root=work,suffix='dwi',desc='eddy',datatype='dwi',**config['subj_wildcards']),'.nii.gz','.bvec','.bval')
     group: 'subj'
     run:
         for in_file,out_file in zip(input,output):
@@ -362,19 +362,19 @@ rule cp_eddy_outputs:
 
 rule eddy_quad:
     input:
-        phenc_concat = bids(root='work',suffix='phenc.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        eddy_index_txt = bids(root='work',suffix='dwi.eddy_index.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        eddy_slspec_txt = bids(root='work',suffix='dwi.eddy_slspec.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        phenc_concat = bids(root=work,suffix='phenc.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        eddy_index_txt = bids(root=work,suffix='dwi.eddy_index.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        eddy_slspec_txt = bids(root=work,suffix='dwi.eddy_slspec.txt',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
         brainmask = get_mask_for_eddy,
-        bvals = bids(root='work',suffix='dwi.bval',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        bvecs = bids(root='work',suffix='dwi.bvec',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
-        fieldmap = bids(root='work',suffix='fmap.nii.gz',desc='topup',datatype='dwi',**config['subj_wildcards']),
-        eddy_dir = bids(root='work',suffix='eddy',datatype='dwi',**config['subj_wildcards'])
+        bvals = bids(root=work,suffix='dwi.bval',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        bvecs = bids(root=work,suffix='dwi.bvec',desc='degibbs',datatype='dwi',**config['subj_wildcards']),
+        fieldmap = bids(root=work,suffix='fmap.nii.gz',desc='topup',datatype='dwi',**config['subj_wildcards']),
+        eddy_dir = bids(root=work,suffix='eddy',datatype='dwi',**config['subj_wildcards'])
     params: 
         eddy_prefix = lambda wildcards, input: os.path.join(input.eddy_dir,'dwi'),
     output:
-        out_dir = directory(bids(root='work',suffix='eddy.qc',datatype='dwi',**config['subj_wildcards'])),
-        eddy_qc_pdf = bids(root='work',suffix='eddy.qc/qc.pdf',datatype='dwi',**config['subj_wildcards'])
+        out_dir = directory(bids(root=work,suffix='eddy.qc',datatype='dwi',**config['subj_wildcards'])),
+        eddy_qc_pdf = bids(root=work,suffix='eddy.qc/qc.pdf',datatype='dwi',**config['subj_wildcards'])
     
     container: config['singularity']['prepdwi']
     group: 'subj'
@@ -387,9 +387,9 @@ rule eddy_quad:
 
 rule split_eddy_qc_report:
     input:
-        eddy_qc_pdf = bids(root='work',suffix='eddy.qc/qc.pdf',datatype='dwi',**config['subj_wildcards'])
+        eddy_qc_pdf = bids(root=work,suffix='eddy.qc/qc.pdf',datatype='dwi',**config['subj_wildcards'])
     output:
-        report(directory(bids(root='work',suffix='eddy.qc_pages',datatype='dwi',**config['subj_wildcards'])),patterns=['{pagenum}.png'],caption="../report/eddy_qc.rst", category="eddy_qc",subcategory=bids(**config['subj_wildcards'],include_subject_dir=False,include_session_dir=False))
+        report(directory(bids(root=work,suffix='eddy.qc_pages',datatype='dwi',**config['subj_wildcards'])),patterns=['{pagenum}.png'],caption="../report/eddy_qc.rst", category="eddy_qc",subcategory=bids(**config['subj_wildcards'],include_subject_dir=False,include_session_dir=False))
     group: 'subj'
     shell:
         'mkdir -p {output} && convert {input} {output}/%02d.png'
@@ -403,14 +403,14 @@ ruleorder: rigid_reg_with_init > get_shell_avg
 rule rigid_reg_with_init:
     input:
         ref = bids(root='work/preproc_t1',**config['subj_wildcards'],desc='cropped', suffix='T1w.nii.gz',space='corobl',hemi='{hemi}'),
-        flo = bids(root='work',suffix='b0.nii.gz',desc='eddy',datatype='dwi',**config['subj_wildcards']),
+        flo = bids(root=work,suffix='b0.nii.gz',desc='eddy',datatype='dwi',**config['subj_wildcards']),
         init_xfm = bids(root='work/preproc_t1',**config['subj_wildcards'],suffix='xfm.txt',from_='subject',to='corobl',desc='affine',type_='itk'),
     params:
-        out_prefix = bids(root='work',**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='',hemi='{hemi}'),
+        out_prefix = bids(root=work,**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='',hemi='{hemi}'),
         multires = '--convergence [40x20x10,1e-6,10]  --shrink-factors 8x4x2  --smoothing-sigmas 8x4x2vox'
     output:
-        warped = bids(root='work',**config['subj_wildcards'],hemi='{hemi}',space='corobl',suffix='b0.nii.gz',desc='cropped'),
-        xfm = bids(root='work',**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
+        warped = bids(root=work,**config['subj_wildcards'],hemi='{hemi}',space='corobl',suffix='b0.nii.gz',desc='cropped'),
+        xfm = bids(root=work,**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
     container: config['singularity']['prepdwi']
     threads: 8
     group: 'subj'
@@ -422,11 +422,11 @@ rule rigid_reg_with_init:
 
 rule warp_mean_dwi_corobl:
     input:
-        nii = bids(root='work',suffix='{meandwi}.nii.gz',desc='eddy',datatype='dwi',**config['subj_wildcards']),
-        xfm = bids(root='work',**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
+        nii = bids(root=work,suffix='{meandwi}.nii.gz',desc='eddy',datatype='dwi',**config['subj_wildcards']),
+        xfm = bids(root=work,**config['subj_wildcards'],from_='dwi',to='corobl',desc='affine',type_='itk',suffix='0GenericAffine.mat',hemi='{hemi}'),
         ref = config['template_files'][config['template']]['crop_ref']
     output: 
-        nii = bids(root='work',suffix='{meandwi,b[0-9]+}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi,L|R}'),
+        nii = bids(root=work,suffix='{meandwi,b[0-9]+}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi,L|R}'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:
@@ -437,9 +437,9 @@ rule warp_mean_dwi_corobl:
 
 rule lr_flip_dwi:
     input:
-        nii = bids(root='work',suffix='{meandwi}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi}'),
+        nii = bids(root=work,suffix='{meandwi}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi}'),
     output:
-        nii = bids(root='work',suffix='{meandwi,b[0-9]+}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi,L}flip'),
+        nii = bids(root=work,suffix='{meandwi,b[0-9]+}.nii.gz',desc='cropped',datatype='dwi',**config['subj_wildcards'],space='corobl',hemi='{hemi,L}flip'),
     container: config['singularity']['prepdwi']
     group: 'subj'
     shell:

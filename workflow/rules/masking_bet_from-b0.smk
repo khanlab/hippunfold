@@ -1,10 +1,10 @@
-#input: bids(root='work',suffix='b0.nii.gz',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards'])
-#output: bids(root='work',desc='brain',method='bet_from-b0',suffix='mask.nii.gz',datatype='dwi',**config['subj_wildcards'])
+#input: bids(root=work,suffix='b0.nii.gz',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards'])
+#output: bids(root=work,desc='brain',method='bet_from-b0',suffix='mask.nii.gz',datatype='dwi',**config['subj_wildcards'])
 
 
 rule import_avg_b0:
     input:  
-        bids(root='work',suffix='b0.nii.gz',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards']),
+        bids(root=work,suffix='b0.nii.gz',desc='topup',method='jac',datatype='dwi',**config['subj_wildcards']),
     output:
         bids(root='work/bet_from-b0',suffix='b0.nii.gz',desc='topup',datatype='dwi',**config['subj_wildcards']),
     group: 'subj'
@@ -63,7 +63,7 @@ rule binarize_avg_b0_custom_frac:
     input:
         bids(root='work/bet_from-b0',suffix='b0.nii.gz',desc='bet',frac='{frac}',datatype='dwi',**config['subj_wildcards']),
     output:
-        bids(root='work',suffix='mask.nii.gz',desc='brain',method='bet_from-b0',frac='{frac}',datatype='dwi',**config['subj_wildcards']),
+        bids(root=work,suffix='mask.nii.gz',desc='brain',method='bet_from-b0',frac='{frac}',datatype='dwi',**config['subj_wildcards']),
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -73,7 +73,7 @@ rule binarize_avg_b0:
     input:
         bids(root='work/bet_from-b0',suffix='b0.nii.gz',desc='bet',datatype='dwi',**config['subj_wildcards']),
     output:
-        bids(root='work',suffix='mask.nii.gz',desc='brain',method='bet_from-b0',datatype='dwi',**config['subj_wildcards']),
+        bids(root=work,suffix='mask.nii.gz',desc='brain',method='bet_from-b0',datatype='dwi',**config['subj_wildcards']),
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
