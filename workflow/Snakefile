@@ -59,7 +59,8 @@ wildcard_constraints:
     density='[a-zA-Z0-9]+',
 
 
-print(f"root is {config['root']}")
+root = os.path.join(config['root'],'hippunfold')
+work = os.path.join(config['root'],'work')
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
