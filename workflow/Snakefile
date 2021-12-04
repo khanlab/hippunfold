@@ -3,7 +3,20 @@
 import snakebids
 from snakebids import bids
 
-configfile: 'config/snakebids.yml'
+
+def snakefile_dir():
+    import inspect
+
+    frame = inspect.currentframe().f_back
+    calling_file = frame.f_code.co_filename
+    calling_dir = os.path.dirname(calling_file)
+    return calling_dir
+
+config['snakemake_dir'] = os.path.join(snakefile_dir(),'../')
+
+
+configfile: os.path.join(config['snakemake_dir'],'config/snakebids.yml')
+
 
 #make adjustments to input params:
 # right now hippb500 or cropseg cannot use T1w output space
@@ -45,6 +58,8 @@ wildcard_constraints:
     modality='[a-zA-Z0-9]+',
     density='[a-zA-Z0-9]+',
 
+
+print(f"root is {config['root']}")
 
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
