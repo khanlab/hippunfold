@@ -1,5 +1,5 @@
-bids_dir: '/path/to/bids/dir'
-output_dir: '/path/to/output/dir' #don't use '.'
+bids_dir: 'test_data/bids_singleT2w'
+output_dir: 'test_out'  #don't use '.'
 
 snakebids_dir: '.' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
 
@@ -396,3 +396,22 @@ masking:
     '0015': 'b0SyN_from-MNI152NLin2009cSym'
 
 archive_work: False
+output_spaces: 
+  - cropT1w
+participant_label:
+exclude_participant_label: 
+hemi: 
+  - L
+  - R
+output_density:
+  - 7k
+  - 2k
+  
+laminar_coords_method: equivolume
+skip_preproc: False
+nnunet_disable_tta: False
+use_gpu: False
+skip_coreg: False
+keep_work: False
+skip_inject_template_labels: False
+root: 'results'
