@@ -56,16 +56,16 @@ jobs:
         run: poetry install --no-interaction
 
       #----------------------------------------------
-      #       run python style checks
+      # run python style checks on hippunfold module
       #----------------------------------------------
-      #      - name: isort
-      #  run: poetry run isort hippunfold -c
-      #- name: Black
-      #  run: poetry run black hippunfold --check
-      #- name: Flake8
-      #  run: poetry run flake8 hippunfold
-      #- name: pylint
-      #  run: poetry run pylint hippunfold
+      - name: isort
+        run: poetry run isort hippunfold -c
+      - name: Black
+        run: poetry run black hippunfold --check
+      - name: Flake8
+        run: poetry run flake8 hippunfold
+      - name: pylint
+        run: poetry run pylint hippunfold
 
   test:
     runs-on: ubuntu-latest
@@ -115,9 +115,12 @@ jobs:
     #----------------------------------------------
     - name: Install library
       run: poetry install --no-interaction
+    #----------------------------------------------
+    # test the workflow with pytest
+    #----------------------------------------------
     - name: Test with pytest
       run: |
-        poetry run pytest --doctest-modules --ignore=docs
+        poetry run pytest 
 
 
 

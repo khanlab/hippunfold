@@ -39,7 +39,6 @@ def reg_to_template_cmd(wildcards,input,output):
         cmd = f'reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras}'
     return cmd
 
-print(os.path.join(config['snakemake_dir'], config['xfm_identity']))
 rule reg_to_template:
     input: 
         flo = bids(root=root,datatype='anat',**config['subj_wildcards'],desc='preproc',suffix='T1w.nii.gz'),
