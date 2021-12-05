@@ -32,6 +32,7 @@ pylint = "^2.11.1"
 isort = "^5.10.1"
 poethepoet = "^0.10.0"
 pre-commit = "^2.15.0"
+snakefmt = "^0.4.4"
 
 [tool.poetry.scripts]
 hippunfold = "hippunfold.run:main"
