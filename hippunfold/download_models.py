@@ -12,7 +12,7 @@ from appdirs import AppDirs
 
 
 def main():
-    """ Main downloader """
+    """Main downloader"""
 
     if "HIPPUNFOLD_CACHE_DIR" in os.environ:
         print(
