@@ -58,14 +58,16 @@ jobs:
       #----------------------------------------------
       # run python style checks on hippunfold module
       #----------------------------------------------
-      - name: isort
+      - name: isort check
         run: poetry run isort hippunfold -c
-      - name: Black
+      - name: Black check
         run: poetry run black hippunfold --check
       - name: Flake8
         run: poetry run flake8 hippunfold
       - name: pylint
         run: poetry run pylint hippunfold
+      - name: snakefmt check
+        run: poetry run snakefmt --check
 
   test:
     runs-on: ubuntu-latest
