@@ -67,7 +67,7 @@ jobs:
       - name: pylint
         run: poetry run pylint hippunfold
       - name: snakefmt check
-        run: poetry run snakefmt --check
+        run: poetry run snakefmt . --check
 
   test:
     runs-on: ubuntu-latest

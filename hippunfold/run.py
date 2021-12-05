@@ -2,6 +2,7 @@
 console-script for snakebids app
 """
 from pathlib import Path
+
 from snakebids.app import SnakeBidsApp
 
 
