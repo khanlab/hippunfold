@@ -2,7 +2,6 @@
 Module for downloading nnunet models
 """
 
-#!/usr/bin/env python3
 import errno
 import os
 
