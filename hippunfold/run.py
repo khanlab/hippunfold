@@ -1,9 +1,7 @@
 """
 console-script for snakebids app
 """
-#!/usr/bin/env python3
 from pathlib import Path
-
 from snakebids.app import SnakeBidsApp
 
 
