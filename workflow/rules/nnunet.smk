@@ -30,7 +30,7 @@ def get_model_tar (wildcards):
     
 
 def parse_task_from_tar (wildcards, input):
-    match = re.search('Task[0-9]{3}_[\w]+',input.model_tar)
+    match = re.search(r'Task[0-9]{3}_[\w]+',input.model_tar)
     if match:
         task = match.group(0)
     else:
@@ -38,7 +38,7 @@ def parse_task_from_tar (wildcards, input):
     return task
 
 def parse_chkpnt_from_tar (wildcards, input):
-    match = re.search('^.*\.(\w+)\.tar',input.model_tar)
+    match = re.search(r'^.*\.(\w+)\.tar',input.model_tar)
     if match:
         chkpnt = match.group(1)
     else:
