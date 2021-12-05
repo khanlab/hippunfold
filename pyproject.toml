@@ -5,7 +5,7 @@ description = "BIDS App for Hippocampal AutoTop (automated hippocampal unfolding
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.7.1,<3.11"
+python = ">=3.7.1,<3.10"
 snakemake = ">=6.0.0"
 snakebids = { git = "https://github.com/akhanf/snakebids.git", rev = "e2034a851ac59ce8d9504e2d6830af39afa28b75" }
 batchgenerators = "0.21"
