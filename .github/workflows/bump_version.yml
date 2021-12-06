@@ -23,7 +23,7 @@ jobs:
         env:
           PREV_VER: ${{ env.PREV_VER }}
         run: |
-          if [[ "$PREV_VER" != *"-prerelease."* ]]; then
+          if [[ "$PREV_VER" != *"-pre."* ]]; then
             echo "OLD_BUMP=0" >> $GITHUB_ENV
           else
             echo "OLD_BUMP=$(echo $PREV_VER | cut -d '.' -f 4)" >> $GITHUB_ENV
@@ -40,11 +40,11 @@ jobs:
         with:
           include: 'pyproject.toml'
           find: 'version = "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
-          replace: 'version = "${{ steps.release-drafter.outputs.name }}-prerelease.${{ env.NEW_BUMP }}"'
+          replace: 'version = "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
 
       - name: Commit updates
         env:
-          SNAKEBIDS_VERSION: ${{ steps.release-drafter.outputs.name }}-prerelease.${{ env.NEW_BUMP }}
+          SNAKEBIDS_VERSION: ${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
