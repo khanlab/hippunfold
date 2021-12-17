@@ -159,20 +159,22 @@ def get_final_qc():
                     hemi=config['hemi'],
                     allow_missing=True)
             )
-#        qc.extend(
-#            expand(
-#                bids(
-#                        root='results',
-#                        datatype='qc',
-#                        suffix='midthickness.surf.png', 
-#                        desc='subfields',
-#                        from_='{modality}',
-#                        space='cropT1w',
-#                        hemi='{hemi}',
-#                        **config['subj_wildcards']),
-#                    hemi=config['hemi'],
-#                    allow_missing=True)
-#            ) 
+        qc.extend(
+            expand(
+                bids(
+                        root='results',
+                        datatype='qc',
+                        suffix='midthickness.surf.png', 
+                        den='{density}',
+                        desc='subfields',
+                        from_='{modality}',
+                        space='cropT1w',
+                        hemi='{hemi}',
+                        **config['subj_wildcards']),
+                    hemi=config['hemi'],
+                    density=config['output_density'],
+                    allow_missing=True)
+            ) 
         if len(config['hemi']) == 2:
             qc.extend(
                 expand(

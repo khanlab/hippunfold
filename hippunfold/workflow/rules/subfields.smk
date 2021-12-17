@@ -132,11 +132,12 @@ rule qc_subfield:
     group: 'subj'
     script: '../scripts/vis_qc_dseg.py'
 
+  
 rule qc_subfield_surf:
     input:
-    	surf = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+    	surf = bids(root='results',datatype='surf_{modality}',suffix='midthickness.surf.gii',den='{density}',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
     output:
-        png = report(bids(root='results',datatype='qc',suffix='midthickness.surf.png', desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+        png = report(bids(root='results',datatype='qc',suffix='midthickness.surf.png', den='{density}',desc='subfields',from_='{modality}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC',
                 subcategory='Subfields from {modality}'),
