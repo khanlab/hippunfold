@@ -118,7 +118,8 @@ def get_final_anat():
                         root='results',
                         datatype='seg',
                         desc='preproc',
-                        suffix='{modality_suffix}.nii.gz',
+                        suffix='{modality_suffix}.nii.gz'.format(
+                                modality_suffix=get_modality_suffix(config['modality'])),
                         space='{space}',
                         hemi='{hemi}',
                         **config['subj_wildcards']),
@@ -226,7 +227,6 @@ def get_final_output():
 
     final_output.extend(
         expand(subj_output,
-                modality=config['modality'],
                 modality_suffix=modality_suffix,
                 subject=config['input_lists'][modality_key]['subject'],
                 session=config['sessions'])
@@ -244,7 +244,7 @@ rule copy_to_results:
 
 
 def get_final_work_tar():
-    return bids(root='work',bgimg='{modality_suffix}',suffix='work.tar.gz',modality='{modality}',
+    return bids(root='work',suffix='work.tar.gz',
                 include_subject_dir=False,
                 include_session_dir=False,
                 **config['subj_wildcards'])

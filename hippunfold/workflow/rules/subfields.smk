@@ -127,8 +127,7 @@ rule qc_subfield:
     output:
         png = report(bids(root='results',datatype='qc',suffix='dseg.png', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
-                category='Segmentation QC',
-                subcategory='Subfields from {modality}'),
+                category='Segmentation QC')
     group: 'subj'
     script: '../scripts/vis_qc_dseg.py'
 
