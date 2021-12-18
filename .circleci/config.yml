@@ -206,7 +206,6 @@ workflows:
             branches:
               only: 
                 - master
-                - neonatal
             tags:
               only: /.*/
       - test:
