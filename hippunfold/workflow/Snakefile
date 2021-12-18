@@ -2,13 +2,13 @@
 
 import snakebids
 from snakebids import bids
-from snakebids.utils import get_source_path
+#from snakebids.utils import get_source_path
 
 
 
 configfile: 'config/snakebids.yml'
 
-config["snakemake_dir"] = get_source_path('../')
+#config["snakemake_dir"] = get_source_path('../')
 
 #make adjustments to input params:
 # right now hippb500 or cropseg cannot use T1w output space
