@@ -35,7 +35,7 @@ snakefmt = "^0.4.4"
 
 [tool.poetry.scripts]
 hippunfold = "hippunfold.run:main"
-
+hippunfold_download_models = "hippunfold.download_models:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
