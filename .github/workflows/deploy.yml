@@ -1,0 +1,100 @@
+name: Deploy workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      author:
+        description: "Author"
+        required: true
+        default: "github-actions[bot] (user publishing release)"
+      date:
+        description: "Date"
+        required: true
+        default: "YYYY-MM-DD"
+      comments:
+        description: "Comments"
+
+jobs:
+  release_changelog:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print author
+        run: |
+          echo "Author: ${{ github.event.inputs.author }}"
+          echo "Date: ${{ github.event.inputs.date }}"
+          echo "Comments: ${{ github.event.inputs.comments }}"
+
+      - uses: actions/checkout@master
+        with:
+          ref: refs/heads/master
+
+      - name: Draft change log
+        uses: release-drafter/release-drafter@v5
+        id: release-drafter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update version in pyproject
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          include: 'pyproject.toml'
+          find: 'version = "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
+          replace: 'version = "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
+
+      - name: Update version in pipeline_description
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          include: 'hippunfold/pipeline_description.json'
+          find: 'version = "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
+          replace: 'version = "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
+
+      - name: Commit updates
+        env:
+          LATEST_VERSION: ${{ steps.release-drafter.outputs.name }}
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git diff-index --quiet HEAD || git commit -m "Bump version to $LATEST_VERSION" -a
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish change log
+        uses: release-drafter/release-drafter@v5
+        with:
+          publish: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [release_changelog]
+
+    steps:
+      - uses: actions/checkout@master
+        with:
+          ref: refs/heads/master
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      #----------------------------------------------
+      #  -----  install & configure poetry  -----
+      #----------------------------------------------
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Build and publish
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          poetry publish --build
+

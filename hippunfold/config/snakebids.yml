@@ -1,7 +1,7 @@
-bids_dir: '/path/to/bids/dir'
-output_dir: '/path/to/output/dir' #don't use '.'
+bids_dir: '../test_data/bids_singleT2w'
+output_dir: 'test_output' #don't use '.'
 
-snakebids_dir: '.' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
+snakemake_dir: '/localscratch/hippunfold_warps/hippunfold' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
 
 #enable printing debug statements during parsing -- disable if generating dag visualization
 debug: False
@@ -363,6 +363,27 @@ laplace_labels:
       - 7
     sink:
       - 0 
+
+
+output_spaces:
+  - cropT1w
+
+participant_label:
+exclude_participant_label:
+hemi:
+  - L
+  - R
+output_density:
+  - 2k
+  - 7k
+
+laminar_coords_method: equivolume
+skip_preproc: False
+nnunet_disable_tta: False
+use_gpu: False
+skip_coreg: False
+keep_work: False
+skip_inject_template_labels: False
 
 
 #---- dwi options below, not used in the default workflow ----
