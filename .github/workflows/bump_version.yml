@@ -35,10 +35,17 @@ jobs:
         run: |
           echo "NEW_BUMP=$(($BUMP_VER + 1))" >> $GITHUB_ENV
 
-      - name: Update version in files
+      - name: Update version in pyproject
         uses: jacobtomlinson/gha-find-replace@master
         with:
           include: 'pyproject.toml'
+          find: 'version = "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
+          replace: 'version = "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
+
+      - name: Update version in pipeline_description
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          include: 'hippunfold/pipeline_description.json'
           find: 'version = "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
           replace: 'version = "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
 
