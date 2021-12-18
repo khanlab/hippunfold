@@ -139,7 +139,6 @@ parse_args:
 
   --modality:
     help: 'Type of image to run hippocampal autotop on, suffixed with seg will import an existing hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
-    nargs: '+'
     choices:
       - T1w
       - T2w
@@ -148,8 +147,7 @@ parse_args:
       - segT1w
       - segT2w
       - cropseg
-    default: 
-      - T2w
+    default: T2w
  # custom command-line parameters can then be added, these will get added to the config
 
   --derivatives:
@@ -262,8 +260,7 @@ template_files:
 rigid_reg_template: False
 no_reg_template: False
 
-modality:
-  - T2w
+modality: T2w
 
 
 

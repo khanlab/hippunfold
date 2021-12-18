@@ -2,12 +2,17 @@
 
 import snakebids
 from snakebids import bids
+from snakebids.utils import get_source_path
+
+
 
 configfile: 'config/snakebids.yml'
 
+config["snakemake_dir"] = get_source_path('../')
+
 #make adjustments to input params:
 # right now hippb500 or cropseg cannot use T1w output space
-if ('hippb500' in config['modality']) or ('cropseg' in config['modality']): 
+if config['modality'] == 'hippb500' or config['modality'] == 'cropseg':
     config['output_spaces'] = ['corobl']
 
 
@@ -17,12 +22,11 @@ if 'cropT1w' in config['output_spaces']:
     limit_to_list.add('T1w') 
 
 
-for modality in config['modality']:
-    if modality[:3] == 'seg': #if modality is segT2w, then add seg and T2w
-        limit_to_list.add('seg')
-        limit_to_list.add(modality[3:])
-    else:
-        limit_to_list.add(modality)
+if config['modality'][:3] == 'seg': #if modality is segT2w, then add seg and T2w
+    limit_to_list.add('seg')
+    limit_to_list.add(config['modality'][3:])
+else:
+    limit_to_list.add(config['modality'])
 
 
 #writes inputs_config.yml and updates config dict
@@ -49,23 +53,21 @@ wildcard_constraints:
 include: 'rules/common.smk'
 include: 'rules/preproc_t1.smk'
 
-#include rules only as they are needed..
-if 'segT1w' in config['modality'] or 'segT2w' in config['modality']:
+#include rules only as they are needed.. 
+if config['modality'] == 'segT1w' or config['modality'] == 'segT2w':
     include: 'rules/preproc_seg.smk'
-elif 'cropseg' in config['modality']:
+elif config['modality'] == 'cropseg':
     include: 'rules/preproc_cropseg.smk'
 else: 
     include: 'rules/nnunet.smk'
 
-
-#if using manual segs, then don't use nnunet
-if 'segT2w' in config['modality'] or 'T2w' in config['modality']:
+if config['modality'] == 'segT2w' or config['modality'] == 'T2w':
     include: 'rules/preproc_t2.smk'
 
-if 'dwi' in config['modality']:
+if config['modality'] == 'dwi':
     include: 'rules/preproc_dwi.smk'
 
-if 'hippb500' in config['modality']:
+if config['modality'] == 'hippb500':
     include: 'rules/preproc_hippb500.smk'
 
 include: 'rules/autotop.smk'
