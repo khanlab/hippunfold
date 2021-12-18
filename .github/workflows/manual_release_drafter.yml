@@ -1,0 +1,29 @@
+name: Manual release-drafter update
+
+on:
+  workflow_dispatch:
+    inputs:
+      author:
+        description: "Author"
+        required: true
+        default: "github-actions[bot] (user publishing release)"
+      comments:
+        description: "Update release drafter notes"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print workflow information
+        run: |
+          echo "Author: ${{ github.event.inputs.author }}"
+          echo "Date: ${{ github.event.inputs.date }}"
+          echo "Comments: ${{ github.event.inputs.comments }}"
+
+      - uses: actions/checkout@v2
+
+      - name: Update changelog
+        uses: release-drafter/release-drafter@v5
+        id: release-drafter
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
