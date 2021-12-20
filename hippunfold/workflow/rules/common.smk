@@ -133,17 +133,17 @@ def get_final_qc():
     #right now can only do qc from cropT1w space 
     if 'cropT1w' in config['output_spaces']:
 
-    #    qc.extend(
-    #        expand(
-    #            bids(
-    #                    root='results',
-    #                    datatype='qc',
-    #                    suffix='regqc.png',
-    #                    from_='subject', 
-    #                    to=config['template'],
-    #                    **config['subj_wildcards']),
-    #                allow_missing=True)
-    #        )
+        qc.extend(
+            expand(
+                bids(
+                        root='results',
+                        datatype='qc',
+                        suffix='regqc.png',
+                        from_='subject', 
+                        to=config['template'],
+                        **config['subj_wildcards']),
+                    allow_missing=True)
+            )
 
         qc.extend(
             expand(
