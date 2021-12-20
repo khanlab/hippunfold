@@ -4,10 +4,9 @@ hemi_to_structure = {'L': 'CORTEX_LEFT', 'Lflip': 'CORTEX_LEFT', 'R': 'CORTEX_RI
 surf_to_secondary_type = {'midthickness': 'MIDTHICKNESS', 'inner': 'PIAL', 'outer': 'GRAY_WHITE'}
 
 
-rule warp_gii_unfoldtemplate2unfold: 
-    """warp from template space to subj unfolded"""
+
+rule cp_subject_unfolded: 
     input: 
-        warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}',modality='{modality}'),
         gii = os.path.join(config['snakemake_dir'],'resources','unfold_template','tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii')
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
@@ -17,10 +16,11 @@ rule warp_gii_unfoldtemplate2unfold:
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', space='unfolded', hemi='{hemi,R|Lflip}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
-    shell:
-        'wb_command -surface-apply-warpfield {input.gii} {input.warp} {output.gii} && '
+    shell: 
+        'cp {input.gii} {output.gii} && '
         'wb_command -set-structure {output.gii} {params.structure_type} -surface-type {params.surface_type}'
             ' -surface-secondary-type {params.secondary_type}'
+
 
 
 rule calc_unfold_template_coords:
@@ -52,11 +52,7 @@ rule calc_unfold_template_coords:
         "wb_command -metric-merge {output.coords_gii}  -metric {params.coord_AP} -metric {params.coord_PD} -metric {params.coord_IO} && "
         "wb_command -set-structure {output.coords_gii} {params.structure_type}"
 
-       
-        
-   
 
-    
 
 #subj unfolded surf might have a few vertices outside the bounding box.. this constrains all the vertices to the warp bounding box
 rule constrain_surf_to_bbox:
