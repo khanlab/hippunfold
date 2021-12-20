@@ -1,11 +1,12 @@
 BIDS whole-brain data
 =====================
+
 This tutorial will cover applications of HippUnfold to an entire `BIDS-compliant dataset <https://bids.neuroimaging.io/>`_, meaning that the same scan types are expected for all subjects which will be processed in parallel. A typical call might look like this::
 
   hippunfold  PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant 
   
 
-Depending on the method you used for installation, you may require additional arguments such as ``--cores all`` or ``--use-singularity``, or prefixing the command with ``singularity run ``. This will expect ``PATH_TO_BIDS_DIR`` to contain something like the following::
+Depending on the method you used for installation, you may require additional arguments such as ``--cores all`` or ``--use-singularity``, or prefixing the command with ``singularity run``. This will expect ``PATH_TO_BIDS_DIR`` to contain something like the following::
 
   PATH_TO_BIDS_DIR/
   └── sub-001/
@@ -35,24 +36,26 @@ would work for a dataset with only T1w images, like this one::
           └── sub-001_T1w.nii.gz
   ...
 
-Note that specifying a manual segmentation (eg. ``--modality segT1w``) expects to additionally find a file with the suffix ``_dseg`` which should contain labels following the protocol outlined `here <https://ars.els-cdn.com/content/image/1-s2.0-S1053811917309977-mmc1.pdf>`_.
+Note that specifying a manual segmentation (eg. ``--modality segT1w``) expects to additionally find a file with the suffix ``_dseg`` which should contain labels following the protocol outlined `here <https://ars.els-cdn.com/content/image/1-s2.0-S1053811917309977-mmc1.pdf>`_. More details are provided on using manual segmentations on the following page.
 
 Non-BIDS datasets
 ------------------
 Wildcards can be used to enumarate input files if the data are not in BIDS format. For example::
 
   PATH_TO_nonBIDS_DIR/
-  └── sub-001/
-      ├── sub-001_T1w.nii.gz
-      └── sub-001_T2SPACE.nii.gz
-      └── sub-001_TSE.nii.gz
+  └── sub-001_T1w.nii.gz
+  └── sub-001_T2SPACE.nii.gz
+  └── sub-001_TSE.nii.gz
+  └── sub-002_T1w.nii.gz
   ...
 
-T2SPACE and TSE are both acquisitions that are sensitive to T2-weights, but HippUnfold will not recognize them without the suffix ``_T2w``. We can thus use the ``--path_T2w`` flag to specify exactly what file(s) to use as inputs::
+This directory doesn't separate subjects into different folders or contain an ``anat/`` folder for structural images. However, we can still specify what subjects and images to use with ``wildcards``. T2SPACE and TSE are both acquisitions that are sensitive to T2-weights, but HippUnfold will not recognize them without the suffix ``_T2w``. We can thus use the ``--path_T2w`` flag to specify exactly which of these file(s) to use as inputs::
 
-  hippunfold  PATH_TO_nonBIDS_DIR PATH_TO_OUTPUT_DIR participant --path_T2w PATH_TO_nonBIDS_DIR/sub-{subject}/sub-{subject}_T2SPACE.nii.gz
+  hippunfold - PATH_TO_OUTPUT_DIR participant \
+  --path_T1w PATH_TO_nonBIDS_DIR/sub-001_T1w.nii.gz \
+  --path_T2w PATH_TO_nonBIDS_DIR/sub-{subject}_T2SPACE.nii.gz
 
-This will search ``PATH_TO_BIDS_DIR`` for any any files following the naming scheme and fill in ``{subject}`` IDs for any files it can. Alternatively, ``{subject}`` IDs can be provided in a list with the ``--participant_label`` flag.
+This will search for any any files following the naming scheme and fill in ``{subject}`` IDs for any files it can. Alternatively, ``{subject}`` IDs can be provided in a list with the ``--participant_label`` flag.
 
 No T1w images
 ------------------
