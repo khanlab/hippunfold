@@ -1,27 +1,31 @@
 [tool.poetry]
 name = "hippunfold"
-version = "0.6.0-pre.3"
+version = "0.6.0-pre.8"
 description = "BIDS App for Hippocampal AutoTop (automated hippocampal unfolding and subfield segmentation)"
 authors = ["Jordan DeKraker & Ali Khan <alik@robarts.ca>"]
 
 [tool.poetry.dependencies]
 python = ">=3.7.1,<3.10"
 snakemake = ">=6.0.0"
-snakebids = { git = "https://github.com/akhanf/snakebids.git", rev = "8e36a9a" }
+snakebids = "0.4.0"
 batchgenerators = "0.21"
 nnunet-inference-on-cpu-and-gpu = "1.6.6"
-numpy = ">=1.20.2"
-astropy = "^4.0"
+numpy = "1.21.2"
+astropy = "^4.0,<=4.3.1"
 appdirs = "^1.4.4"
-pandas = "^1.2.0"
+pandas = "^1.2.0,<=1.3.0"
 nibabel = "^3.2.1"
-scipy = "^1.7.3"
+scipy = "1.7.1"
 nilearn = "^0.8.1"
 seaborn = "^0.11.2"
 Jinja2 = "^3.0.3"
 pygraphviz = "^1.7"
 Pygments = "^2.10.0"
 scikit-fmm = "^2021.10.29"
+simpleitk = "2.0.2"
+matplotlib = "3.4.2"
+torch = "1.10.0"
+
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
@@ -35,7 +39,7 @@ snakefmt = "^0.4.4"
 
 [tool.poetry.scripts]
 hippunfold = "hippunfold.run:main"
-
+hippunfold_download_models = "hippunfold.download_models:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

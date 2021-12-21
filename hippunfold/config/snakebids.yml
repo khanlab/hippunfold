@@ -41,19 +41,6 @@ pybids_inputs:
       - acquisition
       - run
 
-  dwi:
-    filters:
-      suffix: 'dwi'
-      extension: '.nii.gz'
-      invalid_filters: 'allow'
-      datatype: 'dwi'
-    wildcards:
-      - subject
-      - session
-      - acquisition
-      - run
-      - dir
-
   hippb500:
     filters:
       suffix: 'b500'
@@ -143,7 +130,6 @@ parse_args:
       - T1w
       - T2w
       - hippb500
-      - dwi
       - segT1w
       - segT2w
       - cropseg
@@ -268,18 +254,7 @@ modality: T2w
 nnunet_model:
   T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
   T2w: trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
-  T1T2w: trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar
-  b1000: trained_model.3d_fullres.Task104_hcp1200_b1000.nnUNetTrainerV2.model_best.tar
-  trimodal: trained_model.3d_fullres.Task105_hcp1200_trimodal.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
-
-
-#niftynet models -- this will be deprecated soon:
-cnn_model:
-  T2w: 'HCP1200-T2'
-  T1w: 'HCP1200-T1'
-  hippb500: 'HCP1200-b1000'
-  b1000: 'HCP1200-b1000'
 
 
 hippdwi_opts:
@@ -382,35 +357,3 @@ skip_coreg: False
 keep_work: False
 skip_inject_template_labels: False
 
-
-#---- dwi options below, not used in the default workflow ----
-
-#eddy options only used for experimental dwi workflow
-eddy:
-  flags:
-    verbose: True
-    repol: True
-    cnr_maps: True
-    residuals: True
-    data_is_shelled: True
-  opts:
-    mporder: 6
-    s2v_niter: 5
-    s2v_lambda: 1
-    s2v_interp: trilinear
-    ol_type: 'both'  #can be sw, gw, or both (use sw if no multi-band)
-   
-#masking options for dwi
-masking:
-  default_method: 'bet_from-b0_frac-1' #b0SyN_from-MNI152NLin2009cSym' #default method to use for brainmasking
-  methods: # list of methods (for QC report)
-    - 'bet_from-b0'
-    - 'bet_from-b0_frac-4'
-    - 'b0SyN_from-MNI152NLin2009cSym'
-  import_path: #only required if the import_mask - not implemented yet..
-    - '/path/to/mask_to_import/sub-{subject}_mask.nii.gz'
-  custom: #use this to set a custom method for a particular subject
-    #'0015': 'bet_from-b0_frac-4'
-    '0015': 'b0SyN_from-MNI152NLin2009cSym'
-
-archive_work: False

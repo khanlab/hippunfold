@@ -64,9 +64,6 @@ else:
 if config['modality'] == 'segT2w' or config['modality'] == 'T2w':
     include: 'rules/preproc_t2.smk'
 
-if config['modality'] == 'dwi':
-    include: 'rules/preproc_dwi.smk'
-
 if config['modality'] == 'hippb500':
     include: 'rules/preproc_hippb500.smk'
 
