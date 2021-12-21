@@ -125,7 +125,8 @@ parse_args:
 
 
   --modality:
-    help: 'Type of image to run hippocampal autotop on, suffixed with seg will import an existing hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
+    help: 'Type of image to run hippunfold on. Modality prefixed with seg will import an existing (manual) hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
+    required: True
     choices:
       - T1w
       - T2w
@@ -133,6 +134,7 @@ parse_args:
       - segT1w
       - segT2w
       - cropseg
+    
 
   --derivatives:
     help: 'Path to the derivatives folder (e.g. for finding manual segs) (default: %(default)s) '
