@@ -1187,7 +1187,7 @@ scipy = ">=1.0"
 
 [[package]]
 name = "simpleitk"
-version = "2.1.0"
+version = "2.0.2"
 description = "SimpleITK is a simplified interface to the Insight Toolkit (ITK) for image registration and segmentation"
 category = "main"
 optional = false
@@ -1406,7 +1406,7 @@ python-versions = "*"
 
 [[package]]
 name = "torch"
-version = "1.10.1"
+version = "1.10.0"
 description = "Tensors and Dynamic neural networks in Python with strong GPU acceleration"
 category = "main"
 optional = false
@@ -1518,7 +1518,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.1,<3.10"
-content-hash = "a0abfe8d87a7992e0496b3d3ec713502e0420bba0f168aa8a6f7107d30c60043"
+content-hash = "9ad95c5b813c59d32ec8f15986ad7c9d2753fcb92ddb95888baeccdb8ab43dc3"
 
 [metadata.files]
 appdirs = [
@@ -2399,25 +2399,26 @@ seaborn = [
     {file = "seaborn-0.11.2.tar.gz", hash = "sha256:cf45e9286d40826864be0e3c066f98536982baf701a7caa386511792d61ff4f6"},
 ]
 simpleitk = [
-    {file = "SimpleITK-2.1.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:feb2913d16bdd421f2098143c1eebeae125978d597aee544df483cd4a3cfe699"},
-    {file = "SimpleITK-2.1.0-cp36-cp36m-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:e66e6966d189a79d91f3658463b7828df124531edc8e3009798fb6513e8a0ce3"},
-    {file = "SimpleITK-2.1.0-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:cb2c994505c21fb6181bafe592294a00411d311c1b3bb47882108b24de2c7ebd"},
-    {file = "SimpleITK-2.1.0-cp36-cp36m-win_amd64.whl", hash = "sha256:1432f725bfe02afa992d883b147e54984e0649bf10b217de2870644ff2f0c5d3"},
-    {file = "SimpleITK-2.1.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:421b1b8af5c1ce3812cc80c80e8d6f8d5a491926d298b9889a89cf83e9b59227"},
-    {file = "SimpleITK-2.1.0-cp37-cp37m-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:7ddeaeae9e8bdd0989713c066faa6138fa322ac889c2363eae692e196addf410"},
-    {file = "SimpleITK-2.1.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:66c149b28d8383bded6406a7cb55419cd4cb05e06dcf7438a3299e0453b310da"},
-    {file = "SimpleITK-2.1.0-cp37-cp37m-win_amd64.whl", hash = "sha256:c25059de1930f196e1a91703df2a6d931427ddb3e6debc926ce6e6b635cf47a4"},
-    {file = "SimpleITK-2.1.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:61cfcec574d743144f18ec43d56f8a600fc1751f2e25317a5099fcc77e77f431"},
-    {file = "SimpleITK-2.1.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:f9348e04fd9e4cb99773169e5e48cdda854b9fd16fcf70d455e7093cc5cebc85"},
-    {file = "SimpleITK-2.1.0-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:ea8ec38bfe7591a1d6ce7ad8a93071ad620d0e2ab9b132bbd0f2392b37c79e74"},
-    {file = "SimpleITK-2.1.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:644e9cb3bef2233baaee44ddbb49ce4d7f376af97437f1ac1d97fec1217ecd81"},
-    {file = "SimpleITK-2.1.0-cp38-cp38-win_amd64.whl", hash = "sha256:d4513681b86f510f529887a42e4d6fa6c64588ab38418630ae4cfda6d806b826"},
-    {file = "SimpleITK-2.1.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:613c3f362c78d208e657f5391516539b123aaf04cbd2f090acbfc48ef53bb168"},
-    {file = "SimpleITK-2.1.0-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:35b739869878cd2b79c2ae9b908b1726d28f34456217550d45ec6c2f4035a92c"},
-    {file = "SimpleITK-2.1.0-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:3c25c5cb8b510376ddd80130829dbd0648481595bc031d786ae59a23ca21c32d"},
-    {file = "SimpleITK-2.1.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:d5197bf734a8a07607b878ad3e4a42d47413667f081a050b0a9635d60198ca23"},
-    {file = "SimpleITK-2.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:70eb773718ce5f2cdd854c9201bd95d5b9c45ceedbc38f448fab1127c56a4740"},
-    {file = "SimpleITK-2.1.0.tar.gz", hash = "sha256:d5d3b805863b9dfcffeebec69a1b79b5709fc814b12cb9ab759ccbd3e4746839"},
+    {file = "SimpleITK-2.0.2-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:fa87ed3d73732a4668d8e216aac6e6d547ec92b566681a5d34ca5b7d86c569dc"},
+    {file = "SimpleITK-2.0.2-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:8d795689bc613907196b1dc322e3b6247ec19c8e94cc12704a267d017551cb61"},
+    {file = "SimpleITK-2.0.2-cp35-cp35m-manylinux2010_x86_64.whl", hash = "sha256:46772fa3e6e167de0821b85e122debf90833d84daa23c5c66053cf28437f4573"},
+    {file = "SimpleITK-2.0.2-cp35-cp35m-win_amd64.whl", hash = "sha256:e0be3a611b447fb923ebfaacc3ca1ce42d09aa31882086efdb792329e9ab123b"},
+    {file = "SimpleITK-2.0.2-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:21bb06e640a8540d53b3ee00a8fcdcdf6e1a48aa4cf28172cc08bc153f012b76"},
+    {file = "SimpleITK-2.0.2-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:dc077928ab993170da5eed27f4737c9325a9fe705ff871945d0a6d6f15e24fab"},
+    {file = "SimpleITK-2.0.2-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:13628c2b22679a8b36d209ebc1d0ace53fe4ab6c4e8654eff0bc96ee40f702c8"},
+    {file = "SimpleITK-2.0.2-cp36-cp36m-win_amd64.whl", hash = "sha256:09911709ae2d3e29115dce3e78fa437dd78836812306be0a252c2da120928435"},
+    {file = "SimpleITK-2.0.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:cb969855ea1cd14839b10755a9b3cc1528cc912d4d5cc151c04f46fbcbd416c2"},
+    {file = "SimpleITK-2.0.2-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:6522c9e6a24301d0886f5e452724f165e0bd521548a9795b5bdc62031e950d1d"},
+    {file = "SimpleITK-2.0.2-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:ed444d72a6a5f4870077a1ddf376974ac927afe0a2b7c8a34d359b074ac21c2d"},
+    {file = "SimpleITK-2.0.2-cp37-cp37m-win_amd64.whl", hash = "sha256:4728c090a2e95b169ef8edab42f068fcb8657cac1d3d98df805ca468d9c45c38"},
+    {file = "SimpleITK-2.0.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:f83fdde9eb91d0b01af73e64e22d65b26dbaf1edf6e6220a2ab21123229e0863"},
+    {file = "SimpleITK-2.0.2-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:73caad7fb842985abc0ccf3c2590fd4e66e2b66e846b2eb17b759ffe4cc0455c"},
+    {file = "SimpleITK-2.0.2-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:666b7b88bc53c07d012181fa5306134d2d837cc59bc99e5c6641954f81c6501a"},
+    {file = "SimpleITK-2.0.2-cp38-cp38-win_amd64.whl", hash = "sha256:fac923ee2c3c09dcee9b2a80c0d2bd886765a0727eba7a3befa3a36a8e17170f"},
+    {file = "SimpleITK-2.0.2-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:95070b5cd4293586aa788edf79593d1b9600d2c55ffe641920090f58dd69b995"},
+    {file = "SimpleITK-2.0.2-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:5ab5ab167d27bb24e958f02df26b467603197b71e91b13b1635763cf64d2431f"},
+    {file = "SimpleITK-2.0.2-cp39-cp39-manylinux2010_x86_64.whl", hash = "sha256:6efe188b0f375f35734b272fe06863731d9ab08f9f0ff3e4bc342f941cf4ca08"},
+    {file = "SimpleITK-2.0.2-cp39-cp39-win_amd64.whl", hash = "sha256:a49b02bd405a3630be5388c0cafdcee951a8e8a81351fcca9e55b6b1b76f0ff9"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
@@ -2517,24 +2518,24 @@ toposort = [
     {file = "toposort-1.7.tar.gz", hash = "sha256:ddc2182c42912a440511bd7ff5d3e6a1cabc3accbc674a3258c8c41cbfbb2125"},
 ]
 torch = [
-    {file = "torch-1.10.1-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:adbb5f292e260e39715d67478823e03e3001db1af5b02c18caa34549dccb421e"},
-    {file = "torch-1.10.1-cp36-cp36m-manylinux2014_aarch64.whl", hash = "sha256:ac8cae04458cc47555fa07a760496c2fdf687223bcc13df5fed56ea3aead37f5"},
-    {file = "torch-1.10.1-cp36-cp36m-win_amd64.whl", hash = "sha256:40508d67288c46ff1fad301fa6e996e0e936a733f2401475fc92c21dc3ef702d"},
-    {file = "torch-1.10.1-cp36-none-macosx_10_9_x86_64.whl", hash = "sha256:8b47bd113c6cbd9a49669aaaa233ad5f25852d6ca3e640f9c71c808e65a1fdf4"},
-    {file = "torch-1.10.1-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:50360868ad3f039cf99f0250300dbec51bf686a7b84dc6bbdb8dff4b1171c0f0"},
-    {file = "torch-1.10.1-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:e3d2154722189ed74747a494dce9588978dd55e43ca24c5bd307fb52620b232b"},
-    {file = "torch-1.10.1-cp37-cp37m-win_amd64.whl", hash = "sha256:d9c495bcd5f00becff5b051b5e4be86b7eaa0433cd0fe57f77c02bc1b93ab5b1"},
-    {file = "torch-1.10.1-cp37-none-macosx_10_9_x86_64.whl", hash = "sha256:6b327d7b4eb2461b16d46763d46df71e597235ccc428650538a2735a0898270d"},
-    {file = "torch-1.10.1-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:1c6c56178e5dacf7602ad00dc79c263d6c41c0f76261e9641e6bd2679678ceb3"},
-    {file = "torch-1.10.1-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:2ffa2db4ccb6466c59e3f95b7a582d47ae721e476468f4ffbcaa2832e0b92b9b"},
-    {file = "torch-1.10.1-cp38-cp38-win_amd64.whl", hash = "sha256:af577602e884c5e40fbd29ec978f052202355da93cd31e0a23251bd7aaff5a99"},
-    {file = "torch-1.10.1-cp38-none-macosx_10_9_x86_64.whl", hash = "sha256:725d86e9809073eef868a3ddf4189878ee7af46fac71403834dd0925b3db9b82"},
-    {file = "torch-1.10.1-cp38-none-macosx_11_0_arm64.whl", hash = "sha256:fa197cfe047d0515bef238f42472721406609ebaceff2fd4e17f2ad4692ee51c"},
-    {file = "torch-1.10.1-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:cca660b27a90dbbc0af06c859260f6b875aef37c0897bd353e5deed085d2c877"},
-    {file = "torch-1.10.1-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:01f4ffdafbfbd7d106fb4e487feee2cf29cced9903df8cb0444b0e308f9c5e92"},
-    {file = "torch-1.10.1-cp39-cp39-win_amd64.whl", hash = "sha256:607eccb7d539a11877cd02d95f4b164b7941fcf538ac7ff087bfed19e3644283"},
-    {file = "torch-1.10.1-cp39-none-macosx_10_9_x86_64.whl", hash = "sha256:26b6dfbe21e247e67c615bfab0017ec391ed1517f88bbeea6228a49edd24cd88"},
-    {file = "torch-1.10.1-cp39-none-macosx_11_0_arm64.whl", hash = "sha256:5644280d88c5b6de27eacc0d911f968aad41a4bab297af4df5e571bc0927d3e4"},
+    {file = "torch-1.10.0-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:56022b0ce94c54e95a2f63fc5a1494feb1fc3d5c7a9b35a62944651d03edef05"},
+    {file = "torch-1.10.0-cp36-cp36m-manylinux2014_aarch64.whl", hash = "sha256:13e1ffab502aa32d6841a018771b47028d02dbbc685c5b79cfd61db5464dae4e"},
+    {file = "torch-1.10.0-cp36-cp36m-win_amd64.whl", hash = "sha256:3c0a942e0df104c80b0eedc30d2a19cdc3d28601bc6e280bf24b2e6255016d3b"},
+    {file = "torch-1.10.0-cp36-none-macosx_10_9_x86_64.whl", hash = "sha256:eea16c01af1980ba709c00e8d5e6c09bedb5b30f9fa2085f6a52a78d7dc4e125"},
+    {file = "torch-1.10.0-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:b812e8d40d7037748da40bb695bd849e7b2e7faad4cd06df53d2cc4531926fda"},
+    {file = "torch-1.10.0-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:034df0b20603bfc81325094586647302891b9b20be7e36f152c7dd6af00deac1"},
+    {file = "torch-1.10.0-cp37-cp37m-win_amd64.whl", hash = "sha256:67fc509e207b8e7330f2e76e77800950317d31d035a4d19593db991962afead4"},
+    {file = "torch-1.10.0-cp37-none-macosx_10_9_x86_64.whl", hash = "sha256:4499055547087d7ef7e8a754f09c2c4f1470297ae3e5490363dba66c75501b21"},
+    {file = "torch-1.10.0-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:ab0cf330714c8f79a837c04784a7a5658b014cf5a4ca527e7b710155ae519cdf"},
+    {file = "torch-1.10.0-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:e01ba5946267014abfdb30248bcdbd457aaa20cff749febe7fc191e5ae096af4"},
+    {file = "torch-1.10.0-cp38-cp38-win_amd64.whl", hash = "sha256:9013002adcb42bac05dcdbf0a03dd9f6bb5d7ab8b9817041c1176a014870786b"},
+    {file = "torch-1.10.0-cp38-none-macosx_10_9_x86_64.whl", hash = "sha256:aef7afb62e9b174b4e0e5e1e4a42e3bab3b8490a668d666f62f7d4517559fbf2"},
+    {file = "torch-1.10.0-cp38-none-macosx_11_0_arm64.whl", hash = "sha256:d6185827b285780653cdd81d77a09fdca76a5b190d5986d552be2a5c442cfaa4"},
+    {file = "torch-1.10.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:d82e68302c9b5c76ed585e04d61be0ca2184f70cb8ffeba8610570609ad5d7c9"},
+    {file = "torch-1.10.0-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:e5822200bf80a1495ad98a2bb41803eeba4a85ce373e35fc65765f7f888f5374"},
+    {file = "torch-1.10.0-cp39-cp39-win_amd64.whl", hash = "sha256:ca2c88fa4376e2648785029ab108e6e7abd784eb6535fc6036004b9254f9f7c1"},
+    {file = "torch-1.10.0-cp39-none-macosx_10_9_x86_64.whl", hash = "sha256:d6ef87470b44df9970e84542547d5ba7720bb89616602441df555a39b124e2bc"},
+    {file = "torch-1.10.0-cp39-none-macosx_11_0_arm64.whl", hash = "sha256:eea675ec01ec4b4a0655fd2984f166a5ca3b933dae6ad4eb4e52eba7026dc176"},
 ]
 tqdm = [
     {file = "tqdm-4.62.3-py2.py3-none-any.whl", hash = "sha256:8dd278a422499cd6b727e6ae4061c40b48fce8b76d1ccbf5d34fca9b7f925b0c"},
