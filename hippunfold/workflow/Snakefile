@@ -67,7 +67,7 @@ if 'hippb500' in config['modality']:
     include: 'rules/preproc_hippb500.smk'
 
 include: 'rules/autotop.smk'
-include: 'rules/compose_warps.smk'
+include: 'rules/warps.smk'
 include: 'rules/shape_inject.smk'
 include: 'rules/gifti.smk'
 include: 'rules/subfields.smk'
