@@ -13,7 +13,7 @@ rule create_warps:
     output:
         warp_unfold2native = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi,Lflip|R}',from_='unfold',to='corobl',mode='surface'),
         warp_native2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi,Lflip|R}',from_='corobl',to='unfold',mode='surface'),
-        warpitk_unfold2native_nofix = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi,Lflip|R}',from_='unfold',to='corobl',desc='nofix',mode='image'),
+        warpitk_unfold2native = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi,Lflip|R}',from_='unfold',to='corobl',desc='nofix',mode='image'),
 
         warpitk_native2unfold = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi,Lflip|R}',from_='corobl',to='unfold',mode='image')
     group: 'subj'
