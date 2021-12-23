@@ -59,7 +59,7 @@ rule calc_unfold_template_coords:
 rule constrain_surf_to_bbox:
     input:
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi}', **config['subj_wildcards']),
-        ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        ref_nii = bids(root='work',space='unfold',datatype='seg_{modality}',suffix='refvol.nii.gz',**config['subj_wildcards']),
     output:
         gii = bids(root='work',datatype='surf_{modality}',den='{density}',suffix='{surfname}.surf.gii',desc='constrainbbox', space='unfolded',hemi='{hemi}', **config['subj_wildcards'])
     group: 'subj'
