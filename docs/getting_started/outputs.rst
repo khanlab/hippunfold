@@ -1,7 +1,6 @@
 Outputs of hippunfold
 =====================
 
-
 The ``results`` folder is a BIDS-derivatives dataset that contains the pre-processed anatomicals used for the segmentation, segmentatioons and hippocampal coordinate images, and HCP-style surfaces of the hippocampus in native and unfolded configurations::
 
     results/
@@ -15,7 +14,6 @@ The ``results`` folder is a BIDS-derivatives dataset that contains the pre-proce
 Volumetric outputs
 ------------------
 
-
 Anatomical images that have been non-uniformity corrected, motion-corrected, averaged and registered to the ``T1w`` space are placed in each subject's ``anat`` subfolder::
 
     sub-{subject}
@@ -28,24 +26,61 @@ Segmentations are derived from the U-net segmentation, which is by default perfo
 
     sub-{subject}
      └── seg_T2w
-         ├── sub-{subject}_dir-{AP,PD,IO}_hemi-{L,R}_space-cropT1w_coords.nii.gz
+         ├── sub-{subject}_dir-{AP,PD,IO}_hemi-{L,R}_space-cropT1w_desc-laplace_coords.nii.gz
          ├── sub-{subject}_hemi-{L,R}_space-cropT1w_desc-preproc_T2w.nii.gz
          └── sub-{subject}_hemi-{L,R}_space-{T1w,cropT1w,unfold}_desc-subfields_dseg.nii.gz
 
 Images in this folder are provided in the ``T1w`` space (same resolution and FOV as the ``T1w`` image, as well as in a 0.3mm upsampled FOV cropped around each hippocampus, but still aligned to the ``T1w`` image, which is denoted as the ``cropT1w`` space. 
 
-Image Transforms
-^^^^^^^^^^^^^^^^
+For example, the following Image shows a whole-brain T1w image, a ``space-cropT1w`` overlay of the upsampled T2w image, and an output subfield segmentation (colour).
 
-ITK transforms to warp images from the ``T1w`` space to the ``unfold`` space are provided for each hippocampus::
+.. image:: ../images/T1-T2-subfields_sag.png
+  :width: 600
+
+
+Surface-based GIFTI outputs
+---------------------------
+
+Hippunfold produces HCP-style surface-based data in GIFTI format. Similar to the volumetric segmentation data, these files are found in a subfolder named according to the modality used to perform the segmentation, ``surf_{modality}``, which is ``surf_T2w`` by default.
+
+Surface meshes (geometry files) are in ``.surf.gii`` format, and are provided in both the native space (``space-T1w``) and the unfolded space (``space-unfolded``). In each space, there are ``inner``, ``midthickness``, and ``outer`` surfaces, which correspond to ``white``, ``midthickness``, and ``pial`` for cortical surfaces::
 
     sub-{subject}
-     └── seg_T2w
-         └── sub-{subject}_hemi-{L,R}_from-T1w_to-unfold_mode-image_xfm.nii.gz
+     └── surf_T2w
+         └── sub-{subject}_hemi-{L,R}_space-{T1w,unfolded}_den-{density}_{inner,midthickness,outer}.surf.gii
+ 
+The following shows surfaces ``inner``, ``midthickness``, and ``outer`` in yellow, orange, and red, respectively.
 
-This is an ITK transform that can transform any image that is in ``T1w`` space (can be any resolution and FOV, as long as aligned to ``T1w``), to the ``unfold`` hippocampal volume space. You can use the warp itself as a reference image, e.g.::
+.. image:: ../images/inner-mid-outer_sag.png
+  :width: 600
 
-    antsApplyTransforms -i sub-001_space-T1w_FA.nii.gz -o sub-001_hemi-L_space-unfold_FA.nii.gz -t sub-001_hemi-L_from-T1w_to-unfold_mode-image_xfm.nii.gz -r sub-001_hemi-L_from-T1w_to-unfold_mode-image_xfm.nii.gz -v
+Surfaces are provided in different density configurations, and are labelled based on the approximate number of vertices in each. The default densities are `7k` and `2k`, which have approximate vertex spacing of 0.5mm and 1mm respectively. There is also a `400` surface which has 2mm spacing (suitable for lower-resolution BOLD data). Previous versions of hippunfold exclusively used a `32k` template surface, formed by a 254x126 grid in the unfolded space, however a downside of this template is that it results in very non-uniform vertex spacing when transformed to the native space.  The newer `7k`, `2k` and `400` surfaces are designed to have closer to uniform vertex spacing when transformed. 
+
+This is illustrated in the the following ``den-2k`` mesh in folded and unfolded space. 
+
+.. image:: ../images/mesh-foldedunfolded2k.png
+  :width: 800
+
+
+All surfaces of the same density (e.g. `2k`), in both ``space-T1w`` and ``space-unfolded``, share the same mesh topology and have corresponding vertices with each other. The vertex locations for unfolded surfaces are identical for all subjects as well (note that this of course is not the case for the ``space-T1w`` surfaces). 
+
+In addition to the geometry files, surface-based shape metrics are provided in ``.shape.gii`` format. The thickness, curvature and surface area are computed using the same methods as cortical surfaces, based on the surface geometry files, and are provided in the ``T1w`` space. The gyrification metric is the ratio of native to unfolded surface area, or equivalently, the scaling or distortion factor when unfolding::
+
+    sub-{subject}
+     └── surf_T2w
+         └── sub-{subject}_hemi-{L,R}_space-T1w_den-{density}_{thickness,curvature,surfarea,gyrification}.shape.gii
+
+These metrics are shown in both folded and unfolded space in the images below. Note that these results are from group-averaged data and so individual subject maps may show considerably more variability. 
+
+.. image:: ../images/metrics.png
+  :width: 800
+
+Finally, these files are packaged together for easy viewing in Connectome Workbench, ``wb_view``, in the following ``.spec`` files, for each hemisphere separately, and combined::
+
+    sub-{subject}
+     └── surf_T2w
+         ├── sub-{subject}_hemi-{L,R}_den-{density}_hippunfold.spec
+         └── sub-{subject}_den-{density}_hippunfold.spec
 
 
 Subfield segmentations
@@ -69,45 +104,32 @@ index   name                abbreviation
 Coordinate images
 ^^^^^^^^^^^^^^^^^
 
-Hippunfold also provides images that represent anatomical gradients along the 3 principal axes of the hippocampus, longitudinal from anterior to posterior, lamellar from proximal (dentate gyrus) to distal (subiculum), and laminar from inner (SRLM) to outer. These are provided in the images suffixed with ``coords.nii.gz`` with the direction indicated by ``dir-{direction}`` as ``AP``, ``PD`` or ``IO``, and intensities from 0 to 100, e.g. 0 representing the Anterior end and 100 the Posterior end.
+Hippunfold also provides images that represent anatomical gradients along the 3 principal axes of the hippocampus, longitudinal from anterior to posterior, lamellar from proximal (dentate gyrus) to distal (subiculum), and laminar from inner (SRLM) to outer. These are provided in the images suffixed with ``coords.nii.gz`` with the direction indicated by ``dir-{direction}`` as ``AP``, ``PD`` or ``IO``, and intensities from 0 to 1, e.g. 0 representing the Anterior end and 1 the Posterior end.
+
+Here is an example showing coronal slices of the hippocampus with the PD, IO, and AP (sagittal slice) overlaid. 
+
+.. image:: ../images/laplace.png
+  :width: 600
+
+Note that these images have been resampled to ``space-corobl`` which is the space in which most processing is done internally. These can be seen in the ``work/`` output directory or specified as a possible output space. 
 
 
+Image Transforms
+^^^^^^^^^^^^^^^^
 
-Surface-based GIFTI outputs
----------------------------
-
-Hippunfold produces HCP-style surface-based data in GIFTI format. Similar to the volumetric segmentation data, these files are found in a subfolder named according to the modality used to perform the segmentation, ``surf_{modality}``, which is ``surf_T2w`` by default.
-
-
-
-Surface meshes (geometry files) are in ``.surf.gii`` format, and are provided in both the native space (``space-T1w``) and the unfolded space (``space-unfolded``). In each space, there are ``inner``, ``midthickness``, and ``outer`` surfaces, which correspond to ``white``, ``midthickness``, and ``pial`` for cortical surfaces::
-
-    sub-{subject}
-     └── surf_T2w
-         └── sub-{subject}_hemi-{L,R}_space-{T1w,unfolded}_den-{density}_{inner,midthickness,outer}.surf.gii
- 
-Surfaces are provided in different density configurations, and are labelled based on the approximate number of vertices in each. The default densities are `7k` and `2k`, which have approximate vertex spacing of 0.5mm and 1mm respectively. There is also a `400` surface which has 2mm spacing (suitable for lower-resolution BOLD data). Previous versions of hippunfold exclusively used a `32k` template surface, formed by a 254x126 grid in the unfolded space, however a downside of this template is that it results in very non-uniform vertex spacing when transformed to the native space.  The newer `7k`, `2k` and `400` surfaces are designed to have closer to uniform vertex spacing when transformed. 
-
-All surfaces of the same density (e.g. `2k`), in both ``space-T1w`` and ``space-unfolded``, share the same mesh topology and have corresponding vertices with each other. The vertex locations for unfolded surfaces are identical for all subjects as well (note that this of course is not the case for the ``space-T1w`` surfaces). 
-
-In addition to the geometry files, surface-based shape metrics are provided in ``.shape.gii`` format. The thickness, curvature and surface area are computed using the same methods as cortical surfaces, based on the surface geometry files, and are provided in the ``T1w`` space. The gyrification metric is the ratio of native to unfolded surface area, or equivalently, the scaling or distortion factor when unfolding::
+ITK transforms to warp images from the ``T1w`` space to the ``unfold`` space are provided for each hippocampus::
 
     sub-{subject}
-     └── surf_T2w
-         └── sub-{subject}_hemi-{L,R}_space-T1w_den-{density}_{thickness,curvature,surfarea,gyrification}.shape.gii
+     └── seg_T2w
+         └── sub-{subject}_hemi-{L,R}_from-T1w_to-unfold_mode-image_xfm.nii.gz
 
-Finally, these files are packaged together for easy viewing in Connectome Workbench, ``wb_view``, in the following ``.spec`` files, for each hemisphere separately, and combined::
+This is an ITK transform that can transform any image that is in ``T1w`` space (can be any resolution and FOV, as long as aligned to ``T1w``), to the ``unfold`` hippocampal volume space. You can use the warp itself as a reference image, e.g.::
 
-    sub-{subject}
-     └── surf_T2w
-         ├── sub-{subject}_hemi-{L,R}_den-{density}_hippunfold.spec
-         └── sub-{subject}_den-{density}_hippunfold.spec
-
-
-CIFTI outputs
--------------
-
-**Coming soon:** functionality to create CIFTI data based on functional imaging data
+    antsApplyTransforms -d 3 \
+    -i sub-001_space-T1w_FA.nii.gz \
+    -o sub-001_hemi-L_space-unfold_FA.nii.gz \
+    -t sub-001_hemi-L_from-T1w_to-unfold_mode-image_xfm.nii.gz \
+    -r sub-001_hemi-L_from-T1w_to-unfold_mode-image_xfm.nii.gz
         
 
 
@@ -125,6 +147,8 @@ The ``config`` folder contains the hippunfold ``snakebids.yml`` config file, and
 
 Workflow steps that write logs to file are stored in the ``logs`` subfolder, with file names based on the rule wildcards (e.g. subject, hemi, etc..).
 
-Intermediate files are stored in the ``work`` folder. These files and folders, similar to results, are generally  named according to BIDS.
+Intermediate files are stored in the ``work`` folder. These files and folders, similar to results, are generally named according to BIDS. By default this folder is compressed (``.tar.gz``) upon completion to save space. 
+
+
 
 

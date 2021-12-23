@@ -20,7 +20,9 @@ Here is an example of what the input directory might look like::
 
 This can be unfolded with the command::
 
-  hippunfold - PATH_TO_OUTPUT_DIR participant --modality cropseg --path_cropseg exvivo/sub-{subject}/sub-{subject}_hemi-{hemi}_desc-hippo_dseg.nii.gz --hemi R --skip_inject_template_labels
+  hippunfold - PATH_TO_OUTPUT_DIR participant --modality cropseg \
+  --path_cropseg exvivo/sub-{subject}/sub-{subject}_hemi-{hemi}_desc-hippo_dseg.nii.gz \
+  --hemi R --skip_inject_template_labels
   
 Explanation: ``--modality cropseg`` informs HippUnfold that the input manual segmentation should not be resampled and UNet does not need to be run. Because of a limitation in bids parsing for the `hemi` entity, we need to use the generic path input, `--path_cropseg` in this case, making sure we use the `{subject}` and `{hemi}` wildcards in the filename. Output files will be named with ``space-corobl`` because HippUnfold is coded to effectively treat all files as already being in this space. We need the ``--hemi R`` to prevent HippUnfold looking for both hemispheres. Finally, because this segmentation was performed manually on very high resolution data, we can optionally consider skipping the template shape injection step with ``--skip_inject_template_labels``. Template shape injection can fix minor errors in segmentation from UNet or from an imperfect manual rater, at the cost of smoothing out some details of the hippocampus due to the fact that it uses deformable registration with inherent smoothness contraints. 
 
@@ -38,7 +40,9 @@ In this example, we have a single hemisphere that was scanned ex-vivo at a nearl
       
 Note that only the last file is needed for unfolding::
 
-  hippunfold - PATH_TO_OUTPUT_DIR participant --output_spaces corobl --hemi R --no_reg_template --path_T2w PATH_TO_EXVIVO_DIR/sub-001/sub-001_hemi-R_desc-exvivo_space-CITI168_T2w.nii.gz --output_spaces corobl
+  hippunfold - PATH_TO_OUTPUT_DIR participant --output_spaces corobl --hemi R --no_reg_template \
+  --path_T2w PATH_TO_EXVIVO_DIR/sub-001/sub-001_hemi-R_desc-exvivo_space-CITI168_T2w.nii.gz \
+  --output_spaces corobl
 
 Here we need to use ``--path_T2w`` to specify which input should be used, and ``--no_reg_template`` to specify that it is already in ``space-CITI168``. In this case, we also specified ``--output_spaces corobl``. This is not needed, but is useful when we are interested in only the hippocampus as ``space-corobl`` is higher resolution and cropped more nicely around the hippocampus then the original scan, making it a good space to perform subsequent analyses. Alternatively, outputs can be transformed back to the original space using the inverted transform ``sub-001_hemi-R_affine-exvivo-to-CITI168_xfm.txt``.
 
