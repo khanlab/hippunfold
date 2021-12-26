@@ -172,6 +172,7 @@ def get_final_qc():
     qc = []
     #right now can only do qc from cropT1w space 
     if 'cropT1w' in config['output_spaces']:
+
         qc.extend(
             expand(
                 bids(
