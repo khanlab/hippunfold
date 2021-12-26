@@ -122,7 +122,19 @@ def get_final_transforms():
             space=output_ref,
             hemi=config['hemi'],
             allow_missing=True))
-
+    xfms.extend(expand(
+        bids(
+                root='results',
+                datatype='seg',
+                **config['subj_wildcards'],
+                suffix='xfm.nii.gz',
+                hemi='{hemi}',
+                from_='{space}',
+                to='unfold',
+                mode='image'),
+            space=output_ref,
+            hemi=config['hemi'],
+            allow_missing=True))
     return xfms
 
 
