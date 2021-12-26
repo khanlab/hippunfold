@@ -93,7 +93,9 @@ def get_final_transforms():
     else:
         output_ref = 'corobl'
 
-    return expand(
+    xfms = []
+
+    xfms.extend(expand(
         bids(
                 root='results',
                 datatype='seg',
@@ -105,7 +107,23 @@ def get_final_transforms():
                 mode='image'),
             space=output_ref,
             hemi=config['hemi'],
-            allow_missing=True)
+            allow_missing=True))
+
+    xfms.extend(expand(
+        bids(
+                root='results',
+                datatype='seg_{modality}',
+                **config['subj_wildcards'],
+                suffix='xfm.nii.gz',
+                hemi='{hemi}',
+                from_='unfold',
+                to='{space}',
+                mode='image'),
+            space=output_ref,
+            hemi=config['hemi'],
+            allow_missing=True))
+
+    return xfms
 
 
 def get_final_anat():

@@ -4,10 +4,9 @@ hemi_to_structure = {'L': 'CORTEX_LEFT', 'Lflip': 'CORTEX_LEFT', 'R': 'CORTEX_RI
 surf_to_secondary_type = {'midthickness': 'MIDTHICKNESS', 'inner': 'PIAL', 'outer': 'GRAY_WHITE'}
 
 
-rule warp_gii_unfoldtemplate2unfold: 
-    """warp from template space to subj unfolded"""
+rule cp_template_to_unfold:
+    """cp template unfold surf to subject"""
     input: 
-        warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfoldtemplate2unfold.nii',desc='cropped',space='corobl',hemi='{hemi}'),
         gii = os.path.join(config['snakemake_dir'],'resources','unfold_template','tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii')
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
@@ -18,7 +17,7 @@ rule warp_gii_unfoldtemplate2unfold:
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
-        'wb_command -surface-apply-warpfield {input.gii} {input.warp} {output.gii} && '
+        'cp {input.gii} {output.gii} && '
         'wb_command -set-structure {output.gii} {params.structure_type} -surface-type {params.surface_type}'
             ' -surface-secondary-type {params.secondary_type}'
 
@@ -53,8 +52,6 @@ rule calc_unfold_template_coords:
         "wb_command -set-structure {output.coords_gii} {params.structure_type}"
 
        
-        
-   
 
     
 
@@ -62,7 +59,7 @@ rule calc_unfold_template_coords:
 rule constrain_surf_to_bbox:
     input:
         gii = bids(root='work',datatype='surf',den='{density}',suffix='{surfname}.surf.gii', space='unfolded',hemi='{hemi}', **config['subj_wildcards']),
-        ref_nii = bids(root='work',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        ref_nii = bids(root='work',space='unfold',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards']),
     output:
         gii = bids(root='work',datatype='surf',den='{density}',suffix='{surfname}.surf.gii',desc='constrainbbox', space='unfolded',hemi='{hemi}', **config['subj_wildcards'])
     group: 'subj'
@@ -71,7 +68,7 @@ rule constrain_surf_to_bbox:
 #warp from subj unfolded to corobl
 rule warp_gii_unfold2native: 
     input: 
-        warp = bids(root='work',**config['subj_wildcards'],suffix='autotop/Warp_unfold2native.nii',desc='cropped',space='corobl',hemi='{hemi}'),
+        warp = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='unfold',to='corobl',mode='surface'),
         gii = bids(root='work',datatype='surf',den='{density}',suffix='{surfname}.surf.gii', desc='constrainbbox',space='unfolded',hemi='{hemi}', **config['subj_wildcards'])
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
