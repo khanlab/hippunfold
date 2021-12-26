@@ -24,6 +24,7 @@ interp_method = snakemake.params.interp_method
 #load unfolded coordinate map
 #unfold_ref_nib = nib.load(snakemake.input.unfold_ref_nii)
 unfold_phys_coords_nib = nib.load(snakemake.input.unfold_phys_coords_nii)
+native_ref_coords_nib = nib.load(snakemake.input.native_ref_coords_nii)
 
 #load laplace coords
 coord_ap_nib = nib.load(snakemake.input.coords_ap)
@@ -250,8 +251,8 @@ warp_native2unfold_nib.to_filename(snakemake.output.warp_native2unfold)
 #and save ITK warp too
 f = convert_warp_to_itk(native_to_unfold)
 warpitk_unfold2native_nib = nib.Nifti1Image(f.astype(dt),
-                                        coord_ap_nib.affine,
-                                        coord_ap_nib.header)
+                                        native_ref_coords_nib.affine,
+                                        native_ref_coords_nib.header)
 warpitk_unfold2native_nib.to_filename(snakemake.output.warpitk_unfold2native)
 
 
