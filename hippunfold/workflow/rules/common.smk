@@ -112,7 +112,7 @@ def get_final_transforms():
     xfms.extend(expand(
         bids(
                 root='results',
-                datatype='seg_{modality}',
+                datatype='seg',
                 **config['subj_wildcards'],
                 suffix='xfm.nii.gz',
                 hemi='{hemi}',
