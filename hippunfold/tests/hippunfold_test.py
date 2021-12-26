@@ -5,7 +5,7 @@ import tempfile
 def test_dry_runs(script_runner):
     os.environ['HIPPUNFOLD_CACHE_DIR'] = os.path.join(os.getcwd(),'test_data/fake_models')
     with tempfile.TemporaryDirectory() as output_dir:
-        ret = script_runner.run('hippunfold', 'test_data/bids_singleT2w',output_dir,'participant','-np')
+        ret = script_runner.run('hippunfold', 'test_data/bids_singleT2w',output_dir,'participant','-np','--modality','T2w')
         assert ret.success
 
     #test help usage
@@ -14,15 +14,15 @@ def test_dry_runs(script_runner):
         
     #test one hemi at a time
     with tempfile.TemporaryDirectory() as output_dir:
-        ret = script_runner.run('hippunfold', 'test_data/bids_singleT2w',output_dir,'participant','-np','--hemi','R')
+        ret = script_runner.run('hippunfold', 'test_data/bids_singleT2w',output_dir,'participant','-np','--hemi','R','--modality','T2w')
         assert ret.success
     
     with tempfile.TemporaryDirectory() as output_dir:
-        ret = script_runner.run('hippunfold', 'test_data/bids_singleT2w',output_dir,'participant','-np','--hemi','L')
+        ret = script_runner.run('hippunfold', 'test_data/bids_singleT2w',output_dir,'participant','-np','--hemi','L','--modality','T2w')
         assert ret.success
 
     with tempfile.TemporaryDirectory() as output_dir:
-        ret = script_runner.run('hippunfold', 'test_data/bids_multiT2w',output_dir,'participant','-np')
+        ret = script_runner.run('hippunfold', 'test_data/bids_multiT2w',output_dir,'participant','-np','--modality','T2w')
         assert ret.success
 
     with tempfile.TemporaryDirectory() as output_dir:
@@ -38,7 +38,7 @@ def test_dry_runs(script_runner):
         assert ret.success
 
     with tempfile.TemporaryDirectory() as output_dir:
-        ret = script_runner.run('hippunfold', 'test_data/bids_singleT2w_longitudinal',output_dir,'participant','-np')
+        ret = script_runner.run('hippunfold', 'test_data/bids_singleT2w_longitudinal',output_dir,'participant','-np','--modality','T2w')
 
     with tempfile.TemporaryDirectory() as output_dir:
         ret = script_runner.run('hippunfold', 'test_data/bids_segT2w',output_dir,'participant','-np','--modality','segT2w')

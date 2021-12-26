@@ -1,14 +1,14 @@
 
 
 def get_input_splitseg_for_shape_inject(wildcards):
-    if wildcards.modality == 'cropseg':
+    if config['modality'] == 'cropseg':
         seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dsegsplit',desc='cropped',space='corobl',hemi='{hemi}').format(**wildcards)
  
-    elif get_modality_key(wildcards.modality) == 'seg':
-        modality_suffix = get_modality_suffix(wildcards.modality)
+    elif get_modality_key(config['modality']) == 'seg':
+        modality_suffix = get_modality_suffix(config['modality'])
         seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dsegsplit',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(**wildcards, modality_suffix=modality_suffix)
     else:
-        seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dsegsplit',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
+        seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dsegsplit',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
     return seg
 
 rule prep_segs_for_greedy:
@@ -82,12 +82,12 @@ rule template_shape_reg:
         greedy_opts = get_inject_scaling_opt,
         img_pairs = get_image_pairs,
     output:
-        matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg_{modality}',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi,Lflip|R}'),
-        warp = bids(root='work',**config['subj_wildcards'],suffix='xfm.nii.gz',datatype='seg_{modality}',desc='greedy',from_='template',to='subject',space='corobl',hemi='{hemi,Lflip|R}'),
+        matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi,Lflip|R}'),
+        warp = bids(root='work',**config['subj_wildcards'],suffix='xfm.nii.gz',datatype='seg',desc='greedy',from_='template',to='subject',space='corobl',hemi='{hemi,Lflip|R}'),
     group: 'subj'
     container: config['singularity']['autotop'] 
     threads: 8
-    log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',modality='{modality}',suffix='templateshapereg.txt')
+    log: bids(root='logs',**config['subj_wildcards'],space='corobl',hemi='{hemi,Lflip|R}',suffix='templateshapereg.txt')
     shell: 
         #affine (with moments), then greedy
         'greedy -threads {threads} {params.general_opts} {params.affine_opts} {params.img_pairs} -o {output.matrix}  &> {log} && '
@@ -97,12 +97,12 @@ rule template_shape_inject:
     input:
         template_seg = bids(root='work',datatype='anat',space='template',**config['subj_wildcards'],desc='hipptissue',suffix='dseg.nii.gz'),
         subject_seg = get_input_for_shape_inject,
-        matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg_{modality}',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi}'),
-        warp = bids(root='work',**config['subj_wildcards'],suffix='xfm.nii.gz',datatype='seg_{modality}',desc='greedy',from_='template',to='subject',space='corobl',hemi='{hemi}'),
+        matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi}'),
+        warp = bids(root='work',**config['subj_wildcards'],suffix='xfm.nii.gz',datatype='seg',desc='greedy',from_='template',to='subject',space='corobl',hemi='{hemi}'),
     params:
         interp_opt = '-ri LABEL 0.2vox' 
     output:
-        inject_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='inject',space='corobl',hemi='{hemi,Lflip|R}'),
+        inject_seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='inject',space='corobl',hemi='{hemi,Lflip|R}'),
     group: 'subj'
     container: config['singularity']['autotop'] 
     threads: 8 
@@ -113,12 +113,12 @@ rule inject_init_laplace_coords:
     input:
         coords = os.path.join(config['snakemake_dir'],'resources','tpl-upenn','tpl-upenn_dir-{dir}_coords.nii.gz'),
         subject_seg = get_input_for_shape_inject,
-        matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg_{modality}',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi}'),
-        warp = bids(root='work',**config['subj_wildcards'],suffix='xfm.nii.gz',datatype='seg_{modality}',desc='greedy',from_='template',to='subject',space='corobl',hemi='{hemi}'),
+        matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi}'),
+        warp = bids(root='work',**config['subj_wildcards'],suffix='xfm.nii.gz',datatype='seg',desc='greedy',from_='template',to='subject',space='corobl',hemi='{hemi}'),
     params:
         interp_opt = '-ri NN'
     output:
-        init_coords = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],dir='{dir}',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
+        init_coords = bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
     group: 'subj'
     container: config['singularity']['autotop'] 
     threads: 8 
@@ -129,12 +129,12 @@ rule inject_init_laplace_coords:
 
 rule reinsert_subject_labels:
     input:
-        inject_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='inject',space='corobl',hemi='{hemi}'),
+        inject_seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='inject',space='corobl',hemi='{hemi}'),
         subject_seg = get_input_for_shape_inject,
     params:
         labels = ' '.join(str(label) for label in config['shape_inject']['labels_reinsert']),
     output:
-        postproc_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi,Lflip|R}'),
+        postproc_seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi,Lflip|R}'),
     group: 'subj'
     container: config['singularity']['autotop']
     shell: 
@@ -143,9 +143,9 @@ rule reinsert_subject_labels:
 rule create_PD_sink:
     """ this rule is a WIP and shouldn't be used yet"""
     input:
-        lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='reinsert',space='corobl',hemi='{hemi}'),
+        lbl = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='reinsert',space='corobl',hemi='{hemi}'),
     output:
-        lbl = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='withPDsink',space='corobl',hemi='{hemi}'),
+        lbl = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='withPDsink',space='corobl',hemi='{hemi}'),
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -159,9 +159,9 @@ rule create_PD_sink:
 
 rule unflip_postproc:
     input:
-        nii = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='postproc',space='corobl',hemi='{hemi}flip', **config['subj_wildcards']),
+        nii = bids(root='work',datatype='seg',suffix='dseg.nii.gz', desc='postproc',space='corobl',hemi='{hemi}flip', **config['subj_wildcards']),
     output:
-        nii = bids(root='work',datatype='seg_{modality}',suffix='dseg.nii.gz', desc='postproc',space='corobl',hemi='{hemi,L}', **config['subj_wildcards']),
+        nii = bids(root='work',datatype='seg',suffix='dseg.nii.gz', desc='postproc',space='corobl',hemi='{hemi,L}', **config['subj_wildcards']),
     container: config['singularity']['autotop']
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'

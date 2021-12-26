@@ -2,12 +2,12 @@ import re
 from appdirs import AppDirs
 
 def get_nnunet_input (wildcards):
-    if wildcards.modality == 'T2w':
+    if config['modality'] == 'T2w':
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
-    elif wildcards.modality == 'T1w':
+    elif config['modality'] == 'T1w':
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
-    elif wildcards.modality == 'hippb500':
-        nii = bids(root='work',datatype='dwi',hemi='{hemi}',desc='cropped',space='corobl',suffix='b500.nii.gz',**config['subj_wildcards'] ),
+    elif config['modality'] == 'hippb500':
+        nii = bids(root='work',datatype='dwi',hemi='{hemi}',desc='cropped',space='corobl',suffix='b500.nii.gz',**config['subj_wildcards'] )
     else:
         raise ValueError('modality not supported for nnunet!')
     return nii
@@ -24,9 +24,10 @@ def get_model_tar (wildcards):
     if config['force_nnunet_model']:
         model_name = config['force_nnunet_model']
     else:
-        model_name = wildcards.modality
+        model_name = config['modality']
 
     local_tar = config['nnunet_model'][model_name]
+    
     dl_path = os.path.abspath(os.path.join(download_dir,local_tar))
     if os.path.exists(dl_path):
         return dl_path
@@ -66,7 +67,7 @@ rule run_inference:
         chkpnt = parse_chkpnt_from_tar,
         disable_tta = '' if config['nnunet_disable_tta'] else '--disable_tta'
     output: 
-        nnunet_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,Lflip|R}')
+        nnunet_seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,Lflip|R}')
     shadow: 'minimal' 
     threads: 16
     resources:
@@ -86,9 +87,9 @@ rule run_inference:
 rule unflip_nnunet_nii:
     """Unflip the Lflip nnunet seg"""
     input:
-        nnunet_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}flip')
+        nnunet_seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}flip')
     output:
-        nnunet_seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,L}')
+        nnunet_seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi,L}')
     container: config['singularity']['autotop']
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'
@@ -97,9 +98,9 @@ rule unflip_nnunet_nii:
 
 
 def get_f3d_ref (wildcards):
-    if wildcards.modality == 'T2w':
+    if config['modality'] == 'T2w':
         nii = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref']),
-    elif wildcards.modality == 'T1w':
+    elif config['modality'] == 'T1w':
         nii = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_refT1w']),
     else:
         raise ValueError('modality not supported for nnunet!')
@@ -108,12 +109,12 @@ def get_f3d_ref (wildcards):
 rule qc_nnunet_f3d:
     input:
         img = get_nnunet_input,
-        seg = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}'),
+        seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}'),
         ref = get_f3d_ref,
     output:
-        cpp = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='cpp.nii.gz',desc='f3d',space='corobl',hemi='{hemi}'),
-        res = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='{modality}.nii.gz',desc='f3d',space='template',hemi='{hemi}'),
-        res_mask = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='mask.nii.gz',desc='f3d',space='template',hemi='{hemi}')
+        cpp = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='cpp.nii.gz',desc='f3d',space='corobl',hemi='{hemi}'),
+        res = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='{modality}.nii.gz'.format(modality=config['modality']),desc='f3d',space='template',hemi='{hemi}'),
+        res_mask = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='mask.nii.gz',desc='f3d',space='template',hemi='{hemi}')
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -122,15 +123,14 @@ rule qc_nnunet_f3d:
 
 rule qc_nnunet_dice:
     input:
-        res_mask = bids(root='work',datatype='seg_{modality}',**config['subj_wildcards'],suffix='mask.nii.gz',desc='f3d',space='template',hemi='{hemi}'),
+        res_mask = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='mask.nii.gz',desc='f3d',space='template',hemi='{hemi}'),
         ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['Mask_crop'])
     params:
         hipp_lbls = [1,2,7,8]
     output: 
-        dice = report(bids(root='results',datatype='qc',suffix='dice.tsv', desc='unetf3d',from_='{modality}',hemi='{hemi}', **config['subj_wildcards']),
+        dice = report(bids(root='results',datatype='qc',suffix='dice.tsv', desc='unetf3d',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/nnunet_qc.rst',
-                category='Segmentation QC',
-                subcategory='nnunet from {modality}')
+                category='Segmentation QC')
     group: 'subj'
     script: '../scripts/dice.py'
 
