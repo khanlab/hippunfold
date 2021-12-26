@@ -21,7 +21,13 @@ def get_model_tar (wildcards):
         dirs = AppDirs('hippunfold','khanlab')
         download_dir = dirs.user_cache_dir
 
-    local_tar = config['nnunet_model'][config['modality']]
+    if config['force_nnunet_model']:
+        model_name = config['force_nnunet_model']
+    else:
+        model_name = config['modality']
+
+    local_tar = config['nnunet_model'][model_name]
+    
     dl_path = os.path.abspath(os.path.join(download_dir,local_tar))
     if os.path.exists(dl_path):
         return dl_path
