@@ -7,7 +7,7 @@ def get_nnunet_input (wildcards):
     elif wildcards.modality == 'T1w':
         nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     elif wildcards.modality == 'hippb500':
-        nii = bids(root='work',datatype='dwi',hemi='{hemi}',desc='cropped',space='corobl',suffix='b500.nii.gz',**config['subj_wildcards'] )
+        nii = bids(root='work',datatype='dwi',hemi='{hemi}',desc='cropped',space='corobl',suffix='b500.nii.gz',**config['subj_wildcards'] ),
     else:
         raise ValueError('modality not supported for nnunet!')
     return nii
@@ -21,7 +21,12 @@ def get_model_tar (wildcards):
         dirs = AppDirs('hippunfold','khanlab')
         download_dir = dirs.user_cache_dir
 
-    local_tar = config['nnunet_model'][wildcards.modality]
+    if config['force_nnunet_model']:
+        model_name = config['force_nnunet_model']
+    else:
+        model_name = wildcards.modality
+
+    local_tar = config['nnunet_model'][model_name]
     dl_path = os.path.abspath(os.path.join(download_dir,local_tar))
     if os.path.exists(dl_path):
         return dl_path

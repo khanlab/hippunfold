@@ -134,6 +134,7 @@ parse_args:
       - segT1w
       - segT2w
       - cropseg
+      - neonateT1w
     default: 
       - T2w
  # custom command-line parameters can then be added, these will get added to the config
@@ -158,7 +159,11 @@ parse_args:
     default: False
     action: 'store_true'
 
-   
+  
+  --inject_template_smoothing_factor: 
+    help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
+    default: 1.0
+
 
   --rigid_reg_template:
     help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
@@ -169,6 +174,15 @@ parse_args:
     help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
     default: False
     action: 'store_true'
+
+  --template:
+    choices:
+      - 'CITI168'
+      - 'dHCP'
+    default: 'CITI168'
+    help: 'Set the template to use for registration to coronal oblique. (default: %(default)s)'
+
+
 
   --use_gpu:
     help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
@@ -225,6 +239,18 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --force_nnunet_model:
+    help: 'Force nnunet model to use (expert option). (default: %(default)s)'
+    default: False
+    choices:
+      - T1w
+      - T2w
+      - T1T2w
+      - b1000
+      - trimodal
+      - hippb500
+      - neonateT1w
+
 
 #--- workflow specific configuration -- 
 
@@ -235,7 +261,7 @@ singularity:
   ants: 'docker://kaczmarj/ants:2.3.4'
 
 xfm_identity: resources/identity_xfm.txt
-template: CITI168
+template: dHCP
 template_files:
   CITI168:
     T1w: resources/CITI168/T1w_head_700um.nii.gz
@@ -243,6 +269,15 @@ template_files:
     crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+  dHCP:
+    T1w: resources/tpl-dHCP/cohort-1/tpl-dHCP_cohort-1_res-1_T1w.nii.gz
+    xfm_corobl: resources/tpl-dHCP/cohort-1/tpl-dHCP_cohort-1_to-corobl_affine.txt
+    crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+
+
+
 
 
 rigid_reg_template: False
@@ -258,7 +293,7 @@ nnunet_model:
   T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
   T2w: trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
-
+  neonateT1w: trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
 
 hippdwi_opts:
   resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm
@@ -310,6 +345,8 @@ shape_inject:
   labels_reinsert:
     - 7
   label_smoothing_stdev: '0.5x0.5x0.5mm'
+
+inject_template_smoothing_factor: 1.0
 
 laplace_labels:
   AP: 

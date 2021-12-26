@@ -62,6 +62,16 @@ def get_image_pairs(wildcards, input):
         args.append(template_label) #template is moving
     return ' '.join(args)
 
+def get_inject_scaling_opt(wildcards):
+    """ sets the smoothness of the greedy template shape injection deformation """
+    
+    gradient_sigma = 1.732 * float(config['inject_template_smoothing_factor'])
+    warp_sigma  = 0.7071 * float(config['inject_template_smoothing_factor'])
+
+    return f'-s {gradient_sigma}vox {warp_sigma}vox' 
+   
+
+
 rule template_shape_reg:
     input:
         template_seg = bids(root='work',datatype='anat',space='template',**config['subj_wildcards'],desc='hipptissue',suffix='dsegsplit'),
@@ -69,7 +79,7 @@ rule template_shape_reg:
     params:
         general_opts = '-d 3 -m SSD',
         affine_opts = '-moments 2 -det 1',
-        greedy_opts = '',
+        greedy_opts = get_inject_scaling_opt,
         img_pairs = get_image_pairs,
     output:
         matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg_{modality}',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi,Lflip|R}'),
