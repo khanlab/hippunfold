@@ -77,7 +77,7 @@ rule create_unfold_ref:
         origin = 'x'.join(config['unfold_vol_ref']['origin']),
         orient = config['unfold_vol_ref']['orient']
     output: 
-        nii = bids(root='work',datatype='seg_{modality}',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
+        nii = bids(root='work',datatype='seg',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
     group: 'subj'
     container: config['singularity']['autotop'] 
     shell:
@@ -86,9 +86,9 @@ rule create_unfold_ref:
 #this was unfold_phys_coords.nii in matlab implementation
 rule create_unfold_coord_map:
     input:
-        nii = bids(root='work',datatype='seg_{modality}',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
+        nii = bids(root='work',datatype='seg',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
     output:
-        nii = bids(root='work',datatype='seg_{modality}',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards'])
+        nii = bids(root='work',datatype='seg',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards'])
     group: 'subj'
     container: config['singularity']['autotop'] 
     shell:
