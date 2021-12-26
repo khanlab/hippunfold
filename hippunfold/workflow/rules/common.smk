@@ -123,6 +123,15 @@ def get_final_transforms():
             hemi=config['hemi'],
             allow_missing=True))
 
+    xfms.extend(expand(
+        bids(
+                root='results',
+                datatype='seg_{modality}',
+                **config['subj_wildcards'],
+                suffix='refvol.nii.gz',
+                space='unfold'),
+            allow_missing=True))
+
     return xfms
 
 
