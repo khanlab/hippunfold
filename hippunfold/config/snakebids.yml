@@ -1,7 +1,7 @@
 bids_dir: '../test_data/bids_singleT2w'
 output_dir: 'test_output' #don't use '.'
 
-snakemake_dir: '.' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
+#snakemake_dir: '.' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
 
 #enable printing debug statements during parsing -- disable if generating dag visualization
 debug: False
@@ -392,4 +392,5 @@ use_gpu: False
 skip_coreg: False
 keep_work: False
 skip_inject_template_labels: False
-
+force_nnunet_model: False
+root: results

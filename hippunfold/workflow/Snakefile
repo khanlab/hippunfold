@@ -2,13 +2,10 @@
 
 import snakebids
 from snakebids import bids
-#from snakebids.utils import get_source_path
-
 
 
 configfile: 'config/snakebids.yml'
 
-#config["snakemake_dir"] = get_source_path('../')
 
 #make adjustments to input params:
 # right now hippb500 or cropseg cannot use T1w output space
@@ -48,6 +45,10 @@ wildcard_constraints:
     surfname='[a-zA-Z0-9]+',
     modality='[a-zA-Z0-9]+',
     density='[a-zA-Z0-9]+',
+
+
+root = os.path.join(config["root"], "hippunfold")
+work = os.path.join(config["root"], "work")
 
 
 include: 'rules/common.smk'

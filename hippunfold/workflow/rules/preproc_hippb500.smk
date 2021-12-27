@@ -12,7 +12,7 @@ rule resample_hippdwi_to_template:
         bbox_x = lambda wildcards: config['hippdwi_opts']['bbox_x'][wildcards.hemi],
         bbox_y = config['hippdwi_opts']['bbox_y']
     output:
-        crop_b500 = bids(root='work',datatype='dwi',hemi='{hemi,L|R}',desc='cropped',space='corobl',suffix='b500.nii.gz',**config['subj_wildcards'] )
+        crop_b500 = bids(root=work,datatype='dwi',hemi='{hemi,L|R}',desc='cropped',space='corobl',suffix='b500.nii.gz',**config['subj_wildcards'] )
     group: 'subj'
     shell:
         'c3d {input} -resample {params.resample_dim} -as UPSAMPLED '
@@ -26,9 +26,9 @@ rule resample_hippdwi_to_template:
 
 rule lr_flip_b500:
     input:
-        nii = bids(root='work',datatype='dwi',**config['subj_wildcards'],suffix='b500.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
+        nii = bids(root=work,datatype='dwi',**config['subj_wildcards'],suffix='b500.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     output:
-        nii = bids(root='work',datatype='dwi',**config['subj_wildcards'],suffix='b500.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip'),
+        nii = bids(root=work,datatype='dwi',**config['subj_wildcards'],suffix='b500.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip'),
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -36,8 +36,8 @@ rule lr_flip_b500:
 
 rule cp_b500_to_seg_dir:
     input:
-        nii = bids(root='work',datatype='dwi',**config['subj_wildcards'],suffix='b500.nii.gz',desc='cropped',space='corobl',hemi='{hemi}')
+        nii = bids(root=work,datatype='dwi',**config['subj_wildcards'],suffix='b500.nii.gz',desc='cropped',space='corobl',hemi='{hemi}')
     output:
-        nii = bids(root='work',datatype='seg_hippb500',desc='preproc',suffix='b500.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        nii = bids(root=work,datatype='seg_hippb500',desc='preproc',suffix='b500.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     group: 'subj'
     shell: 'cp {input} {output}'
