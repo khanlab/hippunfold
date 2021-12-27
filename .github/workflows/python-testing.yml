@@ -40,6 +40,8 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test via hippunfold CLI
+      env:
+        HIPPUNFOLD_CACHE_DIR: test_data/fake_models
       run: |
         hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w
         hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
