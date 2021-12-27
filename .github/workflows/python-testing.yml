@@ -41,8 +41,12 @@ jobs:
     - name: Test hippunfold CLI and workflow dry-run
       run: |
         export HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models
+        echo "::group::Single T2w bids dataset"
         ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w
+        echo "::endgroup::"
+        echo "::group::Single T2w bids dataset, right hemi only"
         ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
+        echo "::endgroup::"
         ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
         ./hippunfold/run.py test_data/bids_multiT2w test_out participant -np --modality T2w
         ./hippunfold/run.py test_data/bids_T1w test_out participant -np --modality T1w
