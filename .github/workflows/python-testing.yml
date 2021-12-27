@@ -41,7 +41,7 @@ jobs:
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test via hippunfold CLI
       run: |
-        export HIPPUNFOLD_CACHE_DIR=`pwd test_data/fake_models`
+        export HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models
         ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w
         ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
 
