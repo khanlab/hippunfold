@@ -59,6 +59,8 @@ coord_flat_pd = coord_pd[mask==True]
 coord_flat_io = coord_io[mask==True]
 
 summary('coord_flat_ap',coord_flat_ap)
+summary('coord_flat_pd',coord_flat_pd)
+summary('coord_flat_io',coord_flat_io)
 
 #unravel indices of mask voxels into subscripts...
 (i_L,j_L,k_L) = np.unravel_index(idxgm,sz)  # matlab: [i_L,j_L,k_L]=ind2sub(sz,idxgm);
