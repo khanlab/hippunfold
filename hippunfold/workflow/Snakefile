@@ -15,6 +15,8 @@ configfile: 'config/snakebids.yml'
 if config['modality'] == 'hippb500' or config['modality'] == 'cropseg':
     config['output_spaces'] = ['corobl']
 
+if config['skip_inject_template_labels']:
+    config['autotop_labels'] = ['autotopHipp']
 
 #get list of inputs to limit to (T1w + modalities)
 limit_to_list = set()
