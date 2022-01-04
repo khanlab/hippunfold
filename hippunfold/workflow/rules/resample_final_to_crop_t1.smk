@@ -59,11 +59,11 @@ rule resample_subfields_native_crop:
 
 rule resample_coords_native_crop:
     input:
-        nii = bids(root='work',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        nii = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-{autotop}.nii.gz', desc='{desc}', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
         ref = bids(root='work',datatype='seg',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     output:
-        nii = bids(root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+        nii = bids(root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='cropT1w',hemi='{hemi}', label='{autotop}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:

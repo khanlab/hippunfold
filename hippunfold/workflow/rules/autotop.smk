@@ -13,10 +13,10 @@ def get_inputs_laplace(wildcards):
     files = dict()
     files['lbl'] = get_labels_for_laplace(wildcards)
     if not config['skip_inject_template_labels']:
-        files['init_coords'] = bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
+        files['init_coords'] = bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',suffix='coords-autotopHipp.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
     return files
 
-rule laplace_coords:
+rule laplace_coords_autotopHipp:
     input: unpack(get_inputs_laplace)
     params:
         cmd = get_cmd_laplace_coords,
@@ -26,12 +26,22 @@ rule laplace_coords:
         convergence_threshold = 1e-5,
         max_iters = 10000
     output:
-        coords = bids(root='work',datatype='seg',dir='{dir}',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        coords = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-autotopHipp.nii.gz',desc='laplace',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     group: 'subj'
     resources:
         time = 30
-    log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',suffix='laplace.txt')
+    log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',suffix='laplace-autotopHipp.txt')
     script: '{params.cmd}'
+
+rule laplace_coords_autotopDG:
+    input: bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',suffix='coords-autotopDG.nii.gz',desc='init',space='corobl',hemi='{hemi}')
+    output:
+        coords = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-autotopDG.nii.gz',desc='laplace',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+    group: 'subj'
+    resources:
+        time = 30
+    log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',suffix='laplace-autotopDG.txt')
+    script: 'cp {input} {output.coords}'
 
 rule prep_equivolume_coords:
     input: get_labels_for_laplace,
@@ -51,7 +61,7 @@ rule equivolume_coords:
     params:
         src_labels = lambda wildcards: config['laplace_labels'][wildcards.dir]['src'],
     output:
-        coords = bids(root='work',datatype='seg',dir='{dir}',suffix='coords.nii.gz',desc='equivol',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        coords = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-autotopHipp.nii.gz',desc='equivol',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     group: 'subj'
     resources:
         time = 30
@@ -61,45 +71,19 @@ rule equivolume_coords:
 
 rule unflip_coords:
     input:
-        nii = bids(root='work',datatype='seg',dir='{dir}',suffix='coords.nii.gz', space='corobl',desc='{desc}',hemi='{hemi}flip', **config['subj_wildcards']),
+        nii = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-{autotop}.nii.gz', space='corobl',desc='{desc}',hemi='{hemi}flip', **config['subj_wildcards']),
     output:
-        nii = bids(root='work',datatype='seg',dir='{dir}',suffix='coords.nii.gz', space='corobl',desc='{desc,laplace|equivol}',hemi='{hemi,L}', **config['subj_wildcards']),
+        nii = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-{autotop}.nii.gz', space='corobl',desc='{desc,laplace}',hemi='{hemi,L}', **config['subj_wildcards']),
     container: config['singularity']['autotop']
     group: 'subj'
     shell: 'c3d {input} -flip x {output}'
 
-
-#unfold ref nifti
-rule create_unfold_ref:
-    params:
-        dims = 'x'.join(config['unfold_vol_ref']['dims']),
-        voxdims = 'x'.join(config['unfold_vol_ref']['voxdims']),
-        origin = 'x'.join(config['unfold_vol_ref']['origin']),
-        orient = config['unfold_vol_ref']['orient']
-    output: 
-        nii = bids(root='work',datatype='seg',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
-    group: 'subj'
-    container: config['singularity']['autotop'] 
-    shell:
-        'c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}'
-
-#this was unfold_phys_coords.nii in matlab implementation
-rule create_unfold_coord_map:
+rule unflip_coords_equivol:
     input:
-        nii = bids(root='work',datatype='seg',space='unfold',suffix='refvol.nii.gz',**config['subj_wildcards'])
+        nii = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-autotopHipp.nii.gz', space='corobl',desc='{desc}',hemi='{hemi}flip', **config['subj_wildcards']),
     output:
-        nii = bids(root='work',datatype='seg',space='unfold',suffix='refcoords.nii.gz',**config['subj_wildcards'])
+        nii = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-autotopHipp.nii.gz', space='corobl',desc='{desc,equivol}',hemi='{hemi,L}', **config['subj_wildcards']),
+    container: config['singularity']['autotop']
     group: 'subj'
-    container: config['singularity']['autotop'] 
-    shell:
-        'c3d {input.nii} -cmp -omc {output.nii}'
-
-def get_laminar_coords(wildcards):
-        
-    if 'laplace' in config['laminar_coords_method']:
-        coords_io = bids(root='work',datatype='seg',dir='IO',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
-    elif 'equivolume' in config['laminar_coords_method']:
-        coords_io = bids(root='work',datatype='seg',dir='IO',suffix='coords.nii.gz',desc='equivol',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
-    return coords_io
-
+    shell: 'c3d {input} -flip x {output}'
 
