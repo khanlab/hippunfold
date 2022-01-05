@@ -63,7 +63,7 @@ rule create_warps_hipp:
     script: '../scripts/create_warps.py'
 
 
-rule create_warps_DG:
+rule create_warps_dentate:
     input:
         unfold_ref_nii = bids(root='work',space='unfold',label='dentate',suffix='refvol.nii.gz',**config['subj_wildcards']),
         unfold_phys_coords_nii = bids(root='work',space='unfold',label='dentate',suffix='refcoords.nii.gz',**config['subj_wildcards']),

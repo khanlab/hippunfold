@@ -332,14 +332,14 @@ rule create_spec_file_hipp:
     shell: '{params.cmds}'
 
 
-rule create_spec_file_DG:
+rule create_spec_file_dentate:
     input:
         shapes = expand(bids(root='results',datatype='surf',den='{density}',suffix='{shape}.shape.gii', space='{space}',hemi='{hemi}', label='dentate', **config['subj_wildcards']),
-                    shape=['gyrification','curvature','thickness'], allow_missing=True),
+                    shape=['gyrification','curvature'], allow_missing=True),
         surfs = expand(bids(root='results',datatype='surf',den='{density}',suffix='{surfname}.surf.gii', space='{space}', hemi='{hemi}', label='dentate', **config['subj_wildcards']),
-                    surfname=['midthickness','inner','outer'], space=['{space}','unfolded'], allow_missing=True), 
+                    surfname=['midthickness'], space=['{space}','unfolded'], allow_missing=True), 
         cifti = expand(bids(root='results',datatype='surf',den='{density}',suffix='{cifti}.nii', space='{space}', label='dentate', **config['subj_wildcards']),
-                    cifti=['gyrification.dscalar','curvature.dscalar','thickness.dscalar'], allow_missing=True),
+                    cifti=['gyrification.dscalar','curvature.dscalar'], allow_missing=True),
     params:
         cmds = get_cmd_spec_file
     output: 
