@@ -152,7 +152,7 @@ parse_args:
     action: 'store_true'
 
   --skip_inject_template_labels:
-    help: 'Set this flag to skip post-processing template injection into CNN segmentation. Note this is also required for generating DG surfaces. (default: %(default)s)'
+    help: 'Set this flag to skip post-processing template injection into CNN segmentation. Note this will disable generation of DG surfaces. (default: %(default)s)'
     default: False
     action: 'store_true'
 
