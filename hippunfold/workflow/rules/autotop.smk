@@ -34,14 +34,15 @@ rule laplace_coords_autotopHipp:
     script: '{params.cmd}'
 
 rule laplace_coords_autotopDG:
-    input: bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',suffix='coords-autotopDG.nii.gz',desc='init',space='corobl',hemi='{hemi}')
+    input: 
+        coords = bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',suffix='coords-autotopDG.nii.gz',desc='init',space='corobl',hemi='{hemi}')
     output:
         coords = bids(root='work',datatype='seg',dir='{dir}',suffix='coords-autotopDG.nii.gz',desc='laplace',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     group: 'subj'
     resources:
         time = 30
     log: bids(root='logs',**config['subj_wildcards'],dir='{dir}',hemi='{hemi,Lflip|R}',suffix='laplace-autotopDG.txt')
-    script: 'cp {input} {output.coords}'
+    shell: 'cp {input} {output}'
 
 rule prep_equivolume_coords:
     input: get_labels_for_laplace,
