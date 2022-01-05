@@ -3,8 +3,8 @@ rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and bigbrain labels"""
     input:  
         subfields_mat = os.path.join(config['snakemake_dir'],'resources','bigbrain','BigBrain_ManualSubfieldsUnfolded.mat'),
-        nii_ap = bids(root='work',datatype='seg',dir='AP',suffix='coords-autotopHipp.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        nii_pd = bids(root='work',datatype='seg',dir='PD',suffix='coords-autotopHipp.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        nii_ap = bids(root='work',datatype='seg',dir='AP',label='hipp',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        nii_pd = bids(root='work',datatype='seg',dir='PD',label='hipp',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     params:
         mat_name = 'subfields_avg' #avg bigbrain over L/R hemis
     output:

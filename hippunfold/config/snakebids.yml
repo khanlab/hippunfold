@@ -249,8 +249,8 @@ parse_args:
       - neonateT1w
 
 autotop_labels:
-  - 'autotopHipp'
-  - 'autotopDG'
+  - 'hipp'
+  - 'dentate'
 
 #--- workflow specific configuration -- 
 
@@ -301,44 +301,48 @@ hippdwi_opts:
     L: '224 351'
   bbox_y: '198 453'
 
-autotopHipp:
-  dims:
-    - '256'
-    - '128'
-    - '16'
-  voxdims:
-    - '0.15625'
-    - '0.15625'
-    - '0.15625'
-  origin:
-    - '0'
-    - '200'
-    - '0'
-  extent:
-    - '40'
-    - '20'
-    - '2.5'
-  orient: RPI
-autotopDG:
-  dims:
-    - '256'
-    - '32'
-    - '16'
-  voxdims:
-    - '0.15625'
-    - '0.15625'
-    - '0.15625'
-  origin:
-    - '0'
-    - '200'
-    - '0'
-  extent:
-    - '40'
-    - '5'
-    - '2.5'
-  orient: RPI
+unfold_vol_ref:
 
-#space for uniform unfolded grid 
+  hipp:
+    dims:
+      - '256'
+      - '128' 
+      - '16'
+    voxdims:
+      - '0.15625'
+      - '0.15625'
+      - '0.15625'
+    origin:
+      - '0'
+      - '200'
+      - '0'
+    extent:
+      - '40'
+      - '20'
+      - '2.5'
+    orient: RPI
+
+  dentate:
+    dims:
+      - '256'
+      - '32'
+      - '16'
+    voxdims:
+      - '0.15625'
+      - '0.15625'
+      - '0.15625'
+    origin:
+      - '0'
+      - '200'
+      - '0'
+    extent:
+      - '40'
+      - '5'
+      - '2.5'
+    orient: RPI
+
+# space for uniform unfolded grid:
+#  currently only used for interpolating hipp subfields on surface
 unfold_mesh_ref:
   dims:
    - 254
@@ -413,4 +417,4 @@ use_gpu: False
 skip_coreg: False
 keep_work: False
 skip_inject_template_labels: False
-
+force_nnunet_model: False

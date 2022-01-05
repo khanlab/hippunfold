@@ -80,7 +80,7 @@ def get_final_coords():
     coords.extend(
                 expand(
                     bids(
-                        root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', label='autotopHipp', **config['subj_wildcards']),
+                        root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards']),
                             desc=[desc_io],
                             dir=['IO'],
                             hemi=config['hemi'],
@@ -102,7 +102,8 @@ def get_final_transforms():
                 root='results',
                 datatype='seg',
                 **config['subj_wildcards'],
-                suffix='xfm-{autotop}.nii.gz',
+                label='{autotop}',
+                suffix='xfm.nii.gz',
                 hemi='{hemi}',
                 from_='{space}',
                 to='unfold',
@@ -117,7 +118,8 @@ def get_final_transforms():
                 root='results',
                 datatype='seg',
                 **config['subj_wildcards'],
-                suffix='xfm-{autotop}.nii.gz',
+                label='{autotop}',
+                suffix='xfm.nii.gz',
                 hemi='{hemi}',
                 from_='unfold',
                 to='{space}',
@@ -131,7 +133,8 @@ def get_final_transforms():
                 root='results',
                 datatype='seg',
                 **config['subj_wildcards'],
-                suffix='xfm-{autotop}.nii.gz',
+                label='{autotop}',
+                suffix='xfm.nii.gz',
                 hemi='{hemi}',
                 from_='{space}',
                 to='unfold',
@@ -144,7 +147,8 @@ def get_final_transforms():
         bids(
                 root='results',
                 **config['subj_wildcards'],
-                suffix='refvol-{autotop}.nii.gz',
+                label='{autotop}',
+                suffix='refvol.nii.gz',
                 space='unfold'),
             autotop=config['autotop_labels'],
             allow_missing=True))

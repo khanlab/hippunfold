@@ -111,14 +111,14 @@ rule template_shape_inject:
 
 rule inject_init_laplace_coords:
     input:
-        coords = os.path.join(config['snakemake_dir'],'resources','tpl-upenn','tpl-upenn_dir-{dir}_coords-{autotop}.nii.gz'),
+        coords = os.path.join(config['snakemake_dir'],'resources','tpl-upenn','tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz'),
         subject_seg = get_input_for_shape_inject,
         matrix = bids(root='work',**config['subj_wildcards'],suffix='xfm.txt',datatype='seg',desc='moments',from_='template',to='subject',space='corobl',type_='ras',hemi='{hemi}'),
         warp = bids(root='work',**config['subj_wildcards'],suffix='xfm.nii.gz',datatype='seg',desc='greedy',from_='template',to='subject',space='corobl',hemi='{hemi}'),
     params:
         interp_opt = '-ri NN'
     output:
-        init_coords = bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',suffix='coords-{autotop}.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
+        init_coords = bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',label='{autotop}',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}'),
     group: 'subj'
     container: config['singularity']['autotop'] 
     threads: 8 
