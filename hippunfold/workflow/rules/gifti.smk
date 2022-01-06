@@ -7,7 +7,7 @@ surf_to_secondary_type = {'midthickness': 'MIDTHICKNESS', 'inner': 'PIAL', 'oute
 rule cp_template_to_unfold:
     """cp template unfold surf to subject"""
     input: 
-        gii = os.path.join(workflow.basedir,'resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii')
+        gii = os.path.join(workflow.basedir,'..','resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii')
     params:
         structure_type = lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type = lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -161,9 +161,9 @@ rule calculate_gyrification:
     this should be proportional by a constant, to the earlier gyrification on 32k surfaces."""
     input: 
         native_surfarea = bids(root=root,datatype='surf',den='{density}',suffix='surfarea.shape.gii', space='{space}',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
-        unfold_surfarea = os.path.join(workflow.basedir,'resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_surfarea.shape.gii')
+        unfold_surfarea = os.path.join(workflow.basedir,'..','resources','unfold_template_{autotop}','tpl-avg_space-unfold_den-{density}_surfarea.shape.gii')
     output:
-        gii = bids(root='results',datatype='surf',den='{density}',suffix='gyrification.shape.gii', space='{space}',hemi='{hemi}', label='{autotop}', **config['subj_wildcards'])
+        gii = bids(root=root,datatype='surf',den='{density}',suffix='gyrification.shape.gii', space='{space}',hemi='{hemi}', label='{autotop}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell:
@@ -214,8 +214,8 @@ rule resample_bigbrain_subfield_label_gii:
          note, this creates a Nx1 nii file, for subsequent gifti conversion
          using wb_command""" 
     input:
-        label = os.path.join(workflow.basedir,'resources','bigbrain','sub-bigbrain_hemi-{hemi}_subfields.label.gii'),
-        new_surf = os.path.join(workflow.basedir,'resources','unfold_template_hipp','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
+        label = os.path.join(workflow.basedir,'..','resources','bigbrain','sub-bigbrain_hemi-{hemi}_subfields.label.gii'),
+        new_surf = os.path.join(workflow.basedir,'..','resources','unfold_template_hipp','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
     output:
         label_nii = bids(root=work,datatype='surf',den='{density}',suffix='subfields.label.nii', space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards'])
     group: 'subj'
@@ -225,7 +225,7 @@ rule resample_bigbrain_subfield_label_gii:
 rule label_nii_to_metric_gii:
     input:
         label_nii = bids(root=work,datatype='surf',den='{density}',suffix='subfields.label.nii', space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards']),
-        surf = os.path.join(workflow.basedir,'resources','unfold_template_hipp','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
+        surf = os.path.join(workflow.basedir,'..','resources','unfold_template_hipp','tpl-avg_space-unfold_den-{density}_midthickness.surf.gii')
     output:
         metric_gii = bids(root=work,datatype='surf',den='{density}',suffix='subfields.label.func.gii', space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards'])
     group: 'subj'
@@ -236,7 +236,7 @@ rule label_nii_to_metric_gii:
 rule metric_to_label_gii:
     input:
         metric_gii = bids(root=work,datatype='surf',den='{density}',suffix='subfields.label.func.gii', space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards']),
-        label_list = os.path.join(workflow.basedir,'resources','bigbrain','sub-bigbrain_labellist.txt')
+        label_list = os.path.join(workflow.basedir,'..','resources','bigbrain','sub-bigbrain_labellist.txt')
     output:
         label_gii = bids(root=root,datatype='surf',den='{density}',suffix='subfields.label.gii', space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards'])
     group: 'subj'
@@ -334,16 +334,16 @@ rule create_spec_file_hipp:
 
 rule create_spec_file_dentate:
     input:
-        shapes = expand(bids(root='results',datatype='surf',den='{density}',suffix='{shape}.shape.gii', space='{space}',hemi='{hemi}', label='dentate', **config['subj_wildcards']),
+        shapes = expand(bids(root=root,datatype='surf',den='{density}',suffix='{shape}.shape.gii', space='{space}',hemi='{hemi}', label='dentate', **config['subj_wildcards']),
                     shape=['gyrification','curvature'], allow_missing=True),
-        surfs = expand(bids(root='results',datatype='surf',den='{density}',suffix='{surfname}.surf.gii', space='{space}', hemi='{hemi}', label='dentate', **config['subj_wildcards']),
+        surfs = expand(bids(root=root,datatype='surf',den='{density}',suffix='{surfname}.surf.gii', space='{space}', hemi='{hemi}', label='dentate', **config['subj_wildcards']),
                     surfname=['midthickness'], space=['{space}','unfolded'], allow_missing=True), 
-        cifti = expand(bids(root='results',datatype='surf',den='{density}',suffix='{cifti}.nii', space='{space}', label='dentate', **config['subj_wildcards']),
+        cifti = expand(bids(root=root,datatype='surf',den='{density}',suffix='{cifti}.nii', space='{space}', label='dentate', **config['subj_wildcards']),
                     cifti=['gyrification.dscalar','curvature.dscalar'], allow_missing=True),
     params:
         cmds = get_cmd_spec_file
     output: 
-        spec_file = bids(root='results',datatype='surf',den='{density}',suffix='surfaces.spec', hemi='{hemi,L|R}',space='{space}', label='dentate', **config['subj_wildcards'])
+        spec_file = bids(root=root,datatype='surf',den='{density}',suffix='surfaces.spec', hemi='{hemi,L|R}',space='{space}', label='dentate', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell: '{params.cmds}'

@@ -36,9 +36,9 @@ rule laplace_coords_hipp:
 
 rule laplace_coords_dentate:
     input: 
-        coords = bids(root='work',datatype='seg',**config['subj_wildcards'],dir='{dir}',label='dentate',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}')
+        coords = bids(root=work,datatype='seg',**config['subj_wildcards'],dir='{dir}',label='dentate',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}')
     output:
-        coords = bids(root='work',datatype='seg',dir='{dir}',label='dentate',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
+        coords = bids(root=work,datatype='seg',dir='{dir}',label='dentate',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi,Lflip|R}', **config['subj_wildcards']),
     group: 'subj'
     resources:
         time = 30
