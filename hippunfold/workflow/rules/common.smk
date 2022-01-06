@@ -34,18 +34,19 @@ def get_final_spec():
 
     if len(config['hemi']) == 2:
         specs = expand(
-            bids(root='results',datatype='surf',den='{density}',space='{space}',suffix='hippunfold.spec', **config['subj_wildcards']),
+            bids(root='results',datatype='surf',den='{density}',space='{space}',label='{autotop}', suffix='surfaces.spec', **config['subj_wildcards']),
                 density=config['output_density'],
                 space=surf_spaces,
+                autotop=config['autotop_labels'],
                 allow_missing=True)
     else:
          specs = expand(
-            bids(root='results',datatype='surf',den='{density}',space='{space}',hemi='{hemi}',suffix='hippunfold.spec', **config['subj_wildcards']),
+            bids(root='results',datatype='surf',den='{density}',space='{space}',hemi='{hemi}',label='{autotop}',suffix='surfaces.spec', **config['subj_wildcards']),
                 density=config['output_density'],
                 space=surf_spaces,
                 hemi=config['hemi'],
+                autotop=config['autotop_labels'],
                 allow_missing=True)
-       
     return specs
 
 def get_final_subfields():
@@ -69,16 +70,17 @@ def get_final_coords():
     coords.extend(
                 expand(
                     bids(
-                        root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+                        root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
                             desc='laplace',
                             dir=['AP','PD','IO'],
+                            autotop=config['autotop_labels'],
                             hemi=config['hemi'],
                             space=config['output_spaces'],
                             allow_missing=True))
     coords.extend(
                 expand(
                     bids(
-                        root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', **config['subj_wildcards']),
+                        root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards']),
                             desc=[desc_io],
                             dir=['IO'],
                             hemi=config['hemi'],
@@ -100,12 +102,14 @@ def get_final_transforms():
                 root='results',
                 datatype='seg',
                 **config['subj_wildcards'],
+                label='{autotop}',
                 suffix='xfm.nii.gz',
                 hemi='{hemi}',
                 from_='{space}',
                 to='unfold',
                 mode='image'),
             space=output_ref,
+            autotop=config['autotop_labels'],
             hemi=config['hemi'],
             allow_missing=True))
 
@@ -114,12 +118,14 @@ def get_final_transforms():
                 root='results',
                 datatype='seg',
                 **config['subj_wildcards'],
+                label='{autotop}',
                 suffix='xfm.nii.gz',
                 hemi='{hemi}',
                 from_='unfold',
                 to='{space}',
                 mode='image'),
             space=output_ref,
+            autotop=config['autotop_labels'],
             hemi=config['hemi'],
             allow_missing=True))
     xfms.extend(expand(
@@ -127,12 +133,14 @@ def get_final_transforms():
                 root='results',
                 datatype='seg',
                 **config['subj_wildcards'],
+                label='{autotop}',
                 suffix='xfm.nii.gz',
                 hemi='{hemi}',
                 from_='{space}',
                 to='unfold',
                 mode='image'),
             space=output_ref,
+            autotop=config['autotop_labels'],
             hemi=config['hemi'],
             allow_missing=True))
     xfms.extend(expand(
@@ -140,8 +148,10 @@ def get_final_transforms():
                 root='results',
                 datatype='seg',
                 **config['subj_wildcards'],
+                label='{autotop}',
                 suffix='refvol.nii.gz',
                 space='unfold'),
+            autotop=config['autotop_labels'],
             allow_missing=True))
 
     return xfms
@@ -208,8 +218,10 @@ def get_final_qc():
                         desc='subfields',
                         space='cropT1w',
                         hemi='{hemi}',
+                        label='{autotop}',
                         **config['subj_wildcards']),
                     hemi=config['hemi'],
+                    autotop=config['autotop_labels'],
                     density=config['output_density'],
                     allow_missing=True)
             ) 

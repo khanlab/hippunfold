@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GIFTI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="http://brainvis.wustl.edu/caret6/xml_schemas/GIFTI_Caret.xsd"
+       Version="1"
+       NumberOfDataArrays="1">
+   <MetaData>
+      <MD>
+         <Name><![CDATA[AnatomicalStructurePrimary]]></Name>
+         <Value><![CDATA[Invalid]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[ProgramProvenance]]></Name>
+         <Value><![CDATA[Connectome Workbench
+Type: Command Line Application
+Version: 1.4.1
+Qt Compiled Version: 5.7.0
+Qt Runtime Version: 5.7.0
+Commit: cf0a798c7962b0a94bfbaa294c83fc890dec4895
+Commit Date: 2019-11-04 17:17:06 -0600
+Compiled with OpenMP: YES
+Compiler: g++ (/home/caret/gcc/install/gcc-4.8.5/bin)
+Compiler Version: 4.8.5
+Compiled Debug: NO
+Operating System: Linux
+]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[Provenance]]></Name>
+         <Value><![CDATA[/srv/software/workbench/bin_linux64/../exe_linux64/wb_command -surface-vertex-areas unfold_template_dentate/tpl-avg_space-unfold_den-1mm_midthickness.surf.gii unfold_template_dentate/tpl-avg_space-unfold_den-1mm_surfarea.shape.gii]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[WorkingDirectory]]></Name>
+         <Value><![CDATA[/localscratch/hippunfold/gen_unfold_template]]></Value>
+      </MD>
+   </MetaData>
+   <LabelTable>
+      <Label Key="0" Red="1" Green="1" Blue="1" Alpha="0"><![CDATA[???]]></Label>
+   </LabelTable>
+<DataArray Intent="NIFTI_INTENT_NORMAL"
+           DataType="NIFTI_TYPE_FLOAT32"
+           ArrayIndexingOrder="RowMajorOrder"
+           Dimensionality="1"
+           Dim0="449"
+           Encoding="GZipBase64Binary"
+           Endian="LittleEndian"
+           ExternalFileName=""
+           ExternalFileOffset="0">
+   <MetaData>
+      <MD>
+         <Name><![CDATA[Name]]></Name>
+         <Value><![CDATA[vertex areas]]></Value>
+      </MD>
+   </MetaData>
+   <Data>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</Data>
+</DataArray>
+</GIFTI>

@@ -26,7 +26,6 @@ from scipy.interpolate import RegularGridInterpolator
 
 # all the points from the different resolutions are then triangulated
 
-
 target_surfarea = snakemake.params.targetarea
 num_bins = snakemake.params.nbins
 
@@ -37,6 +36,8 @@ end_ap = snakemake.config['in_surfarea']['end'][0]
 start_pd = snakemake.config['in_surfarea']['start'][1]
 end_pd = snakemake.config['in_surfarea']['end'][1]
 
+N_pd = n_pd+2 # i.e. 128 for hipp, 32 for dentate
+aspect_ratio = int((n_ap+2) / (n_pd+2)) # e.g. 256/128 = 2 for hipp, and 256/32 = 5 for dentate
 
 #load average surface area metric
 surfarea_gii = nib.load(snakemake.input.surfarea_gii)
@@ -90,12 +91,12 @@ for i in range(len(histedges)-1):
     print(f'input surf area at bin {i}: {in_surfarea}')
 
     
-    N = int(128 * np.sqrt(in_surfarea/ target_surfarea))
+    N = int(N_pd * np.sqrt(in_surfarea/ target_surfarea))
     #N = int(snakemake.params.scaling_factor * np.power(in_surfarea / target_surfarea,snakemake.params.power_factor))
     print(f'N for gridding is: {N}')
     print(N)
 
-    nx, ny = (2*N,N)
+    nx, ny = (aspect_ratio*N,N)
     x = np.linspace(start_ap,end_ap, nx)
     y = np.linspace(start_pd,end_pd, ny)
     #print(x)
