@@ -46,8 +46,8 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
-quality_check = { shell = "isort hippunfold -c && black hippunfold --check && flake8 hippunfold && pylint hippunfold && snakefmt . --check" }
-quality_fix = { shell = "isort hippunfold && black hippunfold  && flake8 hippunfold && pylint hippunfold && snakefmt ." }
+quality_check = { shell = "isort hippunfold/*.py -c && black hippunfold --check && snakefmt hippunfold --check" }
+quality_fix = { shell = "isort hippunfold/*.py && black hippunfold  && snakefmt hippunfold" }
 test = "pytest"
 
 [tool.isort]
