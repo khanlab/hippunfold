@@ -1,0 +1,39 @@
+
+hippunfold_dir: hippunfold_unfoldDG
+in_cifti: results/sub-{subject}/surf/sub-{subject}_space-T1w_den-32k_label-hipp_gyrification.dscalar.nii
+in_gifti: results/sub-{subject}/surf/sub-{subject}_hemi-{hemi}_space-T1w_den-32k_label-hipp_surfarea.shape.gii
+out_root: results_hipp
+out_final_root: unfold_template_hipp
+
+in_warp_unfold2corobl: /home/ROBARTS/alik/graham/scratch/HCPUR100_hippunfold/hippunfold_unfoldDG/work/sub-{subject}/seg/sub-{subject}_hemi-{hemi}_label-hipp_from-unfold_to-corobl_mode-surface_xfm.nii.gz
+
+num_bins: '100'
+
+in_surfarea:
+  dims:
+   - 254
+   - 126
+  start:
+   - 0.234375
+   - 0.234375
+  end:
+   - 39.765625
+   - 19.765625
+
+surf_to_io:
+  midthickness: 1.171875
+  inner: 0.078125
+  outer: 2.265625
+
+targetareas:
+ - '2.3'
+ - '0.53'
+ - '0.15'
+
+#this is filled in by hand (since they are approximate)
+density_to_area:
+  '2mm': '2.3'
+  '1mm': '0.53'
+  '0p5mm': '0.15'
+
+

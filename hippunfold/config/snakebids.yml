@@ -202,15 +202,15 @@ parse_args:
 
   --output_density:
     choices:
-      - '7k'
-      - '2k'
-      - '400'
-      - '32k'
+      - '0p5mm'
+      - '1mm'
+      - '2mm'
+      - 'unfoldiso'
     default:
-      - '7k'
-      - '2k'
+      - '0p5mm'
+      - '1mm'
     nargs: '+'
-    help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the 32k vertices option having unequal vertex spacing. (default: %(default)s)'
+    help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
 
 
   --hemi:
@@ -407,8 +407,8 @@ hemi:
   - L
   - R
 output_density:
-  - 2k
-  - 7k
+  - 0p5mm
+  - 1mm
 
 laminar_coords_method: equivolume
 skip_preproc: False
