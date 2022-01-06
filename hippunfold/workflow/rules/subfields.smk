@@ -2,13 +2,13 @@
 rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and bigbrain labels"""
     input:  
-        subfields_mat = os.path.join(config['snakemake_dir'],'resources','bigbrain','BigBrain_ManualSubfieldsUnfolded.mat'),
-        nii_ap = bids(root='work',datatype='seg',dir='AP',label='hipp',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        nii_pd = bids(root='work',datatype='seg',dir='PD',label='hipp',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        subfields_mat = os.path.join(workflow.basedir,'..','resources','bigbrain','BigBrain_ManualSubfieldsUnfolded.mat'),
+        nii_ap = bids(root=work,datatype='seg',dir='AP',label='hipp',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        nii_pd = bids(root=work,datatype='seg',dir='PD',label='hipp',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     params:
         mat_name = 'subfields_avg' #avg bigbrain over L/R hemis
     output:
-        nii_label = bids(root='work',datatype='seg',desc='subfieldsnotissue',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        nii_label = bids(root=work,datatype='seg',desc='subfieldsnotissue',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     group: 'subj'
     script: '../scripts/label_subfields_from_vol_coords.py'
 
@@ -27,13 +27,13 @@ rule combine_tissue_subfield_labels_corobl:
     """
     input:
         tissue = get_labels_for_laplace,
-        subfields = bids(root='work',datatype='seg',desc='subfieldsnotissue',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        subfields = bids(root=work,datatype='seg',desc='subfieldsnotissue',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     params:
         remap_dg = '-threshold 8 8 6 0 -popas dg',
         remap_srlm = '-threshold 2 2 7 0 -popas srlm',
         remap_cyst = '-threshold 7 7 8 0 -popas cyst',
     output:
-        combined = bids(root='work',datatype='seg',desc='subfields',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        combined = bids(root=work,datatype='seg',desc='subfields',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell: 
@@ -45,11 +45,11 @@ rule combine_tissue_subfield_labels_corobl:
 rule resample_subfields_to_T1w:
     """Resampling to T1w native space"""
     input:
-        nii = bids(root='work',datatype='seg',desc='subfields',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
-        ref = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
+        nii = bids(root=work,datatype='seg',desc='subfields',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        xfm = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
+        ref = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     output:
-        nii = bids(root='results',datatype='seg',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        nii = bids(root=root,datatype='seg',suffix='dseg.nii.gz', desc='subfields',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -60,11 +60,11 @@ rule resample_subfields_to_T1w:
 rule resample_postproc_to_T1w:
     """Resample post-processed tissue seg to T1w"""
     input:
-        nii = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
-        ref = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
+        nii = bids(root=work,datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}'),
+        xfm = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
+        ref = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     output:
-        nii = bids(root='work',datatype='seg',suffix='dseg.nii.gz', desc='postproc',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        nii = bids(root=work,datatype='seg',suffix='dseg.nii.gz', desc='postproc',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -74,11 +74,11 @@ rule resample_postproc_to_T1w:
 rule resample_unet_to_T1w:
     """Resample unet tissue seg to T1w"""
     input:
-        nii = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}'),
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
-        ref = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
+        nii = bids(root=work,datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}'),
+        xfm = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
+        ref = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T1w.nii.gz')
     output:
-        nii = bids(root='work',datatype='seg',suffix='dseg.nii.gz', desc='unet',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
+        nii = bids(root=work,datatype='seg',suffix='dseg.nii.gz', desc='unet',space='T1w',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -89,21 +89,21 @@ rule resample_unet_to_T1w:
 rule get_subfield_vols_subj:
     """Export segmentation volume for a subject to TSV"""
     input: 
-        segs = expand(bids(root='results',**config['subj_wildcards'],datatype='seg',hemi='{hemi}',space='cropT1w',desc='subfields',suffix='dseg.nii.gz'),
+        segs = expand(bids(root=root,**config['subj_wildcards'],datatype='seg',hemi='{hemi}',space='cropT1w',desc='subfields',suffix='dseg.nii.gz'),
                     hemi=config['hemi'], allow_missing=True),
-        lookup_tsv = os.path.join(config['snakemake_dir'],'resources','desc-subfields_dseg.tsv')
+        lookup_tsv = os.path.join(workflow.basedir,'..','resources','desc-subfields_dseg.tsv')
     group: 'subj'
     output: 
-        tsv = bids(root='results',datatype='seg',desc='subfields',suffix='volumes.tsv',**config['subj_wildcards']),
+        tsv = bids(root=root,datatype='seg',desc='subfields',suffix='volumes.tsv',**config['subj_wildcards']),
     script: '../scripts/gen_volume_tsv.py'
 
 
 
 rule plot_subj_subfields:
     input:
-        tsv = bids(root='results',datatype='seg',desc='subfields',suffix='volumes.tsv',**config['subj_wildcards'])
+        tsv = bids(root=root,datatype='seg',desc='subfields',suffix='volumes.tsv',**config['subj_wildcards'])
     output:
-        png = report(bids(root='results',datatype='qc',desc='subfields',suffix='volumes.png',**config['subj_wildcards']),
+        png = report(bids(root=root,datatype='qc',desc='subfields',suffix='volumes.png',**config['subj_wildcards']),
                 caption='../report/subj_volume_plot.rst',
                 category='Subfield Volumes')
     group: 'subj'
@@ -118,14 +118,14 @@ def get_bg_img_for_subfield_qc(wildcards):
     else:
         bg_modality = config['modality']
 
-    return  bids(root='results',datatype='seg',desc='preproc',suffix=f'{bg_modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
+    return  bids(root=root,datatype='seg',desc='preproc',suffix=f'{bg_modality}.nii.gz', space='cropT1w',hemi='{hemi}', **config['subj_wildcards'])
 
 rule qc_subfield:
     input:
         img = get_bg_img_for_subfield_qc,
-        seg = bids(root='results',datatype='seg',suffix='dseg.nii.gz', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+        seg = bids(root=root,datatype='seg',suffix='dseg.nii.gz', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
     output:
-        png = report(bids(root='results',datatype='qc',suffix='dseg.png', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+        png = report(bids(root=root,datatype='qc',suffix='dseg.png', desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC')
     group: 'subj'
@@ -134,9 +134,9 @@ rule qc_subfield:
   
 rule qc_subfield_surf:
     input:
-    	surf = bids(root='results',datatype='surf',suffix='midthickness.surf.gii',den='{density}',space='T1w',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
+    	surf = bids(root=root,datatype='surf',suffix='midthickness.surf.gii',den='{density}',space='T1w',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
     output:
-        png = report(bids(root='results',datatype='qc',suffix='midthickness.surf.png', den='{density}',desc='subfields',space='cropT1w',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
+        png = report(bids(root=root,datatype='qc',suffix='midthickness.surf.png', den='{density}',desc='subfields',space='cropT1w',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC')
     group: 'subj'
@@ -146,12 +146,12 @@ rule qc_subfield_surf:
 rule concat_subj_vols_tsv:
     """Concatenate all subject tsv files into a single tsv"""
     input: 
-        tsv = lambda wildcards: expand(bids(root='results',datatype='seg',desc='subfields',suffix='volumes.tsv',**config['subj_wildcards']),
+        tsv = lambda wildcards: expand(bids(root=root,datatype='seg',desc='subfields',suffix='volumes.tsv',**config['subj_wildcards']),
                     subject=config['input_lists'][get_modality_key(config['modality'])]['subject'],
                     session=config['sessions'])
     group: 'aggregate'
     output: 
-        tsv = bids(root='results',prefix='group',desc='subfields',suffix='volumes.tsv'),
+        tsv = bids(root=root,prefix='group',desc='subfields',suffix='volumes.tsv'),
     run: 
         import pandas as pd
         pd.concat([pd.read_table(in_tsv) for in_tsv in input ]).to_csv(output.tsv,sep='\t',index=False)
@@ -160,10 +160,10 @@ rule concat_subj_vols_tsv:
 rule resample_subfields_to_unfold:
     """Resampling to unfold space"""
     input:
-        nii = bids(root='work',datatype='seg',desc='subfields',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        xfm = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='corobl',to='unfold',mode='image')
+        nii = bids(root=work,datatype='seg',desc='subfields',suffix='dseg.nii.gz', space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        xfm = bids(root=work,datatype='seg',**config['subj_wildcards'],suffix='xfm.nii.gz',hemi='{hemi}',from_='corobl',to='unfold',mode='image')
     output:
-        nii = bids(root='results',datatype='seg',suffix='dseg.nii.gz', desc='subfields',space='unfold',hemi='{hemi}', **config['subj_wildcards'])
+        nii = bids(root=root,datatype='seg',suffix='dseg.nii.gz', desc='subfields',space='unfold',hemi='{hemi}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell:

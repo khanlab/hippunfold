@@ -31,15 +31,50 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest pytest-console-scripts
-        python -m pip install .
+        python -m pip install snakebids
 #    - name: Lint with flake8
 #      run: |
         # stop the build if there are Python syntax errors or undefined names
 #        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 #        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
+#       
+    - name: Set-up env for hippunfold 
       run: |
-        pytest
-    
+        echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models" >> $GITHUB_ENV
+        echo "HIPPUNFOLD=./hippunfold/run.py" >> $GITHUB_ENV
+    - name: Test single T2w bids
+      run: |
+        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w
+    - name: Test single T2w bids, right hemi
+      run: |
+        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
+    - name: Test single T2w bids, left hemi
+      run: |
+        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
+    - name: Test multiple T2w bids
+      run: |
+        $HIPPUNFOLD test_data/bids_multiT2w test_out participant -np --modality T2w
+    - name: Test T1w bids
+      run: |
+        $HIPPUNFOLD test_data/bids_T1w test_out participant -np --modality T1w
+    - name: Test hipp b500 bids
+      run: |
+        $HIPPUNFOLD test_data/bids_hippb500 test_out participant -np --modality hippb500
+    - name: Test T1w multi-session/longitudinal bids
+      run: |
+        $HIPPUNFOLD test_data/bids_T1w_longitudinal test_out participant -np --modality T1w
+    - name: Test single T2w multi-session/longitudinal bids
+      run: |
+        $HIPPUNFOLD test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w
+    - name: Test manual seg T2w bids
+      run: |
+        $HIPPUNFOLD test_data/bids_segT2w test_out participant -np --modality segT2w
+    - name: Test cropseg bids, with path override
+      run: |
+        $HIPPUNFOLD - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
+    - name: Test cropseg bids, with path override, left hemi
+      run: | 
+        $HIPPUNFOLD - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
+
+

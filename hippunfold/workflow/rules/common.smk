@@ -34,14 +34,14 @@ def get_final_spec():
 
     if len(config['hemi']) == 2:
         specs = expand(
-            bids(root='results',datatype='surf',den='{density}',space='{space}',label='{autotop}', suffix='surfaces.spec', **config['subj_wildcards']),
+            bids(root=root,datatype='surf',den='{density}',space='{space}',label='{autotop}', suffix='surfaces.spec', **config['subj_wildcards']),
                 density=config['output_density'],
                 space=surf_spaces,
                 autotop=config['autotop_labels'],
                 allow_missing=True)
     else:
          specs = expand(
-            bids(root='results',datatype='surf',den='{density}',space='{space}',hemi='{hemi}',label='{autotop}',suffix='surfaces.spec', **config['subj_wildcards']),
+            bids(root=root,datatype='surf',den='{density}',space='{space}',hemi='{hemi}',label='{autotop}',suffix='surfaces.spec', **config['subj_wildcards']),
                 density=config['output_density'],
                 space=surf_spaces,
                 hemi=config['hemi'],
@@ -52,7 +52,7 @@ def get_final_spec():
 def get_final_subfields():
     return expand(
         bids(
-                root='results',datatype='seg',
+                root=root,datatype='seg',
                 desc='subfields',suffix='dseg.nii.gz',
                 space='{space}',hemi='{hemi}', **config['subj_wildcards']),
             hemi=config['hemi'],
@@ -70,7 +70,7 @@ def get_final_coords():
     coords.extend(
                 expand(
                     bids(
-                        root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
+                        root=root,datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
                             desc='laplace',
                             dir=['AP','PD','IO'],
                             autotop=config['autotop_labels'],
@@ -80,7 +80,7 @@ def get_final_coords():
     coords.extend(
                 expand(
                     bids(
-                        root='results',datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards']),
+                        root=root,datatype='seg',dir='{dir}',suffix='coords.nii.gz', desc='{desc}',space='{space}',hemi='{hemi}', label='hipp', **config['subj_wildcards']),
                             desc=[desc_io],
                             dir=['IO'],
                             hemi=config['hemi'],
@@ -99,7 +99,7 @@ def get_final_transforms():
 
     xfms.extend(expand(
         bids(
-                root='results',
+                root=root,
                 datatype='seg',
                 **config['subj_wildcards'],
                 label='{autotop}',
@@ -115,7 +115,7 @@ def get_final_transforms():
 
     xfms.extend(expand(
         bids(
-                root='results',
+                root=root,
                 datatype='seg',
                 **config['subj_wildcards'],
                 label='{autotop}',
@@ -130,7 +130,7 @@ def get_final_transforms():
             allow_missing=True))
     xfms.extend(expand(
         bids(
-                root='results',
+                root=root,
                 datatype='seg',
                 **config['subj_wildcards'],
                 label='{autotop}',
@@ -145,7 +145,7 @@ def get_final_transforms():
             allow_missing=True))
     xfms.extend(expand(
         bids(
-                root='results',
+                root=root,
                 datatype='seg',
                 **config['subj_wildcards'],
                 label='{autotop}',
@@ -164,7 +164,7 @@ def get_final_anat():
         anat.extend(
             expand(
                 bids(
-                        root='results',
+                        root=root,
                         datatype='seg',
                         desc='preproc',
                         suffix='{modality_suffix}.nii.gz'.format(
@@ -186,7 +186,7 @@ def get_final_qc():
         qc.extend(
             expand(
                 bids(
-                        root='results',
+                        root=root,
                         datatype='qc',
                         suffix='regqc.png',
                         from_='subject', 
@@ -198,7 +198,7 @@ def get_final_qc():
         qc.extend(
             expand(
                 bids(
-                        root='results',
+                        root=root,
                         datatype='qc',
                         suffix='dseg.png',
                         desc='subfields',
@@ -211,7 +211,7 @@ def get_final_qc():
         qc.extend(
             expand(
                 bids(
-                        root='results',
+                        root=root,
                         datatype='qc',
                         suffix='midthickness.surf.png', 
                         den='{density}',
@@ -229,7 +229,7 @@ def get_final_qc():
             qc.extend(
                 expand(
                     bids(
-                            root='results',
+                            root=root,
                             datatype='qc',
                             desc='subfields',
                             suffix='volumes.png',
@@ -241,7 +241,7 @@ def get_final_qc():
             qc.extend(
                 expand(
                     bids(
-                            root='results',
+                            root=root,
                             datatype='qc',
                             desc='unetf3d',
                             suffix='dice.tsv',
@@ -289,21 +289,23 @@ def get_final_output():
 
 rule copy_to_results:
     """ Generic rule for copying data from work to results"""
-    input: 'work/{file}'
-    output: 'results/{file}'
+    input:
+        os.path.join(work, "{file}"),
+    output:
+        os.path.join(root, "{file}"),  
     group: 'subj'
     shell: 'cp {input} {output}'
 
 
 def get_final_work_tar():
-    return bids(root='work',suffix='work.tar.gz',
+    return bids(root=work,suffix='work.tar.gz',
                 include_subject_dir=False,
                 include_session_dir=False,
                 **config['subj_wildcards'])
 
 
 def get_work_dir(wildcards):
-    folder_with_file = expand(bids(root='work',**config['subj_wildcards']),**wildcards)
+    folder_with_file = expand(bids(root=work,**config['subj_wildcards']),**wildcards)
     folder_without_file = os.path.dirname(folder_with_file[0])
     return folder_without_file
 
@@ -323,19 +325,19 @@ rule archive_work_after_final:
 
 def get_input_for_shape_inject(wildcards):
     if config['modality'] == 'cropseg':
-        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}').format(**wildcards)
+        seg = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}').format(**wildcards)
     elif get_modality_key(config['modality']) == 'seg':
         modality_suffix = get_modality_suffix(config['modality'])
-        seg = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(
+        seg = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='cropped',space='corobl',hemi='{hemi}',from_='{modality_suffix}').format(
                     **wildcards, modality_suffix=modality_suffix),
     else:
-        seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
+        seg = bids(root=work,datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='nnunet',space='corobl',hemi='{hemi}').format(**wildcards)
     return seg
 
 def get_labels_for_laplace(wildcards):
     if config['skip_inject_template_labels']:
         seg = get_input_for_shape_inject(wildcards)
     else:
-        seg = bids(root='work',datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}').format(**wildcards)
+        seg = bids(root=work,datatype='seg',**config['subj_wildcards'],suffix='dseg.nii.gz',desc='postproc',space='corobl',hemi='{hemi}').format(**wildcards)
     return seg
 

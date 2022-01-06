@@ -1,12 +1,12 @@
 rule import_t2:
     input: config['input_path']['T2w']
-    output: bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz')
+    output: bids(root=work,datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz')
     group: 'subj'
     shell: 'cp {input} {output}'
 
 rule n4_t2:
-    input:  bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz')
-    output:  bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz',desc='n4')
+    input:  bids(root=work,datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz')
+    output:  bids(root=work,datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz',desc='n4')
     threads: 8
     container: config['singularity']['autotop']
     group: 'subj'
@@ -17,12 +17,12 @@ rule n4_t2:
 
 def get_ref_n4_t2 (wildcards):
     #get the first image
-    t2_imgs =  expand(bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz',desc='n4'),
+    t2_imgs =  expand(bids(root=work,datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz',desc='n4'),
             zip,**snakebids.filter_list(config['input_zip_lists']['T2w'],wildcards))
     return t2_imgs[0]
 
 def get_floating_n4_t2 (wildcards):
-    t2_imgs =  expand(bids(root='work',datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz',desc='n4'),
+    t2_imgs =  expand(bids(root=work,datatype='anat',**config['input_wildcards']['T2w'],suffix='T2w.nii.gz',desc='n4'),
             zip,**snakebids.filter_list(config['input_zip_lists']['T2w'],wildcards))
     return t2_imgs[int(wildcards.idx)]
 
@@ -33,9 +33,9 @@ rule reg_t2_to_ref:
         ref = get_ref_n4_t2,
         flo = get_floating_n4_t2
     output:
-        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w{idx}',to='T2w0',desc='rigid',type_='ras'),
-        xfm_itk = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w{idx}',to='T2w0',desc='rigid',type_='itk'),
-        warped = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='aligned',floating='{idx}')
+        xfm_ras = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w{idx}',to='T2w0',desc='rigid',type_='ras'),
+        xfm_itk = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w{idx}',to='T2w0',desc='rigid',type_='itk'),
+        warped = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='aligned',floating='{idx}')
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -51,7 +51,7 @@ def get_aligned_n4_t2 (wildcards):
     num_scans = len(filtered['subject'])
 
     #then, return the path, expanding over range(1,num_scans) -i.e excludes 0 (ref image)
-    t2_imgs =  expand(bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='aligned',floating='{idx}'),
+    t2_imgs =  expand(bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='aligned',floating='{idx}'),
                         **wildcards, idx=range(1,num_scans))
     return t2_imgs
 
@@ -59,7 +59,7 @@ if config['skip_preproc']:
     #grabs the first t2w only 
     rule import_preproc_t2:
         input: lambda wildcards: expand(config['input_path']['T2w'],zip,**snakebids.filter_list(config['input_zip_lists']['T2w'],wildcards))[0]
-        output: bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz', desc='preproc')
+        output: bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz', desc='preproc')
         group: 'subj'
         shell: 'cp {input} {output}'
 
@@ -73,7 +73,7 @@ else:
         params:
             cmd = get_avg_or_cp_scans_cmd
         output:
-            bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc')
+            bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc')
         container: config['singularity']['autotop']
         group: 'subj'
         shell: '{params.cmd}'
@@ -84,12 +84,12 @@ else:
 #register to t1 
 rule reg_t2_to_t1:
     input: 
-        flo = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc'),
-        ref = bids(root='results',datatype='anat',**config['subj_wildcards'],desc='preproc',suffix='T1w.nii.gz')
+        flo = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc'),
+        ref = bids(root=root,datatype='anat',**config['subj_wildcards'],desc='preproc',suffix='T1w.nii.gz')
     output: 
-        warped = bids(root='results',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc',space='T1w'),
-        xfm_ras = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='ras'),
-        xfm_itk = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk')
+        warped = bids(root=root,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc',space='T1w'),
+        xfm_ras = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='ras'),
+        xfm_itk = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk')
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -99,10 +99,10 @@ rule reg_t2_to_t1:
 #now have t2 to t1 xfm, compose this with t1 to corobl xfm
 rule compose_t2_xfm_corobl:
     input:
-        t2_to_t1 = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk'),
-        t1_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
+        t2_to_t1 = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='T1w',desc='rigid',type_='itk'),
+        t1_to_cor = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output:
-        t2_to_cor = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk')
+        t2_to_cor = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk')
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -112,19 +112,19 @@ rule compose_t2_xfm_corobl:
 #if already have t2w in T1w space, then we don't need to use composed xfm:
 def get_xfm_to_corobl():
     if config['skip_coreg']:
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk')
+        xfm = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk')
     else:
-        xfm = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk'),
+        xfm = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T2w',to='corobl',desc='affine',type_='itk'),
     return xfm
 
 #apply transform to get subject in corobl cropped space -- note that this could be marginally improved if we xfm each T2 to the cropped space in single resample (instead of avgT2w first)
 rule warp_t2_to_corobl_crop:
     input:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc'),
+        nii = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='preproc'),
         xfm = get_xfm_to_corobl(),
-        ref = os.path.join(config['snakemake_dir'],config['template_files'][config['template']]['crop_ref'])
+        ref = os.path.join(workflow.basedir,'..',config['template_files'][config['template']]['crop_ref'])
     output: 
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
+        nii = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
@@ -138,9 +138,9 @@ rule warp_t2_to_corobl_crop:
 
 rule lr_flip_t2:
     input:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
+        nii = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi}'),
     output:
-        nii = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip'),
+        nii = bids(root=work,datatype='anat',**config['subj_wildcards'],suffix='T2w.nii.gz',desc='cropped',space='corobl',hemi='{hemi,L}flip'),
     container: config['singularity']['autotop']
     group: 'subj'
     shell:
