@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 
 
 import matplotlib
-matplotlib.use('Agg')
 
-display = plotting.plot_anat(snakemake.input.flo,display_mode='ortho',dim=-0.5)
-display.add_contours(snakemake.input.ref,colors='r')
+matplotlib.use("Agg")
+
+display = plotting.plot_anat(snakemake.input.flo, display_mode="ortho", dim=-0.5)
+display.add_contours(snakemake.input.ref, colors="r")
 display.savefig(snakemake.output.png)
 display.close()
-
