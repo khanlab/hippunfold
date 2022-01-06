@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GIFTI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="http://brainvis.wustl.edu/caret6/xml_schemas/GIFTI_Caret.xsd"
+       Version="1"
+       NumberOfDataArrays="1">
+   <MetaData>
+      <MD>
+         <Name><![CDATA[AnatomicalStructurePrimary]]></Name>
+         <Value><![CDATA[Invalid]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[ProgramProvenance]]></Name>
+         <Value><![CDATA[Connectome Workbench
+Type: Command Line Application
+Version: 1.4.1
+Qt Compiled Version: 5.7.0
+Qt Runtime Version: 5.7.0
+Commit: cf0a798c7962b0a94bfbaa294c83fc890dec4895
+Commit Date: 2019-11-04 17:17:06 -0600
+Compiled with OpenMP: YES
+Compiler: g++ (/home/caret/gcc/install/gcc-4.8.5/bin)
+Compiler Version: 4.8.5
+Compiled Debug: NO
+Operating System: Linux
+]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[Provenance]]></Name>
+         <Value><![CDATA[/srv/software/workbench/bin_linux64/../exe_linux64/wb_command -surface-vertex-areas unfold_template_dentate/tpl-avg_space-unfold_den-2mm_midthickness.surf.gii unfold_template_dentate/tpl-avg_space-unfold_den-2mm_surfarea.shape.gii]]></Value>
+      </MD>
+      <MD>
+         <Name><![CDATA[WorkingDirectory]]></Name>
+         <Value><![CDATA[/localscratch/hippunfold/gen_unfold_template]]></Value>
+      </MD>
+   </MetaData>
+   <LabelTable>
+      <Label Key="0" Red="1" Green="1" Blue="1" Alpha="0"><![CDATA[???]]></Label>
+   </LabelTable>
+<DataArray Intent="NIFTI_INTENT_NORMAL"
+           DataType="NIFTI_TYPE_FLOAT32"
+           ArrayIndexingOrder="RowMajorOrder"
+           Dimensionality="1"
+           Dim0="64"
+           Encoding="GZipBase64Binary"
+           Endian="LittleEndian"
+           ExternalFileName=""
+           ExternalFileOffset="0">
+   <MetaData>
+      <MD>
+         <Name><![CDATA[Name]]></Name>
+         <Value><![CDATA[vertex areas]]></Value>
+      </MD>
+   </MetaData>
+   <Data>eJwBAAH//hh6iEADj+lAjMJOP9DBfj/2S2BA3HXTQHoegD+vX5E/bK6rQG90ikBzJQlAfkHdPxV6CEBE2hhA1UEQPynZTz/JBwhAzqMZQJbnYUCq1p1AVSUmQADXAkGP+oNA5IOtQFUlJkDEvds/4XpqQHN0CkD22Os/3r6BQENY/D/4TgNAAHmyQHZVM0C4VxlAADj5PzRwbD9Zg4Y//Yl2P1hmyT8GQgBA4YHiP635TD/DA6U//H0VP1FJgEBA2tA+rNYpP4DHQj8f8Aw/gVXmPiTb+j4EYJI+vvt0PpJujD7vQd49XVttPh0ahj0+P549Uyp9PoKdeD1C5Sw9NsuWPRdeST4BE2x+</Data>
+</DataArray>
+</GIFTI>

@@ -3,8 +3,8 @@ rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and bigbrain labels"""
     input:  
         subfields_mat = os.path.join(workflow.basedir,'..','resources','bigbrain','BigBrain_ManualSubfieldsUnfolded.mat'),
-        nii_ap = bids(root=work,datatype='seg',dir='AP',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
-        nii_pd = bids(root=work,datatype='seg',dir='PD',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
+        nii_ap = bids(root=work,datatype='seg',dir='AP',label='hipp',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
+        nii_pd = bids(root=work,datatype='seg',dir='PD',label='hipp',suffix='coords.nii.gz', desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards'])
     params:
         mat_name = 'subfields_avg' #avg bigbrain over L/R hemis
     output:
@@ -134,9 +134,9 @@ rule qc_subfield:
   
 rule qc_subfield_surf:
     input:
-    	surf = bids(root=root,datatype='surf',suffix='midthickness.surf.gii',den='{density}',space='T1w',hemi='{hemi}', **config['subj_wildcards']),
+    	surf = bids(root=root,datatype='surf',suffix='midthickness.surf.gii',den='{density}',space='T1w',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
     output:
-        png = report(bids(root=root,datatype='qc',suffix='midthickness.surf.png', den='{density}',desc='subfields',space='cropT1w',hemi='{hemi}', **config['subj_wildcards']),
+        png = report(bids(root=root,datatype='qc',suffix='midthickness.surf.png', den='{density}',desc='subfields',space='cropT1w',hemi='{hemi}', label='{autotop}', **config['subj_wildcards']),
                 caption='../report/subfield_qc.rst',
                 category='Segmentation QC')
     group: 'subj'

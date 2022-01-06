@@ -6,8 +6,15 @@ Requirements:
   - https://github.com/gllmflndn/gifti (clone into this folder)
   - matlab
   - hippunfold with uniform template run on a set of subjects
-    - here we used HCP UR100, and hippunfold v0.5.1
+    - here we used HCP UR100, and hippunfold unfoldDG branch
     - it uses this to create an average surface area (gyrification) map
 
+To run for hipp surf:
+```
+snakemake -np --configfile config_dentate.yml
+```
 
-  
+To run for dentate surf:
+```
+snakemake -np --configfile config_dentate.yml
+```

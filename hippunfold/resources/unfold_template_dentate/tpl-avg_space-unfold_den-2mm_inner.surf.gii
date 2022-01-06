@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE GIFTI SYSTEM "http://www.nitrc.org/frs/download.php/115/gifti.dtd">
+<GIFTI Version="1.0"  NumberOfDataArrays="2">
+   <MetaData/>
+   <LabelTable/>
+   <DataArray  ArrayIndexingOrder="ColumnMajorOrder"
+               DataType="NIFTI_TYPE_INT32"
+               Dim0="99"
+               Dim1="3"
+               Dimensionality="2"
+               Encoding="GZipBase64Binary"
+               Endian="LittleEndian"
+               ExternalFileName=""
+               ExternalFileOffset=""
+               Intent="NIFTI_INTENT_TRIANGLE">
+      <MetaData>
+      </MetaData>
+      <Data>eAEFwIlawQAAAOC/Q46KKCkZmxwbprnn3Pu/VV8JIVKkeEEHbWRY4IwFXpGigxgbfOADb4hQwTte8IAxQgwwwBhTTPCMKQb4RRcXRLjHDE0MUUEdPcwxxhEXbLDEDEsUSDBDggPOOKDABQes0UeAACuskGCIBGWUcUSAEeYYYYstVrjihB12qGONAlfk2CJHjh1+0EWALu5QxSvuEKKNDhZIscAZMWL8IkKMNt7RRBPvqOABz5hggD7GGOAZU0wxwBRd/OKMe0SIMEQFQ2SYY4w5LjhiiRmWKLBEEwmGKHDABgcccEEdAX7QxQwJViijjAQVnDDCHCMEWGGNLQpcccQJO+yQI8cWOa7YIUcXHfQQAB5xhxIe8YVPlFBChhRPeMUnnpDiE2208IYW2ggRooYqquhjghpqCBFigm90kOEJb4jRQgt/KKGGGvrIcEOMGHvssUGECE1skCLFDWfc0EAVVfxgjxka+MMQDfzhhh566KOPPRpo4IYbMhyRoY49CuyxxglrnPCFL3zjG/8HlSi6</Data>
+   </DataArray>
+   <DataArray  ArrayIndexingOrder="ColumnMajorOrder"
+               DataType="NIFTI_TYPE_FLOAT32"
+               Dim0="64"
+               Dim1="3"
+               Dimensionality="2"
+               Encoding="GZipBase64Binary"
+               Endian="LittleEndian"
+               ExternalFileName=""
+               ExternalFileOffset=""
+               Intent="NIFTI_INTENT_POINTSET">
+      <MetaData>
+      </MetaData>
+      <CoordinateSystemTransformMatrix>
+         <DataSpace><![CDATA[NIFTI_XFORM_UNKNOWN]]></DataSpace>
+         <TransformedSpace><![CDATA[NIFTI_XFORM_UNKNOWN]]></TransformedSpace>
+         <MatrixData>1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 </MatrixData>
+      </CoordinateSystemTransformMatrix>
+      <Data>eAEFgE2ojXkcxz9zmwWNqVnMS2YWc+seQ5M7mpekPL/pHs//Of+NYnMsr+OlxEJWSiweWVhYW1j5ZnGLs6LrSuk4v/P7L6SEUMqVi4VEyUZRJDgyerL5xnj56BZfd2zVhB9+nzA35cNDG71/dpczaH3X1Yd+6fZrZ+WLDz+tnjD3vTPe4MwlZ7zbGe925o47gzPO9Dln+pyzsuBo0dGiM5g4g4kzmDjT95zpe87KU0dvnMFHX71nq5/YtN9Xnbzuz3577Cd2vPC1p9760tIHv/vxD992a4ffXLfZt95f9vVLP/nGW7/4viv/OOODfmZvx789uc2Xj27xzq8df/Tgf1+cmvWFl//61MEZf7X/P19cu8Ev/jjrT76b8b0H1vvMpr/84Td/+s/nZ52Sg5KDkoOSg5KDqg5KDqo6qOqgqoOSg5KDkoOSg6oOqjooOWiboOSg5KDkoKqDkoO2Cao6KDlom6Cqg5KDtgnaJmiboG2i3+3FcJSCkqPf7UW/24t+txf9bi/63V4MRylom+BCL5hPwZomWNNE/3Md157Xcfh0imvP6+BdCuZTcKeO4SjFcJTick5BJwWdFO1CivfbUzCf4u+dKQ6fTgEykIEMZCADGchABjKQgQxkIAMZyEAGMpCBDGQgAxnIQAYykIEMZCADGchABjKQgQxkIAMZyEAGMpCBDGQgAxnIQAYykIEMZCADGchABjKQgQxkIAMZyED2FUKaH4s=</Data>
+   </DataArray>
+</GIFTI>

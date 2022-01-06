@@ -27,12 +27,11 @@ change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
 
 version-resolver:
-  # major:
-  #   labels:
-  #     - 'breaking'
-  minor:
+  major:
     labels:
       - 'breaking'
+  minor:
+    labels:
       - 'enhancement'
   patch:
     labels:
