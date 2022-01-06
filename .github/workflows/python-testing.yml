@@ -32,6 +32,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install snakebids
+    - name: Install quality check dependencies
+      run: |
+        python -m pip install snakefmt isort black poethepoet
     - name: Run quality check (isort, black, snakefmt)
       run: |
         poe quality_check
