@@ -146,6 +146,7 @@ def get_final_transforms():
     xfms.extend(expand(
         bids(
                 root='results',
+                datatype='seg',
                 **config['subj_wildcards'],
                 label='{autotop}',
                 suffix='refvol.nii.gz',
