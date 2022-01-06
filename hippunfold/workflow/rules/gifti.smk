@@ -326,7 +326,7 @@ rule create_spec_file_hipp:
     params:
         cmds = get_cmd_spec_file
     output: 
-        spec_file = bids(root='results',datatype='surf',den='{density}',suffix='hippunfold.spec', hemi='{hemi,L|R}',space='{space}', label='hipp', **config['subj_wildcards'])
+        spec_file = bids(root='results',datatype='surf',den='{density}',suffix='surfaces.spec', hemi='{hemi,L|R}',space='{space}', label='hipp', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell: '{params.cmds}'
@@ -343,7 +343,7 @@ rule create_spec_file_dentate:
     params:
         cmds = get_cmd_spec_file
     output: 
-        spec_file = bids(root='results',datatype='surf',den='{density}',suffix='hippunfold.spec', hemi='{hemi,L|R}',space='{space}', label='dentate', **config['subj_wildcards'])
+        spec_file = bids(root='results',datatype='surf',den='{density}',suffix='surfaces.spec', hemi='{hemi,L|R}',space='{space}', label='dentate', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj' 
     shell: '{params.cmds}'
@@ -351,10 +351,10 @@ rule create_spec_file_dentate:
 
 rule merge_lr_spec_file:
     input:
-        spec_files = expand(bids(root='results',datatype='surf',den='{density}',suffix='hippunfold.spec', hemi='{hemi}',space='{space}', label='{autotop}', **config['subj_wildcards']),
+        spec_files = expand(bids(root='results',datatype='surf',den='{density}',suffix='surfaces.spec', hemi='{hemi}',space='{space}', label='{autotop}', **config['subj_wildcards']),
                         hemi=['L','R'], allow_missing=True)
     output:
-        spec_file = bids(root='work',datatype='surf',den='{density}',space='{space}',suffix='hippunfold.spec', label='{autotop}', **config['subj_wildcards'])
+        spec_file = bids(root='work',datatype='surf',den='{density}',space='{space}',suffix='surfaces.spec', label='{autotop}', **config['subj_wildcards'])
     container: config['singularity']['autotop']
     group: 'subj'
     shell: 'wb_command -spec-file-merge {input.spec_files} {output}'

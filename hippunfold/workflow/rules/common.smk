@@ -34,14 +34,14 @@ def get_final_spec():
 
     if len(config['hemi']) == 2:
         specs = expand(
-            bids(root='results',datatype='surf',den='{density}',space='{space}',label='{autotop}', suffix='hippunfold.spec', **config['subj_wildcards']),
+            bids(root='results',datatype='surf',den='{density}',space='{space}',label='{autotop}', suffix='surfaces.spec', **config['subj_wildcards']),
                 density=config['output_density'],
                 space=surf_spaces,
                 autotop=config['autotop_labels'],
                 allow_missing=True)
     else:
          specs = expand(
-            bids(root='results',datatype='surf',den='{density}',space='{space}',hemi='{hemi}',label='{autotop}',suffix='hippunfold.spec', **config['subj_wildcards']),
+            bids(root='results',datatype='surf',den='{density}',space='{space}',hemi='{hemi}',label='{autotop}',suffix='surfaces.spec', **config['subj_wildcards']),
                 density=config['output_density'],
                 space=surf_spaces,
                 hemi=config['hemi'],
