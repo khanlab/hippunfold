@@ -16,7 +16,7 @@ rule create_unfold_ref:
         origin = lambda wildcards: 'x'.join(config['unfold_vol_ref'][wildcards.autotop]['origin']),
         orient = lambda wildcards: config['unfold_vol_ref'][wildcards.autotop]['orient']
     output: 
-        nii = bids(root='work',space='unfold',label='{autotop}',suffix='refvol.nii.gz',**config['subj_wildcards'])
+        nii = bids(root='work',space='unfold',label='{autotop}',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards'])
     group: 'subj'
     container: config['singularity']['autotop'] 
     shell:
@@ -25,9 +25,9 @@ rule create_unfold_ref:
 #this was unfold_phys_coords.nii in matlab implementation
 rule create_unfold_coord_map:
     input:
-        nii = bids(root='work',space='unfold',label='{autotop}',suffix='refvol.nii.gz',**config['subj_wildcards'])
+        nii = bids(root='work',space='unfold',label='{autotop}',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards'])
     output:
-        nii = bids(root='work',space='unfold',label='{autotop}',suffix='refcoords.nii.gz',**config['subj_wildcards'])
+        nii = bids(root='work',datatype='seg',space='unfold',label='{autotop}',suffix='refcoords.nii.gz',**config['subj_wildcards'])
     group: 'subj'
     container: config['singularity']['autotop'] 
     shell:
@@ -43,8 +43,8 @@ def get_laminar_coords(wildcards):
 
 rule create_warps_hipp:
     input:
-        unfold_ref_nii = bids(root='work',space='unfold',label='hipp',suffix='refvol.nii.gz',**config['subj_wildcards']),
-        unfold_phys_coords_nii = bids(root='work',space='unfold',label='hipp',suffix='refcoords.nii.gz',**config['subj_wildcards']),
+        unfold_ref_nii = bids(root='work',space='unfold',label='hipp',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        unfold_phys_coords_nii = bids(root='work',space='unfold',label='hipp',datatype='seg',suffix='refcoords.nii.gz',**config['subj_wildcards']),
         coords_ap = bids(root='work',datatype='seg',dir='AP',label='hipp',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_pd = bids(root='work',datatype='seg',dir='PD',label='hipp',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_io = get_laminar_coords,
@@ -65,8 +65,8 @@ rule create_warps_hipp:
 
 rule create_warps_dentate:
     input:
-        unfold_ref_nii = bids(root='work',space='unfold',label='dentate',suffix='refvol.nii.gz',**config['subj_wildcards']),
-        unfold_phys_coords_nii = bids(root='work',space='unfold',label='dentate',suffix='refcoords.nii.gz',**config['subj_wildcards']),
+        unfold_ref_nii = bids(root='work',space='unfold',label='dentate',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        unfold_phys_coords_nii = bids(root='work',space='unfold',label='dentate',datatype='seg',suffix='refcoords.nii.gz',**config['subj_wildcards']),
         coords_ap = bids(root='work',datatype='seg',dir='AP',label='dentate',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_pd = bids(root='work',datatype='seg',dir='PD',label='dentate',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
         coords_io = bids(root='work',datatype='seg',dir='IO',label='dentate',suffix='coords.nii.gz',desc='init',space='corobl',hemi='{hemi}', **config['subj_wildcards']),
@@ -90,7 +90,7 @@ rule compose_warps_corobl2unfold_lhemi:
     """ Compose corobl to unfold (unfold-template), for left hemi (ie with flip)"""
     input:
         native2unfold = bids(root='work',datatype='seg',**config['subj_wildcards'],label='{autotop}',suffix='xfm.nii.gz',hemi='Lflip',from_='corobl',to='unfold',mode='image'),
-        ref = bids(root='work',space='unfold',label='{autotop}',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        ref = bids(root='work',space='unfold',label='{autotop}',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards']),
         flipLR_xfm = os.path.join(config['snakemake_dir'],'resources','desc-flipLR_type-itk_xfm.txt')
     output:
         corobl2unfold = bids(root='work',datatype='seg',**config['subj_wildcards'],label='{autotop}',suffix='xfm.nii.gz',hemi='L',from_='corobl',to='unfold',mode='image')
@@ -105,7 +105,7 @@ rule compose_warps_unfold2corobl_lhemi:
     input:
         unfold2native = bids(root='work',datatype='seg',**config['subj_wildcards'],label='{autotop}',suffix='xfm.nii.gz',hemi='Lflip',from_='unfold',to='corobl',mode='image'),
         flipLR_xfm = os.path.join(config['snakemake_dir'],'resources','desc-flipLR_type-itk_xfm.txt'),
-        unfold_ref = bids(root='work',space='unfold',label='{autotop}',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        unfold_ref = bids(root='work',space='unfold',label='{autotop}',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards']),
         ref = bids(root='work',datatype='seg',dir='AP',label='{autotop}',suffix='coords.nii.gz',desc='laplace',space='corobl',hemi='L', **config['subj_wildcards']),
     output:
         unfold2corobl = bids(root='work',datatype='seg',**config['subj_wildcards'],label='{autotop}',suffix='xfm.nii.gz',hemi='L',from_='unfold',to='corobl',mode='image')
@@ -119,7 +119,7 @@ rule compose_warps_t1_to_unfold:
     """ Compose warps from T1w to unfold """
     input:
         corobl2unfold = bids(root='work',datatype='seg',**config['subj_wildcards'],label='{autotop}',suffix='xfm.nii.gz',hemi='{hemi}',from_='corobl',to='unfold',mode='image'),
-        ref = bids(root='work',space='unfold',label='{autotop}',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        ref = bids(root='work',space='unfold',label='{autotop}',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards']),
         t1w2corobl = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
     output: 
         bids(root='results',datatype='seg',**config['subj_wildcards'],label='{autotop}',suffix='xfm.nii.gz',hemi='{hemi}',from_='T1w',to='unfold',mode='image')
@@ -134,7 +134,7 @@ rule compose_warps_unfold_to_cropt1:
         unfold2corobl = bids(root='results',datatype='seg',**config['subj_wildcards'],label='{autotop}',suffix='xfm.nii.gz',hemi='{hemi}',from_='unfold',to='corobl',mode='image'),
         ref = bids(root='work',datatype='seg',suffix='cropref.nii.gz', space='T1w',hemi='{hemi}', **config['subj_wildcards']),
         t1w2corobl = bids(root='work',datatype='anat',**config['subj_wildcards'],suffix='xfm.txt',from_='T1w',to='corobl',desc='affine',type_='itk'),
-        unfold_ref = bids(root='work',space='unfold',label='{autotop}',suffix='refvol.nii.gz',**config['subj_wildcards']),
+        unfold_ref = bids(root='work',space='unfold',label='{autotop}',datatype='seg',suffix='refvol.nii.gz',**config['subj_wildcards']),
     output: 
         unfold2cropt1 = bids(root='results',datatype='seg',**config['subj_wildcards'],label='{autotop}',suffix='xfm.nii.gz',hemi='{hemi}',from_='unfold',to='T1w',mode='image')
     container: config['singularity']['ants']
