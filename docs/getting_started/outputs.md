@@ -42,7 +42,7 @@ For example, the following Image shows a whole-brain T1w image, a
 `space-cropT1w` overlay of the upsampled T2w image, and an output
 subfield segmentation (colour).
 
-![image](../images/T1-T2-subfields_sag.png){width="600px"}
+![image](../images/T1-T2-subfields_sag.png)
 
 ## Surface-based GIFTI outputs
 
@@ -64,7 +64,7 @@ and `outer` surfaces, which correspond to `white`, `midthickness`, and
 The following shows surfaces `inner`, `midthickness`, and `outer` in
 yellow, orange, and red, respectively.
 
-![image](../images/inner-mid-outer_sag.png){width="600px"}
+![image](../images/inner-mid-outer_sag.png)
 
 Surfaces are provided in different density configurations, and are
 labelled based on the approximate vertex spacing in each. The default
@@ -83,7 +83,7 @@ closer to uniform vertex spacing when transformed.
 This is illustrated in the the following `den-1mm` mesh in folded and
 unfolded space.
 
-![image](../images/mesh-foldedunfolded2k.png){width="800px"}
+![image](../images/mesh-foldedunfolded2k.png)
 
 All surfaces of the same density (e.g. `1mm`), in both
 `space-T1w` and `space-unfolded`, share the same mesh topology and have
@@ -106,7 +106,7 @@ These metrics are shown in both folded and unfolded space in the images
 below. Note that these results are from group-averaged data and so
 individual subject maps may show considerably more variability.
 
-![image](../images/metrics.png){width="800px"}
+![image](../images/metrics.png)
 
 Finally, these files are packaged together for easy viewing in
 Connectome Workbench, `wb_view`, in the following `.spec` files, for
@@ -122,16 +122,16 @@ each hemisphere separately, and combined:
 Hippocampal subfield segmentations are suffixed with
 `desc-subfields_dseg.nii.gz`, and have the following look-up table:
 
-  index   name                    abbreviation
-  ------- ----------------------- --------------
-  1       subiculum               Sub
-  2       CA1                     CA1
-  3       CA2                     CA2
-  4       CA3                     CA3
-  5       CA4                     CA4
-  6       dentate gyrus           DG
-  7       SRLM or \'dark band\'   SRLM
-  8       cysts                   Cyst
+| index  | name                 |  abbreviation |
+| ------ | -------------------- | ------------- |
+| 1      | subiculum            |   Sub         |
+| 2      | CA1                  |   CA1         |
+| 3      | CA2                  |   CA2         |
+| 4      | CA3                  |   CA3         |
+| 5      | CA4                  |   CA4         |
+| 6      | dentate gyrus        |   DG          |
+| 7      | SRLM or \'dark band\'|   SRLM        |
+| 8      | cysts                |   Cyst        |
 
 ### Coordinate images
 
@@ -146,7 +146,7 @@ e.g. 0 representing the Anterior end and 1 the Posterior end.
 Here is an example showing coronal slices of the hippocampus with the
 PD, IO, and AP (sagittal slice) overlaid.
 
-![image](../images/laplace.png){width="600px"}
+![image](../images/laplace.png)
 
 Note that these images have been resampled to `space-corobl` which is
 the space in which most processing is done internally. These can be seen
