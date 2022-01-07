@@ -6,41 +6,41 @@
 # Hippunfold
 
 This tool aims to automatically model the topological folding structure
-of the human hippocampus. It is currently set up to use sub-millimetric
-T2w MRI data, but may be adapted for other data types. This can then be
-used to apply the hippocampal unfolding methods presented in [DeKraker
-et al.,
-2019](https://www.sciencedirect.com/science/article/pii/S1053811917309977),
-and ex-vivo subfield boundaries can be topologically applied from
-[DeKraker et al.,
-2020](https://www.sciencedirect.com/science/article/pii/S105381191930919X?via%3Dihub).
+of the human hippocampus, and computationally unfold the hippocampus to 
+segment subfields and generate hippocampal and dentate gyrus surfaces.
 
-![Pipeline Overview](https://github.com/khanlab/hippunfold/raw/master/docs/pipeline_overview.png)
+## Relevant papers
+- [ DeKraker J, Haast RAM, Yousif MD, Karat B, Köhler S, Khan AR. HippUnfold: Automated hippocampal unfolding, morphometry, and subfield segmentation. bioRxiv 2021.12.03.471134; doi: https://doi.org/10.1101/2021.12.03.471134](https://www.biorxiv.org/content/10.1101/2021.12.03.471134v1)
+- [DeKraker J, Ferko KM, Lau JC, Köhler S, Khan AR. Unfolding the hippocampus: An intrinsic coordinate system for subfield segmentations and quantitative mapping. Neuroimage. 2018 Feb 15;167:408-418. doi: 10.1016/j.neuroimage.2017.11.054. Epub 2017 Nov 23. PMID: 29175494.](https://pubmed.ncbi.nlm.nih.gov/29175494/)
+- [DeKraker J, Lau JC, Ferko KM, Khan AR, Köhler S. Hippocampal subfields revealed through unfolding and unsupervised clustering of laminar and morphological features in 3D BigBrain. Neuroimage. 2020 Feb 1;206:116328. doi: 10.1016/j.neuroimage.2019.116328. Epub 2019 Nov 1. PMID: 31682982.](https://pubmed.ncbi.nlm.nih.gov/31682982/)
+- [DeKraker J, Köhler S, Khan AR. Surface-based hippocampal subfield segmentation. Trends Neurosci. 2021 Nov;44(11):856-863. doi: 10.1016/j.tins.2021.06.005. Epub 2021 Jul 22. PMID: 34304910.](https://pubmed.ncbi.nlm.nih.gov/34304910/)
+
+
+![Pipeline Overview](docs/images/hippunfold_overview.jpg)
 
 The overall workflow can be summarized in the following steps:
 
-0.  Resampling to a 0.3mm isotropic, coronal oblique, cropped
-    hippocampal block
-1.  Automatic segmentation of hippocampal tissues and surrounding
-    structures via deep convolutional neural network U-net [Li \_et
-    al\_., 2017](https://arxiv.org/abs/1707.01992) \_[OR]() Manual
-    segmentation of hippocampal tissues and surrounding structures using
-    [this](https://ars.els-cdn.com/content/image/1-s2.0-S1053811917309977-mmc1.pdf)
-    protocol
-2.  Post-processing via fluid label-label registration to a high
-    resolution, topoligically correct averaged template
-3.  Imposing of coordinates across the anterior-posterior,
-    proximal-distal, and laminar dimensions of hippocampal grey matter
-    via solving the Laplace equation
-4.  Extraction of a grey matter mid-surface and morpholigical features
-    (thickness, curvature, gyrification index, and, if available,
-    quantitative MRI values sampled along the mid-surface for reduced
-    partial-voluming)
-5.  Quality assurance via inspection of Laplace gradients, grey matter
-    mid-surface, and flatmapped features
-6.  Application of subfield boundaries according to predifined
-    topological coordinates
+1.  Pre-processing MRI images including non-uniformity correction, 
+    resampling to 0.3mm isotropic subvolumes, registration and cropping to coronal-oblique 
+    subvolumes around each hippocampus
+2.  Automatic segmentation of hippocampal tissues and surrounding
+    structures via deep convolutional neural network U-net (nnU-net), models available
+    for T1w, T2w, hippocampal b500 dwi, and neonatal T1w, and post-processing
+    with fluid label-label registration to a high-resolution average template
+3.  Imposing of coordinates across the anterior-posterior and 
+    proximal-distal dimensions of hippocampal grey matter
+    via solving Laplace's equation, and using an equivolume solution for
+    laminar coordinates
+4.  Generating transformations between native and unfolded spaces using scattered 
+    interpolation on the hippocampus and dentate gyrus coordinates separately
+5.  Applying these transformations to generate surfaces meshes of the hippocampus
+    and dentate gyrus, and extraction of morphological surface-based features including
+    thickness, curvature, and gyrification index, sampled at the midthickness surface, and mapping 
+    subfield labels from the histological BigBrain atlas of the hippocampus 
+6.  Generating high-resolution volumetric segmentations of the subfields using the same
+    transformations and volumetric representations of the coordinates.
 
-**Documentation: https://hippunfold.readthedocs.io**
+
+**Full Documentation: https://hippunfold.readthedocs.io**
 
 
