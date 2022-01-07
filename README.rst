@@ -50,6 +50,7 @@ Clone the repository and install dependencies and dev dependencies with poetry::
    cd hippunfold
    poetry install
 
+Poetry will automatically create a virtualenv. To customize ... (TODO: finish this part)
 
 Then, you can run hippunfold with::
 
@@ -61,6 +62,7 @@ or you can activate a virtualenv shell and then run hippunfold directly::
    hippunfold
    
 You can exit the poetry shell with `exit`.
+
 
 Running code format quality checking and fixing:
 ------------------------------------------------
@@ -89,4 +91,7 @@ As a shortcut, you can also use `snakemake` instead of the hippunfold CLI, as th
 
    cd hippunfold
    snakemake -np
+   
+
+
    
