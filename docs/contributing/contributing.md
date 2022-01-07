@@ -48,10 +48,9 @@ Note that if you are in a poetry shell, you do not need to prepend
 ## Dry-run testing your workflow:
 
 Using Snakemake\'s dry-run option (`--dry-run`/`-n`) is an easy way to verify any
-changes to the workflow are working correctly. The `test_data`
- folder contains a number of *fake* bids
-datasets (i.e. datasets with zero-sized files) that are useful for
-verifying different aspects of the workflow. These dry-run tests are
+changes to the workflow are working correctly. The `test_data` folder contains a 
+number of *fake* bids datasets (i.e. datasets with zero-sized files) that are useful
+for verifying different aspects of the workflow. These dry-run tests are
 part of the automated github actions that run for every commit.
 
 You can use the hippunfold CLI to perform a dry-run of the workflow,
