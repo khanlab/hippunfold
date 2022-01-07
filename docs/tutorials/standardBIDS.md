@@ -98,4 +98,4 @@ can sometimes be ameliorated with the `--rigid_reg_template` flag.
 Alternatively, if you do not have a standard T1w scan, consider manually
 orienting and/or cropping your data and following the examples outlined
 in the [Specialized scans
-tutorial](https://github.com/khanlab/hippunfold/blob/tutorials/docs/tutorials/specializedScans.rst).
+tutorial](specializedScans.md).
