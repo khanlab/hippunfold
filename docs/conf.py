@@ -36,6 +36,7 @@ extensions = [
 ]
 
 source_suffix = ['.rst', '.md']
+m2r_parse_relative_links = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
