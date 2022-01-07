@@ -57,10 +57,10 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git diff-index --quiet HEAD || git add docs/images || commit -m "Add updated dags [skip ci]" 
 
-    #  - name: Push changes
-    #    uses: ad-m/github-push-action@master
-    #    with:
-    #      github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
 
 
