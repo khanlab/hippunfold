@@ -41,6 +41,6 @@ The overall workflow can be summarized in the following steps:
 6.  Application of subfield boundaries according to predifined
     topological coordinates
 
-** Documentation: https://hippunfold.readthedocs.io **
+**Documentation: https://hippunfold.readthedocs.io**
 
 
