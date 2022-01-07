@@ -11,7 +11,7 @@ segment subfields and generate hippocampal and dentate gyrus surfaces.
 
 The overall workflow can be summarized in the following steps:
 
-![Pipeline Overview](https://raw.githubusercontent.com/khanlab/hippunfold/markdown/docs/images/hippunfold_overview.jpg)
+![Pipeline Overview](https://raw.githubusercontent.com/khanlab/hippunfold/master/docs/images/hippunfold_overview.jpg)
 
 1.  Pre-processing MRI images including non-uniformity correction, 
     resampling to 0.3mm isotropic subvolumes, registration and cropping to coronal-oblique 
