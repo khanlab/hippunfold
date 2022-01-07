@@ -44,16 +44,18 @@ Hippunfold dependencies are managed with Poetry, which you'll need installed on 
 Set-up your development environment:
 ------------------------------------
 
+Clone the repository and install dependencies and dev dependencies with poetry::
+
    git clone http://github.com/khanlab/hippunfold
    cd hippunfold
    poetry install
 
 
-Then, you can run hippunfold with:
+Then, you can run hippunfold with::
 
    poetry run hippunfold
    
-or you can activate a virtualenv shell and then run hippunfold directly:
+or you can activate a virtualenv shell and then run hippunfold directly::
 
    poetry shell
    hippunfold
