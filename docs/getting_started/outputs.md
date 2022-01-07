@@ -68,16 +68,16 @@ yellow, orange, and red, respectively.
 
 Surfaces are provided in different density configurations, and are
 labelled based on the approximate vertex spacing in each. The default
-densities are [0p5mm]{.title-ref} and [1mm]{.title-ref}, which have
+densities are `0p5mm` and `1mm`, which have
 approximate vertex spacing of 0.5mm and 1mm respectively. There is also
-a [2mm]{.title-ref} surface which has 2mm spacing (suitable for
+a `2mm` surface which has 2mm spacing (suitable for
 lower-resolution BOLD data). Previous versions of hippunfold exclusively
-used a [32k]{.title-ref} template surface, formed by a 254x126 grid in
+used a `32k` template surface, formed by a 254x126 grid in
 the unfolded space, however a downside of this template is that it
 results in very non-uniform vertex spacing when transformed to the
 native space (note: this legacy surface is still available as the
-[unfoldiso]{.title-ref} density). The newer [0p5mm]{.title-ref},
-[1mm]{.title-ref} and [2mm]{.title-ref} surfaces are designed to have
+`unfoldiso` density). The newer `0p5mm`,
+`1mm` and `2mm` surfaces are designed to have
 closer to uniform vertex spacing when transformed.
 
 This is illustrated in the the following `den-1mm` mesh in folded and
@@ -85,7 +85,7 @@ unfolded space.
 
 ![image](../images/mesh-foldedunfolded2k.png){width="800px"}
 
-All surfaces of the same density (e.g. [1mm]{.title-ref}), in both
+All surfaces of the same density (e.g. `1mm`), in both
 `space-T1w` and `space-unfolded`, share the same mesh topology and have
 corresponding vertices with each other. The vertex locations for
 unfolded surfaces are identical for all subjects as well (note that this
@@ -196,7 +196,7 @@ folder will have `tar.gz` files for each subject, unless the
 `--keep_work` option is used.
 
 If the app is run in workflow mode
-([\--workflow-mode]{.title-ref}/[-W]{.title-ref}) which enables direct
-use of the [snakemake]{.title-ref} CLI to run hippunfold, the
-[hippunfold]{.title-ref} and [work]{.title-ref} folders will be placed
-in a [results]{.title-ref} folder.
+(`--workflow-mode`/`-W`) which enables direct
+use of the `snakemake` CLI to run hippunfold, the
+`hippunfold` and `work` folders will be placed
+in a `results` folder.

@@ -32,8 +32,8 @@ already run on the data in `PATH_TO_BIDS_DIR`.
 More examples of possible BIDS-compliant datasets can be found in
 [hippunfold/test\_data/](https://github.com/khanlab/hippunfold/tree/master/test_data).
 
-Different input modalities \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--By
-default, HippUnfold expects the `PATH_TO_BIDS_DIR` to contain at least
+## Different input modalities 
+By default, HippUnfold expects the `PATH_TO_BIDS_DIR` to contain at least
 one T2w file on which performance for segmenting intrahippocampal
 structures like the SRLM has been shown to be optimal. However, we have
 also provided models trained with T1w or DWI data, or, users can input

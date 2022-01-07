@@ -8,7 +8,7 @@ whole-brain T1w image is not available.
 We will show how the available flags can be adapted for these use-cases
 with several worked examples.
 
-Case 1: super high resolution \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
+## Case 1: super high resolution
 
 In this example, we have only a limited field of view covering the
 hippocampus, and the resolution and contrast do not closely match the
@@ -47,10 +47,10 @@ This can be unfolded with the command:
 
 Explanation: `--modality cropseg` informs HippUnfold that the input
 manual segmentation should not be resampled and UNet does not need to be
-run. Because of a limitation in bids parsing for the [hemi]{.title-ref}
+run. Because of a limitation in bids parsing for the `hemi`
 entity, we need to use the generic path input,
-[\--path\_cropseg]{.title-ref} in this case, making sure we use the
-[{subject}]{.title-ref} and [{hemi}]{.title-ref} wildcards in the
+`--path_cropseg` in this case, making sure we use the
+`{subject}` and `{hemi}` wildcards in the
 filename. Output files will be named with `space-corobl` because
 HippUnfold is coded to effectively treat all files as already being in
 this space. We need the `--hemi R` to prevent HippUnfold looking for
@@ -68,8 +68,8 @@ UNet, the T2w image in this example is effectively not being used at
 all. Instead, the provided manual segmentation makes up the basis for
 unfolding.
 
-Case 2: one ex-vivo hemisphere \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--In
-this example, we have a single hemisphere that was scanned ex-vivo at a
+## Case 2: one ex-vivo hemisphere 
+In this example, we have a single hemisphere that was scanned ex-vivo at a
 nearly standard resolution and T2w contrast. Because the resolution and
 contrast are similar to the HippUnfold training data, we expect UNet
 will work and so we don\'t need to perform manual segemntation. However,
