@@ -1,10 +1,7 @@
-# Hippunfold
-
-[![](https://images.microbadger.com/badges/version/khanlab/hippunfold.svg)](https://microbadger.com/images/khanlab/hippunfold%20%22Get%20your%20own%20version%20badge%20on%20microbadger.com%22)
-
 [![Documentation Status](https://readthedocs.org/projects/hippunfold/badge/?version=latest)](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
-
 [![CircleCI](https://circleci.com/gh/khanlab/hippunfold.svg?style=svg)](https://circleci.com/gh/khanlab/hippunfold)
+
+# Hippunfold
 
 This tool aims to automatically model the topological folding structure
 of the human hippocampus. It is currently set up to use sub-millimetric
@@ -16,7 +13,7 @@ and ex-vivo subfield boundaries can be topologically applied from
 [DeKraker et al.,
 2020](https://www.sciencedirect.com/science/article/pii/S105381191930919X?via%3Dihub).
 
-![Pipeline Overview](https://github.com/khanlab/hippunfold/raw/master/docs/pipeline_overview.png){.align-center}
+![Pipeline Overview](https://github.com/khanlab/hippunfold/raw/master/docs/pipeline_overview.png)
 
 The overall workflow can be summarized in the following steps:
 
@@ -41,3 +38,7 @@ The overall workflow can be summarized in the following steps:
     mid-surface, and flatmapped features
 6.  Application of subfield boundaries according to predifined
     topological coordinates
+
+** Documentation: https://hippunfold.readthedocs.io **
+
+
