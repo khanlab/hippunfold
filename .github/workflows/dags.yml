@@ -1,0 +1,66 @@
+name: Generate DAG visualizations
+
+on:
+  workflow_dispatch:
+    inputs:
+      author:
+        description: "Author"
+        required: true
+        default: "github-actions[bot] (user publishing release)"
+      date:
+        description: "Date"
+        required: true
+        default: "YYYY-MM-DD"
+      comments:
+        description: "Comments"
+
+jobs:
+  generate_dag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print author
+        run: |
+          echo "Author: ${{ github.event.inputs.author }}"
+          echo "Date: ${{ github.event.inputs.date }}"
+          echo "Comments: ${{ github.event.inputs.comments }}"
+
+      - uses: actions/checkout@master
+        with:
+          ref: refs/heads/master
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install non-python dependencies
+        run: |
+          sudo apt-get install -y graphviz-dev
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install snakebids
+
+      - name: Set-up env for hippunfold 
+        run: |
+          echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models" >> $GITHUB_ENV
+          echo "HIPPUNFOLD=./hippunfold/run.py" >> $GITHUB_ENV
+      - name: Generate rulegraph single T2w bids
+        run: |
+          $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --rulegraph | dot -Tsvg > docs/images/rulegraph_T2w.svg
+
+      - name: Commit updates
+        env:
+          LATEST_VERSION: ${{ steps.release-drafter.outputs.name }}
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git diff-index --quiet HEAD || git commit -m "Add updated dags [skip ci]" -a
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
+
