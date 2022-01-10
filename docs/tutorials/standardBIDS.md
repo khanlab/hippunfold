@@ -20,23 +20,22 @@ prefixing the command with `singularity run`. This will expect
     └── sub-002/
     ...
 
-In this case, the T1w image is used only to register to a standardized
+The T1w image is used to register to a standardized
 template (CITI168), making it possible to reorient, upsample, and crop
 around the left and right hippocampi (this is referred to within
 HippUnfold as `space-corobl`). Note that only the T1w image needs to
-have a whole-brain field of view. By default, both of these input images
+have a whole-brain field of view. By default, any additional input images
 are coregistered and preprocessed, but this can be skipped with the
-flags `--skip_coreg` and `--skip_preproc`, repsectively, if this was
-already run on the data in `PATH_TO_BIDS_DIR`.
+flags `--skip_coreg` and `--skip_preproc`, repsectively.
 
 More examples of possible BIDS-compliant datasets can be found in
 [hippunfold/test\_data/](https://github.com/khanlab/hippunfold/tree/master/test_data).
 
 ## Different input modalities 
 By default, HippUnfold expects the `PATH_TO_BIDS_DIR` to contain at least
-one T2w file on which performance for segmenting intrahippocampal
-structures like the SRLM has been shown to be optimal. However, we have
-also provided models trained with T1w or DWI data, or, users can input
+one T1w file for segmenting intrahippocampal
+structures like the SRLM. However, we have
+also provided models trained with T1w, T2w, or DWI data, or, users can input
 their own custom manual segmentations for unfolding, which can be
 specified with the `--modality` flag. For example:
 
