@@ -81,7 +81,7 @@ graham to run HippUnfold:
 
         mkdir $SCRATCH/hippdev
         cd $SCRATCH/hippdev
-        module load python/3
+        module load python/3.8
         virtualenv venv
         source venv/bin/activate
 
