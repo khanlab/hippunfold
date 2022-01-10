@@ -66,3 +66,64 @@ from the `hippunfold` folder that contains the
 
     cd hippunfold
     snakemake -np
+
+## Instructions for Compute Canada
+
+This section provides an example of how to set up a `pip installed` copy
+of HippUnfold on CompateCanada\'s `graham` cluster.
+
+### Setting up a dev environment on graham:
+
+Here are some instructions to get your python environment set-up on
+graham to run HippUnfold:
+
+1.  Create a virtualenv and activate it:
+
+        mkdir $SCRATCH/hippdev
+        cd $SCRATCH/hippdev
+        module load python/3
+        virtualenv venv
+        source venv/bin/activate
+
+2.  Install HippUnfold
+
+        git clone https://github.com/khanlab/hippunfold.git
+        pip install hippunfold/
+        
+Note if you make changes to your local HippUnfold, you'll want to call them with:
+
+        python <YOUR_HIPPUNFOLD_DIR>/hippunfold/run.py
+
+### Running hippunfold jobs on graham:
+
+Note that this requires
+[neuroglia-helpers](https://github.com/khanlab/neuroglia-helpers) for
+regularSubmit or regularInteractive wrappers, and the
+[cc-slurm](https://github.com/khanlab/cc-slurm) snakemake profile for cluster execution with slurm.
+
+In an interactive job (for testing):
+
+    regularInteractive -n 8
+    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant \
+    --participant_label 001 -j 8
+
+Here, the last line is used to specify only one subject from a BIDS
+directory presumeably containing many subjects.
+
+Submitting a job (for larger cores, more subjects), still single job,
+but snakemake will parallelize over the 32 cores:
+
+    regularSubmit -j Fat \
+    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant  -j 32
+
+Scaling up to \~hundred subjects (needs cc-slurm snakemake profile
+installed), submits 1 16core job per subject:
+
+    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant \
+    --profile cc-slurm
+
+Scaling up to even more subjects (uses group-components to bundle
+multiple subjects in each job), 1 32core job for N subjects (e.g. 10):
+
+    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant \
+    --profile cc-slurm --group-components subj=10
