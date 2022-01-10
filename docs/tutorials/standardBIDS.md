@@ -5,7 +5,7 @@ This tutorial will cover applications of HippUnfold to an entire
 the same scan types are expected for all subjects which will be
 processed in parallel. A typical call might look like this:
 
-    hippunfold  PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant 
+    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant 
 
 Depending on the method you used for installation, you may require
 additional arguments such as `--cores all` or `--use-singularity`, or
