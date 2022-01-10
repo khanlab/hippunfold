@@ -2,12 +2,14 @@
 import os
 
 from snakebids.app import SnakeBidsApp
-
+from snakebids.cli import add_dynamic_args
 
 def get_parser():
     """Exposes parser for sphinx doc generation, cwd is the docs dir"""
-    app = SnakeBidsApp("../hippunfold", skip_parse_args=True)
+    app = SnakeBidsApp('../')
+    add_dynamic_args(app.parser,app.config['parse_args'],app.config['pybids_inputs'])
     return app.parser
+
 
 
 def main():
