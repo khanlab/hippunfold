@@ -34,7 +34,7 @@ The overall workflow can be summarized in the following steps:
     transformations and volumetric representations of the coordinates.
 
 
-**Full Documentation:**  [here](https://hippunfold.readthedocs.io**)
+**Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
 
 
 **Relevant papers:**
