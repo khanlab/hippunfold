@@ -7,24 +7,42 @@ from snakebids import bids
 configfile: "config/snakebids.yml"
 
 
-# make adjustments to input params:
-# right now hippb500 or cropseg cannot use T1w output space
-if config["modality"] == "hippb500" or config["modality"] == "cropseg":
-    config["output_spaces"] = ["corobl"]
-if config["skip_inject_template_labels"]:
-    config["autotop_labels"] = ["autotopHipp"]
-
-# get list of inputs to limit to (T1w + modalities)
+# consider moving this logic to another smk file to clean-up
 limit_to_list = set()
-if "cropT1w" in config["output_spaces"]:
-    limit_to_list.add("T1w")
+ref_spaces = []
+crop_ref_spaces = []
+template_modality = False
 
+if "cropnative" in config["output_spaces"]:
+    if (
+        config["modality"] == "T1w"
+        or config["modality"] == "segT1w"
+        or config["modality"] == "neonateT1w"
+    ):
+        ref_spaces.append("T1w")
+        crop_ref_spaces.append("cropT1w")
+        limit_to_list.add("T1w")
+        template_modality = "T1w"
+    if config["modality"] == "T2w" or config["modality"] == "segT2w":
+        ref_spaces.append("T2w")
+        crop_ref_spaces.append("cropT2w")
+        template_modality = "T2w"
 if (
-    "cropT1w" not in config["output_spaces"]
-    and config["modality"] == "T2w"
-    and not config["reg_t2_to_template"]
+    config["modality"] == "hippb500"
+    or config["modality"] == "cropseg"
+    or "corobl" in config["output_spaces"]
 ):
+    ref_spaces.append("corobl")
+    crop_ref_spaces.append("corobl")
+
+
+if config["t1_reg_template"]:
     limit_to_list.add("T1w")
+    template_modality = "T1w"
+
+# make adjustments to input params:
+if config["skip_inject_template_labels"]:
+    config["autotop_labels"] = ["hipp"]
 
 
 if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg and T2w

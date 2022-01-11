@@ -134,7 +134,6 @@ parse_args:
       - segT1w
       - segT2w
       - cropseg
-      - neonateT1w
       
   --derivatives:
     help: 'Path to the derivatives folder (e.g. for finding manual segs) (default: %(default)s) '
@@ -179,9 +178,8 @@ parse_args:
     default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique. (default: %(default)s)'
 
-  --reg_t2_to_template:
-    help: 'Register T2w image directly to template (instead of registering T1w). Replaces cropT1w with cropT2w in output spaces.  (default:
-      %(default)s)'
+  --t1_reg_template:
+    help: 'Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
     default: false
     action: store_true
 
@@ -197,11 +195,10 @@ parse_args:
 
   --output_spaces:
     choices: 
-      - 'cropT1w'
-      - 'cropT2w'
+      - 'cropnative'
       - 'corobl'
     default:
-      - 'cropT1w'
+      - 'cropnative'
     nargs: '+'
     help: 'Sets the output space for results (default: %(default)s)'
 
@@ -266,7 +263,7 @@ singularity:
   ants: 'docker://kaczmarj/ants:2.3.4'
 
 xfm_identity: resources/identity_xfm.txt
-template: dHCP
+template: CITI168
 template_files:
   CITI168:
     T1w: resources/CITI168/T1w_head_700um.nii.gz
@@ -405,7 +402,7 @@ laplace_labels:
 
 
 output_spaces:
-  - cropT1w
+  - cropnative
 
 participant_label:
 exclude_participant_label:
@@ -424,4 +421,5 @@ skip_coreg: False
 keep_work: False
 skip_inject_template_labels: False
 force_nnunet_model: False
+t1_reg_template: False
 root: results
