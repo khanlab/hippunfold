@@ -282,57 +282,67 @@ rule reg_t2_to_template:
     shell:
         "{params.cmd}"
 
+
 def get_inputs_compose_t2_xfm_corobl(wildcards):
-    if config['reg_t2_to_template']:
-        #xfm0: t2 to template
-        t2_to_std=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            from_="T2w",
-            to=config["template"],
-            desc="affine",
-            type_="itk"
-        ),
- 
-        #xfm1: template to corobl
-        std_to_cor=os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]]["xfm_corobl"],
-        ),
-        return {'t2_to_std': t2_to_std, 'std_to_cor':std_to_cor}
- 
-    else: 
-        #xfm0: t2 to t1
-        #xfm1: t1 to corobl
-        t2_to_t1=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            from_="T2w",
-            to="T1w",
-            desc="rigid",
-            type_="itk"
-        ),
-        t1_to_cor=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            from_="T1w",
-            to="corobl",
-            desc="affine",
-            type_="itk"
-        ),
-        return {'t2_to_t1': t2_to_t1, 't1_to_cor': t1_to_cor}
- 
+    if config["reg_t2_to_template"]:
+        # xfm0: t2 to template
+        t2_to_std = (
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="xfm.txt",
+                from_="T2w",
+                to=config["template"],
+                desc="affine",
+                type_="itk"
+            ),
+        )
+
+        # xfm1: template to corobl
+        std_to_cor = (
+            os.path.join(
+                workflow.basedir,
+                "..",
+                config["template_files"][config["template"]]["xfm_corobl"],
+            ),
+        )
+        return {"t2_to_std": t2_to_std, "std_to_cor": std_to_cor}
+
+    else:
+        # xfm0: t2 to t1
+        # xfm1: t1 to corobl
+        t2_to_t1 = (
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="xfm.txt",
+                from_="T2w",
+                to="T1w",
+                desc="rigid",
+                type_="itk"
+            ),
+        )
+        t1_to_cor = (
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="xfm.txt",
+                from_="T1w",
+                to="corobl",
+                desc="affine",
+                type_="itk"
+            ),
+        )
+        return {"t2_to_t1": t2_to_t1, "t1_to_cor": t1_to_cor}
+
 
 # now have t2 to t1 xfm, compose this with t1 to corobl xfm
 rule compose_t2_xfm_corobl:
-    input: unpack(get_inputs_compose_t2_xfm_corobl)
+    input:
+        unpack(get_inputs_compose_t2_xfm_corobl),
     output:
         t2_to_cor=bids(
             root=work,

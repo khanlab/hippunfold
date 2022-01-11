@@ -19,7 +19,11 @@ limit_to_list = set()
 if "cropT1w" in config["output_spaces"]:
     limit_to_list.add("T1w")
 
-if "cropT1w" not in config["output_spaces"] and config['modality'] == 'T2w' and not config['reg_t2_to_template']:
+if (
+    "cropT1w" not in config["output_spaces"]
+    and config["modality"] == "T2w"
+    and not config["reg_t2_to_template"]
+):
     limit_to_list.add("T1w")
 
 

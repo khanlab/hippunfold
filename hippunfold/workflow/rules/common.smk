@@ -26,9 +26,9 @@ def get_modality_suffix(modality):
 def get_final_spec():
     surf_spaces = []
     if "cropT1w" in config["output_spaces"]:
-        surf_spaces.append('T1w')
+        surf_spaces.append("T1w")
     if "cropT2w" in config["output_spaces"]:
-        surf_spaces.append('T2w')
+        surf_spaces.append("T2w")
     if "corobl" in config["output_spaces"]:
         surf_spaces.append("corobl")
 
@@ -141,11 +141,11 @@ def get_final_coords():
 def get_final_transforms():
     output_ref = []
     if "cropT1w" in config["output_spaces"]:
-        output_ref.append('T1w')
+        output_ref.append("T1w")
     if "cropT2w" in config["output_spaces"]:
-        output_ref.append('T2w')
+        output_ref.append("T2w")
     if "corobl" in config["output_spaces"]:
-        output_ref.append('corobl')
+        output_ref.append("corobl")
 
     xfms = []
 
@@ -230,10 +230,9 @@ def get_final_anat():
 
     output_ref = []
     if "cropT1w" in config["output_spaces"]:
-        output_ref.append('cropT1w')
+        output_ref.append("cropT1w")
     if "cropT2w" in config["output_spaces"]:
-        output_ref.append('cropT2w')
-
+        output_ref.append("cropT2w")
 
     anat.extend(
         expand(
@@ -243,7 +242,7 @@ def get_final_anat():
                 desc="preproc",
                 suffix="{modality_suffix}.nii.gz".format(
                     modality_suffix=get_modality_suffix(config["modality"])
-                   ),
+                ),
                 space="{space}",
                 hemi="{hemi}",
                 **config["subj_wildcards"],
@@ -258,13 +257,13 @@ def get_final_anat():
 
 def get_final_qc():
     qc = []
-    
+
     # right now can only do qc from cropT1w space
     output_ref = []
     if "cropT1w" in config["output_spaces"]:
-        output_ref.append('T1w')
+        output_ref.append("T1w")
     if "cropT2w" in config["output_spaces"]:
-        output_ref.append('T2w')
+        output_ref.append("T2w")
 
     if len(output_ref) > 0:
         qc.extend(
@@ -277,7 +276,7 @@ def get_final_qc():
                     to=config["template"],
                     **config["subj_wildcards"],
                 ),
-                native_modality=config['modality'],
+                native_modality=config["modality"],
                 allow_missing=True,
             )
         )

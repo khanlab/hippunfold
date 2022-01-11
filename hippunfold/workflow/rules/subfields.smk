@@ -116,7 +116,10 @@ rule resample_subfields_to_native:
             type_="itk"
         ),
         ref=bids(
-            root=work, datatype="anat", **config["subj_wildcards"], suffix="{native_modality}.nii.gz"
+            root=work,
+            datatype="anat",
+            **config["subj_wildcards"],
+            suffix="{native_modality}.nii.gz"
         ),
     output:
         nii=bids(
@@ -160,7 +163,10 @@ rule resample_postproc_to_native:
             type_="itk"
         ),
         ref=bids(
-            root=work, datatype="anat", **config["subj_wildcards"], suffix="{native_modality}.nii.gz"
+            root=work,
+            datatype="anat",
+            **config["subj_wildcards"],
+            suffix="{native_modality}.nii.gz"
         ),
     output:
         nii=bids(
@@ -204,7 +210,10 @@ rule resample_unet_to_native:
             type_="itk"
         ),
         ref=bids(
-            root=work, datatype="anat", **config["subj_wildcards"], suffix="{native_modality}.nii.gz"
+            root=work,
+            datatype="anat",
+            **config["subj_wildcards"],
+            suffix="{native_modality}.nii.gz"
         ),
     output:
         nii=bids(

@@ -126,7 +126,9 @@ rule reg_to_template:
 rule qc_reg_to_template:
     input:
         ref=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]][wildcards.native_modality]
+            workflow.basedir,
+            "..",
+            config["template_files"][config["template"]][wildcards.native_modality],
         ),
         flo=bids(
             root=work,
