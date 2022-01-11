@@ -93,8 +93,8 @@ rule combine_tissue_subfield_labels_corobl:
         "c3d {input.tissue} -dup {params.remap_dg} -dup {params.remap_srlm} {params.remap_cyst} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 
 
-rule resample_subfields_to_T1w:
-    """Resampling to T1w native space"""
+rule resample_subfields_to_native:
+    """Resampling to native space"""
     input:
         nii=bids(
             root=work,
@@ -110,13 +110,13 @@ rule resample_subfields_to_T1w:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
         ),
         ref=bids(
-            root=work, datatype="anat", **config["subj_wildcards"], suffix="T1w.nii.gz"
+            root=work, datatype="anat", **config["subj_wildcards"], suffix="{native_modality}.nii.gz"
         ),
     output:
         nii=bids(
@@ -124,7 +124,7 @@ rule resample_subfields_to_T1w:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -137,8 +137,8 @@ rule resample_subfields_to_T1w:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_postproc_to_T1w:
-    """Resample post-processed tissue seg to T1w"""
+rule resample_postproc_to_native:
+    """Resample post-processed tissue seg to native"""
     input:
         nii=bids(
             root=work,
@@ -154,13 +154,13 @@ rule resample_postproc_to_T1w:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
         ),
         ref=bids(
-            root=work, datatype="anat", **config["subj_wildcards"], suffix="T1w.nii.gz"
+            root=work, datatype="anat", **config["subj_wildcards"], suffix="{native_modality}.nii.gz"
         ),
     output:
         nii=bids(
@@ -168,7 +168,7 @@ rule resample_postproc_to_T1w:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="postproc",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -181,8 +181,8 @@ rule resample_postproc_to_T1w:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_unet_to_T1w:
-    """Resample unet tissue seg to T1w"""
+rule resample_unet_to_native:
+    """Resample unet tissue seg to native"""
     input:
         nii=bids(
             root=work,
@@ -198,13 +198,13 @@ rule resample_unet_to_T1w:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
         ),
         ref=bids(
-            root=work, datatype="anat", **config["subj_wildcards"], suffix="T1w.nii.gz"
+            root=work, datatype="anat", **config["subj_wildcards"], suffix="{native_modality}.nii.gz"
         ),
     output:
         nii=bids(
@@ -212,7 +212,7 @@ rule resample_unet_to_T1w:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="unet",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -234,7 +234,7 @@ rule get_subfield_vols_subj:
                 **config["subj_wildcards"],
                 datatype="seg",
                 hemi="{hemi}",
-                space="cropT1w",
+                space="T2w",
                 desc="subfields",
                 suffix="dseg.nii.gz"
             ),
@@ -297,7 +297,7 @@ def get_bg_img_for_subfield_qc(wildcards):
         datatype="seg",
         desc="preproc",
         suffix=f"{bg_modality}.nii.gz",
-        space="cropT1w",
+        space="crop{native_modality}",
         hemi="{hemi}",
         **config["subj_wildcards"],
     )
@@ -311,7 +311,7 @@ rule qc_subfield:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="cropT1w",
+            space="crop{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -322,7 +322,7 @@ rule qc_subfield:
                 datatype="qc",
                 suffix="dseg.png",
                 desc="subfields",
-                space="cropT1w",
+                space="crop{native_modality}",
                 hemi="{hemi}",
                 **config["subj_wildcards"]
             ),
@@ -342,7 +342,7 @@ rule qc_subfield_surf:
             datatype="surf",
             suffix="midthickness.surf.gii",
             den="{density}",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -355,7 +355,7 @@ rule qc_subfield_surf:
                 suffix="midthickness.surf.png",
                 den="{density}",
                 desc="subfields",
-                space="cropT1w",
+                space="crop{native_modality}",
                 hemi="{hemi}",
                 label="{autotop}",
                 **config["subj_wildcards"]

@@ -26,7 +26,9 @@ def get_modality_suffix(modality):
 def get_final_spec():
     surf_spaces = []
     if "cropT1w" in config["output_spaces"]:
-        surf_spaces.append("T1w")
+        surf_spaces.append('T1w')
+    if "cropT2w" in config["output_spaces"]:
+        surf_spaces.append('T2w')
     if "corobl" in config["output_spaces"]:
         surf_spaces.append("corobl")
 
@@ -137,10 +139,13 @@ def get_final_coords():
 
 
 def get_final_transforms():
+    output_ref = []
     if "cropT1w" in config["output_spaces"]:
-        output_ref = "T1w"
-    else:
-        output_ref = "corobl"
+        output_ref.append('T1w')
+    if "cropT2w" in config["output_spaces"]:
+        output_ref.append('T2w')
+    if "corobl" in config["output_spaces"]:
+        output_ref.append('corobl')
 
     xfms = []
 
@@ -223,43 +228,56 @@ def get_final_transforms():
 def get_final_anat():
     anat = []
 
+    output_ref = []
     if "cropT1w" in config["output_spaces"]:
-        anat.extend(
-            expand(
-                bids(
-                    root=root,
-                    datatype="seg",
-                    desc="preproc",
-                    suffix="{modality_suffix}.nii.gz".format(
-                        modality_suffix=get_modality_suffix(config["modality"])
-                    ),
-                    space="{space}",
-                    hemi="{hemi}",
-                    **config["subj_wildcards"],
-                ),
-                space=config["output_spaces"],
-                hemi=config["hemi"],
-                allow_missing=True,
-            )
+        output_ref.append('cropT1w')
+    if "cropT2w" in config["output_spaces"]:
+        output_ref.append('cropT2w')
+
+
+    anat.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="seg",
+                desc="preproc",
+                suffix="{modality_suffix}.nii.gz".format(
+                    modality_suffix=get_modality_suffix(config["modality"])
+                   ),
+                space="{space}",
+                hemi="{hemi}",
+                **config["subj_wildcards"],
+            ),
+            space=output_ref,
+            hemi=config["hemi"],
+            allow_missing=True,
         )
+    )
     return anat
 
 
 def get_final_qc():
     qc = []
+    
     # right now can only do qc from cropT1w space
+    output_ref = []
     if "cropT1w" in config["output_spaces"]:
+        output_ref.append('T1w')
+    if "cropT2w" in config["output_spaces"]:
+        output_ref.append('T2w')
 
+    if len(output_ref) > 0:
         qc.extend(
             expand(
                 bids(
                     root=root,
                     datatype="qc",
                     suffix="regqc.png",
-                    from_="subject",
+                    from_="{native_modality}",
                     to=config["template"],
                     **config["subj_wildcards"],
                 ),
+                native_modality=config['modality'],
                 allow_missing=True,
             )
         )
@@ -271,11 +289,12 @@ def get_final_qc():
                     datatype="qc",
                     suffix="dseg.png",
                     desc="subfields",
-                    space="cropT1w",
+                    space="crop{native_modality}",
                     hemi="{hemi}",
                     **config["subj_wildcards"],
                 ),
                 hemi=config["hemi"],
+                native_modality=output_ref,
                 allow_missing=True,
             )
         )
@@ -287,7 +306,7 @@ def get_final_qc():
                     suffix="midthickness.surf.png",
                     den="{density}",
                     desc="subfields",
-                    space="cropT1w",
+                    space="crop{native_modality}",
                     hemi="{hemi}",
                     label="{autotop}",
                     **config["subj_wildcards"],
@@ -295,6 +314,7 @@ def get_final_qc():
                 hemi=config["hemi"],
                 autotop=config["autotop_labels"],
                 density=config["output_density"],
+                native_modality=output_ref,
                 allow_missing=True,
             )
         )

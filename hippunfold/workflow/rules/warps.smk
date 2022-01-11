@@ -451,8 +451,8 @@ rule compose_warps_unfold2corobl_lhemi:
         "antsApplyTransforms -o [{output.unfold2corobl},1] -r {input.ref} -t {input.flipLR_xfm} -t {input.unfold2native} -i {input.unfold_ref} -v"
 
 
-rule compose_warps_t1_to_unfold:
-    """ Compose warps from T1w to unfold """
+rule compose_warps_native_to_unfold:
+    """ Compose warps from native to unfold """
     input:
         corobl2unfold=bids(
             root=work,
@@ -473,12 +473,12 @@ rule compose_warps_t1_to_unfold:
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
-        t1w2corobl=bids(
+        native2corobl=bids(
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -491,7 +491,7 @@ rule compose_warps_t1_to_unfold:
             label="{autotop}",
             suffix="xfm.nii.gz",
             hemi="{hemi}",
-            from_="T1w",
+            from_="{native_modality}",
             to="unfold",
             mode="image"
         ),
@@ -500,11 +500,11 @@ rule compose_warps_t1_to_unfold:
     group:
         "subj"
     shell:
-        "ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.t1w2corobl}"
+        "ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.native2corobl}"
 
 
-rule compose_warps_unfold_to_cropt1:
-    """ Compose warps from unfold to cropT1w """
+rule compose_warps_unfold_to_crop_native:
+    """ Compose warps from unfold to crop native """
     input:
         unfold2corobl=bids(
             root=root,
@@ -521,16 +521,16 @@ rule compose_warps_unfold_to_cropt1:
             root=work,
             datatype="seg",
             suffix="cropref.nii.gz",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
-        t1w2corobl=bids(
+        native2corobl=bids(
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -544,7 +544,7 @@ rule compose_warps_unfold_to_cropt1:
             **config["subj_wildcards"]
         ),
     output:
-        unfold2cropt1=bids(
+        unfold2cropnative=bids(
             root=root,
             datatype="seg",
             **config["subj_wildcards"],
@@ -552,7 +552,7 @@ rule compose_warps_unfold_to_cropt1:
             suffix="xfm.nii.gz",
             hemi="{hemi}",
             from_="unfold",
-            to="T1w",
+            to="{native_modality}",
             mode="image"
         ),
     container:
@@ -560,4 +560,4 @@ rule compose_warps_unfold_to_cropt1:
     group:
         "subj"
     shell:
-        "antsApplyTransforms -o [{output.unfold2cropt1},1] -r {input.ref} -t [{input.t1w2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v"
+        "antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v"

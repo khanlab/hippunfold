@@ -11,13 +11,15 @@ configfile: "config/snakebids.yml"
 # right now hippb500 or cropseg cannot use T1w output space
 if config["modality"] == "hippb500" or config["modality"] == "cropseg":
     config["output_spaces"] = ["corobl"]
-
 if config["skip_inject_template_labels"]:
     config["autotop_labels"] = ["autotopHipp"]
 
 # get list of inputs to limit to (T1w + modalities)
 limit_to_list = set()
 if "cropT1w" in config["output_spaces"]:
+    limit_to_list.add("T1w")
+
+if "cropT1w" not in config["output_spaces"] and config['modality'] == 'T2w' and not config['reg_t2_to_template']:
     limit_to_list.add("T1w")
 
 
@@ -95,7 +97,7 @@ include: "rules/warps.smk"
 include: "rules/shape_inject.smk"
 include: "rules/gifti.smk"
 include: "rules/subfields.smk"
-include: "rules/resample_final_to_crop_t1.smk"
+include: "rules/resample_final_to_crop_native.smk"
 
 
 rule all:
