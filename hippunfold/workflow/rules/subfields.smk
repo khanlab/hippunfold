@@ -246,7 +246,7 @@ rule get_subfield_vols_subj:
                 **config["subj_wildcards"],
                 datatype="seg",
                 hemi="{hemi}",
-                space="T2w",
+                space="{native_modality}",
                 desc="subfields",
                 suffix="dseg.nii.gz"
             ),
@@ -262,6 +262,7 @@ rule get_subfield_vols_subj:
         tsv=bids(
             root=root,
             datatype="seg",
+            space="{native_modality}",
             desc="subfields",
             suffix="volumes.tsv",
             **config["subj_wildcards"]
@@ -275,6 +276,7 @@ rule plot_subj_subfields:
         tsv=bids(
             root=root,
             datatype="seg",
+            space="{native_modality}",
             desc="subfields",
             suffix="volumes.tsv",
             **config["subj_wildcards"]
@@ -284,6 +286,7 @@ rule plot_subj_subfields:
             bids(
                 root=root,
                 datatype="qc",
+                space="{native_modality}",
                 desc="subfields",
                 suffix="volumes.png",
                 **config["subj_wildcards"]

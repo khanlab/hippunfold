@@ -324,9 +324,11 @@ def get_final_qc():
                         root=root,
                         datatype="qc",
                         desc="subfields",
+                        space="{native_modality}",
                         suffix="volumes.png",
                         **config["subj_wildcards"],
                     ),
+                    native_modality=output_ref,
                     allow_missing=True,
                 )
             )
