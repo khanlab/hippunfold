@@ -119,6 +119,7 @@ rule resample_subfields_to_native:
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
+            desc="preproc",
             suffix="{native_modality}.nii.gz"
         ),
     output:
@@ -166,6 +167,7 @@ rule resample_postproc_to_native:
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
+            desc="preproc",
             suffix="{native_modality}.nii.gz"
         ),
     output:
@@ -213,6 +215,7 @@ rule resample_unet_to_native:
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
+            desc="preproc",
             suffix="{native_modality}.nii.gz"
         ),
     output:
