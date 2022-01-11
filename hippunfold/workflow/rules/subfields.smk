@@ -128,7 +128,7 @@ rule resample_subfields_to_native:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="{native_modality}",
+            space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -176,7 +176,7 @@ rule resample_postproc_to_native:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="postproc",
-            space="{native_modality}",
+            space="{native_modality,T2w|T2w}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -224,7 +224,7 @@ rule resample_unet_to_native:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="unet",
-            space="{native_modality}",
+            space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
