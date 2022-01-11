@@ -264,7 +264,7 @@ def get_final_qc():
         output_ref.append("T1w")
     if "cropT2w" in config["output_spaces"]:
         output_ref.append("T2w")
-  
+
     if config["reg_t2_to_template"]:
         template_modality = "T2w"
     else:
