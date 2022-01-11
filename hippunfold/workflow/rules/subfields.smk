@@ -116,7 +116,7 @@ rule resample_subfields_to_native:
             type_="itk"
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             desc="preproc",
@@ -164,7 +164,7 @@ rule resample_postproc_to_native:
             type_="itk"
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             desc="preproc",
@@ -212,7 +212,7 @@ rule resample_unet_to_native:
             type_="itk"
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             desc="preproc",
