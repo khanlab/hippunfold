@@ -264,6 +264,11 @@ def get_final_qc():
         output_ref.append("T1w")
     if "cropT2w" in config["output_spaces"]:
         output_ref.append("T2w")
+  
+    if config["reg_t2_to_template"]:
+        template_modality = "T2w"
+    else:
+        template_modality = "T1w"
 
     if len(output_ref) > 0:
         qc.extend(
@@ -276,7 +281,7 @@ def get_final_qc():
                     to=config["template"],
                     **config["subj_wildcards"],
                 ),
-                native_modality=config["modality"],
+                native_modality=template_modality,
                 allow_missing=True,
             )
         )
