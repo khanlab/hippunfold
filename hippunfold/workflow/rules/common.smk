@@ -188,25 +188,7 @@ def get_final_transforms():
             allow_missing=True,
         )
     )
-    xfms.extend(
-        expand(
-            bids(
-                root=root,
-                datatype="seg",
-                **config["subj_wildcards"],
-                label="{autotop}",
-                suffix="xfm.nii.gz",
-                hemi="{hemi}",
-                from_="{space}",
-                to="unfold",
-                mode="image",
-            ),
-            space=output_ref,
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            allow_missing=True,
-        )
-    )
+
     xfms.extend(
         expand(
             bids(
