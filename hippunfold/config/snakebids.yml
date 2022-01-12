@@ -195,12 +195,9 @@ parse_args:
 
   --output_spaces:
     choices: 
-      - 'cropnative'
-      - 'corobl'
-    default:
-      - 'cropnative'
+      - 'T1w'
     nargs: '+'
-    help: 'Sets the output space for results (default: %(default)s)'
+    help: 'Sets additional output spaces for results (default: %(default)s)'
 
   --output_density:
     choices:
@@ -402,7 +399,6 @@ laplace_labels:
 
 
 output_spaces:
-  - cropnative
 
 participant_label:
 exclude_participant_label:
