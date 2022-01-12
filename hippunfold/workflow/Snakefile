@@ -6,8 +6,8 @@ from snakebids import bids
 
 configfile: "config/snakebids.yml"
 
-
 # consider moving this logic to another smk file to clean-up
+
 limit_to_list = set()
 ref_spaces = []
 crop_ref_spaces = []
