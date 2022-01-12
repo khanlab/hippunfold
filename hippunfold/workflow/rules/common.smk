@@ -220,7 +220,6 @@ def get_final_anat():
 def get_final_qc():
     qc = []
 
-
     # right now can only do qc from cropT1w space
     #    output_ref = []
     #    if "cropT1w" in config["output_spaces"]:
