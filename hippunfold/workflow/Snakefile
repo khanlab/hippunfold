@@ -7,21 +7,63 @@ from snakebids import bids
 configfile: "config/snakebids.yml"
 
 
-# make adjustments to input params:
-# right now hippb500 or cropseg cannot use T1w output space
-if config["modality"] == "hippb500" or config["modality"] == "cropseg":
-    config["output_spaces"] = ["corobl"]
+# consider moving this logic to another smk file to clean-up
 
+limit_to_list = set()
+ref_spaces = []
+crop_ref_spaces = []
+template_modality = False
+
+# if no additional output spaces chosen, then empty list:
+if config["output_spaces"] == None:
+    config["output_spaces"] = []
+
+# set the lists used for output spaces
+if (
+    config["modality"] == "T1w"
+    or config["modality"] == "segT1w"
+    or "T1w" in config["output_spaces"]
+):
+    ref_spaces.append("T1w")
+    crop_ref_spaces.append("cropT1w")
+    limit_to_list.add("T1w")
+if (
+    config["modality"] == "T2w"
+    or config["modality"] == "segT2w"
+    or "T2w" in config["output_spaces"]
+):
+    ref_spaces.append("T2w")
+    crop_ref_spaces.append("cropT2w")
+    limit_to_list.add("T2w")
+if (
+    config["modality"] == "hippb500"
+    or config["modality"] == "cropseg"
+    or "corobl" in config["output_spaces"]
+):
+    ref_spaces.append("corobl")
+    crop_ref_spaces.append("corobl")
+
+
+# set the modality to use for template registration
+if "T2w" in config["modality"]:
+    if config["t1_reg_template"]:
+        limit_to_list.add("T1w")
+        template_modality = "T1w"
+    else:
+        template_modality = "T2w"
+
+elif "T1w" in config["modality"]:
+    template_modality = "T1w"
+
+
+# only generate hipp surface if skipping template injection
+#   i.e. drop dentate
 if config["skip_inject_template_labels"]:
     config["autotop_labels"] = ["hipp"]
 
-# get list of inputs to limit to (T1w + modalities)
-limit_to_list = set()
-if "cropT1w" in config["output_spaces"]:
-    limit_to_list.add("T1w")
 
-
-if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg and T2w
+# add seg (if chosen) and the modality to the inputs
+if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg
     limit_to_list.add("seg")
     limit_to_list.add(config["modality"][3:])
 else:
@@ -95,7 +137,7 @@ include: "rules/warps.smk"
 include: "rules/shape_inject.smk"
 include: "rules/gifti.smk"
 include: "rules/subfields.smk"
-include: "rules/resample_final_to_crop_t1.smk"
+include: "rules/resample_final_to_crop_native.smk"
 
 
 rule all:

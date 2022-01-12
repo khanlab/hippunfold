@@ -134,7 +134,6 @@ parse_args:
       - segT1w
       - segT2w
       - cropseg
-      - neonateT1w
       
   --derivatives:
     help: 'Path to the derivatives folder (e.g. for finding manual segs) (default: %(default)s) '
@@ -179,7 +178,10 @@ parse_args:
     default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique. (default: %(default)s)'
 
-
+  --t1_reg_template:
+    help: 'Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
+    default: false
+    action: store_true
 
   --use_gpu:
     help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
@@ -193,12 +195,9 @@ parse_args:
 
   --output_spaces:
     choices: 
-      - 'cropT1w'
-      - 'corobl'
-    default:
-      - 'cropT1w'
+      - 'T1w'
     nargs: '+'
-    help: 'Sets the output space for results (default: %(default)s)'
+    help: 'Sets additional output spaces for results (default: %(default)s)'
 
   --output_density:
     choices:
@@ -261,10 +260,11 @@ singularity:
   ants: 'docker://kaczmarj/ants:2.3.4'
 
 xfm_identity: resources/identity_xfm.txt
-template: dHCP
+template: CITI168
 template_files:
   CITI168:
     T1w: resources/CITI168/T1w_head_700um.nii.gz
+    T2w: resources/CITI168/T2w_head_700um.nii.gz
     xfm_corobl: resources/CITI168/CoronalOblique_rigid.txt
     crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
@@ -399,7 +399,6 @@ laplace_labels:
 
 
 output_spaces:
-  - cropT1w
 
 participant_label:
 exclude_participant_label:
@@ -418,4 +417,5 @@ skip_coreg: False
 keep_work: False
 skip_inject_template_labels: False
 force_nnunet_model: False
+t1_reg_template: False
 root: results

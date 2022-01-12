@@ -77,5 +77,11 @@ jobs:
     - name: Test cropseg bids, with path override, left hemi
       run: | 
         $HIPPUNFOLD - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
+    - name: Test T2w with T1w template registration
+      run: |
+        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
+    - name: Test T2w with additional T1w output space 
+      run: |
+        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
 
 

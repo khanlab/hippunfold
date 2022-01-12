@@ -24,11 +24,6 @@ def get_modality_suffix(modality):
 
 
 def get_final_spec():
-    surf_spaces = []
-    if "cropT1w" in config["output_spaces"]:
-        surf_spaces.append("T1w")
-    if "corobl" in config["output_spaces"]:
-        surf_spaces.append("corobl")
 
     if len(config["hemi"]) == 2:
         specs = expand(
@@ -42,7 +37,7 @@ def get_final_spec():
                 **config["subj_wildcards"],
             ),
             density=config["output_density"],
-            space=surf_spaces,
+            space=ref_spaces,
             autotop=config["autotop_labels"],
             allow_missing=True,
         )
@@ -59,7 +54,7 @@ def get_final_spec():
                 **config["subj_wildcards"],
             ),
             density=config["output_density"],
-            space=surf_spaces,
+            space=ref_spaces,
             hemi=config["hemi"],
             autotop=config["autotop_labels"],
             allow_missing=True,
@@ -79,7 +74,7 @@ def get_final_subfields():
             **config["subj_wildcards"],
         ),
         hemi=config["hemi"],
-        space=config["output_spaces"],
+        space=crop_ref_spaces,
         allow_missing=True,
     )
 
@@ -109,7 +104,7 @@ def get_final_coords():
             dir=["AP", "PD", "IO"],
             autotop=config["autotop_labels"],
             hemi=config["hemi"],
-            space=config["output_spaces"],
+            space=crop_ref_spaces,
             allow_missing=True,
         )
     )
@@ -129,7 +124,7 @@ def get_final_coords():
             desc=[desc_io],
             dir=["IO"],
             hemi=config["hemi"],
-            space=config["output_spaces"],
+            space=crop_ref_spaces,
             allow_missing=True,
         )
     )
@@ -137,11 +132,6 @@ def get_final_coords():
 
 
 def get_final_transforms():
-    if "cropT1w" in config["output_spaces"]:
-        output_ref = "T1w"
-    else:
-        output_ref = "corobl"
-
     xfms = []
 
     xfms.extend(
@@ -157,7 +147,7 @@ def get_final_transforms():
                 to="unfold",
                 mode="image",
             ),
-            space=output_ref,
+            space=ref_spaces,
             autotop=config["autotop_labels"],
             hemi=config["hemi"],
             allow_missing=True,
@@ -177,31 +167,13 @@ def get_final_transforms():
                 to="{space}",
                 mode="image",
             ),
-            space=output_ref,
+            space=ref_spaces,
             autotop=config["autotop_labels"],
             hemi=config["hemi"],
             allow_missing=True,
         )
     )
-    xfms.extend(
-        expand(
-            bids(
-                root=root,
-                datatype="seg",
-                **config["subj_wildcards"],
-                label="{autotop}",
-                suffix="xfm.nii.gz",
-                hemi="{hemi}",
-                from_="{space}",
-                to="unfold",
-                mode="image",
-            ),
-            space=output_ref,
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            allow_missing=True,
-        )
-    )
+
     xfms.extend(
         expand(
             bids(
@@ -223,7 +195,7 @@ def get_final_transforms():
 def get_final_anat():
     anat = []
 
-    if "cropT1w" in config["output_spaces"]:
+    if "T1w" in ref_spaces or "T2w" in ref_spaces:
         anat.extend(
             expand(
                 bids(
@@ -237,7 +209,7 @@ def get_final_anat():
                     hemi="{hemi}",
                     **config["subj_wildcards"],
                 ),
-                space=config["output_spaces"],
+                space=crop_ref_spaces,
                 hemi=config["hemi"],
                 allow_missing=True,
             )
@@ -247,19 +219,26 @@ def get_final_anat():
 
 def get_final_qc():
     qc = []
-    # right now can only do qc from cropT1w space
-    if "cropT1w" in config["output_spaces"]:
 
+    # right now can only do qc from cropT1w space
+    #    output_ref = []
+    #    if "cropT1w" in config["output_spaces"]:
+    #        output_ref.append("T1w")
+    #    if "cropT2w" in config["output_spaces"]:
+    #        output_ref.append("T2w")
+
+    if not template_modality == False:
         qc.extend(
             expand(
                 bids(
                     root=root,
                     datatype="qc",
                     suffix="regqc.png",
-                    from_="subject",
+                    from_="{native_modality}",
                     to=config["template"],
                     **config["subj_wildcards"],
                 ),
+                native_modality=template_modality,
                 allow_missing=True,
             )
         )
@@ -271,11 +250,13 @@ def get_final_qc():
                     datatype="qc",
                     suffix="dseg.png",
                     desc="subfields",
-                    space="cropT1w",
+                    #                   space="crop{native_modality}",
+                    space="{native_modality}",
                     hemi="{hemi}",
                     **config["subj_wildcards"],
                 ),
                 hemi=config["hemi"],
+                native_modality=crop_ref_spaces,
                 allow_missing=True,
             )
         )
@@ -287,7 +268,8 @@ def get_final_qc():
                     suffix="midthickness.surf.png",
                     den="{density}",
                     desc="subfields",
-                    space="cropT1w",
+                    #                    space="crop{native_modality}",
+                    space="{native_modality}",
                     hemi="{hemi}",
                     label="{autotop}",
                     **config["subj_wildcards"],
@@ -295,38 +277,41 @@ def get_final_qc():
                 hemi=config["hemi"],
                 autotop=config["autotop_labels"],
                 density=config["output_density"],
+                native_modality=crop_ref_spaces,
                 allow_missing=True,
             )
         )
-        if len(config["hemi"]) == 2:
-            qc.extend(
-                expand(
-                    bids(
-                        root=root,
-                        datatype="qc",
-                        desc="subfields",
-                        suffix="volumes.png",
-                        **config["subj_wildcards"],
-                    ),
-                    allow_missing=True,
-                )
+    if len(config["hemi"]) == 2:
+        qc.extend(
+            expand(
+                bids(
+                    root=root,
+                    datatype="qc",
+                    desc="subfields",
+                    space="{native_modality}",
+                    suffix="volumes.png",
+                    **config["subj_wildcards"],
+                ),
+                native_modality=ref_spaces,
+                allow_missing=True,
             )
+        )
 
-        if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
-            qc.extend(
-                expand(
-                    bids(
-                        root=root,
-                        datatype="qc",
-                        desc="unetf3d",
-                        suffix="dice.tsv",
-                        hemi="{hemi}",
-                        **config["subj_wildcards"],
-                    ),
-                    hemi=config["hemi"],
-                    allow_missing=True,
-                )
+    if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
+        qc.extend(
+            expand(
+                bids(
+                    root=root,
+                    datatype="qc",
+                    desc="unetf3d",
+                    suffix="dice.tsv",
+                    hemi="{hemi}",
+                    **config["subj_wildcards"],
+                ),
+                hemi=config["hemi"],
+                allow_missing=True,
             )
+        )
     return qc
 
 

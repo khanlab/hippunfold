@@ -7,19 +7,19 @@ rule create_native_crop_ref:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
     params:
         resample="400%",
-        pad_to="192x256x256vox",
+        pad_to="256x256x256vox",
     output:
         ref=bids(
             root=work,
             datatype="seg",
             suffix="cropref.nii.gz",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -47,7 +47,7 @@ rule resample_unet_native_crop:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -56,7 +56,7 @@ rule resample_unet_native_crop:
             root=work,
             datatype="seg",
             suffix="cropref.nii.gz",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -66,7 +66,7 @@ rule resample_unet_native_crop:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="unet",
-            space="cropT1w",
+            space="crop{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -95,7 +95,7 @@ rule resample_postproc_native_crop:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -104,7 +104,7 @@ rule resample_postproc_native_crop:
             root=work,
             datatype="seg",
             suffix="cropref.nii.gz",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -114,7 +114,7 @@ rule resample_postproc_native_crop:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="postproc",
-            space="cropT1w",
+            space="crop{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -143,7 +143,7 @@ rule resample_subfields_native_crop:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -152,7 +152,7 @@ rule resample_subfields_native_crop:
             root=work,
             datatype="seg",
             suffix="cropref.nii.gz",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -162,7 +162,7 @@ rule resample_subfields_native_crop:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="cropT1w",
+            space="crop{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -193,7 +193,7 @@ rule resample_coords_native_crop:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -202,7 +202,7 @@ rule resample_coords_native_crop:
             root=work,
             datatype="seg",
             suffix="cropref.nii.gz",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -213,7 +213,7 @@ rule resample_coords_native_crop:
             dir="{dir}",
             suffix="coords.nii.gz",
             desc="{desc}",
-            space="cropT1w",
+            space="crop{native_modality}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -227,20 +227,20 @@ rule resample_coords_native_crop:
         "antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_t1_to_crop:
+rule resample_native_to_crop:
     input:
         nii=bids(
             root=root,
             datatype="anat",
             **config["subj_wildcards"],
             desc="preproc",
-            suffix="T1w.nii.gz"
+            suffix="{native_modality}.nii.gz"
         ),
         ref=bids(
             root=work,
             datatype="seg",
             suffix="cropref.nii.gz",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -249,8 +249,8 @@ rule resample_t1_to_crop:
             root=root,
             datatype="seg",
             desc="preproc",
-            suffix="T1w.nii.gz",
-            space="cropT1w",
+            suffix="{native_modality}.nii.gz",
+            space="crop{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -273,7 +273,7 @@ def get_xfm_t2_to_t1():
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T2w",
-            to="T1w",
+            to="{native_modality}",
             desc="rigid",
             type_="itk"
         )
@@ -293,7 +293,7 @@ rule resample_t2_to_crop:
             root=work,
             datatype="seg",
             suffix="cropref.nii.gz",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -308,7 +308,7 @@ rule resample_t2_to_crop:
             datatype="seg",
             desc="preproc",
             suffix="T2w.nii.gz",
-            space="cropT1w",
+            space="crop{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),

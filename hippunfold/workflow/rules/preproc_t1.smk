@@ -125,14 +125,16 @@ rule reg_to_template:
 
 rule qc_reg_to_template:
     input:
-        ref=os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]]["T1w"]
+        ref=lambda wildcards: os.path.join(
+            workflow.basedir,
+            "..",
+            config["template_files"][config["template"]][wildcards.native_modality],
         ),
         flo=bids(
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
-            suffix="T1w.nii.gz",
+            suffix="{native_modality}.nii.gz",
             space=config["template"],
             desc="affine"
         ),
@@ -143,7 +145,7 @@ rule qc_reg_to_template:
                 datatype="qc",
                 **config["subj_wildcards"],
                 suffix="regqc.png",
-                from_="subject",
+                from_="{native_modality}",
                 to=config["template"]
             ),
             caption="../report/t1w_template_regqc.rst",
@@ -162,7 +164,7 @@ rule convert_template_xfm_ras2itk:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{reg_suffix}",
             to=config["template"],
             desc="affine",
             type_="ras"
@@ -173,7 +175,7 @@ rule convert_template_xfm_ras2itk:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{reg_suffix}",
             to=config["template"],
             desc="affine",
             type_="itk"
@@ -230,7 +232,7 @@ rule invert_template_xfm_itk2ras:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -241,7 +243,7 @@ rule invert_template_xfm_itk2ras:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affineInverse",
             type_="ras"
@@ -261,7 +263,7 @@ rule template_xfm_itk2ras:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -272,7 +274,7 @@ rule template_xfm_itk2ras:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="ras"

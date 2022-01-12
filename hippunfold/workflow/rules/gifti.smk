@@ -306,8 +306,8 @@ rule unflip_gii_unfolded:
         "cp {input.gii} {output.gii}"
 
 
-# warp from corobl to T1w
-rule warp_gii_to_T1w:
+# warp from corobl to native
+rule warp_gii_to_native:
     input:
         gii=bids(
             root=work,
@@ -324,7 +324,7 @@ rule warp_gii_to_T1w:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="ras"
@@ -335,7 +335,7 @@ rule warp_gii_to_T1w:
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            space="T1w",
+            space="{native_modality}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -348,7 +348,7 @@ rule warp_gii_to_T1w:
         "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"
 
 
-# morphological features, calculated in T1w space:
+# morphological features, calculated in native space:
 rule calculate_surface_area:
     input:
         gii=bids(
