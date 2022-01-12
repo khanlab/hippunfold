@@ -20,18 +20,19 @@ prefixing the command with `singularity run`. This will expect
     └── sub-002/
     ...
 
+The `--modality` flag is required to specify which input image type should be used and in most cases, T1w should be most robust (though other types are supported!).
+
 The T1w image is used to register to a standardized
 template (CITI168), making it possible to reorient, upsample, and crop
 around the left and right hippocampi (this is referred to within
-HippUnfold as `space-corobl`). Note that only the T1w image needs to
-have a whole-brain field of view. By default, any additional input images
-are coregistered and preprocessed, but this can be skipped with the
-flags `--skip_coreg` and `--skip_preproc`, repsectively.
+HippUnfold as `space-corobl`). Note that the T1w image should 
+have a whole-brain field of view. 
 
 More examples of possible BIDS-compliant datasets can be found in
 [hippunfold/test\_data/](https://github.com/khanlab/hippunfold/tree/master/test_data).
 
 ## Different input modalities 
+
 By default, HippUnfold expects the `PATH_TO_BIDS_DIR` to contain at least
 one T1w file for segmenting intrahippocampal
 structures like the SRLM. However, we have
@@ -39,18 +40,20 @@ also provided models trained with T1w, T2w, or DWI data, or, users can input
 their own custom manual segmentations for unfolding, which can be
 specified with the `--modality` flag. For example:
 
-    hippunfold  PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant --modality T1w
+    hippunfold  PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant --modality T2w
 
-would work for a dataset with only T1w images, like this one:
+would work for a dataset with only T2w images, like this one:
 
     PATH_TO_BIDS_DIR/
     └── sub-001/
         └── anat/
-            └── sub-001_T1w.nii.gz
+            └── sub-001_T2w.nii.gz
     ...
 
-Note that specifying a manual segmentation (eg. `--modality segT1w`)
-expects to additionally find a file with the suffix `_dseg` which should
+Note that in this case, registration to a T2w CITI168 template will be performed with the input T2w image. In some cases it may be preferrable to use a T1w image for registration to the standard CITI168 template. A T1w image can be registered to both the input T2w and T1w CITI168 template with the `--t1_reg_template` flag. This is typically most robust as long as a full brain FOV T1w image is available. If this registering is still failing then it may be improved with the `--rigid-reg-template` flag.
+
+Specifying a manual segmentation (eg. `--modality segT1w`)
+expects to additionally find an input file with the suffix `_dseg` which should
 contain labels following the protocol outlined
 [here](https://ars.els-cdn.com/content/image/1-s2.0-S1053811917309977-mmc1.pdf).
 More details are provided on using manual segmentations on the following
@@ -84,17 +87,4 @@ This will search for any any files following the naming scheme and fill
 in `{subject}` IDs for any files it can. Alternatively, `{subject}` IDs
 can be provided in a list with the `--participant_label` flag.
 
-## No T1w images
 
-It is difficult to automatically reorient and crop images appropriately
-without a whole-brain T1w image, which we recommend collecting as a part
-of any acquisition protocol when possible. However, if this is not
-possible, the T2w image may be used instead by specifying it as the T1w
-with the `--path_T1w` flag. This registration may fail, and is
-especially likely to fail if the T2w images are not whole-brain. This
-can sometimes be ameliorated with the `--rigid_reg_template` flag.
-
-Alternatively, if you do not have a standard T1w scan, consider manually
-orienting and/or cropping your data and following the examples outlined
-in the [Specialized scans
-tutorial](specializedScans.md).
