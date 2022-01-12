@@ -17,7 +17,7 @@ def get_inputs_laplace(wildcards):
         files["init_coords"] = (
             bids(
                 root=work,
-                datatype="seg",
+                datatype="coords",
                 **config["subj_wildcards"],
                 dir="{dir}",
                 label="hipp",
@@ -43,7 +43,7 @@ rule laplace_coords_hipp:
     output:
         coords=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             label="hipp",
             suffix="coords.nii.gz",
@@ -72,7 +72,7 @@ rule laplace_coords_dentate:
     input:
         coords=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             **config["subj_wildcards"],
             dir="{dir}",
             label="dentate",
@@ -84,7 +84,7 @@ rule laplace_coords_dentate:
     output:
         coords=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             label="dentate",
             suffix="coords.nii.gz",
@@ -117,7 +117,7 @@ rule prep_equivolume_coords:
     output:
         outerbin=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             desc="all",
             suffix="mask.nii.gz",
@@ -127,7 +127,7 @@ rule prep_equivolume_coords:
         ),
         innerbin=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             desc="SRLM",
             suffix="mask.nii.gz",
@@ -153,7 +153,7 @@ rule equivolume_coords:
     input:
         outerbin=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             desc="all",
             suffix="mask.nii.gz",
@@ -163,7 +163,7 @@ rule equivolume_coords:
         ),
         innerbin=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             desc="SRLM",
             suffix="mask.nii.gz",
@@ -176,7 +176,7 @@ rule equivolume_coords:
     output:
         coords=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             label="hipp",
             suffix="coords.nii.gz",
@@ -207,7 +207,7 @@ rule unflip_coords:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             label="{autotop}",
             suffix="coords.nii.gz",
@@ -219,7 +219,7 @@ rule unflip_coords:
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             label="{autotop}",
             suffix="coords.nii.gz",
@@ -240,7 +240,7 @@ rule unflip_coords_equivol:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             label="hipp",
             suffix="coords.nii.gz",
@@ -252,7 +252,7 @@ rule unflip_coords_equivol:
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             label="hipp",
             suffix="coords.nii.gz",

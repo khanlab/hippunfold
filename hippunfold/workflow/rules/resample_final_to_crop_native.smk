@@ -4,7 +4,7 @@ rule create_native_crop_ref:
     input:
         seg=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
             space="{native_modality}",
@@ -17,7 +17,7 @@ rule create_native_crop_ref:
     output:
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
             hemi="{hemi}",
@@ -35,7 +35,7 @@ rule resample_unet_native_crop:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="nnunet",
@@ -44,7 +44,7 @@ rule resample_unet_native_crop:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -54,7 +54,7 @@ rule resample_unet_native_crop:
         ),
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
             hemi="{hemi}",
@@ -63,7 +63,7 @@ rule resample_unet_native_crop:
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="unet",
             space="crop{native_modality}",
@@ -83,7 +83,7 @@ rule resample_postproc_native_crop:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="postproc",
@@ -92,7 +92,7 @@ rule resample_postproc_native_crop:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -102,7 +102,7 @@ rule resample_postproc_native_crop:
         ),
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
             hemi="{hemi}",
@@ -111,7 +111,7 @@ rule resample_postproc_native_crop:
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="postproc",
             space="crop{native_modality}",
@@ -131,7 +131,7 @@ rule resample_subfields_native_crop:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
             space="corobl",
@@ -140,7 +140,7 @@ rule resample_subfields_native_crop:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -150,7 +150,7 @@ rule resample_subfields_native_crop:
         ),
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
             hemi="{hemi}",
@@ -159,7 +159,7 @@ rule resample_subfields_native_crop:
     output:
         nii=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
             space="crop{native_modality}",
@@ -179,7 +179,7 @@ rule resample_coords_native_crop:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             label="{autotop}",
             suffix="coords.nii.gz",
@@ -190,7 +190,7 @@ rule resample_coords_native_crop:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -200,7 +200,7 @@ rule resample_coords_native_crop:
         ),
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
             hemi="{hemi}",
@@ -209,7 +209,7 @@ rule resample_coords_native_crop:
     output:
         nii=bids(
             root=root,
-            datatype="seg",
+            datatype="coords",
             dir="{dir}",
             suffix="coords.nii.gz",
             desc="{desc}",
@@ -238,7 +238,7 @@ rule resample_native_to_crop:
         ),
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
             hemi="{hemi}",
@@ -247,7 +247,7 @@ rule resample_native_to_crop:
     output:
         nii=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             desc="preproc",
             suffix="{native_modality}.nii.gz",
             space="crop{native_modality}",
@@ -269,7 +269,7 @@ def get_xfm_t2_to_t1():
     else:
         xfm = bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T2w",
@@ -291,7 +291,7 @@ rule resample_t2_to_crop:
         ),
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
             hemi="{hemi}",
@@ -305,7 +305,7 @@ rule resample_t2_to_crop:
     output:
         nii=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             desc="preproc",
             suffix="T2w.nii.gz",
             space="crop{native_modality}",

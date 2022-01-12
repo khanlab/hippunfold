@@ -103,7 +103,7 @@ rule run_inference:
     output:
         nnunet_seg=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="nnunet",
@@ -141,7 +141,7 @@ rule unflip_nnunet_nii:
     input:
         nnunet_seg=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="nnunet",
@@ -151,7 +151,7 @@ rule unflip_nnunet_nii:
     output:
         nnunet_seg=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="nnunet",
@@ -193,7 +193,7 @@ rule qc_nnunet_f3d:
         img=get_nnunet_input,
         seg=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="nnunet",
@@ -204,7 +204,7 @@ rule qc_nnunet_f3d:
     output:
         cpp=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="cpp.nii.gz",
             desc="f3d",
@@ -213,7 +213,7 @@ rule qc_nnunet_f3d:
         ),
         res=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="{modality}.nii.gz".format(modality=config["modality"]),
             desc="f3d",
@@ -222,7 +222,7 @@ rule qc_nnunet_f3d:
         ),
         res_mask=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="mask.nii.gz",
             desc="f3d",
@@ -242,7 +242,7 @@ rule qc_nnunet_dice:
     input:
         res_mask=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="mask.nii.gz",
             desc="f3d",

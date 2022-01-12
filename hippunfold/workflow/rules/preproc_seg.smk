@@ -29,7 +29,7 @@ rule warp_seg_to_corobl_crop:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{space}",

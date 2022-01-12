@@ -79,7 +79,7 @@ rule reg_t2_to_ref:
     output:
         xfm_ras=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T2w{idx}",
@@ -89,7 +89,7 @@ rule reg_t2_to_ref:
         ),
         xfm_itk=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T2w{idx}",
@@ -213,7 +213,7 @@ rule reg_t2_to_t1:
         ),
         xfm_ras=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T2w",
@@ -223,7 +223,7 @@ rule reg_t2_to_t1:
         ),
         xfm_itk=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T2w",
@@ -267,7 +267,7 @@ rule reg_t2_to_template:
         ),
         xfm_ras=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T2w",
@@ -290,7 +290,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         t2_to_t1 = (
             bids(
                 root=work,
-                datatype="anat",
+                datatype="warps",
                 **config["subj_wildcards"],
                 suffix="xfm.txt",
                 from_="T2w",
@@ -302,7 +302,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         t1_to_cor = (
             bids(
                 root=work,
-                datatype="anat",
+                datatype="warps",
                 **config["subj_wildcards"],
                 suffix="xfm.txt",
                 from_="T1w",
@@ -319,7 +319,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         t2_to_std = (
             bids(
                 root=work,
-                datatype="anat",
+                datatype="warps",
                 **config["subj_wildcards"],
                 suffix="xfm.txt",
                 from_="T2w",
@@ -347,7 +347,7 @@ rule compose_t2_xfm_corobl:
     output:
         t2_to_cor=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T2w",
@@ -368,7 +368,7 @@ def get_xfm_to_corobl():
     if config["skip_coreg"]:
         xfm = bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T1w",
@@ -380,7 +380,7 @@ def get_xfm_to_corobl():
         xfm = (
             bids(
                 root=work,
-                datatype="anat",
+                datatype="warps",
                 **config["subj_wildcards"],
                 suffix="xfm.txt",
                 from_="T2w",
