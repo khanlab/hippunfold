@@ -507,7 +507,7 @@ rule compose_warps_unfold_to_crop_native:
     """ Compose warps from unfold to crop native """
     input:
         unfold2corobl=bids(
-            root=root,
+            root=work,
             datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
