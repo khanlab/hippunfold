@@ -13,7 +13,7 @@ def get_parser():
 
 
 def main():
-    app = SnakeBidsApp(os.path.abspath(os.path.dirname(__file__)))
+    app = SnakeBidsApp(os.path.abspath(os.path.dirname(__file__)),configfile_path='config/snakebids.yml')
     app.run_snakemake()
 
 
