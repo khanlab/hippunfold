@@ -301,21 +301,23 @@ rule plot_subj_subfields:
 
 
 def get_bg_img_for_subfield_qc(wildcards):
-
-    if config["modality"][:3] == "seg":
-        bg_modality = config["modality"][3:]
+    if crop_ref_spaces == "corobl":
+        return "None"
     else:
-        bg_modality = config["modality"]
+        if config["modality"][:3] == "seg":
+            bg_modality = config["modality"][3:]
+        else:
+            bg_modality = config["modality"]
 
-    return bids(
-        root=root,
-        datatype="seg",
-        desc="preproc",
-        suffix=f"{bg_modality}.nii.gz",
-        space="crop{native_modality}",
-        hemi="{hemi}",
-        **config["subj_wildcards"],
-    )
+        return bids(
+            root=root,
+            datatype="seg",
+            desc="preproc",
+            suffix=f"{bg_modality}.nii.gz",
+            space="crop{native_modality}",
+            hemi="{hemi}",
+            **config["subj_wildcards"],
+        )
 
 
 rule qc_subfield:
@@ -337,7 +339,7 @@ rule qc_subfield:
                 datatype="qc",
                 suffix="dseg.png",
                 desc="subfields",
-                space="crop{native_modality}",
+                space="{native_modality}",
                 hemi="{hemi}",
                 **config["subj_wildcards"]
             ),
@@ -370,7 +372,7 @@ rule qc_subfield_surf:
                 suffix="midthickness.surf.png",
                 den="{density}",
                 desc="subfields",
-                space="crop{native_modality}",
+                space="{native_modality}",
                 hemi="{hemi}",
                 label="{autotop}",
                 **config["subj_wildcards"]
