@@ -34,8 +34,6 @@ def get_input_for_shape_inject(wildcards):
     return seg
 
 
-
-
 def get_input_splitseg_for_shape_inject(wildcards):
     if config["modality"] == "cropseg":
         seg = bids(

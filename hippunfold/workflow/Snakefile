@@ -25,10 +25,9 @@ if (
     crop_ref_spaces.append("cropT1w")
     limit_to_list.add("T1w")
 if (
-    ((config["modality"] == "T2w"
-    or config["modality"] == "segT2w" )and 'native' in config['output_spaces'])
-    or "T2w" in config["output_spaces"]
-):
+    (config["modality"] == "T2w" or config["modality"] == "segT2w")
+    and "native" in config["output_spaces"]
+) or "T2w" in config["output_spaces"]:
     ref_spaces.append("T2w")
     crop_ref_spaces.append("cropT2w")
     limit_to_list.add("T2w")
@@ -65,7 +64,6 @@ if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg
     limit_to_list.add(config["modality"][3:])
 else:
     limit_to_list.add(config["modality"])
-
 
 
 # writes inputs_config.yml and updates config dict

@@ -394,6 +394,3 @@ rule archive_work_after_final:
         "  rm -rf {params.work_dir}; "
         "else exit 1; "
         "fi"
-
-
-
