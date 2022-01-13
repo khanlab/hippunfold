@@ -207,7 +207,6 @@ parse_args:
       - 'unfoldiso'
     default:
       - '0p5mm'
-      - '1mm'
     nargs: '+'
     help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
 
@@ -407,7 +406,6 @@ hemi:
   - R
 output_density:
   - 0p5mm
-  - 1mm
 
 laminar_coords_method: equivolume
 skip_preproc: False
