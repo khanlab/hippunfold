@@ -10,6 +10,22 @@ def get_cmd_laplace_coords(wildcards):
     return cmd
 
 
+def get_labels_for_laplace(wildcards):
+    if config["skip_inject_template_labels"]:
+        seg = get_input_for_shape_inject(wildcards)
+    else:
+        seg = bids(
+            root=work,
+            datatype="anat",
+            **config["subj_wildcards"],
+            suffix="dseg.nii.gz",
+            desc="postproc",
+            space="corobl",
+            hemi="{hemi}"
+        ).format(**wildcards)
+    return seg
+
+
 def get_inputs_laplace(wildcards):
     files = dict()
     files["lbl"] = get_labels_for_laplace(wildcards)
