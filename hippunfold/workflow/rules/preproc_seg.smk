@@ -48,7 +48,6 @@ rule warp_seg_to_corobl_crop:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi}",
             from_="{space}"
@@ -69,7 +68,6 @@ rule lr_flip_seg:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi}",
             from_="{space}"
@@ -80,7 +78,6 @@ rule lr_flip_seg:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi,L}flip",
             from_="{space}"

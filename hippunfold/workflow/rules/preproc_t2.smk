@@ -414,8 +414,8 @@ rule warp_t2_to_corobl_crop:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
-            desc="cropped",
             space="corobl",
+            desc="preproc",
             hemi="{hemi}"
         ),
     container:
@@ -434,8 +434,8 @@ rule lr_flip_t2:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
-            desc="cropped",
             space="corobl",
+            desc="{desc}",
             hemi="{hemi}"
         ),
     output:
@@ -444,8 +444,8 @@ rule lr_flip_t2:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
-            desc="cropped",
             space="corobl",
+            desc="{desc}",
             hemi="{hemi,L}flip"
         ),
     container:

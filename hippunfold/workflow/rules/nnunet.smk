@@ -10,8 +10,8 @@ def get_nnunet_input(wildcards):
                 datatype="anat",
                 **config["subj_wildcards"],
                 suffix="T2w.nii.gz",
-                desc="cropped",
                 space="corobl",
+                desc="preproc",
                 hemi="{hemi}",
             ),
         )
@@ -22,8 +22,8 @@ def get_nnunet_input(wildcards):
                 datatype="anat",
                 **config["subj_wildcards"],
                 suffix="T1w.nii.gz",
-                desc="cropped",
                 space="corobl",
+                desc="preproc",
                 hemi="{hemi}",
             ),
         )
@@ -32,7 +32,6 @@ def get_nnunet_input(wildcards):
             root=work,
             datatype="dwi",
             hemi="{hemi}",
-            desc="cropped",
             space="corobl",
             suffix="b500.nii.gz",
             **config["subj_wildcards"],
