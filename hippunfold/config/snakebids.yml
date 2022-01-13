@@ -1,264 +1,218 @@
-bids_dir: '../test_data/bids_singleT2w'
-output_dir: 'test_output' #don't use '.'
-
-#snakemake_dir: '.' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
-
-#enable printing debug statements during parsing -- disable if generating dag visualization
-debug: False
-
-derivatives: False #will search in bids/derivatives if True; can also be path(s) to derivatives datasets
-
-#list of analysis levels in the bids app 
-analysis_levels: &analysis_levels
- - participant
- - group
-  
-
-#mapping from analysis_level to set of target rules or files
+bids_dir: /scratch/jdekrake/opt/BIDS_cropseg
+output_dir: /scratch/jdekrake/opt/test2_cropseg
+debug: false
+derivatives: false
+analysis_levels: &id001
+- participant
+- group
 targets_by_analysis_level:
   participant:
-    - ''  # if '', then the first rule is run
+  - ''
   group:
-    - 'all_group_tsv'
-
-#this configures the pybids grabber - create an entry for each type of input you want to grab
-# indexed by name of input
-#   dictionary for each input is passed directly to pybids get()
-#    https://bids-standard.github.io/pybids/generated/bids.layout.BIDSLayout.html#bids.layout.BIDSLayout.get
-
-
+  - all_group_tsv
 pybids_inputs:
   T2w:
     filters:
-      suffix: 'T2w'
-      extension: '.nii.gz'
-      datatype: 'anat'
-      invalid_filters: 'allow'
+      suffix: T2w
+      extension: .nii.gz
+      datatype: anat
+      invalid_filters: allow
       space: null
     wildcards:
-      - subject
-      - session
-      - acquisition
-      - run
-
+    - subject
+    - session
+    - acquisition
+    - run
   hippb500:
     filters:
-      suffix: 'b500'
-      extension: '.nii.gz'
-      invalid_filters: 'allow'
-      datatype: 'dwi'
+      suffix: b500
+      extension: .nii.gz
+      invalid_filters: allow
+      datatype: dwi
     wildcards:
-      - subject
-      - session
-
+    - subject
+    - session
   T1w:
     filters:
-      suffix: 'T1w'
-      extension: '.nii.gz'
-      datatype: 'anat'
-      invalid_filters: 'allow'
+      suffix: T1w
+      extension: .nii.gz
+      datatype: anat
+      invalid_filters: allow
       space: null
     wildcards:
-      - subject
-      - session
-      - acquisition
-      - run
-
+    - subject
+    - session
+    - acquisition
+    - run
   seg:
     filters:
-      suffix: 'dseg'
-      extension: '.nii.gz'
-      datatype: 'anat'
-      invalid_filters: 'allow'
+      suffix: dseg
+      extension: .nii.gz
+      datatype: anat
+      invalid_filters: allow
     wildcards:
-      - subject
-      - session
-
+    - subject
+    - session
   cropseg:
     filters:
-      suffix: 'dseg'
-      extension: '.nii.gz'
-      datatype: 'anat'
-      invalid_filters: 'allow'
+      suffix: dseg
+      extension: .nii.gz
+      datatype: anat
+      invalid_filters: allow
     wildcards:
-      - subject
-      - session
-      - hemi
-
-
-
-#configuration for the command-line parameters to make available
-# passed on the argparse add_argument()
+    - subject
+    - session
+    - hemi
 parse_args:
-
-#---  core BIDS-app options --- (do not modify below) 
-
   bids_dir:
-    help: The directory with the input dataset formatted according 
-          to the BIDS standard.
-
+    help: The directory with the input dataset formatted according to the BIDS standard.
   output_dir:
-    help: The directory where the output files 
-          should be stored. If you are running group level analysis
-          this folder should be prepopulated with the results of the
-          participant level analysis.
-
-  analysis_level: 
-    help: Level of the analysis that will be performed. 
-    choices: *analysis_levels
-
+    help: The directory where the output files should be stored. If you are running
+      group level analysis this folder should be prepopulated with the results of
+      the participant level analysis.
+  analysis_level:
+    help: Level of the analysis that will be performed.
+    choices: *id001
   --participant_label:
-    help: The label(s) of the participant(s) that should be analyzed. The label 
-          corresponds to sub-<participant_label> from the BIDS spec 
-          (so it does not include "sub-"). If this parameter is not 
-          provided all subjects should be analyzed. Multiple 
-          participants can be specified with a space separated list.
-    nargs: '+'
-
+    help: The label(s) of the participant(s) that should be analyzed. The label corresponds
+      to sub-<participant_label> from the BIDS spec (so it does not include "sub-").
+      If this parameter is not provided all subjects should be analyzed. Multiple
+      participants can be specified with a space separated list.
+    nargs: +
   --exclude_participant_label:
-    help: The label(s) of the participant(s) that should be excluded. The label 
-          corresponds to sub-<participant_label> from the BIDS spec 
-          (so it does not include "sub-"). If this parameter is not 
-          provided all subjects should be analyzed. Multiple 
-          participants can be specified with a space separated list.
-    nargs: '+'
-
-
+    help: The label(s) of the participant(s) that should be excluded. The label corresponds
+      to sub-<participant_label> from the BIDS spec (so it does not include "sub-").
+      If this parameter is not provided all subjects should be analyzed. Multiple
+      participants can be specified with a space separated list.
+    nargs: +
   --modality:
-    help: 'Type of image to run hippunfold on. Modality prefixed with seg will import an existing (manual) hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
-    required: True
+    help: 'Type of image to run hippunfold on. Modality prefixed with seg will import
+      an existing (manual) hippocampal tissue segmentation from that space, instead
+      of running neural network (default: %(default)s)'
+    required: true
     choices:
-      - T1w
-      - T2w
-      - hippb500
-      - segT1w
-      - segT2w
-      - cropseg
-      
+    - T1w
+    - T2w
+    - hippb500
+    - segT1w
+    - segT2w
+    - cropseg
   --derivatives:
-    help: 'Path to the derivatives folder (e.g. for finding manual segs) (default: %(default)s) '
-    default: False
-
+    help: 'Path to the derivatives folder (e.g. for finding manual segs) (default:
+      %(default)s) '
+    default: false
   --skip_preproc:
-    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
- 
-  --skip_coreg:
-    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  --skip_inject_template_labels:
-    help: 'Set this flag to skip post-processing template injection into CNN segmentation. Note this will disable generation of DG surfaces. (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  
-  --inject_template_smoothing_factor: 
-    help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
-    default: 1.0
-
-
-  --rigid_reg_template:
-    help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  --no_reg_template:
-    help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  --template:
-    choices:
-      - 'CITI168'
-      - 'dHCP'
-    default: 'CITI168'
-    help: 'Set the template to use for registration to coronal oblique. (default: %(default)s)'
-
-  --t1_reg_template:
-    help: 'Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
+    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed
+      (default: %(default)s)'
     default: false
     action: store_true
-
+  --skip_coreg:
+    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to
+      T1w space (default: %(default)s)'
+    default: false
+    action: store_true
+  --skip_inject_template_labels:
+    help: 'Set this flag to skip post-processing template injection into CNN segmentation.
+      Note this will disable generation of DG surfaces. (default: %(default)s)'
+    default: false
+    action: store_true
+  --inject_template_smoothing_factor:
+    help: 'Scales the default smoothing sigma for gradient and warp in template shape
+      injection. Using a value higher than 1 will use result in a smoother warp, and
+      greater capacity to patch larger holes in segmentations. Try setting to 2 if
+      nnunet segmentations have large holes. Note: the better solution is to re-train
+      network on the data you are using (default: %(default)s)'
+    default: 1.0
+  --rigid_reg_template:
+    help: 'Use rigid instead of affine for registration to template. Try this if your
+      images are reduced FOV (default: %(default)s)'
+    default: false
+    action: store_true
+  --no_reg_template:
+    help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
+    default: false
+    action: store_true
+  --template:
+    choices:
+    - CITI168
+    - dHCP
+    default: CITI168
+    help: 'Set the template to use for registration to coronal oblique. (default:
+      %(default)s)'
+  --t1_reg_template:
+    help: 'Use T1w to register to template space, instead of the segmentation modality.
+      Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
+    default: false
+    action: store_true
   --use_gpu:
-    help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
+    help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule
+      (default: %(default)s)'
+    default: false
+    action: store_true
   --nnunet_disable_tta:
-    help: 'Disable test-time augmentation for nnU-net inference, speeds up inference by 8x, at expense of accuracy (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
+    help: 'Disable test-time augmentation for nnU-net inference, speeds up inference
+      by 8x, at expense of accuracy (default: %(default)s)'
+    default: false
+    action: store_true
   --output_spaces:
-    choices: 
-      - 'T1w'
-    nargs: '+'
+    choices:
+    - T1w
+    nargs: +
     help: 'Sets additional output spaces for results (default: %(default)s)'
-
   --output_density:
     choices:
-      - '0p5mm'
-      - '1mm'
-      - '2mm'
-      - 'unfoldiso'
+    - 0p5mm
+    - 1mm
+    - 2mm
+    - unfoldiso
     default:
-      - '0p5mm'
-      - '1mm'
-    nargs: '+'
-    help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
-
-
+    - 0p5mm
+    - 1mm
+    nargs: +
+    help: 'Sets the output vertex density for results. Options correspond to approximate
+      vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso
+      (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
   --hemi:
     choices:
-      - 'L'
-      - 'R'
+    - L
+    - R
     default:
-      - 'L'
-      - 'R'
-    nargs: '+'
+    - L
+    - R
+    nargs: +
     help: 'Hemisphere(s) to process (default: %(default)s)'
-
   --laminar_coords_method:
     choices:
-      - 'laplace'
-      - 'equivolume'
+    - laplace
+    - equivolume
     default:
-      - 'equivolume'
-    help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)' 
-
+    - equivolume
+    help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering
+      from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)'
   --keep_work:
-    help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
+    help: 'Keep work folder intact instead of archiving it for each subject (default:
+      %(default)s)'
+    default: false
+    action: store_true
   --force_nnunet_model:
     help: 'Force nnunet model to use (expert option). (default: %(default)s)'
-    default: False
+    default: false
     choices:
-      - T1w
-      - T2w
-      - T1T2w
-      - b1000
-      - trimodal
-      - hippb500
-      - neonateT1w
-
+    - T1w
+    - T2w
+    - T1T2w
+    - b1000
+    - trimodal
+    - hippb500
+    - neonateT1w
 autotop_labels:
-  - 'hipp'
-  - 'dentate'
-
-#--- workflow specific configuration -- 
-
+- hipp
+- dentate
 singularity:
-  prepdwi: 'docker://khanlab/prepdwi:latest'  
-  autotop: 'docker://khanlab/autotop_deps:v0.4.1'
-  fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
-  ants: 'docker://kaczmarj/ants:2.3.4'
-
+  prepdwi: docker://khanlab/prepdwi:latest
+  autotop: docker://khanlab/autotop_deps:v0.4.1
+  fsl: /project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif
+  ants: docker://kaczmarj/ants:2.3.4
 xfm_identity: resources/identity_xfm.txt
 template: CITI168
 template_files:
@@ -275,147 +229,135 @@ template_files:
     crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
-
-
-
-
-
-rigid_reg_template: False
-no_reg_template: False
-
-modality: T2w
-
-
-
-#these will be downloaded to ~/.cache/hippunfold
+rigid_reg_template: false
+no_reg_template: false
+modality: cropseg
 nnunet_model:
   T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
   T2w: trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
   neonateT1w: trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
-
 hippdwi_opts:
-  resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm
+  resample_dim: 734x720x67
   bbox_x:
-    R: '383 510'
-    L: '224 351'
-  bbox_y: '198 453'
-
+    R: 383 510
+    L: 224 351
+  bbox_y: 198 453
 unfold_vol_ref:
-
   hipp:
     dims:
-      - '256'
-      - '128' 
-      - '16'
+    - '256'
+    - '128'
+    - '16'
     voxdims:
-      - '0.15625'
-      - '0.15625'
-      - '0.15625'
+    - '0.15625'
+    - '0.15625'
+    - '0.15625'
     origin:
-      - '0'
-      - '200'
-      - '0'
+    - '0'
+    - '200'
+    - '0'
     extent:
-      - '40'
-      - '20'
-      - '2.5'
+    - '40'
+    - '20'
+    - '2.5'
     orient: RPI
-
   dentate:
     dims:
-      - '256'
-      - '32'
-      - '16'
+    - '256'
+    - '32'
+    - '16'
     voxdims:
-      - '0.15625'
-      - '0.15625'
-      - '0.15625'
+    - '0.15625'
+    - '0.15625'
+    - '0.15625'
     origin:
-      - '0'
-      - '200'
-      - '0'
+    - '0'
+    - '200'
+    - '0'
     extent:
-      - '40'
-      - '5'
-      - '2.5'
+    - '40'
+    - '5'
+    - '2.5'
     orient: RPI
-
-# space for uniform unfolded grid:
-#  currently only used for interpolating hipp subfields on surface
 unfold_mesh_ref:
   dims:
-   - 254
-   - 126
+  - 254
+  - 126
   start:
-   - 0.234375
-   - 0.234375
+  - 0.234375
+  - 0.234375
   end:
-   - 39.765625
-   - 19.765625
-
+  - 39.765625
+  - 19.765625
 shape_inject:
-  labels_reg: 
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 8
+  labels_reg:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 8
   labels_reinsert:
-    - 7
-  label_smoothing_stdev: '0.5x0.5x0.5mm'
-
+  - 7
+  label_smoothing_stdev: 0.5x0.5x0.5mm
 inject_template_smoothing_factor: 1.0
-
 laplace_labels:
-  AP: 
+  AP:
     gm:
-      - 1
-      - 8
+    - 1
+    - 8
     src:
-      - 5
+    - 5
     sink:
-      - 6
+    - 6
   PD:
     gm:
-      - 1
-      - 8
+    - 1
+    - 8
     src:
-      - 3
+    - 3
     sink:
-      - 8   
+    - 8
   IO:
     gm:
-      - 1
-      - 8
+    - 1
+    - 8
     src:
-      - 2
-      - 4
-      - 7
+    - 2
+    - 4
+    - 7
     sink:
-      - 0 
-
-
-output_spaces:
-
-participant_label:
-exclude_participant_label:
+    - 0
+output_spaces: null
+participant_label: null
+exclude_participant_label: null
 hemi:
-  - L
-  - R
+- L
+- R
 output_density:
-  - 0p5mm
-  - 1mm
-
-laminar_coords_method: equivolume
-skip_preproc: False
-nnunet_disable_tta: False
-use_gpu: False
-skip_coreg: False
-keep_work: False
-skip_inject_template_labels: False
-force_nnunet_model: False
-t1_reg_template: False
-root: results
+- 0p5mm
+- 1mm
+laminar_coords_method:
+- equivolume
+skip_preproc: false
+nnunet_disable_tta: false
+use_gpu: false
+skip_coreg: false
+keep_work: false
+skip_inject_template_labels: false
+force_nnunet_model: false
+t1_reg_template: false
+root: ''
+snakemake_dir: /scratch/jdekrake/opt/hippunfold/hippunfold
+snakefile: /scratch/jdekrake/opt/hippunfold/hippunfold/workflow/Snakefile
+snakemake_args:
+- --profile
+- cc-slurm
+- -np
+workflow_mode: false
+force_conversion: false
+retrofit: false
+help_snakemake: null
+analysis_level: participant
