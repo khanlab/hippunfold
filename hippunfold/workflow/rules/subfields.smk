@@ -328,7 +328,7 @@ rule qc_subfield:
             datatype="seg",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="crop{native_modality}",
+            space="{native_modality}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),

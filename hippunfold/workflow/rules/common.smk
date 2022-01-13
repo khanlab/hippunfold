@@ -251,12 +251,11 @@ def get_final_qc():
                     suffix="dseg.png",
                     desc="subfields",
                     space="{native_modality}",
-                    space="{native_modality}",
                     hemi="{hemi}",
                     **config["subj_wildcards"],
                 ),
                 hemi=config["hemi"],
-                native_modality=crop_ref_spaces,
+                native_modality=ref_spaces,
                 allow_missing=True,
             )
         )
@@ -269,7 +268,6 @@ def get_final_qc():
                     den="{density}",
                     desc="subfields",
                     space="{native_modality}",
-                    space="{native_modality}",
                     hemi="{hemi}",
                     label="{autotop}",
                     **config["subj_wildcards"],
@@ -277,7 +275,7 @@ def get_final_qc():
                 hemi=config["hemi"],
                 autotop=config["autotop_labels"],
                 density=config["output_density"],
-                native_modality=crop_ref_spaces,
+                native_modality=ref_spaces,
                 allow_missing=True,
             )
         )
