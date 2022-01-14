@@ -11,7 +11,7 @@ rule label_subfields_from_vol_coords_corobl:
         ),
         nii_ap=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="AP",
             label="hipp",
             suffix="coords.nii.gz",
@@ -22,7 +22,7 @@ rule label_subfields_from_vol_coords_corobl:
         ),
         nii_pd=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="PD",
             label="hipp",
             suffix="coords.nii.gz",
@@ -36,7 +36,7 @@ rule label_subfields_from_vol_coords_corobl:
     output:
         nii_label=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             desc="subfieldsnotissue",
             suffix="dseg.nii.gz",
             space="corobl",
@@ -64,7 +64,7 @@ rule combine_tissue_subfield_labels_corobl:
         tissue=get_labels_for_laplace,
         subfields=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             desc="subfieldsnotissue",
             suffix="dseg.nii.gz",
             space="corobl",
@@ -78,7 +78,7 @@ rule combine_tissue_subfield_labels_corobl:
     output:
         combined=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
             space="corobl",
@@ -98,7 +98,7 @@ rule resample_subfields_to_native:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
             space="corobl",
@@ -107,7 +107,7 @@ rule resample_subfields_to_native:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -125,7 +125,7 @@ rule resample_subfields_to_native:
     output:
         nii=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
             space="{native_modality,T1w|T2w}",
@@ -146,7 +146,7 @@ rule resample_postproc_to_native:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="postproc",
@@ -155,7 +155,7 @@ rule resample_postproc_to_native:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -173,7 +173,7 @@ rule resample_postproc_to_native:
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="postproc",
             space="{native_modality,T2w|T2w}",
@@ -194,7 +194,7 @@ rule resample_unet_to_native:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="nnunet",
@@ -203,7 +203,7 @@ rule resample_unet_to_native:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -221,7 +221,7 @@ rule resample_unet_to_native:
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="unet",
             space="{native_modality,T1w|T2w}",
@@ -244,7 +244,7 @@ rule get_subfield_vols_subj:
             bids(
                 root=root,
                 **config["subj_wildcards"],
-                datatype="seg",
+                datatype="anat",
                 hemi="{hemi}",
                 space="{native_modality}",
                 desc="subfields",
@@ -261,7 +261,7 @@ rule get_subfield_vols_subj:
     output:
         tsv=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             space="{native_modality}",
             desc="subfields",
             suffix="volumes.tsv",
@@ -275,7 +275,7 @@ rule plot_subj_subfields:
     input:
         tsv=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             space="{native_modality}",
             desc="subfields",
             suffix="volumes.tsv",
@@ -309,7 +309,7 @@ def get_bg_img_for_subfield_qc(wildcards):
 
     return bids(
         root=root,
-        datatype="seg",
+        datatype="anat",
         desc="preproc",
         suffix=f"{bg_modality}.nii.gz",
         space="crop{native_modality}",
@@ -323,7 +323,7 @@ rule qc_subfield:
         img=get_bg_img_for_subfield_qc,
         seg=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
             space="crop{native_modality}",
@@ -390,7 +390,7 @@ rule concat_subj_vols_tsv:
         tsv=lambda wildcards: expand(
             bids(
                 root=root,
-                datatype="seg",
+                datatype="anat",
                 desc="subfields",
                 suffix="volumes.tsv",
                 **config["subj_wildcards"]
@@ -417,7 +417,7 @@ rule resample_subfields_to_unfold:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
             space="corobl",
@@ -426,7 +426,7 @@ rule resample_subfields_to_unfold:
         ),
         xfm=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.nii.gz",
             hemi="{hemi}",
@@ -437,7 +437,7 @@ rule resample_subfields_to_unfold:
     output:
         nii=bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
             space="unfold",

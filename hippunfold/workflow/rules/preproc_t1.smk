@@ -107,7 +107,7 @@ rule reg_to_template:
         ),
         xfm_ras=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T1w",
@@ -161,7 +161,7 @@ rule convert_template_xfm_ras2itk:
     input:
         bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{reg_suffix}",
@@ -172,7 +172,7 @@ rule convert_template_xfm_ras2itk:
     output:
         bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{reg_suffix}",
@@ -193,7 +193,7 @@ rule compose_template_xfm_corobl:
     input:
         sub_to_std=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T1w",
@@ -209,7 +209,7 @@ rule compose_template_xfm_corobl:
     output:
         sub_to_cor=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T1w",
@@ -229,7 +229,7 @@ rule invert_template_xfm_itk2ras:
     input:
         xfm_ras=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -240,7 +240,7 @@ rule invert_template_xfm_itk2ras:
     output:
         xfm_ras=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -260,7 +260,7 @@ rule template_xfm_itk2ras:
     input:
         xfm_ras=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -271,7 +271,7 @@ rule template_xfm_itk2ras:
     output:
         xfm_ras=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -299,7 +299,7 @@ rule warp_t1_to_corobl_crop:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="T1w",
@@ -322,9 +322,9 @@ rule warp_t1_to_corobl_crop:
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
-            desc="cropped",
             suffix="T1w.nii.gz",
             space="corobl",
+            desc="preproc",
             hemi="{hemi,L|R}"
         ),
     container:
@@ -343,8 +343,8 @@ rule lr_flip_t1:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T1w.nii.gz",
-            desc="cropped",
             space="corobl",
+            desc="{desc}",
             hemi="{hemi}"
         ),
     output:
@@ -353,8 +353,8 @@ rule lr_flip_t1:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T1w.nii.gz",
-            desc="cropped",
             space="corobl",
+            desc="{desc}",
             hemi="{hemi,L}flip"
         ),
     container:

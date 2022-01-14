@@ -17,7 +17,6 @@ rule resample_hippdwi_to_template:
             root=work,
             datatype="dwi",
             hemi="{hemi,L|R}",
-            desc="cropped",
             space="corobl",
             suffix="b500.nii.gz",
             **config["subj_wildcards"]
@@ -41,7 +40,6 @@ rule lr_flip_b500:
             datatype="dwi",
             **config["subj_wildcards"],
             suffix="b500.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi}"
         ),
@@ -51,7 +49,6 @@ rule lr_flip_b500:
             datatype="dwi",
             **config["subj_wildcards"],
             suffix="b500.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi,L}flip"
         ),
@@ -63,21 +60,20 @@ rule lr_flip_b500:
         "c3d {input} -flip x -o  {output}"
 
 
-rule cp_b500_to_seg_dir:
+rule cp_b500_to_anat_dir:
     input:
         nii=bids(
             root=work,
             datatype="dwi",
             **config["subj_wildcards"],
             suffix="b500.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi}"
         ),
     output:
         nii=bids(
             root=work,
-            datatype="seg_hippb500",
+            datatype="anat",
             desc="preproc",
             suffix="b500.nii.gz",
             space="corobl",

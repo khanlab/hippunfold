@@ -2,7 +2,7 @@ rule create_native_coord_ref:
     input:
         coords_ap=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="AP",
             label="{autotop}",
             suffix="coords.nii.gz",
@@ -14,7 +14,7 @@ rule create_native_coord_ref:
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             space="corobl",
             hemi="{hemi}",
             label="{autotop}",
@@ -47,7 +47,7 @@ rule create_unfold_ref:
             root=work,
             space="unfold",
             label="{autotop}",
-            datatype="seg",
+            datatype="warps",
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
@@ -66,14 +66,14 @@ rule create_unfold_coord_map:
             root=work,
             space="unfold",
             label="{autotop}",
-            datatype="seg",
+            datatype="warps",
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             space="unfold",
             label="{autotop}",
             suffix="refcoords.nii.gz",
@@ -91,7 +91,7 @@ def get_laminar_coords(wildcards):
     if "laplace" in config["laminar_coords_method"]:
         coords_io = bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="IO",
             label="hipp",
             suffix="coords.nii.gz",
@@ -103,7 +103,7 @@ def get_laminar_coords(wildcards):
     elif "equivolume" in config["laminar_coords_method"]:
         coords_io = bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="IO",
             label="hipp",
             suffix="coords.nii.gz",
@@ -121,7 +121,7 @@ rule create_warps_hipp:
             root=work,
             space="unfold",
             label="hipp",
-            datatype="seg",
+            datatype="warps",
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
@@ -129,13 +129,13 @@ rule create_warps_hipp:
             root=work,
             space="unfold",
             label="hipp",
-            datatype="seg",
+            datatype="coords",
             suffix="refcoords.nii.gz",
             **config["subj_wildcards"]
         ),
         coords_ap=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="AP",
             label="hipp",
             suffix="coords.nii.gz",
@@ -146,7 +146,7 @@ rule create_warps_hipp:
         ),
         coords_pd=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="PD",
             label="hipp",
             suffix="coords.nii.gz",
@@ -158,7 +158,7 @@ rule create_warps_hipp:
         coords_io=get_laminar_coords,
         native_ref_coords_nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             space="corobl",
             hemi="{hemi}",
             label="hipp",
@@ -172,7 +172,7 @@ rule create_warps_hipp:
     output:
         warp_unfold2native=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="hipp",
             suffix="xfm.nii.gz",
@@ -183,7 +183,7 @@ rule create_warps_hipp:
         ),
         warp_native2unfold=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="hipp",
             suffix="xfm.nii.gz",
@@ -194,7 +194,7 @@ rule create_warps_hipp:
         ),
         warpitk_unfold2native=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="hipp",
             suffix="xfm.nii.gz",
@@ -205,7 +205,7 @@ rule create_warps_hipp:
         ),
         warpitk_native2unfold=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="hipp",
             suffix="xfm.nii.gz",
@@ -233,7 +233,7 @@ rule create_warps_dentate:
             root=work,
             space="unfold",
             label="dentate",
-            datatype="seg",
+            datatype="warps",
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
@@ -241,13 +241,13 @@ rule create_warps_dentate:
             root=work,
             space="unfold",
             label="dentate",
-            datatype="seg",
+            datatype="coords",
             suffix="refcoords.nii.gz",
             **config["subj_wildcards"]
         ),
         coords_ap=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="AP",
             label="dentate",
             suffix="coords.nii.gz",
@@ -258,7 +258,7 @@ rule create_warps_dentate:
         ),
         coords_pd=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="PD",
             label="dentate",
             suffix="coords.nii.gz",
@@ -269,7 +269,7 @@ rule create_warps_dentate:
         ),
         coords_io=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="IO",
             label="dentate",
             suffix="coords.nii.gz",
@@ -280,7 +280,7 @@ rule create_warps_dentate:
         ),
         native_ref_coords_nii=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             space="corobl",
             hemi="{hemi}",
             label="dentate",
@@ -294,7 +294,7 @@ rule create_warps_dentate:
     output:
         warp_unfold2native=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="dentate",
             suffix="xfm.nii.gz",
@@ -305,7 +305,7 @@ rule create_warps_dentate:
         ),
         warp_native2unfold=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="dentate",
             suffix="xfm.nii.gz",
@@ -316,7 +316,7 @@ rule create_warps_dentate:
         ),
         warpitk_unfold2native=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="dentate",
             suffix="xfm.nii.gz",
@@ -327,7 +327,7 @@ rule create_warps_dentate:
         ),
         warpitk_native2unfold=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="dentate",
             suffix="xfm.nii.gz",
@@ -354,7 +354,7 @@ rule compose_warps_corobl2unfold_lhemi:
     input:
         native2unfold=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",
@@ -367,7 +367,7 @@ rule compose_warps_corobl2unfold_lhemi:
             root=work,
             space="unfold",
             label="{autotop}",
-            datatype="seg",
+            datatype="warps",
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
@@ -377,7 +377,7 @@ rule compose_warps_corobl2unfold_lhemi:
     output:
         corobl2unfold=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",
@@ -400,7 +400,7 @@ rule compose_warps_unfold2corobl_lhemi:
     input:
         unfold2native=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",
@@ -416,13 +416,13 @@ rule compose_warps_unfold2corobl_lhemi:
             root=work,
             space="unfold",
             label="{autotop}",
-            datatype="seg",
+            datatype="warps",
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             dir="AP",
             label="{autotop}",
             suffix="coords.nii.gz",
@@ -434,7 +434,7 @@ rule compose_warps_unfold2corobl_lhemi:
     output:
         unfold2corobl=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",
@@ -456,7 +456,7 @@ rule compose_warps_native_to_unfold:
     input:
         corobl2unfold=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",
@@ -469,13 +469,13 @@ rule compose_warps_native_to_unfold:
             root=work,
             space="unfold",
             label="{autotop}",
-            datatype="seg",
+            datatype="warps",
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
         native2corobl=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -486,7 +486,7 @@ rule compose_warps_native_to_unfold:
     output:
         bids(
             root=root,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",
@@ -507,8 +507,8 @@ rule compose_warps_unfold_to_crop_native:
     """ Compose warps from unfold to crop native """
     input:
         unfold2corobl=bids(
-            root=root,
-            datatype="seg",
+            root=work,
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",
@@ -519,7 +519,7 @@ rule compose_warps_unfold_to_crop_native:
         ),
         ref=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
             hemi="{hemi}",
@@ -527,7 +527,7 @@ rule compose_warps_unfold_to_crop_native:
         ),
         native2corobl=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",
@@ -539,14 +539,14 @@ rule compose_warps_unfold_to_crop_native:
             root=work,
             space="unfold",
             label="{autotop}",
-            datatype="seg",
+            datatype="warps",
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
     output:
         unfold2cropnative=bids(
             root=root,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",

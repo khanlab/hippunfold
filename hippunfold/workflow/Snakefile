@@ -14,9 +14,6 @@ ref_spaces = []
 crop_ref_spaces = []
 template_modality = False
 
-# if no additional output spaces chosen, then empty list:
-if config["output_spaces"] == None:
-    config["output_spaces"] = []
 
 # set the lists used for output spaces
 if (
@@ -28,10 +25,9 @@ if (
     crop_ref_spaces.append("cropT1w")
     limit_to_list.add("T1w")
 if (
-    config["modality"] == "T2w"
-    or config["modality"] == "segT2w"
-    or "T2w" in config["output_spaces"]
-):
+    (config["modality"] == "T2w" or config["modality"] == "segT2w")
+    and "native" in config["output_spaces"]
+) or "T2w" in config["output_spaces"]:
     ref_spaces.append("T2w")
     crop_ref_spaces.append("cropT2w")
     limit_to_list.add("T2w")
