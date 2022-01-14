@@ -246,7 +246,7 @@ rule get_subfield_vols_subj:
                 **config["subj_wildcards"],
                 datatype="anat",
                 hemi="{hemi}",
-                space="{native_modality}",
+                space="{crop_ref_spaces}",
                 desc="subfields",
                 suffix="dseg.nii.gz"
             ),
@@ -262,7 +262,7 @@ rule get_subfield_vols_subj:
         tsv=bids(
             root=root,
             datatype="anat",
-            space="{native_modality}",
+            space="{crop_ref_spaces}",
             desc="subfields",
             suffix="volumes.tsv",
             **config["subj_wildcards"]
@@ -276,7 +276,7 @@ rule plot_subj_subfields:
         tsv=bids(
             root=root,
             datatype="anat",
-            space="{native_modality}",
+            space="{crop_ref_spaces}",
             desc="subfields",
             suffix="volumes.tsv",
             **config["subj_wildcards"]
@@ -286,7 +286,7 @@ rule plot_subj_subfields:
             bids(
                 root=root,
                 datatype="qc",
-                space="{native_modality}",
+                space="{crop_ref_spaces}",
                 desc="subfields",
                 suffix="volumes.png",
                 **config["subj_wildcards"]
@@ -301,8 +301,8 @@ rule plot_subj_subfields:
 
 
 def get_bg_img_for_subfield_qc(wildcards):
-    if crop_ref_spaces == "corobl":
-        return "None"
+    if "corobl" in crop_ref_spaces:
+        return []
     else:
         if config["modality"][:3] == "seg":
             bg_modality = config["modality"][3:]
@@ -314,7 +314,7 @@ def get_bg_img_for_subfield_qc(wildcards):
         datatype="anat",
         desc="preproc",
         suffix=f"{bg_modality}.nii.gz",
-        space="crop{native_modality}",
+        space="{crop_ref_spaces}",
         hemi="{hemi}",
         **config["subj_wildcards"],
     )
@@ -328,7 +328,7 @@ rule qc_subfield:
             datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="{native_modality}",
+            space="{crop_ref_spaces}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
@@ -339,7 +339,7 @@ rule qc_subfield:
                 datatype="qc",
                 suffix="dseg.png",
                 desc="subfields",
-                space="{native_modality}",
+                space="{crop_ref_spaces}",
                 hemi="{hemi}",
                 **config["subj_wildcards"]
             ),
@@ -359,7 +359,7 @@ rule qc_subfield_surf:
             datatype="surf",
             suffix="midthickness.surf.gii",
             den="{density}",
-            space="{native_modality}",
+            space="{ref_spaces}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -372,7 +372,7 @@ rule qc_subfield_surf:
                 suffix="midthickness.surf.png",
                 den="{density}",
                 desc="subfields",
-                space="{native_modality}",
+                space="{ref_spaces}",
                 hemi="{hemi}",
                 label="{autotop}",
                 **config["subj_wildcards"]
