@@ -1,16 +1,16 @@
 # Outputs of hippunfold
 
-The `PATH_TO_OUTPUT_DIR` folder containsis a `logs` and `work` folder for troubleshooting, but for most purposes all the outputs of interest will be in a subfolder called `hippunfold` with the following structure:
+The `PATH_TO_OUTPUT_DIR` folder contains a `logs` and `work` folder for troubleshooting, but for most purposes all the outputs of interest will be in a subfolder called `hippunfold` with the following structure:
 
     hippunfold/
-    └── sub-001
+    └── sub-{subject}
         ├── anat
         ├── coords
         ├── qc
         ├── surf
         └── warps
 
-Briefly, `anat` contains preprocessed volumetric input images and output segmentations in nifti format, `surf` contains surface data in gifti format, `coords` contain Laplace fields spanning the hippocampus, `warps` contains transformations between unfolded and native or 'unfolded' space, and `qc` contains snapshots and useful diagnositc information for quality control.
+Briefly, `anat` contains preprocessed volumetric input images and output segmentations in nifti format, `surf` contains surface data in gifti format, `coords` contain Laplace fields spanning the hippocampus, `warps` contains transformations between unfolded and native or 'unfolded' space, and `qc` contains snapshots and useful diagnostic information for quality control.
 
 ## anat
 
@@ -37,7 +37,7 @@ subfield segmentation (colour).
 
 ## surf
 
-### surface shapes
+### surface meshes
 
 Surface meshes (geometry files) are in `.surf.gii` format, and are
 provided in both the native space (`space-T1w`) and the unfolded space
@@ -108,13 +108,13 @@ each hemisphere separately, and combined:
 
 ### New: label-dentate
 
-HippUnfold v1.0.0 introduces `label-dentate` files which represent a distinct surface making up the dentate gyrus (reflecting its distinct topology from the rest of the cortex). The rest of the surfaces are given the name `label-hipp` to defferentiate them from these new files. 
+HippUnfold v1.0.0 introduces `label-dentate` files which represent a distinct surface making up the dentate gyrus (reflecting its distinct topology from the rest of the cortex). The rest of the surfaces are given the name `label-hipp` to differentiate them from these new files. 
 
 These are illustrated in the following image (orange represents the usual hippocampal midthickness surface, while violet shows the new `dentate` surface):
 
 ![image](../images/dentate_cor.png)
 
-Note that the dentate uses the same unfolding methods as the rest of the hippocampus, but with several caveats. Given its small size, its boundaries are not easily deliminated and so `inner`, `outer`, and `thickness` gifti surfaces are omitted. Furthermore, Laplace coordinates and therefore vertex spacing are not garunteed to be topoligically equivalent as they are obtained through volumetric registration with the template shape injection step of this workflow.  
+Note that the dentate uses the same unfolding methods as the rest of the hippocampus, but with several caveats. Given its small size, its boundaries are not easily deliminated and so `inner`, `outer`, and `thickness` gifti surfaces are omitted. Furthermore, Laplace coordinates and therefore vertex spacing are not guaranteed to be topoligically equivalent as they are obtained through volumetric registration with the template shape injection step of this workflow.  
 
 Corresponding `coords` and `warp` files are also generated.
 
