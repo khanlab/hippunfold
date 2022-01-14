@@ -282,7 +282,7 @@ def get_final_qc():
                     suffix="volumes.png",
                     **config["subj_wildcards"],
                 ),
-                space=ref_spaces,
+                space=crop_ref_spaces,
                 allow_missing=True,
             )
         )
