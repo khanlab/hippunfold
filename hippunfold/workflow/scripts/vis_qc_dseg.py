@@ -18,7 +18,7 @@ fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
 display = plotting.plot_roi(
     axes=ax1,
     roi_img=snakemake.input.seg,
-    bg_img=snakemake.params.img,
+    bg_img=snakemake.input.img,
     display_mode="ortho",
     view_type="continuous",
     alpha=0.5,
@@ -30,7 +30,7 @@ display = plotting.plot_roi(
 plotting.plot_roi(
     axes=ax2,
     roi_img=snakemake.input.seg,
-    bg_img=snakemake.params.img,
+    bg_img=snakemake.input.img,
     cut_coords=[x - 2 for x in display.cut_coords],
     display_mode="ortho",
     view_type="continuous",
@@ -43,7 +43,7 @@ plotting.plot_roi(
 plotting.plot_roi(
     axes=ax3,
     roi_img=snakemake.input.seg,
-    bg_img=snakemake.params.img,
+    bg_img=snakemake.input.img,
     cut_coords=[x + 2 for x in display.cut_coords],
     display_mode="ortho",
     view_type="continuous",

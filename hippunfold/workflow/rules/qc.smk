@@ -84,6 +84,7 @@ def get_bg_img_for_subfield_qc(wildcards):
 
 rule qc_subfield:
     input:
+        img=get_bg_img_for_subfield_qc,
         seg=bids(
             root=root,
             datatype="anat",
@@ -93,8 +94,6 @@ rule qc_subfield:
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
-    params:
-        img=get_bg_img_for_subfield_qc,
     output:
         png=report(
             bids(
