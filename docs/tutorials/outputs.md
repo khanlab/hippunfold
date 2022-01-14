@@ -158,7 +158,7 @@ warp itself as a reference image, e.g.:
     -t sub-001_hemi-L_from-T1w_to-unfold_mode-image_xfm.nii.gz \
     -r sub-001_space-unfolded_refvol.nii.gz
 
-# Additional Files
+## Additional Files
 
 The top-level `PATH_TO_OUTPUT_DIR` contains additional folders:
 
