@@ -66,7 +66,7 @@ def get_final_subfields():
     return expand(
         bids(
             root=root,
-            datatype="seg",
+            datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
             space="{space}",
@@ -91,7 +91,7 @@ def get_final_coords():
         expand(
             bids(
                 root=root,
-                datatype="seg",
+                datatype="coords",
                 dir="{dir}",
                 suffix="coords.nii.gz",
                 desc="{desc}",
@@ -112,7 +112,7 @@ def get_final_coords():
         expand(
             bids(
                 root=root,
-                datatype="seg",
+                datatype="coords",
                 dir="{dir}",
                 suffix="coords.nii.gz",
                 desc="{desc}",
@@ -138,7 +138,7 @@ def get_final_transforms():
         expand(
             bids(
                 root=root,
-                datatype="seg",
+                datatype="warps",
                 **config["subj_wildcards"],
                 label="{autotop}",
                 suffix="xfm.nii.gz",
@@ -158,7 +158,7 @@ def get_final_transforms():
         expand(
             bids(
                 root=root,
-                datatype="seg",
+                datatype="warps",
                 **config["subj_wildcards"],
                 label="{autotop}",
                 suffix="xfm.nii.gz",
@@ -178,7 +178,7 @@ def get_final_transforms():
         expand(
             bids(
                 root=root,
-                datatype="seg",
+                datatype="warps",
                 **config["subj_wildcards"],
                 label="{autotop}",
                 suffix="refvol.nii.gz",
@@ -200,7 +200,7 @@ def get_final_anat():
             expand(
                 bids(
                     root=root,
-                    datatype="seg",
+                    datatype="anat",
                     desc="preproc",
                     suffix="{modality_suffix}.nii.gz".format(
                         modality_suffix=get_modality_suffix(config["modality"])
@@ -392,57 +392,3 @@ rule archive_work_after_final:
         "  rm -rf {params.work_dir}; "
         "else exit 1; "
         "fi"
-
-
-def get_input_for_shape_inject(wildcards):
-    if config["modality"] == "cropseg":
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="cropped",
-            space="corobl",
-            hemi="{hemi}"
-        ).format(**wildcards)
-    elif get_modality_key(config["modality"]) == "seg":
-        modality_suffix = get_modality_suffix(config["modality"])
-        seg = (
-            bids(
-                root=work,
-                datatype="anat",
-                **config["subj_wildcards"],
-                suffix="dseg.nii.gz",
-                desc="cropped",
-                space="corobl",
-                hemi="{hemi}",
-                from_="{modality_suffix}"
-            ).format(**wildcards, modality_suffix=modality_suffix),
-        )
-    else:
-        seg = bids(
-            root=work,
-            datatype="seg",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi}"
-        ).format(**wildcards)
-    return seg
-
-
-def get_labels_for_laplace(wildcards):
-    if config["skip_inject_template_labels"]:
-        seg = get_input_for_shape_inject(wildcards)
-    else:
-        seg = bids(
-            root=work,
-            datatype="seg",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="corobl",
-            hemi="{hemi}"
-        ).format(**wildcards)
-    return seg

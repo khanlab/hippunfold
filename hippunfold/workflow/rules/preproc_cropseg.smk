@@ -7,7 +7,6 @@ rule import_cropseg:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi,L|R}"
         ),
@@ -24,7 +23,6 @@ rule lr_flip_seg:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi}"
         ),
@@ -34,7 +32,6 @@ rule lr_flip_seg:
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
-            desc="cropped",
             space="corobl",
             hemi="{hemi,L}flip"
         ),

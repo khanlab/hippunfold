@@ -105,7 +105,7 @@ rule constrain_surf_to_bbox:
         ),
         ref_nii=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             space="unfold",
             label="{autotop}",
             suffix="refvol.nii.gz",
@@ -134,7 +134,7 @@ rule warp_gii_unfold2native:
     input:
         warp=bids(
             root=work,
-            datatype="seg",
+            datatype="warps",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="xfm.nii.gz",
@@ -321,7 +321,7 @@ rule warp_gii_to_native:
         ),
         xfm=bids(
             root=work,
-            datatype="anat",
+            datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
             from_="{native_modality}",

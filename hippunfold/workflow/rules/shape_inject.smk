@@ -1,3 +1,39 @@
+def get_input_for_shape_inject(wildcards):
+    if config["modality"] == "cropseg":
+        seg = bids(
+            root=work,
+            datatype="anat",
+            **config["subj_wildcards"],
+            suffix="dseg.nii.gz",
+            space="corobl",
+            hemi="{hemi}"
+        ).format(**wildcards)
+    elif get_modality_key(config["modality"]) == "seg":
+        modality_suffix = get_modality_suffix(config["modality"])
+        seg = (
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="dseg.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                from_="{modality_suffix}"
+            ).format(**wildcards, modality_suffix=modality_suffix),
+        )
+    else:
+        seg = bids(
+            root=work,
+            datatype="anat",
+            **config["subj_wildcards"],
+            suffix="dseg.nii.gz",
+            desc="nnunet",
+            space="corobl",
+            hemi="{hemi}"
+        ).format(**wildcards)
+    return seg
+
+
 def get_input_splitseg_for_shape_inject(wildcards):
     if config["modality"] == "cropseg":
         seg = bids(
@@ -5,7 +41,6 @@ def get_input_splitseg_for_shape_inject(wildcards):
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dsegsplit",
-            desc="cropped",
             space="corobl",
             hemi="{hemi}"
         ).format(**wildcards)
@@ -17,7 +52,6 @@ def get_input_splitseg_for_shape_inject(wildcards):
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dsegsplit",
-            desc="cropped",
             space="corobl",
             hemi="{hemi}",
             from_="{modality_suffix}"
@@ -25,7 +59,7 @@ def get_input_splitseg_for_shape_inject(wildcards):
     else:
         seg = bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dsegsplit",
             desc="nnunet",
@@ -142,7 +176,7 @@ rule template_shape_reg:
             root=work,
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            datatype="seg",
+            datatype="warps",
             desc="moments",
             from_="template",
             to="subject",
@@ -154,7 +188,7 @@ rule template_shape_reg:
             root=work,
             **config["subj_wildcards"],
             suffix="xfm.nii.gz",
-            datatype="seg",
+            datatype="warps",
             desc="greedy",
             from_="template",
             to="subject",
@@ -195,7 +229,7 @@ rule template_shape_inject:
             root=work,
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            datatype="seg",
+            datatype="warps",
             desc="moments",
             from_="template",
             to="subject",
@@ -207,7 +241,7 @@ rule template_shape_inject:
             root=work,
             **config["subj_wildcards"],
             suffix="xfm.nii.gz",
-            datatype="seg",
+            datatype="warps",
             desc="greedy",
             from_="template",
             to="subject",
@@ -219,7 +253,7 @@ rule template_shape_inject:
     output:
         inject_seg=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="inject",
@@ -249,7 +283,7 @@ rule inject_init_laplace_coords:
             root=work,
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            datatype="seg",
+            datatype="warps",
             desc="moments",
             from_="template",
             to="subject",
@@ -261,7 +295,7 @@ rule inject_init_laplace_coords:
             root=work,
             **config["subj_wildcards"],
             suffix="xfm.nii.gz",
-            datatype="seg",
+            datatype="warps",
             desc="greedy",
             from_="template",
             to="subject",
@@ -273,7 +307,7 @@ rule inject_init_laplace_coords:
     output:
         init_coords=bids(
             root=work,
-            datatype="seg",
+            datatype="coords",
             **config["subj_wildcards"],
             dir="{dir}",
             label="{autotop}",
@@ -295,7 +329,7 @@ rule reinsert_subject_labels:
     input:
         inject_seg=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="inject",
@@ -310,7 +344,7 @@ rule reinsert_subject_labels:
     output:
         postproc_seg=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             desc="postproc",
@@ -329,7 +363,7 @@ rule unflip_postproc:
     input:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
@@ -339,7 +373,7 @@ rule unflip_postproc:
     output:
         nii=bids(
             root=work,
-            datatype="seg",
+            datatype="anat",
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
