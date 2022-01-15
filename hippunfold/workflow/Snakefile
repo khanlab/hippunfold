@@ -134,6 +134,7 @@ include: "rules/shape_inject.smk"
 include: "rules/gifti.smk"
 include: "rules/subfields.smk"
 include: "rules/resample_final_to_crop_native.smk"
+include: "rules/qc.smk"
 
 
 rule all:

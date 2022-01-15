@@ -220,13 +220,6 @@ def get_final_anat():
 def get_final_qc():
     qc = []
 
-    # right now can only do qc from cropT1w space
-    #    output_ref = []
-    #    if "cropT1w" in config["output_spaces"]:
-    #        output_ref.append("T1w")
-    #    if "cropT2w" in config["output_spaces"]:
-    #        output_ref.append("T2w")
-
     if not template_modality == False:
         qc.extend(
             expand(
@@ -242,45 +235,42 @@ def get_final_qc():
                 allow_missing=True,
             )
         )
-
-        qc.extend(
-            expand(
-                bids(
-                    root=root,
-                    datatype="qc",
-                    suffix="dseg.png",
-                    desc="subfields",
-                    #                   space="crop{native_modality}",
-                    space="{native_modality}",
-                    hemi="{hemi}",
-                    **config["subj_wildcards"],
-                ),
-                hemi=config["hemi"],
-                native_modality=crop_ref_spaces,
-                allow_missing=True,
-            )
+    qc.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="qc",
+                suffix="dseg.png",
+                desc="subfields",
+                space="{space}",
+                hemi="{hemi}",
+                **config["subj_wildcards"],
+            ),
+            hemi=config["hemi"],
+            space=crop_ref_spaces,
+            allow_missing=True,
         )
-        qc.extend(
-            expand(
-                bids(
-                    root=root,
-                    datatype="qc",
-                    suffix="midthickness.surf.png",
-                    den="{density}",
-                    desc="subfields",
-                    #                    space="crop{native_modality}",
-                    space="{native_modality}",
-                    hemi="{hemi}",
-                    label="{autotop}",
-                    **config["subj_wildcards"],
-                ),
-                hemi=config["hemi"],
-                autotop=config["autotop_labels"],
-                density=config["output_density"],
-                native_modality=crop_ref_spaces,
-                allow_missing=True,
-            )
+    )
+    qc.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="qc",
+                suffix="midthickness.surf.png",
+                den="{density}",
+                desc="subfields",
+                space="{space}",
+                hemi="{hemi}",
+                label="{autotop}",
+                **config["subj_wildcards"],
+            ),
+            hemi=config["hemi"],
+            autotop=config["autotop_labels"],
+            density=config["output_density"],
+            space=ref_spaces,
+            allow_missing=True,
         )
+    )
     if len(config["hemi"]) == 2:
         qc.extend(
             expand(
@@ -288,15 +278,14 @@ def get_final_qc():
                     root=root,
                     datatype="qc",
                     desc="subfields",
-                    space="{native_modality}",
+                    space="{space}",
                     suffix="volumes.png",
                     **config["subj_wildcards"],
                 ),
-                native_modality=ref_spaces,
+                space=crop_ref_spaces,
                 allow_missing=True,
             )
         )
-
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
         qc.extend(
             expand(
