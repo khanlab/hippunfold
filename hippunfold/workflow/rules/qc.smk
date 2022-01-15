@@ -63,23 +63,53 @@ rule plot_subj_subfields:
 
 
 def get_bg_img_for_subfield_qc(wildcards):
-    if "corobl" in crop_ref_spaces:
-        return None
-    else:
-        if config["modality"][:3] == "seg":
-            bg_modality = config["modality"][3:]
-        else:
-            bg_modality = config["modality"]
 
-    return bids(
-        root=root,
-        datatype="anat",
-        desc="preproc",
-        suffix=f"{bg_modality}.nii.gz",
-        space="{crop_ref_spaces}",
-        hemi="{hemi}",
-        **config["subj_wildcards"],
-    )
+    if config["modality"] == "hippb500":
+        return bids(
+            root=work,
+            datatype="anat",
+            desc="preproc",
+            suffix="b500.nii.gz",
+            space="{space}",
+            hemi="{hemi}",
+            **config["subj_wildcards"],
+        )
+    elif config["modality"] == "cropseg":
+        # blank image as bg
+        return (
+            bids(
+                root=work,
+                datatype="warps",
+                suffix="cropref.nii.gz",
+                space="{space}",
+                hemi="{hemi}",
+                **config["subj_wildcards"],
+            ),
+        )
+
+    elif config["modality"][:3] == "seg":
+        bg_modality = config["modality"][3:]
+        return bids(
+            root=root,
+            datatype="anat",
+            desc="preproc",
+            suffix=f"{bg_modality}.nii.gz",
+            space="{space}",
+            hemi="{hemi}",
+            **config["subj_wildcards"],
+        )
+
+    else:
+        bg_modality = config["modality"]
+        return bids(
+            root=root,
+            datatype="anat",
+            desc="preproc",
+            suffix=f"{bg_modality}.nii.gz",
+            space="{space}",
+            hemi="{hemi}",
+            **config["subj_wildcards"],
+        )
 
 
 rule qc_subfield:
@@ -90,18 +120,18 @@ rule qc_subfield:
             datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="{crop_ref_spaces}",
+            space="{space}",
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
     output:
         png=report(
             bids(
-                root=root,
+                root=work,
                 datatype="qc",
                 suffix="dseg.png",
                 desc="subfields",
-                space="{crop_ref_spaces}",
+                space="{space}",
                 hemi="{hemi}",
                 **config["subj_wildcards"]
             ),
@@ -174,5 +204,3 @@ rule concat_subj_vols_tsv:
         pd.concat([pd.read_table(in_tsv) for in_tsv in input]).to_csv(
             output.tsv, sep="\t", index=False
         )
-
-
