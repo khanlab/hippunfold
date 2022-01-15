@@ -28,7 +28,7 @@ rule create_native_crop_ref:
     group:
         "subj"
     shell:
-        "c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample {params.resample} -pad-to {params.pad_to} 0 -type uchar {output}"
+        "c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample {params.resample} -pad-to {params.pad_to} 0 -scale 0 -type uchar {output}"
 
 
 rule resample_unet_native_crop:
