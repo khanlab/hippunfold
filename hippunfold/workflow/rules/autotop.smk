@@ -188,7 +188,7 @@ rule equivolume_coords:
             **config["subj_wildcards"]
         ),
     params:
-        src_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["src"],
+        script=os.path.join(workflow.basedir,'scripts/equivolume_coords.py')
     output:
         coords=bids(
             root=work,
@@ -215,8 +215,8 @@ rule equivolume_coords:
         ),
     container:
         config["singularity"]["autotop"]
-    script:
-        "../scripts/equivolume_coords.py"
+    shell:
+        "python {params.script} {resources.tmpdir} {input.innerbin} {input.outerbin} {output.coords} &> {log}"
 
 
 rule unflip_coords:
