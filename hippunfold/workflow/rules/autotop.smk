@@ -79,7 +79,8 @@ rule laplace_coords_hipp:
             hemi="{hemi,Lflip|R}",
             suffix="laplace-hipp.txt"
         ),
-    script: get_cmd_laplace_coords()
+    script:
+        get_cmd_laplace_coords()
 
 
 rule laplace_coords_dentate:
