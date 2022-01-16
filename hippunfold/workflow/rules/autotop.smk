@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 
-def get_cmd_laplace_coords(wildcards):
+def get_cmd_laplace_coords():
     if config["skip_inject_template_labels"]:
         cmd = "../scripts/laplace_coords.py"
     else:
@@ -50,7 +50,6 @@ rule laplace_coords_hipp:
     input:
         unpack(get_inputs_laplace),
     params:
-        cmd=get_cmd_laplace_coords,
         gm_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["gm"],
         src_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["src"],
         sink_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["sink"],
@@ -80,8 +79,7 @@ rule laplace_coords_hipp:
             hemi="{hemi,Lflip|R}",
             suffix="laplace-hipp.txt"
         ),
-    script:
-        "{params.cmd}"
+    script: get_cmd_laplace_coords()
 
 
 rule laplace_coords_dentate:

@@ -160,7 +160,7 @@ rule qc_subfield:
     output:
         png=report(
             bids(
-                root=work,
+                root=root,
                 datatype="qc",
                 suffix="dseg.png",
                 desc="subfields",
