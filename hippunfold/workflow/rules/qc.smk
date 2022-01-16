@@ -32,7 +32,6 @@ rule qc_reg_to_template:
         "../scripts/vis_regqc.py"
 
 
-
 rule get_subfield_vols_subj:
     """Export segmentation volume for a subject to TSV"""
     input:

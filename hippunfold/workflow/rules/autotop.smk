@@ -188,7 +188,7 @@ rule equivolume_coords:
             **config["subj_wildcards"]
         ),
     params:
-        script=os.path.join(workflow.basedir,'scripts/equivolume_coords.py')
+        script=os.path.join(workflow.basedir, "scripts/equivolume_coords.py"),
     output:
         coords=bids(
             root=work,

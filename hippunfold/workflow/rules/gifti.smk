@@ -125,7 +125,7 @@ rule constrain_surf_to_bbox:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             den="{density}",
             suffix="{surfname}.txt",
             desc="constrainbbox",
@@ -424,7 +424,7 @@ rule calculate_gyrification:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             den="{density}",
             suffix="calcgyrification.txt",
             space="{space}",
@@ -581,7 +581,7 @@ rule resample_bigbrain_subfield_label_gii:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             den="{density}",
             suffix="resamplesubfieldsurf",
             space="{space}",

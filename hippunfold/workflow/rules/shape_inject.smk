@@ -261,7 +261,7 @@ rule template_shape_inject:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             suffix="templateshapeinject.txt",
             hemi="{hemi,Lflip|R}"
@@ -272,7 +272,7 @@ rule template_shape_inject:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}" 
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule inject_init_laplace_coords:
@@ -324,14 +324,14 @@ rule inject_init_laplace_coords:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             dir="{dir}",
             label="{autotop}",
             suffix="injectcoords.txt",
             desc="init",
             hemi="{hemi}"
-        ),        
+        ),
     group:
         "subj"
     container:

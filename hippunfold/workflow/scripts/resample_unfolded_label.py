@@ -16,12 +16,10 @@ with open(snakemake.log[0], "w") as sys.stdout:
     start_pd = snakemake.config["unfold_mesh_ref"]["start"][1]
     end_pd = snakemake.config["unfold_mesh_ref"]["end"][1]
 
-
     # in label
     # in current surf (to define input grid)
     # in new surf (to define new grid)
     # out label
-
 
     #  might be easier to assume 256x126 grid, and use regular grid interpolator
     # -- then, wouldn't need current surf
@@ -43,7 +41,9 @@ with open(snakemake.log[0], "w") as sys.stdout:
     print(orig_x.shape)
     print(orig_y.shape)
 
-    interpolator = RegularGridInterpolator((orig_x, orig_y), arr_label, method="nearest")
+    interpolator = RegularGridInterpolator(
+        (orig_x, orig_y), arr_label, method="nearest"
+    )
 
     # interpolate at the points of the new grid
     surf_gii = nib.load(snakemake.input.new_surf)
@@ -58,7 +58,6 @@ with open(snakemake.log[0], "w") as sys.stdout:
     print(np.min(new_vertices, 0))
     print(np.max(new_vertices, 0))
     interpolated = interpolator((new_vertices[:, 0], new_vertices[:, 1]))
-
 
     print(f"interpolated.shape: {interpolated.shape}")
 

@@ -388,7 +388,7 @@ rule compose_warps_corobl2unfold_lhemi:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="composexfm.txt",
@@ -397,13 +397,12 @@ rule compose_warps_corobl2unfold_lhemi:
             to="unfold",
             mode="image"
         ),
-
     container:
         config["singularity"]["autotop"]
     group:
         "subj"
     shell:
-        "ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.native2unfold} {input.flipLR_xfm} &> {log}" 
+        "ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.native2unfold} {input.flipLR_xfm} &> {log}"
 
 
 # consider renaming to state this composition is to "un-flip"
@@ -457,7 +456,7 @@ rule compose_warps_unfold2corobl_lhemi:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="composexfm.txt",
@@ -520,7 +519,7 @@ rule compose_warps_native_to_unfold:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="composexfm.txt",
@@ -591,7 +590,7 @@ rule compose_warps_unfold_to_crop_native:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             label="{autotop}",
             suffix="composexfm.txt",
@@ -600,7 +599,6 @@ rule compose_warps_unfold_to_crop_native:
             to="{native_modality}",
             mode="image"
         ),
-
     container:
         config["singularity"]["ants"]
     group:

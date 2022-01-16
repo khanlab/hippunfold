@@ -10,7 +10,6 @@ with open(snakemake.log[0], "w") as sys.stdout:
     arr = gii.get_arrays_from_intent("NIFTI_INTENT_POINTSET")[0]
     vertices = arr.data
 
-
     # get ref nii (for defining bbox)
     img = nib.load(snakemake.input.ref_nii)
     affine = img.affine

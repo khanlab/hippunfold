@@ -233,7 +233,7 @@ rule reg_t2_to_t1:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             suffix="reg.txt",
             from_="T2w",
@@ -241,7 +241,6 @@ rule reg_t2_to_t1:
             desc="rigid",
             type_="ras"
         ),
-
     container:
         config["singularity"]["autotop"]
     group:
@@ -288,7 +287,7 @@ rule reg_t2_to_template:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             suffix="reg.txt",
             from_="T2w",
@@ -296,7 +295,6 @@ rule reg_t2_to_template:
             desc="affine",
             type_="ras"
         ),
-
     container:
         config["singularity"]["autotop"]
     group:

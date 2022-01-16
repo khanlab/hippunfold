@@ -3,22 +3,18 @@ import nighres
 from shutil import copyfile
 import sys
 
-tmpdir=sys.argv[1]
-innerbin=sys.argv[2]
-outerbin=sys.argv[3]
-output_coords=sys.argv[4]
+tmpdir = sys.argv[1]
+innerbin = sys.argv[2]
+outerbin = sys.argv[3]
+output_coords = sys.argv[4]
 
 print("start")
 
 nighres_args = {"save_data": True, "output_dir": tmpdir, "overwrite": True}
 
 ## convert binarized edges to levelset surfaces
-levelset_inner = nighres.surface.probability_to_levelset(
-    innerbin, **nighres_args
-)
-levelset_outer = nighres.surface.probability_to_levelset(
-    outerbin, **nighres_args
-)
+levelset_inner = nighres.surface.probability_to_levelset(innerbin, **nighres_args)
+levelset_outer = nighres.surface.probability_to_levelset(outerbin, **nighres_args)
 
 print("binarized files to levelsets complete")
 

@@ -111,7 +111,7 @@ rule run_inference:
         ),
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             suffix="nnunet.txt",
             space="corobl",
@@ -240,7 +240,7 @@ rule qc_nnunet_f3d:
         config["singularity"]["autotop"]
     log:
         bids(
-            root='logs',
+            root="logs",
             **config["subj_wildcards"],
             suffix="qcreg.txt",
             desc="f3d",
