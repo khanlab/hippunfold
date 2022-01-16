@@ -378,7 +378,7 @@ rule archive_work_after_final:
         "subj"
     shell:
         #exit code 0 or 1 is acceptable (2 is fatal)
-        "tar -cvzf {output} {params.work_dir}; "
+        "tar -czf {output} {params.work_dir}; "
         "if [ $? -le 1 ]; then "
         "  rm -rf {params.work_dir}; "
         "else exit 1; "

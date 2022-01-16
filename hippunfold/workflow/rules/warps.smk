@@ -386,12 +386,23 @@ rule compose_warps_corobl2unfold_lhemi:
             to="unfold",
             mode="image"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            label="{autotop}",
+            suffix="composexfm.txt",
+            hemi="L",
+            from_="corobl",
+            to="unfold",
+            mode="image"
+        ),
     container:
         config["singularity"]["autotop"]
     group:
         "subj"
     shell:
-        "ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.native2unfold} {input.flipLR_xfm}"
+        "ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.native2unfold} {input.flipLR_xfm} &> {log}"
 
 
 # consider renaming to state this composition is to "un-flip"
@@ -443,12 +454,23 @@ rule compose_warps_unfold2corobl_lhemi:
             to="corobl",
             mode="image"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            label="{autotop}",
+            suffix="composexfm.txt",
+            hemi="L",
+            from_="unfold",
+            to="corobl",
+            mode="image"
+        ),
     container:
         config["singularity"]["ants"]
     group:
         "subj"
     shell:
-        "antsApplyTransforms -o [{output.unfold2corobl},1] -r {input.ref} -t {input.flipLR_xfm} -t {input.unfold2native} -i {input.unfold_ref} -v"
+        "antsApplyTransforms -o [{output.unfold2corobl},1] -r {input.ref} -t {input.flipLR_xfm} -t {input.unfold2native} -i {input.unfold_ref} -v &> {log}"
 
 
 rule compose_warps_native_to_unfold:
@@ -495,12 +517,23 @@ rule compose_warps_native_to_unfold:
             to="unfold",
             mode="image"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            label="{autotop}",
+            suffix="composexfm.txt",
+            hemi="{hemi}",
+            from_="{native_modality}",
+            to="unfold",
+            mode="image"
+        ),
     container:
         config["singularity"]["ants"]
     group:
         "subj"
     shell:
-        "ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.native2corobl}"
+        "ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.native2corobl} &> {log}"
 
 
 rule compose_warps_unfold_to_crop_native:
@@ -555,9 +588,20 @@ rule compose_warps_unfold_to_crop_native:
             to="{native_modality}",
             mode="image"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            label="{autotop}",
+            suffix="composexfm.txt",
+            hemi="{hemi}",
+            from_="unfold",
+            to="{native_modality}",
+            mode="image"
+        ),
     container:
         config["singularity"]["ants"]
     group:
         "subj"
     shell:
-        "antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v"
+        "antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v &> {log}"

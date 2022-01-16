@@ -1,3 +1,36 @@
+rule qc_reg_to_template:
+    input:
+        ref=lambda wildcards: os.path.join(
+            workflow.basedir,
+            "..",
+            config["template_files"][config["template"]][wildcards.native_modality],
+        ),
+        flo=bids(
+            root=work,
+            datatype="anat",
+            **config["subj_wildcards"],
+            suffix="{native_modality}.nii.gz",
+            space=config["template"],
+            desc="affine"
+        ),
+    output:
+        png=report(
+            bids(
+                root=root,
+                datatype="qc",
+                **config["subj_wildcards"],
+                suffix="regqc.png",
+                from_="{native_modality}",
+                to=config["template"]
+            ),
+            caption="../report/t1w_template_regqc.rst",
+            category="Registration QC",
+        ),
+    group:
+        "subj"
+    script:
+        "../scripts/vis_regqc.py"
+
 
 rule get_subfield_vols_subj:
     """Export segmentation volume for a subject to TSV"""
@@ -127,7 +160,7 @@ rule qc_subfield:
     output:
         png=report(
             bids(
-                root=work,
+                root=root,
                 datatype="qc",
                 suffix="dseg.png",
                 desc="subfields",

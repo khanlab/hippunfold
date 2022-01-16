@@ -123,6 +123,16 @@ rule constrain_surf_to_bbox:
             label="{autotop}",
             **config["subj_wildcards"]
         ),
+    log:
+        bids(
+            root="logs",
+            den="{density}",
+            suffix="{surfname}.txt",
+            desc="constrainbbox",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+        ),
     group:
         "subj"
     script:
@@ -412,13 +422,23 @@ rule calculate_gyrification:
             label="{autotop}",
             **config["subj_wildcards"]
         ),
+    log:
+        bids(
+            root="logs",
+            den="{density}",
+            suffix="calcgyrification.txt",
+            space="{space}",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+        ),
     container:
         config["singularity"]["autotop"]
     group:
         "subj"
     shell:
         'wb_command -metric-math "nativearea/unfoldarea" {output.gii}'
-        " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea}"
+        " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea} &> {log}"
 
 
 rule smooth_surface:
@@ -554,6 +574,16 @@ rule resample_bigbrain_subfield_label_gii:
             datatype="surf",
             den="{density}",
             suffix="subfields.label.nii",
+            space="{space}",
+            hemi="{hemi}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+    log:
+        bids(
+            root="logs",
+            den="{density}",
+            suffix="resamplesubfieldsurf",
             space="{space}",
             hemi="{hemi}",
             label="hipp",
