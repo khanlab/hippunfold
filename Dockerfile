@@ -9,7 +9,7 @@ ENV HIPPUNFOLD_CACHE_DIR=/opt/hippunfold_cache
 
 #install hippunfold and imagemagick (for reports)
 RUN pip install /src && hippunfold_download_models && \
-    apt install graphviz && \
+    apt install -y graphviz && \
     wget https://download.imagemagick.org/ImageMagick/download/binaries/magick && \
     mv magick /usr/bin && chmod a+x /usr/bin/magick 
     
