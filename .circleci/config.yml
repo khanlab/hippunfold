@@ -206,6 +206,7 @@ workflows:
             branches:
               only: 
                 - master
+                - magick
             tags:
               only: /.*/
       - test:
