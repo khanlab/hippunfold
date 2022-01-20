@@ -1,7 +1,7 @@
 [![Documentation Status](https://readthedocs.org/projects/hippunfold/badge/?version=latest)](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
 [![CircleCI](https://circleci.com/gh/khanlab/hippunfold.svg?style=svg)](https://circleci.com/gh/khanlab/hippunfold)
-![PyPI](https://img.shields.io/pypi/v/hippunfold)
 ![Docker Pulls](https://img.shields.io/docker/pulls/khanlab/hippunfold)
+![Version](https://img.shields.io/github/v/tag/khanlab/hippunfold?label=version)
 
 # Hippunfold
 
