@@ -146,11 +146,13 @@ rule all_group_tsv:
     input:
         tsv=expand(
             bids(
-                root="results",
+                root=root,
                 prefix="group",
                 from_="{modality}",
                 desc="subfields",
+                space="{space}",
                 suffix="volumes.tsv",
             ),
             modality=config["modality"],
+            space=crop_ref_spaces,
         ),

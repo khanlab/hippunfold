@@ -219,6 +219,7 @@ rule concat_subj_vols_tsv:
                 root=root,
                 datatype="anat",
                 desc="subfields",
+                space="{space}",
                 suffix="volumes.tsv",
                 **config["subj_wildcards"]
             ),
@@ -226,11 +227,19 @@ rule concat_subj_vols_tsv:
                 "subject"
             ],
             session=config["sessions"],
+            space=wildcards.space,
         ),
     group:
         "aggregate"
     output:
-        tsv=bids(root=root, prefix="group", desc="subfields", suffix="volumes.tsv"),
+        tsv=bids(
+            root=root,
+            prefix="group",
+            space="{space}",
+            from_="{modality}",
+            desc="subfields",
+            suffix="volumes.tsv",
+        ),
     run:
         import pandas as pd
 
