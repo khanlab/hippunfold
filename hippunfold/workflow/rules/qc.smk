@@ -211,7 +211,6 @@ rule qc_subfield_surf:
         "../scripts/vis_qc_surf.py"
 
 
-
 rule concat_subj_vols_tsv:
     """Concatenate all subject tsv files into a single tsv"""
     input:
