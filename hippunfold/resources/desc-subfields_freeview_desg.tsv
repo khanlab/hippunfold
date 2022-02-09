@@ -1,0 +1,10 @@
+#No.	Label Name	R	G	B	A
+1	subiculum	255	0	0	0
+2	CA1	0	255	0	0
+3	CA2	0	0	255	0
+4	CA3	255	255	0	0
+5	CA4	0	255	255	0
+6	dentate gyrus	255	0	255	0
+7	SRLM or 'dark band'	255	239	213	0
+8	cysts	0	0	205	0
+
