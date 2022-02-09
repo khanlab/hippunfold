@@ -77,6 +77,6 @@ Note that you may need to adjust your [Singularity options](https://sylabs.io/gu
 
     export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
     export SINGULARITY_BINDPATH=/YOURDIR:/YOURDIR
-    HIPPUNFOLD_CACHE_DIR=/YOURDIR/.cache/hippunfold/
+    export HIPPUNFOLD_CACHE_DIR=/YOURDIR/.cache/hippunfold/
 
 , where `YOURDIR` is your preferred storage location.
