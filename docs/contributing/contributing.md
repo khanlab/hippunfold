@@ -133,5 +133,4 @@ By default, singularity stores images in your home directory. HippUnfold also st
 
     export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
     export SINGULARITY_BINDPATH=/YOURDIR:/YOURDIR
-    HIPPUNFOLD_CACHE_DIR=/YOURDIR/.cache/hippunfold/
-
+    export HIPPUNFOLD_CACHE_DIR=/YOURDIR/.cache/hippunfold/
