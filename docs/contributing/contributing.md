@@ -127,3 +127,10 @@ multiple subjects in each job), 1 32core job for N subjects (e.g. 10):
 
     hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant \
     --profile cc-slurm --group-components subj=10
+
+## Environment management
+By default, singularity stores images in your home directory. HippUnfold also stores several files similarly. If your home directory is full or otherwise inaccessible, you may want to change this with the following commands:
+
+    export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
+    export SINGULARITY_BINDPATH=/YOURDIR:/YOURDIR
+    export HIPPUNFOLD_CACHE_DIR=/YOURDIR/.cache/hippunfold/
