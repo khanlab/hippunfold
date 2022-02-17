@@ -120,11 +120,7 @@ else:
     include: "rules/nnunet.smk"
 
 
-if (
-    config["modality"] == "segT2w"
-    or config["modality"] == "T2w"
-    or config["generate_myelin_map"]
-):
+if "T2w" in limit_to_list or config["generate_myelin_map"]:
 
     include: "rules/preproc_t2.smk"
 
