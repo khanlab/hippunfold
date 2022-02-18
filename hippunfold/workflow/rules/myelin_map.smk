@@ -34,7 +34,7 @@ rule divide_t1_by_t2:
     container:
         config["singularity"]["autotop"]
     shell:
-        "c3d {input.t1} {input.t2} -divide -replace inf 1000 -inf -1000 NaN 0"
+        "c3d {input.t1} {input.t2} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
 
 
 rule create_ribbon:
@@ -71,11 +71,12 @@ rule create_ribbon:
 
 # sample on hipp & dg midthickness surfaces
 rule sample_myelin_map_surf:
+    """ samples myelin map on surf using corobl space """
     input:
         vol=bids(
-            root=root,
+            root=work,
             datatype="anat",
-            space="{space}",
+            space="corobl",
             hemi="{hemi}",
             desc="preproc",
             suffix="T1wDividedByT2w.nii.gz",
@@ -86,7 +87,7 @@ rule sample_myelin_map_surf:
             datatype="surf",
             den="{density}",
             suffix="midthickness.surf.gii",
-            space="{space}",
+            space="corobl",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -96,7 +97,7 @@ rule sample_myelin_map_surf:
             datatype="surf",
             den="{density}",
             suffix="inner.surf.gii",
-            space="{space}",
+            space="corobl",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -106,7 +107,7 @@ rule sample_myelin_map_surf:
             datatype="surf",
             den="{density}",
             suffix="outer.surf.gii",
-            space="{space}",
+            space="corobl",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -116,7 +117,7 @@ rule sample_myelin_map_surf:
             datatype="anat",
             label="{autotop}",
             suffix="mask.nii.gz",
-            space="{space}",
+            space="corobl",
             desc="ribbon",
             hemi="{hemi}",
             **config["subj_wildcards"]
@@ -127,7 +128,7 @@ rule sample_myelin_map_surf:
             datatype="surf",
             den="{density}",
             suffix="myelin.shape.gii",
-            space="{space,corobl}",
+            space="{space}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]

@@ -258,6 +258,31 @@ autotop_labels:
   - 'hipp'
   - 'dentate'
 
+
+
+gifti_types:
+  hipp:
+    - gyrification.shape 
+    - curvature.shape
+    - thickness.shape
+    - subfields.label
+  dentate:
+    - gyrification.shape 
+    - curvature.shape
+  
+cifti_types: 
+  hipp:
+    - gyrification.dscalar
+    - curvature.dscalar
+    - thickness.dscalar
+    - subfields.dlabel
+  dentate:
+    - gyrification.dscalar
+    - curvature.dscalar
+
+ 
+
+
 #--- workflow specific configuration -- 
 
 singularity:

@@ -39,9 +39,11 @@ if (
     ref_spaces.append("corobl")
     crop_ref_spaces.append("corobl")
 
+# add required inputs for myelin mapping
 if config["generate_myelin_map"]:
     limit_to_list.add("T1w")
     limit_to_list.add("T2w")
+
 
 # set the modality to use for template registration
 if "T2w" in config["modality"]:
