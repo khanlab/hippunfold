@@ -23,8 +23,8 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-3.9
-          restore-keys: ${{ runner.os }}-pip-3.9
+          key: ${{ runner.os }}-pip-3.8
+          restore-keys: ${{ runner.os }}-pip-3.8
       - name: Install non-python dependencies
         run: |
           sudo apt-get install -y graphviz-dev
@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-3.9
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-3.8
       #----------------------------------------------
       # install dependencies if cache does not exist
       #----------------------------------------------
@@ -119,45 +119,44 @@ jobs:
     - name: Set-up env for hippunfold 
       run: |
         echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models" >> $GITHUB_ENV
-        echo "HIPPUNFOLD='poetry run ./hippunfold/run.py'" >> $GITHUB_ENV
     - name: Test single T2w bids
       run: |
-        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w
     - name: Test single T2w bids, right hemi
       run: |
-        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
     - name: Test single T2w bids, left hemi
       run: |
-        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
     - name: Test multiple T2w bids
       run: |
-        $HIPPUNFOLD test_data/bids_multiT2w test_out participant -np --modality T2w
+        poetry run hippunfold test_data/bids_multiT2w test_out participant -np --modality T2w
     - name: Test T1w bids
       run: |
-        $HIPPUNFOLD test_data/bids_T1w test_out participant -np --modality T1w
+        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w
     - name: Test hipp b500 bids
       run: |
-        $HIPPUNFOLD test_data/bids_hippb500 test_out participant -np --modality hippb500
+        poetry run hippunfold test_data/bids_hippb500 test_out participant -np --modality hippb500
     - name: Test T1w multi-session/longitudinal bids
       run: |
-        $HIPPUNFOLD test_data/bids_T1w_longitudinal test_out participant -np --modality T1w
+        poetry run hippunfold test_data/bids_T1w_longitudinal test_out participant -np --modality T1w
     - name: Test single T2w multi-session/longitudinal bids
       run: |
-        $HIPPUNFOLD test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w
+        poetry run hippunfold test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w
     - name: Test manual seg T2w bids
       run: |
-        $HIPPUNFOLD test_data/bids_segT2w test_out participant -np --modality segT2w
+        poetry run hippunfold test_data/bids_segT2w test_out participant -np --modality segT2w
     - name: Test cropseg bids, with path override
       run: |
-        $HIPPUNFOLD - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
+        poetry run hippunfold - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
     - name: Test cropseg bids, with path override, left hemi
       run: | 
-        $HIPPUNFOLD - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
+        poetry run hippunfold - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
     - name: Test T2w with T1w template registration
       run: |
-        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
     - name: Test T2w with T1w output space 
       run: |
-        $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
 
 
