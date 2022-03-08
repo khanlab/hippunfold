@@ -26,6 +26,9 @@ jobs:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-3.9
           restore-keys: ${{ runner.os }}-pip-3.9
+    - name: Install non-python dependencies
+      run: |
+        sudo apt-get install -y graphviz-dev
       #----------------------------------------------
       #  -----  install & configure poetry  -----
       #----------------------------------------------
@@ -72,26 +75,52 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.7', '3.8']
-
-    steps:
+    
     - uses: actions/checkout@v2
-      with:
-        submodules: True
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+        restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}
     - name: Install non-python dependencies
       run: |
         sudo apt-get install -y graphviz-dev
+    #----------------------------------------------
+    #  -----  install & configure poetry  -----
+    #----------------------------------------------
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    #----------------------------------------------
+    #       load cached venv if cache exists
+    #----------------------------------------------
+    - name: Load cached venv
+      id: cached-poetry-dependencies
+      uses: actions/cache@v2
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-${{ matrix.python-version }}
+    #----------------------------------------------
+    # install dependencies if cache does not exist
+    #----------------------------------------------
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install snakebids
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root
+    #----------------------------------------------
+    # install your root project, if required
+    #----------------------------------------------
+    - name: Install library
+      run: poetry install --no-interaction
     - name: Set-up env for hippunfold 
       run: |
         echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models" >> $GITHUB_ENV
-        echo "HIPPUNFOLD=./hippunfold/run.py" >> $GITHUB_ENV
+        echo "HIPPUNFOLD='poetry run ./hippunfold/run.py'" >> $GITHUB_ENV
     - name: Test single T2w bids
       run: |
         $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w
