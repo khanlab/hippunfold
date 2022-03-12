@@ -4,7 +4,7 @@ MAINTAINER alik@robarts.ca
 
 COPY . /src/
 
-RUN pip install /src
+RUN cd /src && pip install -r requirements.txt .
 
 #pre-download the models here:
 ENV HIPPUNFOLD_CACHE_DIR=/opt/hippunfold_cache
