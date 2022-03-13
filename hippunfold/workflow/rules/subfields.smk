@@ -2,12 +2,12 @@
 rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and bigbrain labels"""
     input:
-        subfields_mat=os.path.join(
+        label_gii=os.path.join(
             workflow.basedir,
             "..",
             "resources",
             "bigbrain",
-            "BigBrain_ManualSubfieldsUnfolded.mat",
+            "sub-bigbrain_hemi-{hemi}_subfields.label.gii",
         ),
         nii_ap=bids(
             root=work,
@@ -31,8 +31,8 @@ rule label_subfields_from_vol_coords_corobl:
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
-    params:
-        mat_name="subfields_avg",  #avg bigbrain over L/R hemis
+#    params:
+#        mat_name="subfields_avg",  #avg bigbrain over L/R hemis
     output:
         nii_label=bids(
             root=work,
