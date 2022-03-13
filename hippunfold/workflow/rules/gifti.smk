@@ -650,7 +650,7 @@ rule metric_to_label_gii:
             "..",
             "resources",
             "bigbrain",
-            "sub-bigbrain_labellist.txt",
+            "sub-bigbrain_labellist.{hemi}.txt",
         ),
     output:
         label_gii=bids(
@@ -989,3 +989,47 @@ rule merge_lr_spec_file:
         "subj"
     shell:
         "wb_command -spec-file-merge {input.spec_files} {output}"
+
+
+rule create_parcellated_scalar_csv:
+    input:
+        dlabel=bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="subfields.dlabel.nii",
+            space="{space}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+        dscalar=bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="{metric}.dscalar.nii",
+            space="{space}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+        ),
+    output:
+        csv=bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="{metric}.csv",
+            space="{space}",
+            label="{autotop,hipp}",
+            **config["subj_wildcards"]
+        ),
+    container:
+        config["singularity"]["autotop"]
+    shadow:
+        "minimal"
+    group:
+        "subj"
+    shell:
+        "wb_command -cifti-parcellate {input.dscalar} {input.dlabel} COLUMN temp.pscalar.nii && "
+        "wb_command -cifti-transpose temp.pscalar.nii temp.tpscalar.nii && "
+        "wb_command -cifti-convert -to-text temp.tpscalar.nii data.csv -col-delim ,  && "
+        "echo 'L Sub,L CA1,L CA2,L CA3,L CA4,R Sub,R CA1,R CA2,R CA3,R CA4' > header.csv && "
+        "cat header.csv data.csv > {output.csv}"

@@ -246,3 +246,32 @@ rule concat_subj_vols_tsv:
         pd.concat([pd.read_table(in_tsv) for in_tsv in input]).to_csv(
             output.tsv, sep="\t", index=False
         )
+
+
+rule plot_subj_surf_scalars:
+    input:
+        csv=bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="{metric}.csv",
+            space="{space}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+    output:
+        png=report(
+            bids(
+                root=root,
+                datatype="qc",
+                space="{space}",
+                den="{density}",
+                desc="subfields",
+                suffix="{metric}.png",
+                **config["subj_wildcards"]
+            ),
+        ),
+    group:
+        "subj"
+    script:
+        "../scripts/plot_subj_surf_scalars.py"

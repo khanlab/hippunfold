@@ -286,6 +286,23 @@ def get_final_qc():
                 allow_missing=True,
             )
         )
+        qc.extend(
+            expand(
+                bids(
+                    root=root,
+                    datatype="qc",
+                    desc="subfields",
+                    space="{space}",
+                    suffix="{metric}.png",
+                    den="{density}",
+                    **config["subj_wildcards"],
+                ),
+                density=config["output_density"],
+                metric=["gyrification", "curvature", "thickness"],
+                space=ref_spaces,
+                allow_missing=True,
+            )
+        )
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
         qc.extend(
             expand(
