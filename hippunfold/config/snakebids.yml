@@ -280,8 +280,10 @@ template_files:
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
   Marmoset:
     T2w: resources/tpl-Marmoset/Marmoset_100um_T2w.nii.gz
+    T1w: resources/tpl-Marmoset/Marmoset_100um_T1w.nii.gz
     xfm_corobl: resources/tpl-Marmoset/CoronalOblique_rigid.txt
     crop_ref: resources/tpl-Marmoset/T2w_50umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_refT1w: resources/tpl-Marmoset/T1w_50umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: resources/CITI168/Mask_50umCoronalOblique_hemi-{hemi}.nii.gz
 
 
