@@ -284,7 +284,7 @@ template_files:
     xfm_corobl: resources/tpl-Marmoset/CoronalOblique_rigid.txt
     crop_ref: resources/tpl-Marmoset/T2w_50umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: resources/tpl-Marmoset/T1w_50umCoronalOblique_hemi-{hemi}.nii.gz
-    Mask_crop: resources/CITI168/Mask_50umCoronalOblique_hemi-{hemi}.nii.gz
+    Mask_crop: resources/tpl-Marmoset/Mask_50umCoronalOblique_hemi-{hemi}.nii.gz
 
 
 
