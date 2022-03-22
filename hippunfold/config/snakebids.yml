@@ -175,6 +175,7 @@ parse_args:
     choices:
       - 'CITI168'
       - 'dHCP'
+      - 'Marmoset'
     default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique. (default: %(default)s)'
 
@@ -277,7 +278,11 @@ template_files:
     crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
-
+  Marmoset:
+    T2w: resources/tpl-Marmoset/Marmoset_100um_T2w.nii.gz
+    xfm_corobl: resources/tpl-Marmoset/CoronalOblique_rigid.txt
+    crop_ref: resources/tpl-Marmoset/T2w_50umCoronalOblique_hemi-{hemi}.nii.gz
+    Mask_crop: resources/CITI168/Mask_50umCoronalOblique_hemi-{hemi}.nii.gz
 
 
 
