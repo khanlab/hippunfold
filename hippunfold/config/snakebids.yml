@@ -401,7 +401,8 @@ laplace_labels:
 
 
 output_spaces:
-
+ - native
+ 
 participant_label:
 exclude_participant_label:
 hemi:
