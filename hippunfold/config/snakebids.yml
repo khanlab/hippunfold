@@ -183,6 +183,14 @@ parse_args:
     default: false
     action: store_true
 
+  --atlas:
+    choices:
+      - 'bigbrain'
+      - 'magdeburg'
+    default: 'bigbrain'
+    help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
+
+
   --use_gpu:
     help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
     default: False
@@ -278,8 +286,14 @@ template_files:
     crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
 
-
-
+atlas: bigbrain
+atlas_files:
+  bigbrain:
+    label_gii: resources/bigbrain/sub-bigbrain_hemi-{hemi}_subfields.label.gii
+    label_list: resources/bigbrain/sub-bigbrain_labellist.txt
+  magdeburg:
+    label_gii: resources/magdeburg/sub-all_hemi-{hemi}_den-unfoldiso_label-hipp_desc-manualsubfields_maxprob.label.gii
+    label_list: resources/magdeburg/magdeburg_labellist.txt
 
 
 rigid_reg_template: False
@@ -401,6 +415,7 @@ laplace_labels:
 
 
 output_spaces:
+  - native
 
 participant_label:
 exclude_participant_label:

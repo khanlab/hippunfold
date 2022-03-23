@@ -549,17 +549,13 @@ rule calculate_thickness_from_surface:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
 
 
-rule resample_bigbrain_subfield_label_gii:
+rule resample_subfield_label_gii:
     """ similar to wb_command -metric-resample, but for unfolded space
     note, this creates a Nx1 nii file, for subsequent gifti conversion
     using wb_command"""
     input:
         label=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "bigbrain",
-            "sub-bigbrain_hemi-{hemi}_subfields.label.gii",
+            workflow.basedir, "..", config["atlas_files"][config["atlas"]]["label_gii"]
         ),
         new_surf=os.path.join(
             workflow.basedir,
@@ -646,11 +642,7 @@ rule metric_to_label_gii:
             **config["subj_wildcards"]
         ),
         label_list=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "bigbrain",
-            "sub-bigbrain_labellist.txt",
+            workflow.basedir, "..", config["atlas_files"][config["atlas"]]["label_gii"]
         ),
     output:
         label_gii=bids(

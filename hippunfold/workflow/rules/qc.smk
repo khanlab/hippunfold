@@ -43,6 +43,7 @@ rule get_subfield_vols_subj:
                 hemi="{hemi}",
                 space="{crop_ref_spaces}",
                 desc="subfields",
+                atlas="{atlas}",
                 suffix="dseg.nii.gz"
             ),
             hemi=config["hemi"],
@@ -59,6 +60,7 @@ rule get_subfield_vols_subj:
             datatype="anat",
             space="{crop_ref_spaces}",
             desc="subfields",
+            atlas="{atlas}",
             suffix="volumes.tsv",
             **config["subj_wildcards"]
         ),
@@ -73,6 +75,7 @@ rule plot_subj_subfields:
             datatype="anat",
             space="{crop_ref_spaces}",
             desc="subfields",
+            atlas="{atlas}",
             suffix="volumes.tsv",
             **config["subj_wildcards"]
         ),
@@ -83,6 +86,7 @@ rule plot_subj_subfields:
                 datatype="qc",
                 space="{crop_ref_spaces}",
                 desc="subfields",
+                atlas="{atlas}",
                 suffix="volumes.png",
                 **config["subj_wildcards"]
             ),
@@ -155,6 +159,7 @@ rule qc_subfield:
             desc="subfields",
             space="{space}",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     output:
@@ -166,6 +171,7 @@ rule qc_subfield:
                 desc="subfields",
                 space="{space}",
                 hemi="{hemi}",
+                atlas="{atlas}",
                 **config["subj_wildcards"]
             ),
             caption="../report/subfield_qc.rst",
