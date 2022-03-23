@@ -5,8 +5,8 @@ import nibabel as nib
 
 # this function labels subfields using the labels in unfolded space, and native space coords (ap, pd) images
 
-#labels_mat = snakemake.input.subfields_mat
-#mat_name = snakemake.params.mat_name
+# labels_mat = snakemake.input.subfields_mat
+# mat_name = snakemake.params.mat_name
 
 label_gii = snakemake.input.label_gii
 
@@ -15,9 +15,9 @@ nii_pd = snakemake.input.nii_pd
 nii_label = snakemake.output.nii_label
 
 # get labels from matlab .mat file
-#labels_subfields = loadmat(labels_mat)
-#labels = labels_subfields[mat_name]
-labels = nib.load(label_gii).agg_data().reshape((126,254)).transpose()
+# labels_subfields = loadmat(labels_mat)
+# labels = labels_subfields[mat_name]
+labels = nib.load(label_gii).agg_data().reshape((126, 254)).transpose()
 print(labels.shape)
 
 # setup the interpolating grid
