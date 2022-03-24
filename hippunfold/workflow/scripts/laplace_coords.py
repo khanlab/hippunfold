@@ -14,7 +14,7 @@ max_iters = snakemake.params.max_iters
 
 # initialize foreground (gm), source, and sink
 
-lbl_nib = nib.load(snakemake.input.lbl)
+lbl_nib = nib.load(str(snakemake.input.lbl))
 lbl = lbl_nib.get_fdata()
 
 idxgm = np.zeros(lbl.shape)
