@@ -15,7 +15,7 @@ rule label_subfields_from_unfolded_atlas:
             root=work,
             datatype="warps",
             **config["subj_wildcards"],
-            label="dentate",
+            label="hipp",
             suffix="xfm.nii.gz",
             hemi="{hemi,Lflip|R}",
             from_="unfold",
