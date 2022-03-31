@@ -17,7 +17,7 @@ nii_label = snakemake.output.nii_label
 # get labels from matlab .mat file
 # labels_subfields = loadmat(labels_mat)
 # labels = labels_subfields[mat_name]
-labels = nib.load(label_nii).agg_data() # shape [256, 128, 16]
+labels = nib.load(label_nii).agg_data()  # shape [256, 128, 16]
 print(labels.shape)
 
 # setup the interpolating grid

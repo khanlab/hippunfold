@@ -550,7 +550,7 @@ rule calculate_thickness_from_surface:
 
 
 rule resample_atlas_to_refvol:
-    '''this is just done in case the atlas has a different unfolded config than the current run'''
+    """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
         atlas=os.path.join(
             workflow.basedir, "..", config["atlas_files"][config["atlas"]]["label_nii"]
