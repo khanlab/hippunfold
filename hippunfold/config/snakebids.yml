@@ -289,10 +289,10 @@ template_files:
 atlas: bigbrain
 atlas_files:
   bigbrain:
-    label_gii: resources/bigbrain/sub-bigbrain_hemi-{hemi}_subfields.label.gii
+    label_nii: resources/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields.nii.gz
     label_list: resources/bigbrain/sub-bigbrain_labellist.txt
   magdeburg:
-    label_gii: resources/magdeburg/sub-all_hemi-{hemi}_den-unfoldiso_label-hipp_desc-manualsubfields_maxprob.label.gii
+    label_nii: resources/magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
     label_list: resources/magdeburg/magdeburg_labellist.txt
 
 

@@ -1,32 +1,28 @@
 
-rule label_subfields_from_vol_coords_corobl:
-    """ Label subfields using the volumetric coords and atlas subfield labels"""
+
+rule label_subfields_from_unfolded_atlas:
     input:
-        label_gii=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_gii"]
-        ),
-        nii_ap=bids(
+        label_nii=bids(
             root=work,
-            datatype="coords",
-            dir="AP",
-            label="hipp",
-            suffix="coords.nii.gz",
-            desc="laplace",
-            space="corobl",
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
             hemi="{hemi}",
+            label="hipp",
             **config["subj_wildcards"]
         ),
-        nii_pd=bids(
+        warpitk_unfold2native=bids(
             root=work,
-            datatype="coords",
-            dir="PD",
-            label="hipp",
-            suffix="coords.nii.gz",
-            desc="laplace",
-            space="corobl",
-            hemi="{hemi}",
-            **config["subj_wildcards"]
+            datatype="warps",
+            **config["subj_wildcards"],
+            label="dentate",
+            suffix="xfm.nii.gz",
+            hemi="{hemi,Lflip|R}",
+            from_="unfold",
+            to="corobl",
+            mode="image"
         ),
+        refvol=get_labels_for_laplace,
     output:
         nii_label=bids(
             root=work,
@@ -38,10 +34,12 @@ rule label_subfields_from_vol_coords_corobl:
             atlas="{atlas}",
             **config["subj_wildcards"]
         ),
+    container:
+        config["singularity"]["ants"]
     group:
         "subj"
-    script:
-        "../scripts/label_subfields_from_vol_coords.py"
+    shell:
+        "antsApplyTransforms -d 3 -n MultiLabel -i {input.label_nii} -r {input.refvol} -t {input.warpitk_unfold2native} -o {output.nii_label}"
 
 
 rule combine_tissue_subfield_labels_corobl:
