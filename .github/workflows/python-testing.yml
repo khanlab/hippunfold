@@ -73,7 +73,7 @@ jobs:
     needs: [ 'quality'  ]
     strategy:
       matrix:
-        python-version: ['3.7', '3.8']
+        python-version: ['3.8']
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -158,5 +158,13 @@ jobs:
     - name: Test T2w with T1w output space 
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
+    - name: Test modality T2w with myelin map
+      run: |
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --generate-myelin-map
+    - name: Test modality T1w with myelin map
+      run: |
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
+
+
 
 
