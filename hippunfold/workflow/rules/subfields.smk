@@ -3,7 +3,7 @@ rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and atlas subfield labels"""
     input:
         label_gii=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_gii"]
+            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
         ),
         nii_ap=bids(
             root=work,
