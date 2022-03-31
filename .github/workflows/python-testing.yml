@@ -45,8 +45,6 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-3.8
-      - name: Upgrade setuptools to latest
-        run: poetry run pip install 'setuptools==61.2.0'
       #----------------------------------------------
       # install dependencies if cache does not exist
       #----------------------------------------------
