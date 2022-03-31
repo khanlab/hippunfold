@@ -20,8 +20,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
       - uses: actions/cache@v2
         with:
           path: ~/.cache/pip
@@ -47,6 +45,8 @@ jobs:
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-3.8
+      - name: Upgrade setuptools to latest
+        run: poetry run pip install 'setuptools==61.2.0'
       #----------------------------------------------
       # install dependencies if cache does not exist
       #----------------------------------------------
