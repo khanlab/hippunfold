@@ -71,7 +71,6 @@ def get_floating_n4_t2(wildcards):
     return t2_imgs[int(wildcards.idx)]
 
 
-# register scan to the ref t2
 rule reg_t2_to_ref:
     input:
         ref=get_ref_n4_t2,
@@ -183,9 +182,10 @@ else:
             "subj"
         shell:
             "{params.cmd}"
-
-
 # register to t1
+
+
+
 rule reg_t2_to_t1:
     input:
         flo=bids(

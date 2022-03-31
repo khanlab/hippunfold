@@ -183,6 +183,11 @@ parse_args:
     default: false
     action: store_true
 
+  --generate_myelin_map:
+    help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
+    default: false
+    action: store_true
+
   --use_gpu:
     help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
     default: False
@@ -252,6 +257,31 @@ parse_args:
 autotop_labels:
   - 'hipp'
   - 'dentate'
+
+
+
+gifti_types:
+  hipp:
+    - gyrification.shape 
+    - curvature.shape
+    - thickness.shape
+    - subfields.label
+  dentate:
+    - gyrification.shape 
+    - curvature.shape
+  
+cifti_types: 
+  hipp:
+    - gyrification.dscalar
+    - curvature.dscalar
+    - thickness.dscalar
+    - subfields.dlabel
+  dentate:
+    - gyrification.dscalar
+    - curvature.dscalar
+
+ 
+
 
 #--- workflow specific configuration -- 
 
@@ -401,8 +431,8 @@ laplace_labels:
 
 
 output_spaces:
- - native
- 
+  - native
+
 participant_label:
 exclude_participant_label:
 hemi:
@@ -420,4 +450,5 @@ keep_work: False
 skip_inject_template_labels: False
 force_nnunet_model: False
 t1_reg_template: False
+generate_myelin_map: False
 root: results

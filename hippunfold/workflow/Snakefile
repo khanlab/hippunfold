@@ -39,6 +39,11 @@ if (
     ref_spaces.append("corobl")
     crop_ref_spaces.append("corobl")
 
+# add required inputs for myelin mapping
+if config["generate_myelin_map"]:
+    limit_to_list.add("T1w")
+    limit_to_list.add("T2w")
+
 
 # set the modality to use for template registration
 if "T2w" in config["modality"]:
@@ -64,7 +69,6 @@ if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg
     limit_to_list.add(config["modality"][3:])
 else:
     limit_to_list.add(config["modality"])
-
 
 # writes inputs_config.yml and updates config dict
 config.update(
@@ -118,7 +122,7 @@ else:
     include: "rules/nnunet.smk"
 
 
-if config["modality"] == "segT2w" or config["modality"] == "T2w":
+if "T2w" in limit_to_list or config["generate_myelin_map"]:
 
     include: "rules/preproc_t2.smk"
 
@@ -129,12 +133,27 @@ if config["modality"] == "hippb500":
 
 
 include: "rules/autotop.smk"
+
+
 include: "rules/warps.smk"
+
+
 include: "rules/shape_inject.smk"
+
+
 include: "rules/gifti.smk"
+
+
 include: "rules/subfields.smk"
+
+
 include: "rules/resample_final_to_crop_native.smk"
+
+
 include: "rules/qc.smk"
+
+
+include: "rules/myelin_map.smk"
 
 
 rule all:
