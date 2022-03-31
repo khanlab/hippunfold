@@ -586,7 +586,7 @@ rule resample_atlas_to_refvol:
         config["singularity"]["ants"]
     group:
         "subj"
-    script:
+    shell:
         "antsApplyTransforms -d 3 -n MultiLabel -i {input.atlas} -r {input.refvol} -o {output.label_nii} -v &> {log}"
 
 
