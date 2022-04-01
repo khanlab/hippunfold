@@ -9,6 +9,7 @@ rule label_subfields_from_vol_coords_corobl:
             space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         nii_ap=bids(

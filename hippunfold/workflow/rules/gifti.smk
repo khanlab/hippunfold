@@ -552,8 +552,8 @@ rule calculate_thickness_from_surface:
 rule resample_atlas_to_refvol:
     """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
-        atlas=os.path.join(
-            workflow.basedir, "..", config["atlas_files"][config["atlas"]]["label_nii"]
+        atlas=lambda wildcards: os.path.join(
+            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
         ),
         refvol=bids(
             root=work,
@@ -571,6 +571,7 @@ rule resample_atlas_to_refvol:
             space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     log:
@@ -580,6 +581,7 @@ rule resample_atlas_to_refvol:
             space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     container:
@@ -599,6 +601,7 @@ rule nii_to_label_gii:
             space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         surf=os.path.join(
@@ -617,6 +620,7 @@ rule nii_to_label_gii:
             space="{space}",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     group:
@@ -702,6 +706,7 @@ def get_inputs_cifti_label(wildcards):
                 space="{space}",
                 hemi="L",
                 label="hipp",
+                atlas=config["atlas"],
                 **config["subj_wildcards"],
             ).format(**wildcards),
         )
@@ -715,6 +720,7 @@ def get_inputs_cifti_label(wildcards):
                 space="{space}",
                 hemi="R",
                 label="hipp",
+                atlas=config["atlas"],
                 **config["subj_wildcards"],
             ).format(**wildcards),
         )
@@ -807,6 +813,7 @@ rule create_spec_file_hipp:
             space="{space}",
             hemi="{hemi}",
             label="hipp",
+            atlas=config["atlas"],
             **config["subj_wildcards"]
         ),
         cifti=expand(
