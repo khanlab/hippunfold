@@ -184,7 +184,6 @@ else:
             "{params.cmd}"
 
 
-
 rule reg_t2_to_t1:
     input:
         flo=bids(
@@ -250,7 +249,7 @@ rule reg_t2_to_t1:
 
 
 rule reg_t2_to_template:
-    """register t2 directly to template, instead of using t1"""
+"""register t2 directly to template, instead of using t1"""
     input:
         flo=bids(
             root=work,
