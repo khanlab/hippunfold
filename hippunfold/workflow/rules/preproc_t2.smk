@@ -249,7 +249,6 @@ rule reg_t2_to_t1:
 
 
 rule reg_t2_to_template:
-"""register t2 directly to template, instead of using t1"""
     input:
         flo=bids(
             root=work,
