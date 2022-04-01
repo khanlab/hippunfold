@@ -34,6 +34,7 @@ rule label_subfields_from_vol_coords_corobl:
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
+        nii_io=get_laminar_coords,
     output:
         nii_label=bids(
             root=work,
