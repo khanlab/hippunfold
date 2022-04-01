@@ -601,7 +601,7 @@ rule nii_to_label_gii:
             space="unfold",
             hemi="{hemi}",
             label="hipp",
-            atlas="{atlas}",
+            atlas=config["atlas"],
             **config["subj_wildcards"]
         ),
         surf=os.path.join(
@@ -620,7 +620,6 @@ rule nii_to_label_gii:
             space="{space}",
             hemi="{hemi}",
             label="hipp",
-            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     group:
@@ -706,7 +705,6 @@ def get_inputs_cifti_label(wildcards):
                 space="{space}",
                 hemi="L",
                 label="hipp",
-                atlas=config["atlas"],
                 **config["subj_wildcards"],
             ).format(**wildcards),
         )
@@ -720,7 +718,6 @@ def get_inputs_cifti_label(wildcards):
                 space="{space}",
                 hemi="R",
                 label="hipp",
-                atlas=config["atlas"],
                 **config["subj_wildcards"],
             ).format(**wildcards),
         )
