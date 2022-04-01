@@ -22,11 +22,11 @@ In this example, a `T1w` image was used as a standard reference image, but a `T2
      └── anat
          ├── sub-001_desc-preproc_T1w.nii.gz
          ├── sub-001_space-T1w_desc-preproc_T2w.nii.gz
-         ├── sub-001_hemi-R_space-T1w_desc-subfields_dseg.nii.gz
+         ├── sub-001_hemi-R_space-T1w_desc-subfields_atlas-bigbrain_dseg.nii.gz
          ├── sub-001_hemi-R_space-cropT1w_desc-preproc_T2w.nii.gz
-         └── sub-001_hemi-R_space-cropT1w_desc-subfields_dseg.nii.gz
+         └── sub-001_hemi-R_space-cropT1w_desc-subfields_atlas-bigbrain_dseg.nii.gz
 
-As per BIDS guidelines, `desc-preproc` refers to preprocessed input images, `space-T1w` refers to the volume to which the image is registered, `hemi` refers to the left or right hemisphere (only shown for the right in this example), and`desc-subfields_dseg` images contains subfield labels (coded as integers as described in the included `volumes.tsv` file). Note that HippUnfold does most intermediate processing in an unshown `space-corobl` which is cropped, upsampled, and rotated. Downsampling to the original `T1w` space can thus degrade the results and so they are also provided in a higher resolution `space-cropT1w` space which is ideal for conducting volumetry or morphometry measures with high precision and detail. 
+As per BIDS guidelines, `desc-preproc` refers to preprocessed input images, `space-T1w` refers to the volume to which the image is registered, `hemi` refers to the left or right hemisphere (only shown for the right in this example), and `dseg` (discrete-segmentation) images with `desc-subfields` contains subfield labels (coded as integers as described in the included `volumes.tsv` file). The subfield atlas used will also be included, by default as `atlas-bigbrain`. Note that HippUnfold does most intermediate processing in an unshown (available in the `work/` folder) `space-corobl` which is cropped, upsampled, and rotated. Downsampling to the original `T1w` space can thus degrade the results and so they are also provided in a higher resolution `space-cropT1w` space which is ideal for conducting volumetry or morphometry measures with high precision and detail. 
 
 For example, the following image shows a whole-brain `T1w` image, a
 `space-cropT1w` overlay of the upsampled T2w image (centre square), and a similarly upsampled output
