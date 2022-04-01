@@ -20,7 +20,7 @@ labels = nib.load(label_nii).get_fdata()  # shape [256, 128, 16]
 spacing_ap = np.linspace(0, 1, labels.shape[0])
 spacing_pd = np.linspace(0, 1, labels.shape[1])
 spacing_io = np.linspace(0, 1, labels.shape[2])
-points = (spacing_ap, spacing_pd,spacing_io)
+points = (spacing_ap, spacing_pd, spacing_io)
 
 # load up the coords
 ap_nib = nib.load(nii_ap)
