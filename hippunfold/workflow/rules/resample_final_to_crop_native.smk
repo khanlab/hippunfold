@@ -9,6 +9,7 @@ rule create_native_crop_ref:
             desc="subfields",
             space="{native_modality}",
             hemi="{hemi}",
+            atlas=config["atlas"],
             **config["subj_wildcards"]
         ),
     params:
@@ -136,6 +137,7 @@ rule resample_subfields_native_crop:
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         xfm=bids(
@@ -164,6 +166,7 @@ rule resample_subfields_native_crop:
             desc="subfields",
             space="crop{native_modality}",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     container:

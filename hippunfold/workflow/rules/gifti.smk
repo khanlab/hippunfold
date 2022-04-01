@@ -549,62 +549,59 @@ rule calculate_thickness_from_surface:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
 
 
-rule resample_bigbrain_subfield_label_gii:
-    """ similar to wb_command -metric-resample, but for unfolded space
-    note, this creates a Nx1 nii file, for subsequent gifti conversion
-    using wb_command"""
+rule resample_atlas_to_refvol:
+    """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
-        label=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "bigbrain",
-            "sub-bigbrain_hemi-{hemi}_subfields.label.gii",
+        atlas=lambda wildcards: os.path.join(
+            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
         ),
-        new_surf=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_hipp",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        refvol=bids(
+            root=work,
+            space="unfold",
+            label="hipp",
+            datatype="warps",
+            suffix="refvol.nii.gz",
+            **config["subj_wildcards"]
         ),
     output:
         label_nii=bids(
             root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.nii",
-            space="{space}",
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     log:
         bids(
             root="logs",
-            den="{density}",
-            suffix="resamplesubfieldsurf",
-            space="{space}",
+            suffix="resamplesubfieldrefvol",
+            space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
+    container:
+        config["singularity"]["ants"]
     group:
         "subj"
-    script:
-        "../scripts/resample_unfolded_label.py"
+    shell:
+        "antsApplyTransforms -d 3 -n MultiLabel -i {input.atlas} -r {input.refvol} -o {output.label_nii} -v &> {log}"
 
 
-rule label_nii_to_metric_gii:
+rule nii_to_label_gii:
     input:
         label_nii=bids(
             root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.nii",
-            space="{space}",
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas=config["atlas"],
             **config["subj_wildcards"]
         ),
         surf=os.path.join(
@@ -613,44 +610,6 @@ rule label_nii_to_metric_gii:
             "resources",
             "unfold_template_hipp",
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
-        ),
-    output:
-        metric_gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.func.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="hipp",
-            **config["subj_wildcards"]
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "wb_command -metric-convert -from-nifti {input.label_nii} {input.surf} {output.metric_gii}"
-
-
-rule metric_to_label_gii:
-    input:
-        metric_gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.func.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="hipp",
-            **config["subj_wildcards"]
-        ),
-        label_list=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "bigbrain",
-            "sub-bigbrain_labellist.txt",
         ),
     output:
         label_gii=bids(
@@ -668,7 +627,7 @@ rule metric_to_label_gii:
     container:
         config["singularity"]["autotop"]
     shell:
-        "wb_command -metric-label-import {input.metric_gii} {input.label_list} {output.label_gii}"
+        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} {output.label_gii} -enclosing"
 
 
 def get_cmd_cifti_metric(wildcards, input, output):
