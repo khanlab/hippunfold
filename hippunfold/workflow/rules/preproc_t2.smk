@@ -183,8 +183,9 @@ else:
             "subj"
         shell:
             "{params.cmd}"
-# register to t1
 
+
+# register to t1
 
 
 rule reg_t2_to_t1:
