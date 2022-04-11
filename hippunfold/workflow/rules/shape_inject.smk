@@ -320,7 +320,7 @@ rule inject_init_laplace_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi,R|Lflip}"
         ),
     log:
         bids(
@@ -330,7 +330,7 @@ rule inject_init_laplace_coords:
             label="{autotop}",
             suffix="injectcoords.txt",
             desc="init",
-            hemi="{hemi}"
+            hemi="{hemi,R|Lflip}"
         ),
     group:
         "subj"
