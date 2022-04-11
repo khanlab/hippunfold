@@ -349,7 +349,6 @@ rule create_warps_dentate:
         "../scripts/create_warps.py"
 
 
-
 rule compose_warps_native_to_unfold:
     """ Compose warps from native to unfold """
     input:
