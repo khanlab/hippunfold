@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hippunfold"
-version = "2.0.0-pre.9"
+version = "2.0.0-pre.10"
 description = "BIDS App for Hippocampal AutoTop (automated hippocampal unfolding and subfield segmentation)"
 authors = ["Jordan DeKraker & Ali Khan <alik@robarts.ca>"]
 
