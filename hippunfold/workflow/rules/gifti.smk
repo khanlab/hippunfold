@@ -28,7 +28,7 @@ rule cp_template_to_unfold:
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="unfolded",
-            hemi="{hemi,R|Lflip}",
+            hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
@@ -176,7 +176,7 @@ rule warp_gii_unfold2native:
             suffix="{surfname}.surf.gii",
             desc="nonancorrect",
             space="corobl",
-            hemi="{hemi,R|Lflip}",
+            hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
@@ -211,7 +211,7 @@ rule correct_nan_vertices:
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="corobl",
-            hemi="{hemi,R|Lflip}",
+            hemi="{hemi}",
             label="{autotop,hipp|dentate}",
             **config["subj_wildcards"]
         ),
@@ -219,101 +219,6 @@ rule correct_nan_vertices:
         "subj"
     script:
         "../scripts/fillnanvertices.py"
-
-
-# unflip surface
-rule unflip_gii:
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="corobl",
-            hemi="{hemi}flip",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="ANATOMICAL",
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="corobl",
-            hemi="{hemi,L}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-flip-lr {input.gii} {output.gii} && "
-        "wb_command -set-structure {output.gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
-
-
-def get_unfolded_surf_R_Lflip(wildcards):
-    if wildcards.hemi == "R":
-        return bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfolded",
-            hemi="{hemi}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ).format(**wildcards)
-    elif wildcards.hemi == "L":
-        return bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfolded",
-            hemi="{hemi}flip",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ).format(**wildcards)
-
-
-rule unflip_gii_unfolded:
-    """copy unfolded from Lflip to L"""
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfolded",
-            hemi="{hemi}flip",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfolded",
-            hemi="{hemi,L}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "cp {input.gii} {output.gii}"
 
 
 # warp from corobl to native
