@@ -1,13 +1,16 @@
 
 rule label_subfields_from_vol_coords_corobl:
-    """ Label subfields using the volumetric coords and bigbrain labels"""
+    """ Label subfields using the volumetric coords and atlas subfield labels"""
     input:
-        subfields_mat=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "bigbrain",
-            "BigBrain_ManualSubfieldsUnfolded.mat",
+        label_nii=bids(
+            root=work,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **config["subj_wildcards"]
         ),
         nii_ap=bids(
             root=work,
@@ -31,8 +34,7 @@ rule label_subfields_from_vol_coords_corobl:
             hemi="{hemi}",
             **config["subj_wildcards"]
         ),
-    params:
-        mat_name="subfields_avg",  #avg bigbrain over L/R hemis
+        nii_io=get_laminar_coords,
     output:
         nii_label=bids(
             root=work,
@@ -41,6 +43,7 @@ rule label_subfields_from_vol_coords_corobl:
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     group:
@@ -69,6 +72,7 @@ rule combine_tissue_subfield_labels_corobl:
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     params:
@@ -83,6 +87,7 @@ rule combine_tissue_subfield_labels_corobl:
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     container:
@@ -103,6 +108,7 @@ rule resample_subfields_to_native:
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         xfm=bids(
@@ -130,6 +136,7 @@ rule resample_subfields_to_native:
             desc="subfields",
             space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     container:
@@ -247,6 +254,7 @@ rule resample_subfields_to_unfold:
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         xfm=bids(
@@ -267,6 +275,7 @@ rule resample_subfields_to_unfold:
             desc="subfields",
             space="unfold",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     container:

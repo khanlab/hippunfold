@@ -1,3 +1,36 @@
+rule qc_reg_to_template:
+    input:
+        ref=lambda wildcards: os.path.join(
+            workflow.basedir,
+            "..",
+            config["template_files"][config["template"]][wildcards.native_modality],
+        ),
+        flo=bids(
+            root=work,
+            datatype="anat",
+            **config["subj_wildcards"],
+            suffix="{native_modality}.nii.gz",
+            space=config["template"],
+            desc="affine"
+        ),
+    output:
+        png=report(
+            bids(
+                root=root,
+                datatype="qc",
+                **config["subj_wildcards"],
+                suffix="regqc.png",
+                from_="{native_modality}",
+                to=config["template"]
+            ),
+            caption="../report/t1w_template_regqc.rst",
+            category="Registration QC",
+        ),
+    group:
+        "subj"
+    script:
+        "../scripts/vis_regqc.py"
+
 
 rule get_subfield_vols_subj:
     """Export segmentation volume for a subject to TSV"""
@@ -10,6 +43,7 @@ rule get_subfield_vols_subj:
                 hemi="{hemi}",
                 space="{crop_ref_spaces}",
                 desc="subfields",
+                atlas="{atlas}",
                 suffix="dseg.nii.gz"
             ),
             hemi=config["hemi"],
@@ -26,6 +60,7 @@ rule get_subfield_vols_subj:
             datatype="anat",
             space="{crop_ref_spaces}",
             desc="subfields",
+            atlas="{atlas}",
             suffix="volumes.tsv",
             **config["subj_wildcards"]
         ),
@@ -40,6 +75,7 @@ rule plot_subj_subfields:
             datatype="anat",
             space="{crop_ref_spaces}",
             desc="subfields",
+            atlas="{atlas}",
             suffix="volumes.tsv",
             **config["subj_wildcards"]
         ),
@@ -50,6 +86,7 @@ rule plot_subj_subfields:
                 datatype="qc",
                 space="{crop_ref_spaces}",
                 desc="subfields",
+                atlas="{atlas}",
                 suffix="volumes.png",
                 **config["subj_wildcards"]
             ),
@@ -122,17 +159,19 @@ rule qc_subfield:
             desc="subfields",
             space="{space}",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     output:
         png=report(
             bids(
-                root=work,
+                root=root,
                 datatype="qc",
                 suffix="dseg.png",
                 desc="subfields",
                 space="{space}",
                 hemi="{hemi}",
+                atlas="{atlas}",
                 **config["subj_wildcards"]
             ),
             caption="../report/subfield_qc.rst",
@@ -186,6 +225,7 @@ rule concat_subj_vols_tsv:
                 root=root,
                 datatype="anat",
                 desc="subfields",
+                space="{space}",
                 suffix="volumes.tsv",
                 **config["subj_wildcards"]
             ),
@@ -193,11 +233,19 @@ rule concat_subj_vols_tsv:
                 "subject"
             ],
             session=config["sessions"],
+            space=wildcards.space,
         ),
     group:
         "aggregate"
     output:
-        tsv=bids(root=root, prefix="group", desc="subfields", suffix="volumes.tsv"),
+        tsv=bids(
+            root=root,
+            prefix="group",
+            space="{space}",
+            from_="{modality}",
+            desc="subfields",
+            suffix="volumes.tsv",
+        ),
     run:
         import pandas as pd
 

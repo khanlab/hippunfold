@@ -204,7 +204,6 @@ rule template_shape_reg:
         bids(
             root="logs",
             **config["subj_wildcards"],
-            space="corobl",
             hemi="{hemi,Lflip|R}",
             suffix="templateshapereg.txt"
         ),
@@ -260,13 +259,20 @@ rule template_shape_inject:
             space="corobl",
             hemi="{hemi,Lflip|R}"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            suffix="templateshapeinject.txt",
+            hemi="{hemi,Lflip|R}"
+        ),
     group:
         "subj"
     container:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule inject_init_laplace_coords:
@@ -314,7 +320,17 @@ rule inject_init_laplace_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi,R|Lflip}"
+        ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            dir="{dir}",
+            label="{autotop}",
+            suffix="injectcoords.txt",
+            desc="init",
+            hemi="{hemi,R|Lflip}"
         ),
     group:
         "subj"
@@ -322,7 +338,7 @@ rule inject_init_laplace_coords:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule reinsert_subject_labels:

@@ -71,10 +71,12 @@ def get_final_subfields():
             suffix="dseg.nii.gz",
             space="{space}",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"],
         ),
         hemi=config["hemi"],
         space=crop_ref_spaces,
+        atlas=config["atlas"],
         allow_missing=True,
     )
 
@@ -244,9 +246,11 @@ def get_final_qc():
                 desc="subfields",
                 space="{space}",
                 hemi="{hemi}",
+                atlas="{atlas}",
                 **config["subj_wildcards"],
             ),
             hemi=config["hemi"],
+            atlas=config["atlas"],
             space=crop_ref_spaces,
             allow_missing=True,
         )
@@ -279,10 +283,12 @@ def get_final_qc():
                     datatype="qc",
                     desc="subfields",
                     space="{space}",
+                    atlas="{atlas}",
                     suffix="volumes.png",
                     **config["subj_wildcards"],
                 ),
                 space=crop_ref_spaces,
+                atlas=config["atlas"],
                 allow_missing=True,
             )
         )
@@ -378,7 +384,7 @@ rule archive_work_after_final:
         "subj"
     shell:
         #exit code 0 or 1 is acceptable (2 is fatal)
-        "tar -cvzf {output} {params.work_dir}; "
+        "tar -czf {output} {params.work_dir}; "
         "if [ $? -le 1 ]; then "
         "  rm -rf {params.work_dir}; "
         "else exit 1; "

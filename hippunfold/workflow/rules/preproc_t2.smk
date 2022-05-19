@@ -71,7 +71,6 @@ def get_floating_n4_t2(wildcards):
     return t2_imgs[int(wildcards.idx)]
 
 
-# register scan to the ref t2
 rule reg_t2_to_ref:
     input:
         ref=get_ref_n4_t2,
@@ -185,7 +184,6 @@ else:
             "{params.cmd}"
 
 
-# register to t1
 rule reg_t2_to_t1:
     input:
         flo=bids(
@@ -231,17 +229,26 @@ rule reg_t2_to_t1:
             desc="rigid",
             type_="itk"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            suffix="reg.txt",
+            from_="T2w",
+            to="T1w",
+            desc="rigid",
+            type_="ras"
+        ),
     container:
         config["singularity"]["autotop"]
     group:
         "subj"
     shell:
-        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac && "
+        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log} && "
         "c3d_affine_tool  {output.xfm_ras} -oitk {output.xfm_itk}"
 
 
 rule reg_t2_to_template:
-    """register t2 directly to template, instead of using t1"""
     input:
         flo=bids(
             root=work,
@@ -275,12 +282,22 @@ rule reg_t2_to_template:
             desc="affine",
             type_="ras"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            suffix="reg.txt",
+            from_="T2w",
+            to=config["template"],
+            desc="affine",
+            type_="ras"
+        ),
     container:
         config["singularity"]["autotop"]
     group:
         "subj"
     shell:
-        "{params.cmd}"
+        "{params.cmd}" + " &> {log}"
 
 
 def get_inputs_compose_t2_xfm_corobl(wildcards):

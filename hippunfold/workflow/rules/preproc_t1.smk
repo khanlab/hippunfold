@@ -123,40 +123,6 @@ rule reg_to_template:
         "{params.cmd}"
 
 
-rule qc_reg_to_template:
-    input:
-        ref=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]][wildcards.native_modality],
-        ),
-        flo=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="{native_modality}.nii.gz",
-            space=config["template"],
-            desc="affine"
-        ),
-    output:
-        png=report(
-            bids(
-                root=root,
-                datatype="qc",
-                **config["subj_wildcards"],
-                suffix="regqc.png",
-                from_="{native_modality}",
-                to=config["template"]
-            ),
-            caption="../report/t1w_template_regqc.rst",
-            category="Registration QC",
-        ),
-    group:
-        "subj"
-    script:
-        "../scripts/vis_regqc.py"
-
-
 rule convert_template_xfm_ras2itk:
     input:
         bids(
