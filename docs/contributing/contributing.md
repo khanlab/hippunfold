@@ -13,8 +13,9 @@ poetry:
     cd hippunfold
     poetry install
 
-Poetry will automatically create a virtualenv. To customize \... (TODO:
-finish this part)
+Poetry will automatically create a virtual environment. To customize where 
+these virtual environments are stored see poetry docs 
+[here](https://python-poetry.org/docs/configuration/)
 
 Then, you can run hippunfold with:
 
@@ -90,7 +91,13 @@ graham to run HippUnfold:
         git clone https://github.com/khanlab/hippunfold.git
         pip install hippunfold/
         
-Note if you make changes to your local HippUnfold, you'll want to call them with:
+3. Run hippunfold:
+
+        hippunfold ...
+        
+Note if you want to run hippunfold with modifications to your cloned 
+repository, you either need to pip install again, or run hippunfold the following, since 
+an `editable` pip install is not allowed with pyproject:
 
         python <YOUR_HIPPUNFOLD_DIR>/hippunfold/run.py
 
@@ -127,3 +134,33 @@ multiple subjects in each job), 1 32core job for N subjects (e.g. 10):
 
     hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant \
     --profile cc-slurm --group-components subj=10
+
+
+    
+## Deep learning nnU-net model files
+
+The trained model files we use for hippunfold are large and thus are not
+included directly in this github repository, and instead are downloaded
+from Zenodo releases. If you are using the docker/singularity 
+container, `docker://khanlab/hippunfold`, they are pre-downloaded there, in `/opt/hippunfold_cache`.
+
+If you are not using this container, you will need to download the models before running hippunfold, by running:
+
+    hippunfold_download_models
+    
+This console script (installed when you install hippunfold) downloads all the models to a cache dir on your system, 
+which on Linux is typically `~/.cache/hippunfold`. To override this, you can set the `HIPPUNFOLD_CACHE_DIR` environment
+variable before running `hippunfold_download_models` and `hippunfold`.
+
+
+## Overriding Singularity cache directories
+
+By default, singularity stores image caches in your home directory when you run `singularity pull` or `singularity run`. As described above, hippunfold also stores deep learning models in your home directory. If your home directory is full or otherwise inaccessible, you may want to change this with the following commands:
+
+    export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
+    export SINGULARITY_BINDPATH=/YOURDIR:/YOURDIR
+    export HIPPUNFOLD_CACHE_DIR=/YOURDIR/.cache/hippunfold/
+    
+If you are running `hippunfold` with the `--use-singularity` option, hippunfold will download the required singularity containers for rules that require it. These containers are placed in the `.snakemake` folder in your hippunfold output directory, but this can be overriden with the Snakemake option: `--singularity-prefix DIRECTORY`
+  
+

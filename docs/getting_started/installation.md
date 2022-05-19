@@ -73,4 +73,9 @@ Run it with maximum number of cores:
     singularity run -e khanlab_hippunfold_latest.sif \
     PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant -p --cores all
 
-Note that you may need to adjust your [Singularity options](https://sylabs.io/guides/3.1/user-guide/cli/singularity_run.html) to ensure this container can read and write to yout input and output directories, repsectively. 
+Note that you may need to adjust your [Singularity options](https://sylabs.io/guides/3.1/user-guide/cli/singularity_run.html) to ensure this container can read and write to yout input and output directories, repsectively. For example, if your home directory is full or inaccessible, you may wish to set the following singularity parameters:
+
+    export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
+    export SINGULARITY_BINDPATH=/YOURDIR:/YOURDIR
+
+, where `YOURDIR` is your preferred storage location.

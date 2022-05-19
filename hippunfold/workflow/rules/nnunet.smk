@@ -109,6 +109,14 @@ rule run_inference:
             space="corobl",
             hemi="{hemi,Lflip|R}"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            suffix="nnunet.txt",
+            space="corobl",
+            hemi="{hemi,Lflip|R}"
+        ),
     shadow:
         "minimal"
     threads: 16
@@ -127,12 +135,12 @@ rule run_inference:
         # run inference
         #copy from temp output folder to final output
         "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
-        "cp -v {input.in_img} {params.temp_img} && "
-        "tar -xvf {input.model_tar} -C {params.model_dir} && "
+        "cp {input.in_img} {params.temp_img} && "
+        "tar -xf {input.model_tar} -C {params.model_dir} && "
         "export RESULTS_FOLDER={params.model_dir} && "
         "export nnUNet_n_proc_DA={threads} && "
-        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} {params.disable_tta} && "
-        "cp -v {params.temp_lbl} {output.nnunet_seg}"
+        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} {params.disable_tta} &> {log} && "
+        "cp {params.temp_lbl} {output.nnunet_seg}"
 
 
 rule unflip_nnunet_nii:
@@ -230,11 +238,20 @@ rule qc_nnunet_f3d:
         ),
     container:
         config["singularity"]["autotop"]
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            suffix="qcreg.txt",
+            desc="f3d",
+            space="corobl",
+            hemi="{hemi}"
+        ),
     group:
         "subj"
     shell:
-        "reg_f3d -flo {input.img} -ref {input.ref} -res {output.res} -cpp {output.cpp} && "
-        "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {input.ref} -res {output.res_mask} -inter 0"
+        "reg_f3d -flo {input.img} -ref {input.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
+        "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {input.ref} -res {output.res_mask} -inter 0 &> {log}"
 
 
 rule qc_nnunet_dice:
