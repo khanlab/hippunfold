@@ -164,6 +164,13 @@ jobs:
     - name: Test modality T1w with myelin map
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
+    - name: Test modality T1w with magdeburg atlas
+      run: |
+        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas magdeburg
+    - name: Test modality T1w with freesurfer atlas
+      run: |
+        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas freesurfer
+
 
 
 

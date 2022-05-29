@@ -187,6 +187,7 @@ parse_args:
     choices:
       - 'bigbrain'
       - 'magdeburg'
+      - 'freesurfer'
     default: 'bigbrain'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
@@ -330,6 +331,9 @@ atlas_files:
   magdeburg:
     label_nii: resources/magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
     label_list: resources/magdeburg/magdeburg_labellist.txt
+  freesurfer:
+    label_nii: resources/freesurfer/sub-freesurfer_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
+    label_list: resources/freesurfer/freesurfer_labellist.txt
 
 
 rigid_reg_template: False
