@@ -332,7 +332,7 @@ atlas_files:
     label_nii: resources/magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
     label_list: resources/magdeburg/magdeburg_labellist.txt
   freesurfer:
-    label_nii: resources/freesurfer/sub-freesurfer_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
+    label_nii: resources/freesurfer/sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
     label_list: resources/freesurfer/freesurfer_labellist.txt
 
 
