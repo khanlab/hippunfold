@@ -200,8 +200,8 @@ parse_args:
     default: False
     action: 'store_true'
 
-  --nnunet_disable_tta:
-    help: 'Disable test-time augmentation for nnU-net inference, speeds up inference by 8x, at expense of accuracy (default: %(default)s)'
+  --nnunet_enable_tta:
+    help: 'Enable test-time augmentation for nnU-net inference, slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -463,7 +463,7 @@ output_density:
 
 laminar_coords_method: equivolume
 skip_preproc: False
-nnunet_disable_tta: False
+nnunet_enable_tta: False
 use_gpu: False
 skip_coreg: False
 keep_work: False
