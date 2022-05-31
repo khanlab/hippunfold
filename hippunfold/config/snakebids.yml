@@ -183,6 +183,10 @@ parse_args:
     default: false
     action: store_true
 
+  --crop_native_box:
+    help: 'Sets the bounding box size for the crop native (e.g. cropT1w) space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off (default: %(default)s)'
+    default: '256x256x256vox'
+
   --atlas:
     choices:
       - 'bigbrain'
@@ -345,6 +349,8 @@ nnunet_model:
   T2w: trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
   neonateT1w: trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
+
+crop_native_box: '256x256x256vox'
 
 hippdwi_opts:
   resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm

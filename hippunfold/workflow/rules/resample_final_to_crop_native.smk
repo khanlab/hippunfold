@@ -14,7 +14,7 @@ rule create_native_crop_ref:
         ),
     params:
         resample="400%",
-        pad_to="256x256x256vox",
+        pad_to=config["crop_native_box"],
     output:
         ref=bids(
             root=work,
