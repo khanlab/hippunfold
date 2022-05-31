@@ -184,9 +184,8 @@ parse_args:
     action: store_true
 
   --crop_native_box:
-    default: '256x256x256vox'
     help: 'Sets the bounding box size for the crop native (e.g. cropT1w) space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off (default: %(default)s)'
-
+    default: '256x256x256vox'
 
   --atlas:
     choices:
