@@ -79,7 +79,7 @@ HippUnfold will not recognize them without the suffix `_T2w`. We can
 thus use the `--path_T2w` flag to specify exactly which of these file(s)
 to use as inputs:
 
-    hippunfold - PATH_TO_OUTPUT_DIR participant \
+    hippunfold . PATH_TO_OUTPUT_DIR participant \
     --path_T1w PATH_TO_nonBIDS_DIR/sub-001_T1w.nii.gz \
     --path_T2w PATH_TO_nonBIDS_DIR/sub-{subject}_T2SPACE.nii.gz
 

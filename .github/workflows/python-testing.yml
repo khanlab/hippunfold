@@ -148,10 +148,10 @@ jobs:
         poetry run hippunfold test_data/bids_segT2w test_out participant -np --modality segT2w
     - name: Test cropseg bids, with path override
       run: |
-        poetry run hippunfold - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
+        poetry run hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
     - name: Test cropseg bids, with path override, left hemi
       run: | 
-        poetry run hippunfold - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
+        poetry run hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
     - name: Test T2w with T1w template registration
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
