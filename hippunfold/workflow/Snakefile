@@ -79,6 +79,7 @@ config.update(
         participant_label=config["participant_label"],
         exclude_participant_label=config["exclude_participant_label"],
         limit_to=list(limit_to_list),
+        use_bids_inputs=False,
     )
 )
 
