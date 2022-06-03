@@ -122,6 +122,10 @@ jobs:
     - name: Test single T2w bids
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w
+    - name: Test running on existing folder
+      run: |
+        mkdir test_newout
+        poetry run hippunfold test_data/bids_singleT2w test_newout participant -np --modality T2w
     - name: Test single T2w bids, right hemi
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
