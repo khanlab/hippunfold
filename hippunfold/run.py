@@ -16,6 +16,7 @@ def main():
     app = SnakeBidsApp(
         os.path.abspath(os.path.dirname(__file__)),
         configfile_path="config/snakebids.yml",
+        force=True,
     )
     app.run_snakemake()
 
