@@ -1,6 +1,8 @@
 bids_dir: '../test_data/bids_singleT2w'
 output_dir: 'test_output' #don't use '.'
 
+force: True
+
 #snakemake_dir: '.' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
 
 #enable printing debug statements during parsing -- disable if generating dag visualization
