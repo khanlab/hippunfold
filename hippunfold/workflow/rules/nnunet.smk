@@ -61,8 +61,9 @@ def get_model_tar(wildcards):
     if os.path.exists(dl_path):
         return dl_path
     else:
-        raise Exception(
-            f"Cannot find downloaded model at {dl_path}, run this first: hippunfold_download_models"
+        print("ERROR:")
+        print(
+            f"  Cannot find downloaded model at {dl_path}, run this first: hippunfold_download_models"
         )
 
 
