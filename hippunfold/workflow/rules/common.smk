@@ -345,18 +345,6 @@ def get_final_output():
     return final_output
 
 
-rule copy_to_results:
-    """ Generic rule for copying data from work to results"""
-    input:
-        os.path.join(work, "{file}"),
-    output:
-        os.path.join(root, "{file}"),
-    group:
-        "subj"
-    shell:
-        "cp {input} {output}"
-
-
 def get_final_work_tar():
     return bids(
         root=work,
