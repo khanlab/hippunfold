@@ -147,7 +147,7 @@ if config["skip_preproc"]:
             )[0],
         output:
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 **config["subj_wildcards"],
                 suffix="T2w.nii.gz",
@@ -170,7 +170,7 @@ else:
             cmd=get_avg_or_cp_scans_cmd,
         output:
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 **config["subj_wildcards"],
                 suffix="T2w.nii.gz",
@@ -187,7 +187,7 @@ else:
 rule reg_t2_to_t1:
     input:
         flo=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
@@ -251,7 +251,7 @@ rule reg_t2_to_t1:
 rule reg_t2_to_template:
     input:
         flo=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
@@ -413,7 +413,7 @@ def get_xfm_to_corobl():
 rule warp_t2_to_corobl_crop:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
