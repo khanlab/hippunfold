@@ -286,7 +286,7 @@ def get_xfm_t2_to_t1():
 rule resample_t2_to_crop:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
