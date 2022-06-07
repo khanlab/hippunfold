@@ -351,7 +351,7 @@ def get_final_work_tar():
         suffix="work.tar.gz",
         include_subject_dir=False,
         include_session_dir=False,
-        **config["subj_wildcards"]
+        **config["subj_wildcards"],
     )
 
 
