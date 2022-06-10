@@ -16,7 +16,7 @@ You should now see a hippocampal surface projected onto the coronal, sagittal, a
   With the surface file selected, use the left information panel to select Overlay > Load Generic and navigate to a metric file (eg. `hippunfold/sub-01/surf/sub-02_hemi-L_space-T1w_den-0p5mm_label-hipp_gyrification.shape.gii`).
 You should now have a Configure button which you can use to adjust the windowing and colormap of this data.
 - Subfield labels (.label.gii files) can be loaded similarly to metric data, but using the Annotation button on the left panel instead of Overlay.
-- Add a segmentation image (eg. `hippunfold/sub-01/anat/sub-01_hemi-L_space-cropT1w_desc-subfield_dseg.nii.gz`). On the left panel, set Colormap > Lookup Table and then Select Lookup Table > Load Lookup Table > Navigate to `YOUR_HIPPUNFOLD_INSTALLATION_DIRECTORY/hippunfold/resources/desc-subfields_freeview_desg.tsv`). 
+- Add a segmentation image (eg. `hippunfold/sub-01/anat/sub-01_hemi-L_space-cropT1w_desc-subfield_dseg.nii.gz`). On the left panel, set Colormap > Lookup Table and then Select Lookup Table > Load Lookup Table > Navigate to `YOUR_HIPPUNFOLD_INSTALLATION_DIRECTORY/hippunfold/resources/desc-subfields_freeview_desg.tsv`. 
 You should now see standardized subfield colours and names in the bottom panel when you mouse over a given subfield. 
 
 ## Other visualization tips and tricks:
