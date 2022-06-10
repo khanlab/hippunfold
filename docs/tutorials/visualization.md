@@ -5,7 +5,7 @@
 - Loading surface metric data can be difficult, see the examples below.
 - Crashes can still occur occasionally, especially when trying to load surfaces or surface overlay data with the incorrect buttons.
 
-## The example below will act as a guide to avoid common mistakes:
+### The example below will act as a guide to avoid common mistakes:
 - open Freeview by simple typing `freeview` in the command line.
 - Add a hippunfold surface:
   File > Load Surface > Navigate to a surface (eg. `hippunfold/sub-01/surf/sub-02_hemi-L_space-T1w_den-0p5mm_label-hipp_midthickness.surf.gii`).
@@ -15,11 +15,11 @@ You should now see a hippocampal surface projected onto the coronal, sagittal, a
 - Add shape data as an overlay on the midthickness surface:
   With the surface file selected, use the left information panel to select Overlay > Load Generic and navigate to a metric file (eg. `hippunfold/sub-01/surf/sub-02_hemi-L_space-T1w_den-0p5mm_label-hipp_gyrification.shape.gii`).
 You should now have a Configure button which you can use to adjust the windowing and colormap of this data.
-- Subfield labels (.label.gii files) can be loaded similarly to metric data, but using the Annotation button on the left panel instead of Overlay.
+- Subfield labels (`.label.gii` files) can be loaded similarly to metric data, but using the Annotation button on the left panel instead of Overlay.
 - Add a segmentation image (eg. `hippunfold/sub-01/anat/sub-01_hemi-L_space-cropT1w_desc-subfield_dseg.nii.gz`). On the left panel, set Colormap > Lookup Table and then Select Lookup Table > Load Lookup Table > Navigate to `YOUR_HIPPUNFOLD_INSTALLATION_DIRECTORY/hippunfold/resources/desc-subfields_freeview_desg.tsv`. 
 You should now see standardized subfield colours and names in the bottom panel when you mouse over a given subfield. 
 
-## Other visualization tips and tricks:
+### Other visualization tips and tricks:
 - Consider adding dentate surfaces (`label-dentate`), unfolded surfaces (`space-unfolded`), or other overlay data (eg. `thickness`).
 - Ensure surfaces and metric data are sampled with the same number of vertices (eg. `label-hipp` and den-'0p5mm'), and note that folded and unfolded surfaces will appear far apart in the 3D viewer and so you may need to zoom out quite far to navigate to them.
 - Any metric data loaded on a folded (eg. `space-T1w`) surface can also be viewed on an unfolded surface that has the same number of vertices.
