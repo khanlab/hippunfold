@@ -345,16 +345,37 @@ def get_final_output():
     return final_output
 
 
-rule copy_to_results:
-    """ Generic rule for copying data from work to results"""
-    input:
-        os.path.join(work, "{file}"),
-    output:
-        os.path.join(root, "{file}"),
-    group:
-        "subj"
-    shell:
-        "cp {input} {output}"
+if "corobl" in ref_spaces:
+
+    rule copy_coords_to_results:
+        input:
+            os.path.join(work, "{pre}_space-corobl_{post}{suffix}.{ext}"),
+        output:
+            os.path.join(root, "{pre}_space-corobl_{post}{suffix,coords}.{ext}"),
+        group:
+            "subj"
+        shell:
+            "cp {input} {output}"
+
+    rule copy_xfm_to_results:
+        input:
+            os.path.join(work, "{pre}_{fromto,from|to}-corobl_{post}{suffix}.{ext}"),
+        output:
+            os.path.join(root, "{pre}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"),
+        group:
+            "subj"
+        shell:
+            "cp {input} {output}"
+
+    rule copy_subfields_to_results:
+        input:
+            os.path.join(work, "{pre}_desc-subfields_{post}{suffix}.{ext}"),
+        output:
+            os.path.join(root, "{pre}_desc-subfields_{post}{suffix,dseg}.{ext}"),
+        group:
+            "subj"
+        shell:
+            "cp {input} {output}"
 
 
 def get_final_work_tar():
