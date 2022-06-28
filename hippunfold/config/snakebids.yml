@@ -1,6 +1,8 @@
 bids_dir: '../test_data/bids_singleT2w'
 output_dir: 'test_output' #don't use '.'
 
+force: True
+
 #snakemake_dir: '.' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
 
 #enable printing debug statements during parsing -- disable if generating dag visualization
@@ -183,10 +185,15 @@ parse_args:
     default: false
     action: store_true
 
+  --crop_native_box:
+    help: 'Sets the bounding box size for the crop native (e.g. cropT1w) space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off (default: %(default)s)'
+    default: '256x256x256vox'
+
   --atlas:
     choices:
       - 'bigbrain'
       - 'magdeburg'
+      - 'freesurfer'
     default: 'bigbrain'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
@@ -200,8 +207,8 @@ parse_args:
     default: False
     action: 'store_true'
 
-  --nnunet_disable_tta:
-    help: 'Disable test-time augmentation for nnU-net inference, speeds up inference by 8x, at expense of accuracy (default: %(default)s)'
+  --nnunet_enable_tta:
+    help: 'Enable test-time augmentation for nnU-net inference, slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -330,6 +337,9 @@ atlas_files:
   magdeburg:
     label_nii: resources/magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
     label_list: resources/magdeburg/magdeburg_labellist.txt
+  freesurfer:
+    label_nii: resources/freesurfer/sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
+    label_list: resources/freesurfer/freesurfer_labellist.txt
 
 
 rigid_reg_template: False
@@ -345,6 +355,8 @@ nnunet_model:
   T2w: trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
   neonateT1w: trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
+
+crop_native_box: '256x256x256vox'
 
 hippdwi_opts:
   resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm
@@ -463,7 +475,7 @@ output_density:
 
 laminar_coords_method: equivolume
 skip_preproc: False
-nnunet_disable_tta: False
+nnunet_enable_tta: False
 use_gpu: False
 skip_coreg: False
 keep_work: False

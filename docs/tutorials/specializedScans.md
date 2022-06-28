@@ -41,7 +41,7 @@ Here is an example of what the input directory might look like:
 
 This can be unfolded with the command:
 
-    hippunfold - PATH_TO_OUTPUT_DIR participant --modality cropseg \
+    hippunfold . PATH_TO_OUTPUT_DIR participant --modality cropseg \
     --path_cropseg exvivo/sub-{subject}/sub-{subject}_hemi-{hemi}_desc-hippo_dseg.nii.gz \
     --hemi R --skip_inject_template_labels
 
@@ -87,7 +87,7 @@ hippocampus. Once done, we may have a directory like this:
 
 Note that only the last file is needed for unfolding:
 
-    hippunfold - PATH_TO_OUTPUT_DIR participant --output_spaces corobl --hemi R --no_reg_template \
+    hippunfold . PATH_TO_OUTPUT_DIR participant --output_spaces corobl --hemi R --no_reg_template \
     --path_T2w PATH_TO_EXVIVO_DIR/sub-001/sub-001_hemi-R_desc-exvivo_space-CITI168_T2w.nii.gz \
     --output_spaces corobl
 

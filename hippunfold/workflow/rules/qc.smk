@@ -226,6 +226,7 @@ rule concat_subj_vols_tsv:
                 datatype="anat",
                 desc="subfields",
                 space="{space}",
+                atlas="{atlas}",
                 suffix="volumes.tsv",
                 **config["subj_wildcards"]
             ),
@@ -234,6 +235,7 @@ rule concat_subj_vols_tsv:
             ],
             session=config["sessions"],
             space=wildcards.space,
+            atlas=wildcards.atlas,
         ),
     group:
         "aggregate"
@@ -241,9 +243,10 @@ rule concat_subj_vols_tsv:
         tsv=bids(
             root=root,
             prefix="group",
-            space="{space}",
-            from_="{modality}",
             desc="subfields",
+            space="{space}",
+            atlas="{atlas}",
+            from_="{modality}",
             suffix="volumes.tsv",
         ),
     run:
