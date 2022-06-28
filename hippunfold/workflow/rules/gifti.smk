@@ -23,7 +23,7 @@ rule cp_template_to_unfold:
         surface_type="FLAT",
     output:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -94,7 +94,7 @@ rule calc_unfold_template_coords:
 rule constrain_surf_to_bbox:
     input:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -104,7 +104,7 @@ rule constrain_surf_to_bbox:
             **config["subj_wildcards"]
         ),
         ref_nii=bids(
-            root=work,
+            root=root,
             datatype="warps",
             space="unfold",
             label="{autotop}",
@@ -206,7 +206,7 @@ rule correct_nan_vertices:
         ),
     output:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -225,7 +225,7 @@ rule correct_nan_vertices:
 rule warp_gii_to_native:
     input:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -246,7 +246,7 @@ rule warp_gii_to_native:
         ),
     output:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -461,7 +461,7 @@ rule resample_atlas_to_refvol:
             workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
         ),
         refvol=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="hipp",
             datatype="warps",
@@ -772,7 +772,7 @@ rule merge_lr_spec_file:
         ),
     output:
         spec_file=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             space="{space}",
