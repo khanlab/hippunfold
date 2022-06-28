@@ -13,8 +13,8 @@ segment subfields and generate hippocampal and dentate gyrus surfaces.
 This is especially useful for:
 - Visualization
 - Topologically-constrained intersubject registration
-- Parcellation (or registration to an atlas)
-- Morphometry (eg. Thickness, Surface Area,Ccurvature, and Gyrification measures)
+- Parcellation (ie. registration to an unfolded atlas)
+- Morphometry (eg. Thickness, Surface Area, Curvature, and Gyrification measures)
 
 The overall workflow can be summarized in the following steps:
 
