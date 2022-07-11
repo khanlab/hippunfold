@@ -195,6 +195,7 @@ parse_args:
       - 'magdeburg'
       - 'freesurfer'
     default: 'bigbrain'
+    nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --generate_myelin_map:
