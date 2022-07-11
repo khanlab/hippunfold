@@ -460,7 +460,7 @@ rule resample_atlas_to_refvol:
         atlas=os.path.join(
             workflow.basedir,
             "..",
-            "config["atlas_files"][{atlas}]["label_nii"]"
+            "config["atlas_files"]["{atlas}"]["label_nii"]"
         ),
         refvol=bids(
             root=root,
