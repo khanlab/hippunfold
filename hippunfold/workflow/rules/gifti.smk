@@ -458,9 +458,7 @@ rule resample_atlas_to_refvol:
     """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
         atlas=os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"]["{atlas}"]["label_nii"]
+            workflow.basedir, "..", config["atlas_files"]["{atlas}"]["label_nii"]
         ),
         refvol=bids(
             root=root,
