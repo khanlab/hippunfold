@@ -457,8 +457,8 @@ rule calculate_thickness_from_surface:
 rule resample_atlas_to_refvol:
     """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
-        atlas=os.path.join(
-            workflow.basedir, "..", config["atlas_files"]["{atlas}"]["label_nii"]
+        atlas=lambda wildcards: os.path.join(
+            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
         ),
         refvol=bids(
             root=root,
@@ -506,7 +506,7 @@ rule nii_to_label_gii:
             space="unfold",
             hemi="{hemi}",
             label="hipp",
-            atlas=config["atlas"],
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         surf=os.path.join(
@@ -525,6 +525,7 @@ rule nii_to_label_gii:
             space="{space}",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     group:
@@ -606,6 +607,7 @@ def get_inputs_cifti_label(wildcards):
                 root=root,
                 datatype="surf",
                 den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="L",
@@ -619,6 +621,7 @@ def get_inputs_cifti_label(wildcards):
                 root=root,
                 datatype="surf",
                 den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="R",
@@ -648,6 +651,7 @@ rule create_dlabel_cifti_subfields:
             root=root,
             datatype="surf",
             den="{density}",
+            atlas="{atlas}",
             suffix="subfields.dlabel.nii",
             space="{space}",
             label="hipp",
@@ -675,15 +679,28 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-def get_cifti_types(label):
-    types = config["cifti_types"][label]
+def concatenate_subfield_atlases(wildcards,types):
+    # only the subfields gii files have an atlas tag. This concatenates it on.
+    for ii in range(len(types)):
+        if "subfields" in types[ii]:
+            if "atlas" not in types[ii]:
+                orig = types[ii]
+                del types[ii]
+                for i in range(len(config["atlas"])):
+                    types.append("atlas-" + config["atlas"][i] + "_" + orig)
+    return types
+
+def get_cifti_types(wildcards):
+    types = config["cifti_types"][wildcards.label]
+    types = concatenate_subfield_atlases(wildcards,types)
     if config["generate_myelin_map"]:
         types.append("myelin.dscalar")
     return types
 
 
-def get_gifti_types(label):
-    types = config["gifti_types"][label]
+def get_gifti_types(wildcards):
+    types = config["gifti_types"][wildcards.label]
+    types = concatenate_subfield_atlases(wildcards,types)
     if config["generate_myelin_map"]:
         types.append("myelin.shape")
     return types
@@ -702,7 +719,7 @@ rule create_spec_file:
                 label="{label}",
                 **config["subj_wildcards"]
             ),
-            metric=get_gifti_types(wildcards.label),
+            metric=get_gifti_types(wildcards),
             allow_missing=True,
         ),
         surfs=expand(
@@ -730,7 +747,7 @@ rule create_spec_file:
                 label="{label}",
                 **config["subj_wildcards"]
             ),
-            cifti=get_cifti_types(wildcards.label),
+            cifti=get_cifti_types(wildcards),
             allow_missing=True,
         ),
     params:
