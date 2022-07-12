@@ -679,34 +679,34 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-def concatenate_subfield_atlases(wildcards, file_list):
+def concatenate_subfield_atlases(wildcards, types_list):
     # only the subfields gii files have an atlas tag. This concatenates it on.
-    if type(file_list) == str:
-        file_list = list(file_list.split())
-    for ii in range(len(file_list)):
-        if "subfields" in file_list[ii]:
-            if "atlas" not in file_list[ii]:
-                orig = file_list[ii]
-                del file_list[ii]
+    if type(types_list) == str:
+        types_list = list(types_list.split())
+    for ii in range(len(types_list)):
+        if "subfields" in types_list[ii]:
+            if "atlas" not in types_list[ii]:
+                orig = types_list[ii]
+                del types_list[ii]
                 for i in range(len(config["atlas"])):
-                    file_list.append("atlas-" + config["atlas"][i] + "_" + orig)
-    return file_list
+                    types_list.append("atlas-" + config["atlas"][i] + "_" + orig)
+    return types_list
 
 
 def get_cifti_types(wildcards):
-    file_list = config["cifti_types"][wildcards.label]
-    file_list = concatenate_subfield_atlases(wildcards, file_list)
+    types_list = config["cifti_types"][wildcards.label]
+    types_list = concatenate_subfield_atlases(wildcards, types_list)
     if config["generate_myelin_map"]:
-        types.append("myelin.dscalar")
-    return file_list
+        types_list.append("myelin.dscalar")
+    return types_list
 
 
 def get_gifti_types(wildcards):
-    file_list = config["gifti_types"][wildcards.label]
-    file_list = concatenate_subfield_atlases(wildcards, file_list)
+    types_list = config["gifti_types"][wildcards.label]
+    types_list = concatenate_subfield_atlases(wildcards, types_list)
     if config["generate_myelin_map"]:
-        types.append("myelin.shape")
-    return file_list
+        types_list.append("myelin.shape")
+    return types_list
 
 
 rule create_spec_file:
