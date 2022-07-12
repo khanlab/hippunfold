@@ -681,7 +681,7 @@ def get_cmd_spec_file(wildcards, input, output):
 
 def concatenate_subfield_atlases(wildcards, file_list):
     # only the subfields gii files have an atlas tag. This concatenates it on.
-    if type(a)==str:
+    if type(a) == str:
         a = list(split(a))
     for ii in range(len(file_list)):
         if "subfields" in file_list[ii]:
