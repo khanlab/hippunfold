@@ -679,7 +679,7 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-def concatenate_subfield_atlases(wildcards,types):
+def concatenate_subfield_atlases(wildcards, types):
     # only the subfields gii files have an atlas tag. This concatenates it on.
     for ii in range(len(types)):
         if "subfields" in types[ii]:
@@ -690,9 +690,10 @@ def concatenate_subfield_atlases(wildcards,types):
                     types.append("atlas-" + config["atlas"][i] + "_" + orig)
     return types
 
+
 def get_cifti_types(wildcards):
     types = config["cifti_types"][wildcards.label]
-    types = concatenate_subfield_atlases(wildcards,types)
+    types = concatenate_subfield_atlases(wildcards, types)
     if config["generate_myelin_map"]:
         types.append("myelin.dscalar")
     return types
@@ -700,7 +701,7 @@ def get_cifti_types(wildcards):
 
 def get_gifti_types(wildcards):
     types = config["gifti_types"][wildcards.label]
-    types = concatenate_subfield_atlases(wildcards,types)
+    types = concatenate_subfield_atlases(wildcards, types)
     if config["generate_myelin_map"]:
         types.append("myelin.shape")
     return types

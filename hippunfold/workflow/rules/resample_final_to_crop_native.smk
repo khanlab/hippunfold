@@ -12,10 +12,10 @@ rule create_native_crop_ref:
                 hemi="{hemi}",
                 atlas="{atlas}",
                 **config["subj_wildcards"]
-                ),
+            ),
             atlas=config["atlas"][0],
             allow_missing=True,
-            )
+        ),
     params:
         resample="400%",
         pad_to=config["crop_native_box"],
