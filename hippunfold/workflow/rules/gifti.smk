@@ -690,7 +690,7 @@ def concatenate_subfield_atlases(wildcards, file_list):
                 del file_list[ii]
                 for i in range(len(config["atlas"])):
                     file_list.append("atlas-" + config["atlas"][i] + "_" + orig)
-    return types
+    return file_list
 
 
 def get_cifti_types(wildcards):
