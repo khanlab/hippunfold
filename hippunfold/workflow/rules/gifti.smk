@@ -679,32 +679,34 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-def concatenate_subfield_atlases(wildcards, types):
+def concatenate_subfield_atlases(wildcards, file_list):
     # only the subfields gii files have an atlas tag. This concatenates it on.
-    for ii in range(len(types)):
-        if "subfields" in types[ii]:
-            if "atlas" not in types[ii]:
-                orig = types[ii]
-                del types[ii]
+    if type(a)==str:
+        a = list(split(a))
+    for ii in range(len(file_list)):
+        if "subfields" in file_list[ii]:
+            if "atlas" not in file_list[ii]:
+                orig = file_list[ii]
+                del file_list[ii]
                 for i in range(len(config["atlas"])):
-                    types.append("atlas-" + config["atlas"][i] + "_" + orig)
+                    file_list.append("atlas-" + config["atlas"][i] + "_" + orig)
     return types
 
 
 def get_cifti_types(wildcards):
-    types = config["cifti_types"][wildcards.label]
-    types = concatenate_subfield_atlases(wildcards, types)
+    file_list = config["cifti_types"][wildcards.label]
+    file_list = concatenate_subfield_atlases(wildcards, file_list)
     if config["generate_myelin_map"]:
         types.append("myelin.dscalar")
-    return types
+    return file_list
 
 
 def get_gifti_types(wildcards):
-    types = config["gifti_types"][wildcards.label]
-    types = concatenate_subfield_atlases(wildcards, types)
+    file_list = config["gifti_types"][wildcards.label]
+    file_list = concatenate_subfield_atlases(wildcards, file_list)
     if config["generate_myelin_map"]:
         types.append("myelin.shape")
-    return types
+    return file_list
 
 
 rule create_spec_file:
