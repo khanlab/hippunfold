@@ -506,7 +506,7 @@ rule nii_to_label_gii:
             space="unfold",
             hemi="{hemi}",
             label="hipp",
-            atlas=config["atlas"],
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         surf=os.path.join(
@@ -525,6 +525,7 @@ rule nii_to_label_gii:
             space="{space}",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     group:
@@ -606,6 +607,7 @@ def get_inputs_cifti_label(wildcards):
                 root=root,
                 datatype="surf",
                 den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="L",
@@ -619,6 +621,7 @@ def get_inputs_cifti_label(wildcards):
                 root=root,
                 datatype="surf",
                 den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="R",
@@ -648,6 +651,7 @@ rule create_dlabel_cifti_subfields:
             root=root,
             datatype="surf",
             den="{density}",
+            atlas="{atlas}",
             suffix="subfields.dlabel.nii",
             space="{space}",
             label="hipp",
@@ -675,18 +679,34 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-def get_cifti_types(label):
-    types = config["cifti_types"][label]
-    if config["generate_myelin_map"]:
-        types.append("myelin.dscalar")
-    return types
+def concatenate_subfield_atlases(wildcards, types_list):
+    # only the subfields gii files have an atlas tag. This concatenates it on.
+    if type(types_list) == str:
+        types_list = list(types_list.split())
+    for ii in range(len(types_list)):
+        if "subfields" in types_list[ii]:
+            if "atlas" not in types_list[ii]:
+                orig = types_list[ii]
+                del types_list[ii]
+                for i in range(len(config["atlas"])):
+                    types_list.append("atlas-" + config["atlas"][i] + "_" + orig)
+    return types_list
 
 
-def get_gifti_types(label):
-    types = config["gifti_types"][label]
+def get_cifti_types(wildcards):
+    types_list = config["cifti_types"][wildcards.label]
+    types_list = concatenate_subfield_atlases(wildcards, types_list)
     if config["generate_myelin_map"]:
-        types.append("myelin.shape")
-    return types
+        types_list.append("myelin.dscalar")
+    return types_list
+
+
+def get_gifti_types(wildcards):
+    types_list = config["gifti_types"][wildcards.label]
+    types_list = concatenate_subfield_atlases(wildcards, types_list)
+    if config["generate_myelin_map"]:
+        types_list.append("myelin.shape")
+    return types_list
 
 
 rule create_spec_file:
@@ -702,7 +722,7 @@ rule create_spec_file:
                 label="{label}",
                 **config["subj_wildcards"]
             ),
-            metric=get_gifti_types(wildcards.label),
+            metric=get_gifti_types(wildcards),
             allow_missing=True,
         ),
         surfs=expand(
@@ -730,7 +750,7 @@ rule create_spec_file:
                 label="{label}",
                 **config["subj_wildcards"]
             ),
-            cifti=get_cifti_types(wildcards.label),
+            cifti=get_cifti_types(wildcards),
             allow_missing=True,
         ),
     params:

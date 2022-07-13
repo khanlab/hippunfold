@@ -2,15 +2,19 @@ rule create_native_crop_ref:
     """Create ref space for hires crop in native space
     TODO:  expose the resampling factor and size as cmd line args"""
     input:
-        seg=bids(
-            root=root,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="subfields",
-            space="{native_modality}",
-            hemi="{hemi}",
-            atlas=config["atlas"],
-            **config["subj_wildcards"]
+        seg=expand(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="subfields",
+                space="{native_modality}",
+                hemi="{hemi}",
+                atlas="{atlas}",
+                **config["subj_wildcards"]
+            ),
+            atlas=config["atlas"][0],
+            allow_missing=True,
         ),
     params:
         resample="400%",

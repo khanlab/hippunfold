@@ -97,6 +97,7 @@ wildcard_constraints:
     surfname="[a-zA-Z0-9]+",
     modality="[a-zA-Z0-9]+",
     density="[a-zA-Z0-9]+",
+    atlas="[a-zA-Z0-9]+",
     autotop="[a-zA-Z0-9]+",
 
 

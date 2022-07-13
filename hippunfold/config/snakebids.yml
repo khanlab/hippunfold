@@ -194,7 +194,9 @@ parse_args:
       - 'bigbrain'
       - 'magdeburg'
       - 'freesurfer'
-    default: 'bigbrain'
+    default: 
+      - 'bigbrain'
+    nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --generate_myelin_map:
@@ -329,7 +331,9 @@ template_files:
     crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
 
-atlas: bigbrain
+atlas: 
+  - bigbrain
+
 atlas_files:
   bigbrain:
     label_nii: resources/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
