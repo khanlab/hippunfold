@@ -149,10 +149,10 @@ save(midthick_DG,'tpl-avg_space-canonical_den-unfoldiso_label-dentate_midthickne
 
 %% downsample to match various surfaces
 
-desnities = {'2mm', '1mm', '0p5mm'};
+densities = {'2mm', '1mm', '0p5mm'};
 template32 = gifti('/export03/data/opt/hippunfold/hippunfold/resources/unfold_template_hipp/tpl-avg_space-unfold_den-unfoldiso_midthickness.surf.gii');
-for sink = 1:length(desnities)
-    den = desnities{sink};
+for i = 1:length(densities)
+    den = densities{i};
     template = gifti(['/export03/data/opt/hippunfold/hippunfold/resources/unfold_template_hipp/tpl-avg_space-unfold_den-' den '_midthickness.surf.gii']);
     ind = dsearchn(template32.vertices,template.vertices);
     template.vertices = vRec_HP(ind,:);
@@ -161,10 +161,32 @@ for sink = 1:length(desnities)
 end
 
 template32 = gifti('/export03/data/opt/hippunfold/hippunfold/resources/unfold_template_dentate/tpl-avg_space-unfold_den-unfoldiso_midthickness.surf.gii');
-for sink = 1:length(desnities)
-    den = desnities{sink};
+for i = 1:length(densities)
+    den = densities{i};
     template = gifti(['/export03/data/opt/hippunfold/hippunfold/resources/unfold_template_dentate/tpl-avg_space-unfold_den-' den '_midthickness.surf.gii']);
     ind = dsearchn(template32.vertices,template.vertices);
     template.vertices = vRec_DG(ind,:);
     save(template,['tpl-avg_space-canonical_den-' den '_label-dentate_midthickness.surf.gii']);
 end
+
+%% patch for https://github.com/khanlab/hippunfold/issues/202
+
+template = gifti(['/export03/data/opt/hippunfold/hippunfold/resources/unfold_template_dentate/tpl-avg_space-unfold_den-2mm_midthickness.surf.gii']);
+
+figure;
+p1 = plot_gifti(template);
+p1.LineStyle = 'none';
+p1.FaceColor = 'r';
+
+i = find(template.vertices(:,2) > -195.3);
+[m,ii] = min(template.vertices(i,1));
+template.vertices(i(ii),1) = min(template.vertices(:,1));
+[m,ii] = max(template.vertices(i,1));
+template.vertices(i(ii),1) = max(template.vertices(:,1));
+
+figure;
+p1 = plot_gifti(template);
+p1.LineStyle = 'none';
+p1.FaceColor = 'r';
+
+save(template,['/export03/data/opt/hippunfold/hippunfold/resources/unfold_template_dentate/tpl-avg_space-unfold_den-2mm_midthickness.surf.gii']);
