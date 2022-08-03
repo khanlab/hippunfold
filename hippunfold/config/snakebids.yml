@@ -365,8 +365,8 @@ crop_native_box: '256x256x256vox'
 hippdwi_opts:
   resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm
   bbox_x:
-    R: '383 510'
-    L: '224 351'
+    L: '383 510'
+    R: '224 351'
   bbox_y: '198 453'
 
 unfold_vol_ref:
