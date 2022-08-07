@@ -679,37 +679,21 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-def concatenate_subfield_atlases(wildcards, types_list):
-    # only the subfields gii files have an atlas tag. This concatenates it on.
-    if type(types_list) == str:
-        types_list = list(types_list.split())
-    for ii in range(len(types_list)):
-        if "subfields" in types_list[ii]:
-            if "atlas" not in types_list[ii]:
-                orig = types_list[ii]
-                del types_list[ii]
-                for i in range(len(config["atlas"])):
-                    types_list.append("atlas-" + config["atlas"][i] + "_" + orig)
-    return types_list
-
-
-def get_cifti_types(wildcards):
-    types_list = config["cifti_types"][wildcards.label]
-    types_list = concatenate_subfield_atlases(wildcards, types_list)
+def get_cifti_metric_types(label):
+    types_list = config["cifti_metric_types"][label]
     if config["generate_myelin_map"]:
         types_list.append("myelin.dscalar")
     return types_list
 
 
-def get_gifti_types(wildcards):
-    types_list = config["gifti_types"][wildcards.label]
-    types_list = concatenate_subfield_atlases(wildcards, types_list)
+def get_gifti_metric_types(label):
+    types_list = config["gifti_metric_types"][label]
     if config["generate_myelin_map"]:
         types_list.append("myelin.shape")
     return types_list
 
 
-rule create_spec_file:
+rule create_spec_file_hipp:
     input:
         metrics=lambda wildcards: expand(
             bids(
@@ -722,7 +706,22 @@ rule create_spec_file:
                 label="{label}",
                 **config["subj_wildcards"]
             ),
-            metric=get_gifti_types(wildcards),
+            metric=get_gifti_metric_types(wildcards.label),
+            allow_missing=True,
+        ),
+        subfields=lambda wildcards: expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="subfields.label.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                atlas="{atlas}",
+                **config["subj_wildcards"]
+            ),
+            atlas=config["atlas"],
             allow_missing=True,
         ),
         surfs=expand(
@@ -750,7 +749,7 @@ rule create_spec_file:
                 label="{label}",
                 **config["subj_wildcards"]
             ),
-            cifti=get_cifti_types(wildcards),
+            cifti=get_cifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
     params:
@@ -763,7 +762,72 @@ rule create_spec_file:
             suffix="surfaces.spec",
             hemi="{hemi,L|R}",
             space="{space}",
-            label="{label}",
+            label="{label,hipp}",
+            **config["subj_wildcards"]
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "{params.cmds}"
+
+
+rule create_spec_file_dentate:
+    input:
+        metrics=lambda wildcards: expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{metric}.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **config["subj_wildcards"]
+            ),
+            metric=get_gifti_metric_types(wildcards.label),
+            allow_missing=True,
+        ),
+        surfs=expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **config["subj_wildcards"]
+            ),
+            surfname=["midthickness"],
+            space=["{space}", "unfolded"],
+            allow_missing=True,
+        ),
+        cifti=lambda wildcards: expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{cifti}.nii",
+                space="{space}",
+                label="{label}",
+                **config["subj_wildcards"]
+            ),
+            cifti=get_cifti_metric_types(wildcards.label),
+            allow_missing=True,
+        ),
+    params:
+        cmds=get_cmd_spec_file,
+    output:
+        spec_file=bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="surfaces.spec",
+            hemi="{hemi,L|R}",
+            space="{space}",
+            label="{label,dentate}",
             **config["subj_wildcards"]
         ),
     container:

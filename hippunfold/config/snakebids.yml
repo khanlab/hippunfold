@@ -283,27 +283,26 @@ surf_types:
   dentate:
     - midthickness
 
-gifti_types:
+gifti_metric_types:
   hipp:
     - gyrification.shape 
     - curvature.shape
     - thickness.shape
-    - subfields.label
   dentate:
     - gyrification.shape 
     - curvature.shape
   
-cifti_types: 
+cifti_metric_types: 
   hipp:
     - gyrification.dscalar
     - curvature.dscalar
     - thickness.dscalar
-    - subfields.dlabel
   dentate:
     - gyrification.dscalar
     - curvature.dscalar
 
- 
+
+
 
 
 #--- workflow specific configuration -- 
