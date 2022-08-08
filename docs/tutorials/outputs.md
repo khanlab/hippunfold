@@ -107,7 +107,7 @@ the name of the atlas (default: `bigbrain`) is in the file name.
 
     sub-{subject}
      └── surf
-         └── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-hipp_atlas-bigbrain_{subfields.label.gii
+         └── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-hipp_atlas-bigbrain_subfields.label.gii
 
 
 ### cifti files
