@@ -89,7 +89,8 @@ equivalently, the scaling or distortion factor when unfolding:
 
     sub-{subject}
      └── surf
-         └── sub-001_hemi-R_space-T1w_den-0p5mm_{thickness,curvature,gyrification}.shape.gii
+         └── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-hipp_{thickness,curvature,gyrification}.shape.gii
+         └── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-dentate_{curvature,gyrification}.shape.gii
 
 These metrics are shown in both folded and unfolded space in the images
 below. Note that these results are from group-averaged data and so
@@ -97,14 +98,44 @@ individual subject maps may show considerably more variability.
 
 ![image](../images/metrics.png)
 
-Finally, these files are packaged together for easy viewing in
-Connectome Workbench, `wb_view`, in the following `.spec` files, for
-each hemisphere separately, and combined:
+
+### surface labels
+
+The subfield labels from unfolded atlases are also provided for each 
+subject, in `.label.gii` format. Analogous to the volume-based labels,
+the name of the atlas (default: `bigbrain`) is in the file name.
 
     sub-{subject}
      └── surf
-         ├── sub-001_hemi-R_space-T1w_den-0p5mm_surfaces.spec
-         └── sub-001_space-T1w_den-0p5mm_surfaces.spec
+         └── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-hipp_atlas-bigbrain_subfields.label.gii
+
+
+### cifti files
+
+In addition to lateralized `.shape.gii` and `.label.gii` metrics and labels,
+we also provide data mapped to hippocampi from hemispheres in a single
+file using the corresponding CIFTI formats, `.dscalar.nii` and `.dlabel.nii`. 
+Note: since CIFTI does not support hippocampus
+surfaces (yet), we make use of the `CORTEX_LEFT` and `CORTEX_RIGHT` labels for
+the hippocampal surfaces. 
+
+    sub-{subject}
+     └── surf
+         ├── sub-001_space-T1w_den-0p5mm_label-{hipp,dentate}_{thickness,curvature,gyrification}.dscalar.nii
+         └── sub-001_space-T1w_den-0p5mm_label-hipp_atlas-bigbrain_subfields.dlabel.nii
+
+
+### spec files
+
+Finally, these files are packaged together for easy viewing in
+Connectome Workbench, `wb_view`, in the following `.spec` files, for
+each hemisphere and structure separately, and combined:
+
+    sub-{subject}
+     └── surf
+         ├── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-{hipp,dentate}_surfaces.spec
+         └── sub-001_space-T1w_den-0p5mm_label-{hipp,dentate}_surfaces.spec
+
 
 ### New: label-dentate
 
@@ -114,7 +145,7 @@ These are illustrated in the following image (orange represents the usual hippoc
 
 ![image](../images/dentate_cor.png)
 
-Note that the dentate uses the same unfolding methods as the rest of the hippocampus, but with several caveats. Given its small size, its boundaries are not easily deliminated and so `inner`, `outer`, and `thickness` gifti surfaces are omitted. Furthermore, Laplace coordinates and therefore vertex spacing are not guaranteed to be topoligically equivalent as they are obtained through volumetric registration with the template shape injection step of this workflow.  
+Note that the dentate uses the same unfolding methods as the rest of the hippocampus, but with several caveats. Given its small size, its boundaries are not easily deliminated and so `inner`, `outer`, and `thickness` gifti surfaces are omitted. Furthermore, Laplace coordinates and therefore vertex spacing are not guaranteed to be topologically equivalent as they are obtained through volumetric registration with the template shape injection step of this workflow.  
 
 Corresponding `coords` and `warp` files are also generated.
 
