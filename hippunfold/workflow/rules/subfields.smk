@@ -54,17 +54,17 @@ rule label_subfields_from_vol_coords_corobl:
 
 def get_tissue_atlas_remapping(wildcards):
 
-    mapping = config['tissue_atlas_mapping']
+    mapping = config["tissue_atlas_mapping"]
 
     remap = []
 
-    for label in mapping['tissue'].keys():
-        in_label = mapping['tissue'][label]
+    for label in mapping["tissue"].keys():
+        in_label = mapping["tissue"][label]
         out_label = mapping[wildcards.atlas][label]
 
         remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
 
-    return ' '.join(remap) 
+    return " ".join(remap)
 
 
 rule combine_tissue_subfield_labels_corobl:
@@ -88,7 +88,7 @@ rule combine_tissue_subfield_labels_corobl:
             **config["subj_wildcards"]
         ),
     params:
-        remap = get_tissue_atlas_remapping,
+        remap=get_tissue_atlas_remapping,
     output:
         combined=bids(
             root=work,
