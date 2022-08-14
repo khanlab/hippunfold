@@ -5,9 +5,10 @@ subfield segmentation)
 
 ## Requirements
 
--   Docker (Mac/Windows/Linux) or Singularity (Linux)
+-   Docker (Intel Mac/Windows/Linux) or Singularity (Linux)
 -   For those wishing to contribute or modify the code, `pip install` or `poetry install` are also available (Linux), but will still require singularity to handle some dependencies. See [Contributing to HippUnfold](https://hippunfold.readthedocs.io/en/latest/contributing/contributing.html).
 -   GPU not required
+-   Note: Apple M1 is currently **not supported**. We don't have a Docker arm64 container yet, and hippunfold is unusably slow with the emulated amd64 container. 
 
 ### Notes:
 

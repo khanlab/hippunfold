@@ -73,7 +73,7 @@ jobs:
     needs: [ 'quality'  ]
     strategy:
       matrix:
-        python-version: ['3.7', '3.8']
+        python-version: ['3.8']
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -122,6 +122,10 @@ jobs:
     - name: Test single T2w bids
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w
+    - name: Test running on existing folder
+      run: |
+        mkdir test_newout
+        poetry run hippunfold test_data/bids_singleT2w test_newout participant -np --modality T2w
     - name: Test single T2w bids, right hemi
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
@@ -148,15 +152,35 @@ jobs:
         poetry run hippunfold test_data/bids_segT2w test_out participant -np --modality segT2w
     - name: Test cropseg bids, with path override
       run: |
-        poetry run hippunfold - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
+        poetry run hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
     - name: Test cropseg bids, with path override, left hemi
       run: | 
-        poetry run hippunfold - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
+        poetry run hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
     - name: Test T2w with T1w template registration
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
     - name: Test T2w with T1w output space 
       run: |
         poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
+    - name: Test modality T2w with myelin map
+      run: |
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --generate-myelin-map
+    - name: Test modality T1w with myelin map
+      run: |
+        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
+    - name: Test modality T1w with magdeburg atlas
+      run: |
+        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas magdeburg
+    - name: Test modality T1w with freesurfer atlas
+      run: |
+        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas freesurfer
+    - name: Test modality T1w with bigbrain and freesurfer atlas
+      run: |
+        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas bigbrain freesurfer
+
+
+
+
+
 
 

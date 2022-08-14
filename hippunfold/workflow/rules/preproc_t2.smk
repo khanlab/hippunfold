@@ -71,7 +71,6 @@ def get_floating_n4_t2(wildcards):
     return t2_imgs[int(wildcards.idx)]
 
 
-# register scan to the ref t2
 rule reg_t2_to_ref:
     input:
         ref=get_ref_n4_t2,
@@ -148,7 +147,7 @@ if config["skip_preproc"]:
             )[0],
         output:
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 **config["subj_wildcards"],
                 suffix="T2w.nii.gz",
@@ -171,7 +170,7 @@ else:
             cmd=get_avg_or_cp_scans_cmd,
         output:
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 **config["subj_wildcards"],
                 suffix="T2w.nii.gz",
@@ -185,11 +184,10 @@ else:
             "{params.cmd}"
 
 
-# register to t1
 rule reg_t2_to_t1:
     input:
         flo=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
@@ -251,10 +249,9 @@ rule reg_t2_to_t1:
 
 
 rule reg_t2_to_template:
-    """register t2 directly to template, instead of using t1"""
     input:
         flo=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",
@@ -416,7 +413,7 @@ def get_xfm_to_corobl():
 rule warp_t2_to_corobl_crop:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",

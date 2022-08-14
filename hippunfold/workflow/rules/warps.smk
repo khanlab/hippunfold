@@ -44,7 +44,7 @@ rule create_unfold_ref:
         orient=lambda wildcards: config["unfold_vol_ref"][wildcards.autotop]["orient"],
     output:
         nii=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="{autotop}",
             datatype="warps",
@@ -63,7 +63,7 @@ rule create_unfold_ref:
 rule create_unfold_coord_map:
     input:
         nii=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="{autotop}",
             datatype="warps",
@@ -118,7 +118,7 @@ def get_laminar_coords(wildcards):
 rule create_warps_hipp:
     input:
         unfold_ref_nii=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="hipp",
             datatype="warps",
@@ -176,7 +176,7 @@ rule create_warps_hipp:
             **config["subj_wildcards"],
             label="hipp",
             suffix="xfm.nii.gz",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             from_="unfold",
             to="corobl",
             mode="surface"
@@ -187,7 +187,7 @@ rule create_warps_hipp:
             **config["subj_wildcards"],
             label="hipp",
             suffix="xfm.nii.gz",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             from_="corobl",
             to="unfold",
             mode="surface"
@@ -198,7 +198,7 @@ rule create_warps_hipp:
             **config["subj_wildcards"],
             label="hipp",
             suffix="xfm.nii.gz",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             from_="unfold",
             to="corobl",
             mode="image"
@@ -209,7 +209,7 @@ rule create_warps_hipp:
             **config["subj_wildcards"],
             label="hipp",
             suffix="xfm.nii.gz",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             from_="corobl",
             to="unfold",
             mode="image"
@@ -220,7 +220,7 @@ rule create_warps_hipp:
         bids(
             root="logs",
             **config["subj_wildcards"],
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             suffix="create_warps-hipp.txt"
         ),
     script:
@@ -230,7 +230,7 @@ rule create_warps_hipp:
 rule create_warps_dentate:
     input:
         unfold_ref_nii=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="dentate",
             datatype="warps",
@@ -251,7 +251,7 @@ rule create_warps_dentate:
             dir="AP",
             label="dentate",
             suffix="coords.nii.gz",
-            desc="init",
+            desc="laplace",
             space="corobl",
             hemi="{hemi}",
             **config["subj_wildcards"]
@@ -262,7 +262,7 @@ rule create_warps_dentate:
             dir="PD",
             label="dentate",
             suffix="coords.nii.gz",
-            desc="init",
+            desc="laplace",
             space="corobl",
             hemi="{hemi}",
             **config["subj_wildcards"]
@@ -273,7 +273,7 @@ rule create_warps_dentate:
             dir="IO",
             label="dentate",
             suffix="coords.nii.gz",
-            desc="init",
+            desc="laplace",
             space="corobl",
             hemi="{hemi}",
             **config["subj_wildcards"]
@@ -298,7 +298,7 @@ rule create_warps_dentate:
             **config["subj_wildcards"],
             label="dentate",
             suffix="xfm.nii.gz",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             from_="unfold",
             to="corobl",
             mode="surface"
@@ -309,7 +309,7 @@ rule create_warps_dentate:
             **config["subj_wildcards"],
             label="dentate",
             suffix="xfm.nii.gz",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             from_="corobl",
             to="unfold",
             mode="surface"
@@ -320,7 +320,7 @@ rule create_warps_dentate:
             **config["subj_wildcards"],
             label="dentate",
             suffix="xfm.nii.gz",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             from_="unfold",
             to="corobl",
             mode="image"
@@ -331,7 +331,7 @@ rule create_warps_dentate:
             **config["subj_wildcards"],
             label="dentate",
             suffix="xfm.nii.gz",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             from_="corobl",
             to="unfold",
             mode="image"
@@ -342,135 +342,11 @@ rule create_warps_dentate:
         bids(
             root="logs",
             **config["subj_wildcards"],
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             suffix="create_warps-dentate.txt"
         ),
     script:
         "../scripts/create_warps.py"
-
-
-rule compose_warps_corobl2unfold_lhemi:
-    """ Compose corobl to unfold (unfold-template), for left hemi (ie with flip)"""
-    input:
-        native2unfold=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            label="{autotop}",
-            suffix="xfm.nii.gz",
-            hemi="Lflip",
-            from_="corobl",
-            to="unfold",
-            mode="image"
-        ),
-        ref=bids(
-            root=work,
-            space="unfold",
-            label="{autotop}",
-            datatype="warps",
-            suffix="refvol.nii.gz",
-            **config["subj_wildcards"]
-        ),
-        flipLR_xfm=os.path.join(
-            workflow.basedir, "..", "resources", "desc-flipLR_type-itk_xfm.txt"
-        ),
-    output:
-        corobl2unfold=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            label="{autotop}",
-            suffix="xfm.nii.gz",
-            hemi="L",
-            from_="corobl",
-            to="unfold",
-            mode="image"
-        ),
-    log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            label="{autotop}",
-            suffix="composexfm.txt",
-            hemi="L",
-            from_="corobl",
-            to="unfold",
-            mode="image"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "ComposeMultiTransform 3 {output.corobl2unfold} -R {input.ref} {input.native2unfold} {input.flipLR_xfm} &> {log}"
-
-
-# consider renaming to state this composition is to "un-flip"
-rule compose_warps_unfold2corobl_lhemi:
-    """ Compose unfold (unfold-template) to corobl, for left hemi (ie with flip)"""
-    input:
-        unfold2native=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            label="{autotop}",
-            suffix="xfm.nii.gz",
-            hemi="Lflip",
-            from_="unfold",
-            to="corobl",
-            mode="image"
-        ),
-        flipLR_xfm=os.path.join(
-            workflow.basedir, "..", "resources", "desc-flipLR_type-itk_xfm.txt"
-        ),
-        unfold_ref=bids(
-            root=work,
-            space="unfold",
-            label="{autotop}",
-            datatype="warps",
-            suffix="refvol.nii.gz",
-            **config["subj_wildcards"]
-        ),
-        ref=bids(
-            root=work,
-            datatype="coords",
-            dir="AP",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            desc="laplace",
-            space="corobl",
-            hemi="L",
-            **config["subj_wildcards"]
-        ),
-    output:
-        unfold2corobl=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            label="{autotop}",
-            suffix="xfm.nii.gz",
-            hemi="L",
-            from_="unfold",
-            to="corobl",
-            mode="image"
-        ),
-    log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            label="{autotop}",
-            suffix="composexfm.txt",
-            hemi="L",
-            from_="unfold",
-            to="corobl",
-            mode="image"
-        ),
-    container:
-        config["singularity"]["ants"]
-    group:
-        "subj"
-    shell:
-        "antsApplyTransforms -o [{output.unfold2corobl},1] -r {input.ref} -t {input.flipLR_xfm} -t {input.unfold2native} -i {input.unfold_ref} -v &> {log}"
 
 
 rule compose_warps_native_to_unfold:
@@ -488,7 +364,7 @@ rule compose_warps_native_to_unfold:
             mode="image"
         ),
         ref=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="{autotop}",
             datatype="warps",
@@ -569,7 +445,7 @@ rule compose_warps_unfold_to_crop_native:
             type_="itk"
         ),
         unfold_ref=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="{autotop}",
             datatype="warps",

@@ -22,13 +22,13 @@ In this example, a `T1w` image was used as a standard reference image, but a `T2
      └── anat
          ├── sub-001_desc-preproc_T1w.nii.gz
          ├── sub-001_space-T1w_desc-preproc_T2w.nii.gz
-         ├── sub-001_hemi-R_space-T1w_desc-subfields_dseg.nii.gz
-         ├── sub-001_space-cropT1w_desc-preproc_T2w.nii.gz
-         └── sub-001_hemi-R_space-cropT1w_desc-subfields_dseg.nii.gz
+         ├── sub-001_hemi-R_space-T1w_desc-subfields_atlas-bigbrain_dseg.nii.gz
+         ├── sub-001_hemi-R_space-cropT1w_desc-preproc_T2w.nii.gz
+         └── sub-001_hemi-R_space-cropT1w_desc-subfields_atlas-bigbrain_dseg.nii.gz
 
-As per BIDS guidelines, `desc-preproc` refers to preprocessed input images, `space-T1w` refers to the volume to which the image is registered, `hemi` refers to the left or right hemisphere (only shown for the right in this example), and`desc-subfields_dseg` images contains subfield labels (coded as integers as described in the included `volumes.tsv` file). Note that HippUnfold does most intermediate processing in an unshown `space-corobl` which is cropped, upsampled, and rotated. Downsampling to the original `T1w` space can thus degrade the results and so they are also provided in a higher resolution `space-cropT1w` space which is ideal for conducting volumetry or morphometry measures with high precision and detail. 
+As per BIDS guidelines, `desc-preproc` refers to preprocessed input images, `space-T1w` refers to the volume to which the image is registered, `hemi` refers to the left or right hemisphere (only shown for the right in this example), and `dseg` (discrete-segmentation) images with `desc-subfields` contains subfield labels (coded as integers as described in the included `volumes.tsv` file). The subfield atlas used will also be included, by default as `atlas-bigbrain`. Note that HippUnfold does most intermediate processing in an unshown (available in the `work/` folder) `space-corobl` which is cropped, upsampled, and rotated. Downsampling to the original `T1w` space can thus degrade the results and so they are also provided in a higher resolution `space-cropT1w` space which is ideal for conducting volumetry or morphometry measures with high precision and detail. 
 
-For example, the following Image shows a whole-brain `T1w` image, a
+For example, the following image shows a whole-brain `T1w` image, a
 `space-cropT1w` overlay of the upsampled T2w image (centre square), and a similarly upsampled output
 subfield segmentation (colour).
 
@@ -89,7 +89,8 @@ equivalently, the scaling or distortion factor when unfolding:
 
     sub-{subject}
      └── surf
-         └── sub-001_hemi-R_space-T1w_den-0p5mm_{thickness,curvature,gyrification}.shape.gii
+         └── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-hipp_{thickness,curvature,gyrification}.shape.gii
+         └── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-dentate_{curvature,gyrification}.shape.gii
 
 These metrics are shown in both folded and unfolded space in the images
 below. Note that these results are from group-averaged data and so
@@ -97,14 +98,44 @@ individual subject maps may show considerably more variability.
 
 ![image](../images/metrics.png)
 
-Finally, these files are packaged together for easy viewing in
-Connectome Workbench, `wb_view`, in the following `.spec` files, for
-each hemisphere separately, and combined:
+
+### surface labels
+
+The subfield labels from unfolded atlases are also provided for each 
+subject, in `.label.gii` format. Analogous to the volume-based labels,
+the name of the atlas (default: `bigbrain`) is in the file name.
 
     sub-{subject}
      └── surf
-         ├── sub-001_hemi-R_space-T1w_den-0p5mm_surfaces.spec
-         └── sub-001_space-T1w_den-0p5mm_surfaces.spec
+         └── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-hipp_atlas-bigbrain_subfields.label.gii
+
+
+### cifti files
+
+In addition to lateralized `.shape.gii` and `.label.gii` metrics and labels,
+we also provide data mapped to hippocampi from hemispheres in a single
+file using the corresponding CIFTI formats, `.dscalar.nii` and `.dlabel.nii`. 
+Note: since CIFTI does not support hippocampus
+surfaces (yet), we make use of the `CORTEX_LEFT` and `CORTEX_RIGHT` labels for
+the hippocampal surfaces. 
+
+    sub-{subject}
+     └── surf
+         ├── sub-001_space-T1w_den-0p5mm_label-{hipp,dentate}_{thickness,curvature,gyrification}.dscalar.nii
+         └── sub-001_space-T1w_den-0p5mm_label-hipp_atlas-bigbrain_subfields.dlabel.nii
+
+
+### spec files
+
+Finally, these files are packaged together for easy viewing in
+Connectome Workbench, `wb_view`, in the following `.spec` files, for
+each hemisphere and structure separately, and combined:
+
+    sub-{subject}
+     └── surf
+         ├── sub-001_hemi-{L,R}_space-T1w_den-0p5mm_label-{hipp,dentate}_surfaces.spec
+         └── sub-001_space-T1w_den-0p5mm_label-{hipp,dentate}_surfaces.spec
+
 
 ### New: label-dentate
 
@@ -114,9 +145,16 @@ These are illustrated in the following image (orange represents the usual hippoc
 
 ![image](../images/dentate_cor.png)
 
-Note that the dentate uses the same unfolding methods as the rest of the hippocampus, but with several caveats. Given its small size, its boundaries are not easily deliminated and so `inner`, `outer`, and `thickness` gifti surfaces are omitted. Furthermore, Laplace coordinates and therefore vertex spacing are not guaranteed to be topoligically equivalent as they are obtained through volumetric registration with the template shape injection step of this workflow.  
+Note that the dentate uses the same unfolding methods as the rest of the hippocampus, but with several caveats. Given its small size, its boundaries are not easily deliminated and so `inner`, `outer`, and `thickness` gifti surfaces are omitted. Furthermore, Laplace coordinates and therefore vertex spacing are not guaranteed to be topologically equivalent as they are obtained through volumetric registration with the template shape injection step of this workflow.  
 
 Corresponding `coords` and `warp` files are also generated.
+
+### New: myelin maps
+
+
+If your dataset has T1w and T2w images (and you are using `--modality=T1w` or `--modality=T2w`), then you can enable the generation of myelin maps as the ratio of T1w over T2w images. This division is done in the `corobl` space, and provides `myelin.shape.gii` surface metrics, and also includes these in the CIFTI and spec files. 
+
+This option is enabled with the `--generate-myelin-maps` command-line option.
 
 ## coords
 

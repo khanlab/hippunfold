@@ -2,18 +2,23 @@ rule create_native_crop_ref:
     """Create ref space for hires crop in native space
     TODO:  expose the resampling factor and size as cmd line args"""
     input:
-        seg=bids(
-            root=root,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="subfields",
-            space="{native_modality}",
-            hemi="{hemi}",
-            **config["subj_wildcards"]
+        seg=expand(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="subfields",
+                space="{native_modality}",
+                hemi="{hemi}",
+                atlas="{atlas}",
+                **config["subj_wildcards"]
+            ),
+            atlas=config["atlas"][0],
+            allow_missing=True,
         ),
     params:
         resample="400%",
-        pad_to="256x256x256vox",
+        pad_to=config["crop_native_box"],
     output:
         ref=bids(
             root=work,
@@ -136,6 +141,7 @@ rule resample_subfields_native_crop:
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         xfm=bids(
@@ -164,6 +170,7 @@ rule resample_subfields_native_crop:
             desc="subfields",
             space="crop{native_modality}",
             hemi="{hemi}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     container:
@@ -283,7 +290,7 @@ def get_xfm_t2_to_t1():
 rule resample_t2_to_crop:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **config["subj_wildcards"],
             suffix="T2w.nii.gz",

@@ -23,12 +23,12 @@ rule cp_template_to_unfold:
         surface_type="FLAT",
     output:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="unfolded",
-            hemi="{hemi,R|Lflip}",
+            hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
@@ -94,7 +94,7 @@ rule calc_unfold_template_coords:
 rule constrain_surf_to_bbox:
     input:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -104,7 +104,7 @@ rule constrain_surf_to_bbox:
             **config["subj_wildcards"]
         ),
         ref_nii=bids(
-            root=work,
+            root=root,
             datatype="warps",
             space="unfold",
             label="{autotop}",
@@ -176,7 +176,7 @@ rule warp_gii_unfold2native:
             suffix="{surfname}.surf.gii",
             desc="nonancorrect",
             space="corobl",
-            hemi="{hemi,R|Lflip}",
+            hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
@@ -206,12 +206,12 @@ rule correct_nan_vertices:
         ),
     output:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="corobl",
-            hemi="{hemi,R|Lflip}",
+            hemi="{hemi}",
             label="{autotop,hipp|dentate}",
             **config["subj_wildcards"]
         ),
@@ -221,106 +221,11 @@ rule correct_nan_vertices:
         "../scripts/fillnanvertices.py"
 
 
-# unflip surface
-rule unflip_gii:
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="corobl",
-            hemi="{hemi}flip",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="ANATOMICAL",
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="corobl",
-            hemi="{hemi,L}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-flip-lr {input.gii} {output.gii} && "
-        "wb_command -set-structure {output.gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
-
-
-def get_unfolded_surf_R_Lflip(wildcards):
-    if wildcards.hemi == "R":
-        return bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfolded",
-            hemi="{hemi}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ).format(**wildcards)
-    elif wildcards.hemi == "L":
-        return bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfolded",
-            hemi="{hemi}flip",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ).format(**wildcards)
-
-
-rule unflip_gii_unfolded:
-    """copy unfolded from Lflip to L"""
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfolded",
-            hemi="{hemi}flip",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfolded",
-            hemi="{hemi,L}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "cp {input.gii} {output.gii}"
-
-
 # warp from corobl to native
 rule warp_gii_to_native:
     input:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -341,7 +246,7 @@ rule warp_gii_to_native:
         ),
     output:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -549,62 +454,59 @@ rule calculate_thickness_from_surface:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
 
 
-rule resample_bigbrain_subfield_label_gii:
-    """ similar to wb_command -metric-resample, but for unfolded space
-    note, this creates a Nx1 nii file, for subsequent gifti conversion
-    using wb_command"""
+rule resample_atlas_to_refvol:
+    """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
-        label=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "bigbrain",
-            "sub-bigbrain_hemi-{hemi}_subfields.label.gii",
+        atlas=lambda wildcards: os.path.join(
+            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
         ),
-        new_surf=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_hipp",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        refvol=bids(
+            root=root,
+            space="unfold",
+            label="hipp",
+            datatype="warps",
+            suffix="refvol.nii.gz",
+            **config["subj_wildcards"]
         ),
     output:
         label_nii=bids(
             root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.nii",
-            space="{space}",
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     log:
         bids(
             root="logs",
-            den="{density}",
-            suffix="resamplesubfieldsurf",
-            space="{space}",
+            suffix="resamplesubfieldrefvol",
+            space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
+    container:
+        config["singularity"]["ants"]
     group:
         "subj"
-    script:
-        "../scripts/resample_unfolded_label.py"
+    shell:
+        "antsApplyTransforms -d 3 -n MultiLabel -i {input.atlas} -r {input.refvol} -o {output.label_nii} -v &> {log}"
 
 
-rule label_nii_to_metric_gii:
+rule nii_to_label_gii:
     input:
         label_nii=bids(
             root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.nii",
-            space="{space}",
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         surf=os.path.join(
@@ -661,6 +563,7 @@ rule metric_to_label_gii:
             space="{space}",
             hemi="{hemi}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     group:
@@ -668,7 +571,7 @@ rule metric_to_label_gii:
     container:
         config["singularity"]["autotop"]
     shell:
-        "wb_command -metric-label-import {input.metric_gii} {input.label_list} {output.label_gii}"
+        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} {output.label_gii} -enclosing"
 
 
 def get_cmd_cifti_metric(wildcards, input, output):
@@ -742,6 +645,7 @@ def get_inputs_cifti_label(wildcards):
                 root=root,
                 datatype="surf",
                 den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="L",
@@ -755,6 +659,7 @@ def get_inputs_cifti_label(wildcards):
                 root=root,
                 datatype="surf",
                 den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="R",
@@ -784,6 +689,7 @@ rule create_dlabel_cifti_subfields:
             root=root,
             datatype="surf",
             den="{density}",
+            atlas="{atlas}",
             suffix="subfields.dlabel.nii",
             space="{space}",
             label="hipp",
@@ -811,21 +717,49 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-# add surfs and metrics to a spec file
+def get_cifti_metric_types(label):
+    types_list = config["cifti_metric_types"][label]
+    if config["generate_myelin_map"]:
+        types_list.append("myelin.dscalar")
+    return types_list
+
+
+def get_gifti_metric_types(label):
+    types_list = config["gifti_metric_types"][label]
+    if config["generate_myelin_map"]:
+        types_list.append("myelin.shape")
+    return types_list
+
+
 rule create_spec_file_hipp:
     input:
-        shapes=expand(
+        metrics=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
                 den="{density}",
-                suffix="{shape}.shape.gii",
+                suffix="{metric}.gii",
                 space="{space}",
                 hemi="{hemi}",
-                label="hipp",
+                label="{label}",
                 **config["subj_wildcards"]
             ),
-            shape=["gyrification", "curvature", "thickness"],
+            metric=get_gifti_metric_types(wildcards.label),
+            allow_missing=True,
+        ),
+        subfields=lambda wildcards: expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="subfields.label.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                atlas="{atlas}",
+                **config["subj_wildcards"]
+            ),
+            atlas=config["atlas"],
             allow_missing=True,
         ),
         surfs=expand(
@@ -836,39 +770,24 @@ rule create_spec_file_hipp:
                 suffix="{surfname}.surf.gii",
                 space="{space}",
                 hemi="{hemi}",
-                label="hipp",
+                label="{label}",
                 **config["subj_wildcards"]
             ),
-            surfname=["midthickness", "inner", "outer"],
+            surfname=["midthickness"],
             space=["{space}", "unfolded"],
             allow_missing=True,
         ),
-        subfields=bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="hipp",
-            **config["subj_wildcards"]
-        ),
-        cifti=expand(
+        cifti=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
                 den="{density}",
                 suffix="{cifti}.nii",
                 space="{space}",
-                label="hipp",
+                label="{label}",
                 **config["subj_wildcards"]
             ),
-            cifti=[
-                "gyrification.dscalar",
-                "curvature.dscalar",
-                "thickness.dscalar",
-                "subfields.dlabel",
-            ],
+            cifti=get_cifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
     params:
@@ -881,7 +800,7 @@ rule create_spec_file_hipp:
             suffix="surfaces.spec",
             hemi="{hemi,L|R}",
             space="{space}",
-            label="hipp",
+            label="{label,hipp}",
             **config["subj_wildcards"]
         ),
     container:
@@ -894,18 +813,18 @@ rule create_spec_file_hipp:
 
 rule create_spec_file_dentate:
     input:
-        shapes=expand(
+        metrics=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
                 den="{density}",
-                suffix="{shape}.shape.gii",
+                suffix="{metric}.gii",
                 space="{space}",
                 hemi="{hemi}",
-                label="dentate",
+                label="{label}",
                 **config["subj_wildcards"]
             ),
-            shape=["gyrification", "curvature"],
+            metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
         surfs=expand(
@@ -916,24 +835,24 @@ rule create_spec_file_dentate:
                 suffix="{surfname}.surf.gii",
                 space="{space}",
                 hemi="{hemi}",
-                label="dentate",
+                label="{label}",
                 **config["subj_wildcards"]
             ),
             surfname=["midthickness"],
             space=["{space}", "unfolded"],
             allow_missing=True,
         ),
-        cifti=expand(
+        cifti=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
                 den="{density}",
                 suffix="{cifti}.nii",
                 space="{space}",
-                label="dentate",
+                label="{label}",
                 **config["subj_wildcards"]
             ),
-            cifti=["gyrification.dscalar", "curvature.dscalar"],
+            cifti=get_cifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
     params:
@@ -946,7 +865,7 @@ rule create_spec_file_dentate:
             suffix="surfaces.spec",
             hemi="{hemi,L|R}",
             space="{space}",
-            label="dentate",
+            label="{label,dentate}",
             **config["subj_wildcards"]
         ),
     container:
@@ -975,7 +894,7 @@ rule merge_lr_spec_file:
         ),
     output:
         spec_file=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             space="{space}",

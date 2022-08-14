@@ -61,8 +61,9 @@ def get_model_tar(wildcards):
     if os.path.exists(dl_path):
         return dl_path
     else:
-        raise Exception(
-            f"Cannot find downloaded model at {dl_path}, run this first: hippunfold_download_models"
+        print("ERROR:")
+        print(
+            f"  Cannot find downloaded model at {dl_path}, run this first: hippunfold_download_models"
         )
 
 
@@ -98,7 +99,7 @@ rule run_inference:
         out_folder="templbl",
         task=parse_task_from_tar,
         chkpnt=parse_chkpnt_from_tar,
-        disable_tta="" if config["nnunet_disable_tta"] else "--disable_tta",
+        tta="" if config["nnunet_enable_tta"] else "--disable_tta",
     output:
         nnunet_seg=bids(
             root=work,
@@ -139,7 +140,7 @@ rule run_inference:
         "tar -xf {input.model_tar} -C {params.model_dir} && "
         "export RESULTS_FOLDER={params.model_dir} && "
         "export nnUNet_n_proc_DA={threads} && "
-        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} {params.disable_tta} &> {log} && "
+        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} {params.tta} &> {log} && "
         "cp {params.temp_lbl} {output.nnunet_seg}"
 
 
