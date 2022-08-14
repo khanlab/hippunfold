@@ -52,13 +52,25 @@ rule label_subfields_from_vol_coords_corobl:
         "../scripts/label_subfields_from_vol_coords.py"
 
 
+def get_tissue_atlas_remapping(wildcards):
+
+    mapping = config["tissue_atlas_mapping"]
+
+    remap = []
+
+    for label in mapping["tissue"].keys():
+        in_label = mapping["tissue"][label]
+        out_label = mapping[wildcards.atlas][label]
+
+        remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
+
+    return " ".join(remap)
+
+
 rule combine_tissue_subfield_labels_corobl:
     """Combine subfield labels with the DG, SRLM and Cyst tissue labels
 
     add srlm, cyst, dg from postproc labels to subfields
-    input dg label 8, output 6
-    input srlm label 2, output 7
-    input cyst label 7, output 8
 
     first remap tissue labels to get three sep labels
     then, we just need to add those in, using max(old,new) to override old with new in case of conflict
@@ -76,9 +88,7 @@ rule combine_tissue_subfield_labels_corobl:
             **config["subj_wildcards"]
         ),
     params:
-        remap_dg="-threshold 8 8 6 0 -popas dg",
-        remap_srlm="-threshold 2 2 7 0 -popas srlm",
-        remap_cyst="-threshold 7 7 8 0 -popas cyst",
+        remap=get_tissue_atlas_remapping,
     output:
         combined=bids(
             root=work,
@@ -95,7 +105,7 @@ rule combine_tissue_subfield_labels_corobl:
     group:
         "subj"
     shell:
-        "c3d {input.tissue} -dup {params.remap_dg} -dup {params.remap_srlm} {params.remap_cyst} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
+        "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 
 
 rule resample_subfields_to_native:
