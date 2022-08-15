@@ -50,7 +50,10 @@ rule get_subfield_vols_subj:
             allow_missing=True,
         ),
         lookup_tsv=os.path.join(
-            workflow.basedir, "..", "resources", "desc-subfields_dseg.tsv"
+            workflow.basedir,
+            "..",
+            "resources",
+            "desc-subfields_atlas-{atlas}_dseg.tsv",
         ),
     group:
         "subj"

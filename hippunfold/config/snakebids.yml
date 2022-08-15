@@ -345,6 +345,28 @@ atlas_files:
     label_list: resources/freesurfer/freesurfer_labellist.txt
 
 
+#values to use for re-mapping tissue labels when combining with subfields.
+# set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
+tissue_atlas_mapping:
+  tissue:
+    dg: 8
+    srlm: 2
+    cyst: 7
+  bigbrain:
+    dg: 6
+    srlm: 7
+    cyst: 8
+  magdeburg:
+    dg: 3
+    srlm: 9
+    cyst: 10
+  freesurfer:
+    dg: 209
+    srlm: 227
+    cyst: 228
+    
+
+
 rigid_reg_template: False
 no_reg_template: False
 
