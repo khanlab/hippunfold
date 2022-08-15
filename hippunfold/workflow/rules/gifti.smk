@@ -497,7 +497,7 @@ rule resample_atlas_to_refvol:
         "antsApplyTransforms -d 3 -n MultiLabel -i {input.atlas} -r {input.refvol} -o {output.label_nii} -v &> {log}"
 
 
-rule nii_to_label_gii:
+rule unfold_subfields_vol_to_metric_gii:
     input:
         label_nii=bids(
             root=work,
@@ -517,6 +517,45 @@ rule nii_to_label_gii:
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
     output:
+        metric_gii=temp(bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="subfields.shape.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **config["subj_wildcards"]
+        )),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} {output.metric_gii} -enclosing"
+
+rule metric_gii_to_label_gii:
+    input: 
+        metric_gii=bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="subfields.shape.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **config["subj_wildcards"]
+        ),
+        label_list=os.path.join(
+            workflow.basedir,
+            "..",
+            "resources",
+            "{atlas}",
+            "{atlas}_labellist.{hemi}.txt",
+        ),
+    output: 
         label_gii=bids(
             root=root,
             datatype="surf",
@@ -532,9 +571,9 @@ rule nii_to_label_gii:
         "subj"
     container:
         config["singularity"]["autotop"]
-    shell:
-        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} {output.label_gii} -enclosing"
-
+    shell: 
+        "wb_command -metric-label-import {input.metric_gii} {input.label_list} {output.label_gii}"
+ 
 
 
 
@@ -713,7 +752,7 @@ rule create_spec_file_hipp:
             metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
-        subfields=lambda wildcards: expand(
+        subfields_gii=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -728,6 +767,21 @@ rule create_spec_file_hipp:
             atlas=config["atlas"],
             allow_missing=True,
         ),
+        subfields_cifti=lambda wildcards: expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="subfields.dlabel.nii",
+                space="{space}",
+                label="{label}",
+                atlas="{atlas}",
+                **config["subj_wildcards"]
+            ),
+            atlas=config["atlas"],
+            allow_missing=True,
+        ),
+
         surfs=expand(
             bids(
                 root=root,
