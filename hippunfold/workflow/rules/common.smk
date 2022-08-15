@@ -301,10 +301,12 @@ def get_final_qc():
                     space="{space}",
                     suffix="{metric}.png",
                     den="{density}",
+                    atlas="{atlas}",
                     **config["subj_wildcards"],
                 ),
                 density=config["output_density"],
                 metric=["gyrification", "curvature", "thickness"],
+                atlas=config["atlas"],
                 space=ref_spaces,
                 allow_missing=True,
             )

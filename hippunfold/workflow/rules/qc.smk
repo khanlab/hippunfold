@@ -269,6 +269,7 @@ rule plot_subj_surf_scalars:
             suffix="{metric}.csv",
             space="{space}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     output:
@@ -280,6 +281,7 @@ rule plot_subj_surf_scalars:
                 den="{density}",
                 desc="subfields",
                 suffix="{metric}.png",
+                atlas="{atlas}",
                 **config["subj_wildcards"]
             ),
         ),

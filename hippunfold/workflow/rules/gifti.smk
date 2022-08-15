@@ -517,44 +517,6 @@ rule nii_to_label_gii:
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
     output:
-        metric_gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.func.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="hipp",
-            **config["subj_wildcards"]
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "wb_command -metric-convert -from-nifti {input.label_nii} {input.surf} {output.metric_gii}"
-
-
-rule metric_to_label_gii:
-    input:
-        metric_gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.func.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="hipp",
-            **config["subj_wildcards"]
-        ),
-        label_list=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "bigbrain",
-            "sub-bigbrain_labellist.{hemi}.txt",
-        ),
-    output:
         label_gii=bids(
             root=root,
             datatype="surf",
@@ -572,6 +534,10 @@ rule metric_to_label_gii:
         config["singularity"]["autotop"]
     shell:
         "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} {output.label_gii} -enclosing"
+
+
+
+
 
 
 def get_cmd_cifti_metric(wildcards, input, output):
@@ -919,6 +885,7 @@ rule create_parcellated_scalar_csv:
             suffix="subfields.dlabel.nii",
             space="{space}",
             label="hipp",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
         dscalar=bids(
@@ -938,6 +905,7 @@ rule create_parcellated_scalar_csv:
             suffix="{metric}.csv",
             space="{space}",
             label="{autotop,hipp}",
+            atlas="{atlas}",
             **config["subj_wildcards"]
         ),
     container:
