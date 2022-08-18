@@ -27,7 +27,7 @@ There are several different ways of running HippUnfold. In order of increasing c
 
 ### CBRAIN Web-based Platform
 
-HippUnfold is available on the [CBRAIN plaform](https://github.com/aces/cbrain/wiki), a 
+HippUnfold is available on the [CBRAIN platform](https://github.com/aces/cbrain/wiki), a 
 web-based platform for batch high-performance computing that is free for researchers.
 
 Pros:
@@ -124,7 +124,7 @@ just print out what would run, without actually running anything.
     -v ds002168:/bids:ro \
     -v ds002168_hippunfold:/output \
     khanlab/hippunfold:latest \
-    /bids /output participant --modality T1w -n
+    /bids /output participant --modality T2w -n
 
 
 For those not familiar with Docker, the first three lines of this
@@ -152,22 +152,26 @@ also have the commands for each rule printed to screen using the `-p` Snakemake 
     -v ds002168:/bids:ro \
     -v ds002168_hippunfold:/output \
     khanlab/hippunfold:latest \
-    /bids /output participant --modality T1w -np | less
+    /bids /output participant --modality T2w -np | less
 
 
 Now, to actually run the workflow, we need to specify how many cores to use and leave out
-the dry-run option.  The `--cores` option in Snakemake is used for this. Using `--cores 8` means
-that HippUnfold will only make use of 8 cores at most. Generally speaking you should use `--cores all`, 
-so it can make maximal use of all the CPU cores it has access to on your system.
+the dry-run option.  The Snakemake `--cores` option tells HippUnfold how many cores to use.
+ Using `--cores 8` means that HippUnfold will only make use of 8 cores at most. Generally speaking 
+you should use `--cores all`,  so it can make maximal use of all the CPU cores it has access to on your system. This is especially 
+useful if you are running multiple subjects. 
 
-Running the following command may take ~30 minutes if you have 8 cores, shorter if you have more 
+Running the following command (hippunfold on a single subject) may take ~30 minutes if you have 8 cores, shorter if you have more 
 cores, but could be much longer (several hours) if you only have a single core.
 
     docker run -it --rm \
     -v ds002168:/bids:ro \
     -v ds002168_hippunfold:/output \
     khanlab/hippunfold:latest \
-    /bids /output participant --modality T1w -p --cores all
+    /bids /output participant --modality T2w -p --cores all
+
+
+After this completes, you should have a `ds002168_hippunfold` folder with outputs for the one subject.
 
 
 ## Running HippUnfold with Singularity
