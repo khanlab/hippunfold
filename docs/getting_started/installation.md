@@ -30,11 +30,11 @@ There are several different ways of running HippUnfold. In order of increasing c
 HippUnfold is available on the [CBRAIN platform](https://github.com/aces/cbrain/wiki), a 
 web-based platform for batch high-performance computing that is free for researchers.
 
-Pros:
+#### Pros:
  - No software installation required
  - Fully point and click interface (no CLI)
  - Can perform batch-processing
-Cons:
+#### Cons:
  - Must upload data for processing
  - Limited command-line options exposed
  - Cannot edit code
@@ -44,10 +44,10 @@ Cons:
 
 The HippUnfold BIDS App is available on a DockerHub as versioned releases and development branches.
 
-Pros:
+#### Pros:
  - Compatible with non-Linux systems 
  - All dependencies+models in a single container
-Cons:
+#### Cons:
  - Typically not possible on shared machines
  - Cannot use Snakemake cluster execution profiles
  - Cannot edit code
@@ -56,10 +56,10 @@ Cons:
 
 The same docker container can also be used with Singularity (now Apptainer). Instructions can be found below.
 
-Pros:
+#### Pros:
  - All dependencies+models in a single container
  - Container stored as a single file (.sif)
-Cons:
+#### Cons:
  - Compatible on shared systems with Singularity installed
  - Cannot use Snakemake cluster execution profiles
  - Cannot edit code
@@ -69,10 +69,10 @@ Cons:
 
 Instructions for this can be found in the **Contributing** documentation page.
 
-Pros:
+#### Pros:
  - Complete flexibility to modify code
  - External (Non-Python) dependencies as Singularity containers
-Cons:
+#### Cons:
  - Must use Python virtual environment
  - Only compatible on Linux systems with Singularity for external dependencies
 
