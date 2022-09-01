@@ -34,6 +34,7 @@ web-based platform for batch high-performance computing that is free for researc
  - No software installation required
  - Fully point and click interface (no CLI)
  - Can perform batch-processing
+
 #### Cons:
  - Must upload data for processing
  - Limited command-line options exposed
@@ -47,6 +48,7 @@ The HippUnfold BIDS App is available on a DockerHub as versioned releases and de
 #### Pros:
  - Compatible with non-Linux systems 
  - All dependencies+models in a single container
+
 #### Cons:
  - Typically not possible on shared machines
  - Cannot use Snakemake cluster execution profiles
@@ -59,6 +61,7 @@ The same docker container can also be used with Singularity (now Apptainer). Ins
 #### Pros:
  - All dependencies+models in a single container
  - Container stored as a single file (.sif)
+
 #### Cons:
  - Compatible on shared systems with Singularity installed
  - Cannot use Snakemake cluster execution profiles
@@ -72,6 +75,7 @@ Instructions for this can be found in the **Contributing** documentation page.
 #### Pros:
  - Complete flexibility to modify code
  - External (Non-Python) dependencies as Singularity containers
+
 #### Cons:
  - Must use Python virtual environment
  - Only compatible on Linux systems with Singularity for external dependencies
