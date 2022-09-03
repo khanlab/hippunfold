@@ -1,4 +1,4 @@
-# Outputs of hippunfold
+# Outputs Files
 
 The `PATH_TO_OUTPUT_DIR` folder contains a `logs` and `work` folder for troubleshooting, but for most purposes all the outputs of interest will be in a subfolder called `hippunfold` with the following structure:
 
