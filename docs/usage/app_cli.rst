@@ -1,4 +1,4 @@
-Command line interface
+HippUnfold Command-line interface
 --------------------
 The following can also be seen by entering ``hippunfold -h`` into your terminal. 
 
