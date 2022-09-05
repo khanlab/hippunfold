@@ -23,10 +23,6 @@ getting_started/installation
 
 usage/app_cli
 usage/snakemake_cli
-usage/cbrain
-usage/docker
-usage/singularity
-usage/python
 usage/standardBIDS
 usage/specializedScans
 

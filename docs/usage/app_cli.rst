@@ -1,5 +1,5 @@
 HippUnfold Command-line interface
---------------------
+---------------------------------
 The following can also be seen by entering ``hippunfold -h`` into your terminal. 
 
 These are all the required and optional arguments HippUnfold accepts in order to run flexibly on many different input data types and with many options, but in most cases only the required arguments are needed. 
