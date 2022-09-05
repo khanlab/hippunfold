@@ -1,0 +1,261 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+    subgraph cluster_0
+    {
+    23 34
+    label = "preproc_t1";
+    color=blue;
+    }
+    subgraph cluster_1
+    {
+    31 9 10 8 42 51 52
+    label = "warps";
+    color=blue;
+    }
+    subgraph cluster_2
+    {
+    54 58 57 55 56
+    label = "qc";
+    color=blue;
+    }
+    subgraph cluster_3
+    {
+    12 43 30 29 11 28
+    label = "autotop";
+    color=blue;
+    }
+    subgraph cluster_4
+    {
+    21 20 19 24 22 18 17
+    label = "preproc_t2";
+    color=blue;
+    }
+    subgraph cluster_5
+    {
+    33 32 7 6 5 4 3 36 35 37 39 38 40 2 41 1
+    label = "gifti";
+    color=blue;
+    }
+    subgraph cluster_6
+    {
+    26 15 25 14 27 13 46
+    label = "shape_inject";
+    color=blue;
+    }
+    subgraph cluster_7
+    {
+    47 45 49
+    label = "subfields";
+    color=blue;
+    }
+    subgraph cluster_8
+    {
+    16 61 60 59
+    label = "nnunet";
+    color=blue;
+    }
+    subgraph cluster_9
+    {
+    48 44 50 53
+    label = "resample_final_to_crop_native";
+    color=blue;
+    }
+	0[label = "all", color = "0.26 0.6 0.85", style="rounded"];
+	1[label = "merge_lr_spec_file", color = "0.01 0.6 0.85", style="rounded"];
+	2[label = "create_spec_file_hipp", color = "0.27 0.6 0.85", style="rounded"];
+	3[label = "calculate_gyrification", color = "0.19 0.6 0.85", style="rounded"];
+	4[label = "calculate_surface_area", color = "0.24 0.6 0.85", style="rounded"];
+	5[label = "warp_gii_to_native", color = "0.16 0.6 0.85", style="rounded"];
+	6[label = "correct_nan_vertices", color = "0.11 0.6 0.85", style="rounded"];
+	7[label = "warp_gii_unfold2native", color = "0.54 0.6 0.85", style="rounded"];
+	8[label = "create_warps_hipp", color = "0.59 0.6 0.85", style="rounded"];
+	9[label = "create_unfold_ref", color = "0.17 0.6 0.85", style="rounded"];
+	10[label = "create_unfold_coord_map", color = "0.64 0.6 0.85", style="rounded"];
+	11[label = "unflip_coords", color = "0.33 0.6 0.85", style="rounded"];
+	12[label = "laplace_coords_hipp", color = "0.18 0.6 0.85", style="rounded"];
+	13[label = "reinsert_subject_labels", color = "0.62 0.6 0.85", style="rounded"];
+	14[label = "template_shape_inject", color = "0.42 0.6 0.85", style="rounded"];
+	15[label = "import_template_shape", color = "0.49 0.6 0.85", style="rounded"];
+	16[label = "run_inference", color = "0.40 0.6 0.85", style="rounded"];
+	17[label = "lr_flip_t2", color = "0.38 0.6 0.85", style="rounded"];
+	18[label = "warp_t2_to_corobl_crop", color = "0.53 0.6 0.85", style="rounded"];
+	19[label = "avg_aligned_or_cp_t2", color = "0.29 0.6 0.85", style="rounded"];
+	20[label = "n4_t2", color = "0.56 0.6 0.85", style="rounded"];
+	21[label = "import_t2", color = "0.64 0.6 0.85", style="rounded"];
+	22[label = "compose_t2_xfm_corobl", color = "0.63 0.6 0.85", style="rounded"];
+	23[label = "convert_template_xfm_ras2itk", color = "0.35 0.6 0.85", style="rounded"];
+	24[label = "reg_t2_to_template", color = "0.34 0.6 0.85", style="rounded"];
+	25[label = "template_shape_reg", color = "0.32 0.6 0.85", style="rounded"];
+	26[label = "prep_segs_for_greedy", color = "0.10 0.6 0.85", style="rounded"];
+	27[label = "inject_init_laplace_coords", color = "0.51 0.6 0.85", style="rounded"];
+	28[label = "unflip_coords_equivol", color = "0.53 0.6 0.85", style="rounded"];
+	29[label = "equivolume_coords", color = "0.50 0.6 0.85", style="rounded"];
+	30[label = "prep_equivolume_coords", color = "0.09 0.6 0.85", style="rounded"];
+	31[label = "create_native_coord_ref", color = "0.45 0.6 0.85", style="rounded"];
+	32[label = "constrain_surf_to_bbox", color = "0.46 0.6 0.85", style="rounded"];
+	33[label = "cp_template_to_unfold", color = "0.30 0.6 0.85", style="rounded"];
+	34[label = "template_xfm_itk2ras", color = "0.00 0.6 0.85", style="rounded"];
+	35[label = "calculate_curvature_from_surface", color = "0.31 0.6 0.85", style="rounded"];
+	36[label = "smooth_surface", color = "0.07 0.6 0.85", style="rounded"];
+	37[label = "calculate_thickness_from_surface", color = "0.13 0.6 0.85", style="rounded"];
+	38[label = "nii_to_label_gii", color = "0.21 0.6 0.85", style="rounded"];
+	39[label = "resample_atlas_to_refvol", color = "0.09 0.6 0.85", style="rounded"];
+	40[label = "create_dscalar_metric_cifti", color = "0.58 0.6 0.85", style="rounded"];
+	41[label = "create_spec_file_dentate", color = "0.36 0.6 0.85", style="rounded"];
+	42[label = "create_warps_dentate", color = "0.49 0.6 0.85", style="rounded"];
+	43[label = "laplace_coords_dentate", color = "0.66 0.6 0.85", style="rounded"];
+	44[label = "resample_subfields_native_crop", color = "0.55 0.6 0.85", style="rounded"];
+	45[label = "combine_tissue_subfield_labels_corobl", color = "0.61 0.6 0.85", style="rounded"];
+	46[label = "unflip_postproc", color = "0.45 0.6 0.85", style="rounded"];
+	47[label = "label_subfields_from_vol_coords_corobl", color = "0.02 0.6 0.85", style="rounded"];
+	48[label = "create_native_crop_ref", color = "0.56 0.6 0.85", style="rounded"];
+	49[label = "resample_subfields_to_native", color = "0.41 0.6 0.85", style="rounded"];
+	50[label = "resample_coords_native_crop", color = "0.20 0.6 0.85", style="rounded"];
+	51[label = "compose_warps_native_to_unfold", color = "0.31 0.6 0.85", style="rounded"];
+	52[label = "compose_warps_unfold_to_crop_native", color = "0.06 0.6 0.85", style="rounded"];
+	53[label = "resample_native_to_crop", color = "0.22 0.6 0.85", style="rounded"];
+	54[label = "qc_reg_to_template", color = "0.13 0.6 0.85", style="rounded"];
+	55[label = "qc_subfield", color = "0.43 0.6 0.85", style="rounded"];
+	56[label = "qc_subfield_surf", color = "0.27 0.6 0.85", style="rounded"];
+	57[label = "plot_subj_subfields", color = "0.44 0.6 0.85", style="rounded"];
+	58[label = "get_subfield_vols_subj", color = "0.16 0.6 0.85", style="rounded"];
+	59[label = "qc_nnunet_dice", color = "0.25 0.6 0.85", style="rounded"];
+	60[label = "qc_nnunet_f3d", color = "0.57 0.6 0.85", style="rounded"];
+	61[label = "unflip_nnunet_nii", color = "0.35 0.6 0.85", style="rounded"];
+	9 -> 0
+	54 -> 0
+	51 -> 0
+	44 -> 0
+	55 -> 0
+	1 -> 0
+	52 -> 0
+	53 -> 0
+	57 -> 0
+	56 -> 0
+	59 -> 0
+	50 -> 0
+	41 -> 1
+	2 -> 1
+	35 -> 2
+	37 -> 2
+	33 -> 2
+	3 -> 2
+	38 -> 2
+	40 -> 2
+	5 -> 2
+	4 -> 3
+	5 -> 4
+	6 -> 5
+	34 -> 5
+	7 -> 6
+	42 -> 7
+	8 -> 7
+	32 -> 7
+	9 -> 8
+	12 -> 8
+	10 -> 8
+	28 -> 8
+	11 -> 8
+	31 -> 8
+	29 -> 8
+	9 -> 10
+	12 -> 11
+	43 -> 11
+	13 -> 12
+	27 -> 12
+	14 -> 13
+	16 -> 13
+	15 -> 14
+	25 -> 14
+	16 -> 14
+	17 -> 16
+	18 -> 16
+	18 -> 17
+	19 -> 18
+	22 -> 18
+	20 -> 19
+	21 -> 20
+	23 -> 22
+	24 -> 23
+	19 -> 24
+	26 -> 25
+	15 -> 26
+	16 -> 26
+	25 -> 27
+	16 -> 27
+	29 -> 28
+	30 -> 29
+	13 -> 30
+	11 -> 31
+	12 -> 31
+	43 -> 31
+	9 -> 32
+	33 -> 32
+	22 -> 34
+	36 -> 35
+	5 -> 36
+	5 -> 37
+	39 -> 38
+	9 -> 39
+	35 -> 40
+	37 -> 40
+	3 -> 40
+	33 -> 41
+	35 -> 41
+	3 -> 41
+	40 -> 41
+	5 -> 41
+	9 -> 42
+	10 -> 42
+	11 -> 42
+	31 -> 42
+	43 -> 42
+	27 -> 43
+	45 -> 44
+	48 -> 44
+	22 -> 44
+	13 -> 45
+	46 -> 45
+	47 -> 45
+	13 -> 46
+	12 -> 47
+	28 -> 47
+	11 -> 47
+	39 -> 47
+	29 -> 47
+	49 -> 48
+	45 -> 49
+	22 -> 49
+	19 -> 49
+	12 -> 50
+	28 -> 50
+	11 -> 50
+	48 -> 50
+	22 -> 50
+	29 -> 50
+	43 -> 50
+	42 -> 51
+	8 -> 51
+	22 -> 51
+	9 -> 51
+	9 -> 52
+	8 -> 52
+	48 -> 52
+	22 -> 52
+	42 -> 52
+	19 -> 53
+	48 -> 53
+	24 -> 54
+	44 -> 55
+	53 -> 55
+	5 -> 56
+	58 -> 57
+	44 -> 58
+	60 -> 59
+	16 -> 60
+	61 -> 60
+	18 -> 60
+	16 -> 61
+}            
