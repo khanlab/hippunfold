@@ -1,0 +1,91 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=resample_final_to_crop_native
+		];
+		73	[color="0.56 0.6 0.85",
+			label=resample_subfields_native_crop];
+		76	[color="0.31 0.6 0.85",
+			label=create_native_crop_ref];
+		76 -> 73;
+		78	[color="0.03 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		76 -> 78;
+		79	[color="0.03 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		76 -> 79;
+		80	[color="0.03 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		76 -> 80;
+		81	[color="0.03 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		76 -> 81;
+		82	[color="0.03 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		76 -> 82;
+		85	[color="0.03 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		76 -> 85;
+		86	[color="0.03 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: equivol"];
+		76 -> 86;
+		91	[color="0.04 0.6 0.85",
+			label=resample_native_to_crop];
+		76 -> 91;
+	}
+	10	[color="0.25 0.6 0.85",
+		label=laplace_coords_hipp];
+	10 -> 78;
+	16	[color="0.09 0.6 0.85",
+		label=n4_t1];
+	77	[color="0.18 0.6 0.85",
+		label="resample_subfields_to_native\nnative_modality: T1w"];
+	16 -> 77;
+	16 -> 91;
+	18	[color="0.64 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	18 -> 73;
+	18 -> 77;
+	18 -> 78;
+	18 -> 79;
+	18 -> 80;
+	18 -> 81;
+	18 -> 82;
+	18 -> 85;
+	18 -> 86;
+	25	[color="0.25 0.6 0.85",
+		label=laplace_coords_hipp];
+	25 -> 80;
+	27	[color="0.25 0.6 0.85",
+		label=equivolume_coords];
+	27 -> 86;
+	60	[color="0.28 0.6 0.85",
+		label=laplace_coords_dentate];
+	60 -> 79;
+	62	[color="0.28 0.6 0.85",
+		label=laplace_coords_dentate];
+	62 -> 81;
+	64	[color="0.28 0.6 0.85",
+		label=laplace_coords_dentate];
+	64 -> 85;
+	74	[color="0.19 0.6 0.85",
+		label=combine_tissue_subfield_labels_corobl];
+	74 -> 73;
+	74 -> 77;
+	77 -> 76;
+	83	[color="0.25 0.6 0.85",
+		label=laplace_coords_hipp];
+	83 -> 82;
+}
