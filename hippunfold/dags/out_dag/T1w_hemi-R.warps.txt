@@ -1,0 +1,89 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=warps
+		];
+		7	[color="0.04 0.6 0.85",
+			label=create_warps_hipp];
+		87	[color="0.61 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T1w"];
+		7 -> 87;
+		89	[color="0.43 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		7 -> 89;
+		8	[color="0.13 0.6 0.85",
+			label="create_unfold_ref\nautotop: hipp\nsubject: 001"];
+		8 -> 7;
+		9	[color="0.27 0.6 0.85",
+			label=create_unfold_coord_map];
+		8 -> 9;
+		8 -> 87;
+		8 -> 89;
+		9 -> 7;
+		29	[color="0.37 0.6 0.85",
+			label="create_native_coord_ref\nautotop: hipp"];
+		29 -> 7;
+		57	[color="0.18 0.6 0.85",
+			label=create_warps_dentate];
+		88	[color="0.61 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T1w"];
+		57 -> 88;
+		90	[color="0.43 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		57 -> 90;
+		58	[color="0.13 0.6 0.85",
+			label="create_unfold_ref\nautotop: dentate\nsubject: 001"];
+		58 -> 57;
+		59	[color="0.27 0.6 0.85",
+			label=create_unfold_coord_map];
+		58 -> 59;
+		58 -> 88;
+		58 -> 90;
+		59 -> 57;
+		66	[color="0.37 0.6 0.85",
+			label="create_native_coord_ref\nautotop: dentate"];
+		66 -> 57;
+	}
+	10	[color="0.25 0.6 0.85",
+		label=laplace_coords_hipp];
+	10 -> 7;
+	10 -> 29;
+	18	[color="0.64 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	18 -> 87;
+	18 -> 88;
+	18 -> 89;
+	18 -> 90;
+	25	[color="0.25 0.6 0.85",
+		label=laplace_coords_hipp];
+	25 -> 7;
+	27	[color="0.25 0.6 0.85",
+		label=equivolume_coords];
+	27 -> 7;
+	60	[color="0.28 0.6 0.85",
+		label=laplace_coords_dentate];
+	60 -> 57;
+	60 -> 66;
+	62	[color="0.28 0.6 0.85",
+		label=laplace_coords_dentate];
+	62 -> 57;
+	64	[color="0.28 0.6 0.85",
+		label=laplace_coords_dentate];
+	64 -> 57;
+	76	[color="0.31 0.6 0.85",
+		label=create_native_crop_ref];
+	76 -> 89;
+	76 -> 90;
+}
