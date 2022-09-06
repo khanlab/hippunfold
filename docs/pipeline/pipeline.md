@@ -10,7 +10,7 @@ there are multiple T2w images or a single T2w image), what modality is used
 Below is a *simplified* rule graph of
  the `--modality T1w` workflow (click on the image to enlarge). 
 
-<img src="../../hippunfold/dags/svg/T1w_rulegraph.svg"  width="1500px">
+<img src="../../hippunfold/dags/out_rulegraph/T1w.svg" width="1500px">
 
 Each rounded rectangle in this diagram represents a *rule*, that is, some code
  or script that produces an output, and the arrows represent file inputs and
@@ -25,9 +25,49 @@ are inputs to this rule.
 The workflow diagram is also organized into groups of 
 rules, which are defined by the names of the rule files, which can be found in
  the [rules sub-folder](http://github.com/khanlab/hippunfold/tree/master/hippunfold/workflow/rules)  
-in the workflow source. For example, the [preproc_t1](http://github.com/khanlab/hippunfold/tree/master/hippunfold/workflow/rules/preproc_t1.smk) 
-file contains the rules related to pre-processing the T1w images, and these are 
+in the workflow source. For example, the [preproc_t1](http://github.com/khanlab/hippunfold/tree/master/hippunfold/workflow/rules/preproc_t1.smk)  file contains the rules related to pre-processing the T1w images, and these are 
 grouped together in the above diagram by a blue rectangle labelled `preproc_t1`. 
+
+
+### Pre-processing
+
+<img src="../../hippunfold/dags/out_dag/T1w.preproc_t1.svg" >
+
+### U-net segmentation
+
+<img src="../../hippunfold/dags/out_dag/T1w.nnunet.svg" >
+
+### Template-based shape injection
+
+<img src="../../hippunfold/dags/out_dag/T1w.shape_inject.svg" >
+
+### Laplace & equivolume coordinates
+
+<img src="../../hippunfold/dags/out_dag/T1w.autotop.svg" >
+
+### Subfields processing
+
+<img src="../../hippunfold/dags/out_dag/T1w.subfields.svg" >
+
+### Generating warp files
+
+<img src="../../hippunfold/dags/out_dag/T1w.warps.svg" >
+
+### Surface processing
+
+<img src="../../hippunfold/dags/out_dag/T1w.gifti.svg" >
+
+### Resampling to output resolution
+
+<img src="../../hippunfold/dags/out_dag/T1w.resample_final_to_crop_native.svg" >
+
+### Quality control snapshots
+
+<img src="../../hippunfold/dags/out_dag/T1w.qc.svg" >
+
+
+
+
 
 
 ## T2w workflow 
@@ -35,7 +75,7 @@ grouped together in the above diagram by a blue rectangle labelled `preproc_t1`.
 In this workflow (`--modality T2w`) the T1w image is not used at all, and instead the T2w is used
 both for initial linear registration and the the `run_inference` rule. 
 
-<img src="../../hippunfold/dags/svg/T2w_rulegraph.svg"  width="1500px">
+<img src="../../hippunfold/dags/out_rulegraph/T2w.svg"  width="1500px">
 
 
 ## T2w workflow using T1w for initial registration
@@ -49,7 +89,7 @@ the T2w image. This option is often used when the T2w image is a reduced field o
 coronal oblique to the hippocampus T2w FSE scans). 
 
 
-<img src="../../hippunfold/dags/svg/T2w_t1-reg-template_rulegraph.svg"  width="1500px">
+<img src="../../hippunfold/dags/out_rulegraph/T2w_t1-reg-template.svg" width="1500px">
 
 
 
