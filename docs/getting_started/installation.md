@@ -31,14 +31,14 @@ HippUnfold is available on the [CBRAIN platform](https://github.com/aces/cbrain/
 web-based platform for batch high-performance computing that is free for researchers.
 
 #### Pros:
- - No software installation required
- - Fully point and click interface (no CLI)
- - Can perform batch-processing
+- No software installation required
+- Fully point and click interface (no CLI)
+- Can perform batch-processing
 
 #### Cons:
- - Must upload data for processing
- - Limited command-line options exposed
- - Cannot edit code
+- Must upload data for processing
+- Limited command-line options exposed
+- Cannot edit code
 
 
 ### Docker on Windows/Mac (Intel)/Linux
@@ -46,26 +46,26 @@ web-based platform for batch high-performance computing that is free for researc
 The HippUnfold BIDS App is available on a DockerHub as versioned releases and development branches.
 
 #### Pros:
- - Compatible with non-Linux systems 
- - All dependencies+models in a single container
+- Compatible with non-Linux systems 
+- All dependencies+models in a single container
 
 #### Cons:
- - Typically not possible on shared machines
- - Cannot use Snakemake cluster execution profiles
- - Cannot edit code
+- Typically not possible on shared machines
+- Cannot use Snakemake cluster execution profiles
+- Cannot edit code
 
 ### Singularity Container
 
 The same docker container can also be used with Singularity (now Apptainer). Instructions can be found below.
 
 #### Pros:
- - All dependencies+models in a single container
- - Container stored as a single file (.sif)
+- All dependencies+models in a single container
+- Container stored as a single file (.sif)
 
 #### Cons:
- - Compatible on shared systems with Singularity installed
- - Cannot use Snakemake cluster execution profiles
- - Cannot edit code
+- Compatible on shared systems with Singularity installed
+- Cannot use Snakemake cluster execution profiles
+- Cannot edit code
 
 
 ### Python Environment with Singularity Dependencies
@@ -73,12 +73,12 @@ The same docker container can also be used with Singularity (now Apptainer). Ins
 Instructions for this can be found in the **Contributing** documentation page.
 
 #### Pros:
- - Complete flexibility to modify code
- - External (Non-Python) dependencies as Singularity containers
+- Complete flexibility to modify code
+- External (Non-Python) dependencies as Singularity containers
 
 #### Cons:
- - Must use Python virtual environment
- - Only compatible on Linux systems with Singularity for external dependencies
+- Must use Python virtual environment
+- Only compatible on Linux systems with Singularity for external dependencies
 
 
 
