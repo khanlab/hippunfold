@@ -21,8 +21,7 @@ getting_started/installation
 :maxdepth: 2
 
 
-usage/app_cli
-usage/snakemake_cli
+usage/cli
 usage/standardBIDS
 usage/specializedScans
 
