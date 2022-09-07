@@ -1,16 +1,14 @@
 # Pipeline Details
 
-The HippUnfold workflow is generated based on the input data (e.g. whether 
-there are multiple T2w images or a single T2w image), what modality is used
- (e.g. `--modality T1w` or `--modality T2w`), and what optional arguments are
- specified (e.g. `--t1-reg-template`). 
 
 ## T1w workflow
+
+TODO: move this section down below (after introducing each subsection)
 
 Below is a *simplified* rule graph of
  the `--modality T1w` workflow (click on the image to enlarge). 
 
-<img src="../../hippunfold/dags/out_rulegraph/T1w.svg" width="1500px">
+<img src="../../hippunfold/dags/out_rulegraph/T1w.svg" width="800px">
 
 Each rounded rectangle in this diagram represents a *rule*, that is, some code
  or script that produces an output, and the arrows represent file inputs and
@@ -31,40 +29,79 @@ grouped together in the above diagram by a blue rectangle labelled `preproc_t1`.
 
 ### Pre-processing
 
-<img src="../../hippunfold/dags/out_dag/T1w.preproc_t1.svg" >
+The pre-processing workflow for HippUnfold is generated based on the input data (e.g. whether 
+there are multiple T2w images or a single T2w image), what modality is used
+ (e.g. `--modality T1w` or `--modality T2w`), and what optional arguments are
+ specified (e.g. `--t1-reg-template`). 
+
+### T1w pre-processing
+
+T1w images are imported, intensity-corrected using N4, and linearly registered 
+to the template image (default: CITI168 - an HCP T1w template). An existing transformation to 
+align the images in a coronal oblique (`space-corobl`) orientation is concatenated, and 
+this space is used to define the left and right hippocampus bounding boxes in 0.3mm isotropic space. The left 
+hippocampus subvolume is left-right flipped at this stage too (subsequent steps in the `corobl` space operate
+on both the `hemi-R` and `hemi-Lflip` images).
+
+<img src="../../hippunfold/dags/out_dag/T1w.preproc_t1.svg" width="400px">
+
+![T1w workflow preproc t1](../../hippunfold/dags/out_dag/T1w.preproc_t1.svg)
+
+
+### T2w pre-processing
+
+T2w images are processed similarly, except the T2w version of the template is used. If multiple T2w images
+exist, these are motion-corrected and averaged prior to N4 correction. The diagram below shows the T2w pre-
+processing workflow for a dataset with three T2w runs.
+
+<img src="../../hippunfold/dags/out_dag/T2w_multi.preproc_t2.svg" width="800px">
+
+
+For T2w images where template registration is failing (e.g. because the T2w images have a limited FOV),
+the `--t1-reg-template` option can be used, and will perform template registration with the T1w images, along with 
+a within-subject registration of the T2w to the T1w, concatenating all the transforms. This is shown in the diagrams below (with a single T2w image in this case):
+
+![T2w t1-reg-template preproc_t1](../../hippunfold/dags/out_dag/T2w_t1-reg-template.preproc_t1.svg)
+![T2w t1-reg-template preproc_t2](../../hippunfold/dags/out_dag/T2w_t1-reg-template.preproc_t2.svg)
+
 
 ### U-net segmentation
 
-<img src="../../hippunfold/dags/out_dag/T1w.nnunet.svg" >
+<img src="../../hippunfold/dags/out_dag/T1w.nnunet.svg"  width="400px">
+
+<img src="../images/nnUnet_hippunfold.png"  width="800px">
 
 ### Template-based shape injection
 
-<img src="../../hippunfold/dags/out_dag/T1w.shape_inject.svg" >
+The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
+
+<img src="../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.shape_inject.svg"  width="800px">
 
 ### Laplace & equivolume coordinates
 
-<img src="../../hippunfold/dags/out_dag/T1w.autotop.svg" >
+The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
+<img src="../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.autotop.svg"  width="800px">
 
 ### Subfields processing
 
-<img src="../../hippunfold/dags/out_dag/T1w.subfields.svg" >
+The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
+<img src="../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.subfields.svg"  width="800px">
 
 ### Generating warp files
 
-<img src="../../hippunfold/dags/out_dag/T1w.warps.svg" >
+The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
+<img src="../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.warps.svg"  width="800px">
 
 ### Surface processing
 
-<img src="../../hippunfold/dags/out_dag/T1w.gifti.svg" >
+The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
+<img src="../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.gifti.svg"  width="800px">
 
-### Resampling to output resolution
+### Additional steps
 
-<img src="../../hippunfold/dags/out_dag/T1w.resample_final_to_crop_native.svg" >
-
-### Quality control snapshots
-
-<img src="../../hippunfold/dags/out_dag/T1w.qc.svg" >
-
+Resampling to output resolution, quality control snapshot generation, and archiving the work folder are steps 
+that are also carried out by the workflow, but the DAGs are now shown here because of the many inputs/outputs, and the linear
+workflow structure.
 
 
 
@@ -75,7 +112,7 @@ grouped together in the above diagram by a blue rectangle labelled `preproc_t1`.
 In this workflow (`--modality T2w`) the T1w image is not used at all, and instead the T2w is used
 both for initial linear registration and the the `run_inference` rule. 
 
-<img src="../../hippunfold/dags/out_rulegraph/T2w.svg"  width="1500px">
+<img src="../../hippunfold/dags/out_rulegraph/T2w.svg"  width="800px">
 
 
 ## T2w workflow using T1w for initial registration
@@ -89,7 +126,7 @@ the T2w image. This option is often used when the T2w image is a reduced field o
 coronal oblique to the hippocampus T2w FSE scans). 
 
 
-<img src="../../hippunfold/dags/out_rulegraph/T2w_t1-reg-template.svg" width="1500px">
+<img src="../../hippunfold/dags/out_rulegraph/T2w_t1-reg-template.svg" width="800px">
 
 
 
