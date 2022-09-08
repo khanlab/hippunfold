@@ -517,7 +517,9 @@ rule nii_to_label_gii:
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
         label_list=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_list"]
+            workflow.basedir,
+            "..",
+            config["atlas_files"][wildcards.atlas]["label_list"],
         ),
     params:
         structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
@@ -535,14 +537,14 @@ rule nii_to_label_gii:
         ),
     group:
         "subj"
-    shadow: "minimal"
+    shadow:
+        "minimal"
     container:
         config["singularity"]["autotop"]
     shell:
         "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} temp.shape.gii -enclosing  && "
         "wb_command -metric-label-import temp.shape.gii {input.label_list} {output.label_gii} && "
         "wb_command -set-structure {output.label_gii} {params.structure_type}"
-
 
 
 def get_cmd_cifti_metric(wildcards, input, output):
@@ -775,7 +777,6 @@ rule create_spec_file_hipp:
             atlas=config["atlas"],
             allow_missing=True,
         ),
-
     params:
         cmds=get_cmd_spec_file,
     output:
