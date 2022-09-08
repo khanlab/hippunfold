@@ -28,7 +28,7 @@ You should now see standardized subfield colours and names in the bottom panel w
 - Add Laplace coordinates (eg. `hippunfold/sub-01/coords/sub-01_dir-AP_hemi-L_space-cropT1w_label-hipp_desc-laplace_coords.nii.gz`) over your T1w image, then set the minimum windowing to 0.001 and tick the box `Clear background` in the left panel to maintain visibility of the T1w underlay.
 - Note that `space-T1w` and `space-cropT1w` should appear in equivalent positions in Freeview, despite having a different field of view and resolution. If loading these data into Matlab or Python, you will need to first resample these images to the same reference image in order to index voxels from equivalent points. 
 
-### HippUnfold Toolbox
+## HippUnfold Toolbox
 
 The [HippUnfold Toolbox](https://github.com/jordandekraker/hippunfold_toolbox) provides examples and functions for mapping data onto hippocampal surfaces, plotting surfaces, and performing comparisons or statistical tests between subjects. Note that this can be done in other programs, like Connectome workbench, but these Python & Matlab tools should give an idea of how this can be done in a fully customizable fashion.
 
