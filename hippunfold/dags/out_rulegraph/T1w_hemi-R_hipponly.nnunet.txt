@@ -15,16 +15,16 @@ strict digraph "" {
 		graph [color=blue,
 			label=nnunet
 		];
-		14	[color="0.39 0.6 0.85",
+		14	[color="0.24 0.6 0.85",
 			label=run_inference];
-		49	[color="0.41 0.6 0.85",
+		49	[color="0.12 0.6 0.85",
 			label=qc_nnunet_f3d];
 		14 -> 49;
-		48	[color="0.23 0.6 0.85",
+		48	[color="0.55 0.6 0.85",
 			label=qc_nnunet_dice];
 		49 -> 48;
 	}
-	15	[color="0.07 0.6 0.85",
+	15	[color="0.20 0.6 0.85",
 		label=warp_t1_to_corobl_crop];
 	15 -> 14;
 	15 -> 49;

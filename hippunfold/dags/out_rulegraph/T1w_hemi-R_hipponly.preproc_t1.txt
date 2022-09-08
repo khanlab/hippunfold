@@ -15,24 +15,24 @@ strict digraph "" {
 		graph [color=blue,
 			label=preproc_t1
 		];
-		15	[color="0.07 0.6 0.85",
+		15	[color="0.20 0.6 0.85",
 			label=warp_t1_to_corobl_crop];
-		16	[color="0.36 0.6 0.85",
+		16	[color="0.26 0.6 0.85",
 			label=n4_t1];
 		16 -> 15;
-		20	[color="0.65 0.6 0.85",
+		20	[color="0.25 0.6 0.85",
 			label=reg_to_template];
 		16 -> 20;
-		17	[color="0.15 0.6 0.85",
+		17	[color="0.54 0.6 0.85",
 			label=import_t1];
 		17 -> 16;
-		18	[color="0.38 0.6 0.85",
+		18	[color="0.00 0.6 0.85",
 			label=compose_template_xfm_corobl];
 		18 -> 15;
-		29	[color="0.28 0.6 0.85",
+		29	[color="0.38 0.6 0.85",
 			label=template_xfm_itk2ras];
 		18 -> 29;
-		19	[color="0.13 0.6 0.85",
+		19	[color="0.64 0.6 0.85",
 			label=convert_template_xfm_ras2itk];
 		19 -> 18;
 		20 -> 19;

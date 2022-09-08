@@ -15,34 +15,34 @@ strict digraph "" {
 		graph [color=blue,
 			label=nnunet
 		];
-		16	[color="0.16 0.6 0.85",
+		16	[color="0.57 0.6 0.85",
 			label="run_inference\nhemi: Lflip"];
-		195	[color="0.32 0.6 0.85",
+		195	[color="0.27 0.6 0.85",
 			label="unflip_nnunet_nii\nhemi: L"];
 		16 -> 195;
-		70	[color="0.16 0.6 0.85",
+		70	[color="0.57 0.6 0.85",
 			label=run_inference];
-		197	[color="0.49 0.6 0.85",
+		197	[color="0.42 0.6 0.85",
 			label=qc_nnunet_f3d];
 		70 -> 197;
-		193	[color="0.10 0.6 0.85",
+		193	[color="0.26 0.6 0.85",
 			label=qc_nnunet_dice];
-		194	[color="0.49 0.6 0.85",
+		194	[color="0.42 0.6 0.85",
 			label=qc_nnunet_f3d];
 		194 -> 193;
 		195 -> 194;
-		196	[color="0.10 0.6 0.85",
+		196	[color="0.26 0.6 0.85",
 			label=qc_nnunet_dice];
 		197 -> 196;
 	}
-	29	[color="0.35 0.6 0.85",
+	17	[color="0.07 0.6 0.85",
 		label="lr_flip_t2\ndesc: preproc"];
-	29 -> 16;
-	30	[color="0.12 0.6 0.85",
+	17 -> 16;
+	18	[color="0.45 0.6 0.85",
 		label="warp_t2_to_corobl_crop\nhemi: L"];
-	30 -> 29;
-	30 -> 194;
-	71	[color="0.12 0.6 0.85",
+	18 -> 17;
+	18 -> 194;
+	71	[color="0.45 0.6 0.85",
 		label="warp_t2_to_corobl_crop\nhemi: R"];
 	71 -> 70;
 	71 -> 197;

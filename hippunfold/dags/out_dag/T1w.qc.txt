@@ -15,53 +15,53 @@ strict digraph "" {
 		graph [color=blue,
 			label=qc
 		];
-		177	[color="0.59 0.6 0.85",
+		177	[color="0.43 0.6 0.85",
 			label="qc_reg_to_template\nnative_modality: T1w"];
-		178	[color="0.63 0.6 0.85",
+		178	[color="0.07 0.6 0.85",
 			label="qc_subfield\nspace: cropT1w"];
-		179	[color="0.63 0.6 0.85",
+		179	[color="0.07 0.6 0.85",
 			label="qc_subfield\nspace: cropT1w"];
-		180	[color="0.57 0.6 0.85",
+		180	[color="0.50 0.6 0.85",
 			label="qc_subfield_surf\nref_spaces: T1w"];
-		181	[color="0.57 0.6 0.85",
+		181	[color="0.50 0.6 0.85",
 			label="qc_subfield_surf\nref_spaces: T1w"];
-		182	[color="0.57 0.6 0.85",
+		182	[color="0.50 0.6 0.85",
 			label="qc_subfield_surf\nref_spaces: T1w"];
-		183	[color="0.57 0.6 0.85",
+		183	[color="0.50 0.6 0.85",
 			label="qc_subfield_surf\nref_spaces: T1w"];
-		184	[color="0.40 0.6 0.85",
+		184	[color="0.37 0.6 0.85",
 			label=plot_subj_subfields];
-		185	[color="0.54 0.6 0.85",
+		185	[color="0.36 0.6 0.85",
 			label="get_subfield_vols_subj\ncrop_ref_spaces: cropT1w"];
 		185 -> 184;
 	}
-	5	[color="0.51 0.6 0.85",
+	5	[color="0.38 0.6 0.85",
 		label=warp_gii_to_native];
 	5 -> 180;
-	23	[color="0.37 0.6 0.85",
+	23	[color="0.26 0.6 0.85",
 		label=reg_to_template];
 	23 -> 177;
-	56	[color="0.51 0.6 0.85",
+	56	[color="0.38 0.6 0.85",
 		label=warp_gii_to_native];
 	56 -> 182;
-	97	[color="0.51 0.6 0.85",
+	97	[color="0.38 0.6 0.85",
 		label=warp_gii_to_native];
 	97 -> 181;
-	120	[color="0.51 0.6 0.85",
+	120	[color="0.38 0.6 0.85",
 		label=warp_gii_to_native];
 	120 -> 183;
-	137	[color="0.04 0.6 0.85",
+	137	[color="0.58 0.6 0.85",
 		label=resample_subfields_native_crop];
 	137 -> 178;
 	137 -> 185;
-	143	[color="0.04 0.6 0.85",
+	143	[color="0.58 0.6 0.85",
 		label=resample_subfields_native_crop];
 	143 -> 179;
 	143 -> 185;
-	175	[color="0.10 0.6 0.85",
+	175	[color="0.46 0.6 0.85",
 		label=resample_native_to_crop];
 	175 -> 178;
-	176	[color="0.10 0.6 0.85",
+	176	[color="0.46 0.6 0.85",
 		label=resample_native_to_crop];
 	176 -> 179;
 }

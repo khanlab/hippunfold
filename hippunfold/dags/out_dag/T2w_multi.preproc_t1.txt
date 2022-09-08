@@ -15,16 +15,16 @@ strict digraph "" {
 		graph [color=blue,
 			label=preproc_t1
 		];
-		27	[color="0.64 0.6 0.85",
+		29	[color="0.25 0.6 0.85",
 			label="convert_template_xfm_ras2itk\nreg_suffix: T2w"];
-		44	[color="0.25 0.6 0.85",
+		44	[color="0.34 0.6 0.85",
 			label="template_xfm_itk2ras\nnative_modality: T2w"];
 	}
-	26	[color="0.38 0.6 0.85",
+	28	[color="0.00 0.6 0.85",
 		label=compose_t2_xfm_corobl];
-	26 -> 44;
-	27 -> 26;
-	28	[color="0.08 0.6 0.85",
+	28 -> 44;
+	29 -> 28;
+	30	[color="0.41 0.6 0.85",
 		label=reg_t2_to_template];
-	28 -> 27;
+	30 -> 29;
 }
