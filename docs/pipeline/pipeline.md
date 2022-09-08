@@ -79,9 +79,6 @@ nnU-net model based on the `modality` chosen. This is done on the `R` and `Lflip
 
 ![U-net workflow](../../hippunfold/dags/out_dag/T1w.nnunet.svg)
 
-The nnU-net architecture used is shown in the diagram below.
-
-![U-net architecture](../images/nnUnet_hippunfold.png)
 
 ## Template-based shape injection
 
