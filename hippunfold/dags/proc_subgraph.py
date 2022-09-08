@@ -90,12 +90,12 @@ for i, cluster_name in enumerate(subgraphs.keys()):
 
     if len(Gsubset.nodes()) > 1:
         Gsubset.write(f"{out_prefix}.{cluster_name}.txt")
-#        Gsubset.draw(f"{out_prefix}.{cluster_name}.svg", prog="dot")
-#        Gsubset.draw(f'{out_prefix}.{cluster_name}.pdf',prog='dot')
-        Gsubset.draw(f'{out_prefix}.{cluster_name}.png',prog='dot')
+        #        Gsubset.draw(f"{out_prefix}.{cluster_name}.svg", prog="dot")
+        #        Gsubset.draw(f'{out_prefix}.{cluster_name}.pdf',prog='dot')
+        Gsubset.draw(f"{out_prefix}.{cluster_name}.png", prog="dot")
 
 
 Gwithclusters.write(f"{out_prefix}.txt")
-#Gwithclusters.draw(f"{out_prefix}.svg", prog="dot")
-Gwithclusters.draw(f'{out_prefix}.png',prog='dot')
-#Gwithclusters.draw(f'{out_prefix}.pdf',prog='dot')
+# Gwithclusters.draw(f"{out_prefix}.svg", prog="dot")
+Gwithclusters.draw(f"{out_prefix}.png", prog="dot")
+# Gwithclusters.draw(f'{out_prefix}.pdf',prog='dot')
