@@ -42,13 +42,21 @@ jobs:
           find: 'version = "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
           replace: 'version = "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
 
-      - name: Update version in pipeline_description
+      - name: Update version in pipeline_description (not actually used)
         uses: jacobtomlinson/gha-find-replace@master
         with:
           include: 'hippunfold/pipeline_description.json'
-          find: 'version = "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
-          replace: 'version = "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
+          find: '"Version": "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
+          replace: '"Version": "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
 
+      - name: Update version in config/snakebids.yml
+        uses: jacobtomlinson/gha-find-replace@master
+        with:
+          include: 'hippunfold/config/snakebids.yml'
+          find: 'version: "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
+          replace: 'version: "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
+
+ 
       - name: Commit updates
         env:
           SNAKEBIDS_VERSION: ${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}
