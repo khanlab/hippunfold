@@ -19,9 +19,9 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 
-project = 'hippunfold'
+project = 'HippUnfold Documentation'
 copyright = '2020, Jordan DeKraker and Ali R. Khan'
-author = 'Jordan DeKraker and Ali R. Khan'
+author = 'HippUnfold Development Team'
 
 
 # -- General configuration ---------------------------------------------------
