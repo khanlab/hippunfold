@@ -10,6 +10,8 @@
 :maxdepth: 2
 
 getting_started/installation
+getting_started/docker
+getting_started/singularity
 ```
 
 
@@ -22,11 +24,10 @@ getting_started/installation
 
 
 usage/cli
-usage/standardBIDS
+usage/useful_options
 usage/specializedScans
 
 ```
-
 
 
 ```{toctree}

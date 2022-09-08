@@ -1,58 +1,29 @@
-# BIDS whole-brain data
+# Running HippUnfold on your data
 
-This tutorial will cover applications of HippUnfold to an entire
-[BIDS-compliant dataset](https://bids.neuroimaging.io/), meaning that
-the same scan types are expected for all subjects which will be
-processed in parallel. A typical call might look like this:
+This section goes over the command-line options you will find
+most useful when running HippUnfold on your dataset, along with 
+describing some of the issues you might face.
 
-    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant --modality T1w
+Note: Please first refer to the simple example in the Installation 
+section, which goes over running HippUnfold on a test dataset, and the
+essential required options.
 
-Depending on the method you used for installation, you may require
-additional arguments such as `--cores all` or `--use-singularity`, or
-prefixing the command with `singularity run`. This will expect
-`PATH_TO_BIDS_DIR` to contain something like the following:
+## Selecting the modality to use
 
-    PATH_TO_BIDS_DIR/
-    └── dataset_description.json
-    └── sub-001/
-        └── anat/
-            ├── sub-001_T1w.nii.gz
-            └── sub-001_T2w.nii.gz
-    └── sub-002/
-    ...
+The `--modality` option must be chosen when running HippUnfold, and it affects what 
+U-net model will be used, and how the pre-processing will be performed on 
+the images.
 
-The `--modality` flag is **required** to specify which input image type should be used and in most cases, T1w should be most robust (though other types are supported!).
+If you have sub-millimetric, isotropic, whole-brain T1w data, the `--modality T1w` option is recommended. 
 
-The T1w image is used to register to a standardized
-template (CITI168), making it possible to reorient, upsample, and crop
-around the left and right hippocampi (this is referred to within
-HippUnfold as `space-corobl`). Note that the T1w image should 
-have a whole-brain field of view. 
+If you T2w data, you can use the `--modality T2w` option, however, you may need to also
+use the T1w data for template registration (`--t1-reg-template`), especially if you have a limited FOV.
+This is typically most robust as long as a full brain FOV T1w image is available. If this registration
+ is still failing then it may be improved with the `--rigid-reg-template` flag.
 
-More examples of possible BIDS-compliant datasets can be found in
-[hippunfold/test\_data/](https://github.com/khanlab/hippunfold/tree/master/test_data).
-
-## Different input modalities 
-
-If using `modality=T1w`, HippUnfold expects the `PATH_TO_BIDS_DIR` to contain at least
-one T1w file for segmenting intrahippocampal
-structures like the SRLM. However, we have
-also provided models trained with other contrasts, such as T2w, or, users can input
-their own custom manual segmentations for unfolding. These can be
-specified with the `--modality` flag. For example:
-
-    hippunfold  PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant --modality T2w
-
-would work for a dataset with only T2w images, like this one:
-
-    PATH_TO_BIDS_DIR/
-    └── dataset_description.json
-    └── sub-001/
-        └── anat/
-            └── sub-001_T2w.nii.gz
-    ...
-
-Note that in this case, registration to a T2w CITI168 template will be performed with the input T2w image. In some cases it may be preferrable to use a T1w image for registration to the standard CITI168 template. A T1w image can be registered to both the input T2w and T1w CITI168 template with the `--t1-reg-template` flag. This is typically most robust as long as a full brain FOV T1w image is available. If this registering is still failing then it may be improved with the `--rigid-reg-template` flag.
+For protocols employing high-resolution, b-value 500, hippocampal diffusion-weighted imaging, 
+the `--modality hippb500` option can be used, and does not require registration
+to a template (providing your acquisition is axial and oblique to the hippocampus).
 
 Specifying a manual segmentation (eg. `--modality segT1w`)
 expects to additionally find an input file with the suffix `_dseg` which should
@@ -74,6 +45,60 @@ would run only on `sub-001`. You can add additional subjects by listing addition
 runs for `sub-001` and `sub-001`.
 
 Also, if you want to exclude a subject, you can use the `--exclude-participant-label` option.
+
+
+## Known limitations for BIDS parsing
+
+
+HippUnfold uses snakebids, which makes use of pybids to parse 
+a [BIDS-compliant dataset](https://bids.neuroimaging.io/). However,
+because of the way Snakebids and Snakemake operate, one limitation is that 
+the input files in your BIDS dataset need to be consistent in terms of 
+what optional BIDS entities exist in them. We can use the acquisition (`acq`) 
+entity as an example. HippUnfold should have no problem parsing the following dataset:
+
+    PATH_TO_BIDS_DIR/
+    └── dataset_description.json
+    └── sub-001/
+        └── anat/
+            ├── sub-001_acq-mprage_T1w.nii.gz
+    └── sub-002/
+        └── anat/
+            ├── sub-002_acq-spgr_T1w.nii.gz
+    ...
+
+as the path (with wildcards) will be interpreted as `sub-{subject}_acq-{acq}_T1w.nii.gz`.
+
+However, the following dataset will raise an error:
+
+    PATH_TO_BIDS_DIR/
+    └── dataset_description.json
+    └── sub-001/
+        └── anat/
+            ├── sub-001_acq-mprage_T1w.nii.gz
+    └── sub-002/
+        └── anat/
+            ├── sub-002_T1w.nii.gz
+    ...
+
+because two distinct paths (with wildcards) would be found for T1w images:
+```
+sub-{subject}_acq-{acq}_T1w.nii.gz
+``` 
+and 
+```
+sub-{subject}_T1w.nii.gz
+```
+
+Similarly, you could not have some subjects with the `ses` identifier, 
+and some subjects without it. 
+
+There will soon be added functionality in snakebids to filter out extra files, 
+but for now, if your dataset has these issues you will need to rename or remove extraneous files.
+
+More examples of possible BIDS-compliant datasets can be found in
+[hippunfold/test\_data/](https://github.com/khanlab/hippunfold/tree/master/test_data).
+
 
 ## Parsing Non-BIDS datasets with custom paths
 
