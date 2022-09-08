@@ -43,6 +43,7 @@ The overall workflow can be summarized in the following steps:
 
 **Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
 
+**Additional toolbox** for plotting, mapping fMRI, DWI or other data, and manipulating surfaces [here](https://github.com/jordandekraker/hippunfold_toolbox)
 
 **Relevant papers:**
 -  DeKraker J, Haast RAM, Yousif MD, Karat B, Köhler S, Khan AR. HippUnfold: Automated hippocampal unfolding, morphometry, and subfield segmentation. bioRxiv 2021.12.03.471134; doi: 10.1101/2021.12.03.471134 [link](https://www.biorxiv.org/content/10.1101/2021.12.03.471134v1)
