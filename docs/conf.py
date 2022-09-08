@@ -19,9 +19,9 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 
-project = 'hippunfold'
+project = 'HippUnfold Documentation'
 copyright = '2020, Jordan DeKraker and Ali R. Khan'
-author = 'Jordan DeKraker and Ali R. Khan'
+author = 'HippUnfold Development Team'
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,11 +32,9 @@ author = 'Jordan DeKraker and Ali R. Khan'
 extensions = [
     "sphinx_rtd_theme",
     "sphinxarg.ext",
-    'm2r2',
+    "myst_parser",
 ]
 
-source_suffix = ['.rst', '.md']
-m2r_parse_relative_links = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -46,6 +44,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+myst_enable_extensions = ['html_image','dollarmath','amsmath']
 
 master_doc = 'index'
 

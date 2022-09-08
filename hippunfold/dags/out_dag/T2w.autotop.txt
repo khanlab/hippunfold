@@ -1,0 +1,122 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=autotop
+		];
+		11	[color="0.07 0.6 0.85",
+			label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+		12	[color="0.40 0.6 0.85",
+			label=laplace_coords_hipp];
+		12 -> 11;
+		29	[color="0.07 0.6 0.85",
+			label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+		30	[color="0.40 0.6 0.85",
+			label=laplace_coords_hipp];
+		30 -> 29;
+		32	[color="0.15 0.6 0.85",
+			label="unflip_coords_equivol\ndesc: equivol\nhemi: L"];
+		33	[color="0.01 0.6 0.85",
+			label=equivolume_coords];
+		33 -> 32;
+		34	[color="0.18 0.6 0.85",
+			label="prep_equivolume_coords\ndir: IO"];
+		34 -> 33;
+		61	[color="0.40 0.6 0.85",
+			label=laplace_coords_hipp];
+		69	[color="0.40 0.6 0.85",
+			label=laplace_coords_hipp];
+		71	[color="0.01 0.6 0.85",
+			label=equivolume_coords];
+		72	[color="0.18 0.6 0.85",
+			label="prep_equivolume_coords\ndir: IO"];
+		72 -> 71;
+		104	[color="0.07 0.6 0.85",
+			label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+		105	[color="0.02 0.6 0.85",
+			label=laplace_coords_dentate];
+		105 -> 104;
+		107	[color="0.07 0.6 0.85",
+			label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+		108	[color="0.02 0.6 0.85",
+			label=laplace_coords_dentate];
+		108 -> 107;
+		110	[color="0.07 0.6 0.85",
+			label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+		111	[color="0.02 0.6 0.85",
+			label=laplace_coords_dentate];
+		111 -> 110;
+		125	[color="0.02 0.6 0.85",
+			label=laplace_coords_dentate];
+		127	[color="0.02 0.6 0.85",
+			label=laplace_coords_dentate];
+		129	[color="0.02 0.6 0.85",
+			label=laplace_coords_dentate];
+		158	[color="0.07 0.6 0.85",
+			label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+		159	[color="0.40 0.6 0.85",
+			label=laplace_coords_hipp];
+		159 -> 158;
+		162	[color="0.40 0.6 0.85",
+			label=laplace_coords_hipp];
+	}
+	13	[color="0.51 0.6 0.85",
+		label=reinsert_subject_labels];
+	13 -> 12;
+	13 -> 30;
+	13 -> 34;
+	13 -> 159;
+	28	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
+	28 -> 12;
+	31	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
+	31 -> 30;
+	62	[color="0.51 0.6 0.85",
+		label=reinsert_subject_labels];
+	62 -> 61;
+	62 -> 69;
+	62 -> 72;
+	62 -> 162;
+	68	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
+	68 -> 61;
+	70	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
+	70 -> 69;
+	106	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: dentate\ndir: AP"];
+	106 -> 105;
+	109	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: dentate\ndir: PD"];
+	109 -> 108;
+	112	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: dentate\ndir: IO"];
+	112 -> 111;
+	126	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: dentate\ndir: AP"];
+	126 -> 125;
+	128	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: dentate\ndir: PD"];
+	128 -> 127;
+	130	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: dentate\ndir: IO"];
+	130 -> 129;
+	160	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
+	160 -> 159;
+	163	[color="0.49 0.6 0.85",
+		label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
+	163 -> 162;
+}

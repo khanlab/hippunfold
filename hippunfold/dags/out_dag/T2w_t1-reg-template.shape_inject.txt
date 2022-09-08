@@ -1,0 +1,111 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=shape_inject
+		];
+		13	[color="0.55 0.6 0.85",
+			label=reinsert_subject_labels];
+		144	[color="0.49 0.6 0.85",
+			label="unflip_postproc\nhemi: L"];
+		13 -> 144;
+		14	[color="0.64 0.6 0.85",
+			label=template_shape_inject];
+		14 -> 13;
+		15	[color="0.21 0.6 0.85",
+			label="import_template_shape\nsubject: 001"];
+		15 -> 14;
+		30	[color="0.45 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_space-template_desc-hipptissue"];
+		15 -> 30;
+		67	[color="0.64 0.6 0.85",
+			label=template_shape_inject];
+		15 -> 67;
+		29	[color="0.35 0.6 0.85",
+			label="template_shape_reg\nhemi: Lflip\nsubject: 001"];
+		29 -> 14;
+		32	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
+		29 -> 32;
+		35	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
+		29 -> 35;
+		110	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: AP"];
+		29 -> 110;
+		113	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: PD"];
+		29 -> 113;
+		116	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: IO"];
+		29 -> 116;
+		164	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
+		29 -> 164;
+		30 -> 29;
+		70	[color="0.35 0.6 0.85",
+			label="template_shape_reg\nhemi: R\nsubject: 001"];
+		30 -> 70;
+		31	[color="0.45 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_hemi-Lflip_space-corobl_desc-nnunet"];
+		31 -> 29;
+		66	[color="0.55 0.6 0.85",
+			label=reinsert_subject_labels];
+		67 -> 66;
+		70 -> 67;
+		72	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
+		70 -> 72;
+		74	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
+		70 -> 74;
+		130	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: AP"];
+		70 -> 130;
+		132	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: PD"];
+		70 -> 132;
+		134	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: IO"];
+		70 -> 134;
+		167	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
+		70 -> 167;
+		71	[color="0.45 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_hemi-R_space-corobl_desc-nnunet"];
+		71 -> 70;
+	}
+	16	[color="0.65 0.6 0.85",
+		label="run_inference\nhemi: Lflip"];
+	16 -> 13;
+	16 -> 14;
+	16 -> 31;
+	16 -> 32;
+	16 -> 35;
+	16 -> 110;
+	16 -> 113;
+	16 -> 116;
+	16 -> 164;
+	68	[color="0.65 0.6 0.85",
+		label=run_inference];
+	68 -> 66;
+	68 -> 67;
+	68 -> 71;
+	68 -> 72;
+	68 -> 74;
+	68 -> 130;
+	68 -> 132;
+	68 -> 134;
+	68 -> 167;
+}

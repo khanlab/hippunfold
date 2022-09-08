@@ -1,0 +1,75 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=subfields
+		];
+		138	[color="0.61 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		142	[color="0.25 0.6 0.85",
+			label="resample_subfields_to_native\nnative_modality: T1w"];
+		138 -> 142;
+		140	[color="0.02 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		140 -> 138;
+		144	[color="0.61 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		147	[color="0.25 0.6 0.85",
+			label="resample_subfields_to_native\nnative_modality: T1w"];
+		144 -> 147;
+		145	[color="0.02 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		145 -> 144;
+	}
+	11	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	11 -> 140;
+	19	[color="0.16 0.6 0.85",
+		label=n4_t1];
+	19 -> 142;
+	19 -> 147;
+	21	[color="0.18 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	21 -> 142;
+	21 -> 147;
+	28	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	28 -> 140;
+	31	[color="0.04 0.6 0.85",
+		label="unflip_coords_equivol\ndesc: equivol\nhemi: L"];
+	31 -> 140;
+	52	[color="0.10 0.6 0.85",
+		label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: L"];
+	52 -> 140;
+	60	[color="0.59 0.6 0.85",
+		label=laplace_coords_hipp];
+	60 -> 145;
+	61	[color="0.01 0.6 0.85",
+		label=reinsert_subject_labels];
+	61 -> 60;
+	68	[color="0.59 0.6 0.85",
+		label=laplace_coords_hipp];
+	61 -> 68;
+	61 -> 144;
+	68 -> 145;
+	70	[color="0.00 0.6 0.85",
+		label=equivolume_coords];
+	70 -> 145;
+	92	[color="0.10 0.6 0.85",
+		label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: R"];
+	92 -> 145;
+	139	[color="0.23 0.6 0.85",
+		label="unflip_postproc\nhemi: L"];
+	139 -> 138;
+}

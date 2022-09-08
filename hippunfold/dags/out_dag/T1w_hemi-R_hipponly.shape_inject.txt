@@ -1,0 +1,54 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=shape_inject
+		];
+		11	[color="0.13 0.6 0.85",
+			label=reinsert_subject_labels];
+		12	[color="0.07 0.6 0.85",
+			label=template_shape_inject];
+		12 -> 11;
+		13	[color="0.39 0.6 0.85",
+			label="import_template_shape\nsubject: 001"];
+		13 -> 12;
+		22	[color="0.20 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_space-template_desc-hipptissue"];
+		13 -> 22;
+		21	[color="0.04 0.6 0.85",
+			label="template_shape_reg\nhemi: R\nsubject: 001"];
+		21 -> 12;
+		24	[color="0.08 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
+		21 -> 24;
+		26	[color="0.08 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
+		21 -> 26;
+		60	[color="0.08 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
+		21 -> 60;
+		22 -> 21;
+		23	[color="0.20 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_hemi-R_space-corobl_desc-nnunet"];
+		23 -> 21;
+	}
+	14	[color="0.57 0.6 0.85",
+		label=run_inference];
+	14 -> 11;
+	14 -> 12;
+	14 -> 23;
+	14 -> 24;
+	14 -> 26;
+	14 -> 60;
+}

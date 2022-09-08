@@ -1,0 +1,30 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=preproc_t1
+		];
+		23	[color="0.53 0.6 0.85",
+			label=convert_template_xfm_ras2itk];
+		34	[color="0.41 0.6 0.85",
+			label=template_xfm_itk2ras];
+	}
+	22	[color="0.31 0.6 0.85",
+		label=compose_t2_xfm_corobl];
+	22 -> 34;
+	23 -> 22;
+	24	[color="0.03 0.6 0.85",
+		label=reg_t2_to_template];
+	24 -> 23;
+}

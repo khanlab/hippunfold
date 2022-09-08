@@ -1,0 +1,62 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=qc
+		];
+		157	[color="0.59 0.6 0.85",
+			label="qc_subfield\natlas: bigbrain\nspace: corobl"];
+		159	[color="0.59 0.6 0.85",
+			label="qc_subfield\natlas: bigbrain\nspace: corobl"];
+		161	[color="0.40 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: corobl"];
+		162	[color="0.40 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: corobl"];
+		163	[color="0.40 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: corobl"];
+		164	[color="0.40 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: corobl"];
+		165	[color="0.56 0.6 0.85",
+			label=plot_subj_subfields];
+		166	[color="0.31 0.6 0.85",
+			label="get_subfield_vols_subj\natlas: bigbrain\ncrop_ref_spaces: corobl\nsubject: 001"];
+		166 -> 165;
+	}
+	5	[color="0.47 0.6 0.85",
+		label=correct_nan_vertices];
+	5 -> 161;
+	47	[color="0.47 0.6 0.85",
+		label=correct_nan_vertices];
+	47 -> 163;
+	85	[color="0.47 0.6 0.85",
+		label=correct_nan_vertices];
+	85 -> 162;
+	107	[color="0.47 0.6 0.85",
+		label=correct_nan_vertices];
+	107 -> 164;
+	123	[color="0.66 0.6 0.85",
+		label="copy_subfields_to_results\next: nii.gz\npost: atlas-bigbrain_\npre: sub-001/anat/sub-001_hemi-L_space-corobl\nsuffix: dseg"];
+	123 -> 157;
+	123 -> 166;
+	127	[color="0.66 0.6 0.85",
+		label="copy_subfields_to_results\next: nii.gz\npost: atlas-bigbrain_\npre: sub-001/anat/sub-001_hemi-R_space-corobl\nsuffix: dseg"];
+	127 -> 159;
+	127 -> 166;
+	158	[color="0.50 0.6 0.85",
+		label=cp_b500_to_anat_dir];
+	158 -> 157;
+	160	[color="0.50 0.6 0.85",
+		label=cp_b500_to_anat_dir];
+	160 -> 159;
+}

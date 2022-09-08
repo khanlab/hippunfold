@@ -1,0 +1,46 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=shape_inject
+		];
+		12	[color="0.33 0.6 0.85",
+			label=reinsert_subject_labels];
+		38	[color="0.37 0.6 0.85",
+			label=unflip_postproc];
+		12 -> 38;
+		13	[color="0.50 0.6 0.85",
+			label=template_shape_inject];
+		13 -> 12;
+		14	[color="0.48 0.6 0.85",
+			label=import_template_shape];
+		14 -> 13;
+		19	[color="0.17 0.6 0.85",
+			label=prep_segs_for_greedy];
+		14 -> 19;
+		18	[color="0.23 0.6 0.85",
+			label=template_shape_reg];
+		18 -> 13;
+		20	[color="0.25 0.6 0.85",
+			label=inject_init_laplace_coords];
+		18 -> 20;
+		19 -> 18;
+	}
+	15	[color="0.16 0.6 0.85",
+		label=run_inference];
+	15 -> 12;
+	15 -> 13;
+	15 -> 19;
+	15 -> 20;
+}

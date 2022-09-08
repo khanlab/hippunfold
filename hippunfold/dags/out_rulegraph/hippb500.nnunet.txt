@@ -1,0 +1,28 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=nnunet
+		];
+		15	[color="0.16 0.6 0.85",
+			label=run_inference];
+	}
+	16	[color="0.05 0.6 0.85",
+		label=lr_flip_b500];
+	16 -> 15;
+	17	[color="0.28 0.6 0.85",
+		label=resample_hippdwi_to_template];
+	17 -> 15;
+	17 -> 16;
+}

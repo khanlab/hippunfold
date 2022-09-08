@@ -1,0 +1,307 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=gifti
+		];
+		1	[color="0.56 0.6 0.85",
+			label="merge_lr_spec_file\nautotop: hipp"];
+		2	[color="0.08 0.6 0.85",
+			label="create_spec_file_hipp\nlabel: hipp"];
+		2 -> 1;
+		3	[color="0.44 0.6 0.85",
+			label=calculate_gyrification];
+		3 -> 2;
+		60	[color="0.40 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: gyrification"];
+		3 -> 60;
+		4	[color="0.46 0.6 0.85",
+			label="calculate_surface_area\nspace: T2w"];
+		4 -> 3;
+		5	[color="0.61 0.6 0.85",
+			label=warp_gii_to_native];
+		5 -> 2;
+		5 -> 4;
+		46	[color="0.01 0.6 0.85",
+			label="smooth_surface\nspace: T2w"];
+		5 -> 46;
+		6	[color="0.28 0.6 0.85",
+			label=correct_nan_vertices];
+		6 -> 5;
+		7	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		7 -> 6;
+		42	[color="0.31 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		42 -> 7;
+		43	[color="0.29 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: L\nsubject: 001\nsurfname: midthickness"];
+		43 -> 2;
+		43 -> 42;
+		45	[color="0.10 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		45 -> 2;
+		82	[color="0.40 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: curvature"];
+		45 -> 82;
+		46 -> 45;
+		47	[color="0.13 0.6 0.85",
+			label="calculate_thickness_from_surface\nspace: T2w"];
+		47 -> 2;
+		85	[color="0.40 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: thickness"];
+		47 -> 85;
+		48	[color="0.61 0.6 0.85",
+			label=warp_gii_to_native];
+		48 -> 47;
+		49	[color="0.28 0.6 0.85",
+			label=correct_nan_vertices];
+		49 -> 48;
+		50	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		50 -> 49;
+		51	[color="0.31 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		51 -> 50;
+		52	[color="0.29 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: L\nsubject: 001\nsurfname: inner"];
+		52 -> 51;
+		53	[color="0.61 0.6 0.85",
+			label=warp_gii_to_native];
+		53 -> 47;
+		54	[color="0.28 0.6 0.85",
+			label=correct_nan_vertices];
+		54 -> 53;
+		55	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		55 -> 54;
+		56	[color="0.31 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		56 -> 55;
+		57	[color="0.29 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: L\nsubject: 001\nsurfname: outer"];
+		57 -> 56;
+		58	[color="0.09 0.6 0.85",
+			label="nii_to_label_gii\ndensity: 0p5mm\nspace: T2w"];
+		58 -> 2;
+		59	[color="0.51 0.6 0.85",
+			label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: L"];
+		59 -> 58;
+		60 -> 2;
+		97	[color="0.08 0.6 0.85",
+			label="create_spec_file_hipp\nlabel: hipp"];
+		60 -> 97;
+		61	[color="0.44 0.6 0.85",
+			label=calculate_gyrification];
+		61 -> 60;
+		61 -> 97;
+		62	[color="0.46 0.6 0.85",
+			label="calculate_surface_area\nspace: T2w"];
+		62 -> 61;
+		63	[color="0.61 0.6 0.85",
+			label=warp_gii_to_native];
+		63 -> 62;
+		84	[color="0.01 0.6 0.85",
+			label="smooth_surface\nspace: T2w"];
+		63 -> 84;
+		63 -> 97;
+		64	[color="0.28 0.6 0.85",
+			label=correct_nan_vertices];
+		64 -> 63;
+		65	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		65 -> 64;
+		80	[color="0.31 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		80 -> 65;
+		81	[color="0.29 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: R\nsubject: 001\nsurfname: midthickness"];
+		81 -> 80;
+		81 -> 97;
+		82 -> 2;
+		82 -> 97;
+		83	[color="0.10 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		83 -> 82;
+		83 -> 97;
+		84 -> 83;
+		85 -> 2;
+		85 -> 97;
+		86	[color="0.13 0.6 0.85",
+			label="calculate_thickness_from_surface\nspace: T2w"];
+		86 -> 85;
+		86 -> 97;
+		87	[color="0.61 0.6 0.85",
+			label=warp_gii_to_native];
+		87 -> 86;
+		88	[color="0.28 0.6 0.85",
+			label=correct_nan_vertices];
+		88 -> 87;
+		89	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		89 -> 88;
+		90	[color="0.31 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		90 -> 89;
+		91	[color="0.29 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: R\nsubject: 001\nsurfname: inner"];
+		91 -> 90;
+		92	[color="0.61 0.6 0.85",
+			label=warp_gii_to_native];
+		92 -> 86;
+		93	[color="0.28 0.6 0.85",
+			label=correct_nan_vertices];
+		93 -> 92;
+		94	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		94 -> 93;
+		95	[color="0.31 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		95 -> 94;
+		96	[color="0.29 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: R\nsubject: 001\nsurfname: outer"];
+		96 -> 95;
+		97 -> 1;
+		98	[color="0.09 0.6 0.85",
+			label="nii_to_label_gii\ndensity: 0p5mm\nspace: T2w"];
+		98 -> 97;
+		99	[color="0.51 0.6 0.85",
+			label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: R"];
+		99 -> 98;
+		100	[color="0.56 0.6 0.85",
+			label="merge_lr_spec_file\nautotop: dentate"];
+		101	[color="0.60 0.6 0.85",
+			label="create_spec_file_dentate\nlabel: dentate"];
+		101 -> 100;
+		102	[color="0.44 0.6 0.85",
+			label=calculate_gyrification];
+		102 -> 101;
+		124	[color="0.40 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: gyrification"];
+		102 -> 124;
+		103	[color="0.46 0.6 0.85",
+			label="calculate_surface_area\nspace: T2w"];
+		103 -> 102;
+		104	[color="0.61 0.6 0.85",
+			label=warp_gii_to_native];
+		104 -> 101;
+		104 -> 103;
+		123	[color="0.01 0.6 0.85",
+			label="smooth_surface\nspace: T2w"];
+		104 -> 123;
+		105	[color="0.28 0.6 0.85",
+			label=correct_nan_vertices];
+		105 -> 104;
+		106	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		106 -> 105;
+		120	[color="0.31 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		120 -> 106;
+		121	[color="0.29 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: dentate\ndensity: 0p5mm\nhemi: L\nsubject: 001\nsurfname: midthickness"];
+		121 -> 101;
+		121 -> 120;
+		122	[color="0.10 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		122 -> 101;
+		140	[color="0.40 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: curvature"];
+		122 -> 140;
+		123 -> 122;
+		124 -> 101;
+		143	[color="0.60 0.6 0.85",
+			label="create_spec_file_dentate\nlabel: dentate"];
+		124 -> 143;
+		125	[color="0.44 0.6 0.85",
+			label=calculate_gyrification];
+		125 -> 124;
+		125 -> 143;
+		126	[color="0.46 0.6 0.85",
+			label="calculate_surface_area\nspace: T2w"];
+		126 -> 125;
+		127	[color="0.61 0.6 0.85",
+			label=warp_gii_to_native];
+		127 -> 126;
+		142	[color="0.01 0.6 0.85",
+			label="smooth_surface\nspace: T2w"];
+		127 -> 142;
+		127 -> 143;
+		128	[color="0.28 0.6 0.85",
+			label=correct_nan_vertices];
+		128 -> 127;
+		129	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		129 -> 128;
+		138	[color="0.31 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		138 -> 129;
+		139	[color="0.29 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: dentate\ndensity: 0p5mm\nhemi: R\nsubject: 001\nsurfname: midthickness"];
+		139 -> 138;
+		139 -> 143;
+		140 -> 101;
+		140 -> 143;
+		141	[color="0.10 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		141 -> 140;
+		141 -> 143;
+		142 -> 141;
+		143 -> 100;
+	}
+	8	[color="0.23 0.6 0.85",
+		label=create_warps_hipp];
+	8 -> 7;
+	8 -> 50;
+	8 -> 55;
+	9	[color="0.39 0.6 0.85",
+		label="create_unfold_ref\nautotop: hipp\nsubject: 001"];
+	9 -> 8;
+	9 -> 42;
+	9 -> 51;
+	9 -> 56;
+	9 -> 59;
+	66	[color="0.23 0.6 0.85",
+		label=create_warps_hipp];
+	9 -> 66;
+	9 -> 80;
+	9 -> 90;
+	9 -> 95;
+	9 -> 99;
+	44	[color="0.34 0.6 0.85",
+		label="template_xfm_itk2ras\nnative_modality: T2w"];
+	44 -> 5;
+	44 -> 48;
+	44 -> 53;
+	44 -> 63;
+	44 -> 87;
+	44 -> 92;
+	44 -> 104;
+	44 -> 127;
+	66 -> 65;
+	66 -> 89;
+	66 -> 94;
+	107	[color="0.60 0.6 0.85",
+		label=create_warps_dentate];
+	107 -> 106;
+	108	[color="0.39 0.6 0.85",
+		label="create_unfold_ref\nautotop: dentate\nsubject: 001"];
+	108 -> 107;
+	108 -> 120;
+	130	[color="0.60 0.6 0.85",
+		label=create_warps_dentate];
+	108 -> 130;
+	108 -> 138;
+	130 -> 129;
+}

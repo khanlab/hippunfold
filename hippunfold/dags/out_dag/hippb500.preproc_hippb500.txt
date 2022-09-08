@@ -1,0 +1,32 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=preproc_hippb500
+		];
+		16	[color="0.41 0.6 0.85",
+			label=lr_flip_b500];
+		17	[color="0.36 0.6 0.85",
+			label="resample_hippdwi_to_template\nhemi: L\nsubject: 001"];
+		17 -> 16;
+		158	[color="0.50 0.6 0.85",
+			label=cp_b500_to_anat_dir];
+		17 -> 158;
+		54	[color="0.36 0.6 0.85",
+			label="resample_hippdwi_to_template\nhemi: R\nsubject: 001"];
+		160	[color="0.50 0.6 0.85",
+			label=cp_b500_to_anat_dir];
+		54 -> 160;
+	}
+}

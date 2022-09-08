@@ -1,0 +1,64 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=resample_final_to_crop_native
+		];
+		43	[color="0.06 0.6 0.85",
+			label=resample_subfields_native_crop];
+		47	[color="0.18 0.6 0.85",
+			label=create_native_crop_ref];
+		47 -> 43;
+		49	[color="0.11 0.6 0.85",
+			label=resample_coords_native_crop];
+		47 -> 49;
+		52	[color="0.24 0.6 0.85",
+			label=resample_native_to_crop];
+		47 -> 52;
+	}
+	11	[color="0.39 0.6 0.85",
+		label=unflip_coords];
+	11 -> 49;
+	12	[color="0.09 0.6 0.85",
+		label=laplace_coords_hipp];
+	12 -> 11;
+	12 -> 49;
+	19	[color="0.12 0.6 0.85",
+		label=n4_t1];
+	48	[color="0.07 0.6 0.85",
+		label=resample_subfields_to_native];
+	19 -> 48;
+	19 -> 52;
+	21	[color="0.44 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	21 -> 43;
+	21 -> 48;
+	21 -> 49;
+	27	[color="0.35 0.6 0.85",
+		label=unflip_coords_equivol];
+	27 -> 49;
+	28	[color="0.43 0.6 0.85",
+		label=equivolume_coords];
+	28 -> 27;
+	28 -> 49;
+	42	[color="0.11 0.6 0.85",
+		label=laplace_coords_dentate];
+	42 -> 11;
+	42 -> 49;
+	44	[color="0.52 0.6 0.85",
+		label=combine_tissue_subfield_labels_corobl];
+	44 -> 43;
+	44 -> 48;
+	48 -> 47;
+}

@@ -1,0 +1,147 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=warps
+		];
+		8	[color="0.54 0.6 0.85",
+			label=create_warps_hipp];
+		167	[color="0.33 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T1w"];
+		8 -> 167;
+		171	[color="0.19 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		8 -> 171;
+		9	[color="0.47 0.6 0.85",
+			label="create_unfold_ref\nautotop: hipp\nsubject: 001"];
+		9 -> 8;
+		10	[color="0.14 0.6 0.85",
+			label=create_unfold_coord_map];
+		9 -> 10;
+		59	[color="0.54 0.6 0.85",
+			label=create_warps_hipp];
+		9 -> 59;
+		9 -> 167;
+		168	[color="0.33 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T1w"];
+		9 -> 168;
+		9 -> 171;
+		172	[color="0.19 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		9 -> 172;
+		10 -> 8;
+		10 -> 59;
+		34	[color="0.46 0.6 0.85",
+			label=create_native_coord_ref];
+		34 -> 8;
+		59 -> 168;
+		59 -> 172;
+		72	[color="0.46 0.6 0.85",
+			label="create_native_coord_ref\nautotop: hipp"];
+		72 -> 59;
+		100	[color="0.06 0.6 0.85",
+			label=create_warps_dentate];
+		169	[color="0.33 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T1w"];
+		100 -> 169;
+		173	[color="0.19 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		100 -> 173;
+		101	[color="0.47 0.6 0.85",
+			label="create_unfold_ref\nautotop: dentate\nsubject: 001"];
+		101 -> 100;
+		102	[color="0.14 0.6 0.85",
+			label=create_unfold_coord_map];
+		101 -> 102;
+		123	[color="0.06 0.6 0.85",
+			label=create_warps_dentate];
+		101 -> 123;
+		101 -> 169;
+		170	[color="0.33 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T1w"];
+		101 -> 170;
+		101 -> 173;
+		174	[color="0.19 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		101 -> 174;
+		102 -> 100;
+		102 -> 123;
+		112	[color="0.46 0.6 0.85",
+			label=create_native_coord_ref];
+		112 -> 100;
+		123 -> 170;
+		123 -> 174;
+		130	[color="0.46 0.6 0.85",
+			label="create_native_coord_ref\nautotop: dentate"];
+		130 -> 123;
+	}
+	11	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	11 -> 8;
+	11 -> 34;
+	21	[color="0.18 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	21 -> 167;
+	21 -> 168;
+	21 -> 169;
+	21 -> 170;
+	21 -> 171;
+	21 -> 172;
+	21 -> 173;
+	21 -> 174;
+	28	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	28 -> 8;
+	31	[color="0.04 0.6 0.85",
+		label="unflip_coords_equivol\ndesc: equivol\nhemi: L"];
+	31 -> 8;
+	60	[color="0.59 0.6 0.85",
+		label=laplace_coords_hipp];
+	60 -> 59;
+	60 -> 72;
+	68	[color="0.59 0.6 0.85",
+		label=laplace_coords_hipp];
+	68 -> 59;
+	70	[color="0.00 0.6 0.85",
+		label=equivolume_coords];
+	70 -> 59;
+	103	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	103 -> 100;
+	103 -> 112;
+	106	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	106 -> 100;
+	109	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	109 -> 100;
+	124	[color="0.25 0.6 0.85",
+		label=laplace_coords_dentate];
+	124 -> 123;
+	124 -> 130;
+	126	[color="0.25 0.6 0.85",
+		label=laplace_coords_dentate];
+	126 -> 123;
+	128	[color="0.25 0.6 0.85",
+		label=laplace_coords_dentate];
+	128 -> 123;
+	141	[color="0.61 0.6 0.85",
+		label=create_native_crop_ref];
+	141 -> 171;
+	141 -> 173;
+	146	[color="0.61 0.6 0.85",
+		label=create_native_crop_ref];
+	146 -> 172;
+	146 -> 174;
+}

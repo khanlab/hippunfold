@@ -1,0 +1,58 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=subfields
+		];
+		45	[color="0.15 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		49	[color="0.48 0.6 0.85",
+			label=resample_subfields_to_native];
+		45 -> 49;
+		47	[color="0.32 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		47 -> 45;
+	}
+	11	[color="0.61 0.6 0.85",
+		label=unflip_coords];
+	11 -> 47;
+	12	[color="0.02 0.6 0.85",
+		label=laplace_coords_hipp];
+	12 -> 11;
+	12 -> 47;
+	13	[color="0.04 0.6 0.85",
+		label=reinsert_subject_labels];
+	13 -> 12;
+	13 -> 45;
+	46	[color="0.24 0.6 0.85",
+		label=unflip_postproc];
+	13 -> 46;
+	19	[color="0.18 0.6 0.85",
+		label=avg_aligned_or_cp_t2];
+	19 -> 49;
+	22	[color="0.31 0.6 0.85",
+		label=compose_t2_xfm_corobl];
+	22 -> 49;
+	28	[color="0.39 0.6 0.85",
+		label=unflip_coords_equivol];
+	28 -> 47;
+	29	[color="0.19 0.6 0.85",
+		label=equivolume_coords];
+	29 -> 28;
+	29 -> 47;
+	39	[color="0.59 0.6 0.85",
+		label=resample_atlas_to_refvol];
+	39 -> 47;
+	46 -> 45;
+}

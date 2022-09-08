@@ -1,0 +1,97 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=warps
+		];
+		7	[color="0.27 0.6 0.85",
+			label=create_warps_hipp];
+		8	[color="0.02 0.6 0.85",
+			label="create_unfold_ref\nautotop: hipp\nsubject: 001"];
+		8 -> 7;
+		9	[color="0.12 0.6 0.85",
+			label=create_unfold_coord_map];
+		8 -> 9;
+		49	[color="0.27 0.6 0.85",
+			label=create_warps_hipp];
+		8 -> 49;
+		9 -> 7;
+		9 -> 49;
+		28	[color="0.28 0.6 0.85",
+			label=create_native_coord_ref];
+		28 -> 7;
+		62	[color="0.28 0.6 0.85",
+			label="create_native_coord_ref\nautotop: hipp"];
+		62 -> 49;
+		87	[color="0.48 0.6 0.85",
+			label=create_warps_dentate];
+		88	[color="0.02 0.6 0.85",
+			label="create_unfold_ref\nautotop: dentate\nsubject: 001"];
+		88 -> 87;
+		89	[color="0.12 0.6 0.85",
+			label=create_unfold_coord_map];
+		88 -> 89;
+		109	[color="0.48 0.6 0.85",
+			label=create_warps_dentate];
+		88 -> 109;
+		89 -> 87;
+		89 -> 109;
+		99	[color="0.28 0.6 0.85",
+			label=create_native_coord_ref];
+		99 -> 87;
+		116	[color="0.28 0.6 0.85",
+			label="create_native_coord_ref\nautotop: dentate"];
+		116 -> 109;
+	}
+	10	[color="0.38 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	10 -> 7;
+	10 -> 28;
+	22	[color="0.38 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	22 -> 7;
+	25	[color="0.53 0.6 0.85",
+		label="unflip_coords_equivol\ndesc: equivol\nhemi: L"];
+	25 -> 7;
+	50	[color="0.52 0.6 0.85",
+		label=laplace_coords_hipp];
+	50 -> 49;
+	50 -> 62;
+	58	[color="0.52 0.6 0.85",
+		label=laplace_coords_hipp];
+	58 -> 49;
+	60	[color="0.16 0.6 0.85",
+		label=equivolume_coords];
+	60 -> 49;
+	90	[color="0.38 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	90 -> 87;
+	90 -> 99;
+	93	[color="0.38 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	93 -> 87;
+	96	[color="0.38 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	96 -> 87;
+	110	[color="0.64 0.6 0.85",
+		label=laplace_coords_dentate];
+	110 -> 109;
+	110 -> 116;
+	112	[color="0.64 0.6 0.85",
+		label=laplace_coords_dentate];
+	112 -> 109;
+	114	[color="0.64 0.6 0.85",
+		label=laplace_coords_dentate];
+	114 -> 109;
+}

@@ -12,71 +12,73 @@ subfield segmentation)
 
 ### Notes:
 
--   Inputs to Hippunfold should typically be a BIDS dataset including T1w images. Higher-resolution data are preferred (\<= 0.8mm) but the pipeline will still work with 1mm T1w images. See [Tutorials](https://hippunfold.readthedocs.io/en/latest/tutorials/standardBIDS.html).
+-   Inputs to Hippunfold should typically be a BIDS dataset including T1w images or T2w images. Higher-resolution data are preferred (\<= 0.8mm) but the pipeline will still work with 1mm T1w images. See [Tutorials](https://hippunfold.readthedocs.io/en/latest/tutorials/standardBIDS.html).
 -   Other 3D imaging modalities (eg. ex-vivo MRI, 3D histology, etc.) can be used, but may require manual tissue segmentation as the current workflow relies on U-net segmentation trained only on common MRI modalities.
 
-## Running with Docker
 
-Pull the container:
+## Comparison of methods for running HippUnfold
 
-    docker pull khanlab/hippunfold:latest
+There are several different ways of running HippUnfold. In order of increasing complexity/flexibility, we have:
 
-See HippUnfold usage docs:
+1. CBRAIN Web-based Platform
+2. Singularity Container on Linux
+3. Docker Container on Windows/Mac (Intel)/Linux
+4. Python Environment with Singularity Dependencies
 
-    docker run -it --rm \
-    khanlab/hippunfold:latest \
-    -h
+### CBRAIN Web-based Platform
 
-Do a dry run, printing the command at each step:
+HippUnfold is available on the [CBRAIN platform](https://github.com/aces/cbrain/wiki), a 
+web-based platform for batch high-performance computing that is free for researchers.
 
-    docker run -it --rm \
-    -v PATH_TO_BIDS_DIR:/bids:ro \
-    -v PATH_TO_OUTPUT_DIR:/output \
-    khanlab/hippunfold:latest \
-    /bids /output participant -np 
+#### Pros:
+- No software installation required
+- Fully point and click interface (no CLI)
+- Can perform batch-processing
 
-Run it with maximum number of cores:
+#### Cons:
+- Must upload data for processing
+- Limited command-line options exposed
+- Cannot edit code
 
-    docker run -it --rm \
-    -v PATH_TO_BIDS_DIR:/bids:ro \
-    -v PATH_TO_OUTPUT_DIR:/output \
-    khanlab/hippunfold:latest \
-    /bids /output participant -p --cores all
 
-For those not familiar with Docker, the first three lines of this
-example are generic Docker arguments to ensure it is run with the safest
-options and has permission to access your input and output directories
-(specified here in capital letters). The third line specifies the
-HippUnfold Docker container, and the fourth line contains the required
-arguments for HippUnfold, after which you can additionally specify optional arguments. You may want to familiarize yourself with
-[Docker options](https://docs.docker.com/engine/reference/run/), and an
-overview of HippUnfold arguments is provided in the [Command line
-interface](https://hippunfold.readthedocs.io/en/latest/usage/app_cli.html)
-documentation section.
+### Docker on Windows/Mac (Intel)/Linux
 
-## Running with Singularity
+The HippUnfold BIDS App is available on a DockerHub as versioned releases and development branches.
 
-Pull from dockerhub:
+#### Pros:
+- Compatible with non-Linux systems 
+- All dependencies+models in a single container
 
-    singularity pull khanlab_hippunfold_latest.sif docker://khanlab/hippunfold:latest
+#### Cons:
+- Typically not possible on shared machines
+- Cannot use Snakemake cluster execution profiles
+- Cannot edit code
 
-See HippUnfold usage docs:
+### Singularity Container
 
-    singularity run -e khanlab_hippunfold_latest.sif -h
+The same docker container can also be used with Singularity (now Apptainer). Instructions can be found below.
 
-Do a dry run, printing the command at each step:
+#### Pros:
+- All dependencies+models in a single container
+- Container stored as a single file (.sif)
 
-    singularity run -e khanlab_hippunfold_latest.sif \
-    PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant -np 
+#### Cons:
+- Compatible on shared systems with Singularity installed
+- Cannot use Snakemake cluster execution profiles
+- Cannot edit code
 
-Run it with maximum number of cores:
 
-    singularity run -e khanlab_hippunfold_latest.sif \
-    PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant -p --cores all
+### Python Environment with Singularity Dependencies
 
-Note that you may need to adjust your [Singularity options](https://sylabs.io/guides/3.1/user-guide/cli/singularity_run.html) to ensure this container can read and write to yout input and output directories, repsectively. For example, if your home directory is full or inaccessible, you may wish to set the following singularity parameters:
+Instructions for this can be found in the **Contributing** documentation page.
 
-    export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
-    export SINGULARITY_BINDPATH=/YOURDIR:/YOURDIR
+#### Pros:
+- Complete flexibility to modify code
+- External (Non-Python) dependencies as Singularity containers
 
-, where `YOURDIR` is your preferred storage location.
+#### Cons:
+- Must use Python virtual environment
+- Only compatible on Linux systems with Singularity for external dependencies
+
+
+

@@ -1,0 +1,67 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=qc
+		];
+		184	[color="0.56 0.6 0.85",
+			label="qc_reg_to_template\nnative_modality: T2w"];
+		185	[color="0.45 0.6 0.85",
+			label="qc_subfield\nspace: cropT2w"];
+		186	[color="0.45 0.6 0.85",
+			label="qc_subfield\nspace: cropT2w"];
+		187	[color="0.37 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T2w"];
+		188	[color="0.37 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T2w"];
+		189	[color="0.37 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T2w"];
+		190	[color="0.37 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T2w"];
+		191	[color="0.11 0.6 0.85",
+			label=plot_subj_subfields];
+		192	[color="0.02 0.6 0.85",
+			label="get_subfield_vols_subj\ncrop_ref_spaces: cropT2w"];
+		192 -> 191;
+	}
+	5	[color="0.61 0.6 0.85",
+		label=warp_gii_to_native];
+	5 -> 187;
+	30	[color="0.41 0.6 0.85",
+		label=reg_t2_to_template];
+	30 -> 184;
+	63	[color="0.61 0.6 0.85",
+		label=warp_gii_to_native];
+	63 -> 189;
+	104	[color="0.61 0.6 0.85",
+		label=warp_gii_to_native];
+	104 -> 188;
+	127	[color="0.61 0.6 0.85",
+		label=warp_gii_to_native];
+	127 -> 190;
+	144	[color="0.49 0.6 0.85",
+		label=resample_subfields_native_crop];
+	144 -> 185;
+	144 -> 192;
+	150	[color="0.49 0.6 0.85",
+		label=resample_subfields_native_crop];
+	150 -> 186;
+	150 -> 192;
+	182	[color="0.14 0.6 0.85",
+		label=resample_native_to_crop];
+	182 -> 185;
+	183	[color="0.14 0.6 0.85",
+		label=resample_native_to_crop];
+	183 -> 186;
+}

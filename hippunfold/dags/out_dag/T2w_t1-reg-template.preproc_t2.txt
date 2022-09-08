@@ -1,0 +1,50 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=preproc_t2
+		];
+		17	[color="0.66 0.6 0.85",
+			label=avg_aligned_or_cp_t2];
+		21	[color="0.62 0.6 0.85",
+			label=reg_t2_to_t1];
+		17 -> 21;
+		28	[color="0.40 0.6 0.85",
+			label="warp_t2_to_corobl_crop\nhemi: L"];
+		17 -> 28;
+		69	[color="0.40 0.6 0.85",
+			label="warp_t2_to_corobl_crop\nhemi: R"];
+		17 -> 69;
+		18	[color="0.05 0.6 0.85",
+			label=n4_t2];
+		18 -> 17;
+		19	[color="0.07 0.6 0.85",
+			label="import_t2\nsubject: 001"];
+		19 -> 18;
+		20	[color="0.50 0.6 0.85",
+			label=compose_t2_xfm_corobl];
+		20 -> 28;
+		20 -> 69;
+		21 -> 20;
+		27	[color="0.00 0.6 0.85",
+			label="lr_flip_t2\ndesc: preproc"];
+		28 -> 27;
+	}
+	22	[color="0.60 0.6 0.85",
+		label=n4_t1];
+	22 -> 21;
+	24	[color="0.45 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	24 -> 20;
+}

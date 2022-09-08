@@ -1,0 +1,43 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=qc
+		];
+		55	[color="0.38 0.6 0.85",
+			label=qc_reg_to_template];
+		56	[color="0.58 0.6 0.85",
+			label=qc_subfield];
+		57	[color="0.30 0.6 0.85",
+			label=qc_subfield_surf];
+		58	[color="0.15 0.6 0.85",
+			label=plot_subj_subfields];
+		59	[color="0.05 0.6 0.85",
+			label=get_subfield_vols_subj];
+		59 -> 58;
+	}
+	5	[color="0.60 0.6 0.85",
+		label=warp_gii_to_native];
+	5 -> 57;
+	23	[color="0.21 0.6 0.85",
+		label=reg_t2_to_template];
+	23 -> 55;
+	45	[color="0.24 0.6 0.85",
+		label=resample_subfields_native_crop];
+	45 -> 56;
+	45 -> 59;
+	54	[color="0.25 0.6 0.85",
+		label=resample_native_to_crop];
+	54 -> 56;
+}

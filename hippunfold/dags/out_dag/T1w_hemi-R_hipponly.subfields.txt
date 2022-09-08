@@ -1,0 +1,50 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=subfields
+		];
+		52	[color="0.18 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		55	[color="0.42 0.6 0.85",
+			label="resample_subfields_to_native\nnative_modality: T1w"];
+		52 -> 55;
+		53	[color="0.15 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		53 -> 52;
+	}
+	10	[color="0.58 0.6 0.85",
+		label=laplace_coords_hipp];
+	10 -> 53;
+	11	[color="0.13 0.6 0.85",
+		label=reinsert_subject_labels];
+	11 -> 10;
+	25	[color="0.58 0.6 0.85",
+		label=laplace_coords_hipp];
+	11 -> 25;
+	11 -> 52;
+	16	[color="0.02 0.6 0.85",
+		label=n4_t1];
+	16 -> 55;
+	18	[color="0.33 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	18 -> 55;
+	25 -> 53;
+	27	[color="0.52 0.6 0.85",
+		label=equivolume_coords];
+	27 -> 53;
+	47	[color="0.17 0.6 0.85",
+		label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: R"];
+	47 -> 53;
+}

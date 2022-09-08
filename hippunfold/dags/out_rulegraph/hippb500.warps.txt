@@ -1,0 +1,58 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=warps
+		];
+		7	[color="0.59 0.6 0.85",
+			label=create_warps_hipp];
+		8	[color="0.63 0.6 0.85",
+			label=create_unfold_ref];
+		8 -> 7;
+		9	[color="0.18 0.6 0.85",
+			label=create_unfold_coord_map];
+		8 -> 9;
+		34	[color="0.21 0.6 0.85",
+			label=create_warps_dentate];
+		8 -> 34;
+		9 -> 7;
+		9 -> 34;
+		24	[color="0.65 0.6 0.85",
+			label=create_native_coord_ref];
+		24 -> 7;
+		24 -> 34;
+	}
+	10	[color="0.24 0.6 0.85",
+		label=unflip_coords];
+	10 -> 7;
+	10 -> 24;
+	10 -> 34;
+	11	[color="0.34 0.6 0.85",
+		label=laplace_coords_hipp];
+	11 -> 7;
+	11 -> 10;
+	11 -> 24;
+	21	[color="0.66 0.6 0.85",
+		label=unflip_coords_equivol];
+	21 -> 7;
+	22	[color="0.36 0.6 0.85",
+		label=equivolume_coords];
+	22 -> 7;
+	22 -> 21;
+	35	[color="0.35 0.6 0.85",
+		label=laplace_coords_dentate];
+	35 -> 10;
+	35 -> 24;
+	35 -> 34;
+}

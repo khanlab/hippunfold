@@ -1,0 +1,75 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=warps
+		];
+		8	[color="0.46 0.6 0.85",
+			label=create_warps_hipp];
+		50	[color="0.36 0.6 0.85",
+			label=compose_warps_native_to_unfold];
+		8 -> 50;
+		51	[color="0.28 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		8 -> 51;
+		9	[color="0.21 0.6 0.85",
+			label=create_unfold_ref];
+		9 -> 8;
+		10	[color="0.20 0.6 0.85",
+			label=create_unfold_coord_map];
+		9 -> 10;
+		41	[color="0.41 0.6 0.85",
+			label=create_warps_dentate];
+		9 -> 41;
+		9 -> 50;
+		9 -> 51;
+		10 -> 8;
+		10 -> 41;
+		30	[color="0.45 0.6 0.85",
+			label=create_native_coord_ref];
+		30 -> 8;
+		30 -> 41;
+		41 -> 50;
+		41 -> 51;
+	}
+	11	[color="0.39 0.6 0.85",
+		label=unflip_coords];
+	11 -> 8;
+	11 -> 30;
+	11 -> 41;
+	12	[color="0.09 0.6 0.85",
+		label=laplace_coords_hipp];
+	12 -> 8;
+	12 -> 11;
+	12 -> 30;
+	21	[color="0.44 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	21 -> 50;
+	21 -> 51;
+	27	[color="0.35 0.6 0.85",
+		label=unflip_coords_equivol];
+	27 -> 8;
+	28	[color="0.43 0.6 0.85",
+		label=equivolume_coords];
+	28 -> 8;
+	28 -> 27;
+	42	[color="0.11 0.6 0.85",
+		label=laplace_coords_dentate];
+	42 -> 11;
+	42 -> 30;
+	42 -> 41;
+	47	[color="0.18 0.6 0.85",
+		label=create_native_crop_ref];
+	47 -> 51;
+}

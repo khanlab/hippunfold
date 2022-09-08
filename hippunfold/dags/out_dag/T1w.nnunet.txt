@@ -1,0 +1,49 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=nnunet
+		];
+		16	[color="0.11 0.6 0.85",
+			label="run_inference\nhemi: Lflip"];
+		188	[color="0.54 0.6 0.85",
+			label="unflip_nnunet_nii\nhemi: L"];
+		16 -> 188;
+		63	[color="0.11 0.6 0.85",
+			label=run_inference];
+		190	[color="0.04 0.6 0.85",
+			label=qc_nnunet_f3d];
+		63 -> 190;
+		186	[color="0.44 0.6 0.85",
+			label=qc_nnunet_dice];
+		187	[color="0.04 0.6 0.85",
+			label=qc_nnunet_f3d];
+		187 -> 186;
+		188 -> 187;
+		189	[color="0.44 0.6 0.85",
+			label=qc_nnunet_dice];
+		190 -> 189;
+	}
+	17	[color="0.40 0.6 0.85",
+		label="lr_flip_t1\ndesc: preproc"];
+	17 -> 16;
+	18	[color="0.39 0.6 0.85",
+		label="warp_t1_to_corobl_crop\nhemi: L"];
+	18 -> 17;
+	18 -> 187;
+	64	[color="0.39 0.6 0.85",
+		label="warp_t1_to_corobl_crop\nhemi: R"];
+	64 -> 63;
+	64 -> 190;
+}
