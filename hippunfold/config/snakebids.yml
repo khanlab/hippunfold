@@ -125,6 +125,11 @@ parse_args:
           participants can be specified with a space separated list.
     nargs: '+'
 
+  --version:
+    help: 'Print the version of HippUnfold'
+    action: version
+    version: "1.2.0-pre.29"
+
 
   --modality:
     help: 'Type of image to run hippunfold on. Modality prefixed with seg will import an existing (manual) hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
