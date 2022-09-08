@@ -516,6 +516,13 @@ rule nii_to_label_gii:
             "unfold_template_hipp",
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
+        label_list=lambda wildcards: os.path.join(
+            workflow.basedir,
+            "..",
+            config["atlas_files"][wildcards.atlas]["label_list"],
+        ),
+    params:
+        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
     output:
         label_gii=bids(
             root=root,
@@ -530,10 +537,14 @@ rule nii_to_label_gii:
         ),
     group:
         "subj"
+    shadow:
+        "minimal"
     container:
         config["singularity"]["autotop"]
     shell:
-        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} {output.label_gii} -enclosing"
+        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} temp.shape.gii -enclosing  && "
+        "wb_command -metric-label-import temp.shape.gii {input.label_list} {output.label_gii} && "
+        "wb_command -set-structure {output.label_gii} {params.structure_type}"
 
 
 def get_cmd_cifti_metric(wildcards, input, output):
@@ -739,7 +750,7 @@ rule create_spec_file_hipp:
             space=["{space}", "unfolded"],
             allow_missing=True,
         ),
-        cifti=lambda wildcards: expand(
+        cifti_metrics=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -750,6 +761,20 @@ rule create_spec_file_hipp:
                 **config["subj_wildcards"]
             ),
             cifti=get_cifti_metric_types(wildcards.label),
+            allow_missing=True,
+        ),
+        cifti_labels=lambda wildcards: expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="subfields.dlabel.nii",
+                atlas="{atlas}",
+                space="{space}",
+                label="{label}",
+                **config["subj_wildcards"]
+            ),
+            atlas=config["atlas"],
             allow_missing=True,
         ),
     params:
