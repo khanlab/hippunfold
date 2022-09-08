@@ -18,7 +18,7 @@ instances of each rule are not shown, e.g. the `run_inference` rule
 runs on both left and right hemispheres (`hemi=L`, `hemi=R`),
 but only one `run_inference` box is shown here.  
 
-<img src="../../hippunfold/dags/out_rulegraph/T1w.svg" width="800px">
+<img src="../../hippunfold/dags/out_rulegraph/T1w.png" width="800px">
 
 Although it may still look very complex (click on the image to 
 enlarge), it is also  organized into groups of rules, 
@@ -50,7 +50,7 @@ this space is used to define the left and right hippocampus bounding boxes in 0.
 hippocampus subvolume is left-right flipped at this stage too (subsequent steps in the `corobl` space operate
 on both the `hemi-R` and `hemi-Lflip` images).
 
-![T1w workflow preproc t1](../../hippunfold/dags/out_dag/T1w.preproc_t1.svg)
+![T1w workflow preproc t1](../../hippunfold/dags/out_dag/T1w.preproc_t1.png)
 
 
 ### T2w pre-processing
@@ -59,7 +59,7 @@ T2w images are processed similarly, except the T2w version of the template is us
 exist, these are motion-corrected and averaged prior to N4 correction. The diagram below shows the T2w pre-
 processing workflow for a dataset with three T2w runs.
 
-![T2w multi preproc_t2](../../hippunfold/dags/out_dag/T2w_multi.preproc_t2.svg)
+![T2w multi preproc_t2](../../hippunfold/dags/out_dag/T2w_multi.preproc_t2.png)
 
 ### T2w with T1w template registration
 
@@ -67,8 +67,8 @@ For T2w images where template registration is failing (e.g. because the T2w imag
 the `--t1-reg-template` option can be used, and will perform template registration with the T1w images, along with 
 a within-subject registration of the T2w to the T1w, concatenating all the transforms. This is shown in the diagrams below (with a single T2w image in this case):
 
-![T2w t1-reg-template preproc_t1](../../hippunfold/dags/out_dag/T2w_t1-reg-template.preproc_t1.svg)
-![T2w t1-reg-template preproc_t2](../../hippunfold/dags/out_dag/T2w_t1-reg-template.preproc_t2.svg)
+![T2w t1-reg-template preproc_t1](../../hippunfold/dags/out_dag/T2w_t1-reg-template.preproc_t1.png)
+![T2w t1-reg-template preproc_t2](../../hippunfold/dags/out_dag/T2w_t1-reg-template.preproc_t2.png)
 
 Note that these are not the only workflow configurations possible, several other variants exist by using the command-line flags. For example, if you have T1w and T2w images that are already pre-processed and co-registered (e.g. HCP processed data), then you should use the `--skip-preproc` and `--skip-coreg` options to skip N4 and T1w/T2w co-registration.
 
@@ -77,7 +77,7 @@ Note that these are not the only workflow configurations possible, several other
 The U-net segmentation is performed on the cropped, `space-corobl` images, producing tissue segmentations (gray matter, SRLM, and anatomical landmarks for unfolding). This step is done in a single rule, which runs inference on the image using the corresponding
 nnU-net model based on the `modality` chosen. This is done on the `R` and `Lflip` hippocampus images, and the `Lflip` is subsequently unflipped. 
 
-![U-net workflow](../../hippunfold/dags/out_dag/T1w.nnunet.svg)
+![U-net workflow](../../hippunfold/dags/out_dag/T1w.nnunet.png)
 
 
 ## Template-based shape injection
@@ -86,7 +86,7 @@ Since the nnU-net segmentation may possibly contain topological errors that can 
 
 The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
 
-![Shape injection](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.shape_inject.svg)
+![Shape injection](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.shape_inject.png)
 
 
 ## Laplace & equivolume coordinates
@@ -95,7 +95,7 @@ The basis of the hippocampal unfolding is the definition of the Laplace coordina
 
 The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
 
-![Laplace coordinates](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.autotop.svg)
+![Laplace coordinates](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.autotop.png)
 
 ## Subfields processing
 
@@ -103,7 +103,7 @@ The volumetric subfield segmentation is derived from the coord images from the l
 
 The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
 
-![Subfields](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.subfields.svg)
+![Subfields](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.subfields.png)
 
 
 ## Generating warp files
@@ -112,7 +112,7 @@ To allow users to transform data between the different spaces, we generate warp 
 
 The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
 
-![Generating warps](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.warps.svg)
+![Generating warps](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.warps.png)
 
 ## Surface processing
 
@@ -120,7 +120,7 @@ Using the warps, we transform standard template unfolded meshes to each subject 
 
 The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
 
-![Surface processing](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.gifti.svg)
+![Surface processing](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.gifti.png)
 
 
 ## Additional steps
