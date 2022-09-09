@@ -91,10 +91,19 @@ graham to run HippUnfold:
         git clone https://github.com/khanlab/hippunfold.git
         pip install hippunfold/
         
-3. Run hippunfold:
+3. To run Hippunfold on Graham as a member of the Khan lab, please configure the
+[neuroglia-helpers](https://github.com/khanlab/neuroglia-helpers) with the khanlab profile.
 
-        hippunfold ...
-        
+4. Set an environment variable in your bash profile (~/.bash_profile) with the location of the
+trained models. For Khan lab's members, the following line must be add to the bash profile file:
+
+        export HIPPUNFOLD_CACHE_DIR="/project/6050199/akhanf/opt/hippunfold_trained_models"
+
+Note: make sure to reload your bash profile if needed (`source ~./bash_profile`).        
+
+5. For an easier execution in Graham, it's recommended to also install
+[cc-slurm](https://github.com/khanlab/cc-slurm) snakemake profile for cluster execution with slurm.
+
 Note if you want to run hippunfold with modifications to your cloned 
 repository, you either need to pip install again, or run hippunfold the following, since 
 an `editable` pip install is not allowed with pyproject:
@@ -111,32 +120,56 @@ regularSubmit or regularInteractive wrappers, and the
 In an interactive job (for testing):
 
     regularInteractive -n 8
-    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant \
-    --participant_label 001 -j 8
+    hippunfold <PATH_TO_BIDS_DIR> <PATH_TO_OUTPUT_DIR> participant \
+    --participant_label 001 -j 8 --modality T1w --use-singularity \
+    --singularity-prefix $SNAKEMAKE_SINGULARITY_DIR
 
-Here, the last line is used to specify only one subject from a BIDS
+Where:
+ - `--participant_label 001` is used to specify only one subject from a BIDS
 directory presumeably containing many subjects.
+ - `-j 8` specifies the number of cores used
+ - `--modality T1w` is used to specify that a T1w dataset is being processed
+ - `--singularity-prefix $SNAKEMAKE_SINGULARITY_DIR` specifies the directory in
+which singularity images will be stored. The environment variable is created
+when installing neuroglia-helpers.
 
 Submitting a job (for larger cores, more subjects), still single job,
 but snakemake will parallelize over the 32 cores:
 
     regularSubmit -j Fat \
-    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant  -j 32
+    hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant  -j 32 \
+    --modality T1w --use-singularity --singularity-prefix $SNAKEMAKE_SINGULARITY_DIR
 
 Scaling up to \~hundred subjects (needs cc-slurm snakemake profile
 installed), submits 1 16core job per subject:
 
     hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant \
+    --modality T1w --use-singularity --singularity-prefix $SNAKEMAKE_SINGULARITY_DIR \
     --profile cc-slurm
 
 Scaling up to even more subjects (uses group-components to bundle
 multiple subjects in each job), 1 32core job for N subjects (e.g. 10):
 
     hippunfold PATH_TO_BIDS_DIR PATH_TO_OUTPUT_DIR participant \
+    --modality T1w --use-singularity --singularity-prefix $SNAKEMAKE_SINGULARITY_DIR \
     --profile cc-slurm --group-components subj=10
 
+### Running hippunfold jobs on the CBS server
+1. Clone the repository and install dependencies and dev dependencies with poetry:
 
-    
+       git clone http://github.com/khanlab/hippunfold
+       cd hippunfold
+       poetry install
+If poetry is not installed, please refer to the [installation documentation](https://python-poetry.org/docs/). If the command poetry is not found, add the following line to your bashrc file located in your home directory (considering that the poetry binary is located under `$HOME/.local/bin`:
+
+       export PATH=$PATH:$HOME/.local/bin
+2. Add the `$SNAKEMAKE_SINGULARITY_DIR` and `$HIPPUNFOLD_CACHE_DIR` environment variables to the bashrc file. For Khan lab's members, add the following lines:
+
+        export SNAKEMAKE_SINGULARITY_DIR="/srv/khan/shared/containers/snakemake_containers"
+        export HIPPUNFOLD_CACHE_DIR="/srv/khan/shared/data/hippunfold_models"
+This will work only if the `setup_automount_v2` script was already executed.
+3. HippUnfold might be executed using `poetry run hippunfold <arguments>` or through the `poetry shell` method. Refer to previous section for more information in regards to execution options. Please be aware that the CBS server shouldn't be used for high computing tasks.
+
 ## Deep learning nnU-net model files
 
 The trained model files we use for hippunfold are large and thus are not
