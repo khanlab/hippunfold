@@ -4,6 +4,8 @@ Hippunfold dependencies are managed with Poetry, which you\'ll need
 installed on your machine. You can find instructions on the [poetry
 website](https://python-poetry.org/docs/master/#installation).
 
+Note: These instructions are only recommended if you are making changes to HippUnfold code to commit back to this repository, or if you are using Snakemake's cluster execution profiles. If not, it is easier to run HippUnfold when it is packaged into a single singularity container (e.g. `docker://khanlab/hippunfold:latest`). 
+
 ## Set-up your development environment:
 
 Clone the repository and install dependencies and dev dependencies with
@@ -71,7 +73,7 @@ from the `hippunfold` folder that contains the
 ## Instructions for Compute Canada
 
 This section provides an example of how to set up a `pip installed` copy
-of HippUnfold on CompateCanada\'s `graham` cluster.
+of HippUnfold on Compute Canada\'s `graham` cluster.
 
 ### Setting up a dev environment on graham:
 
