@@ -21,6 +21,8 @@ rule resample_hippdwi_to_template:
             suffix="b500.nii.gz",
             **config["subj_wildcards"]
         ),
+    container:
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
