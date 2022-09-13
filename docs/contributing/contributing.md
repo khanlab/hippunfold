@@ -96,7 +96,7 @@ graham to run HippUnfold:
 3. To run Hippunfold on Graham as a member of the Khan lab, please configure the
 [neuroglia-helpers](https://github.com/khanlab/neuroglia-helpers) with the khanlab profile.
 
-4. Set an environment variable in your bash profile (~/.bash_profile) with the location of the
+4. To avoid having to download trained models (see section [below](#deep-learning-nnu-net-model-files)), you can set an environment variable in your bash profile (~/.bash_profile) with the location of the
 trained models. For Khan lab's members, the following line must be add to the bash profile file:
 
         export HIPPUNFOLD_CACHE_DIR="/project/6050199/akhanf/opt/hippunfold_trained_models"
@@ -165,12 +165,18 @@ multiple subjects in each job), 1 32core job for N subjects (e.g. 10):
 If poetry is not installed, please refer to the [installation documentation](https://python-poetry.org/docs/). If the command poetry is not found, add the following line to your bashrc file located in your home directory (considering that the poetry binary is located under `$HOME/.local/bin`:
 
        export PATH=$PATH:$HOME/.local/bin
-2. Add the `$SNAKEMAKE_SINGULARITY_DIR` and `$HIPPUNFOLD_CACHE_DIR` environment variables to the bashrc file. For Khan lab's members, add the following lines:
+2. To avoid having to download containers and trained models (see section [below](#deep-learning-nnu-net-model-files)), add the `$SNAKEMAKE_SINGULARITY_DIR` and `$HIPPUNFOLD_CACHE_DIR` environment variables to the bashrc file. For Khan lab's members, add the following lines:
 
         export SNAKEMAKE_SINGULARITY_DIR="/srv/khan/shared/containers/snakemake_containers"
         export HIPPUNFOLD_CACHE_DIR="/srv/khan/shared/data/hippunfold_models"
 This will work only if the `setup_automount_v2` script was already executed.
-3. HippUnfold might be executed using `poetry run hippunfold <arguments>` or through the `poetry shell` method. Refer to previous section for more information in regards to execution options. Please be aware that the CBS server shouldn't be used for high computing tasks.
+3. HippUnfold might be executed using `poetry run hippunfold <arguments>` or through the `poetry shell` method. Refer to previous section for more information in regards to execution options. 
+
+4. On the CBS server you should always set your output folder to a path inside `/localscratch`, and not your home folder or a `/srv` or `/cifs` path, and copy the final results out after they have finished computing. Please be aware that the CBS server may not be the most efficient option for running a large number of subjects (since you are limited in processing cores vs a HPC cluster).
+
+5. If you are using input files in your home directory (or in your `graham` mount in your home directory), you may also need to also add the following to your bashrc file (Note: this will become a default system-enabled option soon)
+
+        export SINGULARITY_BINDPATH="/home/ROBARTS:/home/ROBARTS"
 
 ## Deep learning nnU-net model files
 
