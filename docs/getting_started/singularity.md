@@ -1,6 +1,15 @@
 # Running HippUnfold with Singularity
 
-Note: These instructions assume you have Singularity installed on your system.
+## Pre-requisities:
+ 1. Singularity or Apptainer is installed on your system. For more info, see the detailed [apptainer install instructions](https://apptainer.org/docs/admin/main/installation.html#install-from-pre-built-packages).
+ 2. The following command-line tools are installed:
+  - wget
+  - tar
+ 3. Sufficient disk-space in your `/tmp` folder (>30GB), as well as your working folder to store the container (~15GB), raw data, and processed data (~XXGB per subject) 
+ 4. Sufficient CPU and memory - the more you have, the faster it will run, but we recommend at least 8 CPU cores and 16GB memory.
+
+
+### Downloading the test dataset
 
 Download and extract a single-subject BIDS dataset for this test:
 
@@ -24,31 +33,38 @@ ds002168/
 2 directories, 6 files
 ```
 
+### Downloading HippUnfold
 
-Next we will pull the container from dockerhub:
+2. Next we will pull the container. The container can be pulled from dockerhub, but this requires a large amount of disk space in your /tmp folder, since it has to convert from a docker container to a singularity container. To avoid this, we provide a Dropbox link to the singularity container itself:
 
-    singularity pull khanlab_hippunfold_latest.sif docker://khanlab/hippunfold:latest
+    wget https://www.dropbox.com/s/jtf6zyy0u8sc2k6/khanlab_hippunfold_v1.2.0.sif
+
+If you really need to pull the container from docker hub, you can use the following command, but beware, it is more prone to errors and will take up lots of system resources:
+
+    singularity pull khanlab_hippunfold_v1.2.0.sif docker://khanlab/hippunfold:v1.2.0
 
 
-If you encounter any errors  pulling the container, it may be because you are running 
+Note: If you encounter any errors  pulling the container from dockerhub, it may be because you are running 
 out of disk space in your cache folders. Note, you can change these locations 
 by setting environment variables, e.g.:
     
     export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
 
 
-Run HippUnfold any arguments to print the short help:
+### Running HippUnfold
 
-    singularity run -e khanlab_hippunfold_latest.sif 
+Run HippUnfold without any arguments to print the short help:
+
+    singularity run -e khanlab_hippunfold_v1.2.0.sif 
 
 Use the `-h` option to get a detailed help listing:
 
-    singularity run -e khanlab_hippunfold_latest.sif -h
+    singularity run -e khanlab_hippunfold_v1.2.0.sif -h
 
 Note that all the Snakemake command-line options are also available in
 HippUnfold, and can be listed with `--help-snakemake`:
 
-    singularity run -e khanlab_hippunfold_latest.sif --help-snakemake
+    singularity run -e khanlab_hippunfold_v1.2.0.sif --help-snakemake
 
 
 Now let's run it on the test dataset. The `--modality` flag is a 
@@ -57,8 +73,7 @@ we will use the T1w image. We will also use the `--dry-run/-n`  option to
 just print out what would run, without actually running anything.
 
 
-    singularity run -e khanlab_hippunfold_latest.sif \
-    ds002168 ds002168_hippunfold participant -n --modality T1w
+    singularity run -e khanlab_hippunfold_v1.2.0.sif ds002168 ds002168_hippunfold participant -n --modality T1w
 
 
 The first three arguments to HippUnfold (as with any BIDS App) are the input
@@ -72,8 +87,7 @@ When you run the above command, a long listing will print out, describing all th
 will be run. This is a long listing, and you can better appreciate it with the `less` tool. We can
 also have the shell command used for each rule printed to screen using the `-p` Snakemake option:
 
-    singularity run -e khanlab_hippunfold_latest.sif \
-    ds002168 ds002168_hippunfold participant -np --modality T1w | less
+    singularity run -e khanlab_hippunfold_v1.2.0.sif ds002168 ds002168_hippunfold participant -np --modality T1w | less
 
 
 Now, to actually run the workflow, we need to specify how many cores to use and leave out
@@ -86,8 +100,7 @@ Running the following command (hippunfold on a single subject) may take ~30 minu
 cores, but could be much longer (several hours) if you only have a single core.
 
 
-    singularity run -e khanlab_hippunfold_latest.sif \
-    ds002168 ds002168_hippunfold participant -p --cores all --modality T1w
+    singularity run -e khanlab_hippunfold_v1.2.0.sif ds002168 ds002168_hippunfold participant -p --cores all --modality T1w
 
 
 Note that you may need to adjust your [Singularity options](https://sylabs.io/guides/3.1/user-guide/cli/singularity_run.html) to ensure the container can read and write to yout input and output directories, respectively. You can bind paths easily by setting an 
@@ -104,8 +117,7 @@ in the BIDS test dataset, you can use the `--modality T2w` option. In this case,
 test dataset has a limited FOV, we should also make use of the `--t1-reg-template` command-line option,
 which will make use of the T1w image for template registration, since a limited FOV T2w template does not exist.
 
-    singularity run -e khanlab_hippunfold_latest.sif \
-    ds002168 ds002168_hippunfold_t2w participant --modality T2w --t1-reg-template -p --cores all
+    singularity run -e khanlab_hippunfold_v1.2.0.sif ds002168 ds002168_hippunfold_t2w participant --modality T2w --t1-reg-template -p --cores all
 
 Note that if you run with a different modality, you should use a separate output folder, since some of the files 
 would be overwritten if not.
