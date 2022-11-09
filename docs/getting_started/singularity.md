@@ -35,18 +35,18 @@ ds002168/
 
 ### Downloading HippUnfold
 
-2. Next we will pull the container. The container can be pulled from dockerhub, but this requires a large amount of disk space in your /tmp folder, since it has to convert from a docker container to a singularity container. To avoid this, we provide a Dropbox link to the singularity container itself:
+Next we will pull the container. The container can be pulled from dockerhub, but this requires a large amount of disk space in your /tmp folder, since it has to convert from a docker container to a singularity container. To avoid this, we provide a Dropbox link to the singularity container itself:
 
     wget https://www.dropbox.com/s/jtf6zyy0u8sc2k6/khanlab_hippunfold_v1.2.0.sif
 
-If you really need to pull the container from docker hub, you can use the following command, but beware, it is more prone to errors and will take up lots of system resources:
+If you really need to pull the container from docker hub, you can use the following command, but beware, it is more prone to errors and will take up lots of system resources (e.g. ~70GB of free disk space):
 
     singularity pull khanlab_hippunfold_v1.2.0.sif docker://khanlab/hippunfold:v1.2.0
 
 
-Note: If you encounter any errors  pulling the container from dockerhub, it may be because you are running 
+Note: If you encounter any errors pulling the container from dockerhub, it may be because you are running 
 out of disk space in your cache folders. Note, you can change these locations 
-by setting environment variables, e.g.:
+by setting environment variables, however, using a network file system for the folders may result in poor performance and/or errors e.g.:
     
     export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
 
