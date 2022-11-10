@@ -4,11 +4,11 @@ MAINTAINER alik@robarts.ca
 
 COPY . /src/
 
-#pre-download the models here:
-ENV HIPPUNFOLD_CACHE_DIR=/opt/hippunfold_cache
+# avoid pre-downloading the models to make for lighter container
+# ENV HIPPUNFOLD_CACHE_DIR=/opt/hippunfold_cache
 
 #install hippunfold and imagemagick (for reports)
-RUN pip install /src && hippunfold_download_models && \
+RUN pip install --no-cache-dir /src && \
     apt install -y graphviz && \
     wget https://imagemagick.org/archive/binaries/magick && \
     mv magick /usr/bin && chmod a+x /usr/bin/magick 
