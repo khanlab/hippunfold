@@ -4,6 +4,7 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 HTTP = HTTPRemoteProvider()
 
+
 def get_nnunet_input(wildcards):
     if config["modality"] == "T2w":
         nii = (
@@ -59,8 +60,7 @@ def get_model_tar():
 
     local_tar = config["nnunet_model"][model_name]
 
-    return os.path.abspath(os.path.join(download_dir, local_tar.split('/')[-1]))
-
+    return os.path.abspath(os.path.join(download_dir, local_tar.split("/")[-1]))
 
 
 def parse_task_from_tar(wildcards, input):
@@ -80,12 +80,16 @@ def parse_chkpnt_from_tar(wildcards, input):
         raise ValueError("cannot parse chkpnt from model tar")
     return chkpnt
 
+
 rule download_model:
     input:
-        HTTP.remote(config['nnunet_model'][config['modality']])
+        HTTP.remote(config["nnunet_model"][config["modality"]]),
     output:
         model_tar=get_model_tar(),
-    shell: 'cp {input} {output}'
+    shell:
+        "cp {input} {output}"
+
+
 rule run_inference:
     """ This rule uses either GPU or CPU .
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
