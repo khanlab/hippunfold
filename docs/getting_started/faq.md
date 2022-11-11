@@ -35,8 +35,8 @@ virtual machine (e.g. VirtualBox) you will need to increase the amount of memory
 ## No input images found
 
 This can happen if:
- - Singularity or docker cannot read your input directory. For Singularity, ensure your [Singularity options](https://docs.sylabs.io/guides/3.1/user-guide/cli/singularity_run.html) are appropriate, in particular `SINGULARITY_BINDPATH`. For docker, ensure you are mounting the correct directory with the `-v` flag described in the [Getting started](https://hippunfold.readthedocs.io/en/latest/getting_started/docker.html) section. 
- - HippUnfold does not recognize and BIDS-formatted input images. This can occur if, for example, T1w images are labelled with the suffix `_t1w.nii.gz` instead of `_T1w.nii.gz` as per [BIDS specifications](https://bids.neuroimaging.io/specification.html). (Note HippUnfold makes use of [PyBIDS](https://github.com/bids-standard/pybids)). This can be overwritten with the `--path-T1w` argument.
+ - Singularity or docker cannot access your input directory. For Singularity, ensure your [Singularity options](https://docs.sylabs.io/guides/3.1/user-guide/cli/singularity_run.html) are appropriate, in particular `SINGULARITY_BINDPATH`. For docker, ensure you are mounting the correct directory with the `-v` flag described in the [Getting started](https://hippunfold.readthedocs.io/en/latest/getting_started/docker.html) section. 
+ - HippUnfold does not recognize your BIDS-formatted input images. This can occur if, for example, T1w images are labelled with the suffix `_t1w.nii.gz` instead of `_T1w.nii.gz` as per [BIDS specifications](https://bids.neuroimaging.io/specification.html). (Note HippUnfold makes use of [PyBIDS](https://github.com/bids-standard/pybids)). This can be overwritten with the `--path-T1w` argument.
     
 ## Third Example
 
