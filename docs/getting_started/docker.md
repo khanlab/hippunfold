@@ -45,7 +45,7 @@ ds002168/
 2 directories, 6 files
 ```
 
-Now let's run HippUnfold on the test dataset. Docker will need read/write access to the input and output directories, respectively. This is achieved with the `-v` flag. This 'binds' or 'mounts' a directory to a new directory inside the container. The `--modality` flag is also required, and describes which image we use for segmentation. Here we will use the T1w image. We will also use the `--dry-run/-n`  option to just print out what would run, without actually running anything.
+Now let's run HippUnfold on the test dataset. Docker will need read/write access to the input and output directories, respectively. This is achieved with the `-v` flag. This 'binds' or 'mounts' a directory to a new directory inside the container.
 
     docker run -it --rm -v c:\Users\jordan\Downloads\ds002168:/bids -v c:\Users\jordan\Downloads\ds002168_hippunfold:/output khanlab/hippunfold:v1.2.0 /bids /output participant --modality T1w -n
 
@@ -56,7 +56,7 @@ Explanation:
 Everything after we specified the container (`khanlab/hippunfold:v1.2.0`) are arguments to HippUnfold itself. The first of these arguments (as with any BIDS App) are the input directory (`/bids`), the output directory (`/output`), and then the analysis level (`participant`). The `participant` analysis 
 level is used in HippUnfold for performing the segmentation, unfolding, and any
 participant-level processing. The `group` analysis is used to combine subfield volumes
-across subjects into a single tsv file.
+across subjects into a single tsv file.  The `--modality` flag is also required, and describes which image we use for segmentation. Here we used the T1w image. We also used the `--dry-run/-n`  option to just print out what would run, without actually running anything.
 
 When you run the above command, a long listing will print out, describing all the rules that 
 will be run. Now, to actually run the workflow, we need to specify how many cores to use and leave out
