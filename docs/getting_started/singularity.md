@@ -3,13 +3,48 @@
 ## Pre-requisities:
  1. Singularity or Apptainer is installed on your system. For more info, see the detailed [apptainer install instructions](https://apptainer.org/docs/admin/main/installation.html#install-from-pre-built-packages).
  2. The following command-line tools are installed:
-  - wget
-  - tar
- 3. Sufficient disk-space in your `/tmp` folder (>30GB), as well as your working folder to store the container (~15GB), raw data, and processed data (~XXGB per subject) 
+      - wget
+      - tar
+ 3. Sufficient disk-space 
+      - in your `/tmp` folder (>30GB) to build the container (not needed for dropbox download)
+      - in your working folder to store the container (~15GB)
+      - for HippUnfold outputs (~4GB per subject) 
  4. Sufficient CPU and memory - the more you have, the faster it will run, but we recommend at least 8 CPU cores and 16GB memory.
 
 
-### Downloading the test dataset
+### First time setup
+
+Pull the container. This can be done from dockerhub, but this requires a large amount of disk space in your /tmp folder, since it has to convert from a docker container to a singularity container. To avoid this, we provide a Dropbox link to the singularity container itself:
+
+    wget https://www.dropbox.com/s/jtf6zyy0u8sc2k6/khanlab_hippunfold_v1.2.0.sif
+
+
+Run HippUnfold without any arguments to print the short help:
+
+    singularity run -e khanlab_hippunfold_v1.2.0.sif 
+
+Use the `-h` option to get a detailed help listing:
+
+    singularity run -e khanlab_hippunfold_v1.2.0.sif -h
+
+Note that all the Snakemake command-line options are also available in
+HippUnfold, and can be listed with `--help-snakemake`:
+
+    singularity run -e khanlab_hippunfold_v1.2.0.sif --help-snakemake
+
+If you really need to pull the container from docker hub, you can use the following command, but beware, it is more prone to errors and will take up lots of system resources (e.g. ~70GB of free disk space):
+
+    singularity pull khanlab_hippunfold_v1.2.0.sif docker://khanlab/hippunfold:v1.2.0
+
+
+Note: If you encounter any errors pulling the container from dockerhub, it may be because you are running 
+out of disk space in your cache folders. Note, you can change these locations 
+by setting environment variables, however, using a network file system for the folders may result in poor performance and/or errors e.g.:
+    
+    export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
+
+
+### Running an example
 
 Download and extract a single-subject BIDS dataset for this test:
 
@@ -33,54 +68,20 @@ ds002168/
 2 directories, 6 files
 ```
 
-### Downloading HippUnfold
-
-Next we will pull the container. The container can be pulled from dockerhub, but this requires a large amount of disk space in your /tmp folder, since it has to convert from a docker container to a singularity container. To avoid this, we provide a Dropbox link to the singularity container itself:
-
-    wget https://www.dropbox.com/s/jtf6zyy0u8sc2k6/khanlab_hippunfold_v1.2.0.sif
-
-If you really need to pull the container from docker hub, you can use the following command, but beware, it is more prone to errors and will take up lots of system resources (e.g. ~70GB of free disk space):
-
-    singularity pull khanlab_hippunfold_v1.2.0.sif docker://khanlab/hippunfold:v1.2.0
-
-
-Note: If you encounter any errors pulling the container from dockerhub, it may be because you are running 
-out of disk space in your cache folders. Note, you can change these locations 
-by setting environment variables, however, using a network file system for the folders may result in poor performance and/or errors e.g.:
-    
-    export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
-
-
-### Running HippUnfold
-
-Run HippUnfold without any arguments to print the short help:
-
-    singularity run -e khanlab_hippunfold_v1.2.0.sif 
-
-Use the `-h` option to get a detailed help listing:
-
-    singularity run -e khanlab_hippunfold_v1.2.0.sif -h
-
-Note that all the Snakemake command-line options are also available in
-HippUnfold, and can be listed with `--help-snakemake`:
-
-    singularity run -e khanlab_hippunfold_v1.2.0.sif --help-snakemake
-
-
-Now let's run it on the test dataset. The `--modality` flag is a 
-required argument, and describes what image we use for segmentation. Here 
-we will use the T1w image. We will also use the `--dry-run/-n`  option to 
-just print out what would run, without actually running anything.
-
+Now let's run HippUnfold. 
 
     singularity run -e khanlab_hippunfold_v1.2.0.sif ds002168 ds002168_hippunfold participant -n --modality T1w
 
+Explanation:
 
-The first three arguments to HippUnfold (as with any BIDS App) are the input
-folder, the output folder, and then the analysis level. The `participant` analysis 
+Everything prior to the container (`khanlab_hippunfold_v1.2.0.sif`) are arguments to singularity, and after are to HippUnfold itself. The first three arguments to HippUnfold (as with any BIDS App) are the input
+folder (`ds002168`), the output folder (`ds002168_hippunfold`), and then the analysis level (`participant`). The `participant` analysis 
 level is used in HippUnfold for performing the segmentation, unfolding, and any
 participant-level processing. The `group` analysis is used to combine subfield volumes
-across subjects into a single tsv file.
+across subjects into a single tsv file. The `--modality` flag is a 
+required argument, and describes what image we use for segmentation. Here 
+we used the T1w image. We also used the `--dry-run/-n`  option to 
+just print out what would run, without actually running anything.
 
 
 When you run the above command, a long listing will print out, describing all the rules that 
@@ -111,6 +112,8 @@ environment variable, e.g. if you have a `/project` folder that contains your da
 
 
 After this completes, you should have a `ds002168_hippunfold` folder with outputs for the one subject.
+
+## Exploring different options
 
 If you alternatively want to run HippUnfold using a different modality, e.g. the high-resolution T2w image
 in the BIDS test dataset, you can use the `--modality T2w` option. In this case, since the T2w image in the 
