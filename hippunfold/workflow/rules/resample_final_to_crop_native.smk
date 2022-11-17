@@ -17,7 +17,7 @@ rule create_native_crop_ref:
             allow_missing=True,
         ),
     params:
-        resample="400%",
+        resample=["crop_native_res"],
         pad_to=config["crop_native_box"],
     output:
         ref=bids(
