@@ -63,7 +63,7 @@ for i in range(max_iters):
     #       tonii[np.isnan(tonii)] = -1
     #       nib.Nifti1Image(tonii,lbl_nib.affine,lbl_nib.header).to_filename(f'debug_iter-{i:02d}.nii')
 
-    upd_coords = nan_convolve(coords, hl, preserve_nan=True)
+    upd_coords = nan_convolve(coords, hl, fill_value=np.nan, preserve_nan=True)
 
     upd_coords[source == 1] = 0
     upd_coords[sink == 1] = 1
