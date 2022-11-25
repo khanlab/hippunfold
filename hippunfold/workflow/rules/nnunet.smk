@@ -83,7 +83,9 @@ def parse_chkpnt_from_tar(wildcards, input):
 
 rule download_model:
     input:
-        HTTP.remote(config["nnunet_model"][config["modality"]]),
+        HTTP.remote(config["nnunet_model"][config["force_nnunet_model"]])
+        if config["force_nnunet_model"]
+        else HTTP.remote(config["nnunet_model"][config["modality"]]),
     output:
         model_tar=get_model_tar(),
     shell:
