@@ -4,6 +4,7 @@ from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 
 HTTP = HTTPRemoteProvider()
 
+
 def get_nnunet_input(wildcards):
     if config["modality"] == "T2w":
         nii = (
@@ -44,7 +45,6 @@ def get_nnunet_input(wildcards):
 
 
 def get_model_tar():
->>>>>>> 2b5e287... download nnunet as a workflow rule
 
     if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
         download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
@@ -62,8 +62,7 @@ def get_model_tar():
     if local_tar == None:
         print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
 
-    return os.path.abspath(os.path.join(download_dir, local_tar.split('/')[-1]))
-
+    return os.path.abspath(os.path.join(download_dir, local_tar.split("/")[-1]))
 
 
 def parse_task_from_tar(wildcards, input):
@@ -83,12 +82,17 @@ def parse_chkpnt_from_tar(wildcards, input):
         raise ValueError("cannot parse chkpnt from model tar")
     return chkpnt
 
+
 rule download_model:
     input:
-        HTTP.remote(config['nnunet_model'][config['modality']])
+        HTTP.remote(config["nnunet_model"][config["force_nnunet_model"]])
+        if config["force_nnunet_model"]
+        else HTTP.remote(config["nnunet_model"][config["modality"]]),
     output:
         model_tar=get_model_tar(),
-    shell: 'cp {input} {output}'
+    shell:
+        "cp {input} {output}"
+
 
 rule run_inference:
     """ This rule uses either GPU or CPU .
