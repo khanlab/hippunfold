@@ -1,10 +1,10 @@
 # Frequently asked questions
 
-1. [Why is the workflow stopping at the run_inference step?](#Why-is-the-workflow-stopping-at-the-run_inference-step)
-2. [No input images found](#No-input-images-found)
-3. [Third Example](#third-example)
+1. [](run-inference-mem)
+2. [](no-input-images)
 
 
+(run-inference-mem)=
 ## Why is the workflow stopping at the run_inference step?
 
 If you are getting an error in the run_inference step, e.g. as follows:
@@ -32,12 +32,15 @@ Complete log: .snakemake/log/2022-11-10T020645.651622.snakemake.log
 it is likely that you do not have enough memory available on your system. You need to have at least 8GB of memory on your system. If you are running Docker on Windows/Mac or another 
 virtual machine (e.g. VirtualBox) you will need to increase the amount of memory dedicated to the virtual machine.
 
-## No input images found
+(no-input-images)=
+## Why do I get the error, `No input images found for T1w`, or `No input images found for T2w`
+
+The workflow is unable to find any input files to run HippUnfold.
 
 This can happen if:
  - Singularity or docker cannot access your input directory. For Singularity, ensure your [Singularity options](https://docs.sylabs.io/guides/3.1/user-guide/cli/singularity_run.html) are appropriate, in particular `SINGULARITY_BINDPATH`. For docker, ensure you are mounting the correct directory with the `-v` flag described in the [Getting started](https://hippunfold.readthedocs.io/en/latest/getting_started/docker.html) section. 
- - HippUnfold does not recognize your BIDS-formatted input images. This can occur if, for example, T1w images are labelled with the suffix `_t1w.nii.gz` instead of `_T1w.nii.gz` as per [BIDS specifications](https://bids.neuroimaging.io/specification.html). (Note HippUnfold makes use of [PyBIDS](https://github.com/bids-standard/pybids)). This can be overwritten with the `--path-T1w` argument.
+ - HippUnfold does not recognize your BIDS-formatted input images. This can occur if, for example, T1w images are labelled with the suffix `_t1w.nii.gz` instead of `_T1w.nii.gz` as per [BIDS specifications](https://bids.neuroimaging.io/specification.html). HippUnfold makes use of [PyBIDS](https://github.com/bids-standard/pybids) to parse the dataset, so we suggest you use the [BIDS Validator](https://bids-standard.github.io/bids-validator/) to ensure your dataset has no errors. Note: You can override BIDS parsing and use custom filenames with the `--path-*` option as described in the [](../usage/useful_options.md#parsing-non-bids-datasets-with-custom-paths) section. 
+
     
-## Third Example
 
 
