@@ -33,6 +33,7 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinxarg.ext",
     "myst_parser",
+    "sphinxcontrib.asciinema",
 ]
 
 

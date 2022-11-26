@@ -7,10 +7,14 @@ three are supported by VirtualBox and Vagrant). Note: VirtualBox does the actual
 virtualization, but Vagrant provides an easy and reproducible way to create the
 VMs (as shown below).
 
+
 ### Install VirtualBox and Vagrant
 
 ### Create a VM and connect to it
 
+
+```{asciinema} 520410
+```
 
 `Vagrantfile`: 
 ```
