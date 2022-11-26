@@ -12,7 +12,7 @@
  4. Sufficient CPU and memory - the more you have, the faster it will run, but we recommend at least 8 CPU cores and 16GB memory.
 
 
-### First time setup
+## First time setup
 
 Pull the container. This can be done from dockerhub, but this requires a large amount of disk space in your /tmp folder, since it has to convert from a docker container to a singularity container. To avoid this, we provide a Dropbox link to the singularity container itself:
 
@@ -44,7 +44,7 @@ by setting environment variables, however, using a network file system for the f
     export SINGULARITY_CACHEDIR=/YOURDIR/.cache/singularity
 
 
-### Running an example
+## Running an example
 
 Download and extract a single-subject BIDS dataset for this test:
 

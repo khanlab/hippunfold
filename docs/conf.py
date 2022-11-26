@@ -46,6 +46,7 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 myst_enable_extensions = ['html_image','dollarmath','amsmath']
+myst_heading_anchors = 3
 
 master_doc = 'index'
 
