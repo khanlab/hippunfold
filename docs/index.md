@@ -38,6 +38,7 @@ usage/faq.md
 :maxdepth: 2
 
 pipeline/pipeline
+pipeline/algorithms
 ```
 
 
