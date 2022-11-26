@@ -9,6 +9,4 @@ tail -n +5 $tmpfile > ../README.md
 make latexpdf
 cp _build/latex/hippunfold.pdf hippunfold_manual.pdf
 git restore ../README.md
-git add hippunfold_manual.pdf
-git commit -m "updated hippunfold manual"
 

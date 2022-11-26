@@ -29,7 +29,11 @@ $$
 
 ### Template-based shape injection
 
-TODO
+We make use of a fluid diffeomorphic image registration, between a template hippocampus tissue segmentation, and the U-net tissue segmentation, in order to 1) help enforce the template topology, and 2) provide an initialization to the Laplace solution. By performing a fluid registration, driven by the segmentations instead of the MRI images, the warp is able to bring the template shape into close correspondence with the subject, but the regularization helps ensure that the topology present in the template is not broken.  The template we use was built from 22 *ex vivo* images from the [Penn Hippocampus Atlas](https://www.nitrc.org/projects/pennhippoatlas/). 
+
+The registration is performed using [greedy](https://sites.google.com/view/greedyreg/about), initialized using moment tensor matching (without reflections) to obtain an affine transformation, and a multi-channel sum of squared differences cost function for the fluid registration. The channels are made up of binary images, split from the multi-label tissue segmentations, which are then smoothed with a Gaussian kernel with standard deviation of 0.5*mm*. The Cyst label is replaced by the SRLM prior to this, since the locations of cysts are not readily mapped using a template shape. After warping the discrete template tissue labels to the subject, the subject's Cyst label is then re-combined with the transformed template labels.
+
+The pre-computed Laplace solutions on the template image (analogous to method described below), $\psi_{A \to P}^{template}$, $\psi_{P \to D}^{template}$, $\psi_{I \to O}^{template}$, are then warped to the subject using the diffeomorphic registration to provide an initialization for the subject.
 
 ### Fast marching initialization
 As an alternative if template-based shape injection is not used, we employ a fast marching method to provide an initialization to the Laplace solution, to speed up convergence. We make use of the [scikit-fmm Python package](https://github.com/scikit-fmm/scikit-fmm), that finds approximate solutions to the boundary value problems of the Eikonal equation,
@@ -156,6 +160,10 @@ Subfield atlases in HippUnfold are now defined in the volumetric unfolded space,
 The volumetric subfield labels are then modified to override the $L_{SRLM}$, $L_{Cyst}$, and $L_{DG}$ labels from the tissue segmentation, since these labels are not included in the subfield atlas.
 
 
-## Dentate gyrus unfolding
+### Dentate gyrus unfolding
 
+Unfolding for the dentate gyrus conceptually identical to the hippocampus, however, the $\psi_{I \to O}$ and $\psi_{P \to D}$ fields are swapped, since the dentate gyrus tissue is topologically-perpendicular to the rest of the hippocampus. 
+
+
+Furthermore, because the dentate gyrus is a much smaller structure than the hippocampus, solving Laplace's equation for each individual hippocampus can be challenging if the spatial resolution is limited. Thus instead, we solely make use of the template shape injection, and use the pre-computed Laplace solution, $\psi^{template}$, to define the coordinates. Also, for the pre-computed solution, the $\psi_{A \to P}$ field is computed from the hippocampus (since this coordinate is naturally constrained to be identical for both structures). 
 
