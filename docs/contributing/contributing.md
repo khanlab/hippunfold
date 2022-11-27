@@ -170,10 +170,9 @@ If poetry is not installed, please refer to the [installation documentation](htt
        export PATH=$PATH:$HOME/.local/bin
 2. To avoid having to download containers and trained models (see section [below](#deep-learning-nnu-net-model-files)), add the `$SNAKEMAKE_SINGULARITY_DIR` and `$HIPPUNFOLD_CACHE_DIR` environment variables to the bashrc file. For Khan lab's members, add the following lines:
 
-        export SNAKEMAKE_SINGULARITY_DIR="/srv/khan/shared/containers/snakemake_containers"
-        export HIPPUNFOLD_CACHE_DIR="/srv/khan/shared/data/hippunfold_models"
+        export SNAKEMAKE_SINGULARITY_DIR="/cifs/khan/shared/containers/snakemake_containers"
+        export HIPPUNFOLD_CACHE_DIR="/cifs/khan/shared/data/hippunfold_models"
 
-This will work only if the `setup_automount_v2` script was already executed.
 3. HippUnfold might be executed using `poetry run hippunfold <arguments>` or through the `poetry shell` method. Refer to previous section for more information in regards to execution options. 
 
 4. On the CBS server you should always set your output folder to a path inside `/localscratch`, and not your home folder or a `/srv` or `/cifs` path, and copy the final results out after they have finished computing. Please be aware that the CBS server may not be the most efficient option for running a large number of subjects (since you are limited in processing cores vs a HPC cluster).
