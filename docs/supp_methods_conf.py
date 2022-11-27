@@ -19,8 +19,8 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 
-project = 'HippUnfold Documentation'
-copyright = '2020, Jordan DeKraker and Ali R. Khan'
+project = 'HippUnfold Algorithmic Details'
+copyright = '2022, Jordan DeKraker and Ali R. Khan'
 author = 'HippUnfold Development Team'
 
 
