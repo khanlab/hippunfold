@@ -84,7 +84,7 @@ for i in range(max_iters):
     #       tonii[np.isnan(tonii)] = -1
     #       nib.Nifti1Image(tonii,lbl_nib.affine,lbl_nib.header).to_filename(f'debug_iter-{i:02d}.nii')
 
-    upd_coords = nan_convolve(coords, hl, preserve_nan=True)
+    upd_coords = nan_convolve(coords, hl, fill_value=np.nan, preserve_nan=True)
 
     upd_coords[source == 1] = 0
     upd_coords[sink == 1] = 1
@@ -105,10 +105,7 @@ for i in range(max_iters):
 
     coords = upd_coords
 
-# remove any remaining NaNS
-coordsnonan = np.zeros_like(coords)
-coordsnonan[idxgm == 1] = coords[idxgm == 1]
-coordsnonan = np.nan_to_num(coordsnonan)
+coords[idxgm == 0] = np.nan  # setting outside GM to nan -- this was zero before..
 
 
 # save file
