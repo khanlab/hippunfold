@@ -10,11 +10,20 @@ segment subfields and generate hippocampal and dentate gyrus surfaces.
 
 ![Hippo Fold Unfold](https://raw.githubusercontent.com//khanlab/hippunfold/master/docs/images/subfields_foldunfold.png)
 
+
 This is especially useful for:
 - Visualization
 - Topologically-constrained intersubject registration
 - Parcellation (ie. registration to an unfolded atlas)
 - Morphometry (eg. Thickness, Surface Area, Curvature, and Gyrification measures)
+
+## :tada: HippUnfold has now been accepted for publication in eLife :tada: 
+Jordan DeKraker, Roy AM Haast, Mohamed D Yousif, Bradley Karat, Jonathan C Lau, Stefan Köhler, Ali R Khan (2022) Automated hippocampal unfolding for morphometry and subfield segmentation with HippUnfold eLife 11:e77945
+
+https://doi.org/10.7554/eLife.77945
+
+
+## Workflow
 
 The overall workflow can be summarized in the following steps:
 
