@@ -168,7 +168,7 @@ rule template_shape_reg:
         subject_seg=get_input_splitseg_for_shape_inject,
     params:
         general_opts="-d 3 -m SSD",
-        affine_opts="-moments 2 -det 1",
+        affine_opts="-moments 2",
         greedy_opts=get_inject_scaling_opt,
         img_pairs=get_image_pairs,
     output:
