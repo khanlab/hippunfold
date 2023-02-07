@@ -205,8 +205,9 @@ parse_args:
       - 'bigbrain'
       - 'magdeburg'
       - 'freesurfer'
+      - 'histologyReference2023'
     default: 
-      - 'bigbrain'
+      - 'histologyReference2023'
     nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
@@ -342,9 +343,12 @@ template_files:
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
 
 atlas: 
-  - bigbrain
+  - histologyReference2023
 
 atlas_files:
+  histologyReference2023:
+    label_nii: resources/histologyReference2023/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
+    label_list: resources/histologyReference2023/labellist.txt
   bigbrain:
     label_nii: resources/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
     label_list: resources/bigbrain/sub-bigbrain_labellist.txt
@@ -364,6 +368,10 @@ tissue_atlas_mapping:
     srlm: 2
     cyst: 7
   bigbrain:
+    dg: 6
+    srlm: 7
+    cyst: 8
+  histologyReference2023:
     dg: 6
     srlm: 7
     cyst: 8
