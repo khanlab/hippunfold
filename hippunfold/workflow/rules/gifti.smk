@@ -221,7 +221,7 @@ rule warp_gii_unfold2native:
             den="{density}",
             suffix="{surfname}.surf.gii",
             desc="nonancorrect",
-            space="corob",
+            space="corobl",
             align="{align}",
             hemi="{hemi}",
             label="{autotop}",
