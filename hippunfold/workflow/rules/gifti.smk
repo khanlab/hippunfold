@@ -23,11 +23,11 @@ rule cp_template_to_unfold:
         surface_type="FLAT",
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            space="unfolded",
+            space="unfold",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -94,17 +94,17 @@ rule calc_unfold_template_coords:
 rule constrain_surf_to_bbox:
     input:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            space="unfolded",
+            space="unfold",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
         ref_nii=bids(
-            root=root,
+            root=work,
             datatype="warps",
             space="unfold",
             label="{autotop}",
@@ -118,7 +118,8 @@ rule constrain_surf_to_bbox:
             den="{density}",
             suffix="{surfname}.surf.gii",
             desc="constrainbbox",
-            space="unfolded",
+            space="unfold",
+            align="none",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -137,6 +138,50 @@ rule constrain_surf_to_bbox:
         "subj"
     script:
         "../scripts/constrain_surf_to_bbox.py"
+
+
+rule dentate_skip_unfoldreg:
+    input:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            desc="constrainbbox",
+            space="unfold",
+            align="none",
+            hemi="{hemi}",
+            label="dentate",
+            **config["subj_wildcards"]
+        ),
+    output:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            desc="constrainbbox",
+            space="unfold",
+            hemi="{hemi}",
+            label="dentate",
+            **config["subj_wildcards"]
+        ),
+    group:
+        "subj"
+    shell:
+        "cp {input} {output}"
+
+
+
+
+
+
+### A) we will run the following rules once for align-none and again later for align-{config["atlas"]}
+# NOTE see https://snakemake.readthedocs.io/en/v6.1.2/project_info/faq.html#snakemake-complains-about-a-cyclic-dependency-or-a-periodicwildcarderror-what-can-i-do
+
+
+
+
 
 
 # warp from subj unfolded to corobl
@@ -159,7 +204,8 @@ rule warp_gii_unfold2native:
             den="{density}",
             suffix="{surfname}.surf.gii",
             desc="constrainbbox",
-            space="unfolded",
+            space="unfold",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -175,7 +221,8 @@ rule warp_gii_unfold2native:
             den="{density}",
             suffix="{surfname}.surf.gii",
             desc="nonancorrect",
-            space="corobl",
+            space="corob",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -200,17 +247,19 @@ rule correct_nan_vertices:
             suffix="{surfname}.surf.gii",
             desc="nonancorrect",
             space="corobl",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="corobl",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop,hipp|dentate}",
             **config["subj_wildcards"]
@@ -220,16 +269,16 @@ rule correct_nan_vertices:
     script:
         "../scripts/fillnanvertices.py"
 
-
 # warp from corobl to native
-rule warp_gii_to_native:
+rule affine_gii_to_native:
     input:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="corobl",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -246,13 +295,14 @@ rule warp_gii_to_native:
         ),
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="{native_modality}",
+            align="{align}",
             hemi="{hemi}",
-            label="{autotop}",
+            label="{autotop,hipp|dentate}",
             **config["subj_wildcards"]
         ),
     container:
@@ -267,22 +317,24 @@ rule warp_gii_to_native:
 rule calculate_surface_area:
     input:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="midthickness.surf.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="surfarea.shape.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -300,11 +352,12 @@ rule calculate_gyrification:
     this should be proportional by a constant, to the earlier gyrification on 32k surfaces."""
     input:
         native_surfarea=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="surfarea.shape.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -318,11 +371,12 @@ rule calculate_gyrification:
         ),
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="gyrification.shape.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -333,6 +387,7 @@ rule calculate_gyrification:
             den="{density}",
             suffix="calcgyrification.txt",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -349,11 +404,12 @@ rule calculate_gyrification:
 rule smooth_surface:
     input:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="midthickness.surf.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -363,11 +419,12 @@ rule smooth_surface:
         iterations=100,
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="midthickness.surf.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             desc="smoothed",
@@ -384,11 +441,12 @@ rule smooth_surface:
 rule calculate_curvature_from_surface:
     input:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="midthickness.surf.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             desc="smoothed",
@@ -396,11 +454,12 @@ rule calculate_curvature_from_surface:
         ),
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="curvature.shape.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -416,32 +475,35 @@ rule calculate_curvature_from_surface:
 rule calculate_thickness_from_surface:
     input:
         inner=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="inner.surf.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
         outer=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="outer.surf.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
         ),
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="thickness.shape.gii",
             space="{space}",
+            align="{align}",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -452,6 +514,276 @@ rule calculate_thickness_from_surface:
         "subj"
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
+
+
+
+
+
+
+### B) up to here everything is calculated in align-none. Now we will align to the reference atlas based on thickness, curvature, and gyrification
+
+
+
+
+
+rule metric_to_nii:
+    """converts metric .gii files to .nii for use in ANTs"""
+    input:
+        metrc_gii=bids(
+            root=work,
+            datatype="surf",
+            den="unfoldiso",
+            suffix="{metric}.shape.gii",
+            space="corobl",
+            align="none",
+            hemi="{hemi}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+        unfoldedsurf=bids(
+            root=root,
+            datatype="surf",
+            den="unfoldiso",
+            suffix="inner.surf.gii",
+            space="unfoldunaligned",
+            align="none",
+            hemi="{hemi}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+    params:
+        interp="-nearest-verrtex 1",
+        refflatnii = "../resources/histologyReference2023/unfolded2Dref.nii.gz", #TODO dont hard-code this
+    output:
+        metric_nii=bids(
+            root=work,
+            datatype="anat",
+            den="unfoldiso",
+            suffix="{metric}.nii.gz",
+            space="unfold",
+            align="none",
+            hemi="{hemi}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.unfoldedsurf} {params.refflatnii} {output.metric_nii} {params.interp}"
+
+
+rule unfolded_registration:
+    """performs 2D registration in unfolded space as in [reference paper]
+        this is done in a shadow directory to get rid of the tmp files generated by ants."""
+    input:
+        thickness = bids(
+            root=work,
+            datatype="anat",
+            den="unfoldiso",
+            suffix="thickness.nii.gz",
+            space="unfold",
+            align="none",
+            hemi="{hemi}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+        curvature = bids(
+            root=work,
+            datatype="anat",
+            den="unfoldiso",
+            suffix="curvature.nii.gz",
+            space="unfold",
+            align="none",
+            hemi="{hemi}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+        gyrification = bids(
+            root=work,
+            datatype="anat",
+            den="unfoldiso",
+            suffix="gyrification.nii.gz",
+            space="unfold",
+            align="none",
+            hemi="{hemi}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+        refthickness = "../resources/histologyReference2023/thickness.nii.gz", #TODO: also don't hard-code these
+        refcurvature = "../resources/histologyReference2023/curvature.nii.gz",
+        refgyrification = "../resources/histologyReference2023/gyrification.nii.gz",
+    params:
+        "-d 2 -t so"
+    output:
+        warp=bids(
+            root=work,
+            **config["subj_wildcards"],
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="SyN",
+            from_="template",
+            to="subject",
+            space="unfold",
+            align="none",
+            type_="itk",
+            hemi="{hemi}"
+        ),
+        invwarp=bids(
+            root=work,
+            **config["subj_wildcards"],
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="SyN",
+            from_="subject",
+            to="template",
+            space="unfold",
+            align="none",
+            type_="itk",
+            hemi="{hemi}"
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    log:
+        bids(
+            root="logs",
+            den="unfoldiso",
+            suffix="unfoldedRegistration.txt",
+            space="unfoldu",
+            align="none",
+            hemi="{hemi}",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+    shadow:
+        "minimal"
+    shell:
+        "antsRegistrationSyNQuick.sh {params} -f {inputs.refthickness} {inputs.refcurvature} {inputs.refgyrification} -m {inputs.thickness} {inputs.curvature} {inputs.gyrification} -o tmp && cp tmp1Warp.nii.gz {output.warp} && cp tmp1InverseWarp.nii.gz {output.invwarp}"
+
+
+# warp from subj unfolded to unfoldedaligned
+rule warp_gii_unfold2aligned:
+    input:
+        invwarp=bids(
+            root=work,
+            **config["subj_wildcards"],
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="SyN",
+            from_="subject",
+            to="template",
+            space="unfold",
+            align="none",
+            type_="itk",
+            hemi="{hemi}"
+        ),
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            desc="constrainbbox",
+            space="unfold",
+            align="none",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+        ),
+    params:
+        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type="ANATOMICAL",
+    output:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            desc="constrainbbox",
+            space="unfold",
+            align=config["atlas"],
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+        ),
+    group:
+        "subj"
+    script:
+        "../scripts/warp_flatsurf.py"
+
+
+
+
+
+
+### C) We will now feed the align-atlas mesh files back into A), then continue below
+
+
+
+
+rule copy_surfaces_to_results:
+    input:
+        bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            space="{space}",
+            align=config["atlas"],
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"],
+        )
+    output:
+        bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"],
+        )
+    group:
+        "subj"
+    shell:
+        "cp {input} {output}"
+
+rule copy_metrics_to_results:
+    input:
+        bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{metric}.shape.gii",
+            space="{space}",
+            align=config["atlas"],
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"],
+        )
+    output:
+        bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="{metric}.shape.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"],
+        )
+    group:
+        "subj"
+    shell:
+        "cp {input} {output}"
+
+
+
 
 
 rule resample_atlas_to_refvol:
@@ -747,7 +1079,7 @@ rule create_spec_file_hipp:
                 **config["subj_wildcards"]
             ),
             surfname=["midthickness"],
-            space=["{space}", "unfolded"],
+            space=["{space}", "unfold"],
             allow_missing=True,
         ),
         cifti_metrics=lambda wildcards: expand(
@@ -826,7 +1158,7 @@ rule create_spec_file_dentate:
                 **config["subj_wildcards"]
             ),
             surfname=["midthickness"],
-            space=["{space}", "unfolded"],
+            space=["{space}", "unfold"],
             allow_missing=True,
         ),
         cifti=lambda wildcards: expand(
@@ -895,3 +1227,4 @@ rule merge_lr_spec_file:
         "subj"
     shell:
         "wb_command -spec-file-merge {input.spec_files} {output}"
+
