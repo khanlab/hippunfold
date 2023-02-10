@@ -321,7 +321,7 @@ cifti_metric_types:
 
 singularity:
   prepdwi: 'docker://khanlab/prepdwi:latest'  
-  autotop: 'docker://khanlab/autotop_deps:v0.4.1'
+  autotop: 'docker://khanlab/autotop_deps:v0.4.3'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
   ants: 'docker://kaczmarj/ants:2.3.4'
 
@@ -349,6 +349,9 @@ atlas_files:
   histologyReference2023:
     label_nii: resources/histologyReference2023/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
     label_list: resources/histologyReference2023/labellist.txt
+    thick: resources/histologyReference2023/thickness.nii.gz
+    curv: resources/histologyReference2023/curvature.nii.gz
+    gyr: resources/histologyReference2023/gyrification.nii.gz
   bigbrain:
     label_nii: resources/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
     label_list: resources/bigbrain/sub-bigbrain_labellist.txt
