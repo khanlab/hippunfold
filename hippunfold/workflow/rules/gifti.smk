@@ -781,6 +781,7 @@ rule correct_nan_vertices2:
     script:
         "../scripts/fillnanvertices.py"
 
+
 # needed for if native_modality is corobl
 rule cp_corobl_root:
     input:
@@ -809,6 +810,7 @@ rule cp_corobl_root:
         "subj"
     shell:
         "cp {input} {output}"
+
 
 # warp from corobl to native
 rule affine_gii_to_native:
