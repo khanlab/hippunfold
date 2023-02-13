@@ -211,9 +211,14 @@ parse_args:
     nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
+  --no_unfolded_reg:
+    help: 'Perform unfolded space (2D) registration based on thickness, curvature, and gyrification for closer alignment to the reference atlas. NOTE only histologyReference2023 has these features currently. (default: %(default)s)'
+    default: False
+    action: store_true
+
   --generate_myelin_map:
     help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
-    default: false
+    default: False
     action: store_true
 
   --use_gpu:
