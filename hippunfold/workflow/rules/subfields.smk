@@ -46,30 +46,36 @@ rule resample_unfoldreg_subfields:
         "c3d tmp*.nii.gz -tile z -o recombined.nii.gz && "
         "c3d {input.label_nii} recombined.nii.gz -copy-transform -o {output}"
 
+
 def skip_unfoldreg_option_subfields(wildcards):
     if config["no_unfolded_reg"]:
-        label_nii =bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **config["subj_wildcards"]
-        ),
+        label_nii = (
+            bids(
+                root=work,
+                datatype="anat",
+                suffix="subfields.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="hipp",
+                atlas="{atlas}",
+                **config["subj_wildcards"]
+            ),
+        )
     else:
-        label_nii=bids(
-            root=root,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **config["subj_wildcards"]
-        ),
+        label_nii = (
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="subfields.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="hipp",
+                atlas="{atlas}",
+                **config["subj_wildcards"]
+            ),
+        )
     return label_nii
+
 
 rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and atlas subfield labels"""
