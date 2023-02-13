@@ -229,7 +229,7 @@ rule template_xfm_itk2ras:
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -240,7 +240,7 @@ rule template_xfm_itk2ras:
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="ras"
