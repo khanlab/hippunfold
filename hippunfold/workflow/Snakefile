@@ -72,11 +72,11 @@ else:
 
 # if atlas doesn't contain alignment features
 if (
-    config["atlas"] == "bigbrain"
-    or config["atlas"] == "magdeburg"
-    or config["atlas"] == "freesurfer"
+    config["atlas"] == ["bigbrain"]
+    or config["atlas"] == ["magdeburg"]
+    or config["atlas"] == ["freesurfer"]
 ):
-    config["no_unfolded_reg"] = "none"
+    config["no_unfolded_reg"] = True
 
 # writes inputs_config.yml and updates config dict
 config.update(
