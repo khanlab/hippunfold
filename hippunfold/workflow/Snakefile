@@ -71,11 +71,7 @@ else:
     limit_to_list.add(config["modality"])
 
 # if atlas doesn't contain alignment features
-if (
-    config["atlas"] == ["bigbrain"]
-    or config["atlas"] == ["magdeburg"]
-    or config["atlas"] == ["freesurfer"]
-):
+if not config["atlas"] == ["histologyReference2023"]:
     config["no_unfolded_reg"] = True
 
 # writes inputs_config.yml and updates config dict
