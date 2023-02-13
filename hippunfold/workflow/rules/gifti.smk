@@ -781,6 +781,34 @@ rule correct_nan_vertices2:
     script:
         "../scripts/fillnanvertices.py"
 
+# needed for if native_modality is corobl
+rule cp_corobl_root:
+    input:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+        ),
+    output:
+        gii=bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+        ),
+    group:
+        "subj"
+    shell:
+        "cp {input} {output}"
 
 # warp from corobl to native
 rule affine_gii_to_native:
@@ -811,7 +839,7 @@ rule affine_gii_to_native:
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            space="{native_modality,T1w|T2w}",
+            space="{native_modality}",
             hemi="{hemi}",
             label="{autotop,hipp|dentate}",
             **config["subj_wildcards"]
