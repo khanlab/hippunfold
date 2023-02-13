@@ -198,7 +198,7 @@ rule invert_template_xfm_itk2ras:
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="T1w",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -209,7 +209,7 @@ rule invert_template_xfm_itk2ras:
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="T1w",
             to="corobl",
             desc="affineInverse",
             type_="ras"
@@ -229,7 +229,7 @@ rule template_xfm_itk2ras:
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="T1w",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -240,7 +240,7 @@ rule template_xfm_itk2ras:
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="T1w",
             to="corobl",
             desc="affine",
             type_="ras"
