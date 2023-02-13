@@ -683,33 +683,29 @@ rule dentate_skip_unfoldreg:
 
 def skip_unfoldreg_option(wildcards):
     if config["no_unfolded_reg"]:
-        gii = (
-            bids(
-                root=work,
-                datatype="surf",
-                den="{density}",
-                suffix="{surfname}.surf.gii",
-                desc="constrainbbox",
-                space="unfold",
-                unfoldreg="none",
-                hemi="{hemi}",
-                label="{autotop}",
-                **config["subj_wildcards"]
-            ),
+        gii = bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            desc="constrainbbox",
+            space="unfold",
+            unfoldreg="none",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
         )
     else:
-        gii = (
-            bids(
-                root=work,
-                datatype="surf",
-                den="{density}",
-                suffix="{surfname}.surf.gii",
-                desc="constrainbbox",
-                space="unfold",
-                hemi="{hemi}",
-                label="{autotop}",
-                **config["subj_wildcards"]
-            ),
+        gii = bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            desc="constrainbbox",
+            space="unfold",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
         )
     return gii
 
