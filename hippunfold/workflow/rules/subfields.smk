@@ -49,30 +49,26 @@ rule resample_unfoldreg_subfields:
 
 def skip_unfoldreg_option_subfields(wildcards):
     if config["no_unfolded_reg"]:
-        label_nii = (
-            bids(
-                root=work,
-                datatype="anat",
-                suffix="subfields.nii.gz",
-                space="unfold",
-                hemi="{hemi}",
-                label="hipp",
-                atlas="{atlas}",
-                **config["subj_wildcards"]
-            ),
+        label_nii = bids(
+            root=work,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **config["subj_wildcards"]
         )
     else:
-        label_nii = (
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="subfields.nii.gz",
-                space="unfold",
-                hemi="{hemi}",
-                label="hipp",
-                atlas="{atlas}",
-                **config["subj_wildcards"]
-            ),
+        label_nii = bids(
+            root=root,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **config["subj_wildcards"]
         )
     return label_nii
 
