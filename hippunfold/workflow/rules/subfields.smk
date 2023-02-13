@@ -1,9 +1,62 @@
 
+rule resample_align_subfields:
+    input:
+        label_nii=bids(
+            root=work,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **config["subj_wildcards"]
+        ),
+        warp=bids(
+            root=work,
+            **config["subj_wildcards"],
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="SyN",
+            from_="{atlas}",
+            to="subject",
+            space="unfold",
+            type_="itk",
+            hemi="{hemi}"
+        ),
+    params:
+        refflatnii = os.path.join(
+            workflow.basedir,
+            "..",
+            config["atlas_files"]["histologyReference2023"]["label_nii"],
+        ),
+    output:
+        label_nii=bids(
+            root=root,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **config["subj_wildcards"]
+        ),
+    container:
+        config["singularity"]["autotop"]
+    shadow:
+        "minimal"
+    group:
+        "subj"
+    shell:
+        "c3d {input.label_nii} -slice z 0:15 -oo tmp0%d.nii.gz && "
+        "for fn in $(ls tmp*.nii.gz); do antsApplyTransforms -d 2 -i $fn -r $fn -o $fn -n MultiLabel -t {input.warp}; done && "
+        "c3d tmp*.nii.gz -tile z -o recombined.nii.gz && "
+        "c3d {input.label_nii} recombined.nii.gz -copy-transform -o {output}"
+
 rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and atlas subfield labels"""
     input:
         label_nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="subfields.nii.gz",
             space="unfold",
