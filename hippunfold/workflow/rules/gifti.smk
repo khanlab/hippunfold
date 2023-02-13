@@ -119,7 +119,7 @@ rule constrain_surf_to_bbox:
             suffix="{surfname}.surf.gii",
             desc="constrainbbox",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="{autotop}",
             **config["subj_wildcards"]
@@ -145,7 +145,7 @@ rule constrain_surf_to_bbox:
 
 
 
-### A) we will run the following rules once for align-none and again later (with no align wildcard, as in previous version)
+### A) we will run the following rules once for unfoldreg-none and again later (with no unfoldreg wildcard, as in previous version)
 
 
 
@@ -173,7 +173,7 @@ rule warp_gii_unfold2corobl1:
             suffix="{surfname}.surf.gii",
             desc="constrainbbox",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -190,7 +190,7 @@ rule warp_gii_unfold2corobl1:
             suffix="{surfname}.surf.gii",
             desc="nonancorrect",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -215,7 +215,7 @@ rule correct_nan_vertices1:
             suffix="{surfname}.surf.gii",
             desc="nonancorrect",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -227,7 +227,7 @@ rule correct_nan_vertices1:
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -247,7 +247,7 @@ rule calculate_surface_area1:
             den="{density}",
             suffix="midthickness.surf.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -259,7 +259,7 @@ rule calculate_surface_area1:
             den="{density}",
             suffix="surfarea.shape.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -282,7 +282,7 @@ rule calculate_gyrification1:
             den="{density}",
             suffix="surfarea.shape.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -301,7 +301,7 @@ rule calculate_gyrification1:
             den="{density}",
             suffix="gyrification.shape.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -312,7 +312,7 @@ rule calculate_gyrification1:
             den="{density}",
             suffix="calcgyrification.txt",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -334,7 +334,7 @@ rule smooth_surface1:
             den="{density}",
             suffix="midthickness.surf.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -349,7 +349,7 @@ rule smooth_surface1:
             den="{density}",
             suffix="midthickness.surf.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             desc="smoothed",
@@ -371,7 +371,7 @@ rule calculate_curvature_from_surface1:
             den="{density}",
             suffix="midthickness.surf.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             desc="smoothed",
@@ -384,7 +384,7 @@ rule calculate_curvature_from_surface1:
             den="{density}",
             suffix="curvature.shape.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -405,7 +405,7 @@ rule calculate_thickness_from_surface1:
             den="{density}",
             suffix="inner.surf.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -416,7 +416,7 @@ rule calculate_thickness_from_surface1:
             den="{density}",
             suffix="outer.surf.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -428,7 +428,7 @@ rule calculate_thickness_from_surface1:
             den="{density}",
             suffix="thickness.shape.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -445,7 +445,7 @@ rule calculate_thickness_from_surface1:
 
 
 
-### B) up to here everything is calculated in align-none. Now we will align to the reference atlas based on thickness, curvature, and gyrification
+### B) up to here everything is calculated in unfoldreg-none. Now we will align to the reference atlas based on thickness, curvature, and gyrification
 
 
 
@@ -460,7 +460,7 @@ rule metric_to_nii:
             den="unfoldiso",
             suffix="{metric}.shape.gii",
             space="corobl",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -472,7 +472,7 @@ rule metric_to_nii:
             suffix="inner.surf.gii",
             desc="constrainbbox",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -491,7 +491,7 @@ rule metric_to_nii:
             den="unfoldiso",
             suffix="{metric}.nii.gz",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -514,7 +514,7 @@ rule unfolded_registration:
             den="unfoldiso",
             suffix="thickness.nii.gz",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -525,7 +525,7 @@ rule unfolded_registration:
             den="unfoldiso",
             suffix="curvature.nii.gz",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -536,7 +536,7 @@ rule unfolded_registration:
             den="unfoldiso",
             suffix="gyrification.nii.gz",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -595,8 +595,8 @@ rule unfolded_registration:
             root="logs",
             den="unfoldiso",
             suffix="unfoldedRegistration.txt",
-            space="unfoldu",
-            align="{atlas}",
+            space="unfold",
+            unfoldreg="{atlas}",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -614,7 +614,7 @@ rule unfolded_registration:
 
 
 # warp from subj unfolded to unfoldedaligned
-rule warp_gii_unfold2aligned:
+rule warp_gii_unfoldreg:
     input:
         invwarp=expand(
             bids(
@@ -639,7 +639,7 @@ rule warp_gii_unfold2aligned:
             suffix="{surfname}.surf.gii",
             desc="constrainbbox",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
@@ -661,7 +661,7 @@ rule warp_gii_unfold2aligned:
     script:
         "../scripts/warp_flatsurf.py"
 
-rule dentete_skip_align:
+rule dentate_skip_unfoldreg:
     input:
         gii=bids(
             root=work,
@@ -670,15 +670,11 @@ rule dentete_skip_align:
             suffix="{surfname}.surf.gii",
             desc="constrainbbox",
             space="unfold",
-            align="none",
+            unfoldreg="none",
             hemi="{hemi}",
             label="dentate",
             **config["subj_wildcards"]
         ),
-    params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="ANATOMICAL",
     output:
         gii=bids(
             root=work,
@@ -700,13 +696,39 @@ rule dentete_skip_align:
 
 
 
-
 ### C) We will now repeat A), then continue below
 
 
 
 
 
+def skip_unfoldreg_option(wildcards):
+    if config["no_unfolded_reg"]:
+        gii = bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            desc="constrainbbox",
+            space="unfold",
+            unfoldreg="none",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+            ),
+    else:
+        gii= bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            desc="constrainbbox",
+            space="unfold",
+            hemi="{hemi}",
+            label="{autotop}",
+            **config["subj_wildcards"]
+            ),
+    return gii
 
 # warp from subj unfolded to corobl
 rule warp_gii_unfold2corobl2:
@@ -722,17 +744,7 @@ rule warp_gii_unfold2corobl2:
             to="corobl",
             mode="surface"
         ),
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            desc="constrainbbox",
-            space="unfold",
-            hemi="{hemi}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
+        gii=skip_unfoldreg_option
     params:
         structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -1274,17 +1286,7 @@ def get_gifti_metric_types(label):
 
 rule cp_unfolded_noconstrain:
     input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            desc="constrainbbox",
-            space="unfold",
-            hemi="{hemi}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
+        gii=skip_unfoldreg_option
     output:
         gii=bids(
             root=root,
