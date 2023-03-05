@@ -55,7 +55,9 @@ def get_model_tar(wildcards):
     else:
         model_name = config["modality"]
 
-    local_tar = config["nnunet_model"][model_name]
+    local_tar = config["nnunet_model"].get(model_name, None)
+    if local_tar == None:
+        print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
 
     dl_path = os.path.abspath(os.path.join(download_dir, local_tar))
     if os.path.exists(dl_path):
