@@ -13,8 +13,6 @@ dim = (
 
 fig, (ax1, ax2, ax3) = plt.subplots(3, 1)
 
-if not isinstance(snakemake.input.img, str):
-    snakemake.input.img = snakemake.input.img[0]
 
 # original plot (centered)
 display = plotting.plot_roi(
