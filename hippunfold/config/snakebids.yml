@@ -280,6 +280,7 @@ parse_args:
       - trimodal
       - hippb500
       - neonateT1w
+      - synthseg
 
 autotop_labels:
   - 'hipp'
@@ -392,6 +393,7 @@ nnunet_model:
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
   neonateT1w: trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
   T1T2w: trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar
+  synthseg: trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar
 
 crop_native_box: '256x256x256vox'
 crop_native_res: '0.2x0.2x0.2mm'
