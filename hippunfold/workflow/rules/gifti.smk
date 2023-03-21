@@ -571,7 +571,7 @@ rule unfolded_registration:
             hemi="{hemi}"
         ),
     container:
-        config["singularity"]["autotop"]
+        config["singularity"]["ants"]
     group:
         "subj"
     log:
