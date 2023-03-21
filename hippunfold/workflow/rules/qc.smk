@@ -116,15 +116,13 @@ def get_bg_img_for_subfield_qc(wildcards):
         )
     elif config["modality"] == "cropseg":
         # blank image as bg
-        return (
-            bids(
-                root=work,
-                datatype="warps",
-                suffix="cropref.nii.gz",
-                space="{space}",
-                hemi="{hemi}",
-                **config["subj_wildcards"],
-            ),
+        return bids(
+            root=work,
+            datatype="warps",
+            suffix="cropref.nii.gz",
+            space="{space}",
+            hemi="{hemi}",
+            **config["subj_wildcards"],
         )
 
     elif config["modality"][:3] == "seg":

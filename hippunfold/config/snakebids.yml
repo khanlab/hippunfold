@@ -128,7 +128,7 @@ parse_args:
   --version:
     help: 'Print the version of HippUnfold'
     action: version
-    version: "1.3.0-pre.9"
+    version: "1.3.0-pre.12"
 
 
   --modality:
@@ -195,8 +195,8 @@ parse_args:
     default: '0.2x0.2x0.2mm'
 
   --crop_native_box:
-    help: 'Sets the bounding box size for the crop native (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off (default: %(default)s)'
-    default: '52x52x52mm'
+    help: 'Sets the bounding box size for the crop native (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
+    default: '256x256x256vox'
 
 
 
@@ -407,8 +407,9 @@ nnunet_model:
   T2w: trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
   hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
   neonateT1w: trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
+  T1T2w: trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar
 
-crop_native_box: '52x52x52mm'
+crop_native_box: '256x256x256vox'
 crop_native_res: '0.2x0.2x0.2mm'
 
 hippdwi_opts:
