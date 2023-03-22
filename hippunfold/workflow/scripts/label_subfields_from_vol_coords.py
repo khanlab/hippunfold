@@ -30,8 +30,15 @@ ap_img = ap_nib.get_fdata()
 pd_img = pd_nib.get_fdata()
 io_img = io_nib.get_fdata()
 
-# create mask (TODO: maybe load a separate mask instead, so valid coords=0 are not discarded)
-mask = np.logical_or(ap_img > 0, pd_img > 0, io_img > 0)
+# get mask of coords
+lbl_nib = nib.load(snakemake.input.lbl)
+lbl = lbl_nib.get_fdata()
+idxgm = np.zeros(lbl.shape)
+for i in snakemake.params.gm_labels:
+    idxgm[lbl == i] = 1
+mask = idxgm==1
+num_mask_voxels = np.sum(mask)
+print(f"num_mask_voxels {num_mask_voxels}", file=logfile, flush=True)
 
 
 # interpolate
