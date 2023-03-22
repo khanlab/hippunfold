@@ -165,10 +165,10 @@ rule create_warps_hipp:
             suffix="refcoords.nii.gz",
             **config["subj_wildcards"]
         ),
-        labelmap = unpack(get_inputs_laplace),
+        labelmap = get_labels_for_laplace,
     params:
         interp_method="linear",
-        gm_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["gm"],
+        gm_labels=lambda wildcards: config["laplace_labels"]["AP"]["gm"],
     resources:
         mem_mb=16000,
     output:
