@@ -289,8 +289,10 @@ rule create_warps_dentate:
             suffix="refcoords.nii.gz",
             **config["subj_wildcards"]
         ),
+        labelmap = get_labels_for_laplace,
     params:
         interp_method="linear",
+        gm_labels=lambda wildcards: config["laplace_labels"]["PD"]["sink"],
     resources:
         mem_mb=16000,
     output:
