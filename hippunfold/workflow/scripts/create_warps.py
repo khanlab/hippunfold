@@ -43,8 +43,9 @@ coord_pd = coord_pd_nib.get_fdata()
 coord_io = coord_io_nib.get_fdata()
 
 # get mask of coords
-lbl_nib = nib.load(snakemake.input.lbl)
+lbl_nib = nib.load(snakemake.input.labelmap)
 lbl = lbl_nib.get_fdata()
+idxgm = np.zeros(lbl.shape)
 for i in snakemake.params.gm_labels:
     idxgm[lbl == i] = 1
 mask = idxgm==1
