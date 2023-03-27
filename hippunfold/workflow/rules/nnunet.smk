@@ -158,6 +158,7 @@ rule unflip_nnunet_nii:
             space="corobl",
             hemi="{hemi}flip"
         ),
+        unflip_ref=get_nnunet_input,
     output:
         nnunet_seg=bids(
             root=work,
@@ -173,7 +174,8 @@ rule unflip_nnunet_nii:
     group:
         "subj"
     shell:
-        "c3d {input} -flip x {output}"
+        "c3d {input.nnunet_seg} -flip x -popas FLIPPED "
+        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nnunet_seg} "
 
 
 def get_f3d_ref(wildcards):
