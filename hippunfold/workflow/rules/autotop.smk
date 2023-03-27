@@ -231,6 +231,7 @@ rule unflip_coords:
             hemi="{hemi}flip",
             **config["subj_wildcards"]
         ),
+        unflip_ref=get_nnunet_input,
     output:
         nii=bids(
             root=work,
@@ -248,7 +249,8 @@ rule unflip_coords:
     group:
         "subj"
     shell:
-        "c3d {input} -flip x {output}"
+        "c3d {input.nii} -flip x -popas FLIPPED "
+        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nii} "
 
 
 rule unflip_coords_equivol:
@@ -264,6 +266,7 @@ rule unflip_coords_equivol:
             hemi="{hemi}flip",
             **config["subj_wildcards"]
         ),
+        unflip_ref=get_nnunet_input,
     output:
         nii=bids(
             root=work,
@@ -281,4 +284,5 @@ rule unflip_coords_equivol:
     group:
         "subj"
     shell:
-        "c3d {input} -flip x {output}"
+        "c3d {input.nii} -flip x -popas FLIPPED "
+        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nii} "
