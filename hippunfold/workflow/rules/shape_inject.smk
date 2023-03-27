@@ -386,6 +386,7 @@ rule unflip_postproc:
             hemi="{hemi}flip",
             **config["subj_wildcards"]
         ),
+        unflip_ref=get_nnunet_input,
     output:
         nii=bids(
             root=work,
@@ -401,4 +402,5 @@ rule unflip_postproc:
     group:
         "subj"
     shell:
-        "c3d {input} -flip x {output}"
+        "c3d {input.nii} -flip x -popas FLIPPED "
+        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nii} "
