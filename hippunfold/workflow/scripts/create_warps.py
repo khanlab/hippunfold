@@ -42,9 +42,14 @@ coord_ap = coord_ap_nib.get_fdata()
 coord_pd = coord_pd_nib.get_fdata()
 coord_io = coord_io_nib.get_fdata()
 
-# get mask of coords  (note: this leaves out coord=0)
-mask = (coord_ap > 0) | (coord_pd > 0)  # some points were lost, especially IO
-num_mask_voxels = np.sum(mask > 0)
+# get mask of coords
+lbl_nib = nib.load(snakemake.input.labelmap)
+lbl = lbl_nib.get_fdata()
+idxgm = np.zeros(lbl.shape)
+for i in snakemake.params.gm_labels:
+    idxgm[lbl == i] = 1
+mask = idxgm==1
+num_mask_voxels = np.sum(mask)
 print(f"num_mask_voxels {num_mask_voxels}", file=logfile, flush=True)
 
 # get indices of mask voxels
