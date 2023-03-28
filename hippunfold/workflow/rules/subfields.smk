@@ -100,6 +100,9 @@ rule label_subfields_from_vol_coords_corobl:
             **config["subj_wildcards"]
         ),
         nii_io=get_laminar_coords,
+        labelmap = get_labels_for_laplace,
+    params:
+        gm_labels=lambda wildcards: config["laplace_labels"]["AP"]["gm"],
     output:
         nii_label=bids(
             root=work,
