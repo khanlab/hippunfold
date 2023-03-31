@@ -37,6 +37,10 @@ jobs:
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
+      - name: Disable Poetry modern installation
+        run: |
+          poetry config installer.modern-installation false
+      #----------------------------------------------
       #----------------------------------------------
       #       load cached venv if cache exists
       #----------------------------------------------
@@ -97,6 +101,9 @@ jobs:
       with:
         virtualenvs-create: true
         virtualenvs-in-project: true
+    - name: Disable Poetry modern installation
+      run: |
+        poetry config installer.modern-installation false
     #----------------------------------------------
     #       load cached venv if cache exists
     #----------------------------------------------
