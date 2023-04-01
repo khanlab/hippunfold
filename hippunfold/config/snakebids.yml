@@ -182,7 +182,8 @@ parse_args:
     choices:
       - 'CITI168'
       - 'dHCP'
-    default: 'CITI168'
+      - 'macaque'
+    default: 'macaque'
     help: 'Set the template to use for registration to coronal oblique. (default: %(default)s)'
 
   --t1_reg_template:
@@ -341,6 +342,13 @@ template_files:
     crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+  macaque:
+    T1w: resources/tpl-macaque/tpl-macaque_T1w.nii.gz
+    xfm_corobl: resources/tpl-macaque/tpl-macaque_to-CIT168corobl_type-itk_affine.xfm.txt
+    crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+
 
 atlas: 
   - bigbrain
