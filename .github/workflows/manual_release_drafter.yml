@@ -20,7 +20,7 @@ jobs:
           echo "Date: ${{ github.event.inputs.date }}"
           echo "Comments: ${{ github.event.inputs.comments }}"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@master
 
       - name: Update changelog
         uses: release-drafter/release-drafter@v5
