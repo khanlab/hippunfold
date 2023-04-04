@@ -2,6 +2,8 @@
 ![Docker Pulls](https://img.shields.io/docker/pulls/khanlab/hippunfold)
 ![Version](https://img.shields.io/github/v/tag/khanlab/hippunfold?label=version)
 
+**Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
+
 # Hippunfold
 
 This tool aims to automatically model the topological folding structure
@@ -29,16 +31,16 @@ The overall workflow can be summarized in the following steps:
 
 ![Pipeline Overview](https://raw.githubusercontent.com/khanlab/hippunfold/master/docs/images/hippunfold_overview_unfoldreg.jpg)
 
-
+For more information, see
 **Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
 
-**Additional tools** 
+## Additional tools
 
 For plotting, mapping fMRI, DWI or other data, and manipulating surfaces, see [here](https://github.com/jordandekraker/hippunfold_toolbox)
 
 For statistical testing (spin tests) in unfolded space, see [here](https://github.com/Bradley-Karat/Hippo_Spin_Testing)
 
-**Relevant papers:**
+## Relevant papers:
 - DeKraker, J., Haast, R. A., Yousif, M. D., Karat, B., Lau, J. C., Köhler, S., & Khan, A. R. (2022). Automated hippocampal unfolding for morphometry and subfield segmentation with HippUnfold. Elife, 11, e77945. [link](https://doi.org/10.7554/eLife.77945)
 - DeKraker, J., Palomero-Gallagher, N., Kedo, O., Ladbon-Bernasconi, N., Muenzing, S. E., Axer, M., ... & Evans, A. C. (2023). Evaluation of surface-based hippocampal registration using ground-truth subfield definitions. bioRxiv, 2023-03. [link](https://www.biorxiv.org/content/10.1101/2023.03.30.534978v1)
 - DeKraker J, Ferko KM, Lau JC, Köhler S, Khan AR. Unfolding the hippocampus: An intrinsic coordinate system for subfield segmentations and quantitative mapping. Neuroimage. 2018 Feb 15;167:408-418. doi: 10.1016/j.neuroimage.2017.11.054. Epub 2017 Nov 23. PMID: 29175494. [link](https://pubmed.ncbi.nlm.nih.gov/29175494/)
