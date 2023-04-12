@@ -353,9 +353,64 @@ rule create_warps_dentate:
         "../scripts/create_warps.py"
 
 
+rule expand_unfolded_warps:
+    """unfolded space registration in 2D expanded to 3D"""
+    input: 
+        warp2d=bids(
+            root=work,
+            **config["subj_wildcards"],
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="SyN",
+            from_="{from}",
+            to="{to}",
+            space="unfold",
+            type_="itk",
+            hemi="{hemi}"
+        ),
+        unfold_phys_coords_nii=bids(
+            root=work,
+            space="unfold",
+            label="hipp",
+            datatype="coords",
+            suffix="refcoords.nii.gz",
+            **config["subj_wildcards"]
+        ),
+    output:
+        warp3d=bids(
+            root=work,
+            **config["subj_wildcards"],
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="SyN3D",
+            from_="{from}",
+            to="{to}",
+            space="unfold",
+            type_="itk",
+            hemi="{hemi}"
+        ),
+    group:
+        "subj"
+    script:
+        "../scripts/expand_2Dwarp.py"
+
+
 rule compose_warps_native_to_unfold:
     """ Compose warps from native to unfold """
     input:
+        unfold2unfoldatlas=lambda wildcards: expand(
+            bids(
+                root=work,
+                **config["subj_wildcards"],
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="SyN3D",
+                from_="subject",
+                to=config["atlas"][0],
+                space="unfold",
+                type_="itk",
+                hemi="{hemi}"
+            ), allow_missing=True, proxy=[] if config["no_unfolded_reg"] else [None]),
         corobl2unfold=bids(
             root=work,
             datatype="warps",
@@ -413,12 +468,25 @@ rule compose_warps_native_to_unfold:
     group:
         "subj"
     shell:
-        "ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.native2corobl} &> {log}"
+        "ComposeMultiTransform 3 {output} -R {input.ref} {input.unfold2unfoldatlas} {input.corobl2unfold} {input.native2corobl} &> {log}"
 
 
 rule compose_warps_unfold_to_crop_native:
     """ Compose warps from unfold to crop native """
     input:
+        unfoldatlas2unfold=lambda wildcards: expand(
+            bids(
+                root=work,
+                **config["subj_wildcards"],
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="SyN3D",
+                from_=config["atlas"][0],
+                to="subject",
+                space="unfold",
+                type_="itk",
+                hemi="{hemi}"
+            ), allow_missing=True, proxy=[] if config["no_unfolded_reg"] else [None]),
         unfold2corobl=bids(
             root=work,
             datatype="warps",
@@ -484,4 +552,4 @@ rule compose_warps_unfold_to_crop_native:
     group:
         "subj"
     shell:
-        "antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v &> {log}"
+        "antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -t  {input.unfoldatlas2unfold} -i {input.unfold_ref} -v &> {log}"
