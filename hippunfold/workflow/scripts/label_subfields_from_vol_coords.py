@@ -36,7 +36,7 @@ lbl = lbl_nib.get_fdata()
 idxgm = np.zeros(lbl.shape)
 for i in snakemake.params.gm_labels:
     idxgm[lbl == i] = 1
-mask = idxgm==1
+mask = idxgm == 1
 
 # interpolate
 query_points = np.vstack((ap_img[mask], pd_img[mask], io_img[mask])).T

@@ -48,7 +48,7 @@ lbl = lbl_nib.get_fdata()
 idxgm = np.zeros(lbl.shape)
 for i in snakemake.params.gm_labels:
     idxgm[lbl == i] = 1
-mask = idxgm==1
+mask = idxgm == 1
 num_mask_voxels = np.sum(mask)
 print(f"num_mask_voxels {num_mask_voxels}", file=logfile, flush=True)
 
