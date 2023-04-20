@@ -355,7 +355,7 @@ rule create_warps_dentate:
 
 rule expand_unfolded_warps:
     """unfolded space registration in 2D expanded to 3D"""
-    input: 
+    input:
         warp2d=bids(
             root=work,
             **config["subj_wildcards"],
@@ -410,7 +410,10 @@ rule compose_warps_native_to_unfold:
                 space="unfold",
                 type_="itk",
                 hemi="{hemi}"
-            ), allow_missing=True, proxy=[] if config["no_unfolded_reg"] else [None]),
+            ),
+            allow_missing=True,
+            proxy=[] if config["no_unfolded_reg"] else [None],
+        ),
         corobl2unfold=bids(
             root=work,
             datatype="warps",
@@ -486,7 +489,10 @@ rule compose_warps_unfold_to_crop_native:
                 space="unfold",
                 type_="itk",
                 hemi="{hemi}"
-            ), allow_missing=True, proxy=[] if config["no_unfolded_reg"] else [None]),
+            ),
+            allow_missing=True,
+            proxy=[] if config["no_unfolded_reg"] else [None],
+        ),
         unfold2corobl=bids(
             root=work,
             datatype="warps",
