@@ -395,10 +395,11 @@ rule expand_unfolded_warps:
         "../scripts/expand_2Dwarp.py"
 
 
-rule compose_warps_native_to_unfold:
-    """ Compose warps from native to unfold """
-    input:
-        unfold2unfoldatlas=lambda wildcards: expand(
+def get_unfold2unfoldatlas(wildcards):
+    if config["no_unfolded_reg"]:
+        fn = []
+    else:
+        fn = (
             bids(
                 root=work,
                 **config["subj_wildcards"],
@@ -411,9 +412,14 @@ rule compose_warps_native_to_unfold:
                 type_="itk",
                 hemi="{hemi}"
             ),
-            allow_missing=True,
-            proxy=[] if config["no_unfolded_reg"] else [None],
-        ),
+        )
+    return fn
+
+
+rule compose_warps_native_to_unfold:
+    """ Compose warps from native to unfold """
+    input:
+        unfold2unfoldatlas=get_unfold2unfoldatlas,
         corobl2unfold=bids(
             root=work,
             datatype="warps",
@@ -474,10 +480,11 @@ rule compose_warps_native_to_unfold:
         "ComposeMultiTransform 3 {output} -R {input.ref} {input.unfold2unfoldatlas} {input.corobl2unfold} {input.native2corobl} &> {log}"
 
 
-rule compose_warps_unfold_to_crop_native:
-    """ Compose warps from unfold to crop native """
-    input:
-        unfoldatlas2unfold=lambda wildcards: expand(
+def get_unfoldatlas2unfold(wildcards):
+    if config["no_unfolded_reg"]:
+        fn = []
+    else:
+        fn = (
             bids(
                 root=work,
                 **config["subj_wildcards"],
@@ -488,11 +495,24 @@ rule compose_warps_unfold_to_crop_native:
                 to="subject",
                 space="unfold",
                 type_="itk",
-                hemi="{hemi}"
+                hemi="{hemi}",
             ),
-            allow_missing=True,
-            proxy=[] if config["no_unfolded_reg"] else [None],
-        ),
+        )
+    return fn
+
+
+def get_cmd_compose_warps_unfold_to_crop_native(wildcards, input, output):
+    if config["no_unfolded_reg"]:
+        cmd = f"antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v"
+    else:
+        cmd = f"antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -t  {input.unfoldatlas2unfold} -i {input.unfold_ref} -v"
+    return cmd
+
+
+rule compose_warps_unfold_to_crop_native:
+    """ Compose warps from unfold to crop native """
+    input:
+        unfoldatlas2unfold=get_unfoldatlas2unfold,
         unfold2corobl=bids(
             root=work,
             datatype="warps",
@@ -553,9 +573,11 @@ rule compose_warps_unfold_to_crop_native:
             to="{native_modality}",
             mode="image"
         ),
+    params:
+        cmd=get_cmd_compose_warps_unfold_to_crop_native,
     container:
         config["singularity"]["ants"]
     group:
         "subj"
     shell:
-        "antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -t  {input.unfoldatlas2unfold} -i {input.unfold_ref} -v &> {log}"
+        "{params.cmd}  &> {log}"
