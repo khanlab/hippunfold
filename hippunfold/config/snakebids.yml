@@ -251,7 +251,6 @@ parse_args:
     nargs: '+'
     help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
 
-
   --hemi:
     choices:
       - 'L'
@@ -269,6 +268,16 @@ parse_args:
     default:
       - 'equivolume'
     help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)' 
+
+  --autotop_labels:
+    choices:
+      - 'hipp'
+      - 'dentate'
+    default:
+      - 'hipp'
+      - 'dentate'
+    nargs: '+'
+    help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
 
   --keep_work:
     help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
