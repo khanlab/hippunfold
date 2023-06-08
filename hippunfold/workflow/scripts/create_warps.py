@@ -119,8 +119,8 @@ points = (
 # get unfolded grid (from 0 to 1, not world coords), using meshgrid:
 #  note: indexing='ij' to swap the ordering of x and y
 (unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(
-    np.linspace(0, 1, unfold_dims[0]+2)[1:-1],
-    np.linspace(0, 1, unfold_dims[1]+2)[1:-1],
+    np.linspace(0, 1, unfold_dims[0]),
+    np.linspace(0, 1, unfold_dims[1]),
     np.linspace(0, 1, unfold_dims[2]+2)[1:-1],
     indexing="ij",
 )
