@@ -121,7 +121,7 @@ points = (
 (unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(
     np.linspace(0, 1, unfold_dims[0]),
     np.linspace(0, 1, unfold_dims[1]),
-    np.linspace(0, 1, unfold_dims[2]+2)[1:-1],
+    np.linspace(0, 1, unfold_dims[2] + 2)[1:-1],
     indexing="ij",
 )
 
