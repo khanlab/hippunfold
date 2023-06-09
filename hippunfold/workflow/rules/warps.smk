@@ -294,6 +294,7 @@ rule create_warps_dentate:
     params:
         interp_method="linear",
         gm_labels=lambda wildcards: config["laplace_labels"]["PD"]["sink"],
+        epsilon=lambda wildcards: config["unfold_crop_epsilon_fractions"],
     resources:
         mem_mb=16000,
     output:
