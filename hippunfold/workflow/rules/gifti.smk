@@ -979,7 +979,7 @@ rule normalize_curvature2:
         ),
     output:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="curvature.shape.gii",
