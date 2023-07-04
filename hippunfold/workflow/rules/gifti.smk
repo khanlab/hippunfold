@@ -985,7 +985,7 @@ rule normalize_curvature2:
             suffix="curvature.shape.gii",
             space="{space}",
             hemi="{hemi}",
-            label="hipp",
+            label="{autotop}",
             **config["subj_wildcards"]
         ),
     group:
