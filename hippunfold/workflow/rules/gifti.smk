@@ -971,7 +971,7 @@ rule normalize_curvature2:
             datatype="surf",
             den="{density}",
             suffix="curvature.shape.gii",
-            space="corobl",
+            space="{space}",
             hemi="{hemi}",
             desc="unnorm",
             label="hipp",
@@ -983,7 +983,7 @@ rule normalize_curvature2:
             datatype="surf",
             den="{density}",
             suffix="curvature.shape.gii",
-            space="corobl",
+            space="{space}",
             hemi="{hemi}",
             label="hipp",
             **config["subj_wildcards"]
