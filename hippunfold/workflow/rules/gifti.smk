@@ -946,7 +946,7 @@ rule calculate_curvature_from_surface2:
         ),
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="curvature.shape.gii",
@@ -979,7 +979,7 @@ rule normalize_curvature2:
         ),
     output:
         gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             den="{density}",
             suffix="curvature.shape.gii",
