@@ -355,7 +355,7 @@ rule unflip_init_coords:
             space="corobl",
             hemi="{hemi}flip"
         ),
-        unflip_ref=get_input_for_shape_inject
+        unflip_ref=get_input_for_shape_inject,
     output:
         nnunet_seg=bids(
             root=work,
@@ -422,7 +422,7 @@ rule unflip_postproc:
             hemi="{hemi}flip",
             **config["subj_wildcards"]
         ),
-        unflip_ref=get_input_for_shape_inject
+        unflip_ref=get_input_for_shape_inject,
     output:
         nii=bids(
             root=work,

@@ -216,4 +216,3 @@ rule equivolume_coords:
         config["singularity"]["autotop"]
     shell:
         "python {params.script} {resources.tmpdir} {input.innerbin} {input.outerbin} {output.coords} &> {log}"
-
