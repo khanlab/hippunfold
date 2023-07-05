@@ -25,6 +25,8 @@ Major changes include the addition of unfolded space registration to a reference
 
 Read more in our [preprinted manuscript](https://www.biorxiv.org/content/10.1101/2023.03.30.534978v1)
 
+Also the ability to specify a new **experimental** UNet model that is contrast-agnostic using [synthseg](https://github.com/BBillot/SynthSeg) and trained using more detailed segmentations. This generally produces more detailed results but has not been extensively tested yet. 
+
 ## Workflow
 
 The overall workflow can be summarized in the following steps:
