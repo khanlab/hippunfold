@@ -341,6 +341,42 @@ rule inject_init_laplace_coords:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
+rule unflip_init_coords:
+    """Unflip the Lflip init coords"""
+    input:
+        nnunet_seg=bids(
+            root=work,
+            datatype="coords",
+            **config["subj_wildcards"],
+            dir="{dir}",
+            label="{autotop}",
+            suffix="coords.nii.gz",
+            desc="init",
+            space="corobl",
+            hemi="{hemi}flip"
+        ),
+        unflip_ref=get_input_for_shape_inject
+    output:
+        nnunet_seg=bids(
+            root=work,
+            datatype="coords",
+            **config["subj_wildcards"],
+            dir="{dir}",
+            label="{autotop}",
+            suffix="coords.nii.gz",
+            desc="init",
+            space="corobl",
+            hemi="{hemi,L}"
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "c3d {input.nnunet_seg} -flip x -popas FLIPPED "
+        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nnunet_seg} "
+
+
 rule reinsert_subject_labels:
     input:
         inject_seg=bids(
@@ -386,17 +422,7 @@ rule unflip_postproc:
             hemi="{hemi}flip",
             **config["subj_wildcards"]
         ),
-        unflip_ref=(
-            bids(
-                root=work,
-                datatype="anat",
-                **config["subj_wildcards"],
-                suffix="{modality}.nii.gz".format(modality=config["modality"]),
-                space="corobl",
-                desc="preproc",
-                hemi="{hemi}",
-            ),
-        ),
+        unflip_ref=get_input_for_shape_inject
     output:
         nii=bids(
             root=work,
