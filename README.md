@@ -19,7 +19,7 @@ This is especially useful for:
 - Morphometry (eg. thickness, surface area, curvature, and gyrification measures)
 - Quantitative mapping (eg. map your qT1 MRI data to a midthickness surface; extract laminar profiles perpendicular to this surface)
 
-## :tada: NEW: Version 1.3.0 release :tada:
+## NEW: Version 1.3.0 release 
 
 Major changes include the addition of unfolded space registration to a reference atlas harmonized across 7 ground-truth histology samples. This method allows shifting in unfolded space, providing even better intersubject alignment.
 
