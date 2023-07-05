@@ -10,7 +10,7 @@ This tool aims to automatically model the topological folding structure
 of the human hippocampus, and computationally unfold the hippocampus to 
 segment subfields and generate hippocampal and dentate gyrus surfaces.
 
-![Hippo Fold Unfold](https://raw.githubusercontent.com//khanlab/hippunfold/master/docs/images/subfields_foldunfold.png)
+![Hippo Fold Unfold](images/subfields_foldunfold.png)
 
 This is especially useful for:
 - Visualization
@@ -19,9 +19,9 @@ This is especially useful for:
 - Morphometry (eg. thickness, surface area, curvature, and gyrification measures)
 - Quantitative mapping (eg. map your qT1 MRI data to a midthickness surface; extract laminar profiles perpendicular to this surface)
 
-## Version 1.3.0 release
+## :tada: NEW: Version 1.3.0 release :tada:
 
-Major changes include the addition of unfolded space registration to a reference atlas harmonized across 7 ground-truth histology samples. This method allows shifting in unfolded space, providing subfield alignment within approx 0.5mm.
+Major changes include the addition of unfolded space registration to a reference atlas harmonized across 7 ground-truth histology samples. This method allows shifting in unfolded space, providing even better intersubject alignment.
 
 Read more in our [preprinted manuscript](https://www.biorxiv.org/content/10.1101/2023.03.30.534978v1)
 
@@ -29,7 +29,7 @@ Read more in our [preprinted manuscript](https://www.biorxiv.org/content/10.1101
 
 The overall workflow can be summarized in the following steps:
 
-![Pipeline Overview](https://raw.githubusercontent.com/khanlab/hippunfold/master/docs/images/hippunfold_overview_unfoldreg.jpg)
+![Pipeline Overview](images/hippunfold_overview_unfoldreg.png)
 
 For more information, see
 **Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
