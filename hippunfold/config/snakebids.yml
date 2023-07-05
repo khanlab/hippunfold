@@ -128,7 +128,7 @@ parse_args:
   --version:
     help: 'Print the version of HippUnfold'
     action: version
-    version: "1.3.0-pre.12"
+    version: "1.2.2-pre.13"
 
 
   --modality:
@@ -205,14 +205,20 @@ parse_args:
       - 'bigbrain'
       - 'magdeburg'
       - 'freesurfer'
+      - 'histologyReference2023'
     default: 
-      - 'bigbrain'
+      - 'histologyReference2023'
     nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
+  --no_unfolded_reg:
+    help: 'Perform unfolded space (2D) registration based on thickness, curvature, and gyrification for closer alignment to the reference atlas. NOTE only histologyReference2023 has these features currently. (default: %(default)s)'
+    default: False
+    action: store_true
+
   --generate_myelin_map:
     help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
-    default: false
+    default: False
     action: store_true
 
   --use_gpu:
@@ -245,7 +251,6 @@ parse_args:
     nargs: '+'
     help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
 
-
   --hemi:
     choices:
       - 'L'
@@ -263,6 +268,16 @@ parse_args:
     default:
       - 'equivolume'
     help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)' 
+
+  --autotop_labels:
+    choices:
+      - 'hipp'
+      - 'dentate'
+    default:
+      - 'hipp'
+      - 'dentate'
+    nargs: '+'
+    help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
 
   --keep_work:
     help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
@@ -321,7 +336,7 @@ cifti_metric_types:
 
 singularity:
   prepdwi: 'docker://khanlab/prepdwi:latest'  
-  autotop: 'docker://khanlab/autotop_deps:v0.4.1'
+  autotop: 'docker://khanlab/autotop_deps:v0.4.3'
   fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
   ants: 'docker://kaczmarj/ants:2.3.4'
 
@@ -343,9 +358,15 @@ template_files:
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
 
 atlas: 
-  - bigbrain
+  - histologyReference2023
 
 atlas_files:
+  histologyReference2023:
+    label_nii: resources/histologyReference2023/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
+    label_list: resources/histologyReference2023/labellist.txt
+    thick: resources/histologyReference2023/thickness.nii.gz
+    curv: resources/histologyReference2023/curvature.nii.gz
+    gyr: resources/histologyReference2023/gyrification.nii.gz
   bigbrain:
     label_nii: resources/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
     label_list: resources/bigbrain/sub-bigbrain_labellist.txt
@@ -365,6 +386,10 @@ tissue_atlas_mapping:
     srlm: 2
     cyst: 7
   bigbrain:
+    dg: 6
+    srlm: 7
+    cyst: 8
+  histologyReference2023:
     dg: 6
     srlm: 7
     cyst: 8
@@ -406,7 +431,6 @@ hippdwi_opts:
   bbox_y: '198 453'
 
 unfold_vol_ref:
-
   hipp:
     dims:
       - '256'
@@ -444,6 +468,11 @@ unfold_vol_ref:
       - '5'
       - '2.5'
     orient: RPI
+
+unfold_crop_epsilon_fractions:
+    - 0
+    - 0
+    - 0.0625 #1/16
 
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface
