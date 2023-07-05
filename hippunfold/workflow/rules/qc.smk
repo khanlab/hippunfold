@@ -109,7 +109,7 @@ def get_bg_img_for_subfield_qc(wildcards):
             root=work,
             datatype="anat",
             desc="preproc",
-            suffix="b500.nii.gz",
+            suffix="hippb500.nii.gz",
             space="{space}",
             hemi="{hemi}",
             **config["subj_wildcards"],

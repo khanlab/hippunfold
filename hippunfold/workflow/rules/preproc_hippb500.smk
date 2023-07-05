@@ -77,7 +77,7 @@ rule cp_b500_to_anat_dir:
             root=work,
             datatype="anat",
             desc="preproc",
-            suffix="b500.nii.gz",
+            suffix="hippb500.nii.gz",
             space="corobl",
             hemi="{hemi}",
             **config["subj_wildcards"]
