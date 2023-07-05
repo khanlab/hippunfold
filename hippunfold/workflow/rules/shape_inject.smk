@@ -386,7 +386,17 @@ rule unflip_postproc:
             hemi="{hemi}flip",
             **config["subj_wildcards"]
         ),
-        unflip_ref=get_nnunet_input,
+        unflip_ref=(
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="{modality}.nii.gz".format(modality=config["modality"]),
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi}",
+            ),
+        ),
     output:
         nii=bids(
             root=work,
