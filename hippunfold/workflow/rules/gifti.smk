@@ -317,43 +317,6 @@ rule calculate_gyrification1:
         " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea} &> {log}"
 
 
-rule smooth_surface1:
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="midthickness.surf.gii",
-            space="corobl",
-            unfoldreg="none",
-            hemi="{hemi}",
-            label="hipp",
-            **config["subj_wildcards"]
-        ),
-    params:
-        strength=0.6,
-        iterations=100,
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="midthickness.surf.gii",
-            space="corobl",
-            unfoldreg="none",
-            hemi="{hemi}",
-            label="hipp",
-            desc="smoothed",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-smoothing {input.gii} {params.strength} {params.iterations} {output.gii}"
-
-
 rule calculate_curvature_from_surface1:
     input:
         gii=bids(
@@ -365,7 +328,41 @@ rule calculate_curvature_from_surface1:
             unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
-            desc="smoothed",
+            **config["subj_wildcards"]
+        ),
+    output:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="curvature.shape.gii",
+            space="corobl",
+            unfoldreg="none",
+            hemi="{hemi}",
+            desc="unnorm",
+            label="hipp",
+            **config["subj_wildcards"]
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-curvature {input} -mean {output}"
+
+
+rule normalize_curvature1:
+    input:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="curvature.shape.gii",
+            space="corobl",
+            unfoldreg="none",
+            hemi="{hemi}",
+            desc="unnorm",
+            label="hipp",
             **config["subj_wildcards"]
         ),
     output:
@@ -380,12 +377,10 @@ rule calculate_curvature_from_surface1:
             label="hipp",
             **config["subj_wildcards"]
         ),
-    container:
-        config["singularity"]["autotop"]
     group:
         "subj"
-    shell:
-        "wb_command -surface-curvature {input} -mean {output}"
+    script:
+        "../scripts/normalize_tanh.py"
 
 
 rule calculate_thickness_from_surface1:
@@ -937,41 +932,6 @@ rule calculate_gyrification2:
         " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea} &> {log}"
 
 
-rule smooth_surface2:
-    input:
-        gii=bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            suffix="midthickness.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{autotop}",
-            **config["subj_wildcards"]
-        ),
-    params:
-        strength=0.6,
-        iterations=100,
-    output:
-        gii=bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            suffix="midthickness.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{autotop}",
-            desc="smoothed",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-smoothing {input.gii} {params.strength} {params.iterations} {output.gii}"
-
-
 rule calculate_curvature_from_surface2:
     input:
         gii=bids(
@@ -982,7 +942,39 @@ rule calculate_curvature_from_surface2:
             space="{space}",
             hemi="{hemi}",
             label="{autotop}",
-            desc="smoothed",
+            **config["subj_wildcards"]
+        ),
+    output:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="curvature.shape.gii",
+            space="{space}",
+            hemi="{hemi}",
+            desc="unnorm",
+            label="{autotop}",
+            **config["subj_wildcards"]
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-curvature {input} -mean {output}"
+
+
+rule normalize_curvature2:
+    input:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="curvature.shape.gii",
+            space="{space}",
+            hemi="{hemi}",
+            desc="unnorm",
+            label="hipp",
             **config["subj_wildcards"]
         ),
     output:
@@ -996,12 +988,10 @@ rule calculate_curvature_from_surface2:
             label="{autotop}",
             **config["subj_wildcards"]
         ),
-    container:
-        config["singularity"]["autotop"]
     group:
         "subj"
-    shell:
-        "wb_command -surface-curvature {input} -mean {output}"
+    script:
+        "../scripts/normalize_tanh.py"
 
 
 rule calculate_thickness_from_surface2:
