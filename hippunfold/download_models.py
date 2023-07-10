@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argparse
 import errno
 import os
 
@@ -7,7 +8,32 @@ import yaml
 from appdirs import AppDirs
 
 
+def get_model_dict():
+    # get list of model urls
+    model_cfg = os.path.join(
+        os.path.dirname(__file__), "config", "nnunet_model_urls.yml"
+    )
+    with open(model_cfg, "r") as cfg:
+        model_dict = yaml.load(cfg, Loader=yaml.FullLoader)
+    return model_dict
+
+
+def parse_args(model_dict):
+    parser = argparse.ArgumentParser(
+        prog="hippunfold_download_models",
+        description="Tool for downloading U-net models for hippunfold",
+    )
+
+    parser.add_argument("--models", nargs="+", dest="models", choices=model_dict.keys())
+    args = parser.parse_args()
+    return args
+
+
 def main():
+
+    # get the model dict first, so we know what to parse
+    model_dict = get_model_dict()
+    inputs = parse_args(model_dict)
 
     if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
         print(
@@ -27,14 +53,13 @@ def main():
             raise
         pass
 
-    # get list of model urls
-    model_cfg = os.path.join(
-        os.path.dirname(__file__), "config", "nnunet_model_urls.yml"
-    )
-    with open(model_cfg, "r") as cfg:
-        model_dict = yaml.load(cfg, Loader=yaml.FullLoader)
+    if inputs.models == None:
+        models = model_dict.keys()
+    else:
+        models = inputs.models
 
-    for modality, url in model_dict.items():
+    for modality in models:
+        url = model_dict[modality]
         tarfile = url.split("/")[-1]
         local_path = os.path.join(download_dir, tarfile)
 
