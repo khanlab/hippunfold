@@ -2,45 +2,6 @@ import re
 from appdirs import AppDirs
 
 
-def get_nnunet_input(wildcards):
-    if config["modality"] == "T2w":
-        nii = (
-            bids(
-                root=work,
-                datatype="anat",
-                **config["subj_wildcards"],
-                suffix="T2w.nii.gz",
-                space="corobl",
-                desc="preproc",
-                hemi="{hemi}",
-            ),
-        )
-    elif config["modality"] == "T1w":
-        nii = (
-            bids(
-                root=work,
-                datatype="anat",
-                **config["subj_wildcards"],
-                suffix="T1w.nii.gz",
-                space="corobl",
-                desc="preproc",
-                hemi="{hemi}",
-            ),
-        )
-    elif config["modality"] == "hippb500":
-        nii = bids(
-            root=work,
-            datatype="dwi",
-            hemi="{hemi}",
-            space="corobl",
-            suffix="b500.nii.gz",
-            **config["subj_wildcards"],
-        )
-    else:
-        raise ValueError("modality not supported for nnunet!")
-    return nii
-
-
 def get_model_tar(wildcards):
 
     if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
@@ -91,7 +52,17 @@ rule run_inference:
     """ This rule REQUIRES a GPU -- will need to modify nnUnet code to create an alternate for CPU-based inference
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
     input:
-        in_img=get_nnunet_input,
+        in_img=(
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="{modality}.nii.gz".format(modality=config["modality"]),
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi}",
+            ),
+        ),
         model_tar=get_model_tar,
     params:
         temp_img="tempimg/temp_0000.nii.gz",
@@ -158,6 +129,17 @@ rule unflip_nnunet_nii:
             space="corobl",
             hemi="{hemi}flip"
         ),
+        unflip_ref=(
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="{modality}.nii.gz".format(modality=config["modality"]),
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi}",
+            ),
+        ),
     output:
         nnunet_seg=bids(
             root=work,
@@ -173,7 +155,8 @@ rule unflip_nnunet_nii:
     group:
         "subj"
     shell:
-        "c3d {input} -flip x {output}"
+        "c3d {input.nnunet_seg} -flip x -popas FLIPPED "
+        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nnunet_seg} "
 
 
 def get_f3d_ref(wildcards):
@@ -200,7 +183,17 @@ def get_f3d_ref(wildcards):
 
 rule qc_nnunet_f3d:
     input:
-        img=get_nnunet_input,
+        img=(
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="{modality}.nii.gz".format(modality=config["modality"]),
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi}",
+            ),
+        ),
         seg=bids(
             root=work,
             datatype="anat",
