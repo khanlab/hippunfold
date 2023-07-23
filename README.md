@@ -10,7 +10,7 @@ This tool aims to automatically model the topological folding structure
 of the human hippocampus, and computationally unfold the hippocampus to 
 segment subfields and generate hippocampal and dentate gyrus surfaces.
 
-![Hippo Fold Unfold](images/subfields_foldunfold.png)
+![Hippo Fold Unfold](https://github.com/khanlab/hippunfold/blob/master/docs/images/subfields_foldunfold.png)
 
 This is especially useful for:
 - Visualization
@@ -31,7 +31,7 @@ Also the ability to specify a new **experimental** UNet model that is contrast-a
 
 The overall workflow can be summarized in the following steps:
 
-![Pipeline Overview](images/hippunfold_overview_unfoldreg.png)
+![Pipeline Overview](https://github.com/khanlab/hippunfold/blob/master/docs/images/hippunfold_overview_unfoldreg.png)
 
 For more information, see
 **Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
