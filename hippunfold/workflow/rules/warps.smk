@@ -165,8 +165,11 @@ rule create_warps_hipp:
             suffix="refcoords.nii.gz",
             **config["subj_wildcards"]
         ),
+        labelmap=get_labels_for_laplace,
     params:
         interp_method="linear",
+        gm_labels=lambda wildcards: config["laplace_labels"]["AP"]["gm"],
+        epsilon=lambda wildcards: config["unfold_crop_epsilon_fractions"],
     resources:
         mem_mb=16000,
     output:
@@ -287,8 +290,11 @@ rule create_warps_dentate:
             suffix="refcoords.nii.gz",
             **config["subj_wildcards"]
         ),
+        labelmap=get_labels_for_laplace,
     params:
         interp_method="linear",
+        gm_labels=lambda wildcards: config["laplace_labels"]["PD"]["sink"],
+        epsilon=lambda wildcards: config["unfold_crop_epsilon_fractions"],
     resources:
         mem_mb=16000,
     output:
@@ -349,9 +355,73 @@ rule create_warps_dentate:
         "../scripts/create_warps.py"
 
 
+rule expand_unfolded_warps:
+    """unfolded space registration in 2D expanded to 3D"""
+    input:
+        warp2d=bids(
+            root=work,
+            **config["subj_wildcards"],
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="SyN",
+            from_="{from}",
+            to="{to}",
+            space="unfold",
+            type_="itk",
+            hemi="{hemi}"
+        ),
+        unfold_phys_coords_nii=bids(
+            root=work,
+            space="unfold",
+            label="hipp",
+            datatype="coords",
+            suffix="refcoords.nii.gz",
+            **config["subj_wildcards"]
+        ),
+    output:
+        warp3d=bids(
+            root=work,
+            **config["subj_wildcards"],
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="SyN3D",
+            from_="{from}",
+            to="{to}",
+            space="unfold",
+            type_="itk",
+            hemi="{hemi}"
+        ),
+    group:
+        "subj"
+    script:
+        "../scripts/expand_2Dwarp.py"
+
+
+def get_unfold2unfoldatlas(wildcards):
+    if config["no_unfolded_reg"]:
+        fn = []
+    else:
+        fn = (
+            bids(
+                root=work,
+                **config["subj_wildcards"],
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="SyN3D",
+                from_="subject",
+                to=config["atlas"][0],
+                space="unfold",
+                type_="itk",
+                hemi="{hemi}"
+            ),
+        )
+    return fn
+
+
 rule compose_warps_native_to_unfold:
     """ Compose warps from native to unfold """
     input:
+        unfold2unfoldatlas=get_unfold2unfoldatlas,
         corobl2unfold=bids(
             root=work,
             datatype="warps",
@@ -409,12 +479,42 @@ rule compose_warps_native_to_unfold:
     group:
         "subj"
     shell:
-        "ComposeMultiTransform 3 {output} -R {input.ref} {input.corobl2unfold} {input.native2corobl} &> {log}"
+        "ComposeMultiTransform 3 {output} -R {input.ref} {input.unfold2unfoldatlas} {input.corobl2unfold} {input.native2corobl} &> {log}"
+
+
+def get_unfoldatlas2unfold(wildcards):
+    if config["no_unfolded_reg"]:
+        fn = []
+    else:
+        fn = (
+            bids(
+                root=work,
+                **config["subj_wildcards"],
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="SyN3D",
+                from_=config["atlas"][0],
+                to="subject",
+                space="unfold",
+                type_="itk",
+                hemi="{hemi}",
+            ),
+        )
+    return fn
+
+
+def get_cmd_compose_warps_unfold_to_crop_native(wildcards, input, output):
+    if config["no_unfolded_reg"]:
+        cmd = f"antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v"
+    else:
+        cmd = f"antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -t  {input.unfoldatlas2unfold} -i {input.unfold_ref} -v"
+    return cmd
 
 
 rule compose_warps_unfold_to_crop_native:
     """ Compose warps from unfold to crop native """
     input:
+        unfoldatlas2unfold=get_unfoldatlas2unfold,
         unfold2corobl=bids(
             root=work,
             datatype="warps",
@@ -475,9 +575,11 @@ rule compose_warps_unfold_to_crop_native:
             to="{native_modality}",
             mode="image"
         ),
+    params:
+        cmd=get_cmd_compose_warps_unfold_to_crop_native,
     container:
         config["singularity"]["ants"]
     group:
         "subj"
     shell:
-        "antsApplyTransforms -o [{output.unfold2cropnative},1] -r {input.ref} -t [{input.native2corobl},1] -t {input.unfold2corobl} -i {input.unfold_ref} -v &> {log}"
+        "{params.cmd}  &> {log}"

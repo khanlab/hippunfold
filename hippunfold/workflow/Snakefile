@@ -70,6 +70,10 @@ if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg
 else:
     limit_to_list.add(config["modality"])
 
+# if atlas doesn't contain alignment features
+if not config["atlas"] == ["histologyReference2023"]:
+    config["no_unfolded_reg"] = True
+
 # writes inputs_config.yml and updates config dict
 config.update(
     snakebids.generate_inputs(

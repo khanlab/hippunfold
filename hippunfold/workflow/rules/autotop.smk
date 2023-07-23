@@ -64,7 +64,7 @@ rule laplace_coords_hipp:
             suffix="coords.nii.gz",
             desc="laplace",
             space="corobl",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             **config["subj_wildcards"]
         ),
     group:
@@ -76,7 +76,7 @@ rule laplace_coords_hipp:
             root="logs",
             **config["subj_wildcards"],
             dir="{dir}",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             suffix="laplace-hipp.txt"
         ),
     script:
@@ -105,7 +105,7 @@ rule laplace_coords_dentate:
             suffix="coords.nii.gz",
             desc="laplace",
             space="corobl",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             **config["subj_wildcards"]
         ),
     group:
@@ -117,7 +117,7 @@ rule laplace_coords_dentate:
             root="logs",
             **config["subj_wildcards"],
             dir="{dir}",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             suffix="laplace-dentate.txt"
         ),
     shell:
@@ -137,7 +137,7 @@ rule prep_equivolume_coords:
             desc="all",
             suffix="mask.nii.gz",
             space="corobl",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             **config["subj_wildcards"]
         ),
         innerbin=bids(
@@ -147,7 +147,7 @@ rule prep_equivolume_coords:
             desc="SRLM",
             suffix="mask.nii.gz",
             space="corobl",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             **config["subj_wildcards"]
         ),
     log:
@@ -155,7 +155,7 @@ rule prep_equivolume_coords:
             root="logs",
             **config["subj_wildcards"],
             dir="{dir}",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             suffix="binarize.txt"
         ),
     group:
@@ -197,7 +197,7 @@ rule equivolume_coords:
             suffix="coords.nii.gz",
             desc="equivol",
             space="corobl",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             **config["subj_wildcards"]
         ),
     group:
@@ -209,76 +209,10 @@ rule equivolume_coords:
             root="logs",
             **config["subj_wildcards"],
             dir="{dir}",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi}",
             suffix="equivolume.txt"
         ),
     container:
         config["singularity"]["autotop"]
     shell:
         "python {params.script} {resources.tmpdir} {input.innerbin} {input.outerbin} {output.coords} &> {log}"
-
-
-rule unflip_coords:
-    input:
-        nii=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            space="corobl",
-            desc="{desc}",
-            hemi="{hemi}flip",
-            **config["subj_wildcards"]
-        ),
-    output:
-        nii=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            space="corobl",
-            desc="{desc,laplace}",
-            hemi="{hemi,L}",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -flip x {output}"
-
-
-rule unflip_coords_equivol:
-    input:
-        nii=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            label="hipp",
-            suffix="coords.nii.gz",
-            space="corobl",
-            desc="{desc}",
-            hemi="{hemi}flip",
-            **config["subj_wildcards"]
-        ),
-    output:
-        nii=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            label="hipp",
-            suffix="coords.nii.gz",
-            space="corobl",
-            desc="{desc,equivol}",
-            hemi="{hemi,L}",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -flip x {output}"
