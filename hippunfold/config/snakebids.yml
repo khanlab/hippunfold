@@ -419,8 +419,8 @@ nnunet_model:
   hippb500: 'zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
   neonateT1w: 'zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
   T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
-  synthseg_v0.1: 'dropbox.com/s/asoanq94ofersv3/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
-  synthseg_v0.2: 'dropbox.com/scl/fi/69yvmo38gdn3dj8aupq9z/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar?rlkey=90km7u4t0cw8t15akr5tawxyl&dl=0'
+  synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
+  synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
 
 crop_native_box: '256x256x256vox'
 crop_native_res: '0.2x0.2x0.2mm'
