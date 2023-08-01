@@ -43,7 +43,6 @@ jobs:
             ghcr.io/${{ github.repository }}
           flavor: |
             latest=auto
-            suffix=_synthseg
       
       - name: Build and push Docker images
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
