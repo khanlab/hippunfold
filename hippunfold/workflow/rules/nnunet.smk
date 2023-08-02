@@ -47,6 +47,7 @@ def parse_chkpnt_from_tar(wildcards, input):
         raise ValueError("cannot parse chkpnt from model tar")
     return chkpnt
 
+
 def parse_trainer_from_tar(wildcards, input):
     match = re.search("^.*\.(\w+)\..*.tar", input.model_tar)
     if match:
