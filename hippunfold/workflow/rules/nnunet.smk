@@ -47,6 +47,14 @@ def parse_chkpnt_from_tar(wildcards, input):
         raise ValueError("cannot parse chkpnt from model tar")
     return chkpnt
 
+def parse_trainer_from_tar(wildcards, input):
+    match = re.search("^.*\.(\w+)\..*.tar", input.model_tar)
+    if match:
+        trainer = match.group(1)
+    else:
+        raise ValueError("cannot parse chkpnt from model tar")
+    return trainer
+
 
 rule run_inference:
     """ This rule REQUIRES a GPU -- will need to modify nnUnet code to create an alternate for CPU-based inference
@@ -72,6 +80,7 @@ rule run_inference:
         out_folder="templbl",
         task=parse_task_from_tar,
         chkpnt=parse_chkpnt_from_tar,
+        trainer=parse_trainer_from_tar,
         tta="" if config["nnunet_enable_tta"] else "--disable_tta",
     output:
         nnunet_seg=bids(
@@ -113,7 +122,7 @@ rule run_inference:
         "tar -xf {input.model_tar} -C {params.model_dir} && "
         "export RESULTS_FOLDER={params.model_dir} && "
         "export nnUNet_n_proc_DA={threads} && "
-        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} {params.tta} &> {log} && "
+        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
         "cp {params.temp_lbl} {output.nnunet_seg}"
 
 
