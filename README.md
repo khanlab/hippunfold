@@ -18,7 +18,7 @@ This is especially useful for:
 - Morphometry (eg. thickness, surface area, curvature, and gyrification measures)
 - Quantitative mapping (eg. map your qT1 MRI data to a midthickness surface; extract laminar profiles perpendicular to this surface)
 
-## NEW: Version 1.3.0 release 
+## NEW: Version 1.3.1 release 
 
 Major changes include the addition of unfolded space registration to a reference atlas harmonized across seven ground-truth histology samples. This method allows shifting in unfolded space, providing even better intersubject alignment. 
 
@@ -28,7 +28,7 @@ Read more in our [preprinted manuscript](https://www.biorxiv.org/content/10.1101
 
 Also the ability to specify a new **experimental** UNet model that is contrast-agnostic using [synthseg](https://github.com/BBillot/SynthSeg) and trained using more detailed segmentations. This generally produces more detailed results but has not been extensively tested yet. 
 
-
+Note: Docker containers for version 1.3.1 and above do not come pre-shipped with nnU-net models (and are accordingly more lightweight!) - models are downloaded automatically when running, but please see the FAQ for more information!
 
 ## Workflow
 
