@@ -104,6 +104,7 @@ trained models. For Khan lab's members, the following line must be add to the ba
 
         export HIPPUNFOLD_CACHE_DIR="/project/6050199/akhanf/opt/hippunfold_trained_models"
 
+
 Note: make sure to reload your bash profile if needed (`source ~./bash_profile`).        
 
 5. For an easier execution in Graham, it's recommended to also install
@@ -185,8 +186,10 @@ If poetry is not installed, please refer to the [installation documentation](htt
 
 The trained model files we use for hippunfold are large and thus are not
 included directly in this github repository, and instead are downloaded
-from Zenodo releases. If you are using the docker/singularity 
-container, `docker://khanlab/hippunfold`, they are pre-downloaded there, in `/opt/hippunfold_cache`.
+from Zenodo releases. 
+
+### For HippUnfold versions earlier than 1.3.0 (< 1.3.0): 
+If you are using the docker/singularity container, `docker://khanlab/hippunfold`, they are pre-downloaded there, in `/opt/hippunfold_cache`.
 
 If you are not using this container, you will need to download the models before running hippunfold, by running:
 
@@ -195,6 +198,18 @@ If you are not using this container, you will need to download the models before
 This console script (installed when you install hippunfold) downloads all the models to a cache dir on your system, 
 which on Linux is typically `~/.cache/hippunfold`. To override this, you can set the `HIPPUNFOLD_CACHE_DIR` environment
 variable before running `hippunfold_download_models` and `hippunfold`.
+
+### NEW: For HippUnfold versions 1.3.0 and later (>= 1.3.0):
+With the addition of new models, including all models in the container was not feasible and a change was made to 
+**not include** any models in the docker/singularity containers. In these versions, the `hippunfold_download_models` command
+is removed, and any models will simply be downloaded as part of the workflow. As before, all models will be stored in the system cache dir, 
+which is typically `~/.cache/hippunfold`, and to override this can set the `HIPPUNFOLD_CACHE_DIR` environment variable before running `hippunfold`.
+
+If you want to pre-download a model (e.g. if your compute nodes do not have internet access), you can run simply run `download_model` rule in HippUnfold e.g.:
+
+```
+hippunfold BIDS_DIR OUTPUT_DIR PARTICIPANT_LEVEL --modality T1w --until download_model -c 1
+```
 
 
 ## Overriding Singularity cache directories
