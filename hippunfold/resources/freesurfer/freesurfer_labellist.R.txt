@@ -1,0 +1,88 @@
+Right alveus
+201 255 204 153 255
+Right perforant_pathway
+202 255 128 128 255
+Right parasubiculum
+203 175 175 75  255
+Right presubiculum
+204 64  0   64  255
+Right subiculum
+205 0   0   255 255
+Right CA1
+206 255 0   0   255
+Right CA2
+207 128 128 255 255
+Right CA3
+208 0   128 0   255
+Right CA4
+209 196 160 128 255
+Right GC-DG
+210 32  200 255 255
+Right HATA
+211 128 255 128 255
+Right fimbria
+212 204 153 204 255
+Right lateral_ventricle
+213 121 17  136 255
+Right molecular_layer_HP
+214 128 0   0   255
+Right hippocampal_fissure
+215 128 32  255 255
+Right entorhinal_cortex
+216 255 204 102 255
+Right molecular_layer_subiculum
+217 128 128 128 255
+Right Amygdala
+218 104 255 255 255
+Right Cerebral_White_Matter
+219 0   226 0   255
+Right Cerebral_Cortex
+220 205 63  78  255
+Right Inf_Lat_Vent
+221 197 58  250 255
+Right Perirhinal
+222 33  150 250 255
+Right Cerebral_White_Matter_Edge
+223 226 0   0   255
+Right Background
+224 100 100 100 255
+Right Ectorhinal
+225 197 150 250 255
+Right HP_tail
+226 170 170 255 255
+Right Polymorphic-Layer
+227 128 255 128 255
+Right Intracellular-Space
+228 204 153 204 255
+Right HP_body
+231 0 255 0 255
+Right HP_head
+232 255 0 0 255
+Right presubiculum-head
+233 32  0   32  255
+Right presubiculum-body
+234 64  0   64  255
+Right subiculum-head
+235 0   0   175 255
+Right subiculum-body
+236 0   0   255 255
+Right CA1-head
+237 175 75   75   255
+Right CA1-body
+238 255 0   0   255
+Right CA3-head
+239 0   80 0   255
+Right CA3-body
+240 0   128 0   255
+Right CA4-head
+241 120 90 50 255
+Right CA4-body
+242 196 160 128 255
+Right GC-ML-DG-head
+243 75   125 175 255
+Right GC-ML-DG-body
+244 32  200 255 255
+Right molecular_layer_HP-head
+245 100 25   25   255
+Right molecular_layer_HP-body
+246 128 0   0   255
