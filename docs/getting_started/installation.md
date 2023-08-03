@@ -47,7 +47,7 @@ The HippUnfold BIDS App is available on a DockerHub as versioned releases and de
 
 #### Pros:
 - Compatible with non-Linux systems 
-- All dependencies+models in a single container
+- All dependencies+models (* See Note 1) in a single container
 
 #### Cons:
 - Typically not possible on shared machines
@@ -59,7 +59,7 @@ The HippUnfold BIDS App is available on a DockerHub as versioned releases and de
 The same docker container can also be used with Singularity (now Apptainer). Instructions can be found below.
 
 #### Pros:
-- All dependencies+models in a single container
+- All dependencies+models (* See Note 1) in a single container 
 - Container stored as a single file (.sif)
 
 #### Cons:
@@ -80,5 +80,6 @@ Instructions for this can be found in the **Contributing** documentation page.
 - Must use Python virtual environment
 - Only compatible on Linux systems with Singularity for external dependencies
 
-
+## Note 1: 
+As of version 1.3.0 of HippUnfold, containers are no longer shipped with all the models, and the models are downloaded as part of the workflow. By default, models are placed in `~/.cache/hippunfold` unless you set the `HIPPUNFOLD_CACHE_DIR` environment variable. See [Deep learning nnU-net model files](https://hippunfold.readthedocs.io/en/latest/contributing/contributing.html#deep-learning-nnu-net-model-files) for more information.
 
