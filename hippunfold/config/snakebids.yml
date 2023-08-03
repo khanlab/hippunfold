@@ -415,14 +415,14 @@ modality: T2w
 
 #these will be downloaded to ~/.cache/hippunfold
 nnunet_model:
-  T1w: trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
-  T2w: trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
-  hippb500: trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
-  neonateT1w: trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
-  T1T2w: trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar
-  synthseg_v0.1: trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar
-  synthseg_v0.2: trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar
-  neonateT1w_v2: trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar
+  T1w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
+  T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar'
+  hippb500: 'zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
+  neonateT1w: 'zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
+  neonateT1w_v2: 'zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
+  T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
+  synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
+  synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
 
 crop_native_box: '256x256x256vox'
 crop_native_res: '0.2x0.2x0.2mm'
@@ -556,4 +556,5 @@ skip_inject_template_labels: False
 force_nnunet_model: False
 t1_reg_template: False
 generate_myelin_map: False
+no_unfolded_reg: False
 root: results

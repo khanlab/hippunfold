@@ -1,8 +1,50 @@
 import re
 from appdirs import AppDirs
+from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+
+HTTP = HTTPRemoteProvider()
 
 
-def get_model_tar(wildcards):
+def get_nnunet_input(wildcards):
+    if config["modality"] == "T2w":
+        nii = (
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="T2w.nii.gz",
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi}",
+            ),
+        )
+    elif config["modality"] == "T1w":
+        nii = (
+            bids(
+                root=work,
+                datatype="anat",
+                **config["subj_wildcards"],
+                suffix="T1w.nii.gz",
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi}",
+            ),
+        )
+    elif config["modality"] == "hippb500":
+        nii = bids(
+            root=work,
+            datatype="dwi",
+            hemi="{hemi}",
+            space="corobl",
+            suffix="b500.nii.gz",
+            **config["subj_wildcards"],
+        )
+    else:
+        raise ValueError("modality not supported for nnunet!")
+    return nii
+
+
+def get_model_tar():
 
     if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
         download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
@@ -20,14 +62,7 @@ def get_model_tar(wildcards):
     if local_tar == None:
         print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
 
-    dl_path = os.path.abspath(os.path.join(download_dir, local_tar))
-    if os.path.exists(dl_path):
-        return dl_path
-    else:
-        print("ERROR:")
-        print(
-            f"  Cannot find downloaded model at {dl_path}, run this first: hippunfold_download_models"
-        )
+    return os.path.abspath(os.path.join(download_dir, local_tar.split("/")[-1]))
 
 
 def parse_task_from_tar(wildcards, input):
@@ -57,22 +92,23 @@ def parse_trainer_from_tar(wildcards, input):
     return trainer
 
 
+rule download_model:
+    input:
+        HTTP.remote(config["nnunet_model"][config["force_nnunet_model"]])
+        if config["force_nnunet_model"]
+        else HTTP.remote(config["nnunet_model"][config["modality"]]),
+    output:
+        model_tar=get_model_tar(),
+    shell:
+        "cp {input} {output}"
+
+
 rule run_inference:
-    """ This rule REQUIRES a GPU -- will need to modify nnUnet code to create an alternate for CPU-based inference
+    """ This rule uses either GPU or CPU .
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
     input:
-        in_img=(
-            bids(
-                root=work,
-                datatype="anat",
-                **config["subj_wildcards"],
-                suffix="{modality}.nii.gz".format(modality=config["modality"]),
-                space="corobl",
-                desc="preproc",
-                hemi="{hemi}",
-            ),
-        ),
-        model_tar=get_model_tar,
+        in_img=get_nnunet_input,
+        model_tar=get_model_tar(),
     params:
         temp_img="tempimg/temp_0000.nii.gz",
         temp_lbl="templbl/temp.nii.gz",

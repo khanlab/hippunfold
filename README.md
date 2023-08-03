@@ -20,11 +20,15 @@ This is especially useful for:
 
 ## NEW: Version 1.3.0 release 
 
-Major changes include the addition of unfolded space registration to a reference atlas harmonized across seven ground-truth histology samples. This method allows shifting in unfolded space, providing even better intersubject alignment.
+Major changes include the addition of unfolded space registration to a reference atlas harmonized across seven ground-truth histology samples. This method allows shifting in unfolded space, providing even better intersubject alignment. 
+
+*Note: this replaces the default workflow, however you can revert to the legacy workflow, disabling unfolded space registration, by setting `--atlas bigbrain` or `--no-unfolded-reg`*
 
 Read more in our [preprinted manuscript](https://www.biorxiv.org/content/10.1101/2023.03.30.534978v1)
 
 Also the ability to specify a new **experimental** UNet model that is contrast-agnostic using [synthseg](https://github.com/BBillot/SynthSeg) and trained using more detailed segmentations. This generally produces more detailed results but has not been extensively tested yet. 
+
+
 
 ## Workflow
 

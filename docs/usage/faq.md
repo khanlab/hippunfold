@@ -2,6 +2,8 @@
 
 1. [](run-inference-mem)
 2. [](no-input-images)
+3. [](container-size)
+4. [](model-files)
 
 
 (run-inference-mem)=
@@ -41,6 +43,17 @@ This can happen if:
  - Singularity or docker cannot access your input directory. For Singularity, ensure your [Singularity options](https://docs.sylabs.io/guides/3.1/user-guide/cli/singularity_run.html) are appropriate, in particular `SINGULARITY_BINDPATH`. For docker, ensure you are mounting the correct directory with the `-v` flag described in the [Getting started](https://hippunfold.readthedocs.io/en/latest/getting_started/docker.html) section. 
  - HippUnfold does not recognize your BIDS-formatted input images. This can occur if, for example, T1w images are labelled with the suffix `_t1w.nii.gz` instead of `_T1w.nii.gz` as per [BIDS specifications](https://bids.neuroimaging.io/specification.html). HippUnfold makes use of [PyBIDS](https://github.com/bids-standard/pybids) to parse the dataset, so we suggest you use the [BIDS Validator](https://bids-standard.github.io/bids-validator/) to ensure your dataset has no errors. Note: You can override BIDS parsing and use custom filenames with the `--path-*` option as described in the [](../usage/useful_options.md#parsing-non-bids-datasets-with-custom-paths) section. 
 
-    
+(container-size)=
+## Why is the HippUnfold Docker/Singularity/Apptainer container so large?
+
+In addition to some large software dependencies, the container has historically included U-net models for all the possible modalities we trained, each model taking up 2-4GB. 
+We have addressed this issue in versions >= 1.3.0, by updating the workflow to download models on the fly (when they have not been previously downloaded), and not including any 
+models in the container itself. This drops the container size significantly (<4GB compressed).
+
+(model-files)=
+## Why do I end up with large files in `~/.cache/hippunfold` after running HippUnfold? 
+
+This folder is where the nnU-net model parameters are stored by default. You can override the location with the `HIPPUNFOLD_CACHE_DIR` environment variable. See [](../contributing/contributing.md#deep-learning-nnu-net-model-files) for more details.
+
 
 

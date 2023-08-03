@@ -27,7 +27,7 @@ HippUnfold, and can be listed with `--help-snakemake`:
 
 ## Running an example
 
-Download and extract a single-subject BIDS dataset for this test from https://www.dropbox.com/s/mdbmpmmq6fi8sk0/hippunfold_test_data.tar. Here we will also assume you chose to save and extract to the directory `c:\Users\jordan\Downloads\`.
+Download and extract a single-subject BIDS dataset for this test from [hippunfold_test_data.tar](https://www.dropbox.com/s/mdbmpmmq6fi8sk0/hippunfold_test_data.tar). Here we will also assume you chose to save and extract to the directory `c:\Users\jordan\Downloads\`.
 
 This contains a `ds002168/` directory with a single subject, that has a both T1w and T2w images. 
 
