@@ -1,8 +1,5 @@
 import re
 from appdirs import AppDirs
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-
-HTTP = HTTPRemoteProvider()
 
 
 def get_nnunet_input(wildcards):
@@ -93,14 +90,14 @@ def parse_trainer_from_tar(wildcards, input):
 
 
 rule download_model:
-    input:
-        HTTP.remote(config["nnunet_model"][config["force_nnunet_model"]])
+    params:
+        url=config["nnunet_model"][config["force_nnunet_model"]]
         if config["force_nnunet_model"]
-        else HTTP.remote(config["nnunet_model"][config["modality"]]),
+        else config["nnunet_model"][config["modality"]],
     output:
         model_tar=get_model_tar(),
     shell:
-        "cp {input} {output}"
+        "wget https://{params.url} -O {output}"
 
 
 rule run_inference:
