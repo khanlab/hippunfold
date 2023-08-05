@@ -76,9 +76,9 @@ def reg_to_template_cmd(wildcards, input, output):
         cmd = f"reg_resample -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {input.xfm_identity}; cp {input.xfm_identity} {output.xfm_ras}"
     elif config["use_greedy_reg"]:
         if config["rigid_reg_template"]:
-            cmd = f"greedy -d 3 -a -m MI -i {input.ref} {input.flo} -o {output.xfm_ras} -dof 6 -ia-moments 2 && greedy -d 3 -r -rf {input.ref} -rm {input.flo} {output.warped_subj}"
+            cmd = f"greedy -d 3 -moments 2 -det 1 -i {input.ref} {input.flo} -o moments.xfm && greedy -d 3 -a -m MI -i {input.ref} {input.flo} -o {output.xfm_ras} -dof 6 -ia moments.xfm && greedy -d 3 -r {output.xfm_ras} -rf {input.ref} -rm {input.flo} {output.warped_subj}"
         else:
-            cmd = f"greedy -d 3 -a -m MI -i {input.ref} {input.flo} -o {output.xfm_ras} -dof 12 -ia-moments 2 && greedy -d 3 -r -rf {input.ref} -rm {input.flo} {output.warped_subj}"
+            cmd = f"greedy -d 3 -moments 2 -det 1 -i {input.ref} {input.flo} -o moments.xfm && greedy -d 3 -a -m MI -i {input.ref} {input.flo} -o {output.xfm_ras} -dof 12 -ia moments.xfm && greedy -d 3 -r {output.xfm_ras} -rf {input.ref} -rm {input.flo} {output.warped_subj}"
 
     else:
         if config["rigid_reg_template"]:
@@ -126,6 +126,7 @@ rule reg_to_template:
         config["singularity"]["autotop"]
     group:
         "subj"
+    shadow: 'minimal'
     shell:
         "{params.cmd}"
 
