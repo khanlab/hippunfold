@@ -173,6 +173,12 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --use_greedy_reg:
+    help: 'Use alternative method for affine/rigid alignment to template. Try this if affine/rigid alignment is failing (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
+
   --no_reg_template:
     help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
     default: False
@@ -557,4 +563,5 @@ force_nnunet_model: False
 t1_reg_template: False
 generate_myelin_map: False
 no_unfolded_reg: False
+use_greedy_reg: False
 root: results
