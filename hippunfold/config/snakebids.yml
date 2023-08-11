@@ -198,21 +198,19 @@ parse_args:
     help: 'Sets the bounding box size for the crop native (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
     default: '256x256x256vox'
 
-
-
   --atlas:
     choices:
       - 'bigbrain'
       - 'magdeburg'
       - 'freesurfer'
-      - 'histologyReference2023'
+      - 'multihist7'
     default: 
-      - 'histologyReference2023'
+      - 'multihist7'
     nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
-    help: 'Perform unfolded space (2D) registration based on thickness, curvature, and gyrification for closer alignment to the reference atlas. NOTE only histologyReference2023 has these features currently. (default: %(default)s)'
+    help: 'Do not perform unfolded space (2D) registration based on thickness, curvature, and gyrification for closer alignment to the reference atlas. NOTE: only multihist7 has these features currently, so this unfolded_reg is automatically skipped if a different atlas is chosen. (default: %(default)s)'
     default: False
     action: store_true
 
@@ -360,15 +358,15 @@ template_files:
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
 
 atlas: 
-  - histologyReference2023
+  - multihist7
 
 atlas_files:
-  histologyReference2023:
-    label_nii: resources/histologyReference2023/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
-    label_list: resources/histologyReference2023/labellist.txt
-    thick: resources/histologyReference2023/thickness.nii.gz
-    curv: resources/histologyReference2023/curvature.nii.gz
-    gyr: resources/histologyReference2023/gyrification.nii.gz
+  multihist7:
+    label_nii: resources/multihist7/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
+    label_list: resources/multihist7/labellist.txt
+    thick: resources/multihist7/thickness.nii.gz
+    curv: resources/multihist7/curvature.nii.gz
+    gyr: resources/multihist7/gyrification.nii.gz
   bigbrain:
     label_nii: resources/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
     label_list: resources/bigbrain/sub-bigbrain_labellist.txt
@@ -391,7 +389,7 @@ tissue_atlas_mapping:
     dg: 6
     srlm: 7
     cyst: 8
-  histologyReference2023:
+  multihist7:
     dg: 6
     srlm: 7
     cyst: 8
