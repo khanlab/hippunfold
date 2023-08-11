@@ -461,7 +461,7 @@ rule metric_to_nii:
         refflatnii=os.path.join(
             workflow.basedir,
             "..",
-            config["atlas_files"]["histologyReference2023"]["label_nii"],
+            config["atlas_files"]["multihist7"]["label_nii"],
         ),
     output:
         metric_nii=bids(
