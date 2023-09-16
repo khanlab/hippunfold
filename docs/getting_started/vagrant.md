@@ -67,22 +67,9 @@ speed: 2
 
 ## Download the HippUnfold container
 
-We download the Singularity container for HippUnfold using
-Dropbox in this example:
+We pull/build the container from DockerHub:
 ```
-wget https://www.dropbox.com/s/jtf6zyy0u8sc2k6/khanlab_hippunfold_v1.2.0.sif
-```
-
-Note, you can also pull/build the container from DockerHub:
-```
-singularity pull docker://khanlab/hippunfold:v1.2.0
-```
-
-```{asciinema} ../casts/vagrant_hippunfold_get_app_dropbox.cast
----
-preload: 1
-speed: 2
----
+singularity pull docker://khanlab/hippunfold:latest
 ```
 
 ## Run HippUnfold
