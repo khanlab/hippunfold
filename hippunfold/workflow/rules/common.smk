@@ -333,12 +333,18 @@ def get_final_output():
     modality_suffix = get_modality_suffix(config["modality"])
     modality_key = get_modality_key(config["modality"])
 
+    #use a zip list for subject/session:
+    zip_list = config['input_zip_lists'][modality_key]
+    if 'session' in zip_list:
+        zip_list = snakebids.filter_list(zip_list,{'session':config['sessions']})
+
     final_output.extend(
         expand(
+        expand(
             subj_output,
+            zip,allow_missing=True,
+            **zip_list),
             modality_suffix=modality_suffix,
-            subject=config["input_lists"][modality_key]["subject"],
-            session=config["sessions"],
         )
     )
 
