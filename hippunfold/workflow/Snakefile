@@ -118,11 +118,9 @@ if config["modality"] == "segT1w" or config["modality"] == "segT2w":
 
     include: "rules/preproc_seg.smk"
 
-
 elif config["modality"] == "cropseg":
 
     include: "rules/preproc_cropseg.smk"
-
 
 else:
 

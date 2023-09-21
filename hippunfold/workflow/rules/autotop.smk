@@ -1,5 +1,6 @@
 import os
 
+
 def get_cmd_laplace_coords():
     if config["skip_inject_template_labels"]:
         cmd = "../scripts/laplace_coords.py"
@@ -76,7 +77,7 @@ rule laplace_coords_hipp:
             dir="{dir}",
             hemi="{hemi}",
             suffix="laplace-hipp.txt"
-        ), 
+        ),
     container:
         config["singularity"]["autotop"]
     script:
@@ -119,7 +120,7 @@ rule laplace_coords_dentate:
             dir="{dir}",
             hemi="{hemi}",
             suffix="laplace-dentate.txt"
-        ), 
+        ),
     container:
         config["singularity"]["autotop"]
     shell:
