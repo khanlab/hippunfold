@@ -42,7 +42,6 @@ if config["skip_preproc"]:
         shell:
             "cp {input} {output}"
 
-
 else:
 
     rule n4_t1:
