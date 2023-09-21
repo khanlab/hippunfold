@@ -106,6 +106,8 @@ rule import_template_shape:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"
 

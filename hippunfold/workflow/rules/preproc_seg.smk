@@ -14,6 +14,8 @@ rule import_seg:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"
 

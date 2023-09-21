@@ -116,6 +116,8 @@ rule label_subfields_from_vol_coords_corobl:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/label_subfields_from_vol_coords.py"
 

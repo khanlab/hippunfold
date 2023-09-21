@@ -12,6 +12,8 @@ rule import_cropseg:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"
 

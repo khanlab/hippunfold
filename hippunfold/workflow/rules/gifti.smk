@@ -136,6 +136,8 @@ rule constrain_surf_to_bbox:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/constrain_surf_to_bbox.py"
 
@@ -225,6 +227,8 @@ rule correct_nan_vertices1:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/fillnanvertices.py"
 
@@ -379,6 +383,8 @@ rule normalize_curvature1:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/normalize_tanh.py"
 
@@ -637,6 +643,8 @@ rule warp_gii_unfoldreg:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/warp_flatsurf.py"
 
@@ -669,6 +677,8 @@ rule dentate_skip_unfoldreg:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"
 
@@ -773,6 +783,8 @@ rule correct_nan_vertices2:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/fillnanvertices.py"
 
@@ -803,6 +815,8 @@ rule cp_corobl_root:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"
 
@@ -990,6 +1004,8 @@ rule normalize_curvature2:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/normalize_tanh.py"
 
@@ -1074,7 +1090,7 @@ rule resample_atlas_to_refvol:
             **config["subj_wildcards"]
         ),
     container:
-        config["singularity"]["ants"]
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
@@ -1304,6 +1320,8 @@ rule cp_unfolded_noconstrain:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"
 
