@@ -74,7 +74,7 @@ Instructions for this can be found in the **Contributing** documentation page.
 
 #### Pros:
 - Complete flexibility to modify code
-- External (Non-Python) dependencies as Singularity containers
+- External (python and non-python) dependencies as Singularity containers
 
 #### Cons:
 - Must use Python virtual environment

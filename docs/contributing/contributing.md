@@ -4,7 +4,7 @@ Hippunfold python package dependencies are managed with Poetry, which you\'ll ne
 installed on your machine. You can find instructions on the [poetry
 website](https://python-poetry.org/docs/master/#installation).
 
-HippUnfold also has a number of dependencies outside of python, including popular neuroimaging tools like `wb_command`, `ANTs`, `c3d`, and others listed in https://github.com/khanlab/autotop_deps. Thus we strongly recommend running HippUnfold with the `--use-singularity` flag, which will pull this container automatically and use it when required, unless you are comfortable using all of these tools yourself. 
+HippUnfold also has a number of dependencies outside of python, including popular neuroimaging tools like `wb_command`, `ANTs`, `c3d`, and others listed in https://github.com/khanlab/hippunfold_deps. Thus we strongly recommend running HippUnfold with the `--use-singularity` flag, which will pull this container automatically and use it when required, unless you are comfortable using all of these tools yourself. 
 
 Note: These instructions are only recommended if you are making changes to HippUnfold code to commit back to this repository, or if you are using Snakemake's cluster execution profiles. If not, it is easier to run HippUnfold when it is packaged into a single singularity container (e.g. `docker://khanlab/hippunfold:latest`). 
 
@@ -32,6 +32,8 @@ or you can activate a virtualenv shell and then run hippunfold directly:
     hippunfold
 
 You can exit the poetry shell with `exit`.
+
+Note: you can alternatively use `pip install` to install dependencies.
 
 ## Running code format quality checking and fixing:
 

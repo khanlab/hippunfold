@@ -335,10 +335,7 @@ cifti_metric_types:
 #--- workflow specific configuration -- 
 
 singularity:
-  prepdwi: 'docker://khanlab/prepdwi:latest'  
-  autotop: 'docker://khanlab/autotop_deps:v0.4.3'
-  fsl: '/project/6050199/akhanf/singularity/bids-apps/fsl_6.0.3_cuda9.1.sif'  #fsl with cuda container not on docker hub yet.. only used for dwi workflow anyhow..
-  ants: 'docker://kaczmarj/ants:2.3.4'
+  autotop: 'docker://khanlab/hippunfold_deps:v0.5.0'
 
 xfm_identity: resources/identity_xfm.txt
 template: CITI168
