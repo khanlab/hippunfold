@@ -96,6 +96,8 @@ rule download_model:
         else config["nnunet_model"][config["modality"]],
     output:
         model_tar=get_model_tar(),
+    container:
+        config["singularity"]["autotop"]
     shell:
         "wget https://{params.url} -O {output}"
 
@@ -143,6 +145,8 @@ rule run_inference:
         time=30 if config["use_gpu"] else 60,
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -326,5 +330,7 @@ rule qc_nnunet_dice:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/dice.py"

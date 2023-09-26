@@ -226,6 +226,8 @@ rule create_warps_hipp:
             hemi="{hemi}",
             suffix="create_warps-hipp.txt"
         ),
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/create_warps.py"
 
@@ -351,6 +353,8 @@ rule create_warps_dentate:
             hemi="{hemi}",
             suffix="create_warps-dentate.txt"
         ),
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/create_warps.py"
 
@@ -393,6 +397,8 @@ rule expand_unfolded_warps:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/expand_2Dwarp.py"
 
@@ -475,7 +481,7 @@ rule compose_warps_native_to_unfold:
             mode="image"
         ),
     container:
-        config["singularity"]["ants"]
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
@@ -578,7 +584,7 @@ rule compose_warps_unfold_to_crop_native:
     params:
         cmd=get_cmd_compose_warps_unfold_to_crop_native,
     container:
-        config["singularity"]["ants"]
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:

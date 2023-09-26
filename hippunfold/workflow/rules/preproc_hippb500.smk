@@ -84,5 +84,7 @@ rule cp_b500_to_anat_dir:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"

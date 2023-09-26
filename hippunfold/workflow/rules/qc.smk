@@ -28,6 +28,8 @@ rule qc_reg_to_template:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/vis_regqc.py"
 
@@ -67,6 +69,8 @@ rule get_subfield_vols_subj:
             suffix="volumes.tsv",
             **config["subj_wildcards"]
         ),
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/gen_volume_tsv.py"
 
@@ -98,6 +102,8 @@ rule plot_subj_subfields:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/plot_subj_subfields.py"
 
@@ -180,6 +186,8 @@ rule qc_subfield:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/vis_qc_dseg.py"
 
@@ -214,6 +222,8 @@ rule qc_subfield_surf:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/vis_qc_surf.py"
 
@@ -250,9 +260,7 @@ rule concat_subj_vols_tsv:
             from_="{modality}",
             suffix="volumes.tsv",
         ),
-    run:
-        import pandas as pd
-
-        pd.concat([pd.read_table(in_tsv) for in_tsv in input]).to_csv(
-            output.tsv, sep="\t", index=False
-        )
+    container:
+        config["singularity"]["autotop"]
+    script:
+        "../scripts/concat_tsv.py"

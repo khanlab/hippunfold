@@ -1,5 +1,4 @@
 import os
-import numpy as np
 
 
 def get_cmd_laplace_coords():
@@ -79,6 +78,8 @@ rule laplace_coords_hipp:
             hemi="{hemi}",
             suffix="laplace-hipp.txt"
         ),
+    container:
+        config["singularity"]["autotop"]
     script:
         get_cmd_laplace_coords()
 
@@ -120,6 +121,8 @@ rule laplace_coords_dentate:
             hemi="{hemi}",
             suffix="laplace-dentate.txt"
         ),
+    container:
+        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"
 
@@ -160,6 +163,8 @@ rule prep_equivolume_coords:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     script:
         "../scripts/prep_equivolume_coords.py"
 
