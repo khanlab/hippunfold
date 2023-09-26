@@ -59,8 +59,8 @@ elif "T1w" in config["modality"]:
 
 # only generate hipp surface if skipping template injection
 #   i.e. drop dentate
-if config["skip_inject_template_labels"]:
-    config["autotop_labels"] = ["hipp"]
+#if config["skip_inject_template_labels"]:
+#    config["autotop_labels"] = ["hipp"]
 
 
 # add seg (if chosen) and the modality to the inputs
@@ -160,6 +160,7 @@ include: "rules/qc.smk"
 
 include: "rules/myelin_map.smk"
 
+include: "rules/templateseg.smk"
 
 rule all:
     input:
