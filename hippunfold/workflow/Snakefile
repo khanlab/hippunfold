@@ -143,7 +143,6 @@ include: "rules/autotop.smk"
 include: "rules/warps.smk"
 
 
-include: "rules/shape_inject.smk"
 
 
 include: "rules/gifti.smk"
@@ -160,7 +159,10 @@ include: "rules/qc.smk"
 
 include: "rules/myelin_map.smk"
 
-include: "rules/templateseg.smk"
+if config['use_template_seg']:
+    include: "rules/templateseg.smk"
+else:
+    include: "rules/shape_inject.smk"
 
 rule all:
     input:
