@@ -89,7 +89,7 @@ rule prep_segs_for_greedy:
 rule import_template_shape:
     input:
         template_seg=os.path.join(
-            workflow.basedir, "..", config["inject_template_files"][config["inject_template"]]["dseg"]
+            workflow.basedir, "..", config["template_files"][config["inject_template"]]["dseg"]
         ),
     output:
         template_seg=bids(
@@ -276,7 +276,7 @@ rule template_shape_inject:
 rule inject_init_laplace_coords:
     input:
         coords=os.path.join(
-            workflow.basedir, "..", config["inject_template_files"][config["inject_template"]]["coords"]
+            workflow.basedir, "..", config["template_files"][config["inject_template"]]["coords"]
         ),
         subject_seg=get_input_for_shape_inject,
         matrix=bids(

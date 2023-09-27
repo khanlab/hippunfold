@@ -45,7 +45,7 @@ rule template_reg:
 rule warp_template_dseg:
     input:
         template_seg=os.path.join(
-            workflow.basedir, "..", config["inject_template_files"][config["inject_template"]]["dseg"]
+            workflow.basedir, "..", config["template_files"][config["inject_template"]]["dseg"]
         ),
         ref=bids(
             root=work,
@@ -91,7 +91,7 @@ rule warp_template_dseg:
 rule warp_template_coords:
     input:
         template_coords=os.path.join(
-            workflow.basedir, "..", config["inject_template_files"][config["inject_template"]]["coords"]
+            workflow.basedir, "..", config["template_files"][config["inject_template"]]["coords"]
         ),
         ref=bids(
             root=work,
