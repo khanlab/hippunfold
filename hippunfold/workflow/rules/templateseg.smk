@@ -89,7 +89,7 @@ rule warp_template_dseg:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp}"
 
 
 rule warp_template_coords:
