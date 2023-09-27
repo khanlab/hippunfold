@@ -165,7 +165,7 @@ parse_args:
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet. This is only to be used if nnUnet models are not trained for the data you are using (e.g. for marmoset data with the MBMv2 template). (default: %(default)s)'
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using (e.g. for marmoset data with the MBMv2 template). (default: %(default)s)'
     default: False
     action: 'store_true'
 
