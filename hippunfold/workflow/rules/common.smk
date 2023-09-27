@@ -292,25 +292,23 @@ def get_final_qc():
                 allow_missing=True,
             )
         )
-    if (
-        (config["modality"] == "T1w")
-        or (config["modality"] == "T2w")
-        and not config["use_template_seg"]
-    ):
-        qc.extend(
-            expand(
-                bids(
-                    root=root,
-                    datatype="qc",
-                    desc="unetf3d",
-                    suffix="dice.tsv",
-                    hemi="{hemi}",
-                    **config["subj_wildcards"],
-                ),
-                hemi=config["hemi"],
-                allow_missing=True,
+    if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
+
+        if not config["use_template_seg"]:
+            qc.extend(
+                expand(
+                    bids(
+                        root=root,
+                        datatype="qc",
+                        desc="unetf3d",
+                        suffix="dice.tsv",
+                        hemi="{hemi}",
+                        **config["subj_wildcards"],
+                    ),
+                    hemi=config["hemi"],
+                    allow_missing=True,
+                )
             )
-        )
     return qc
 
 
