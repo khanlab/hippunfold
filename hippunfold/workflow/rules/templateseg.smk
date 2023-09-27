@@ -1,12 +1,14 @@
-
- 
 rule template_reg:
     input:
         moving_img=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]][config['modality']]
+            workflow.basedir,
+            "..",
+            config["template_files"][config["template"]][config["modality"]],
         ),
         xfm_corobl=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]]["xfm_corobl"]
+            workflow.basedir,
+            "..",
+            config["template_files"][config["template"]]["xfm_corobl"],
         ),
         fixed_img=bids(
             root=work,
@@ -15,11 +17,11 @@ rule template_reg:
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi}"
-        ),        
+            hemi="{hemi}",
+        ),
     params:
         general_opts="-d 3 -m NCC 2x2x2",
-        greedy_opts="-n 100x50x10 -s 4vox 2vox", #1.732vox, 0.7071vox
+        greedy_opts="-n 100x50x10 -s 4vox 2vox",  #default is 1.732vox, 0.7071vox
     output:
         warp=bids(
             root=work,
@@ -45,7 +47,9 @@ rule template_reg:
 rule warp_template_dseg:
     input:
         template_seg=os.path.join(
-            workflow.basedir, "..", config["template_files"][config["inject_template"]]["dseg"]
+            workflow.basedir,
+            "..",
+            config["template_files"][config["inject_template"]]["dseg"],
         ),
         ref=bids(
             root=work,
@@ -54,8 +58,8 @@ rule warp_template_dseg:
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi}"
-        ),   
+            hemi="{hemi}",
+        ),
         warp=bids(
             root=work,
             **config["subj_wildcards"],
@@ -91,7 +95,9 @@ rule warp_template_dseg:
 rule warp_template_coords:
     input:
         template_coords=os.path.join(
-            workflow.basedir, "..", config["template_files"][config["inject_template"]]["coords"]
+            workflow.basedir,
+            "..",
+            config["template_files"][config["inject_template"]]["coords"],
         ),
         ref=bids(
             root=work,
@@ -100,8 +106,8 @@ rule warp_template_coords:
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi}"
-        ),   
+            hemi="{hemi}",
+        ),
         warp=bids(
             root=work,
             **config["subj_wildcards"],
@@ -127,7 +133,6 @@ rule warp_template_coords:
             space="corobl",
             hemi="{hemi,R|Lflip}"
         ),
-
     group:
         "subj"
     container:
@@ -137,12 +142,12 @@ rule warp_template_coords:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.ref} -rm {input.template_coords} {output.init_coords}  -r {input.warp}"
 
 
-
-
 rule warp_template_anat:
     input:
         template_anat=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]][config['modality']]
+            workflow.basedir,
+            "..",
+            config["template_files"][config["template"]][config["modality"]],
         ),
         ref=bids(
             root=work,
@@ -151,10 +156,12 @@ rule warp_template_anat:
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi}"
-        ),   
+            hemi="{hemi}",
+        ),
         xfm_corobl=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]]["xfm_corobl"]
+            workflow.basedir,
+            "..",
+            config["template_files"][config["template"]]["xfm_corobl"],
         ),
         warp=bids(
             root=work,
@@ -167,8 +174,6 @@ rule warp_template_anat:
             space="corobl",
             hemi="{hemi}"
         ),
-#    params:
-#        interp_opt="-ri LABEL 0.2vox",
     output:
         warped=bids(
             root=work,
@@ -177,7 +182,7 @@ rule warp_template_anat:
             suffix=f"{config['modality']}.nii.gz",
             desc="warpedtemplate",
             space="corobl",
-            hemi="{hemi,Lflip|R}"
+            hemi="{hemi,Lflip|R}",
         ),
     group:
         "subj"
@@ -206,8 +211,8 @@ rule unflip_template_dseg:
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi}"
-        ),   
+            hemi="{hemi}",
+        ),
     output:
         nii=bids(
             root=work,
@@ -247,8 +252,8 @@ rule unflip_template_coords:
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi}"
-        ),   
+            hemi="{hemi}",
+        ),
     output:
         nii=bids(
             root=work,
@@ -268,4 +273,3 @@ rule unflip_template_coords:
     shell:
         "c3d {input.nii} -flip x -popas FLIPPED "
         " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nii} "
-
