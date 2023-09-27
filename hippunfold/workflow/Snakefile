@@ -161,8 +161,20 @@ include: "rules/myelin_map.smk"
 
 
 if config["use_template_seg"]:
+    if (
+        "dseg" in config["template_files"][config["template"]]
+        and "coords" in config["template_files"][config["template"]]
+    ):
 
-    include: "rules/templateseg.smk"
+        include: "rules/templateseg.smk"
+
+
+    else:
+        print(
+            "use_template_seg is not possible, template dseg or coords do not exist for the chosen template"
+        )
+
+        include: "rules/shape_inject.smk"
 
 
 else:
