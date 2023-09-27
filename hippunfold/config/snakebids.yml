@@ -353,6 +353,7 @@ singularity:
 
 xfm_identity: resources/identity_xfm.txt
 template: CITI168
+
 template_files:
   CITI168:
     T1w: resources/CITI168/T1w_head_700um.nii.gz
@@ -374,6 +375,13 @@ template_files:
     crop_ref: resources/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_T2w.nii.gz
     crop_refT1w: resources/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_MTR.nii.gz
     Mask_crop: resources/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: resources/tpl-MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: resources/tpl-MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+  upenn:
+    dseg: resources/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
+    coords: resources/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+
+
 
 
 atlas: 
