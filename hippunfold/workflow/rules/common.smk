@@ -292,7 +292,11 @@ def get_final_qc():
                 allow_missing=True,
             )
         )
-    if (config["modality"] == "T1w") or (config["modality"] == "T2w") and not config['use_template_seg']:
+    if (
+        (config["modality"] == "T1w")
+        or (config["modality"] == "T2w")
+        and not config["use_template_seg"]
+    ):
         qc.extend(
             expand(
                 bids(

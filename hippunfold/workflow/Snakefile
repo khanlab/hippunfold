@@ -59,7 +59,7 @@ elif "T1w" in config["modality"]:
 
 # only generate hipp surface if skipping template injection
 #   i.e. drop dentate
-#if config["skip_inject_template_labels"]:
+# if config["skip_inject_template_labels"]:
 #    config["autotop_labels"] = ["hipp"]
 
 
@@ -118,9 +118,11 @@ if config["modality"] == "segT1w" or config["modality"] == "segT2w":
 
     include: "rules/preproc_seg.smk"
 
+
 elif config["modality"] == "cropseg":
 
     include: "rules/preproc_cropseg.smk"
+
 
 else:
 
@@ -143,8 +145,6 @@ include: "rules/autotop.smk"
 include: "rules/warps.smk"
 
 
-
-
 include: "rules/gifti.smk"
 
 
@@ -159,10 +159,16 @@ include: "rules/qc.smk"
 
 include: "rules/myelin_map.smk"
 
-if config['use_template_seg']:
+
+if config["use_template_seg"]:
+
     include: "rules/templateseg.smk"
+
+
 else:
+
     include: "rules/shape_inject.smk"
+
 
 rule all:
     input:

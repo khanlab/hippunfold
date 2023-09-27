@@ -158,6 +158,7 @@ if config["skip_preproc"]:
         shell:
             "cp {input} {output}"
 
+
 else:
 
     # average aligned n4 images to get preproc T2w (or if single scan, just copy it)
