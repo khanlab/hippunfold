@@ -160,14 +160,19 @@ parse_args:
   --inject_template:
     choices:
       - 'upenn'
-      - 'MBMv2'
+      - 'MBMv3'
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using (e.g. for marmoset data with the MBMv2 template). (default: %(default)s)'
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using (e.g. for marmoset data with the MBMv3 template). (default: %(default)s)'
     default: False
     action: 'store_true'
+
+  --template_seg_smoothing_factor: 
+    help: 'Scales the default smoothing sigma for gradient and warp in greedy registration for template-based segmentation. Using a value higher than 1 will use result in a smoother warp. (default: %(default)s)'
+    default: 2.0
+
 
 
   --skip_inject_template_labels:
@@ -195,7 +200,7 @@ parse_args:
     choices:
       - 'CITI168'
       - 'dHCP'
-      - 'MBMv2'
+      - 'MBMv3'
     default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique. (default: %(default)s)'
 
@@ -368,18 +373,18 @@ template_files:
     crop_ref: resources/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: resources/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: resources/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
-  MBMv2:
-    T1w: resources/tpl-MBMv2/Template_sym_MTR_80um.nii.gz
-    T2w: resources/tpl-MBMv2/Template_sym_T2_80um.nii.gz
-    xfm_corobl: resources/tpl-MBMv2/tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: resources/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: resources/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_MTR.nii.gz
-    Mask_crop: resources/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: resources/tpl-MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: resources/tpl-MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
-  upenn:
+    upenn:
     dseg: resources/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
     coords: resources/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+  MBMv3:
+    T1w: resources/tpl-MBMv3/tpl-MBMv3_T1w.nii.gz
+    T2w: resources/tpl-MBMv3/tpl-MBMv3_T2w.nii.gz
+    xfm_corobl: resources/tpl-MBMv3/tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: resources/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T2w.nii.gz
+    crop_refT1w: resources/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
+    Mask_crop: resources/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: resources/tpl-MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
+    coords: resources/tpl-MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
 
 
 
@@ -411,9 +416,9 @@ inject_template_files:
   upenn:
     dseg: resources/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
     coords: resources/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
-  MBMv2:
-    dseg: resources/tpl-MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: resources/tpl-MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+  MBMv3:
+    dseg: resources/tpl-MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
+    coords: resources/tpl-MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
 
 #values to use for re-mapping tissue labels when combining with subfields.
 # set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
@@ -594,3 +599,5 @@ generate_myelin_map: False
 no_unfolded_reg: False
 root: results
 use_template_seg: False
+template_seg_smoothing_factor: 2
+
