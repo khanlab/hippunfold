@@ -36,7 +36,7 @@ rule template_reg:
         general_opts="-d 3 -m NCC 2x2x2",
         smoothing_opts=get_smoothing_opt,
         iteration_opts="-n 100x50x10",  #default -n 100x100
-        img_pairs=lambda wildcards, input: "-i {input.fixed_img} {input.moving_img}",
+        img_pairs=lambda wildcards, input: f"-i {input.fixed_img} {input.moving_img}",
     output:
         warp=bids(
             root=work,
