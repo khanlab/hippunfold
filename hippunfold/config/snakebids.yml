@@ -397,6 +397,10 @@ template_files:
     Mask_crop: resources/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: resources/tpl-MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
     coords: resources/tpl-MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+  upenn:
+    dseg: resources/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
+    coords: resources/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+
 
 
 
@@ -424,16 +428,6 @@ atlas_files:
 
 inject_template: upenn
 
-inject_template_files:
-  upenn:
-    dseg: resources/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
-    coords: resources/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
-  MBMv2:
-    dseg: resources/tpl-MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: resources/tpl-MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
-  MBMv3:
-    dseg: resources/tpl-MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
-    coords: resources/tpl-MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
 
 #values to use for re-mapping tissue labels when combining with subfields.
 # set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
