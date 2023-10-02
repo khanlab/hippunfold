@@ -118,11 +118,9 @@ if config["modality"] == "segT1w" or config["modality"] == "segT2w":
 
     include: "rules/preproc_seg.smk"
 
-
 elif config["modality"] == "cropseg":
 
     include: "rules/preproc_cropseg.smk"
-
 
 else:
 
@@ -168,14 +166,12 @@ if config["use_template_seg"]:
 
         include: "rules/templateseg.smk"
 
-
     else:
         print(
             "use_template_seg is not possible, template dseg or coords do not exist for the chosen template"
         )
 
         include: "rules/shape_inject.smk"
-
 
 else:
 
