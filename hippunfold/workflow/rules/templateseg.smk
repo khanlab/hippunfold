@@ -1,9 +1,20 @@
+def get_smoothing_opt(wildcards):
+    """sets the smoothness of the greedy template shape injection deformation"""
+
+    gradient_sigma = 1.732 * float(config["template_seg_smoothing_factor"])
+    warp_sigma = 0.7071 * float(config["template_seg_smoothing_factor"])
+
+    return f"-s {gradient_sigma}vox {warp_sigma}vox"
+
+
 rule template_reg:
     input:
         moving_img=lambda wildcards: os.path.join(
             workflow.basedir,
             "..",
-            config["template_files"][config["template"]][config["modality"]],
+            config["template_files"][config["template"]][
+                get_modality_suffix(config["modality"])
+            ],
         ),
         xfm_corobl=lambda wildcards: os.path.join(
             workflow.basedir,
@@ -14,14 +25,18 @@ rule template_reg:
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
-            suffix=f"{config['modality']}.nii.gz",
+            suffix="{modality}.nii.gz".format(
+                modality=get_modality_suffix(config["modality"])
+            ),
             space="corobl",
             desc="preproc",
-            hemi="{hemi}",
+            hemi="{hemi}"
         ),
     params:
         general_opts="-d 3 -m NCC 2x2x2",
-        greedy_opts="-n 100x50x10 -s 4vox 2vox",  #default is 1.732vox, 0.7071vox
+        smoothing_opts=get_smoothing_opt,
+        iteration_opts="-n 100x50x10",  #default -n 100x100
+        img_pairs=lambda wildcards, input: "-i {input.fixed_img} {input.moving_img}",
     output:
         warp=bids(
             root=work,
@@ -40,8 +55,9 @@ rule template_reg:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -threads {threads} {params.general_opts} {params.greedy_opts} "
-        " -i {input.fixed_img} {input.moving_img} -it {input.xfm_corobl} -o {output.warp}"
+        "greedy -threads {threads} {params.general_opts} "
+        " {params.smoothing_opts} {params.iteration_opts} "
+        " {params.img_pairs} -it {input.xfm_corobl} -o {output.warp}"
 
 
 rule warp_template_dseg:
