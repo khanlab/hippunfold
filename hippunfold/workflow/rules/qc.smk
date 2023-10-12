@@ -55,7 +55,7 @@ rule get_subfield_vols_subj:
             workflow.basedir,
             "..",
             "resources",
-            "atlases-unfold",
+            "atlases-unfolded",
             "{atlas}",
             "desc-subfields_atlas-{atlas}_dseg.tsv",
         ),
