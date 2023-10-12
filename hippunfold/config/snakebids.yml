@@ -410,20 +410,20 @@ atlas:
 
 atlas_files:
   multihist7:
-    label_nii: resources/altases-unfolded/multihist7/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
-    label_list: resources/altases-unfolded/multihist7/labellist.txt
-    thick: resources/altases-unfolded/multihist7/thickness.nii.gz
-    curv: resources/altases-unfolded/multihist7/curvature.nii.gz
-    gyr: resources/altases-unfolded/multihist7/gyrification.nii.gz
+    label_nii: resources/atlases-unfolded/multihist7/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
+    label_list: resources/atlases-unfolded/multihist7/labellist.txt
+    thick: resources/atlases-unfolded/multihist7/thickness.nii.gz
+    curv: resources/atlases-unfolded/multihist7/curvature.nii.gz
+    gyr: resources/atlases-unfolded/multihist7/gyrification.nii.gz
   bigbrain:
-    label_nii: resources/altases-unfolded/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
-    label_list: resources/altases-unfolded/bigbrain/sub-bigbrain_labellist.txt
+    label_nii: resources/atlases-unfolded/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
+    label_list: resources/atlases-unfolded/bigbrain/sub-bigbrain_labellist.txt
   magdeburg:
-    label_nii: resources/altases-unfolded/magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
-    label_list: resources/altases-unfolded/magdeburg/magdeburg_labellist.txt
+    label_nii: resources/atlases-unfolded/magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
+    label_list: resources/atlases-unfolded/magdeburg/magdeburg_labellist.txt
   freesurfer:
-    label_nii: resources/altases-unfolded/freesurfer/sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
-    label_list: resources/altases-unfolded/freesurfer/freesurfer_labellist.txt
+    label_nii: resources/atlases-unfolded/freesurfer/sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
+    label_list: resources/atlases-unfolded/freesurfer/freesurfer_labellist.txt
 
 
 inject_template: upenn
