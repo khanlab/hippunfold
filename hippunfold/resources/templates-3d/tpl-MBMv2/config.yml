@@ -1,0 +1,61 @@
+laplace_labels:
+  hipp:
+    AP: 
+      img: 'tpl-{template}_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz'
+      gm:
+        - 1
+        - 8
+      src:
+        - 5
+      sink:
+        - 6
+    PD:
+      img: 'tpl-{template}_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz'
+      gm:
+        - 1
+        - 8
+      src:
+        - 3
+      sink:
+        - 8   
+    IO:
+      img: 'tpl-{template}_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz'
+      gm:
+        - 1
+        - 8
+      src:
+        - 2
+        - 4
+        - 7
+      sink:
+        - 0 
+  dentate:
+    AP: 
+      img: 'tpl-{template}_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz'
+      gm:
+        - 8
+      src:
+        - 5
+      sink:
+        - 6
+    PD:
+      img: 'tpl-{template}_hemi-{hemi}_space-corobl_desc-tissueDGmanual_dseg.nii.gz'
+      gm:
+        - 8
+      src:
+        - 1
+      sink:
+        - 2   
+    IO:
+      img: 'tpl-{template}_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz'
+      gm:
+        - 8
+      src:
+        - 1 
+      sink:
+        - 2
+        - 4
+        - 7
+        - 0
+
+

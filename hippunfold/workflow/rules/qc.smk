@@ -1,7 +1,8 @@
 rule qc_reg_to_template:
     input:
         ref=lambda wildcards: os.path.join(
-            download_dir,
+            workflow.basedir,
+            "..",
             config["template_files"][config["template"]][wildcards.native_modality],
         ),
         flo=bids(
