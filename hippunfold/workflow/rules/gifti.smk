@@ -462,12 +462,13 @@ rule metric_to_nii:
             label="hipp",
             **config["subj_wildcards"]
         ),
-        refflatnii=os.path.join(
-            download_dir,
-            config["atlas_files"]["multihist7"]["label_nii"],
-        ),
     params:
         interp="-nearest-vertex 1",
+        refflatnii=os.path.join(
+            workflow.basedir,
+            "..",
+            config["atlas_files"]["multihist7"]["label_nii"],
+        ),
     output:
         metric_nii=bids(
             root=work,
@@ -525,24 +526,26 @@ rule unfolded_registration:
             label="hipp",
             **config["subj_wildcards"]
         ),
-        refthickness=lambda wildcards: os.path.join(
-            download_dir,
-            config["atlas_files"][wildcards.atlas]["thick"],
-        ),
-        refcurvature=lambda wildcards: os.path.join(
-            download_dir,
-            config["atlas_files"][wildcards.atlas]["curv"],
-        ),
-        refgyrification=lambda wildcards: os.path.join(
-            download_dir,
-            config["atlas_files"][wildcards.atlas]["gyr"],
-        ),
     params:
         antsparams="-d 2 -t so",
         outsuffix="tmp",
         warpfn="tmp1Warp.nii.gz",
         invwarpfn="tmp1InverseWarp.nii.gz",
-
+        refthickness=lambda wildcards: os.path.join(
+            workflow.basedir,
+            "..",
+            config["atlas_files"][wildcards.atlas]["thick"],
+        ),
+        refcurvature=lambda wildcards: os.path.join(
+            workflow.basedir,
+            "..",
+            config["atlas_files"][wildcards.atlas]["curv"],
+        ),
+        refgyrification=lambda wildcards: os.path.join(
+            workflow.basedir,
+            "..",
+            config["atlas_files"][wildcards.atlas]["gyr"],
+        ),
     output:
         warp=bids(
             root=work,
