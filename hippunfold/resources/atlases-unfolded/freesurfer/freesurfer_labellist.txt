@@ -1,0 +1,88 @@
+alveus
+201 255 204 153 255
+perforant_pathway
+202 255 128 128 255
+parasubiculum
+203 175 175 75  255
+presubiculum
+204 64  0   64  255
+subiculum
+205 0   0   255 255
+CA1
+206 255 0   0   255
+CA2
+207 128 128 255 255
+CA3
+208 0   128 0   255
+CA4
+209 196 160 128 255
+GC-DG
+210 32  200 255 255
+HATA
+211 128 255 128 255
+fimbria
+212 204 153 204 255
+lateral_ventricle
+213 121 17  136 255
+molecular_layer_HP
+214 128 0   0   255
+hippocampal_fissure
+215 128 32  255 255
+entorhinal_cortex
+216 255 204 102 255
+molecular_layer_subiculum
+217 128 128 128 255
+Amygdala
+218 104 255 255 255
+Cerebral_White_Matter
+219 0   226 0   255
+Cerebral_Cortex
+220 205 63  78  255
+Inf_Lat_Vent
+221 197 58  250 255
+Perirhinal
+222 33  150 250 255
+Cerebral_White_Matter_Edge
+223 226 0   0   255
+Background
+224 100 100 100 255
+Ectorhinal
+225 197 150 250 255
+HP_tail
+226 170 170 255 255
+Polymorphic-Layer
+227 128 255 128 255
+Intracellular-Space
+228 204 153 204 255
+HP_body
+231 0 255 0 255
+HP_head
+232 255 0 0 255
+presubiculum-head
+233 32  0   32  255
+presubiculum-body
+234 64  0   64  255
+subiculum-head
+235 0   0   175 255
+subiculum-body
+236 0   0   255 255
+CA1-head
+237 175 75   75   255
+CA1-body
+238 255 0   0   255
+CA3-head
+239 0   80 0   255
+CA3-body
+240 0   128 0   255
+CA4-head
+241 120 90 50 255
+CA4-body
+242 196 160 128 255
+GC-ML-DG-head
+243 75   125 175 255
+GC-ML-DG-body
+244 32  200 255 255
+molecular_layer_HP-head
+245 100 25   25   255
+molecular_layer_HP-body
+246 128 0   0   255
