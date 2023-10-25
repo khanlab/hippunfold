@@ -363,44 +363,43 @@ template: CITI168
 
 template_files:
   CITI168:
-    T1w: resources/templates-3d/CITI168/T1w_head_700um.nii.gz
-    T2w: resources/templates-3d/CITI168/T2w_head_700um.nii.gz
-    xfm_corobl: resources/templates-3d/CITI168/CoronalOblique_rigid.txt
-    crop_ref: resources/templates-3d/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: resources/templates-3d/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    Mask_crop: resources/templates-3d/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+    T1w: templates-3d/CITI168/T1w_head_700um.nii.gz
+    T2w: templates-3d/CITI168/T2w_head_700um.nii.gz
+    xfm_corobl: templates-3d/CITI168/CoronalOblique_rigid.txt
+    crop_ref: templates-3d/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_refT1w: templates-3d/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    Mask_crop: templates-3d/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
   dHCP:
-    T1w: resources/templates-3d/tpl-dHCP/cohort-1/tpl-dHCP_cohort-1_res-1_T1w.nii.gz
-    xfm_corobl: resources/templates-3d/tpl-dHCP/cohort-1/tpl-dHCP_cohort-1_to-corobl_affine.txt
-    crop_ref: resources/templates-3d/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: resources/templates-3d/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    Mask_crop: resources/templates-3d/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+    T1w: templates-3d/tpl-dHCP/cohort-1/tpl-dHCP_cohort-1_res-1_T1w.nii.gz
+    xfm_corobl: templates-3d/tpl-dHCP/cohort-1/tpl-dHCP_cohort-1_to-corobl_affine.txt
+    crop_ref: templates-3d/CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_refT1w: templates-3d/CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    Mask_crop: templates-3d/CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
     upenn:
-    dseg: resources/templates-3d/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
-    coords: resources/templates-3d/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+    dseg: templates-3d/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
+    coords: templates-3d/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
   MBMv2:
-    T1w: resources/templates-3d/tpl-MBMv2/Template_sym_MTR_80um.nii.gz
-    T2w: resources/templates-3d/tpl-MBMv2/Template_sym_T2_80um.nii.gz
-    xfm_corobl: resources/templates-3d/tpl-MBMv2/tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: resources/templates-3d/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: resources/templates-3d/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_MTR.nii.gz
-    Mask_crop: resources/templates-3d/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: resources/templates-3d/tpl-MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: resources/templates-3d/tpl-MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+    T1w: templates-3d/tpl-MBMv2/Template_sym_MTR_80um.nii.gz
+    T2w: templates-3d/tpl-MBMv2/Template_sym_T2_80um.nii.gz
+    xfm_corobl: templates-3d/tpl-MBMv2/tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: templates-3d/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_T2w.nii.gz
+    crop_refT1w: templates-3d/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_MTR.nii.gz
+    Mask_crop: templates-3d/tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: templates-3d/tpl-MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: templates-3d/tpl-MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
   MBMv3:
-    T1w: resources/templates-3d/tpl-MBMv3/tpl-MBMv3_T1w.nii.gz
-    T2w: resources/templates-3d/tpl-MBMv3/tpl-MBMv3_T2w.nii.gz
-    xfm_corobl: resources/templates-3d/tpl-MBMv3/tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: resources/templates-3d/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: resources/templates-3d/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
-    Mask_crop: resources/templates-3d/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: resources/templates-3d/tpl-MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
-    coords: resources/templates-3d/tpl-MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+    T1w: templates-3d/tpl-MBMv3/tpl-MBMv3_T1w.nii.gz
+    T2w: templates-3d/tpl-MBMv3/tpl-MBMv3_T2w.nii.gz
+    xfm_corobl: templates-3d/tpl-MBMv3/tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: templates-3d/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T2w.nii.gz
+    crop_refT1w: templates-3d/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
+    Mask_crop: templates-3d/tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: templates-3d/tpl-MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
+    coords: templates-3d/tpl-MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
   upenn:
-    dseg: resources/templates-3d/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
-    coords: resources/templates-3d/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
-
-
+    T1w: templates-3d/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
+    dseg: templates-3d/tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
+    coords: templates-3d/tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
 
 
 
@@ -409,20 +408,20 @@ atlas:
 
 atlas_files:
   multihist7:
-    label_nii: resources/atlases-unfolded/multihist7/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
-    label_list: resources/atlases-unfolded/multihist7/labellist.txt
-    thick: resources/atlases-unfolded/multihist7/thickness.nii.gz
-    curv: resources/atlases-unfolded/multihist7/curvature.nii.gz
-    gyr: resources/atlases-unfolded/multihist7/gyrification.nii.gz
+    label_nii: atlases-unfolded/multihist7/sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
+    label_list: atlases-unfolded/multihist7/labellist.txt
+    thick: atlases-unfolded/multihist7/thickness.nii.gz
+    curv: atlases-unfolded/multihist7/curvature.nii.gz
+    gyr: atlases-unfolded/multihist7/gyrification.nii.gz
   bigbrain:
-    label_nii: resources/atlases-unfolded/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
-    label_list: resources/atlases-unfolded/bigbrain/sub-bigbrain_labellist.txt
+    label_nii: atlases-unfolded/bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
+    label_list: atlases-unfolded/bigbrain/sub-bigbrain_labellist.txt
   magdeburg:
-    label_nii: resources/atlases-unfolded/magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
-    label_list: resources/atlases-unfolded/magdeburg/magdeburg_labellist.txt
+    label_nii: atlases-unfolded/magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
+    label_list: atlases-unfolded/magdeburg/magdeburg_labellist.txt
   freesurfer:
-    label_nii: resources/atlases-unfolded/freesurfer/sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
-    label_list: resources/atlases-unfolded/freesurfer/freesurfer_labellist.txt
+    label_nii: atlases-unfolded/freesurfer/sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
+    label_list: atlases-unfolded/freesurfer/freesurfer_labellist.txt
 
 
 inject_template: upenn
@@ -461,7 +460,7 @@ modality: T2w
 
 
 
-#these will be downloaded to ~/.cache/hippunfold
+#these will be downloaded to ~/.cache/hippunfold or $HIPPUNFOLD_CACHE_DIR
 nnunet_model:
   T1w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
   T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar'
@@ -471,6 +470,21 @@ nnunet_model:
   T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
   synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
   synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
+
+atlas_files_osf:
+  multihist7: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
+  bigbrain: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
+  magdeburg: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
+  freesurfer: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
+#https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
+
+template_files_osf:
+  CITI168: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
+  dHCP: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
+  MBMv2: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0887852d133ca597dd/?zip='
+  MBMv3: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
+  upenn: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
+#https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 crop_native_box: '256x256x256vox'
 crop_native_res: '0.2x0.2x0.2mm'
