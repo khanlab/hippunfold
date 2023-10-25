@@ -40,7 +40,8 @@ rule warp_seg_to_corobl_crop:
             type_="itk"
         ),
         ref=os.path.join(
-            download_dir,
+            workflow.basedir,
+            "..",
             config["template_files"][config["template"]]["crop_ref"],
         ),
     output:
