@@ -90,7 +90,7 @@ rule reg_to_template:
             suffix="T1w.nii.gz"
         ),
         ref=os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]]["T1w"]
+            download_dir, config["template_files"][config["template"]]["T1w"]
         ),
         xfm_identity=os.path.join(workflow.basedir, "..", config["xfm_identity"]),
     params:
@@ -167,8 +167,7 @@ rule compose_template_xfm_corobl:
             type_="itk"
         ),
         std_to_cor=os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["template_files"][config["template"]]["xfm_corobl"],
         ),
     output:
