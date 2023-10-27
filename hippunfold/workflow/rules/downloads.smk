@@ -26,22 +26,30 @@ rule download_model:
 
 rule download_atlas:
     params:
-        url=config["atlas_files_osf"][config["atlas"]],
+        url=lambda wildcards: config["atlas_files_osf"][wildcards.atlas],
     output:
-        model_zip=os.path.join(download_dir,config["atlas"]+'.zip')
+        model_zip=os.path.join(download_dir,"{atlas}"+'.zip')
     container:
         config["singularity"]["autotop"]
     shell:
         "wget https://{params.url} -O {output.model_zip}"
 
 
+def atlas_outs():
+    outs = []
+    for a in config["atlas"]:
+        for fn in config["atlas_files"][a]:
+            outs.append(os.path.join(download_dir,config["atlas_files"][a][fn]))
+    return outs
+
 rule unzip_atlas:
     input:
-        model_zip=os.path.join(download_dir,config["atlas"]+'.zip'),
+        model_zip=lambda wildcards: os.path.join(download_dir,"{wildcards.atlas}"+'.zip'),
+        atlas=config["atlas"],
     params:
         dir=download_dir,
     output:
-        os.path.join(download_dir,config["atlas_files"][config["atlas"]]["label_nii"])
+        atlas_outs(),
     shell:
         "unzip {input.model_zip} -d {params.dir}"
 
