@@ -257,7 +257,7 @@ rule reg_t2_to_template:
             desc="preproc"
         ),
         ref=os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]]["T2w"]
+            download_dir, config["template_files"][config["template"]]["T2w"]
         ),
         xfm_identity=os.path.join(workflow.basedir, "..", config["xfm_identity"]),
     params:
@@ -348,8 +348,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         # xfm1: template to corobl
         std_to_cor = (
             os.path.join(
-                workflow.basedir,
-                "..",
+                download_dir,
                 config["template_files"][config["template"]]["xfm_corobl"],
             ),
         )
