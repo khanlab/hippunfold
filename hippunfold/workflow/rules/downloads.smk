@@ -10,7 +10,6 @@ def get_model_tar():
 
     return os.path.abspath(os.path.join(download_dir, local_tar.split("/")[-1]))
 
-
 rule download_model:
     params:
         url=config["nnunet_model"][config["force_nnunet_model"]]
@@ -34,6 +33,16 @@ rule download_atlas:
     shell:
         "wget https://{params.url} -O {output.model_zip}"
 
+rule download_template:
+    params:
+        url=lambda wildcards: config["template_files_osf"][wildcards.atlas],
+    output:
+        model_zip=os.path.join(download_dir,"{template}"+'.zip')
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "wget https://{params.url} -O {output.model_zip}"
+
 
 def atlas_outs():
     outs = []
@@ -42,35 +51,44 @@ def atlas_outs():
             outs.append(os.path.join(download_dir,config["atlas_files"][a][fn]))
     return outs
 
-rule unzip_atlas:
-    input:
-        model_zip=lambda wildcards: os.path.join(download_dir,"{wildcards.atlas}"+'.zip'),
-        atlas=config["atlas"],
-    params:
-        dir=download_dir,
-    output:
-        atlas_outs(),
-    shell:
-        "unzip {input.model_zip} -d {params.dir}"
-
-
-rule download_template:
-    params:
-        url=config["template_files_osf"][config["template"]],
-    output:
-        model_zip=os.path.join(download_dir,config["template"]+'.zip')
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "wget https://{params.url} -O {output.model_zip}"
+def template_outs():
+    outs = []
+    for fn in config["template_files"][config["template"]]:
+        outs.append(os.path.join(download_dir,config["template_files"][config["template"]][fn]))
+    return outs
 
 
 rule unzip_template:
     input:
-        model_zip=os.path.join(download_dir,config["template"]+'.zip'),
+        model_zip=os.path.join(download_dir,"{template}"+'.zip'),
     params:
         dir=download_dir,
     output:
-        os.path.join(download_dir,config["template_files"][config["template"]]["T1w"])
+        template_outs(),
     shell:
         "unzip {input.model_zip} -d {params.dir}"
+
+rule unzip_atlas:
+    input:
+        model_zip=os.path.join(download_dir,"{atlas}"+'.zip'),
+    params:
+        dir=download_dir,
+    output:
+        atlas_outs()
+    shell:
+        "unzip {input.model_zip} -d {params.dir}"
+
+
+rule unzip_template_shape:
+    input:
+        model_zip=os.path.join(download_dir,config["inject_template"]+'.zip'),
+    params:
+        dir=download_dir,
+    output:
+        template_seg=os.path.join(
+            download_dir,
+            config["template_files"][config["inject_template"]]["dseg"],
+        )
+    shell:
+        "unzip {input.model_zip} -d {params.dir}"
+    
