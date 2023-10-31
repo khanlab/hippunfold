@@ -176,7 +176,7 @@ def get_f3d_ref(wildcards):
     if config["modality"] == "T2w":
         nii = (
             os.path.join(
-                download_dir
+                download_dir,
                 config["template_files"][config["template"]]["crop_ref"],
             ),
         )
