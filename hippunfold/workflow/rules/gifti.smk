@@ -462,13 +462,12 @@ rule metric_to_nii:
             label="hipp",
             **config["subj_wildcards"]
         ),
-    params:
-        interp="-nearest-vertex 1",
         refflatnii=os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["atlas_files"]["multihist7"]["label_nii"],
         ),
+    params:
+        interp="-nearest-vertex 1",
     output:
         metric_nii=bids(
             root=work,
@@ -526,26 +525,24 @@ rule unfolded_registration:
             label="hipp",
             **config["subj_wildcards"]
         ),
+        refthickness=lambda wildcards: os.path.join(
+            download_dir,
+            config["atlas_files"][wildcards.atlas]["thick"],
+        ),
+        refcurvature=lambda wildcards: os.path.join(
+            download_dir,
+            config["atlas_files"][wildcards.atlas]["curv"],
+        ),
+        refgyrification=lambda wildcards: os.path.join(
+            download_dir,
+            config["atlas_files"][wildcards.atlas]["gyr"],
+        ),
     params:
         antsparams="-d 2 -t so",
         outsuffix="tmp",
         warpfn="tmp1Warp.nii.gz",
         invwarpfn="tmp1InverseWarp.nii.gz",
-        refthickness=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["thick"],
-        ),
-        refcurvature=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["curv"],
-        ),
-        refgyrification=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["gyr"],
-        ),
+
     output:
         warp=bids(
             root=work,
@@ -1058,7 +1055,7 @@ rule resample_atlas_to_refvol:
     """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
         atlas=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
+            download_dir, config["atlas_files"][wildcards.atlas]["label_nii"]
         ),
         refvol=bids(
             root=root,
