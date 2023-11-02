@@ -130,7 +130,7 @@ def get_tissue_atlas_remapping(wildcards):
 
     for label in mapping["tissue"].keys():
         in_label = mapping["tissue"][label]
-        out_label = mapping[wildcards.atlas][label]
+        out_label = mapping[config["atlas"]][label]
 
         remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
 

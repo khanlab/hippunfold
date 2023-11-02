@@ -1,8 +1,7 @@
 rule qc_reg_to_template:
     input:
         ref=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["template_files"][config["template"]][wildcards.native_modality],
         ),
         flo=bids(
@@ -52,12 +51,7 @@ rule get_subfield_vols_subj:
             allow_missing=True,
         ),
         lookup_tsv=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "atlases-unfolded",
-            "{atlas}",
-            "desc-subfields_atlas-{atlas}_dseg.tsv",
+            download_dir, config["atlas_files"][config["atlas"]]["subfields_list"]
         ),
     group:
         "subj"
