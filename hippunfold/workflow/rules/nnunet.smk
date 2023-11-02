@@ -2,6 +2,32 @@ import re
 from appdirs import AppDirs
 
 
+def get_model_tar():
+    if config["force_nnunet_model"]:
+        model_name = config["force_nnunet_model"]
+    else:
+        model_name = config["modality"]
+
+    local_tar = config["nnunet_model"].get(model_name, None)
+    if local_tar == None:
+        print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
+
+    return os.path.abspath(os.path.join(download_dir, local_tar.split("/")[-1]))
+
+
+rule download_model:
+    params:
+        url=config["nnunet_model"][config["force_nnunet_model"]]
+        if config["force_nnunet_model"]
+        else config["nnunet_model"][config["modality"]],
+    output:
+        model_tar=get_model_tar(),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "wget https://{params.url} -O {output.model_tar}"
+
+
 def get_nnunet_input(wildcards):
     if config["modality"] == "T2w":
         nii = (
