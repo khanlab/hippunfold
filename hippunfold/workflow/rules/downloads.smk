@@ -97,7 +97,7 @@ rule unzip_atlas:
     input:
         model_zip=os.path.join(download_dir,config["atlas"]+'.zip'),
     params:
-        dir=os.path.join(download_dir,config["template"])
+        dir=os.path.join(download_dir,config["atlas"])
     output:
         atlas_outs()
     shell:
