@@ -87,7 +87,7 @@ rule unzip_template:
     input:
         model_zip=os.path.join(download_dir,config["template"]+'.zip'),
     params:
-        dir=download_dir,
+        dir=os.path.join(download_dir,config["template"])
     output:
         template_outs(),
     shell:
@@ -97,7 +97,7 @@ rule unzip_atlas:
     input:
         model_zip=os.path.join(download_dir,config["atlas"]+'.zip'),
     params:
-        dir=download_dir,
+        dir=os.path.join(download_dir,config["template"])
     output:
         atlas_outs()
     shell:
@@ -108,7 +108,7 @@ rule unzip_template_shape:
     input:
         model_zip=os.path.join(download_dir,config["inject_template"]+'.zip'),
     params:
-        dir=download_dir,
+        dir=os.path.join(download_dir,config["inject_template"])
     output:
         template_shape_outs()
     shell:
