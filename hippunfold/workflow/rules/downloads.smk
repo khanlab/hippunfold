@@ -25,9 +25,9 @@ rule download_model:
 
 rule download_atlas:
     params:
-        url=config["atlas_links_osf"][config["atlas"][0]],
+        url=config["atlas_links_osf"][config["atlas"]],
     output:
-        model_zip=os.path.join(download_dir,config["atlas"][0]+'.zip')
+        model_zip=os.path.join(download_dir,config["atlas"]+'.zip')
     container:
         config["singularity"]["autotop"]
     shell:
@@ -57,11 +57,10 @@ rule download_template_shape:
 
 def atlas_outs():
     outs = []
-    for a in config["atlas"]:
-        for fn in config["atlas_files"][a]:
-            for hemi in ['L','R']:
-                outs.append(download_dir + '/' +
-                    expand(config["atlas_files"][a][fn],hemi=hemi)[0])
+    for fn in config["atlas_files"][config["atlas"]]:
+        for hemi in ['L','R']:
+            outs.append(download_dir + '/' +
+                expand(config["atlas_files"][config["atlas"]][fn],hemi=hemi)[0])
     return list(dict.fromkeys(outs))
 
 def template_outs():
@@ -96,7 +95,7 @@ rule unzip_template:
 
 rule unzip_atlas:
     input:
-        model_zip=os.path.join(download_dir,config["atlas"][0]+'.zip'),
+        model_zip=os.path.join(download_dir,config["atlas"]+'.zip'),
     params:
         dir=download_dir,
     output:

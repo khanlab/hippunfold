@@ -225,8 +225,7 @@ parse_args:
       - 'magdeburg'
       - 'freesurfer'
       - 'multihist7'
-    default: 
-      - 'multihist7'
+    default: 'multihist7'
     nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
@@ -403,8 +402,7 @@ template_files:
 
 
 
-atlas: 
-  - multihist7
+atlas: multihist7
 
 atlas_files:
   multihist7:
