@@ -51,12 +51,8 @@ rule get_subfield_vols_subj:
             allow_missing=True,
         ),
         lookup_tsv=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "atlases-unfolded",
-            "{atlas}",
-            "desc-subfields_atlas-{atlas}_dseg.tsv",
+            download_dir,
+            config["atlas_files"][config["atlas"][0]]["label_list"]
         ),
     group:
         "subj"

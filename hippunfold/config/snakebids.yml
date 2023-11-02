@@ -471,14 +471,14 @@ nnunet_model:
   synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
   synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
 
-atlas_files_osf:
+atlas_links_osf:
   multihist7: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
   bigbrain: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
   magdeburg: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
   freesurfer: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
 #https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
-template_files_osf:
+template_links_osf:
   CITI168: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
   dHCP: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
   MBMv2: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0887852d133ca597dd/?zip='

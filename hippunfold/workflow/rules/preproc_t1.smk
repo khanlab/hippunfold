@@ -272,13 +272,11 @@ rule warp_t1_to_corobl_crop:
             type_="itk"
         ),
         ref=os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["template_files"][config["template"]]["crop_ref"],
         ),
         std_to_cor=os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["template_files"][config["template"]]["xfm_corobl"],
         ),
     output:
