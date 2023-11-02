@@ -118,10 +118,9 @@ work = os.path.join(config["root"], "work")
 
 include: "rules/common.smk"
 include: "rules/preproc_t1.smk"
-
-
 # include rules only as they are needed..
 include: "rules/downloads.smk"
+
 
 if config["modality"] == "segT1w" or config["modality"] == "segT2w":
 

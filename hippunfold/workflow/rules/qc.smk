@@ -51,8 +51,7 @@ rule get_subfield_vols_subj:
             allow_missing=True,
         ),
         lookup_tsv=os.path.join(
-            download_dir,
-            config["atlas_files"][config["atlas"]]["subfields_list"]
+            download_dir, config["atlas_files"][config["atlas"]]["subfields_list"]
         ),
     group:
         "subj"
