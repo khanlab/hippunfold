@@ -419,8 +419,7 @@ rule warp_t2_to_corobl_crop:
         ),
         xfm=get_xfm_to_corobl(),
         ref=os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["template_files"][config["template"]]["crop_ref"],
         ),
     output:
