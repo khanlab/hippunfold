@@ -542,7 +542,6 @@ rule unfolded_registration:
         outsuffix="tmp",
         warpfn="tmp1Warp.nii.gz",
         invwarpfn="tmp1InverseWarp.nii.gz",
-
     output:
         warp=bids(
             root=work,

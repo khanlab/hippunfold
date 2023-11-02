@@ -259,7 +259,9 @@ displace_to_unfold_vec = uvw_phys - native_coords_phys
 summary("displace_to_unfold_vec", displace_to_unfold_vec)
 
 # create new shape as 5d vector image in native space
-native_map_shape = np.ones(5,)
+native_map_shape = np.ones(
+    5,
+)
 native_map_shape[:3] = mask.shape
 native_map_shape[-1] = 3
 
