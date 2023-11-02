@@ -2,6 +2,32 @@ import re
 from appdirs import AppDirs
 
 
+def get_model_tar():
+    if config["force_nnunet_model"]:
+        model_name = config["force_nnunet_model"]
+    else:
+        model_name = config["modality"]
+
+    local_tar = config["nnunet_model"].get(model_name, None)
+    if local_tar == None:
+        print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
+
+    return os.path.abspath(os.path.join(download_dir, local_tar.split("/")[-1]))
+
+
+rule download_model:
+    params:
+        url=config["nnunet_model"][config["force_nnunet_model"]]
+        if config["force_nnunet_model"]
+        else config["nnunet_model"][config["modality"]],
+    output:
+        model_tar=get_model_tar(),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "wget https://{params.url} -O {output.model_tar}"
+
+
 def get_nnunet_input(wildcards):
     if config["modality"] == "T2w":
         nii = (
@@ -41,27 +67,6 @@ def get_nnunet_input(wildcards):
     return nii
 
 
-def get_model_tar():
-
-    if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
-        download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
-    else:
-        # create local download dir if it doesn't exist
-        dirs = AppDirs("hippunfold", "khanlab")
-        download_dir = dirs.user_cache_dir
-
-    if config["force_nnunet_model"]:
-        model_name = config["force_nnunet_model"]
-    else:
-        model_name = config["modality"]
-
-    local_tar = config["nnunet_model"].get(model_name, None)
-    if local_tar == None:
-        print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
-
-    return os.path.abspath(os.path.join(download_dir, local_tar.split("/")[-1]))
-
-
 def parse_task_from_tar(wildcards, input):
     match = re.search("Task[0-9]{3}_[\w]+", input.model_tar)
     if match:
@@ -87,19 +92,6 @@ def parse_trainer_from_tar(wildcards, input):
     else:
         raise ValueError("cannot parse chkpnt from model tar")
     return trainer
-
-
-rule download_model:
-    params:
-        url=config["nnunet_model"][config["force_nnunet_model"]]
-        if config["force_nnunet_model"]
-        else config["nnunet_model"][config["modality"]],
-    output:
-        model_tar=get_model_tar(),
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "wget https://{params.url} -O {output}"
 
 
 rule run_inference:
@@ -210,16 +202,14 @@ def get_f3d_ref(wildcards):
     if config["modality"] == "T2w":
         nii = (
             os.path.join(
-                workflow.basedir,
-                "..",
+                download_dir,
                 config["template_files"][config["template"]]["crop_ref"],
             ),
         )
     elif config["modality"] == "T1w":
         nii = (
             os.path.join(
-                workflow.basedir,
-                "..",
+                download_dir,
                 config["template_files"][config["template"]]["crop_refT1w"],
             ),
         )
@@ -309,8 +299,7 @@ rule qc_nnunet_dice:
             hemi="{hemi}"
         ),
         ref=os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["template_files"][config["template"]]["Mask_crop"],
         ),
     params:

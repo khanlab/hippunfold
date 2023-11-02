@@ -462,13 +462,12 @@ rule metric_to_nii:
             label="hipp",
             **config["subj_wildcards"]
         ),
-    params:
-        interp="-nearest-vertex 1",
         refflatnii=os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["atlas_files"]["multihist7"]["label_nii"],
         ),
+    params:
+        interp="-nearest-vertex 1",
     output:
         metric_nii=bids(
             root=work,
@@ -486,7 +485,7 @@ rule metric_to_nii:
     group:
         "subj"
     shell:
-        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.unfoldedsurf} {params.refflatnii} {output.metric_nii} {params.interp}"
+        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.unfoldedsurf} {input.refflatnii} {output.metric_nii} {params.interp}"
 
 
 rule unfolded_registration:
@@ -526,26 +525,23 @@ rule unfolded_registration:
             label="hipp",
             **config["subj_wildcards"]
         ),
+        refthickness=lambda wildcards: os.path.join(
+            download_dir,
+            config["atlas_files"][wildcards.atlas]["thick"],
+        ),
+        refcurvature=lambda wildcards: os.path.join(
+            download_dir,
+            config["atlas_files"][wildcards.atlas]["curv"],
+        ),
+        refgyrification=lambda wildcards: os.path.join(
+            download_dir,
+            config["atlas_files"][wildcards.atlas]["gyr"],
+        ),
     params:
         antsparams="-d 2 -t so",
         outsuffix="tmp",
         warpfn="tmp1Warp.nii.gz",
         invwarpfn="tmp1InverseWarp.nii.gz",
-        refthickness=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["thick"],
-        ),
-        refcurvature=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["curv"],
-        ),
-        refgyrification=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["gyr"],
-        ),
     output:
         warp=bids(
             root=work,
@@ -593,7 +589,7 @@ rule unfolded_registration:
         mem_mb=16000,
         time=10,
     shell:
-        "antsRegistrationSyNQuick.sh {params.antsparams} -f {params.refthickness} -f {params.refcurvature} -f {params.refgyrification} -m {input.thickness} -m {input.curvature} -m {input.gyrification} -o {params.outsuffix} &> {log} && "
+        "antsRegistrationSyNQuick.sh {params.antsparams} -f {input.refthickness} -f {input.refcurvature} -f {input.refgyrification} -m {input.thickness} -m {input.curvature} -m {input.gyrification} -o {params.outsuffix} &> {log} && "
         "cp {params.warpfn} {output.warp} && "
         "cp {params.invwarpfn} {output.invwarp}"
 
@@ -1057,8 +1053,8 @@ rule calculate_thickness_from_surface2:
 rule resample_atlas_to_refvol:
     """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
-        atlas=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
+        atlas=os.path.join(
+            download_dir, config["atlas_files"][config["atlas"]]["label_nii"]
         ),
         refvol=bids(
             root=root,
@@ -1117,8 +1113,7 @@ rule nii_to_label_gii:
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
         label_list=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["atlas_files"][wildcards.atlas]["label_list"],
         ),
     params:
