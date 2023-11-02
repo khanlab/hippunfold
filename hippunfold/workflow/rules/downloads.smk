@@ -25,9 +25,9 @@ rule download_model:
 
 rule download_atlas:
     params:
-        url=lambda wildcards: config["atlas_files_osf"][wildcards.atlas],
+        url=config["atlas_links_osf"][config["atlas"][0]],
     output:
-        model_zip=os.path.join(download_dir,"{atlas}"+'.zip')
+        model_zip=os.path.join(download_dir,config["atlas"][0]+'.zip')
     container:
         config["singularity"]["autotop"]
     shell:
@@ -35,9 +35,20 @@ rule download_atlas:
 
 rule download_template:
     params:
-        url=lambda wildcards: config["template_files_osf"][wildcards.atlas],
+        url=config["template_links_osf"][config["template"]],
     output:
-        model_zip=os.path.join(download_dir,"{template}"+'.zip')
+        model_zip=os.path.join(download_dir,config["template"]+'.zip')
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "wget https://{params.url} -O {output.model_zip}"
+
+
+rule download_template_shape:
+    params:
+        url=config["template_links_osf"][config["inject_template"]],
+    output:
+        model_zip=os.path.join(download_dir,config["inject_template"]+'.zip')
     container:
         config["singularity"]["autotop"]
     shell:
@@ -48,19 +59,34 @@ def atlas_outs():
     outs = []
     for a in config["atlas"]:
         for fn in config["atlas_files"][a]:
-            outs.append(os.path.join(download_dir,config["atlas_files"][a][fn]))
-    return outs
+            for hemi in ['L','R']:
+                outs.append(download_dir + '/' +
+                    expand(config["atlas_files"][a][fn],hemi=hemi)[0])
+    return list(dict.fromkeys(outs))
 
 def template_outs():
     outs = []
     for fn in config["template_files"][config["template"]]:
-        outs.append(os.path.join(download_dir,config["template_files"][config["template"]][fn]))
-    return outs
+        for hemi in ['L','R']:
+            for dir in ['AP','PD','IO']:
+                outs.append(download_dir + '/' +
+                    expand(config["template_files"][config["template"]][fn],hemi=hemi,dir=dir)[0])
+    return list(dict.fromkeys(outs))
+
+def template_shape_outs():
+    outs = []
+    for fn in config["template_files"][config["inject_template"]]:
+        for hemi in ['L','R']:
+            for dir in ['AP','PD','IO']:
+                for autotop in ['hipp','dentate']:
+                    outs.append(download_dir + '/' +
+                        expand(config["template_files"][config["inject_template"]][fn],hemi=hemi,dir=dir,autotop=autotop)[0])
+    return list(dict.fromkeys(outs))
 
 
 rule unzip_template:
     input:
-        model_zip=os.path.join(download_dir,"{template}"+'.zip'),
+        model_zip=os.path.join(download_dir,config["template"]+'.zip'),
     params:
         dir=download_dir,
     output:
@@ -70,7 +96,7 @@ rule unzip_template:
 
 rule unzip_atlas:
     input:
-        model_zip=os.path.join(download_dir,"{atlas}"+'.zip'),
+        model_zip=os.path.join(download_dir,config["atlas"][0]+'.zip'),
     params:
         dir=download_dir,
     output:
@@ -85,10 +111,7 @@ rule unzip_template_shape:
     params:
         dir=download_dir,
     output:
-        template_seg=os.path.join(
-            download_dir,
-            config["template_files"][config["inject_template"]]["dseg"],
-        )
+        template_shape_outs()
     shell:
         "unzip {input.model_zip} -d {params.dir}"
     

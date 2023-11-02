@@ -485,7 +485,7 @@ rule metric_to_nii:
     group:
         "subj"
     shell:
-        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.unfoldedsurf} {params.refflatnii} {output.metric_nii} {params.interp}"
+        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.unfoldedsurf} {input.refflatnii} {output.metric_nii} {params.interp}"
 
 
 rule unfolded_registration:
@@ -590,7 +590,7 @@ rule unfolded_registration:
         mem_mb=16000,
         time=10,
     shell:
-        "antsRegistrationSyNQuick.sh {params.antsparams} -f {params.refthickness} -f {params.refcurvature} -f {params.refgyrification} -m {input.thickness} -m {input.curvature} -m {input.gyrification} -o {params.outsuffix} &> {log} && "
+        "antsRegistrationSyNQuick.sh {params.antsparams} -f {input.refthickness} -f {input.refcurvature} -f {input.refgyrification} -m {input.thickness} -m {input.curvature} -m {input.gyrification} -o {params.outsuffix} &> {log} && "
         "cp {params.warpfn} {output.warp} && "
         "cp {params.invwarpfn} {output.invwarp}"
 
@@ -1114,8 +1114,7 @@ rule nii_to_label_gii:
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
         label_list=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
+            download_dir,
             config["atlas_files"][wildcards.atlas]["label_list"],
         ),
     params:
