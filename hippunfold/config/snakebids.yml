@@ -351,7 +351,6 @@ cifti_metric_types:
 
 
 
-
 #--- workflow specific configuration -- 
 
 singularity:
@@ -369,38 +368,36 @@ template_files:
     crop_refT1w: CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
   dHCP:
-    T1w: tpl-dHCP/cohort-1/tpl-dHCP_cohort-1_res-1_T1w.nii.gz
-    xfm_corobl: tpl-dHCP/cohort-1/tpl-dHCP_cohort-1_to-corobl_affine.txt
+    T1w: dHCP/cohort-1/tpl-dHCP_cohort-1_res-1_T1w.nii.gz
+    xfm_corobl: dHCP/cohort-1/tpl-dHCP_cohort-1_to-corobl_affine.txt
     crop_ref: CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
     upenn:
-    dseg: tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
-    coords: tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+    dseg: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
+    coords: upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
   MBMv2:
-    T1w: tpl-MBMv2/Template_sym_MTR_80um.nii.gz
-    T2w: tpl-MBMv2/Template_sym_T2_80um.nii.gz
-    xfm_corobl: tpl-MBMv2/tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_MTR.nii.gz
-    Mask_crop: tpl-MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+    T1w: MBMv2/Template_sym_MTR_80um.nii.gz
+    T2w: MBMv2/Template_sym_T2_80um.nii.gz
+    xfm_corobl: MBMv2/tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_T2w.nii.gz
+    crop_refT1w: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_MTR.nii.gz
+    Mask_crop: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
   MBMv3:
-    T1w: tpl-MBMv3/tpl-MBMv3_T1w.nii.gz
-    T2w: tpl-MBMv3/tpl-MBMv3_T2w.nii.gz
-    xfm_corobl: tpl-MBMv3/tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
-    coords: tpl-MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+    T1w: MBMv3/tpl-MBMv3_T1w.nii.gz
+    T2w: MBMv3/tpl-MBMv3_T2w.nii.gz
+    xfm_corobl: MBMv3/tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T2w.nii.gz
+    crop_refT1w: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
+    Mask_crop: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
+    coords: MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
   upenn:
-    T1w: tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
-    dseg: tpl-upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
-    coords: tpl-upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
-
-
+    T1w: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
+    dseg: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
+    coords: upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
 
 atlas: multihist7
 
@@ -470,19 +467,19 @@ nnunet_model:
   synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
 
 atlas_links_osf:
-  multihist7: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
-  bigbrain: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
-  magdeburg: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
-  freesurfer: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
-#https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
+  multihist7: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
+  bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
+  magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
+  freesurfer: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
+#to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 template_links_osf:
-  CITI168: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
-  dHCP: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
-  MBMv2: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0887852d133ca597dd/?zip='
-  MBMv3: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
-  upenn: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
-#https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
+  CITI168: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
+  dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
+  MBMv2: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0887852d133ca597dd/?zip='
+  MBMv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
+  upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
+#to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 crop_native_box: '256x256x256vox'
 crop_native_res: '0.2x0.2x0.2mm'
