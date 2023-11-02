@@ -226,7 +226,6 @@ parse_args:
       - 'freesurfer'
       - 'multihist7'
     default: 'multihist7'
-    nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
