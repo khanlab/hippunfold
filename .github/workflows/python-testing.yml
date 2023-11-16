@@ -11,21 +11,23 @@ on:
 #    branches: [ main ]
 
 jobs:
-  
   quality:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repo
         uses: actions/checkout@master
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: "3.8"
+
       - uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-3.8
           restore-keys: ${{ runner.os }}-pip-3.8
+
       - name: Install non-python dependencies
         run: |
           sudo apt-get install -y graphviz-dev
@@ -37,6 +39,7 @@ jobs:
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
+
       - name: Disable Poetry modern installation
         run: |
           poetry config installer.modern-installation false
@@ -71,124 +74,141 @@ jobs:
         run: poetry run black hippunfold --check
       - name: snakefmt
         run: poetry run snakefmt hippunfold --check
- 
-  test:
 
+  test:
     runs-on: ubuntu-latest
-    needs: [ 'quality'  ]
+    needs: ["quality"]
     strategy:
       matrix:
-        python-version: ['3.8']
+        python-version: ["3.8"]
+
     steps:
-    - uses: actions/checkout@master
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ matrix.python-version }}
-        restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}
-    - name: Install non-python dependencies
-      run: |
-        sudo apt-get install -y graphviz-dev
-    #----------------------------------------------
-    #  -----  install & configure poetry  -----
-    #----------------------------------------------
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-    - name: Disable Poetry modern installation
-      run: |
-        poetry config installer.modern-installation false
-    #----------------------------------------------
-    #       load cached venv if cache exists
-    #----------------------------------------------
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-${{ matrix.python-version }}
-    #----------------------------------------------
-    # install dependencies if cache does not exist
-    #----------------------------------------------
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root
-    #----------------------------------------------
-    # install your root project, if required
-    #----------------------------------------------
-    - name: Install library
-      run: poetry install --no-interaction
-    - name: Set-up env for hippunfold 
-      run: |
-        echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models" >> $GITHUB_ENV
-    - name: Test single T2w bids
-      run: |
-        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w
-    - name: Test running on existing folder
-      run: |
-        mkdir test_newout
-        poetry run hippunfold test_data/bids_singleT2w test_newout participant -np --modality T2w
-    - name: Test single T2w bids, right hemi
-      run: |
-        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
-    - name: Test single T2w bids, left hemi
-      run: |
-        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
-    - name: Test multiple T2w bids
-      run: |
-        poetry run hippunfold test_data/bids_multiT2w test_out participant -np --modality T2w
-    - name: Test T1w bids
-      run: |
-        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w
-    - name: Test hipp b500 bids
-      run: |
-        poetry run hippunfold test_data/bids_hippb500 test_out participant -np --modality hippb500
-    - name: Test T1w multi-session/longitudinal bids
-      run: |
-        poetry run hippunfold test_data/bids_T1w_longitudinal test_out participant -np --modality T1w
-    - name: Test single T2w multi-session/longitudinal bids
-      run: |
-        poetry run hippunfold test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w
-    - name: Test manual seg T2w bids
-      run: |
-        poetry run hippunfold test_data/bids_segT2w test_out participant -np --modality segT2w
-    - name: Test cropseg bids, with path override
-      run: |
-        poetry run hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
-    - name: Test cropseg bids, with path override, left hemi
-      run: | 
-        poetry run hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
-    - name: Test T2w with T1w template registration
-      run: |
-        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
-    - name: Test T2w with T1w output space 
-      run: |
-        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
-    - name: Test modality T2w with myelin map
-      run: |
-        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --generate-myelin-map
-    - name: Test modality T1w with myelin map
-      run: |
-        poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
-    - name: Test modality T1w with magdeburg atlas
-      run: |
-        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas magdeburg
-    - name: Test modality T1w with freesurfer atlas
-      run: |
-        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas freesurfer
-    - name: Test modality T1w with bigbrain and freesurfer atlas
-      run: |
-        poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas bigbrain freesurfer
+      - uses: actions/checkout@master
 
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
 
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+          restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}
 
+      - name: Install non-python dependencies
+        run: |
+          sudo apt-get install -y graphviz-dev
+      #----------------------------------------------
+      #  -----  install & configure poetry  -----
+      #----------------------------------------------
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
+      - name: Disable Poetry modern installation
+        run: |
+          poetry config installer.modern-installation false
+      #----------------------------------------------
+      #       load cached venv if cache exists
+      #----------------------------------------------
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}-${{ matrix.python-version }}
+      #----------------------------------------------
+      # install dependencies if cache does not exist
+      #----------------------------------------------
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      #----------------------------------------------
+      # install your root project, if required
+      #----------------------------------------------
+      - name: Install library
+        run: poetry install --no-interaction
 
+      - name: Set-up env for hippunfold
+        run: |
+          echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models" >> $GITHUB_ENV
 
+      - name: Test single T2w bids
+        run: |
+          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w
 
+      - name: Test running on existing folder
+        run: |
+          mkdir test_newout
+          poetry run hippunfold test_data/bids_singleT2w test_newout participant -np --modality T2w
+
+      - name: Test single T2w bids, right hemi
+        run: |
+          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
+
+      - name: Test single T2w bids, left hemi
+        run: |
+          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
+
+      - name: Test multiple T2w bids
+        run: |
+          poetry run hippunfold test_data/bids_multiT2w test_out participant -np --modality T2w
+
+      - name: Test T1w bids
+        run: |
+          poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w
+
+      - name: Test hipp b500 bids
+        run: |
+          poetry run hippunfold test_data/bids_hippb500 test_out participant -np --modality hippb500
+
+      - name: Test T1w multi-session/longitudinal bids
+        run: |
+          poetry run hippunfold test_data/bids_T1w_longitudinal test_out participant -np --modality T1w
+
+      - name: Test single T2w multi-session/longitudinal bids
+        run: |
+          poetry run hippunfold test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w
+
+      - name: Test manual seg T2w bids
+        run: |
+          poetry run hippunfold test_data/bids_segT2w test_out participant -np --modality segT2w
+
+      - name: Test cropseg bids, with path override
+        run: |
+          poetry run hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
+
+      - name: Test cropseg bids, with path override, left hemi
+        run: |
+          poetry run hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
+
+      - name: Test T2w with T1w template registration
+        run: |
+          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
+
+      - name: Test T2w with T1w output space
+        run: |
+          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
+
+      - name: Test modality T2w with myelin map
+        run: |
+          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --generate-myelin-map
+
+      - name: Test modality T1w with myelin map
+        run: |
+          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
+
+      - name: Test modality T1w with magdeburg atlas
+        run: |
+          poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas magdeburg
+
+      - name: Test modality T1w with freesurfer atlas
+        run: |
+          poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas freesurfer
+
+      - name: Test modality T1w with bigbrain and freesurfer atlas
+        run: |
+          poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w --atlas bigbrain freesurfer

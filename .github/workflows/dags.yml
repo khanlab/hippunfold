@@ -33,6 +33,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install non-python dependencies
         run: |
           sudo apt-get install -y graphviz-dev graphviz
@@ -41,10 +42,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install snakebids
 
-      - name: Set-up env for hippunfold 
+      - name: Set-up env for hippunfold
         run: |
           echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models" >> $GITHUB_ENV
           echo "HIPPUNFOLD=./hippunfold/run.py" >> $GITHUB_ENV
+
       - name: Generate rulegraph single T2w bids
         run: |
           $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --rulegraph | dot -Tsvg > docs/images/rulegraph_T2w.svg
@@ -55,12 +57,9 @@ jobs:
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git diff-index --quiet HEAD || git add docs/images || commit -m "Add updated dags [skip ci]" 
+          git diff-index --quiet HEAD || git add docs/images || commit -m "Add updated dags [skip ci]"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-
-
