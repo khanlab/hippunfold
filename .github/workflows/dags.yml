@@ -1,31 +1,26 @@
+---
 name: Generate DAG visualizations
-
 on:
   workflow_dispatch:
     inputs:
-      author:
-        description: "Author"
-        required: true
-        default: "github-actions[bot] (user publishing release)"
-      date:
-        description: "Date"
-        required: true
-        default: "YYYY-MM-DD"
       comments:
         description: "Comments"
 
 jobs:
   generate_dag:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
 
     steps:
       - name: Print author
         run: |
-          echo "Author: ${{ github.event.inputs.author }}"
-          echo "Date: ${{ github.event.inputs.date }}"
+          echo "Author: ${{ github.triggering_actor }}"
           echo "Comments: ${{ github.event.inputs.comments }}"
 
-      - uses: actions/checkout@master
+      - name: Checkout main branch
+        uses: actions/checkout@v3
         with:
           ref: refs/heads/master
 
@@ -37,6 +32,7 @@ jobs:
       - name: Install non-python dependencies
         run: |
           sudo apt-get install -y graphviz-dev graphviz
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -52,14 +48,12 @@ jobs:
           $HIPPUNFOLD test_data/bids_singleT2w test_out participant -np --modality T2w --rulegraph | dot -Tsvg > docs/images/rulegraph_T2w.svg
 
       - name: Commit updates
-        env:
-          LATEST_VERSION: ${{ steps.release-drafter.outputs.name }}
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git diff-index --quiet HEAD || git add docs/images || commit -m "Add updated dags [skip ci]"
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
