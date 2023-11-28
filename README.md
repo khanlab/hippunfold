@@ -1,6 +1,7 @@
 [![Documentation Status](https://readthedocs.org/projects/hippunfold/badge/?version=latest)](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
 ![Docker Pulls](https://img.shields.io/docker/pulls/khanlab/hippunfold)
 ![Version](https://img.shields.io/github/v/tag/khanlab/hippunfold?label=version)
+<img align="right" width="200" src="https://github.com/khanlab/hippunfold/assets/25106300/0c16d33e-893a-4ac3-b127-21fa843823d5">
 
 **Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
 
