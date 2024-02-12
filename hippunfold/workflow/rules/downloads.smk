@@ -1,6 +1,6 @@
 rule download_atlas:
     params:
-        url=config["atlas_links_osf"][config["atlas"]],
+        url=config["atlas_links_url"][config["atlas"]],
     output:
         model_zip=os.path.join(download_dir, config["atlas"] + ".zip"),
     container:
@@ -11,7 +11,7 @@ rule download_atlas:
 
 rule download_template:
     params:
-        url=config["template_links_osf"][config["template"]],
+        url=config["template_links_url"][config["template"]],
     output:
         model_zip=os.path.join(download_dir, config["template"] + ".zip"),
     container:
@@ -22,7 +22,7 @@ rule download_template:
 
 rule download_template_shape:
     params:
-        url=config["template_links_osf"][config["inject_template"]],
+        url=config["template_links_url"][config["inject_template"]],
     output:
         model_zip=os.path.join(download_dir, config["inject_template"] + ".zip"),
     container:
