@@ -1,3 +1,5 @@
 hippunfold.egg-info
 hippunfold/.snakemake
 hippunfold/__pycache__
+hippunfold/resources/atlases-unfolded
+hippunfold/resources/templates-3d
