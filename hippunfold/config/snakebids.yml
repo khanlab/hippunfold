@@ -228,6 +228,7 @@ parse_args:
       - 'freesurfer'
       - 'multihist7'
     default: 'multihist7'
+    nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
@@ -365,14 +366,12 @@ template_files:
     T1w: CITI168/T1w_head_700um.nii.gz
     T2w: CITI168/T2w_head_700um.nii.gz
     xfm_corobl: CITI168/CoronalOblique_rigid.txt
-    crop_ref: CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_ref: CITI168/{modality}_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
   dHCP:
     T1w: dHCP/cohort-1/tpl-dHCP_cohort-1_res-1_T1w.nii.gz
     xfm_corobl: dHCP/cohort-1/tpl-dHCP_cohort-1_to-corobl_affine.txt
-    crop_ref: CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_ref: CITI168/{modality}_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
     upenn:
     dseg: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
@@ -381,8 +380,7 @@ template_files:
     T1w: MBMv2/Template_sym_MTR_80um.nii.gz
     T2w: MBMv2/Template_sym_T2_80um.nii.gz
     xfm_corobl: MBMv2/tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_MTR.nii.gz
+    crop_ref: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_{modality}.nii.gz
     Mask_crop: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
@@ -390,16 +388,14 @@ template_files:
     T1w: MBMv3/tpl-MBMv3_T1w.nii.gz
     T2w: MBMv3/tpl-MBMv3_T2w.nii.gz
     xfm_corobl: MBMv3/tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
+    crop_ref: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_{modality}.nii.gz
     Mask_crop: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
     coords: MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   CIVM:
     T1w: CIVM/tpl-CIVM_T1w.nii.gz
     xfm_corobl: CIVM/tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: CIVM/tpl-CIVM_hemi-{hemi}_space-corobl_T1w.nii.gz
-    crop_refT1w: CIVM/tpl-CIVM_hemi-{hemi}_space-corobl_T1w.nii.gz
+    crop_ref: CIVM/tpl-CIVM_hemi-{hemi}_space-corobl_{modality}.nii.gz
     Mask_crop: CIVM/tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: CIVM/tpl-CIVM_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
     coords: CIVM/tpl-CIVM_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
@@ -420,7 +416,7 @@ atlas_files:
     gyr: multihist7/gyrification.nii.gz
   bigbrain:
     label_nii: bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
-    subfields_list: multihist7/desc-subfields_atlas-bigbrain_dseg.tsv
+    subfields_list: bigbrain/desc-subfields_atlas-bigbrain_dseg.tsv
     label_list: bigbrain/sub-bigbrain_labellist.txt
   magdeburg:
     label_nii: magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
