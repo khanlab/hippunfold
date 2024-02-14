@@ -1,13 +1,16 @@
+---
 name: Bump version
 on:
   push:
     branches:
       - master
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - name: Checkout main branch
+        uses: actions/checkout@v4
 
       - name: Update changelog
         uses: release-drafter/release-drafter@v5
@@ -15,6 +18,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Can replace the below with (until pipeline description) with
+      # khanlab/actions/.github/workflows/workflow-version_task-semverGithub.yml
+      # after adding PAT token
       - name: Get previous release version
         run: |
           echo "PREV_VER=$(cat pyproject.toml | grep -o -E '(version\s=\s)([[:punct:]])([0-9]+\.[0-9]+\.[0-9]+.+)([[:punct:]])' | cut -d ' ' -f 3 | tr -d '"')" >> $GITHUB_ENV
@@ -35,28 +41,27 @@ jobs:
         run: |
           echo "NEW_BUMP=$(($BUMP_VER + 1))" >> $GITHUB_ENV
 
-      - name: Update version in pyproject
-        uses: jacobtomlinson/gha-find-replace@master
+      - name: Update version in pyproject.toml
+        uses: jacobtomlinson/gha-find-replace@v3
         with:
-          include: 'pyproject.toml'
+          include: "pyproject.toml"
           find: 'version = "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
           replace: 'version = "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
 
       - name: Update version in pipeline_description (not actually used)
-        uses: jacobtomlinson/gha-find-replace@master
+        uses: jacobtomlinson/gha-find-replace@v3
         with:
-          include: 'hippunfold/pipeline_description.json'
+          include: "hippunfold/pipeline_description.json"
           find: '"Version": "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
           replace: '"Version": "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
 
       - name: Update version in config/snakebids.yml
-        uses: jacobtomlinson/gha-find-replace@master
+        uses: jacobtomlinson/gha-find-replace@v3
         with:
-          include: 'hippunfold/config/snakebids.yml'
+          include: "hippunfold/config/snakebids.yml"
           find: 'version: "(?:([0-9]+\.[0-9]+\.[0-9]+.+)|([0-9]+\.[0-9]+\.[0-9]+))"'
           replace: 'version: "${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}"'
 
- 
       - name: Commit updates
         env:
           SNAKEBIDS_VERSION: ${{ steps.release-drafter.outputs.name }}-pre.${{ env.NEW_BUMP }}
@@ -66,10 +71,7 @@ jobs:
           git diff-index --quiet HEAD || git commit -m "Bump version to $SNAKEBIDS_VERSION" -a
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v0.8.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: false
-
-
-
