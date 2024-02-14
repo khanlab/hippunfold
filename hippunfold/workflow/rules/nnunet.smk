@@ -43,19 +43,14 @@ def get_nnunet_input(wildcards):
 
 def get_model_tar():
 
-    if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
-        download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
-    else:
-        # create local download dir if it doesn't exist
-        dirs = AppDirs("hippunfold", "khanlab")
-        download_dir = dirs.user_cache_dir
+    download_dir=get_download_dir()
 
     if config["force_nnunet_model"]:
         model_name = config["force_nnunet_model"]
     else:
         model_name = config["modality"]
 
-    local_tar = config["nnunet_model"].get(model_name, None)
+    local_tar = config["resource_urls"]["nnunet_model"].get(model_name, None)
     if local_tar == None:
         print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
 
@@ -91,9 +86,9 @@ def parse_trainer_from_tar(wildcards, input):
 
 rule download_model:
     params:
-        url=config["nnunet_model"][config["force_nnunet_model"]]
+        url=config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
         if config["force_nnunet_model"]
-        else config["nnunet_model"][config["modality"]],
+        else config["resource_urls"]["nnunet_model"][config["modality"]],
     output:
         model_tar=get_model_tar(),
     container:
