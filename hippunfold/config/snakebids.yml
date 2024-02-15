@@ -225,7 +225,9 @@ parse_args:
       - 'magdeburg'
       - 'freesurfer'
       - 'multihist7'
-    default: 'multihist7'
+    default: 
+      - 'multihist7'
+    nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
@@ -398,7 +400,9 @@ template_files:
     dseg: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
     coords: upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
 
-atlas: multihist7
+atlas: 
+ - multihist7
+ - bigbrain
 
 atlas_files:
   multihist7:

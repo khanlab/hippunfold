@@ -1,12 +1,27 @@
-rule download_atlas:
-    params:
-        url=config["atlas_links_url"][config["atlas"]],
-    output:
-        model_zip=os.path.join(download_dir, config["atlas"] + ".zip"),
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "wget https://{params.url} -O {output.model_zip}"
+# create rules for downloading each atlas, since output files need to be specified
+# without using wildcards
+for atlas in config['atlas']:
+    rule: 
+        name: f"download_atlas_{atlas}"
+        params:
+            url=config["atlas_links_url"][atlas],
+        output:
+            model_zip=os.path.join(download_dir, atlas + ".zip"),
+        container:
+            config["singularity"]["autotop"]
+        shell:
+            "wget https://{params.url} -O {output.model_zip}"
+
+    rule:
+        name: f"unzip_download_atlas_{atlas}"
+        input:
+            model_zip=os.path.join(download_dir, atlas + ".zip"),
+        params:
+            dir=os.path.join(download_dir, atlas),
+        output:
+            [expand(Path(download_dir)/path,hemi=config['hemi']) for key,path in config['atlas_files'][atlas].items()]
+        shell:
+            "unzip {input.model_zip} -d {params.dir}"
 
 
 rule download_template:
@@ -33,12 +48,12 @@ rule download_template_shape:
 
 def atlas_outs():
     outs = []
-    for fn in config["atlas_files"][config["atlas"]]:
+    for fn in config["atlas_files"][wildcards.atlas]:
         for hemi in ["L", "R"]:
             outs.append(
                 download_dir
                 + "/"
-                + expand(config["atlas_files"][config["atlas"]][fn], hemi=hemi)[0]
+                + expand(config["atlas_files"][wildcards.atlas][fn], hemi=hemi)[0]
             )
     return list(dict.fromkeys(outs))
 
@@ -86,17 +101,6 @@ rule unzip_template:
         dir=os.path.join(download_dir, config["template"]),
     output:
         template_outs(),
-    shell:
-        "unzip {input.model_zip} -d {params.dir}"
-
-
-rule unzip_atlas:
-    input:
-        model_zip=os.path.join(download_dir, config["atlas"] + ".zip"),
-    params:
-        dir=os.path.join(download_dir, config["atlas"]),
-    output:
-        atlas_outs(),
     shell:
         "unzip {input.model_zip} -d {params.dir}"
 
