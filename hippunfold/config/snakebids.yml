@@ -162,11 +162,12 @@ parse_args:
       - 'upenn'
       - 'MBMv2'
       - 'MBMv3'
+      - 'CIVM'
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for marmoset data with the MBMv2 (ex vivo) or MBMv3 (in vivo) template. (default: %(default)s)'
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv2 (ex vivo marmoset), MBMv3 (in vivomarmoset), or CIVM (in vivo macaque) template. (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -203,8 +204,9 @@ parse_args:
       - 'dHCP'
       - 'MBMv2'
       - 'MBMv3'
+      - 'CIVM'
     default: 'CITI168'
-    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, and MBMv3 is for in vivo marmoset data. (default: %(default)s)'
+    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, and CIVM is for in vivo macaque data. (default: %(default)s)'
 
   --t1_reg_template:
     help: 'Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
@@ -365,14 +367,12 @@ template_files:
     T1w: CITI168/T1w_head_700um.nii.gz
     T2w: CITI168/T2w_head_700um.nii.gz
     xfm_corobl: CITI168/CoronalOblique_rigid.txt
-    crop_ref: CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_ref: CITI168/{modality}_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
   dHCP:
     T1w: dHCP/cohort-1/tpl-dHCP_cohort-1_res-1_T1w.nii.gz
     xfm_corobl: dHCP/cohort-1/tpl-dHCP_cohort-1_to-corobl_affine.txt
-    crop_ref: CITI168/T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: CITI168/T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_ref: CITI168/{modality}_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: CITI168/Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
     upenn:
     dseg: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
@@ -381,20 +381,25 @@ template_files:
     T1w: MBMv2/Template_sym_MTR_80um.nii.gz
     T2w: MBMv2/Template_sym_T2_80um.nii.gz
     xfm_corobl: MBMv2/tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_MTR.nii.gz
+    crop_ref: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_{modality}.nii.gz
     Mask_crop: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+    coords: MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   MBMv3:
     T1w: MBMv3/tpl-MBMv3_T1w.nii.gz
     T2w: MBMv3/tpl-MBMv3_T2w.nii.gz
     xfm_corobl: MBMv3/tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T2w.nii.gz
-    crop_refT1w: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
+    crop_ref: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_{modality}.nii.gz
     Mask_crop: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
-    coords: MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz 
+    coords: MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  CIVM:
+    T1w: CIVM/tpl-CIVM_T1w.nii.gz
+    xfm_corobl: CIVM/tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: CIVM/tpl-CIVM_hemi-{hemi}_space-corobl_{modality}.nii.gz
+    Mask_crop: CIVM/tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: CIVM/tpl-CIVM_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
+    coords: CIVM/tpl-CIVM_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   upenn:
     T1w: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
@@ -414,7 +419,7 @@ atlas_files:
     gyr: multihist7/gyrification.nii.gz
   bigbrain:
     label_nii: bigbrain/sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
-    subfields_list: multihist7/desc-subfields_atlas-bigbrain_dseg.tsv
+    subfields_list: bigbrain/desc-subfields_atlas-bigbrain_dseg.tsv
     label_list: bigbrain/sub-bigbrain_labellist.txt
   magdeburg:
     label_nii: magdeburg/sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
@@ -485,6 +490,7 @@ template_links_url:
   dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
   MBMv2: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0887852d133ca597dd/?zip='
   MBMv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
+  CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
   upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
 #to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
