@@ -1,8 +1,10 @@
 # create rules for downloading each atlas, since output files need to be specified
 # without using wildcards
-for atlas in config['atlas']:
-    rule: 
-        name: f"download_atlas_{atlas}"
+for atlas in config["atlas"]:
+
+    rule:
+        name:
+            f"download_atlas_{atlas}"
         params:
             url=config["atlas_links_url"][atlas],
         output:
@@ -13,13 +15,17 @@ for atlas in config['atlas']:
             "wget https://{params.url} -O {output.model_zip}"
 
     rule:
-        name: f"unzip_download_atlas_{atlas}"
+        name:
+            f"unzip_download_atlas_{atlas}"
         input:
             model_zip=os.path.join(download_dir, atlas + ".zip"),
         params:
             dir=os.path.join(download_dir, atlas),
         output:
-            [expand(Path(download_dir)/path,hemi=config['hemi']) for key,path in config['atlas_files'][atlas].items()]
+            [
+                expand(Path(download_dir) / path, hemi=config["hemi"])
+                for key, path in config["atlas_files"][atlas].items()
+            ],
         shell:
             "unzip {input.model_zip} -d {params.dir}"
 
