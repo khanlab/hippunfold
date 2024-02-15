@@ -405,7 +405,7 @@ def get_download_dir():
         dirs = AppDirs("hippunfold", "khanlab")
         download_dir = dirs.user_cache_dir
     return download_dir
-   
+
 
 rule archive_work_after_final:
     input:

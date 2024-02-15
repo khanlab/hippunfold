@@ -462,13 +462,11 @@ rule metric_to_nii:
             label="hipp",
             **config["subj_wildcards"]
         ),
+        atlas_dir=Path(download_dir) / "atlas" / "multihist7",
     params:
         interp="-nearest-vertex 1",
-        refflatnii=os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"]["multihist7"]["label_nii"],
-        ),
+        refflatnii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"]["multihist7"]["label_nii"],
     output:
         metric_nii=bids(
             root=work,
@@ -526,26 +524,18 @@ rule unfolded_registration:
             label="hipp",
             **config["subj_wildcards"]
         ),
+        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
     params:
         antsparams="-d 2 -t so",
         outsuffix="tmp",
         warpfn="tmp1Warp.nii.gz",
         invwarpfn="tmp1InverseWarp.nii.gz",
-        refthickness=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["thick"],
-        ),
-        refcurvature=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["curv"],
-        ),
-        refgyrification=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["gyr"],
-        ),
+        refthickness=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["thickness"],
+        refcurvature=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["curvature"],
+        refgyrification=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["gyrification"],
     output:
         warp=bids(
             root=work,
@@ -1057,9 +1047,6 @@ rule calculate_thickness_from_surface2:
 rule resample_atlas_to_refvol:
     """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
-        atlas=lambda wildcards: os.path.join(
-            workflow.basedir, "..", config["atlas_files"][wildcards.atlas]["label_nii"]
-        ),
         refvol=bids(
             root=root,
             space="unfold",
@@ -1068,6 +1055,10 @@ rule resample_atlas_to_refvol:
             suffix="refvol.nii.gz",
             **config["subj_wildcards"]
         ),
+        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
+    params:
+        atlas=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_nii"],
     output:
         label_nii=bids(
             root=work,
@@ -1094,7 +1085,7 @@ rule resample_atlas_to_refvol:
     group:
         "subj"
     shell:
-        "antsApplyTransforms -d 3 -n MultiLabel -i {input.atlas} -r {input.refvol} -o {output.label_nii} -v &> {log}"
+        "antsApplyTransforms -d 3 -n MultiLabel -i {params.atlas} -r {input.refvol} -o {output.label_nii} -v &> {log}"
 
 
 rule nii_to_label_gii:
@@ -1116,12 +1107,10 @@ rule nii_to_label_gii:
             "unfold_template_hipp",
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
-        label_list=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["atlas_files"][wildcards.atlas]["label_list"],
-        ),
+        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
     params:
+        label_list=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_list"],
         structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
     output:
         label_gii=bids(
@@ -1142,8 +1131,8 @@ rule nii_to_label_gii:
     shadow:
         "minimal"
     shell:
-        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} temp.shape.gii -enclosing  && "
-        "wb_command -metric-label-import temp.shape.gii {input.label_list} {output.label_gii} && "
+        "wb_command -volume-to-surface-mapping {params.label_list} {input.surf} temp.shape.gii -enclosing  && "
+        "wb_command -metric-label-import temp.shape.gii {params.label_list} {output.label_gii} && "
         "wb_command -set-structure {output.label_gii} {params.structure_type}"
 
 

@@ -1,10 +1,5 @@
 rule qc_reg_to_template:
     input:
-        ref=lambda wildcards: os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]][wildcards.native_modality],
-        ),
         flo=bids(
             root=work,
             datatype="anat",
@@ -13,6 +8,10 @@ rule qc_reg_to_template:
             space=config["template"],
             desc="affine"
         ),
+        template_dir=Path(download_dir) / "template" / config["template"],
+    params:
+        ref=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]][wildcards.native_modality],
     output:
         png=report(
             bids(

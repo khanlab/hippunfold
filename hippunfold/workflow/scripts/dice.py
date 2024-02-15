@@ -1,7 +1,7 @@
 import nibabel as nib
 import numpy as np
 
-r = nib.load(snakemake.input.ref)
+r = nib.load(snakemake.params.ref)
 ref_mask = r.get_fdata()
 n = nib.load(snakemake.input.res_mask)
 nnunet_rois = n.get_fdata()

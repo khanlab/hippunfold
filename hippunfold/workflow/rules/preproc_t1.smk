@@ -71,28 +71,32 @@ else:
 
 
 def reg_to_template_cmd(wildcards, input, output):
+
+    ref = (
+        Path(input.template_dir)
+        / config["template_files"][config["template"]][wildcards.modality],
+    )
     if config["no_reg_template"]:
-        cmd = f"reg_resample -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {input.xfm_identity}; cp {input.xfm_identity} {output.xfm_ras}"
+        cmd = f"reg_resample -flo {input.flo} -ref {ref} -res {output.warped_subj} -aff {input.xfm_identity}; cp {input.xfm_identity} {output.xfm_ras}"
     elif config["rigid_reg_template"]:
-        cmd = f"reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras} -rigOnly"
+        cmd = f"reg_aladin -flo {input.flo} -ref {ref} -res {output.warped_subj} -aff {output.xfm_ras} -rigOnly"
     else:
-        cmd = f"reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped_subj} -aff {output.xfm_ras}"
+        cmd = f"reg_aladin -flo {input.flo} -ref {ref} -res {output.warped_subj} -aff {output.xfm_ras}"
     return cmd
 
 
 rule reg_to_template:
+    """ generic for T1w or T2w right now """
     input:
         flo=bids(
             root=root,
             datatype="anat",
             **config["subj_wildcards"],
             desc="preproc",
-            suffix="T1w.nii.gz"
-        ),
-        ref=os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]]["T1w"]
+            suffix="{modality}.nii.gz"
         ),
         xfm_identity=os.path.join(workflow.basedir, "..", config["xfm_identity"]),
+        template_dir=Path(download_dir) / "template" / config["template"],
     params:
         cmd=reg_to_template_cmd,
     output:
@@ -100,7 +104,7 @@ rule reg_to_template:
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
-            suffix="T1w.nii.gz",
+            suffix="{modality,T1w|T2w}.nii.gz",
             space=config["template"],
             desc="affine"
         ),
@@ -109,7 +113,17 @@ rule reg_to_template:
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T1w",
+            from_="{modality,T1w|T2w}",
+            to=config["template"],
+            desc="affine",
+            type_="ras"
+        ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            suffix="reg.txt",
+            from_="{modality,T1w|T2w}",
             to=config["template"],
             desc="affine",
             type_="ras"
@@ -166,11 +180,10 @@ rule compose_template_xfm_corobl:
             desc="affine",
             type_="itk"
         ),
-        std_to_cor=os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]]["xfm_corobl"],
-        ),
+        template_dir=Path(download_dir) / "template" / config["template"],
+    params:
+        std_to_cor=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["xfm_corobl"],
     output:
         sub_to_cor=bids(
             root=work,
@@ -187,7 +200,7 @@ rule compose_template_xfm_corobl:
     group:
         "subj"
     shell:
-        "c3d_affine_tool -itk {input.sub_to_std} -itk {input.std_to_cor} -mult -oitk {output}"
+        "c3d_affine_tool -itk {input.sub_to_std} -itk {params.std_to_cor} -mult -oitk {output}"
 
 
 rule invert_template_xfm_itk2ras:
@@ -272,16 +285,10 @@ rule warp_t1_to_corobl_crop:
             desc="affine",
             type_="itk"
         ),
-        ref=os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]]["crop_ref"],
-        ),
-        std_to_cor=os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]]["xfm_corobl"],
-        ),
+        template_dir=Path(download_dir) / "template" / config["template"],
+    params:
+        ref=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["crop_ref"],
     output:
         t1=bids(
             root=work,
@@ -298,7 +305,7 @@ rule warp_t1_to_corobl_crop:
         "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
-        "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {input.ref}  -t {input.xfm}"
+        "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {params.ref}  -t {input.xfm}"
 
 
 rule lr_flip_t1:

@@ -247,58 +247,6 @@ rule reg_t2_to_t1:
         "c3d_affine_tool  {output.xfm_ras} -oitk {output.xfm_itk}"
 
 
-rule reg_t2_to_template:
-    input:
-        flo=bids(
-            root=root,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="T2w.nii.gz",
-            desc="preproc"
-        ),
-        ref=os.path.join(
-            workflow.basedir, "..", config["template_files"][config["template"]]["T2w"]
-        ),
-        xfm_identity=os.path.join(workflow.basedir, "..", config["xfm_identity"]),
-    params:
-        cmd=reg_to_template_cmd,
-    output:
-        warped_subj=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="T2w.nii.gz",
-            space=config["template"],
-            desc="affine"
-        ),
-        xfm_ras=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            from_="T2w",
-            to=config["template"],
-            desc="affine",
-            type_="ras"
-        ),
-    log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            suffix="reg.txt",
-            from_="T2w",
-            to=config["template"],
-            desc="affine",
-            type_="ras"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "{params.cmd}" + " &> {log}"
-
-
 def get_inputs_compose_t2_xfm_corobl(wildcards):
     if config["t1_reg_template"]:
         # xfm0: t2 to t1
@@ -346,20 +294,34 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         )
 
         # xfm1: template to corobl
-        std_to_cor = (
-            os.path.join(
-                workflow.basedir,
-                "..",
-                config["template_files"][config["template"]]["xfm_corobl"],
-            ),
+        template_dir = Path(download_dir) / "template" / config["template"]
+        return {"t2_to_std": t2_to_std, "template_dir": template_dir}
+
+
+def get_cmd_compose_t2_xfm_corobl(wildcards, input):
+    if config["t1_reg_template"]:
+        # xfm0: t2 to t1
+        xfm0 = input.t2_to_t1
+        # xfm1: t1 to corobl
+        xfm1 = input.t1_to_cor
+    else:
+        # xfm0: t2 to template
+        xfm0 = input.t2_to_std
+        # xfm1: template to corobl
+        xfm1 = (
+            Path(input.template_dir)
+            / config["template_files"][config["template"]]["xfm_corobl"]
         )
-        return {"t2_to_std": t2_to_std, "std_to_cor": std_to_cor}
+
+    return "c3d_affine_tool -itk {xfm0} -itk {xfm1} -mult -oitk {output}"
 
 
 # now have t2 to t1 xfm, compose this with t1 to corobl xfm
 rule compose_t2_xfm_corobl:
     input:
         unpack(get_inputs_compose_t2_xfm_corobl),
+    params:
+        cmd=get_cmd_compose_t2_xfm_corobl,
     output:
         t2_to_cor=bids(
             root=work,
@@ -371,12 +333,22 @@ rule compose_t2_xfm_corobl:
             desc="affine",
             type_="itk"
         ),
+    log:
+        bids(
+            root="logs",
+            **config["subj_wildcards"],
+            suffix="composecorobl.txt",
+            from_="T2w",
+            to="corobl",
+            desc="affine",
+            type_="itk"
+        ),
     container:
         config["singularity"]["autotop"]
     group:
         "subj"
     shell:
-        "c3d_affine_tool -itk {input[0]} -itk {input[1]} -mult -oitk {output}"
+        "{params.cmd} > {log}"
 
 
 # if already have t2w in T1w space, then we don't need to use composed xfm:
@@ -419,11 +391,10 @@ rule warp_t2_to_corobl_crop:
             desc="preproc"
         ),
         xfm=get_xfm_to_corobl(),
-        ref=os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]]["crop_ref"],
-        ),
+        template_dir=Path(download_dir) / "template" / config["template"],
+    params:
+        ref=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["crop_ref"],
     output:
         nii=bids(
             root=work,
@@ -432,7 +403,7 @@ rule warp_t2_to_corobl_crop:
             suffix="T2w.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi}"
+            hemi="{hemi,L|R}"
         ),
     container:
         config["singularity"]["autotop"]
@@ -440,7 +411,7 @@ rule warp_t2_to_corobl_crop:
         "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
-        "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref}  -t {input.xfm}"
+        "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {params.ref}  -t {input.xfm}"
 
 
 rule lr_flip_t2:
