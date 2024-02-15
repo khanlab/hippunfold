@@ -1053,7 +1053,8 @@ rule calculate_thickness_from_surface2:
 rule resample_atlas_to_refvol:
     """this is just done in case the atlas has a different unfolded config than the current run"""
     input:
-        atlas=lambda wildcards: Path(download_dir) / config["atlas_files"][wildcards.atlas]["label_nii"],
+        atlas=lambda wildcards: Path(download_dir)
+        / config["atlas_files"][wildcards.atlas]["label_nii"],
         refvol=bids(
             root=root,
             space="unfold",
