@@ -50,12 +50,10 @@ rule get_subfield_vols_subj:
             hemi=config["hemi"],
             allow_missing=True,
         ),
-        lookup_tsv=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "desc-subfields_atlas-{atlas}_dseg.tsv",
-        ),
+        lookup_tsv=Path(workflow.basedir).parent
+        / "resources"
+        / "label_lut"
+        / "desc-subfields_atlas-{atlas}_dseg.tsv",
     group:
         "subj"
     output:
