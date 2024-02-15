@@ -337,7 +337,7 @@ cifti_metric_types:
 singularity:
   autotop: 'docker://khanlab/hippunfold_deps:v0.5.0'
 
-xfm_identity: resources/identity_xfm.txt
+xfm_identity: resources/etc/identity_xfm.txt
 
 template_files:
   CITI168:
