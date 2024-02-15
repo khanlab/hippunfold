@@ -59,7 +59,7 @@ elif "T1w" in config["modality"]:
 
 # only generate hipp surface if skipping template injection
 #   i.e. drop dentate
-if config["skip_inject_template_labels"]:
+if config["skip_inject_template_labels"]:  # TODO do we need this?
     config["autotop_labels"] = ["hipp"]
 
 
@@ -144,9 +144,6 @@ include: "rules/autotop.smk"
 include: "rules/warps.smk"
 
 
-include: "rules/shape_inject.smk"
-
-
 include: "rules/gifti.smk"
 
 
@@ -160,6 +157,26 @@ include: "rules/qc.smk"
 
 
 include: "rules/myelin_map.smk"
+
+
+if config["use_template_seg"]:
+    if (
+        "dseg" in config["template_files"][config["template"]]
+        and "coords" in config["template_files"][config["template"]]
+    ):
+
+        include: "rules/templateseg.smk"
+
+    else:
+        print(
+            "use_template_seg is not possible, template dseg or coords do not exist for the chosen template"
+        )
+
+        include: "rules/shape_inject.smk"
+
+else:
+
+    include: "rules/shape_inject.smk"
 
 
 rule all:
