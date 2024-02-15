@@ -382,32 +382,32 @@ template_files:
     crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
   MBMv2:
-    T1w: MBMv2/Template_sym_MTR_80um.nii.gz
-    T2w: MBMv2/Template_sym_T2_80um.nii.gz
-    xfm_corobl: MBMv2/tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_{modality}.nii.gz
-    Mask_crop: MBMv2/tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: MBMv2/tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: MBMv2/tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    T1w: Template_sym_MTR_80um.nii.gz
+    T2w: Template_sym_T2_80um.nii.gz
+    xfm_corobl: tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-MBMv2_hemi-{hemi}_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   MBMv3:
-    T1w: MBMv3/tpl-MBMv3_T1w.nii.gz
-    T2w: MBMv3/tpl-MBMv3_T2w.nii.gz
-    xfm_corobl: MBMv3/tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_{modality}.nii.gz
-    Mask_crop: MBMv3/tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: MBMv3/tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
-    coords: MBMv3/tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    T1w: tpl-MBMv3_T1w.nii.gz
+    T2w: tpl-MBMv3_T2w.nii.gz
+    xfm_corobl: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-MBMv3_hemi-{hemi}_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-MBMv3_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
+    coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   CIVM:
-    T1w: CIVM/tpl-CIVM_T1w.nii.gz
-    xfm_corobl: CIVM/tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: CIVM/tpl-CIVM_hemi-{hemi}_space-corobl_{modality}.nii.gz
-    Mask_crop: CIVM/tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: CIVM/tpl-CIVM_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
-    coords: CIVM/tpl-CIVM_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    T1w: tpl-CIVM_T1w.nii.gz
+    xfm_corobl: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-CIVM_hemi-{hemi}_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-CIVM_hemi-R_space-corobl_desc-tissue_dseg.nii.gz
+    coords: tpl-CIVM_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   upenn:
-    T1w: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
-    dseg: upenn/tpl-upenn_desc-hipptissue_dseg.nii.gz
-    coords: upenn/tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+    T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
+    dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
+    coords: tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
 
 atlas_files:
   multihist7:
@@ -457,6 +457,8 @@ rigid_reg_template: False
 no_reg_template: False
 
 modality: T2w
+
+inject_template: upenn
 
 template: CITI168
 
