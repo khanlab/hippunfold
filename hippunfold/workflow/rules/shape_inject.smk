@@ -106,7 +106,7 @@ rule import_template_shape:
     container:
         config["singularity"]["autotop"]
     shell:
-        "cp {input} {output}"
+        "cp {params.template_seg} {output.template_seg}"
 
 
 def get_image_pairs(wildcards, input):
