@@ -39,11 +39,10 @@ rule warp_seg_to_corobl_crop:
             desc="affine",
             type_="itk"
         ),
-        ref=os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]]["crop_ref"],
-        ),
+        template_dir=Path(download_dir) / "template" / config["template"],
+    params:
+        ref=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["crop_ref"],
     output:
         nii=bids(
             root=work,
@@ -51,7 +50,7 @@ rule warp_seg_to_corobl_crop:
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             space="corobl",
-            hemi="{hemi}",
+            hemi="{hemi,L|R}",
             from_="{space}"
         ),
     container:
@@ -60,7 +59,7 @@ rule warp_seg_to_corobl_crop:
         "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
-        "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t {input.xfm}"
+        "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {params.ref}  -t {input.xfm}"
 
 
 rule lr_flip_seg:

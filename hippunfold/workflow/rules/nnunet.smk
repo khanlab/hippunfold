@@ -43,23 +43,30 @@ def get_nnunet_input(wildcards):
 
 def get_model_tar():
 
-    if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
-        download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
-    else:
-        # create local download dir if it doesn't exist
-        dirs = AppDirs("hippunfold", "khanlab")
-        download_dir = dirs.user_cache_dir
-
     if config["force_nnunet_model"]:
         model_name = config["force_nnunet_model"]
     else:
         model_name = config["modality"]
 
-    local_tar = config["nnunet_model"].get(model_name, None)
+    local_tar = config["resource_urls"]["nnunet_model"].get(model_name, None)
     if local_tar == None:
         print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
 
-    return os.path.abspath(os.path.join(download_dir, local_tar.split("/")[-1]))
+    return (Path(download_dir) / "model" / Path(local_tar).name).absolute()
+
+
+rule download_nnunet_model:
+    params:
+        url=config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
+        if config["force_nnunet_model"]
+        else config["resource_urls"]["nnunet_model"][config["modality"]],
+        model_dir=Path(download_dir) / "model",
+    output:
+        model_tar=get_model_tar(),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "mkdir -p {params.model_dir} && wget https://{params.url} -O {output}"
 
 
 def parse_task_from_tar(wildcards, input):
@@ -87,19 +94,6 @@ def parse_trainer_from_tar(wildcards, input):
     else:
         raise ValueError("cannot parse chkpnt from model tar")
     return trainer
-
-
-rule download_model:
-    params:
-        url=config["nnunet_model"][config["force_nnunet_model"]]
-        if config["force_nnunet_model"]
-        else config["nnunet_model"][config["modality"]],
-    output:
-        model_tar=get_model_tar(),
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "wget https://{params.url} -O {output}"
 
 
 rule run_inference:
@@ -206,22 +200,17 @@ rule unflip_nnunet_nii:
         " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nnunet_seg} "
 
 
-def get_f3d_ref(wildcards):
+def get_f3d_ref(wildcards, input):
+
     if config["modality"] == "T2w":
         nii = (
-            os.path.join(
-                workflow.basedir,
-                "..",
-                config["template_files"][config["template"]]["crop_ref"],
-            ),
+            Path(input.template_dir)
+            / config["template_files"][config["template"]]["crop_ref"]
         )
     elif config["modality"] == "T1w":
         nii = (
-            os.path.join(
-                workflow.basedir,
-                "..",
-                config["template_files"][config["template"]]["crop_refT1w"],
-            ),
+            Path(input.template_dir)
+            / config["template_files"][config["template"]]["crop_refT1w"]
         )
     else:
         raise ValueError("modality not supported for nnunet!")
@@ -250,6 +239,8 @@ rule qc_nnunet_f3d:
             space="corobl",
             hemi="{hemi}"
         ),
+        template_dir=Path(download_dir) / "template" / config["template"],
+    params:
         ref=get_f3d_ref,
     output:
         cpp=bids(
@@ -293,8 +284,8 @@ rule qc_nnunet_f3d:
     group:
         "subj"
     shell:
-        "reg_f3d -flo {input.img} -ref {input.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
-        "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {input.ref} -res {output.res_mask} -inter 0 &> {log}"
+        "reg_f3d -flo {input.img} -ref {params.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
+        "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {params.ref} -res {output.res_mask} -inter 0 &> {log}"
 
 
 rule qc_nnunet_dice:
@@ -308,13 +299,11 @@ rule qc_nnunet_dice:
             space="template",
             hemi="{hemi}"
         ),
-        ref=os.path.join(
-            workflow.basedir,
-            "..",
-            config["template_files"][config["template"]]["Mask_crop"],
-        ),
+        template_dir=Path(download_dir) / "template" / config["template"],
     params:
         hipp_lbls=[1, 2, 7, 8],
+        ref=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["Mask_crop"],
     output:
         dice=report(
             bids(
