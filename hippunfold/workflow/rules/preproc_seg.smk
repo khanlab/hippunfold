@@ -50,7 +50,7 @@ rule warp_seg_to_corobl_crop:
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             space="corobl",
-            hemi="{hemi}",
+            hemi="{hemi,L|R}",
             from_="{space}"
         ),
     container:
