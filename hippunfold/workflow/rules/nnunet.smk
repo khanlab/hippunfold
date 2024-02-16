@@ -203,15 +203,13 @@ rule unflip_nnunet_nii:
 def get_f3d_ref(wildcards, input):
 
     if config["modality"] == "T2w":
-        nii = (
-            Path(input.template_dir)
-            / config["template_files"][config["template"]]["crop_ref"]
-        )
+        nii = Path(input.template_dir) / config["template_files"][config["template"]][
+            "crop_ref"
+        ].format(**wildcards)
     elif config["modality"] == "T1w":
-        nii = (
-            Path(input.template_dir)
-            / config["template_files"][config["template"]]["crop_refT1w"]
-        )
+        nii = Path(input.template_dir) / config["template_files"][config["template"]][
+            "crop_refT1w"
+        ].format(**wildcards)
     else:
         raise ValueError("modality not supported for nnunet!")
     return nii
@@ -302,8 +300,12 @@ rule qc_nnunet_dice:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         hipp_lbls=[1, 2, 7, 8],
-        ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["Mask_crop"],
+        ref=lambda wildcards, input: (
+            Path(input.template_dir)
+            / config["template_files"][config["template"]]["Mask_crop"].format(
+                **wildcards
+            )
+        ),
     output:
         dice=report(
             bids(
