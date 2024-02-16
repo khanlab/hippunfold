@@ -42,7 +42,7 @@ rule warp_seg_to_corobl_crop:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"],
+        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     output:
         nii=bids(
             root=work,

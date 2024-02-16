@@ -466,7 +466,7 @@ rule metric_to_nii:
     params:
         interp="-nearest-vertex 1",
         refflatnii=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"]["multihist7"]["label_nii"],
+        / config["atlas_files"]["multihist7"]["label_nii"].format(**wildcards),
     output:
         metric_nii=bids(
             root=work,
@@ -531,11 +531,11 @@ rule unfolded_registration:
         warpfn="tmp1Warp.nii.gz",
         invwarpfn="tmp1InverseWarp.nii.gz",
         refthickness=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["thickness"],
+        / config["atlas_files"][wildcards.atlas]["thickness"].format(**wildcards),
         refcurvature=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["curvature"],
+        / config["atlas_files"][wildcards.atlas]["curvature"].format(**wildcards),
         refgyrification=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["gyrification"],
+        / config["atlas_files"][wildcards.atlas]["gyrification"].format(**wildcards),
     output:
         warp=bids(
             root=work,
@@ -1058,7 +1058,7 @@ rule resample_atlas_to_refvol:
         atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
     params:
         atlas=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["label_nii"],
+        / config["atlas_files"][wildcards.atlas]["label_nii"].format(**wildcards),
     output:
         label_nii=bids(
             root=work,
@@ -1110,7 +1110,7 @@ rule nii_to_label_gii:
         atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
     params:
         label_list=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["label_list"],
+        / config["atlas_files"][wildcards.atlas]["label_list"].format(**wildcards),
         structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
     output:
         label_gii=bids(
@@ -1131,7 +1131,7 @@ rule nii_to_label_gii:
     shadow:
         "minimal"
     shell:
-        "wb_command -volume-to-surface-mapping {params.label_list} {input.surf} temp.shape.gii -enclosing  && "
+        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} temp.shape.gii -enclosing  && "
         "wb_command -metric-label-import temp.shape.gii {params.label_list} {output.label_gii} && "
         "wb_command -set-structure {output.label_gii} {params.structure_type}"
 

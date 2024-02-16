@@ -308,10 +308,9 @@ def get_cmd_compose_t2_xfm_corobl(wildcards, input):
         # xfm0: t2 to template
         xfm0 = input.t2_to_std
         # xfm1: template to corobl
-        xfm1 = (
-            Path(input.template_dir)
-            / config["template_files"][config["template"]]["xfm_corobl"]
-        )
+        xfm1 = Path(input.template_dir) / config["template_files"][config["template"]][
+            "xfm_corobl"
+        ].format(**wildcards)
 
     return "c3d_affine_tool -itk {xfm0} -itk {xfm1} -mult -oitk {output}"
 
@@ -394,7 +393,7 @@ rule warp_t2_to_corobl_crop:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"],
+        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     output:
         nii=bids(
             root=work,

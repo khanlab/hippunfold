@@ -72,9 +72,11 @@ else:
 
 def reg_to_template_cmd(wildcards, input, output):
 
-    ref = (
+    ref = str(
         Path(input.template_dir)
-        / config["template_files"][config["template"]][wildcards.modality],
+        / config["template_files"][config["template"]][wildcards.modality].format(
+            **wildcards
+        ),
     )
     if config["no_reg_template"]:
         cmd = f"reg_resample -flo {input.flo} -ref {ref} -res {output.warped_subj} -aff {input.xfm_identity}; cp {input.xfm_identity} {output.xfm_ras}"
@@ -183,7 +185,9 @@ rule compose_template_xfm_corobl:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         std_to_cor=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["xfm_corobl"],
+        / config["template_files"][config["template"]]["xfm_corobl"].format(
+            **wildcards
+        ),
     output:
         sub_to_cor=bids(
             root=work,
@@ -288,7 +292,7 @@ rule warp_t1_to_corobl_crop:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"],
+        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     output:
         t1=bids(
             root=work,
