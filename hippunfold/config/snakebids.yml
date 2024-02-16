@@ -374,6 +374,8 @@ template_files:
     crop_ref: T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+    dseg:  sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz 
+    coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{autotop}_desc-laplace_coords.nii.gz 
   dHCP:
     T1w: tpl-dHCP_cohort-1_res-1_T1w.nii.gz
     T2w: tpl-dHCP_cohort-1_res-1_T2w.nii.gz
