@@ -10,8 +10,12 @@ rule qc_reg_to_template:
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
-        ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]][wildcards.native_modality],
+        ref=lambda wildcards, input: str(
+            Path(input.template_dir)
+            / config["template_files"][config["template"]][
+                wildcards.native_modality
+            ].format(**wildcards)
+        ),
     output:
         png=report(
             bids(
