@@ -91,7 +91,9 @@ rule import_template_shape:
         template_dir=Path(download_dir) / "template" / config["inject_template"],
     params:
         template_seg=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["inject_template"]]["dseg"],
+        / config["template_files"][config["inject_template"]]["dseg"].format(
+            **wildcards
+        ),
     output:
         template_seg=bids(
             root=work,
@@ -303,7 +305,9 @@ rule inject_init_laplace_coords:
         template_dir=Path(download_dir) / "template" / config["inject_template"],
     params:
         coords=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["inject_template"]]["coords"],
+        / config["template_files"][config["inject_template"]]["coords"].format(
+            **wildcards
+        ),
         interp_opt="-ri NN",
     output:
         init_coords=bids(
