@@ -25,9 +25,11 @@ rule template_reg:
         moving_img=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]][
             get_modality_suffix(config["modality"])
-        ],
+        ].format(**wildcards),
         xfm_corobl=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["xfm_corobl"],
+        / config["template_files"][config["template"]]["xfm_corobl"].format(
+            **wildcards
+        ),
         general_opts="-d 3 -m NCC 2x2x2",
         smoothing_opts=get_smoothing_opt,
         iteration_opts="-n 100x50x10",  #default -n 100x100
@@ -41,7 +43,7 @@ rule template_reg:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi,Lflip|R}"
+            hemi="{hemi,R|L}"
         ),
     group:
         "subj"
@@ -79,7 +81,7 @@ rule warp_template_dseg:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         template_dseg=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["dseg"],
+        / config["template_files"][config["template"]]["dseg"].format(**wildcards),
         interp_opt="-ri LABEL 0.2vox",
     output:
         inject_seg=bids(
@@ -89,7 +91,7 @@ rule warp_template_dseg:
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi,Lflip|R}"
+            hemi="{hemi,R|L}"
         ),
     group:
         "subj"
@@ -126,7 +128,7 @@ rule warp_template_coords:
     params:
         interp_opt="-ri NN",
         template_coords=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["coords"],
+        / config["template_files"][config["template"]]["coords"].format(**wildcards),
     output:
         init_coords=bids(
             root=work,
@@ -137,7 +139,7 @@ rule warp_template_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi,R|Lflip}"
+            hemi="{hemi,R|L|Lflip}"
         ),
     group:
         "subj"
@@ -173,9 +175,13 @@ rule warp_template_anat:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         template_anat=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]][config["modality"]],
+        / config["template_files"][config["template"]][config["modality"]].format(
+            **wildcards
+        ),
         xfm_corobl=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["xfm_corobl"],
+        / config["template_files"][config["template"]]["xfm_corobl"].format(
+            **wildcards
+        ),
     output:
         warped=bids(
             root=work,
@@ -184,7 +190,7 @@ rule warp_template_anat:
             suffix=f"{config['modality']}.nii.gz",
             desc="warpedtemplate",
             space="corobl",
-            hemi="{hemi,Lflip|R}",
+            hemi="{hemi,L|R}",
         ),
     group:
         "subj"
