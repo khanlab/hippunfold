@@ -7,6 +7,39 @@ def get_smoothing_opt(wildcards):
     return f"-s {gradient_sigma}vox {warp_sigma}vox"
 
 
+# Template-based segmentation supports templates that have only a single hemisphere
+# by mapping it to the flipped version of the other hemisphere.
+# If a template has both L and R files, then we set hemi_constrained_wildcard to L|R.
+# If a hemisphere is missing data, then we set it to flip that, e.g. if L missing, then use Lflip|R
+
+hemi_constraints = []
+if config["template"] in config["template_based_segmentation"]:
+    for hemi in config["hemi"]:
+        if hemi in config["template_based_segmentation"][config["template"]]["hemi"]:
+            hemi_constraints.append(hemi)
+        else:
+            hemi_constraints.append(f"{hemi}flip")
+
+hemi_constrained_wildcard = "{{hemi,{constraints}}}".format(
+    constraints="|".join(hemi_constraints)
+)
+
+
+def flipped(wildcards):
+    """function to map hemi in wildcards from Lflip to R, or Rflip to L,
+    for use in rules where e.g. the output wildcard is Lflip, but for the input, R is desired, such as
+    when mapping a R hemi dseg to the Lflip hemisphere of a subject."""
+
+    if wildcards.hemi == "L" or wildcards.hemi == "R":
+        return wildcards
+    elif wildcards.hemi == "Lflip":
+        wildcards.hemi = "R"
+        return wildcards
+    elif wildcards.hemi == "Rflip":
+        wildcards.hemi = "L"
+        return wildcards
+
+
 rule template_reg:
     input:
         fixed_img=bids(
@@ -25,7 +58,7 @@ rule template_reg:
         moving_img=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]][
             get_modality_suffix(config["modality"])
-        ].format(**wildcards),
+        ].format(**flipped(wildcards)),
         xfm_corobl=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["xfm_corobl"].format(
             **wildcards
@@ -43,7 +76,7 @@ rule template_reg:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi,R|L}"
+            hemi=hemi_constrained_wildcard,
         ),
     group:
         "subj"
@@ -81,7 +114,9 @@ rule warp_template_dseg:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         template_dseg=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["dseg"].format(**wildcards),
+        / config["template_files"][config["template"]]["dseg"].format(
+            **flipped(wildcards)
+        ),
         interp_opt="-ri LABEL 0.2vox",
     output:
         inject_seg=bids(
@@ -91,7 +126,7 @@ rule warp_template_dseg:
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi,R|L}"
+            hemi=hemi_constrained_wildcard,
         ),
     group:
         "subj"
@@ -128,7 +163,9 @@ rule warp_template_coords:
     params:
         interp_opt="-ri NN",
         template_coords=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["coords"].format(**wildcards),
+        / config["template_files"][config["template"]]["coords"].format(
+            **flipped(wildcards)
+        ),
     output:
         init_coords=bids(
             root=work,
@@ -139,7 +176,7 @@ rule warp_template_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi,R|L|Lflip}"
+            hemi=hemi_constrained_wildcard,
         ),
     group:
         "subj"
@@ -176,7 +213,7 @@ rule warp_template_anat:
     params:
         template_anat=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]][config["modality"]].format(
-            **wildcards
+            **flipped(wildcards)
         ),
         xfm_corobl=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["xfm_corobl"].format(
@@ -190,7 +227,7 @@ rule warp_template_anat:
             suffix=f"{config['modality']}.nii.gz",
             desc="warpedtemplate",
             space="corobl",
-            hemi="{hemi,L|R}",
+            hemi=hemi_constrained_wildcard,
         ),
     group:
         "subj"
@@ -228,7 +265,7 @@ rule unflip_template_dseg:
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi,L}",
+            hemi="{hemi,L|R}",
             **config["subj_wildcards"]
         ),
     container:
@@ -272,7 +309,7 @@ rule unflip_template_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi,L}"
+            hemi="{hemi,L|R}",
         ),
     container:
         config["singularity"]["autotop"]
