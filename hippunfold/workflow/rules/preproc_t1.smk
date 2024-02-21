@@ -291,7 +291,7 @@ rule warp_t1_to_corobl_crop:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
+        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards, modality="T1w"),
     output:
         t1=bids(
             root=work,
