@@ -298,7 +298,7 @@ rule warp_t1_to_corobl_crop:
             root=work,
             datatype="anat",
             **config["subj_wildcards"],
-            suffix="T1w.nii.gz",
+            suffix="{modality}.nii.gz",
             space="corobl",
             desc="preproc",
             hemi="{hemi,L|R}"

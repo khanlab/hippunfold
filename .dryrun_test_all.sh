@@ -14,3 +14,4 @@ hippunfold - test_out participant -np --modality cropseg --path_cropseg test_dat
 hippunfold - test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
 hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
 hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
+hippunfold test_data/bids_T1w test_out participant -np --modality T1w --use-template-seg
