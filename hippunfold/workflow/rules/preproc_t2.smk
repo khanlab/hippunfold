@@ -114,7 +114,6 @@ rule reg_t2_to_ref:
 
 
 def get_aligned_n4_t2(wildcards):
-
     # first get the number of floating t2s
     filtered = snakebids.filter_list(config["input_zip_lists"]["T2w"], wildcards)
     num_scans = len(filtered["subject"])
@@ -278,7 +277,6 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         return {"t2_to_t1": t2_to_t1, "t1_to_cor": t1_to_cor}
 
     else:
-
         # xfm0: t2 to template
         t2_to_std = (
             bids(

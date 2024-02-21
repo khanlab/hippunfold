@@ -24,7 +24,6 @@ def get_modality_suffix(modality):
 
 
 def get_final_spec():
-
     if len(config["hemi"]) == 2:
         specs = expand(
             bids(
@@ -323,7 +322,6 @@ def get_final_subj_output():
 
 
 def get_final_output():
-
     if config["keep_work"]:
         subj_output = get_final_subj_output()
     else:

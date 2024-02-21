@@ -71,7 +71,6 @@ else:
 
 
 def reg_to_template_cmd(wildcards, input, output):
-
     ref = str(
         Path(input.template_dir)
         / config["template_files"][config["template"]][wildcards.modality].format(

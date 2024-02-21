@@ -15,7 +15,6 @@ df = pd.DataFrame(columns=["subject", "hemi"] + names)
 
 
 for in_img, hemi in zip(snakemake.input.segs, hemis):
-
     img_nib = nib.load(in_img)
     img = img_nib.get_fdata()
     zooms = img_nib.header.get_zooms()

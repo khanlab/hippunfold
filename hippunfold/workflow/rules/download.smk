@@ -5,13 +5,9 @@ download_dir = get_download_dir()
 
 rule download_extract_atlas:
     params:
-        url=lambda wildcards: config["resource_urls"]["atlas"][
-            wildcards.atlas
-        ],
+        url=lambda wildcards: config["resource_urls"]["atlas"][wildcards.atlas],
     output:
-        unzip_dir=directory(
-            Path(download_dir) / "atlas" / "{atlas}"
-        ),
+        unzip_dir=directory(Path(download_dir) / "atlas" / "{atlas}"),
     container:
         config["singularity"]["autotop"]
     shadow:
@@ -23,13 +19,9 @@ rule download_extract_atlas:
 
 rule download_extract_template:
     params:
-        url=lambda wildcards: config["resource_urls"]["template"][
-            wildcards.template
-        ],
+        url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
-        unzip_dir=directory(
-            Path(download_dir) / "template" / "{template}"
-        ),
+        unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
     container:
         config["singularity"]["autotop"]
     shadow:
