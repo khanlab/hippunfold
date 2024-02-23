@@ -166,7 +166,7 @@ parse_args:
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv2 (ex vivo marmoset), MBMv3 (in vivomarmoset), or CIVM (in vivo macaque) template. (default: %(default)s)'
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv2 (ex vivo marmoset), MBMv3 (in vivo marmoset), or CIVM (ex vivo macaque) template. (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -367,12 +367,9 @@ singularity:
 xfm_identity: resources/etc/identity_xfm.txt
 
 #templates enabled for template-based segmentation are here
+# TODO: should also perhaps include modalities avaialble, and any custom crop_native_res settings
 template_based_segmentation:
   CITI168:
-    hemi:
-      - R
-      - L
-  dHCP:
     hemi:
       - R
       - L
@@ -383,7 +380,6 @@ template_based_segmentation:
   MBMv2:
     hemi:
       - R
-      - L
   MBMv3:
     hemi:
       - R
