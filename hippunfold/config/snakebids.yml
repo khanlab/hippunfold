@@ -427,8 +427,8 @@ template_files:
     xfm_corobl: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
     crop_ref: tpl-CIVM_hemi-{hemi}_space-corobl_{modality}.nii.gz
     Mask_crop: tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-CIVM_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-CIVM_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    dseg: tpl-CIVM_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
