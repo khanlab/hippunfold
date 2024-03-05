@@ -5,3 +5,4 @@ snakebids>=0.4.0
 myst-parser==1.0.0
 sphinxcontrib.asciinema==0.3.7
 pulp<2.8.0
+
