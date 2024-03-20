@@ -19,7 +19,6 @@ pattern = re.compile(r"rule (\w+):")
 subgraphs = dict()
 
 for smk in glob("../workflow/rules/*.smk"):
-
     smk_name = re.findall(re.compile(r"/(\w+).smk"), smk)[0]
 
     with open(smk, "r") as f:

@@ -114,7 +114,6 @@ rule reg_t2_to_ref:
 
 
 def get_aligned_n4_t2(wildcards):
-
     # first get the number of floating t2s
     filtered = snakebids.filter_list(config["input_zip_lists"]["T2w"], wildcards)
     num_scans = len(filtered["subject"])
