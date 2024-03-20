@@ -338,6 +338,7 @@ singularity:
   autotop: 'docker://khanlab/hippunfold_deps:v0.5.0'
 
 xfm_identity: resources/etc/identity_xfm.txt
+xfm_identity_itk: resources/etc/identity_xfm_itk.txt
 
 template_files:
   CITI168:
