@@ -42,7 +42,6 @@ def get_nnunet_input(wildcards):
 
 
 def get_model_tar():
-
     if config["force_nnunet_model"]:
         model_name = config["force_nnunet_model"]
     else:
@@ -201,7 +200,6 @@ rule unflip_nnunet_nii:
 
 
 def get_f3d_ref(wildcards, input):
-
     if config["modality"] == "T2w":
         nii = Path(input.template_dir) / config["template_files"][config["template"]][
             "crop_ref"

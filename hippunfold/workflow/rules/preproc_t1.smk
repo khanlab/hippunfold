@@ -71,7 +71,6 @@ else:
 
 
 def reg_to_template_cmd(wildcards, input, output):
-
     ref = str(
         Path(input.template_dir)
         / config["template_files"][config["template"]][wildcards.modality].format(
@@ -245,7 +244,7 @@ rule template_xfm_itk2ras:
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="{native_modality,T1w|T2w}",
+            from_="{native_modality}",
             to="corobl",
             desc="affine",
             type_="itk"
@@ -292,7 +291,9 @@ rule warp_t1_to_corobl_crop:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
+        / config["template_files"][config["template"]]["crop_ref"].format(
+            **wildcards, modality="T1w"
+        ),
     output:
         t1=bids(
             root=work,

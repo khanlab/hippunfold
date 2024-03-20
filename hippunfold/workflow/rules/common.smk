@@ -24,7 +24,6 @@ def get_modality_suffix(modality):
 
 
 def get_final_spec():
-
     if len(config["hemi"]) == 2:
         specs = expand(
             bids(
@@ -293,20 +292,21 @@ def get_final_qc():
             )
         )
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
-        qc.extend(
-            expand(
-                bids(
-                    root=root,
-                    datatype="qc",
-                    desc="unetf3d",
-                    suffix="dice.tsv",
-                    hemi="{hemi}",
-                    **config["subj_wildcards"],
-                ),
-                hemi=config["hemi"],
-                allow_missing=True,
+        if not config["use_template_seg"]:
+            qc.extend(
+                expand(
+                    bids(
+                        root=root,
+                        datatype="qc",
+                        desc="unetf3d",
+                        suffix="dice.tsv",
+                        hemi="{hemi}",
+                        **config["subj_wildcards"],
+                    ),
+                    hemi=config["hemi"],
+                    allow_missing=True,
+                )
             )
-        )
     return qc
 
 
@@ -322,7 +322,6 @@ def get_final_subj_output():
 
 
 def get_final_output():
-
     if config["keep_work"]:
         subj_output = get_final_subj_output()
     else:

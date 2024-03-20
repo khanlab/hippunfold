@@ -123,7 +123,6 @@ rule label_subfields_from_vol_coords_corobl:
 
 
 def get_tissue_atlas_remapping(wildcards):
-
     mapping = config["tissue_atlas_mapping"]
 
     remap = []

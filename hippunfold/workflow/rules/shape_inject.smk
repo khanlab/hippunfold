@@ -88,12 +88,11 @@ rule prep_segs_for_greedy:
 
 rule import_template_shape:
     input:
-        template_seg=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "tpl-upenn",
-            "tpl-upenn_desc-hipptissue_dseg.nii.gz",
+        template_dir=Path(download_dir) / "template" / config["inject_template"],
+    params:
+        template_seg=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["inject_template"]]["dseg"].format(
+            **wildcards
         ),
     output:
         template_seg=bids(
@@ -109,7 +108,7 @@ rule import_template_shape:
     container:
         config["singularity"]["autotop"]
     shell:
-        "cp {input} {output}"
+        "cp {params.template_seg} {output.template_seg}"
 
 
 def get_image_pairs(wildcards, input):
@@ -279,13 +278,6 @@ rule template_shape_inject:
 
 rule inject_init_laplace_coords:
     input:
-        coords=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "tpl-upenn",
-            "tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz",
-        ),
         subject_seg=get_input_for_shape_inject,
         matrix=bids(
             root=work,
@@ -310,7 +302,12 @@ rule inject_init_laplace_coords:
             space="corobl",
             hemi="{hemi}"
         ),
+        template_dir=Path(download_dir) / "template" / config["inject_template"],
     params:
+        coords=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["inject_template"]]["coords"].format(
+            **wildcards
+        ),
         interp_opt="-ri NN",
     output:
         init_coords=bids(
@@ -340,7 +337,7 @@ rule inject_init_laplace_coords:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {params.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule unflip_init_coords:
