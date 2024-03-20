@@ -248,8 +248,6 @@ rule reg_t2_to_t1:
 
 def get_inputs_compose_t2_xfm_corobl(wildcards):
     if config["t1_reg_template"]:
-        # xfm0: t2 to t1
-        # xfm1: t1 to corobl
         t2_to_t1 = (
             bids(
                 root=work,
@@ -262,79 +260,27 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
                 type_="itk"
             ),
         )
-        t1_to_cor = (
-            bids(
-                root=work,
-                datatype="warps",
-                **config["subj_wildcards"],
-                suffix="xfm.txt",
-                from_="T1w",
-                to="corobl",
-                desc="affine",
-                type_="itk"
-            ),
-        )
-        return {"t2_to_t1": t2_to_t1, "t1_to_cor": t1_to_cor}
-
     else:
-        # xfm0: t2 to template
-        t2_to_std = (
-            bids(
-                root=work,
-                datatype="warps",
-                **config["subj_wildcards"],
-                suffix="xfm.txt",
-                from_="T2w",
-                to=config["template"],
-                desc="affine",
-                type_="itk"
-            ),
-        )
-
-        # xfm1: template to corobl
-        template_dir = Path(download_dir) / "template" / config["template"]
-        return {"t2_to_std": t2_to_std, "template_dir": template_dir}
-
-
-def get_cmd_compose_t2_xfm_corobl(wildcards, input):
-    if config["t1_reg_template"]:
-        # xfm0: t2 to t1
-        xfm0 = input.t2_to_t1
-        # xfm1: t1 to corobl
-        xfm1 = input.t1_to_cor
-    else:
-        # xfm0: t2 to template
-        xfm0 = input.t2_to_std
-        # xfm1: template to corobl
-        xfm1 = Path(input.template_dir) / config["template_files"][config["template"]][
-            "xfm_corobl"
-        ].format(**wildcards)
-
-    return "c3d_affine_tool -itk {xfm0} -itk {xfm1} -mult -oitk {output}"
+        t2_to_t1 = Path(workflow.basedir).parent / config["xfm_identity_itk"]
+    to_corobl = (
+        Path(download_dir)
+        / "template"
+        / config["template"]
+        / config["template_files"][config["template"]]["xfm_corobl"]
+    )
+    return {"t2_to_t1": t2_to_t1, "to_corobl": to_corobl}
 
 
 # now have t2 to t1 xfm, compose this with t1 to corobl xfm
 rule compose_t2_xfm_corobl:
     input:
         unpack(get_inputs_compose_t2_xfm_corobl),
-    params:
-        cmd=get_cmd_compose_t2_xfm_corobl,
     output:
-        t2_to_cor=bids(
+        bids(
             root=work,
             datatype="warps",
             **config["subj_wildcards"],
             suffix="xfm.txt",
-            from_="T2w",
-            to="corobl",
-            desc="affine",
-            type_="itk"
-        ),
-    log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            suffix="composecorobl.txt",
             from_="T2w",
             to="corobl",
             desc="affine",
@@ -345,7 +291,7 @@ rule compose_t2_xfm_corobl:
     group:
         "subj"
     shell:
-        "{params.cmd} > {log}"
+        "c3d_affine_tool -itk {input.t2_to_t1} -itk {input.to_corobl} -mult -oitk {output}"
 
 
 # if already have t2w in T1w space, then we don't need to use composed xfm:
