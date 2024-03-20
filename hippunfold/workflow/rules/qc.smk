@@ -110,7 +110,6 @@ rule plot_subj_subfields:
 
 
 def get_bg_img_for_subfield_qc(wildcards):
-
     if config["modality"] == "hippb500":
         return bids(
             root=work,

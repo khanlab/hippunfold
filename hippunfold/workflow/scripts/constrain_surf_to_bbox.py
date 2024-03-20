@@ -2,7 +2,6 @@ import nibabel as nib
 import numpy as np
 
 with open(snakemake.log[0], "w") as sys.stdout:
-
     epsilon = 0.01
 
     # load gifti surf
