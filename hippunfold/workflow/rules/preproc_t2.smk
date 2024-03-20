@@ -263,7 +263,12 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         )
     else:
         t2_to_t1 = Path(workflow.basedir).parent / config["xfm_identity_itk"]
-    to_corobl = Path(download_dir) / "template" / config["template"] / config["template_files"][config["template"]]["xfm_corobl"]
+    to_corobl = (
+        Path(download_dir)
+        / "template"
+        / config["template"]
+        / config["template_files"][config["template"]]["xfm_corobl"]
+    )
     return {"t2_to_t1": t2_to_t1, "to_corobl": to_corobl}
 
 
