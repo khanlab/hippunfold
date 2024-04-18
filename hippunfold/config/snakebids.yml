@@ -130,7 +130,6 @@ parse_args:
     action: version
     version: "1.4.2-pre.35"
 
-
   --modality:
     help: 'Type of image to run hippunfold on. Modality prefixed with seg will import an existing (manual) hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
     required: True
@@ -142,7 +141,6 @@ parse_args:
       - segT2w
       - cropseg
 
-
   --template:
     choices:
       - 'CITI168'
@@ -150,11 +148,9 @@ parse_args:
       - 'MBMv2'
       - 'MBMv3'
       - 'CIVM'
+      - 'ABAv3'
     default: 'CITI168'
-    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, and CIVM is for in vivo macaque data. (default: %(default)s)'
-
-
-
+    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex-vivo marmoset data, MBMv3 is for in-vivo marmoset data, CIVM is for in-vivo macaque data, ABAv3 is ex-vivo mouse data. Linear registration errors can sometimes occur due to differences in skull-stripping, which can be ameliorated with the "--rigid_reg_template" flag. (default: %(default)s)'
 
   --inject_template:
     choices:
@@ -162,18 +158,18 @@ parse_args:
       - 'MBMv2'
       - 'MBMv3'
       - 'CIVM'
+      - 'ABAv3'
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv2 (ex vivo marmoset), MBMv3 (in vivo marmoset), or CIVM (ex vivo macaque) template. (default: %(default)s)'
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv2 (ex-vivo marmoset), MBMv3 (in-vivo marmoset), or CIVM (ex-vivo macaque) template. (default: %(default)s)'
     default: False
     action: 'store_true'
 
   --template_seg_smoothing_factor: 
     help: 'Scales the default smoothing sigma for gradient and warp in greedy registration for template-based segmentation. Using a value higher than 1 will use result in a smoother warp. (default: %(default)s)'
     default: 2.0
-
 
   --derivatives:
     help: 'Path to the derivatives folder (e.g. for finding manual segs) (default: %(default)s) '
@@ -184,7 +180,6 @@ parse_args:
     default: False
     action: 'store_true'
 
- 
   --skip_coreg:
     help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s)'
     default: False
@@ -195,11 +190,9 @@ parse_args:
     default: False
     action: 'store_true'
 
-  
   --inject_template_smoothing_factor: 
     help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
     default: 1.0
-
 
   --rigid_reg_template:
     help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
@@ -211,7 +204,6 @@ parse_args:
     default: False
     action: 'store_true'
 
-  
   --t1_reg_template:
     help: 'Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
     default: false
@@ -328,7 +320,6 @@ autotop_labels:
   - 'hipp'
   - 'dentate'
 
-
 surf_types:
   hipp:
     - midthickness
@@ -345,7 +336,7 @@ gifti_metric_types:
   dentate:
     - gyrification.shape 
     - curvature.shape
-  
+
 cifti_metric_types: 
   hipp:
     - gyrification.dscalar
@@ -354,7 +345,6 @@ cifti_metric_types:
   dentate:
     - gyrification.dscalar
     - curvature.dscalar
-
 
 
 
@@ -374,6 +364,10 @@ template_based_segmentation:
       - R
       - L
   CIVM:
+    hemi:
+      - R
+      - L
+  ABAv3:
     hemi:
       - R
       - L
@@ -416,7 +410,7 @@ template_files:
     xfm_corobl: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
     crop_ref: tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
     Mask_crop: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    dseg: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissue_dseg.nii.gz
     coords: tpl-MBMv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   CIVM:
     T1w: tpl-CIVM_T1w.nii.gz
@@ -425,6 +419,13 @@ template_files:
     Mask_crop: tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-CIVM_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  ABAv3:
+    T1w: tpl-ABAv3_T1w.nii.gz
+    xfm_corobl: tpl-ABAv3_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-ABAv3_hemi-{hemi}_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
@@ -511,6 +512,7 @@ resource_urls:
     MBMv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
     upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
     CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
+    ABAv3: ''
 #to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 
