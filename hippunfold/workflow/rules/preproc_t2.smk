@@ -259,7 +259,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
                 from_="T2w",
                 to="T1w",
                 desc="rigid",
-                type_="itk"
+                type_="itk",
             ),
         )
         t1_to_cor = (
@@ -271,7 +271,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
                 from_="T1w",
                 to="corobl",
                 desc="affine",
-                type_="itk"
+                type_="itk",
             ),
         )
         return {"t2_to_t1": t2_to_t1, "t1_to_cor": t1_to_cor}
@@ -287,7 +287,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
                 from_="T2w",
                 to=config["template"],
                 desc="affine",
-                type_="itk"
+                type_="itk",
             ),
         )
 
@@ -296,7 +296,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         return {"t2_to_std": t2_to_std, "template_dir": template_dir}
 
 
-def get_cmd_compose_t2_xfm_corobl(wildcards, input):
+def get_cmd_compose_t2_xfm_corobl(wildcards, input, output):
     if config["t1_reg_template"]:
         # xfm0: t2 to t1
         xfm0 = input.t2_to_t1
@@ -310,7 +310,7 @@ def get_cmd_compose_t2_xfm_corobl(wildcards, input):
             "xfm_corobl"
         ].format(**wildcards)
 
-    return "c3d_affine_tool -itk {xfm0} -itk {xfm1} -mult -oitk {output}"
+    return f"c3d_affine_tool -itk {xfm0} -itk {xfm1} -mult -oitk {output}"
 
 
 # now have t2 to t1 xfm, compose this with t1 to corobl xfm
