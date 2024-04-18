@@ -51,6 +51,7 @@ pipeline/algorithms
 
 outputs/output_files
 outputs/visualization
+outputs/QC
 ```
 
 

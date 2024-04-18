@@ -128,7 +128,7 @@ parse_args:
   --version:
     help: 'Print the version of HippUnfold'
     action: version
-    version: "1.4.2-pre.35"
+    version: "1.4.2-pre.37"
 
   --modality:
     help: 'Type of image to run hippunfold on. Modality prefixed with seg will import an existing (manual) hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
@@ -355,6 +355,7 @@ singularity:
   autotop: 'docker://khanlab/hippunfold_deps:v0.5.0'
 
 xfm_identity: resources/etc/identity_xfm.txt
+xfm_identity_itk: resources/etc/identity_xfm_itk.txt
 
 #templates enabled for template-based segmentation are here
 # TODO: should also perhaps include modalities avaialble, and any custom crop_native_res settings

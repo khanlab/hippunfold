@@ -103,6 +103,7 @@ wildcard_constraints:
     density="[a-zA-Z0-9]+",
     atlas="[a-zA-Z0-9]+",
     autotop="[a-zA-Z0-9]+",
+    template="[a-zA-Z0-9]+",
 
 
 root = os.path.join(config["root"], "hippunfold")
