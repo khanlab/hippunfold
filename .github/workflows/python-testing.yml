@@ -55,7 +55,7 @@ jobs:
 
       - name: Setup env for hippunfold
         run: |
-          echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models" >> $GITHUB_ENV
+          echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/hippunfold_cache_dir" >> $GITHUB_ENV
 
       - name: Test single T2w bids
         run: |

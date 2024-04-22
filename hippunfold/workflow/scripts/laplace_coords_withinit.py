@@ -56,7 +56,6 @@ upd_coords = coords.copy()
 
 # iterate until the solution doesn't change anymore (or reach max iters)
 for i in range(max_iters):
-
     # debug: save niftis to check progress
     #   if (i % 100 == 0):
     #       tonii = coords.copy()
