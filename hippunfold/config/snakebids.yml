@@ -128,7 +128,7 @@ parse_args:
   --version:
     help: 'Print the version of HippUnfold'
     action: version
-    version: "1.4.2-pre.37"
+    version: "1.5.0-pre.38"
 
 
   --modality:
