@@ -27,6 +27,7 @@ getting_started/vagrant
 usage/cli
 usage/useful_options
 usage/specializedScans
+usage/templates.md
 usage/faq.md
 ```
 
@@ -62,6 +63,7 @@ outputs/QC
 :hidden:
 :maxdepth: 2
 
+contributing/references
 contributing/contributing
 ```
 
