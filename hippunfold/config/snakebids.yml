@@ -151,7 +151,7 @@ parse_args:
       - 'MBMv3'
       - 'CIVM'
     default: 'CITI168'
-    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, and CIVM is for in vivo macaque data. (default: %(default)s)'
+    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, and CIVM is for in vivo macaque data. When using a non-human template, consider using a corresponding atlas. (default: %(default)s)'
 
 
 
@@ -231,6 +231,7 @@ parse_args:
       - 'magdeburg'
       - 'freesurfer'
       - 'multihist7'
+      - 'macaque'
     default: 
       - 'multihist7'
     nargs: '+'
@@ -447,6 +448,9 @@ atlas_files:
   freesurfer:
     label_nii: sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
     label_list: freesurfer_labellist.txt
+  macaque:
+    label_nii: sub-bigmac_hemi-{hemi}_space-unfold_label-hipp_desc-macaquesubfields_dseg.nii.gz
+    label_list: macaque_labellist.txt
 
 
 #values to use for re-mapping tissue labels when combining with subfields.
@@ -505,6 +509,7 @@ resource_urls:
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
     magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
     freesurfer: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
+    macaque: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6661f504d835c42bcb4cddab/?zip='
   template:
     CITI168: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
     dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
