@@ -387,6 +387,10 @@ template_based_segmentation:
   MBMv3:
     hemi:
       - R
+  ABAv3:
+    hemi:
+      - R
+      - L
 
 
 template_files:
@@ -485,7 +489,10 @@ tissue_atlas_mapping:
     dg: 209
     srlm: 227
     cyst: 228
-    
+  mouse: 
+    dg: 6
+    srlm: 7
+    cyst: 8
 
 
 rigid_reg_template: False
