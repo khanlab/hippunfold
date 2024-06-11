@@ -150,8 +150,9 @@ parse_args:
       - 'MBMv2'
       - 'MBMv3'
       - 'CIVM'
+      - 'ABAv3'
     default: 'CITI168'
-    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, and CIVM is for in vivo macaque data. (default: %(default)s)'
+    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, CIVM is for in vivo macaque data, and ABAv3 is for mouse data. (default: %(default)s)'
 
 
 
@@ -162,6 +163,7 @@ parse_args:
       - 'MBMv2'
       - 'MBMv3'
       - 'CIVM'
+      - 'ABAv3'
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
@@ -231,6 +233,7 @@ parse_args:
       - 'magdeburg'
       - 'freesurfer'
       - 'multihist7'
+      - 'mouse'
     default: 
       - 'multihist7'
     nargs: '+'
@@ -430,6 +433,13 @@ template_files:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
     coords: tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+  ABAv3:
+    T1w: tpl-ABAv3_T1w.nii.gz
+    xfm_corobl: tpl-ABAv3_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-ABAv3_hemi-{hemi}_space-corobl_T1w.nii.gz
+    Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
 
 atlas_files:
   multihist7:
@@ -447,6 +457,9 @@ atlas_files:
   freesurfer:
     label_nii: sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
     label_list: freesurfer_labellist.txt
+  mouse:
+    label_nii: sub-ABAv3_space-unfold_label-hipp_desc-mousesubfields_dseg.nii.gz
+    label_list: mouse_labellist.txt
 
 
 #values to use for re-mapping tissue labels when combining with subfields.
@@ -505,6 +518,7 @@ resource_urls:
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
     magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
     freesurfer: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
+    mouse: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666884380f8c80103a3c9569/?zip='
   template:
     CITI168: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
     dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
@@ -512,6 +526,7 @@ resource_urls:
     MBMv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
     upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
     CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
+    ABAv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip='
 #to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 
