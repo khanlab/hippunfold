@@ -54,10 +54,10 @@ rule get_subfield_vols_subj:
             hemi=config["hemi"],
             allow_missing=True,
         ),
-        lookup_tsv=Path(workflow.basedir).parent
-        / "resources"
-        / "label_lut"
-        / "desc-subfields_atlas-{atlas}_dseg.tsv",
+        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
+    params:
+        lookup_tsv=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["lut"].format(**wildcards),
     group:
         "subj"
     output:
