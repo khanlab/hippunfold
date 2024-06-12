@@ -348,6 +348,7 @@ gifti_metric_types:
   dentate:
     - gyrification.shape 
     - curvature.shape
+    - thickness.shape
   
 cifti_metric_types: 
   hipp:
@@ -357,8 +358,10 @@ cifti_metric_types:
   dentate:
     - gyrification.dscalar
     - curvature.dscalar
+    - thickness.dscalar
 
-
+outlierSmoothDist: 15
+vertexOutlierThreshold: 3
 
 
 
@@ -564,7 +567,7 @@ unfold_vol_ref:
     dims:
       - '256'
       - '128' 
-      - '16'
+      - '8'
     voxdims:
       - '0.15625'
       - '0.15625'
@@ -599,9 +602,9 @@ unfold_vol_ref:
     orient: RPI
 
 unfold_crop_epsilon_fractions:
-    - 0
-    - 0
-    - 0.0625 #1/16
+    - 1
+    - 1
+    - 1
 
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface

@@ -111,18 +111,18 @@ summary("unfold_grid_phys", unfold_grid_phys)
 
 # add some noise to avoid perfectly overlapping datapoints!
 points = (
-    coord_flat_ap + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    coord_flat_pd + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    coord_flat_io + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+    coord_flat_ap * unfold_dims[0] + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+    coord_flat_pd * unfold_dims[1] + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+    coord_flat_io * unfold_dims[2] + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
 )
 
 # get unfolded grid (from 0 to 1, not world coords), using meshgrid:
 #  note: indexing='ij' to swap the ordering of x and y
 epsilon = snakemake.params.epsilon
 (unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(
-    np.linspace(0 + float(epsilon[0]), 1 - float(epsilon[0]), unfold_dims[0]),
-    np.linspace(0 + float(epsilon[1]), 1 - float(epsilon[1]), unfold_dims[1]),
-    np.linspace(0 + float(epsilon[2]), 1 - float(epsilon[2]), unfold_dims[2]),
+    np.linspace(0 + float(epsilon[0]), unfold_dims[0] - float(epsilon[0]), unfold_dims[0]),
+    np.linspace(0 + float(epsilon[1]), unfold_dims[1] - float(epsilon[1]), unfold_dims[1]),
+    np.linspace(0 + float(epsilon[2]), unfold_dims[2] - float(epsilon[2]), unfold_dims[2]),
     indexing="ij",
 )
 
