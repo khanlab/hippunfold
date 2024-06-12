@@ -448,21 +448,26 @@ template_files:
 atlas_files:
   multihist7:
     label_nii: sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
+    lut: desc-subfields_atlas-multihist7_dseg.tsv
     label_list: labellist.txt
     thickness: thickness.nii.gz
     curvature: curvature.nii.gz
     gyrification: gyrification.nii.gz
   bigbrain:
     label_nii: sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
+    lut: desc-subfields_atlas-bigbrain_dseg.tsv
     label_list: sub-bigbrain_labellist.txt
   magdeburg:
     label_nii: sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
+    lut: desc-subfields_atlas-magdeburg_dseg.tsv
     label_list: magdeburg_labellist.txt
   freesurfer:
     label_nii: sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
+    lut: desc-subfields_atlas-mfreesurfer_dseg.tsv
     label_list: freesurfer_labellist.txt
   mouse:
     label_nii: sub-ABAv3_space-unfold_label-hipp_desc-mousesubfields_dseg.nii.gz
+    lut: desc-subfields_atlas-mouse_dseg.tsv
     label_list: mouse_labellist.txt
 
 
