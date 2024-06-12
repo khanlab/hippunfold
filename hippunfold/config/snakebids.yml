@@ -348,7 +348,6 @@ gifti_metric_types:
   dentate:
     - gyrification.shape 
     - curvature.shape
-    - thickness.shape
   
 cifti_metric_types: 
   hipp:
@@ -358,7 +357,6 @@ cifti_metric_types:
   dentate:
     - gyrification.dscalar
     - curvature.dscalar
-    - thickness.dscalar
 
 outlierSmoothDist: 15
 vertexOutlierThreshold: 3
@@ -567,7 +565,7 @@ unfold_vol_ref:
     dims:
       - '256'
       - '128' 
-      - '8'
+      - '16'
     voxdims:
       - '0.15625'
       - '0.15625'
@@ -602,8 +600,8 @@ unfold_vol_ref:
     orient: RPI
 
 unfold_crop_epsilon_fractions:
-    - 1
-    - 1
+    - 0
+    - 0
     - 1
 
 # space for uniform unfolded grid:
