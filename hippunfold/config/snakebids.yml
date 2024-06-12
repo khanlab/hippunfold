@@ -358,6 +358,8 @@ cifti_metric_types:
     - gyrification.dscalar
     - curvature.dscalar
 
+# params for detecting and removing outlier vertices
+# NOTE this is currently dependent on surface density
 outlierSmoothDist: 15
 vertexOutlierThreshold: 3
 
