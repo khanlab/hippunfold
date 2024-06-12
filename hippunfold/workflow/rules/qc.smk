@@ -54,8 +54,8 @@ rule get_subfield_vols_subj:
             hemi=config["hemi"],
             allow_missing=True,
         ),
-        lookup_tsv=Path(download_dir)
-        / config["atlas_files"]["{atlas}"]["label_nii"].format(**wildcards),
+        lookup_tsv=lambda wildcards: Path(download_dir)
+        / config["atlas_files"][wildcards.atlas]["label_nii"].format(**wildcards),
     group:
         "subj"
     output:
