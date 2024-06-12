@@ -54,7 +54,7 @@ rule get_subfield_vols_subj:
             hemi=config["hemi"],
             allow_missing=True,
         ),
-        lookup_tsv=Path(download_dir) /
+        lookup_tsv=Path(download_dir)
         / "atlas"
         / "{atlas}"
         / "desc-subfields_atlas-{atlas}_dseg.tsv",
