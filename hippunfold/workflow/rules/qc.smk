@@ -54,7 +54,7 @@ rule get_subfield_vols_subj:
             hemi=config["hemi"],
             allow_missing=True,
         ),
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
+        atlas_dir=lambda wildcards, input: Path(download_dir) / "atlas" / wildcards.atlas,
     params:
         lookup_tsv=lambda wildcards: Path(input.atlas_dir)
         / config["atlas_files"][wildcards.atlas]["lut"].format(**wildcards),
