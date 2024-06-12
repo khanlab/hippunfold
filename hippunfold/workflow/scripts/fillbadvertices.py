@@ -19,8 +19,9 @@ def avg_neighbours(F, cdat, n):
     frows = np.where(F == n)[0]
     v = np.unique(F[frows, :])
     cdat = np.reshape(cdat, (len(cdat), -1))
-    out = np.nanmean(cdat[v,:], 0)
+    out = np.nanmean(cdat[v, :], 0)
     return out
+
 
 def surfdat_smooth(F, cdata, iters=1):
     sz = cdata.shape
@@ -28,17 +29,17 @@ def surfdat_smooth(F, cdata, iters=1):
     cdata_smooth = copy.deepcopy(cdata)
     for i in range(iters):
         for n in range(len(cdata)):
-            cdata_smooth[n,:] = avg_neighbours(F, cdata, n)
+            cdata_smooth[n, :] = avg_neighbours(F, cdata, n)
         cdata = copy.deepcopy(cdata_smooth)
     return cdata_smooth.reshape(sz)
 
+
 Vsmooth = surfdat_smooth(F, V, iters=iters)
 Vdiffs = V - Vsmooth
-Vdists = np.sqrt((Vdiffs[:,0])**2 + (Vdiffs[:,1])**2 + (Vdiffs[:,2])**2)
+Vdists = np.sqrt((Vdiffs[:, 0]) ** 2 + (Vdiffs[:, 1]) ** 2 + (Vdiffs[:, 2]) ** 2)
 Vzscored = zscore(Vdists)
-outliers = ((Vzscored > SDthreshold) | (Vzscored < -SDthreshold))
-V[outliers,:] = np.nan
-
+outliers = (Vzscored > SDthreshold) | (Vzscored < -SDthreshold)
+V[outliers, :] = np.nan
 
 
 # most nans should be just isolated points, but in case there is an island of nans this will erode it, replacing with decent (but not perfect) guesses of where vertices should be
