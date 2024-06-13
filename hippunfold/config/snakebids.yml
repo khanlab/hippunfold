@@ -327,10 +327,13 @@ parse_args:
       - synthseg_v0.2
       - neonateT1w_v2
 
+
+
+# --- surface specific configuration -- 
+
 autotop_labels:
   - 'hipp'
   - 'dentate'
-
 
 surf_types:
   hipp:
@@ -339,6 +342,8 @@ surf_types:
     - outer
   dentate:
     - midthickness
+#    - inner
+#    - outer
 
 gifti_metric_types:
   hipp:
@@ -359,8 +364,11 @@ cifti_metric_types:
     - curvature.dscalar
 
 # params for detecting and removing outlier vertices
-# NOTE this is currently dependent on surface density
-outlierSmoothDist: 15
+outlierSmoothDist: 
+  unfoldiso: 15
+  0p5mm: 7
+  1mm: 3
+  2mm: 1
 vertexOutlierThreshold: 3
 
 

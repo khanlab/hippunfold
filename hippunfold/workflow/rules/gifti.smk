@@ -214,7 +214,7 @@ rule correct_bad_vertices1:
             **config["subj_wildcards"]
         ),
     params:
-        dist=config["outlierSmoothDist"],
+        dist=lambda wildcards: config["outlierSmoothDist"][wildcards.density],
         threshold=config["vertexOutlierThreshold"],
     output:
         gii=bids(
@@ -764,7 +764,7 @@ rule correct_bad_vertices2:
             **config["subj_wildcards"]
         ),
     params:
-        dist=config["outlierSmoothDist"],
+        dist=lambda wildcards: config["outlierSmoothDist"][wildcards.density],
         threshold=config["vertexOutlierThreshold"],
     output:
         gii=bids(
