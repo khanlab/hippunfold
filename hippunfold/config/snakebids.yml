@@ -151,6 +151,7 @@ parse_args:
       - 'MBMv3'
       - 'CIVM'
       - 'ABAv3'
+      - 'bigbrain'
     default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, CIVM is for in vivo macaque data, and ABAv3 is for mouse data. When using a non-human template, consider using a corresponding atlas. (default: %(default)s)'
 
@@ -163,6 +164,7 @@ parse_args:
       - 'MBMv3'
       - 'CIVM'
       - 'ABAv3'
+      - 'bigbrain'
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
@@ -402,6 +404,10 @@ template_based_segmentation:
     hemi:
       - R
       - L
+  bigbrain:
+    hemi:
+      - R
+      - L
 
 
 template_files:
@@ -455,6 +461,13 @@ template_files:
     Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  bigbrain:
+    T1w: tpl-bigbrain_100um_T1w.nii.gz
+    xfm_corobl: tpl-bigbrain_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-bigbrain_hemi-{hemi}_space-corobl_40um_T1w.nii.gz
+    Mask_crop: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_40um_dseg.nii.gz
+    dseg: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_40um_dseg.nii.gz
+    coords: tpl-bigbrain_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
 
 atlas_files:
   multihist7:
@@ -555,6 +568,7 @@ resource_urls:
     upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
     CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
     ABAv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip='
+    bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666b1bc765e1de5972893e59/?zip='
 #to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 
