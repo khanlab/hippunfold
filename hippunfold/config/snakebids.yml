@@ -391,6 +391,10 @@ template_based_segmentation:
     hemi:
       - R
       - L
+  dHCP:
+    hemi:
+      - R
+      - L
 
 
 template_files:
@@ -410,6 +414,7 @@ template_files:
     crop_ref: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
+    coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   MBMv2:
     T1w: Template_sym_MTR_80um.nii.gz
     T2w: Template_sym_T2_80um.nii.gz
