@@ -105,26 +105,7 @@ coord_flat_ap_unnorm = coord_flat_ap * unfold_dims[0]
 coord_flat_pd_unnorm = coord_flat_pd * unfold_dims[1]
 coord_flat_io_unnorm = coord_flat_io * unfold_dims[2]
 
-# get unfolded grid (from 0 to 1, not world coords), using meshgrid:
-#  note: indexing='ij' to swap the ordering of x and y
-epsilon = snakemake.params.epsilon
-(unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(
-    np.linspace(
-        0 + float(epsilon[0]), unfold_dims[0] - float(epsilon[0]), unfold_dims[0]
-    ),
-    np.linspace(
-        0 + float(epsilon[1]), unfold_dims[1] - float(epsilon[1]), unfold_dims[1]
-    ),
-    np.linspace(
-        0 + float(epsilon[2]), unfold_dims[2] - float(epsilon[2]), unfold_dims[2]
-    ),
-    indexing="ij",
-)
-summary("unfold_gx", unfold_gx)
-summary("unfold_gy", unfold_gy)
-summary("unfold_gz", unfold_gz)
-
-# perform the interpolation
+# get unfolded grid 
 
 points = np.stack(
     [
@@ -137,6 +118,10 @@ points = np.stack(
     ],
     axis=1,
 )
+summary("points", points)
+
+
+# perform the interpolation
 
 interp_ap = naturalneighbor.griddata(
     points,

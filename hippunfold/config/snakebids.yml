@@ -608,10 +608,6 @@ unfold_vol_ref:
       - '2.5'
     orient: RPI
 
-unfold_crop_epsilon_fractions:
-    - 0
-    - 0
-    - 0.0625 #1/16
 
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface
