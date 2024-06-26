@@ -24,41 +24,69 @@ def get_modality_suffix(modality):
 
 
 def get_final_spec():
-    if len(config["hemi"]) == 2:
-        specs = expand(
+    specs = expand(
+        bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            space="{space}",
+            hemi="{hemi}",
+            label="{autotop}",
+            suffix="surfaces.spec",
+            **config["subj_wildcards"],
+        ),
+        density=config["output_density"],
+        space=ref_spaces,
+        hemi=config["hemi"],
+        autotop=config["autotop_labels"],
+        allow_missing=True,
+    )
+    return specs
+
+
+def get_final_surf():
+    gii = []
+    gii.extend(
+        expand(
             bids(
                 root=root,
                 datatype="surf",
                 den="{density}",
-                space="{space}",
-                label="{autotop}",
-                suffix="surfaces.spec",
-                **config["subj_wildcards"],
-            ),
-            density=config["output_density"],
-            space=ref_spaces,
-            autotop=config["autotop_labels"],
-            allow_missing=True,
-        )
-    else:
-        specs = expand(
-            bids(
-                root=root,
-                datatype="surf",
-                den="{density}",
+                suffix="{surfname}.surf.gii",
                 space="{space}",
                 hemi="{hemi}",
                 label="{autotop}",
-                suffix="surfaces.spec",
                 **config["subj_wildcards"],
             ),
             density=config["output_density"],
             space=ref_spaces,
             hemi=config["hemi"],
             autotop=config["autotop_labels"],
+            surfname=config["surf_types"]["hipp"],
             allow_missing=True,
         )
-    return specs
+    )
+    gii.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{autotop}",
+                **config["subj_wildcards"],
+            ),
+            density=config["output_density"],
+            space=ref_spaces,
+            hemi=config["hemi"],
+            autotop=config["autotop_labels"],
+            surfname=config["surf_types"]["dentate"],
+            allow_missing=True,
+        )
+    )
+    return gii
 
 
 def get_final_subfields():
@@ -313,6 +341,7 @@ def get_final_qc():
 def get_final_subj_output():
     subj_output = []
     subj_output.extend(get_final_spec())
+    subj_output.extend(get_final_surf())
     subj_output.extend(get_final_subfields())
     subj_output.extend(get_final_coords())
     subj_output.extend(get_final_transforms())

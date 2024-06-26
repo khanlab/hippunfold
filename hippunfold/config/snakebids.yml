@@ -159,6 +159,7 @@ parse_args:
   --inject_template:
     choices:
       - 'upenn'
+      - 'dHCP'
       - 'MBMv2'
       - 'MBMv3'
       - 'CIVM'
@@ -327,10 +328,14 @@ parse_args:
       - synthseg_v0.2
       - neonateT1w_v2
 
+
+
+
+# --- surface specific configuration -- 
+
 autotop_labels:
   - 'hipp'
   - 'dentate'
-
 
 surf_types:
   hipp:

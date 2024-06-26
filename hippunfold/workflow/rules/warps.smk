@@ -167,7 +167,6 @@ rule create_warps_hipp:
         ),
         labelmap=get_labels_for_laplace,
     params:
-        interp_method="linear",
         gm_labels=lambda wildcards: config["laplace_labels"]["AP"]["gm"],
         epsilon=lambda wildcards: config["unfold_crop_epsilon_fractions"],
     resources:
@@ -226,8 +225,6 @@ rule create_warps_hipp:
             hemi="{hemi}",
             suffix="create_warps-hipp.txt"
         ),
-    container:
-        config["singularity"]["autotop"]
     script:
         "../scripts/create_warps.py"
 
@@ -294,7 +291,6 @@ rule create_warps_dentate:
         ),
         labelmap=get_labels_for_laplace,
     params:
-        interp_method="linear",
         gm_labels=lambda wildcards: config["laplace_labels"]["PD"]["sink"],
         epsilon=lambda wildcards: config["unfold_crop_epsilon_fractions"],
     resources:
@@ -353,8 +349,6 @@ rule create_warps_dentate:
             hemi="{hemi}",
             suffix="create_warps-dentate.txt"
         ),
-    container:
-        config["singularity"]["autotop"]
     script:
         "../scripts/create_warps.py"
 

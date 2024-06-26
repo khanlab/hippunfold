@@ -1,7 +1,7 @@
 import nibabel as nib
 import numpy as np
-from scipy.interpolate import griddata
-from scipy.interpolate import NearestNDInterpolator
+import naturalneighbor
+from scipy.stats import zscore
 
 logfile = open(snakemake.log[0], "w")
 print(f"Start", file=logfile, flush=True)
@@ -24,9 +24,6 @@ def summary(name, array):
     )
     return
 
-
-# params:
-interp_method = snakemake.params.interp_method
 
 # load unfolded coordinate map
 # unfold_ref_nib = nib.load(snakemake.input.unfold_ref_nii)
@@ -66,7 +63,7 @@ sz = mask.shape
 # the unfolded space, using scipy's griddata (equivalent to matlab scatteredInterpolant).
 
 
-coord_flat_ap = coord_ap[mask == True]  # matlab: Laplace_AP = coord_ap(mask==1);
+coord_flat_ap = coord_ap[mask == True]
 coord_flat_pd = coord_pd[mask == True]
 coord_flat_io = coord_io[mask == True]
 
@@ -75,15 +72,11 @@ summary("coord_flat_pd", coord_flat_pd)
 summary("coord_flat_io", coord_flat_io)
 
 # unravel indices of mask voxels into subscripts...
-(i_L, j_L, k_L) = np.unravel_index(
-    idxgm, sz
-)  # matlab: [i_L,j_L,k_L]=ind2sub(sz,idxgm);
+(i_L, j_L, k_L) = np.unravel_index(idxgm, sz)
 summary("i_L", i_L)
 
 # ... and stack into vectors ...
-native_coords_mat = np.vstack(
-    (i_L, j_L, k_L, np.ones(i_L.shape))
-)  # matlab: native_coords_mat = [i_L-1, j_L-1, k_L-1,ones(size(i_L))]';
+native_coords_mat = np.vstack((i_L, j_L, k_L, np.ones(i_L.shape)))
 summary("native_coords_mat", native_coords_mat)
 
 
@@ -104,74 +97,63 @@ summary("unfold_grid_phys", unfold_grid_phys)
 
 # scattered interpolation / griddata:
 
-# matlab:  interp_X = scatteredInterpolant(Laplace_AP,Laplace_PD,Laplace_IO,native_coords_phys(:,1),interp,extrap);
-
 # we have points defined by coord_flat_{ap,pd,io}, and corresponding value as native_coords_phys[:,i]
 # and we want to interpolate on a grid in the unfolded space
 
-# add some noise to avoid perfectly overlapping datapoints!
-points = (
-    coord_flat_ap + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    coord_flat_pd + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    coord_flat_io + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-)
+# unnormalize and add a bit of noise so points don't ever perfectly overlap
+coord_flat_ap_unnorm = coord_flat_ap * unfold_dims[0]
+coord_flat_pd_unnorm = coord_flat_pd * unfold_dims[1]
+coord_flat_io_unnorm = coord_flat_io * unfold_dims[2]
 
 # get unfolded grid (from 0 to 1, not world coords), using meshgrid:
 #  note: indexing='ij' to swap the ordering of x and y
 epsilon = snakemake.params.epsilon
 (unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(
-    np.linspace(0 + float(epsilon[0]), 1 - float(epsilon[0]), unfold_dims[0]),
-    np.linspace(0 + float(epsilon[1]), 1 - float(epsilon[1]), unfold_dims[1]),
-    np.linspace(0 + float(epsilon[2]), 1 - float(epsilon[2]), unfold_dims[2]),
+    np.linspace(
+        0 + float(epsilon[0]), unfold_dims[0] - float(epsilon[0]), unfold_dims[0]
+    ),
+    np.linspace(
+        0 + float(epsilon[1]), unfold_dims[1] - float(epsilon[1]), unfold_dims[1]
+    ),
+    np.linspace(
+        0 + float(epsilon[2]), unfold_dims[2] - float(epsilon[2]), unfold_dims[2]
+    ),
     indexing="ij",
 )
-
-# tuple for use in griddata:
-unfold_xi = (unfold_gx, unfold_gy, unfold_gz)
 summary("unfold_gx", unfold_gx)
 summary("unfold_gy", unfold_gy)
 summary("unfold_gz", unfold_gz)
 
-# perform the interpolation, filling in outside values as 0
-#  TODO: linear vs cubic?  we were using "natural" interpolation in matlab
-#         so far, linear seems close enough..
-interp_ap = griddata(
-    points, values=native_coords_phys[:, 0], xi=unfold_xi, method=interp_method
-)
-summary("interp_ap", interp_ap)
-interp_pd = griddata(
-    points, values=native_coords_phys[:, 1], xi=unfold_xi, method=interp_method
-)
-summary("interp_pd", interp_pd)
-interp_io = griddata(
-    points, values=native_coords_phys[:, 2], xi=unfold_xi, method=interp_method
-)
-summary("interp_io", interp_ap)
+# perform the interpolation
 
-# fill NaNs (NN interpolater allows for extrapolation!)
-[x, y, z] = np.where(np.invert(np.isnan(interp_ap)))
-interp = NearestNDInterpolator(
-    np.c_[x, y, z], interp_ap[np.invert(np.isnan(interp_ap))]
+points = np.stack(
+    [
+        coord_flat_ap * unfold_dims[0]
+        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+        coord_flat_pd * unfold_dims[1]
+        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+        coord_flat_io * unfold_dims[2]
+        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+    ],
+    axis=1,
 )
-[qx, qy, qz] = np.where(np.isnan(interp_ap))
-fill = interp(qx, qy, qz)
-interp_ap[np.isnan(interp_ap)] = fill
 
-[x, y, z] = np.where(np.invert(np.isnan(interp_pd)))
-interp = NearestNDInterpolator(
-    np.c_[x, y, z], interp_pd[np.invert(np.isnan(interp_pd))]
+interp_ap = naturalneighbor.griddata(
+    points,
+    native_coords_phys[:, 0],
+    [[0, unfold_dims[0], 1], [0, unfold_dims[1], 1], [0, unfold_dims[2], 1]],
 )
-[qx, qy, qz] = np.where(np.isnan(interp_pd))
-fill = interp(qx, qy, qz)
-interp_pd[np.isnan(interp_pd)] = fill
+interp_pd = naturalneighbor.griddata(
+    points,
+    native_coords_phys[:, 1],
+    [[0, unfold_dims[0], 1], [0, unfold_dims[1], 1], [0, unfold_dims[2], 1]],
+)
+interp_io = naturalneighbor.griddata(
+    points,
+    native_coords_phys[:, 2],
+    [[0, unfold_dims[0], 1], [0, unfold_dims[1], 1], [0, unfold_dims[2], 1]],
+)
 
-[x, y, z] = np.where(np.invert(np.isnan(interp_io)))
-interp = NearestNDInterpolator(
-    np.c_[x, y, z], interp_io[np.invert(np.isnan(interp_io))]
-)
-[qx, qy, qz] = np.where(np.isnan(interp_io))
-fill = interp(qx, qy, qz)
-interp_io[np.isnan(interp_io)] = fill
 
 # prepare maps for writing as warp file:
 
@@ -180,9 +162,10 @@ mapToNative = np.zeros(unfold_grid_phys.shape)
 mapToNative[:, :, :, 0, 0] = interp_ap
 mapToNative[:, :, :, 0, 1] = interp_pd
 mapToNative[:, :, :, 0, 2] = interp_io
-# TODO: interpolate nans more better
-mapToNative[np.isnan(mapToNative)] = 0
 summary("mapToNative", mapToNative)
+
+mapToNative[np.isnan(mapToNative)] = 0
+
 
 # mapToNative has the absolute coordinates, but we want them relative to the
 # unfolded grid, so we subtract it out:
@@ -219,13 +202,6 @@ warpitk_native2unfold_nib.to_filename(snakemake.output.warpitk_native2unfold)
 # The image affine from the unfolded grid takes points from 0 to N to world coords, so
 # just need to un-normalize, then multiply by affine
 
-# unnormalize
-coord_flat_ap_unnorm = coord_flat_ap * unfold_dims[0]
-coord_flat_pd_unnorm = coord_flat_pd * unfold_dims[1]
-coord_flat_io_unnorm = coord_flat_io * unfold_dims[2]
-
-summary("coord_flat_ap_unnorm", coord_flat_ap_unnorm)
-
 
 # reshape for multiplication (affine * vec)
 coord_flat_unnorm_vec = np.stack(
@@ -250,7 +226,7 @@ uvw_phys = uvw1_phys[:, :3]
 summary("uvw_phys", uvw_phys)
 
 # now we have the absolute unfold world coords for each native grid point
-#  but we need the displacement from the native grid point world coord
+# but we need the displacement from the native grid point world coord
 
 # the native world coords are in native_coords_phys
 # so we subtract it
