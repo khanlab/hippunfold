@@ -61,6 +61,51 @@ def get_final_spec():
     return specs
 
 
+def get_final_surf():
+    gii = []
+    gii.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{autotop}",
+                **config["subj_wildcards"],
+            ),
+            density=config["output_density"],
+            space=ref_spaces,
+            hemi=config["hemi"],
+            autotop=config["autotop_labels"],
+            surfname=config["surf_types"]["hipp"],
+            allow_missing=True,
+        )
+    )
+    gii.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{autotop}",
+                **config["subj_wildcards"],
+            ),
+            density=config["output_density"],
+            space=ref_spaces,
+            hemi=config["hemi"],
+            autotop=config["autotop_labels"],
+            surfname=config["surf_types"]["dentate"],
+            allow_missing=True,
+        )
+    )
+    return gii
+
+
 def get_final_subfields():
     return expand(
         bids(
@@ -313,6 +358,7 @@ def get_final_qc():
 def get_final_subj_output():
     subj_output = []
     subj_output.extend(get_final_spec())
+    subj_output.extend(get_final_surf())
     subj_output.extend(get_final_subfields())
     subj_output.extend(get_final_coords())
     subj_output.extend(get_final_transforms())

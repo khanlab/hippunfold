@@ -167,9 +167,7 @@ rule create_warps_hipp:
         ),
         labelmap=get_labels_for_laplace,
     params:
-        interp_method="linear",
         gm_labels=lambda wildcards: config["laplace_labels"]["AP"]["gm"],
-        epsilon=lambda wildcards: config["unfold_crop_epsilon_fractions"],
     resources:
         mem_mb=16000,
     output:
@@ -294,9 +292,7 @@ rule create_warps_dentate:
         ),
         labelmap=get_labels_for_laplace,
     params:
-        interp_method="linear",
         gm_labels=lambda wildcards: config["laplace_labels"]["PD"]["sink"],
-        epsilon=lambda wildcards: config["unfold_crop_epsilon_fractions"],
     resources:
         mem_mb=16000,
     output:
