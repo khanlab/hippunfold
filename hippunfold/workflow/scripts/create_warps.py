@@ -105,7 +105,7 @@ coord_flat_ap_unnorm = coord_flat_ap * unfold_dims[0]
 coord_flat_pd_unnorm = coord_flat_pd * unfold_dims[1]
 coord_flat_io_unnorm = coord_flat_io * unfold_dims[2]
 
-# get unfolded grid 
+# get unfolded grid
 
 points = np.stack(
     [
