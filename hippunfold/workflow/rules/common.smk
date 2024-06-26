@@ -24,23 +24,40 @@ def get_modality_suffix(modality):
 
 
 def get_final_spec():
-    specs = expand(
-        bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            space="{space}",
-            hemi="{hemi}",
-            label="{autotop}",
-            suffix="surfaces.spec",
-            **config["subj_wildcards"],
-        ),
-        density=config["output_density"],
-        space=ref_spaces,
-        hemi=config["hemi"],
-        autotop=config["autotop_labels"],
-        allow_missing=True,
-    )
+    if len(config["hemi"]) == 2:
+        specs = expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                space="{space}",
+                label="{autotop}",
+                suffix="surfaces.spec",
+                **config["subj_wildcards"],
+            ),
+            density=config["output_density"],
+            space=ref_spaces,
+            autotop=config["autotop_labels"],
+            allow_missing=True,
+        )
+    else:
+        specs = expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                space="{space}",
+                hemi="{hemi}",
+                label="{autotop}",
+                suffix="surfaces.spec",
+                **config["subj_wildcards"],
+            ),
+            density=config["output_density"],
+            space=ref_spaces,
+            hemi=config["hemi"],
+            autotop=config["autotop_labels"],
+            allow_missing=True,
+        )
     return specs
 
 
