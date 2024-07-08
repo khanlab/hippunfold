@@ -159,6 +159,7 @@ parse_args:
   --inject_template:
     choices:
       - 'upenn'
+      - 'dHCP'
       - 'MBMv2'
       - 'MBMv3'
       - 'CIVM'
@@ -327,10 +328,14 @@ parse_args:
       - synthseg_v0.2
       - neonateT1w_v2
 
+
+
+
+# --- surface specific configuration -- 
+
 autotop_labels:
   - 'hipp'
   - 'dentate'
-
 
 surf_types:
   hipp:
@@ -365,7 +370,7 @@ cifti_metric_types:
 #--- workflow specific configuration -- 
 
 singularity:
-  autotop: 'docker://khanlab/hippunfold_deps:v0.5.0'
+  autotop: 'docker://khanlab/hippunfold_deps:v0.5.1'
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
@@ -607,10 +612,6 @@ unfold_vol_ref:
       - '2.5'
     orient: RPI
 
-unfold_crop_epsilon_fractions:
-    - 0
-    - 0
-    - 0.0625 #1/16
 
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface
