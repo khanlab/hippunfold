@@ -51,7 +51,7 @@ def get_input_for_shape_inject(wildcards):
                 suffix="dseg.nii.gz",
                 space="corobl",
                 hemi="{hemi}",
-                from_="{modality_suffix}"
+                from_="{modality_suffix}",
             ).format(**wildcards, modality_suffix=modality_suffix),
         )
     else:
@@ -87,7 +87,7 @@ def get_input_splitseg_for_shape_inject(wildcards):
             suffix="dsegsplit",
             space="corobl",
             hemi="{hemi}",
-            from_="{modality_suffix}"
+            from_="{modality_suffix}",
         ).format(**wildcards, modality_suffix=modality_suffix)
     else:
         seg = bids(
@@ -100,7 +100,6 @@ def get_input_splitseg_for_shape_inject(wildcards):
             hemi="{hemi}",
         ).format(**wildcards)
     return seg
-
 
 
 rule prep_segs_for_greedy:
