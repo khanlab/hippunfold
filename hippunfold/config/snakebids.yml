@@ -384,21 +384,25 @@ template_based_segmentation:
     hemi:
       - R
       - L
-  CIVM:
+  dHCP:
     hemi:
       - R
       - L
+
   MBMv2:
     hemi:
       - R
   MBMv3:
     hemi:
       - R
-  ABAv3:
+  CIVM:
     hemi:
       - R
       - L
-  dHCP:
+  upenn:
+    hemi:
+      - R
+  ABAv3:
     hemi:
       - R
       - L
