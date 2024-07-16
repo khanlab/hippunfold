@@ -77,7 +77,7 @@ from the `hippunfold` folder that contains the
 
 ## Wet-run testing your workflow:
 
-Opensource data has been made available for wet-run testing any changes to HippUnfold [here](https://osf.io/k2nme/). These are real data meant ot span a wide array of HippUnfold use cases with various modalities, resolutions, developmental stages, and species. Please note that some changes will impact all worflows and should be run and then visually inspected for all these cases. Other chances may impact only one workflow (e.g. adding a new template) and so the recommended run parameters may be adjusted accordingly. 
+Opensource data has been made available for wet-run testing any changes to HippUnfold on OSF [here](https://osf.io/k2nme/). These are real opensource data meant ot span a wide array of HippUnfold use cases with various modalities, resolutions, developmental stages, and species. Please note that some changes to hippUnfold will impact all worflows and should be run and then visually inspected for all these cases. Other changes may impact only one workflow (e.g. adding a new template) and so the recommended run parameters should be adjusted accordingly. 
 
 ## Instructions for Compute Canada
 
