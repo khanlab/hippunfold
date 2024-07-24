@@ -1,5 +1,4 @@
 import re
-from appdirs import AppDirs
 
 
 def get_nnunet_input(wildcards):
