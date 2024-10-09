@@ -7,7 +7,7 @@ authors = ["Jordan DeKraker & Ali Khan <alik@robarts.ca>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
 snakemake = ">=6.0.0"
-snakebids = "^0.8.1"
+snakebids = "^0.13.1"
 appdirs = "^1.4.4"
 Jinja2 = "^3.0.3"
 pygraphviz = "1.7"
