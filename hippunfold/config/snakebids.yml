@@ -35,8 +35,8 @@ pybids_inputs:
       suffix: 'T2w'
       extension: '.nii.gz'
       datatype: 'anat'
-      invalid_filters: 'allow'
-      space: null
+      # invalid_filters: 'allow'
+      # space: null
     wildcards:
       - subject
       - session
@@ -58,8 +58,8 @@ pybids_inputs:
       suffix: 'T1w'
       extension: '.nii.gz'
       datatype: 'anat'
-      invalid_filters: 'allow'
-      space: null
+      # invalid_filters: 'allow'
+      # space: null
     wildcards:
       - subject
       - session
