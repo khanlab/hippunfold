@@ -431,11 +431,7 @@ if "corobl" in ref_spaces:
 
 def get_final_work_tar():
     bids = bids_factory(specs.v0_0_0(subject_dir=False, session_dir=False))
-    return bids(
-        root=work,
-        suffix="work.tar.gz",
-        **config["subj_wildcards"]
-    )
+    return bids(root=work, suffix="work.tar.gz", **config["subj_wildcards"])
 
 
 def get_work_dir(wildcards):
