@@ -1,11 +1,12 @@
 # ---- snakebids boilerplate
 
 import snakebids
-from snakebids import bids
+from snakebids import bids, set_bids_spec
 
 
 configfile: "config/snakebids.yml"
 
+set_bids_spec("v0_0_0")
 
 # consider moving this logic to another smk file to clean-up
 
@@ -106,8 +107,8 @@ wildcard_constraints:
     template="[a-zA-Z0-9]+",
 
 
-root = os.path.join(config["root"], "hippunfold")
-work = os.path.join(config["root"], "work")
+root = os.path.normpath(os.path.join(config["root"], "hippunfold"))
+work = os.path.normpath(os.path.join(config["root"], "work"))
 
 
 include: "rules/common.smk"
