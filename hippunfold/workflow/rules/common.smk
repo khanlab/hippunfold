@@ -1,4 +1,5 @@
 from appdirs import AppDirs
+from snakebids.paths import bids_factory, specs
 
 # take mean of all scans if >1, otherwise just copy the one scan
 def get_avg_or_cp_scans_cmd(wildcards, input, output):
@@ -429,11 +430,10 @@ if "corobl" in ref_spaces:
 
 
 def get_final_work_tar():
+    bids = bids_factory(specs.v0_0_0(subject_dir=False, session_dir=False))
     return bids(
         root=work,
         suffix="work.tar.gz",
-        include_subject_dir=False,
-        include_session_dir=False,
         **config["subj_wildcards"]
     )
 
