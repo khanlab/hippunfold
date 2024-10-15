@@ -10,6 +10,8 @@ debug: False
 
 derivatives: False #will search in bids/derivatives if True; can also be path(s) to derivatives datasets
 
+plugins.validator.skip: true
+
 #list of analysis levels in the bids app 
 analysis_levels: &analysis_levels
  - participant
