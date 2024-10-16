@@ -10,7 +10,6 @@ debug: False
 
 derivatives: False #will search in bids/derivatives if True; can also be path(s) to derivatives datasets
 
-plugins.validator.skip: true
 
 #list of analysis levels in the bids app 
 analysis_levels: &analysis_levels
@@ -190,6 +189,10 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --plugins.validator.skip:
+    help: 'Set this flag if you to skip BIDS validating your inputs (e.g. T2w, dwi) (default: %(default)s)'
+    default: False
+    action: 'store_true'
  
   --skip_coreg:
     help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s)'
@@ -702,6 +705,7 @@ output_density:
 
 laminar_coords_method: equivolume
 skip_preproc: False
+plugins.validator.skip: False
 nnunet_enable_tta: False
 use_gpu: False
 skip_coreg: False
