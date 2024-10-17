@@ -3,7 +3,7 @@ rule qc_reg_to_template:
         flo=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="{native_modality}.nii.gz",
             space=config["template"],
             desc="affine"
@@ -21,7 +21,7 @@ rule qc_reg_to_template:
             bids(
                 root=root,
                 datatype="qc",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="regqc.png",
                 from_="{native_modality}",
                 to=config["template"]
@@ -40,10 +40,10 @@ rule qc_reg_to_template:
 rule get_subfield_vols_subj:
     """Export segmentation volume for a subject to TSV"""
     input:
-        segs=expand(
+        segs=inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 datatype="anat",
                 hemi="{hemi}",
                 space="{crop_ref_spaces}",
@@ -68,7 +68,7 @@ rule get_subfield_vols_subj:
             desc="subfields",
             atlas="{atlas}",
             suffix="volumes.tsv",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -85,7 +85,7 @@ rule plot_subj_subfields:
             desc="subfields",
             atlas="{atlas}",
             suffix="volumes.tsv",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     output:
         png=report(
@@ -96,7 +96,7 @@ rule plot_subj_subfields:
                 desc="subfields",
                 atlas="{atlas}",
                 suffix="volumes.png",
-                **config["subj_wildcards"]
+                **inputs.subj_wildcards
             ),
             caption="../report/subj_volume_plot.rst",
             category="Subfield Volumes",
@@ -118,7 +118,7 @@ def get_bg_img_for_subfield_qc(wildcards):
             suffix="hippb500.nii.gz",
             space="{space}",
             hemi="{hemi}",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
         )
     elif config["modality"] == "cropseg":
         # blank image as bg
@@ -128,7 +128,7 @@ def get_bg_img_for_subfield_qc(wildcards):
             suffix="cropref.nii.gz",
             space="{space}",
             hemi="{hemi}",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
         )
 
     elif config["modality"][:3] == "seg":
@@ -140,7 +140,7 @@ def get_bg_img_for_subfield_qc(wildcards):
             suffix=f"{bg_modality}.nii.gz",
             space="{space}",
             hemi="{hemi}",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
         )
 
     else:
@@ -152,7 +152,7 @@ def get_bg_img_for_subfield_qc(wildcards):
             suffix=f"{bg_modality}.nii.gz",
             space="{space}",
             hemi="{hemi}",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
         )
 
 
@@ -167,7 +167,7 @@ rule qc_subfield:
             space="{space}",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     output:
         png=report(
@@ -179,7 +179,7 @@ rule qc_subfield:
                 space="{space}",
                 hemi="{hemi}",
                 atlas="{atlas}",
-                **config["subj_wildcards"]
+                **inputs.subj_wildcards
             ),
             caption="../report/subfield_qc.rst",
             category="Segmentation QC",
@@ -202,7 +202,7 @@ rule qc_subfield_surf:
             space="{ref_spaces}",
             hemi="{hemi}",
             label="{autotop}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     output:
         png=report(
@@ -215,7 +215,7 @@ rule qc_subfield_surf:
                 space="{ref_spaces}",
                 hemi="{hemi}",
                 label="{autotop}",
-                **config["subj_wildcards"]
+                **inputs.subj_wildcards
             ),
             caption="../report/subfield_qc.rst",
             category="Segmentation QC",
@@ -231,7 +231,7 @@ rule qc_subfield_surf:
 rule concat_subj_vols_tsv:
     """Concatenate all subject tsv files into a single tsv"""
     input:
-        tsv=lambda wildcards: expand(
+        tsv=lambda wildcards: inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="anat",
@@ -239,12 +239,12 @@ rule concat_subj_vols_tsv:
                 space="{space}",
                 atlas="{atlas}",
                 suffix="volumes.tsv",
-                **config["subj_wildcards"]
+                **inputs.subj_wildcards
             ),
-            subject=config["input_lists"][get_modality_key(config["modality"])][
+            subject=inputs[get_modality_key(config["modality"])].zip_lists[
                 "subject"
             ],
-            session=config["sessions"],
+            session=inputs[get_modality_key(config["modality"])].zip_lists["session"],
             space=wildcards.space,
             atlas=wildcards.atlas,
         ),

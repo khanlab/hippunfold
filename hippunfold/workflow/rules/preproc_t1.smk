@@ -5,14 +5,14 @@ rule import_t1:
     """Note: this rule only grabs the first T1w
     TODO: add motion-corrected averaging, like we do for T2w"""
     input:
-        lambda wildcards: expand(
-            config["input_path"]["T1w"],
+        lambda wildcards: inputs["T1w"].expand(
+            inputs["T1w"].path,
             zip,
-            **snakebids.filter_list(config["input_zip_lists"]["T1w"], wildcards)
+            **snakebids.filter_list(inputs["T1w"].zip_lists, wildcards)
         )[0],
     output:
         bids(
-            root=work, datatype="anat", **config["subj_wildcards"], suffix="T1w.nii.gz"
+            root=work, datatype="anat", **inputs.subj_wildcards, suffix="T1w.nii.gz"
         ),
     group:
         "subj"
@@ -24,16 +24,16 @@ if config["skip_preproc"]:
 
     rule import_preproc_t1:
         input:
-            lambda wildcards: expand(
-                config["input_path"]["T1w"],
+            lambda wildcards: inputs["T1w"].expand(
+                inputs["T1w"].path,
                 zip,
-                **snakebids.filter_list(config["input_zip_lists"]["T1w"], wildcards)
+                **snakebids.filter_list(inputs["T1w"].zip_lists, wildcards)
             )[0],
         output:
             bids(
                 root=root,
                 datatype="anat",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="T1w.nii.gz",
                 desc="preproc"
             ),
@@ -49,14 +49,14 @@ else:
             t1=bids(
                 root=work,
                 datatype="anat",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="T1w.nii.gz"
             ),
         output:
             t1=bids(
                 root=root,
                 datatype="anat",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 desc="preproc",
                 suffix="T1w.nii.gz"
             ),
@@ -92,7 +92,7 @@ rule reg_to_template:
         flo=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
             suffix="{modality}.nii.gz"
         ),
@@ -104,7 +104,7 @@ rule reg_to_template:
         warped_subj=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="{modality,T1w|T2w}.nii.gz",
             space=config["template"],
             desc="affine"
@@ -112,7 +112,7 @@ rule reg_to_template:
         xfm_ras=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{modality,T1w|T2w}",
             to=config["template"],
@@ -122,7 +122,7 @@ rule reg_to_template:
     log:
         bids(
             root="logs",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="reg.txt",
             from_="{modality,T1w|T2w}",
             to=config["template"],
@@ -142,7 +142,7 @@ rule convert_template_xfm_ras2itk:
         bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{reg_suffix}",
             to=config["template"],
@@ -153,7 +153,7 @@ rule convert_template_xfm_ras2itk:
         bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{reg_suffix}",
             to=config["template"],
@@ -174,7 +174,7 @@ rule compose_template_xfm_corobl:
         sub_to_std=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="T1w",
             to=config["template"],
@@ -191,7 +191,7 @@ rule compose_template_xfm_corobl:
         sub_to_cor=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="T1w",
             to="corobl",
@@ -211,7 +211,7 @@ rule invert_template_xfm_itk2ras:
         xfm_ras=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="T1w",
             to="corobl",
@@ -222,7 +222,7 @@ rule invert_template_xfm_itk2ras:
         xfm_ras=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="T1w",
             to="corobl",
@@ -242,7 +242,7 @@ rule template_xfm_itk2ras:
         xfm_ras=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{native_modality}",
             to="corobl",
@@ -253,7 +253,7 @@ rule template_xfm_itk2ras:
         xfm_ras=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{native_modality,T1w|T2w}",
             to="corobl",
@@ -274,14 +274,14 @@ rule warp_t1_to_corobl_crop:
         t1=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
             suffix="T1w.nii.gz"
         ),
         xfm=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="T1w",
             to="corobl",
@@ -298,7 +298,7 @@ rule warp_t1_to_corobl_crop:
         t1=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="T1w.nii.gz",
             space="corobl",
             desc="preproc",
@@ -318,7 +318,7 @@ rule lr_flip_t1:
         nii=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="T1w.nii.gz",
             space="corobl",
             desc="{desc}",
@@ -328,7 +328,7 @@ rule lr_flip_t1:
         nii=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="T1w.nii.gz",
             space="corobl",
             desc="{desc}",

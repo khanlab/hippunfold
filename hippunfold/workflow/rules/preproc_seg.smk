@@ -1,15 +1,15 @@
 rule import_seg:
     input:
-        lambda wildcards: expand(
-            config["input_path"]["seg"],
+        lambda wildcards: inputs["seg"].expand(
+            inputs["seg"].path,
             zip,
-            **snakebids.filter_list(config["input_zip_lists"]["seg"], wildcards)
+            **snakebids.filter_list(inputs["seg"].zip_lists, wildcards)
         )[0],
     output:
         bids(
             root=work,
             datatype="anat",
-            **config["input_wildcards"]["seg"],
+            **inputs["seg"].wildcards,
             suffix="dseg.nii.gz"
         ),
     group:
@@ -26,13 +26,13 @@ rule warp_seg_to_corobl_crop:
         nii=bids(
             root=work,
             datatype="anat",
-            **config["input_wildcards"]["seg"],
+            **inputs["seg"].wildcards,
             suffix="dseg.nii.gz"
         ),
         xfm=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{space}",
             to="corobl",
@@ -47,7 +47,7 @@ rule warp_seg_to_corobl_crop:
         nii=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi,L|R}",
@@ -67,7 +67,7 @@ rule lr_flip_seg:
         nii=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
@@ -77,7 +77,7 @@ rule lr_flip_seg:
         nii=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi,L}flip",
