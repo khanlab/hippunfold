@@ -51,7 +51,9 @@ def get_ref_n4_t2(wildcards):
             desc="n4"
         ),
         zip,
-        **snakebids.filter_list(inputs[get_modality_key(config["modality"])].zip_lists, wildcards)
+        **snakebids.filter_list(
+            inputs[get_modality_key(config["modality"])].zip_lists, wildcards
+        )
     )
     return t2_imgs[0]
 
@@ -66,7 +68,9 @@ def get_floating_n4_t2(wildcards):
             desc="n4"
         ),
         zip,
-        **snakebids.filter_list(inputs[get_modality_key(config["modality"])].zip_lists, wildcards)
+        **snakebids.filter_list(
+            inputs[get_modality_key(config["modality"])].zip_lists, wildcards
+        )
     )
     return t2_imgs[int(wildcards.idx)]
 
@@ -115,7 +119,9 @@ rule reg_t2_to_ref:
 
 def get_aligned_n4_t2(wildcards):
     # first get the number of floating t2s
-    filtered = snakebids.filter_list(inputs[get_modality_key(config["modality"])].zip_lists, wildcards)
+    filtered = snakebids.filter_list(
+        inputs[get_modality_key(config["modality"])].zip_lists, wildcards
+    )
     num_scans = len(filtered["subject"])
 
     # then, return the path, expanding over range(1,num_scans) -i.e excludes 0 (ref image)
@@ -142,7 +148,9 @@ if config["skip_preproc"]:
             lambda wildcards: inputs["T2w"].expand(
                 inputs["T2w"].path,
                 zip,
-                **snakebids.filter_list(inputs[get_modality_key(config["modality"])].zip_lists, wildcards)
+                **snakebids.filter_list(
+                    inputs[get_modality_key(config["modality"])].zip_lists, wildcards
+                )
             )[0],
         output:
             bids(

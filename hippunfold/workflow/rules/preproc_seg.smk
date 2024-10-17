@@ -7,10 +7,7 @@ rule import_seg:
         )[0],
     output:
         bids(
-            root=work,
-            datatype="anat",
-            **inputs["seg"].wildcards,
-            suffix="dseg.nii.gz"
+            root=work, datatype="anat", **inputs["seg"].wildcards, suffix="dseg.nii.gz"
         ),
     group:
         "subj"
@@ -24,10 +21,7 @@ rule import_seg:
 rule warp_seg_to_corobl_crop:
     input:
         nii=bids(
-            root=work,
-            datatype="anat",
-            **inputs["seg"].wildcards,
-            suffix="dseg.nii.gz"
+            root=work, datatype="anat", **inputs["seg"].wildcards, suffix="dseg.nii.gz"
         ),
         xfm=bids(
             root=work,

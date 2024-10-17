@@ -241,9 +241,7 @@ rule concat_subj_vols_tsv:
                 suffix="volumes.tsv",
                 **inputs.subj_wildcards
             ),
-            subject=inputs[get_modality_key(config["modality"])].zip_lists[
-                "subject"
-            ],
+            subject=inputs[get_modality_key(config["modality"])].zip_lists["subject"],
             session=inputs[get_modality_key(config["modality"])].zip_lists["session"],
             space=wildcards.space,
             atlas=wildcards.atlas,

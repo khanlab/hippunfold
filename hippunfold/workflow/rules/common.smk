@@ -384,7 +384,14 @@ def get_final_output():
     # use a zip list for subject/session:
     zip_list = inputs[modality_key].zip_lists
     if "session" in zip_list:
-        zip_list = snakebids.filter_list(zip_list, {"session": inputs[get_modality_key(config["modality"])].zip_lists["session"]})
+        zip_list = snakebids.filter_list(
+            zip_list,
+            {
+                "session": inputs[get_modality_key(config["modality"])].zip_lists[
+                    "session"
+                ]
+            },
+        )
 
     final_output.extend(
         expand(
@@ -435,7 +442,9 @@ def get_final_work_tar():
 
 
 def get_work_dir(wildcards):
-    folder_with_file = inputs[get_modality_key(config["modality"])].expand(bids(root=work, **inputs.subj_wildcards), **wildcards)
+    folder_with_file = inputs[get_modality_key(config["modality"])].expand(
+        bids(root=work, **inputs.subj_wildcards), **wildcards
+    )
     folder_without_file = os.path.dirname(folder_with_file[0])
     return folder_without_file
 

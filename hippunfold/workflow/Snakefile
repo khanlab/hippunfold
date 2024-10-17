@@ -77,13 +77,14 @@ if not config["atlas"] == ["multihist7"]:
     config["no_unfolded_reg"] = True
 
 inputs = snakebids.generate_inputs(
-        bids_dir=config["bids_dir"],
-        pybids_inputs=config["pybids_inputs"],
-        derivatives=config["derivatives"],
-        participant_label=config["participant_label"],
-        exclude_participant_label=config["exclude_participant_label"],
-        limit_to=list(limit_to_list),
-    )
+    bids_dir=config["bids_dir"],
+    pybids_inputs=config["pybids_inputs"],
+    derivatives=config["derivatives"],
+    participant_label=config["participant_label"],
+    exclude_participant_label=config["exclude_participant_label"],
+    limit_to=list(limit_to_list),
+)
+
 
 # this adds constraints to the bids naming
 wildcard_constraints:

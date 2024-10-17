@@ -11,9 +11,7 @@ rule import_t1:
             **snakebids.filter_list(inputs["T1w"].zip_lists, wildcards)
         )[0],
     output:
-        bids(
-            root=work, datatype="anat", **inputs.subj_wildcards, suffix="T1w.nii.gz"
-        ),
+        bids(root=work, datatype="anat", **inputs.subj_wildcards, suffix="T1w.nii.gz"),
     group:
         "subj"
     shell:
