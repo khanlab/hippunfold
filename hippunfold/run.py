@@ -9,7 +9,7 @@ app = bidsapp.app(
         plugins.BidsValidator(),
         plugins.Version(distribution="hippunfold"),
         plugins.CliConfig("parse_args"),
-        plugins.ComponentEdit("pybids_inputs")
+        plugins.ComponentEdit("pybids_inputs"),
     ]
 )
 
