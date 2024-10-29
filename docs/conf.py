@@ -13,6 +13,14 @@
 # import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
+
+#--# Fallback definition of __file__ ------------------------------------------
+import os
+from pathlib import Path
+
+if '__file__' not in globals():
+    __file__ = os.path.join(os.getcwd(), 'conf.py')
+
 import sphinx_rtd_theme
 
 
