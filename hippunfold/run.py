@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import os
 
 from snakebids import bidsapp, plugins
+
+if '__file__' not in globals():
+    __file__ = os.path.join(os.getcwd(), 'run.py')
 
 app = bidsapp.app(
     [
