@@ -10,17 +10,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
-#--# Fallback definition of __file__ ------------------------------------------
 import os
-from pathlib import Path
-
-if '__file__' not in globals():
-    __file__ = os.path.join(os.getcwd(), 'conf.py')
-
+import sys
+sys.path.insert(0, os.path.abspath('../hippunfold/run.py'))
 import sphinx_rtd_theme
 
 
