@@ -3,26 +3,28 @@ import re
 
 def get_nnunet_input(wildcards):
     T1w_nii = bids(
-        root=root,
+        root=work,
         datatype="anat",
+        **config["subj_wildcards"],
+        suffix="T1w.nii.gz",
         space="corobl",
         desc="preproc",
         hemi="{hemi}",
-        suffix="T1w.nii.gz",
-        **inputs.subj_wildcards,
     )
     T2w_nii = bids(
-        root=root,
+        root=work,
         datatype="anat",
+        **config["subj_wildcards"],
+        suffix="T2w.nii.gz",
         space="corobl",
         desc="preproc",
         hemi="{hemi}",
-        suffix="T2w.nii.gz",
-        **inputs.subj_wildcards,
     )
-    if (config["modality"] == "T1w" or config["modality"] == "T2w") and config[
-        "force_nnunet_model"
-    ] == "T1T2w":
+    if (
+        config["modality"] == "T1w"
+        or config["modality"] == "T2w"
+        and config["force_nnunet_model"] == "T1T2w"
+    ):
         return (T1w_nii, T2w_nii)
 
     elif config["modality"] == "T2w":
