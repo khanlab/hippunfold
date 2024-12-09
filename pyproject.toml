@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hippunfold"
-version = "1.5.4"
+version = "1.5.2-pre.2"
 description = "BIDS App for Hippocampal AutoTop (automated hippocampal unfolding and subfield segmentation)"
 readme = "README.md"
 license = "MIT"

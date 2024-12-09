@@ -297,6 +297,10 @@ parse_args:
     default: True
 
 
+  --version:
+    help: 'Print the version of HippUnfold'
+    action: version
+    version: "1.5.2-pre.2"
 
 
 
