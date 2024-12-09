@@ -978,7 +978,7 @@ rule normalize_curvature2:
             space="{space}",
             hemi="{hemi}",
             desc="unnorm",
-            label="hipp",
+            label="{autotop}",
             **config["subj_wildcards"]
         ),
     output:
