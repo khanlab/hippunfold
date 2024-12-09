@@ -20,11 +20,9 @@ def get_nnunet_input(wildcards):
         desc="preproc",
         hemi="{hemi}",
     )
-    if (
-        config["modality"] == "T1w"
-        or config["modality"] == "T2w"
-        and config["force_nnunet_model"] == "T1T2w"
-    ):
+    if (config["modality"] == "T1w" or config["modality"] == "T2w") and config[
+        "force_nnunet_model"
+    ] == "T1T2w":
         return (T1w_nii, T2w_nii)
 
     elif config["modality"] == "T2w":
