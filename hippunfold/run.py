@@ -3,8 +3,8 @@ from pathlib import Path
 
 from snakebids import bidsapp, plugins
 
-if '__file__' not in globals():
-    __file__ = '../hippunfold/run.py'
+if "__file__" not in globals():
+    __file__ = "../hippunfold/run.py"
 
 
 app = bidsapp.app(
