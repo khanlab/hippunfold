@@ -9,11 +9,11 @@ rule resample_unfoldreg_subfields:
             hemi="{hemi}",
             label="hipp",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
         warp=bids(
             root=work,
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="SyN",
@@ -32,7 +32,7 @@ rule resample_unfoldreg_subfields:
             hemi="{hemi}",
             label="hipp",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -57,7 +57,7 @@ def skip_unfoldreg_option_subfields(wildcards):
             hemi="{hemi}",
             label="hipp",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         )
     else:
         label_nii = bids(
@@ -68,7 +68,7 @@ def skip_unfoldreg_option_subfields(wildcards):
             hemi="{hemi}",
             label="hipp",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         )
     return label_nii
 
@@ -86,7 +86,7 @@ rule label_subfields_from_vol_coords_corobl:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
         nii_pd=bids(
             root=work,
@@ -97,7 +97,7 @@ rule label_subfields_from_vol_coords_corobl:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
         nii_io=get_laminar_coords,
         labelmap=get_labels_for_laplace,
@@ -112,7 +112,7 @@ rule label_subfields_from_vol_coords_corobl:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     group:
         "subj"
@@ -154,7 +154,7 @@ rule combine_tissue_subfield_labels_corobl:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     params:
         remap=get_tissue_atlas_remapping,
@@ -167,7 +167,7 @@ rule combine_tissue_subfield_labels_corobl:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -188,12 +188,12 @@ rule resample_subfields_to_native:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
         xfm=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{native_modality}",
             to="corobl",
@@ -203,7 +203,7 @@ rule resample_subfields_to_native:
         ref=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
             suffix="{native_modality}.nii.gz"
         ),
@@ -216,7 +216,7 @@ rule resample_subfields_to_native:
             space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -233,7 +233,7 @@ rule resample_postproc_to_native:
         nii=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
@@ -242,7 +242,7 @@ rule resample_postproc_to_native:
         xfm=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{native_modality}",
             to="corobl",
@@ -252,7 +252,7 @@ rule resample_postproc_to_native:
         ref=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
             suffix="{native_modality}.nii.gz"
         ),
@@ -264,7 +264,7 @@ rule resample_postproc_to_native:
             desc="postproc",
             space="{native_modality,T2w|T2w}",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -281,7 +281,7 @@ rule resample_unet_to_native:
         nii=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="nnunet",
             space="corobl",
@@ -290,7 +290,7 @@ rule resample_unet_to_native:
         xfm=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="{native_modality}",
             to="corobl",
@@ -300,7 +300,7 @@ rule resample_unet_to_native:
         ref=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
             suffix="{native_modality}.nii.gz"
         ),
@@ -312,7 +312,7 @@ rule resample_unet_to_native:
             desc="unet",
             space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -334,12 +334,12 @@ rule resample_subfields_to_unfold:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
         xfm=bids(
             root=work,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             hemi="{hemi}",
             from_="corobl",
@@ -355,7 +355,7 @@ rule resample_subfields_to_unfold:
             space="unfold",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]

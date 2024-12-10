@@ -16,7 +16,7 @@ def get_labels_for_laplace(wildcards):
         seg = bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
@@ -33,7 +33,7 @@ def get_inputs_laplace(wildcards):
             bids(
                 root=work,
                 datatype="coords",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 dir="{dir}",
                 label="hipp",
                 suffix="coords.nii.gz",
@@ -64,7 +64,7 @@ rule laplace_coords_hipp:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     group:
         "subj"
@@ -73,7 +73,7 @@ rule laplace_coords_hipp:
     log:
         bids(
             root="logs",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
             suffix="laplace-hipp.txt"
@@ -89,7 +89,7 @@ rule laplace_coords_dentate:
         coords=bids(
             root=work,
             datatype="coords",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
             label="dentate",
             suffix="coords.nii.gz",
@@ -107,7 +107,7 @@ rule laplace_coords_dentate:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     group:
         "subj"
@@ -116,7 +116,7 @@ rule laplace_coords_dentate:
     log:
         bids(
             root="logs",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
             suffix="laplace-dentate.txt"
@@ -141,7 +141,7 @@ rule prep_equivolume_coords:
             suffix="mask.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
         innerbin=bids(
             root=work,
@@ -151,12 +151,12 @@ rule prep_equivolume_coords:
             suffix="mask.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     log:
         bids(
             root="logs",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
             suffix="binarize.txt"
@@ -179,7 +179,7 @@ rule equivolume_coords:
             suffix="mask.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
         innerbin=bids(
             root=work,
@@ -189,7 +189,7 @@ rule equivolume_coords:
             suffix="mask.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     params:
         script=os.path.join(workflow.basedir, "scripts/equivolume_coords.py"),
@@ -203,7 +203,7 @@ rule equivolume_coords:
             desc="equivol",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     group:
         "subj"
@@ -212,7 +212,7 @@ rule equivolume_coords:
     log:
         bids(
             root="logs",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
             suffix="equivolume.txt"
