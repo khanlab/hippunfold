@@ -110,7 +110,11 @@ work = os.path.normpath(os.path.join(config["root"], "work"))
 
 include: "rules/common.smk"
 include: "rules/download.smk"
-include: "rules/preproc_t1.smk"
+
+
+if "T1w" in limit_to_list:
+
+    include: "rules/preproc_t1.smk"
 
 
 # include rules only as they are needed..

@@ -76,6 +76,8 @@ pybids_inputs:
     wildcards:
       - subject
       - session
+      - acquisition
+      - run
 
   cropseg:
     filters:
@@ -87,6 +89,9 @@ pybids_inputs:
       - subject
       - session
       - hemi
+      - acquisition
+      - run
+
 
 
 

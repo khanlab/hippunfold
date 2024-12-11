@@ -1,14 +1,8 @@
 rule import_seg:
     input:
-        lambda wildcards: inputs["seg"].expand(
-            inputs["seg"].path,
-            zip,
-            **snakebids.filter_list(inputs["seg"].zip_lists, wildcards)
-        )[0],
+        in_img=partial(get_single_bids_input, component="seg"),
     output:
-        bids(
-            root=work, datatype="anat", **inputs["seg"].wildcards, suffix="dseg.nii.gz"
-        ),
+        bids(root=work, datatype="anat", **inputs.subj_wildcards, suffix="dseg.nii.gz"),
     group:
         "subj"
     container:
@@ -21,7 +15,7 @@ rule import_seg:
 rule warp_seg_to_corobl_crop:
     input:
         nii=bids(
-            root=work, datatype="anat", **inputs["seg"].wildcards, suffix="dseg.nii.gz"
+            root=work, datatype="anat", **inputs.subj_wildcards, suffix="dseg.nii.gz"
         ),
         xfm=bids(
             root=work,

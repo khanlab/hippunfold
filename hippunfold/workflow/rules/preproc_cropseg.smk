@@ -1,6 +1,7 @@
+
 rule import_cropseg:
     input:
-        inputs["cropseg"].path,
+        in_img=partial(get_single_bids_input, component="cropseg"),
     output:
         nii=bids(
             root=work,

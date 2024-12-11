@@ -591,7 +591,7 @@ rule unfolded_registration:
 # warp from subj unfolded to unfoldedaligned
 rule warp_gii_unfoldreg:
     input:
-        invwarp=inputs[get_modality_key(config["modality"])].expand(
+        invwarp=expand(
             bids(
                 root=work,
                 **inputs.subj_wildcards,
@@ -1317,7 +1317,7 @@ rule cp_unfolded_noconstrain:
 
 rule create_spec_file_hipp:
     input:
-        metrics=lambda wildcards: inputs[get_modality_key(config["modality"])].expand(
+        metrics=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1348,7 +1348,7 @@ rule create_spec_file_hipp:
             atlas=config["atlas"],
             allow_missing=True,
         ),
-        surfs=inputs[get_modality_key(config["modality"])].expand(
+        surfs=expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1417,7 +1417,7 @@ rule create_spec_file_hipp:
 
 rule create_spec_file_dentate:
     input:
-        metrics=lambda wildcards: inputs[get_modality_key(config["modality"])].expand(
+        metrics=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1431,7 +1431,7 @@ rule create_spec_file_dentate:
             metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
-        surfs=inputs[get_modality_key(config["modality"])].expand(
+        surfs=expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1446,7 +1446,7 @@ rule create_spec_file_dentate:
             space=["{space}", "unfold"],
             allow_missing=True,
         ),
-        cifti=lambda wildcards: inputs[get_modality_key(config["modality"])].expand(
+        cifti=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1482,7 +1482,7 @@ rule create_spec_file_dentate:
 
 rule merge_lr_spec_file:
     input:
-        spec_files=inputs[get_modality_key(config["modality"])].expand(
+        spec_files=expand(
             bids(
                 root=root,
                 datatype="surf",

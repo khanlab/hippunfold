@@ -1,6 +1,28 @@
 from appdirs import AppDirs
 from snakebids.paths import bids_factory, specs
 
+from functools import partial
+
+
+def get_single_bids_input(wildcards, component):
+    """Generic input function for getting the first instance of a bids component
+    from a dataset, and throw an error if more than one are found.
+
+    Use this in a rule by using e.g.:
+        in_img = partial(get_single_bids_input,component='T1w')
+    """
+
+    subj_inputs = inputs[component].filter(**wildcards).expand()
+    if len(subj_inputs) > 1:
+        raise ValueError(
+            f"Expected 1 input for '{component}' {wildcards}, "
+            f"but found {len(subj_inputs)}: {subj_inputs}."
+            f"You can use the --filter-{component} option to filter your wildcards."
+        )
+    else:
+        return subj_inputs[0]
+
+
 # take mean of all scans if >1, otherwise just copy the one scan
 def get_avg_or_cp_scans_cmd(wildcards, input, output):
     if len(input) > 1:

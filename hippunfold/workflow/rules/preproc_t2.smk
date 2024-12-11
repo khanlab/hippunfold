@@ -1,12 +1,12 @@
 rule import_t2:
     input:
-        inputs[get_modality_key(config["modality"])].path,
+        inputs["T2w"].path,
     output:
         bids(
             root=work,
             datatype="anat",
-            **inputs[get_modality_key(config["modality"])].wildcards,
-            suffix="T2w.nii.gz"
+            suffix="T2w.nii.gz",
+            **inputs["T2w"].wildcards,
         ),
     group:
         "subj"
@@ -19,16 +19,16 @@ rule n4_t2:
         bids(
             root=work,
             datatype="anat",
-            **inputs[get_modality_key(config["modality"])].wildcards,
-            suffix="T2w.nii.gz"
+            suffix="T2w.nii.gz",
+            **inputs["T2w"].wildcards,
         ),
     output:
         bids(
             root=work,
             datatype="anat",
-            **inputs[get_modality_key(config["modality"])].wildcards,
+            desc="n4",
             suffix="T2w.nii.gz",
-            desc="n4"
+            **inputs["T2w"].wildcards,
         ),
     threads: 8
     container:
@@ -42,34 +42,35 @@ rule n4_t2:
 
 def get_ref_n4_t2(wildcards):
     # get the first image
-    t2_imgs = inputs[get_modality_key(config["modality"])].expand(
-        bids(
-            root=work,
-            datatype="anat",
-            **inputs[get_modality_key(config["modality"])].wildcards,
-            suffix="T2w.nii.gz",
-            desc="n4"
-        ),
-        zip,
-        **snakebids.filter_list(
-            inputs[get_modality_key(config["modality"])].zip_lists, wildcards
+    t2_imgs = (
+        inputs["T2w"]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=work,
+                datatype="anat",
+                desc="n4",
+                suffix="T2w.nii.gz",
+                **inputs["T2w"].wildcards,
+            )
         )
     )
+
     return t2_imgs[0]
 
 
 def get_floating_n4_t2(wildcards):
-    t2_imgs = inputs[get_modality_key(config["modality"])].expand(
-        bids(
-            root=work,
-            datatype="anat",
-            **inputs[get_modality_key(config["modality"])].wildcards,
-            suffix="T2w.nii.gz",
-            desc="n4"
-        ),
-        zip,
-        **snakebids.filter_list(
-            inputs[get_modality_key(config["modality"])].zip_lists, wildcards
+    t2_imgs = (
+        inputs["T2w"]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=work,
+                datatype="anat",
+                suffix="T2w.nii.gz",
+                desc="n4",
+                **inputs["T2w"].wildcards,
+            ),
         )
     )
     return t2_imgs[int(wildcards.idx)]
@@ -103,10 +104,10 @@ rule reg_t2_to_ref:
         warped=bids(
             root=work,
             datatype="anat",
-            **inputs.subj_wildcards,
             suffix="T2w.nii.gz",
             desc="aligned",
-            floating="{idx}"
+            floating="{idx}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -119,39 +120,33 @@ rule reg_t2_to_ref:
 
 def get_aligned_n4_t2(wildcards):
     # first get the number of floating t2s
-    filtered = snakebids.filter_list(
-        inputs[get_modality_key(config["modality"])].zip_lists, wildcards
-    )
-    num_scans = len(filtered["subject"])
+    num_scans = len(inputs["T2w"].filter(**wildcards).expand())
 
     # then, return the path, expanding over range(1,num_scans) -i.e excludes 0 (ref image)
-    t2_imgs = inputs[get_modality_key(config["modality"])].expand(
-        bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="T2w.nii.gz",
-            desc="aligned",
-            floating="{idx}"
-        ),
-        **wildcards,
-        idx=range(1, num_scans)
+    t2_imgs = (
+        inputs["T2w"]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=work,
+                datatype="anat",
+                desc="aligned",
+                floating="{idx}",
+                suffix="T2w.nii.gz",
+                **inputs.subj_wildcards,
+            ),
+            idx=range(1, num_scans),
+        )
     )
     return t2_imgs
 
 
 if config["skip_preproc"]:
 
-    # grabs the first t2w only
+    # for preproc T2, we expect the user to use bids filters/wildcards to ensure only 1 T1w is matched per subject
     rule import_preproc_t2:
         input:
-            lambda wildcards: inputs["T2w"].expand(
-                inputs["T2w"].path,
-                zip,
-                **snakebids.filter_list(
-                    inputs[get_modality_key(config["modality"])].zip_lists, wildcards
-                )
-            )[0],
+            lambda wildcards: inputs["T2w"].filter(**wildcards).expand()[0],
         output:
             bids(
                 root=root,
