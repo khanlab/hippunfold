@@ -7,7 +7,7 @@ rule resample_hippdwi_to_template:
     bounding boxes, and keep all Z slices (since is Z 
     is smaller than in template). """
     input:
-        b500=config["input_path"]["hippb500"],
+        b500=inputs["hippb500"].path,
     params:
         resample_dim=config["hippdwi_opts"]["resample_dim"],
         bbox_x=lambda wildcards: config["hippdwi_opts"]["bbox_x"][wildcards.hemi],
@@ -19,7 +19,7 @@ rule resample_hippdwi_to_template:
             hemi="{hemi,L|R}",
             space="corobl",
             suffix="b500.nii.gz",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -40,7 +40,7 @@ rule lr_flip_b500:
         nii=bids(
             root=work,
             datatype="dwi",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="b500.nii.gz",
             space="corobl",
             hemi="{hemi}"
@@ -49,7 +49,7 @@ rule lr_flip_b500:
         nii=bids(
             root=work,
             datatype="dwi",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="b500.nii.gz",
             space="corobl",
             hemi="{hemi,L}flip"
@@ -67,7 +67,7 @@ rule cp_b500_to_anat_dir:
         nii=bids(
             root=work,
             datatype="dwi",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="b500.nii.gz",
             space="corobl",
             hemi="{hemi}"
@@ -80,7 +80,7 @@ rule cp_b500_to_anat_dir:
             suffix="hippb500.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     group:
         "subj"

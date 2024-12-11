@@ -45,7 +45,7 @@ rule template_reg:
         fixed_img=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="{modality}.nii.gz".format(
                 modality=get_modality_suffix(config["modality"])
             ),
@@ -69,7 +69,7 @@ rule template_reg:
     output:
         warp=bids(
             root=work,
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="greedytemplatereg",
@@ -94,7 +94,7 @@ rule warp_template_dseg:
         ref=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
@@ -102,7 +102,7 @@ rule warp_template_dseg:
         ),
         warp=bids(
             root=work,
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="greedytemplatereg",
@@ -122,7 +122,7 @@ rule warp_template_dseg:
         inject_seg=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
@@ -143,7 +143,7 @@ rule warp_template_coords:
         ref=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
@@ -151,7 +151,7 @@ rule warp_template_coords:
         ),
         warp=bids(
             root=work,
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="greedytemplatereg",
@@ -170,7 +170,7 @@ rule warp_template_coords:
         init_coords=bids(
             root=work,
             datatype="coords",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
             label="{autotop}",
             suffix="coords.nii.gz",
@@ -192,7 +192,7 @@ rule warp_template_anat:
         ref=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
@@ -200,7 +200,7 @@ rule warp_template_anat:
         ),
         warp=bids(
             root=work,
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="greedytemplatereg",
@@ -223,7 +223,7 @@ rule warp_template_anat:
         warped=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix=f"{config['modality']}.nii.gz",
             desc="warpedtemplate",
             space="corobl",
@@ -247,12 +247,12 @@ rule unflip_template_dseg:
             desc="postproc",
             space="corobl",
             hemi="{hemi}flip",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
         unflip_ref=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
@@ -266,7 +266,7 @@ rule unflip_template_dseg:
             desc="postproc",
             space="corobl",
             hemi="{hemi,L|R}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -282,7 +282,7 @@ rule unflip_template_coords:
         nii=bids(
             root=work,
             datatype="coords",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
             label="{autotop}",
             suffix="coords.nii.gz",
@@ -293,7 +293,7 @@ rule unflip_template_coords:
         unflip_ref=bids(
             root=work,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix=f"{config['modality']}.nii.gz",
             space="corobl",
             desc="preproc",
@@ -303,7 +303,7 @@ rule unflip_template_coords:
         nii=bids(
             root=work,
             datatype="coords",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
             label="{autotop}",
             suffix="coords.nii.gz",

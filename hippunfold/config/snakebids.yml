@@ -10,6 +10,7 @@ debug: False
 
 derivatives: False #will search in bids/derivatives if True; can also be path(s) to derivatives datasets
 
+
 #list of analysis levels in the bids app 
 analysis_levels: &analysis_levels
  - participant
@@ -35,8 +36,8 @@ pybids_inputs:
       suffix: 'T2w'
       extension: '.nii.gz'
       datatype: 'anat'
-      invalid_filters: 'allow'
-      space: null
+      # invalid_filters: 'allow'
+      # space: null
     wildcards:
       - subject
       - session
@@ -58,8 +59,8 @@ pybids_inputs:
       suffix: 'T1w'
       extension: '.nii.gz'
       datatype: 'anat'
-      invalid_filters: 'allow'
-      space: null
+      # invalid_filters: 'allow'
+      # space: null
     wildcards:
       - subject
       - session
@@ -75,6 +76,8 @@ pybids_inputs:
     wildcards:
       - subject
       - session
+      - acquisition
+      - run
 
   cropseg:
     filters:
@@ -86,50 +89,15 @@ pybids_inputs:
       - subject
       - session
       - hemi
+      - acquisition
+      - run
+
 
 
 
 #configuration for the command-line parameters to make available
 # passed on the argparse add_argument()
 parse_args:
-
-#---  core BIDS-app options --- (do not modify below) 
-
-  bids_dir:
-    help: The directory with the input dataset formatted according 
-          to the BIDS standard.
-
-  output_dir:
-    help: The directory where the output files 
-          should be stored. If you are running group level analysis
-          this folder should be prepopulated with the results of the
-          participant level analysis.
-
-  analysis_level: 
-    help: Level of the analysis that will be performed. 
-    choices: *analysis_levels
-
-  --participant_label:
-    help: The label(s) of the participant(s) that should be analyzed. The label 
-          corresponds to sub-<participant_label> from the BIDS spec 
-          (so it does not include "sub-"). If this parameter is not 
-          provided all subjects should be analyzed. Multiple 
-          participants can be specified with a space separated list.
-    nargs: '+'
-
-  --exclude_participant_label:
-    help: The label(s) of the participant(s) that should be excluded. The label 
-          corresponds to sub-<participant_label> from the BIDS spec 
-          (so it does not include "sub-"). If this parameter is not 
-          provided all subjects should be analyzed. Multiple 
-          participants can be specified with a space separated list.
-    nargs: '+'
-
-  --version:
-    help: 'Print the version of HippUnfold'
-    action: version
-    version: "1.5.4"
-
 
   --modality:
     help: 'Type of image to run hippunfold on. Modality prefixed with seg will import an existing (manual) hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
@@ -178,17 +146,11 @@ parse_args:
     help: 'Scales the default smoothing sigma for gradient and warp in greedy registration for template-based segmentation. Using a value higher than 1 will use result in a smoother warp. (default: %(default)s)'
     default: 2.0
 
-
-  --derivatives:
-    help: 'Path to the derivatives folder (e.g. for finding manual segs) (default: %(default)s) '
-    default: False
-
   --skip_preproc:
     help: 'Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed (default: %(default)s)'
     default: False
     action: 'store_true'
 
- 
   --skip_coreg:
     help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s)'
     default: False
@@ -330,6 +292,20 @@ parse_args:
       - synthseg_v0.2
       - neonateT1w_v2
 
+  --enable-bids-validation:
+    help: |
+      Enable validation of BIDS dataset. BIDS validation would be performed
+      using the bids-validator plugin (if installed/enabled) or with the pybids
+      validator implementation (if bids-validator is not installed/enabled).
+    dest: "plugins.validator.skip"
+    action: "store_false"
+    default: True
+
+
+  --version:
+    help: 'Print the version of HippUnfold'
+    action: version
+    version: "1.5.2-pre.2"
 
 
 
@@ -700,6 +676,7 @@ output_density:
 
 laminar_coords_method: equivolume
 skip_preproc: False
+plugins.validator.skip: False
 nnunet_enable_tta: False
 use_gpu: False
 skip_coreg: False
