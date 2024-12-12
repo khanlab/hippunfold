@@ -67,18 +67,6 @@ pybids_inputs:
       - acquisition
       - run
 
-  seg:
-    filters:
-      suffix: 'dseg'
-      extension: '.nii.gz'
-      datatype: 'anat'
-      invalid_filters: 'allow'
-    wildcards:
-      - subject
-      - session
-      - acquisition
-      - run
-
   cropseg:
     filters:
       suffix: 'dseg'
@@ -100,14 +88,12 @@ pybids_inputs:
 parse_args:
 
   --modality:
-    help: 'Type of image to run hippunfold on. Modality prefixed with seg will import an existing (manual) hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
+    help: 'Type of image to run hippunfold on. For manual segmentations, use cropseg and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with hemi-L|R in the name. (default: %(default)s)'
     required: True
     choices:
       - T1w
       - T2w
       - hippb500
-      - segT1w
-      - segT2w
       - cropseg
 
 

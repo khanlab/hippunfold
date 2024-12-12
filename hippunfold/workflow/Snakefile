@@ -65,13 +65,6 @@ if config["skip_inject_template_labels"]:  # TODO do we need this?
     config["autotop_labels"] = ["hipp"]
 
 
-# add seg (if chosen) and the modality to the inputs
-if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg
-    limit_to_list.add("seg")
-    limit_to_list.add(config["modality"][3:])
-else:
-    limit_to_list.add(config["modality"])
-
 # if atlas doesn't contain alignment features
 if not config["atlas"] == ["multihist7"]:
     config["no_unfolded_reg"] = True
@@ -118,11 +111,7 @@ if "T1w" in limit_to_list:
 
 
 # include rules only as they are needed..
-if config["modality"] == "segT1w" or config["modality"] == "segT2w":
-
-    include: "rules/preproc_seg.smk"
-
-elif config["modality"] == "cropseg":
+if config["modality"] == "cropseg":
 
     include: "rules/preproc_cropseg.smk"
 
