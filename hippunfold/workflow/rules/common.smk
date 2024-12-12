@@ -1,4 +1,27 @@
 from appdirs import AppDirs
+from snakebids.paths import bids_factory, specs
+
+from functools import partial
+
+
+def get_single_bids_input(wildcards, component):
+    """Generic input function for getting the first instance of a bids component
+    from a dataset, and throw an error if more than one are found.
+
+    Use this in a rule by using e.g.:
+        in_img = partial(get_single_bids_input,component='T1w')
+    """
+
+    subj_inputs = inputs[component].filter(**wildcards).expand()
+    if len(subj_inputs) > 1:
+        raise ValueError(
+            f"Expected 1 input for '{component}' {wildcards}, "
+            f"but found {len(subj_inputs)}: {subj_inputs}."
+            f"You can use the --filter-{component} option to filter your wildcards."
+        )
+    else:
+        return subj_inputs[0]
+
 
 # take mean of all scans if >1, otherwise just copy the one scan
 def get_avg_or_cp_scans_cmd(wildcards, input, output):
@@ -27,7 +50,7 @@ def get_modality_suffix(modality):
 
 def get_final_spec():
     if len(config["hemi"]) == 2:
-        specs = expand(
+        specs = inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -35,7 +58,7 @@ def get_final_spec():
                 space="{space}",
                 label="{autotop}",
                 suffix="surfaces.spec",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
             ),
             density=config["output_density"],
             space=ref_spaces,
@@ -43,7 +66,7 @@ def get_final_spec():
             allow_missing=True,
         )
     else:
-        specs = expand(
+        specs = inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -52,7 +75,7 @@ def get_final_spec():
                 hemi="{hemi}",
                 label="{autotop}",
                 suffix="surfaces.spec",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
             ),
             density=config["output_density"],
             space=ref_spaces,
@@ -66,7 +89,7 @@ def get_final_spec():
 def get_final_surf():
     gii = []
     gii.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -75,7 +98,7 @@ def get_final_surf():
                 space="{space}",
                 hemi="{hemi}",
                 label="{autotop}",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
             ),
             density=config["output_density"],
             space=ref_spaces,
@@ -86,7 +109,7 @@ def get_final_surf():
         )
     )
     gii.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -95,7 +118,7 @@ def get_final_surf():
                 space="{space}",
                 hemi="{hemi}",
                 label="{autotop}",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
             ),
             density=config["output_density"],
             space=ref_spaces,
@@ -109,7 +132,7 @@ def get_final_surf():
 
 
 def get_final_subfields():
-    return expand(
+    return inputs[get_modality_key(config["modality"])].expand(
         bids(
             root=root,
             datatype="anat",
@@ -118,7 +141,7 @@ def get_final_subfields():
             space="{space}",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
         ),
         hemi=config["hemi"],
         space=crop_ref_spaces,
@@ -136,7 +159,7 @@ def get_final_coords():
     coords = []
     # compute all laplace coords by default (incl IO)
     coords.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="coords",
@@ -146,7 +169,7 @@ def get_final_coords():
                 space="{space}",
                 hemi="{hemi}",
                 label="{autotop}",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
             ),
             desc="laplace",
             dir=["AP", "PD", "IO"],
@@ -157,7 +180,7 @@ def get_final_coords():
         )
     )
     coords.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="coords",
@@ -167,7 +190,7 @@ def get_final_coords():
                 space="{space}",
                 hemi="{hemi}",
                 label="hipp",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
             ),
             desc=[desc_io],
             dir=["IO"],
@@ -183,11 +206,11 @@ def get_final_transforms():
     xfms = []
 
     xfms.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="warps",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 label="{autotop}",
                 suffix="xfm.nii.gz",
                 hemi="{hemi}",
@@ -203,11 +226,11 @@ def get_final_transforms():
     )
 
     xfms.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="warps",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 label="{autotop}",
                 suffix="xfm.nii.gz",
                 hemi="{hemi}",
@@ -223,11 +246,11 @@ def get_final_transforms():
     )
 
     xfms.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="warps",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 label="{autotop}",
                 suffix="refvol.nii.gz",
                 space="unfold",
@@ -245,7 +268,7 @@ def get_final_anat():
 
     if "T1w" in ref_spaces or "T2w" in ref_spaces:
         anat.extend(
-            expand(
+            inputs[get_modality_key(config["modality"])].expand(
                 bids(
                     root=root,
                     datatype="anat",
@@ -255,7 +278,7 @@ def get_final_anat():
                     ),
                     space="{space}",
                     hemi="{hemi}",
-                    **config["subj_wildcards"],
+                    **inputs.subj_wildcards,
                 ),
                 space=crop_ref_spaces,
                 hemi=config["hemi"],
@@ -270,21 +293,21 @@ def get_final_qc():
 
     if not template_modality == False:
         qc.extend(
-            expand(
+            inputs[get_modality_key(config["modality"])].expand(
                 bids(
                     root=root,
                     datatype="qc",
                     suffix="regqc.png",
                     from_="{native_modality}",
                     to=config["template"],
-                    **config["subj_wildcards"],
+                    **inputs.subj_wildcards,
                 ),
                 native_modality=template_modality,
                 allow_missing=True,
             )
         )
     qc.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="qc",
@@ -293,7 +316,7 @@ def get_final_qc():
                 space="{space}",
                 hemi="{hemi}",
                 atlas="{atlas}",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
             ),
             hemi=config["hemi"],
             atlas=config["atlas"],
@@ -302,7 +325,7 @@ def get_final_qc():
         )
     )
     qc.extend(
-        expand(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="qc",
@@ -312,7 +335,7 @@ def get_final_qc():
                 space="{space}",
                 hemi="{hemi}",
                 label="{autotop}",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
             ),
             hemi=config["hemi"],
             autotop=config["autotop_labels"],
@@ -323,7 +346,7 @@ def get_final_qc():
     )
     if len(config["hemi"]) == 2:
         qc.extend(
-            expand(
+            inputs[get_modality_key(config["modality"])].expand(
                 bids(
                     root=root,
                     datatype="qc",
@@ -331,7 +354,7 @@ def get_final_qc():
                     space="{space}",
                     atlas="{atlas}",
                     suffix="volumes.png",
-                    **config["subj_wildcards"],
+                    **inputs.subj_wildcards,
                 ),
                 space=crop_ref_spaces,
                 atlas=config["atlas"],
@@ -341,14 +364,14 @@ def get_final_qc():
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
         if not config["use_template_seg"]:
             qc.extend(
-                expand(
+                inputs[get_modality_key(config["modality"])].expand(
                     bids(
                         root=root,
                         datatype="qc",
                         desc="unetf3d",
                         suffix="dice.tsv",
                         hemi="{hemi}",
-                        **config["subj_wildcards"],
+                        **inputs.subj_wildcards,
                     ),
                     hemi=config["hemi"],
                     allow_missing=True,
@@ -381,9 +404,16 @@ def get_final_output():
     modality_key = get_modality_key(config["modality"])
 
     # use a zip list for subject/session:
-    zip_list = config["input_zip_lists"][modality_key]
+    zip_list = inputs[modality_key].zip_lists
     if "session" in zip_list:
-        zip_list = snakebids.filter_list(zip_list, {"session": config["sessions"]})
+        zip_list = snakebids.filter_list(
+            zip_list,
+            {
+                "session": inputs[get_modality_key(config["modality"])].zip_lists[
+                    "session"
+                ]
+            },
+        )
 
     final_output.extend(
         expand(
@@ -429,17 +459,14 @@ if "corobl" in ref_spaces:
 
 
 def get_final_work_tar():
-    return bids(
-        root=work,
-        suffix="work.tar.gz",
-        include_subject_dir=False,
-        include_session_dir=False,
-        **config["subj_wildcards"]
-    )
+    bids = bids_factory(specs.v0_0_0(subject_dir=False, session_dir=False))
+    return bids(root=work, suffix="work.tar.gz", **inputs.subj_wildcards)
 
 
 def get_work_dir(wildcards):
-    folder_with_file = expand(bids(root=work, **config["subj_wildcards"]), **wildcards)
+    folder_with_file = inputs[get_modality_key(config["modality"])].expand(
+        bids(root=work, **inputs.subj_wildcards), **wildcards
+    )
     folder_without_file = os.path.dirname(folder_with_file[0])
     return folder_without_file
 

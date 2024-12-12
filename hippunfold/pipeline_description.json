@@ -1,14 +1,15 @@
 {
-    "Name": "Snakemake BIDS app for hippocampal unfolding & subfield segmentation",
-    "BIDSVersion": "1.4.0",
-    "DatasetType": "derivative",
-    "GeneratedBy": [
-        {
-            "Name": "hippunfold",
-            "Version": "1.5.2-pre.2",
-            "CodeURL": "https://github.com/khanlab/hippunfold",
-            "Author": "Jordan DeKraker & Ali Khan",
-            "AuthorEmail": "ali.khan@uwo.ca"
-        }
-    ]
+
+  "Name": "Snakemake BIDS app for hippocampal unfolding & subfield segmentation",
+  "BIDSVersion": "1.8.0",
+  "DatasetType": "derivative",
+  "GeneratedBy": [
+    {
+      "Name": "hippunfold",
+      "Version": "1.5.4",
+      "CodeURL": "https://github.com/khanlab/hippunfold",
+      "Author": "Jordan DeKraker & Ali Khan",
+      "AuthorEmail": "ali.khan@uwo.ca"
+    }
+  ]
 }

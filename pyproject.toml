@@ -2,17 +2,30 @@
 name = "hippunfold"
 version = "1.5.2-pre.2"
 description = "BIDS App for Hippocampal AutoTop (automated hippocampal unfolding and subfield segmentation)"
+readme = "README.md"
+license = "MIT"
 authors = ["Jordan DeKraker & Ali Khan <alik@robarts.ca>"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
-snakemake = ">=6.0.0"
-snakebids = "^0.8.1"
+python = ">=3.8,<4.0"
+snakemake = [
+    { version=">=7.20,<8", python = "<3.11" },
+    { version=">=8.1.2", python = ">=3.11" },
+]
+snakebids = ">=0.13.1"
 appdirs = "^1.4.4"
 Jinja2 = "^3.0.3"
 pygraphviz = "1.7"
 Pygments = "^2.10.0"
-pulp = "<2.8.0"
+pulp = { version="<2.8.0", python = "<3.11" }
+pandas = [
+    { version = "<=2.0.3", python = "<3.9" },
+    { version = ">=2.1.1", python = ">=3.12" },
+]
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
@@ -23,14 +36,13 @@ pylint = "^2.11.1"
 isort = "^5.10.1"
 poethepoet = "^0.10.0"
 snakefmt = ">=0.5.0"
-
 [tool.poetry.scripts]
-hippunfold = "hippunfold.run:main"
+hippunfold = "hippunfold.run:app.run"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
 [tool.poe.tasks]
 quality_check = { shell = "isort hippunfold/*.py -c && black hippunfold --check && snakefmt hippunfold --check" }
 quality_fix = { shell = "isort hippunfold/*.py && black hippunfold  && snakefmt hippunfold" }
