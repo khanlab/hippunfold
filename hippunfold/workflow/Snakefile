@@ -35,7 +35,7 @@ if (
     limit_to_list.add("T2w")
 if (
     config["modality"] == "hippb500"
-    or config["modality"] == "cropseg"
+    or config["modality"] == "manualseg"
     or "corobl" in config["output_spaces"]
 ):
     ref_spaces.append("corobl")
@@ -111,9 +111,9 @@ if "T1w" in limit_to_list:
 
 
 # include rules only as they are needed..
-if config["modality"] == "cropseg":
+if config["modality"] == "manualseg":
 
-    include: "rules/preproc_cropseg.smk"
+    include: "rules/preproc_manualseg.smk"
 
 else:
 

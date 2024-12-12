@@ -32,7 +32,7 @@ def flipped(wildcards):
 
 
 def get_input_for_shape_inject(wildcards):
-    if config["modality"] == "cropseg":
+    if config["modality"] == "manualseg":
         seg = bids(
             root=work,
             datatype="anat",
@@ -55,7 +55,7 @@ def get_input_for_shape_inject(wildcards):
 
 
 def get_input_splitseg_for_shape_inject(wildcards):
-    if config["modality"] == "cropseg":
+    if config["modality"] == "manualseg":
         seg = bids(
             root=work,
             datatype="anat",

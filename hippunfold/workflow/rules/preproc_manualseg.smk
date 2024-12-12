@@ -1,7 +1,7 @@
 
-rule import_cropseg_to_corobl:
+rule import_manualseg_to_corobl:
     input:
-        in_img=partial(get_single_bids_input, component="cropseg"),
+        in_img=partial(get_single_bids_input, component="manualseg"),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         std_to_cor=lambda wildcards: config["template_files"][config["template"]][

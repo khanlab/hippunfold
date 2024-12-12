@@ -67,7 +67,7 @@ pybids_inputs:
       - acquisition
       - run
 
-  cropseg:
+  manualseg:
     filters:
       suffix: 'dseg'
       extension: '.nii.gz'
@@ -88,13 +88,13 @@ pybids_inputs:
 parse_args:
 
   --modality:
-    help: 'Type of image to run hippunfold on. For manual segmentations, use cropseg and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with hemi-L|R in the name. (default: %(default)s)'
+    help: 'Type of image to run hippunfold on. For manualseg and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with separate hemi-L|R in the name(s). (default: %(default)s)'
     required: True
     choices:
       - T1w
       - T2w
       - hippb500
-      - cropseg
+      - manualseg
 
 
   --template:

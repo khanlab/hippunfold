@@ -120,7 +120,7 @@ def get_bg_img_for_subfield_qc(wildcards):
             hemi="{hemi}",
             **inputs.subj_wildcards,
         )
-    elif config["modality"] == "cropseg":
+    elif config["modality"] == "manualseg":
         # blank image as bg
         return bids(
             root=work,
