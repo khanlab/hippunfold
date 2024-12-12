@@ -127,24 +127,13 @@ if config["modality"] == "hippb500":
 
 
 include: "rules/autotop.smk"
-
-
 include: "rules/warps.smk"
-
-
 include: "rules/gifti.smk"
-
-
 include: "rules/subfields.smk"
-
-
 include: "rules/resample_final_to_crop_native.smk"
-
-
 include: "rules/qc.smk"
-
-
 include: "rules/myelin_map.smk"
+include: "rules/native_surf.smk"
 
 
 if config["use_template_seg"]:
