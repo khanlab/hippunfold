@@ -4,7 +4,8 @@ print(bids(
             datatype="surf_", #temporarily, to keep things separate for development
             suffix="{surfname}.surf.gii",
             space="unfold",
-            desc="{desc}nostruct",
+            den="{density}",
+            desc="{desc}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
@@ -189,4 +190,53 @@ rule resample_subfields_to_native_surf:
         "subj"
     shell:
         'wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check'
+
+rule resample_native_surf:
+    input:
+        native_corobl=bids(
+            root=root,
+            datatype="surf_", #temporarily, to keep things separate for development
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            desc="{desc}",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards
+        ),
+        ref_unfold=os.path.join(
+            workflow.basedir,
+            "..",
+            "resources",
+            "unfold_template_hipp",
+            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        ),
+        native_unfold=bids(
+            root=root,
+            datatype="surf_", #temporarily, to keep things separate for development
+            suffix="midthickness.surf.gii",
+            space="unfold",
+            desc="{desc}",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards
+        ),
+    output:
+        native_corobl_resampled=bids(
+            root=root,
+            datatype="surf_", #temporarily, to keep things separate for development
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            den="{density}",
+            desc="{desc}",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards
+        ),
+    container: None
+#        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        'wb_command -surface-resample {input.native_corobl} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_corobl_resampled} -bypass-sphere-check'
+
 
