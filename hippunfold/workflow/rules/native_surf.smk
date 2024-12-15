@@ -1,28 +1,28 @@
 surf_thresholds={'inner': 0.05, 'outer':0.95, 'midthickness':0.5}
-print(bids(
-            root=root,
-            datatype="surf_", #temporarily, to keep things separate for development
-            suffix="{surfname}.surf.gii",
-            space="unfold",
-            den="{density}",
-            desc="{desc}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ))
 
-print(bids(
+rule get_hipp_mask_for_meshing:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        gm_labels=' '.join([str(lbl) for lbl in config["laplace_labels"]["AP"]["gm"]])
+
+    output:
+        mask=bids(
             root=root,
-            datatype="surf_",
-            fromdensity="{density}",
-            suffix="subfields.label.gii",
-            desc="{desc}",
+            datatype="anat",
+            suffix="mask.nii.gz",
             space="corobl",
+            desc="GM",
             hemi="{hemi}",
             label="hipp",
-            atlas="{atlas}",
             **inputs.subj_wildcards
-        ))
+        ),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        'c3d {input} -retain-labels {params} {output}' 
+
+
 
 rule gen_native_hipp_mesh:
     input:
@@ -37,9 +37,19 @@ rule gen_native_hipp_mesh:
             hemi="{hemi}",
             **inputs.subj_wildcards
         ),
+        mask=bids(
+            root=root,
+            datatype="anat",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="GM",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards
+        ),
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
-        decimate_percent=0
+        decimate_percent=0 # not currently working right now
     output:
         surf_gii=bids(
             root=root,
@@ -196,7 +206,7 @@ rule resample_native_surf:
         native_corobl=bids(
             root=root,
             datatype="surf_", #temporarily, to keep things separate for development
-            suffix="midthickness.surf.gii",
+            suffix="{surf_name}.surf.gii",
             space="corobl",
             desc="{desc}",
             hemi="{hemi}",
@@ -208,12 +218,12 @@ rule resample_native_surf:
             "..",
             "resources",
             "unfold_template_hipp",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+            "tpl-avg_space-unfold_den-{density}_{surf_name}.surf.gii",
         ),
         native_unfold=bids(
             root=root,
             datatype="surf_", #temporarily, to keep things separate for development
-            suffix="midthickness.surf.gii",
+            suffix="{surf_name}.surf.gii",
             space="unfold",
             desc="{desc}",
             hemi="{hemi}",
@@ -224,7 +234,7 @@ rule resample_native_surf:
         native_corobl_resampled=bids(
             root=root,
             datatype="surf_", #temporarily, to keep things separate for development
-            suffix="midthickness.surf.gii",
+            suffix="{surf_name}.surf.gii",
             space="corobl",
             den="{density}",
             desc="{desc}",

@@ -37,6 +37,13 @@ def remove_nan_points_faces(vertices,faces):
 # Load the NIfTI file
 nifti_img = nib.load(snakemake.input.nii)
 data = nifti_img.get_fdata()
+
+
+# Load the mask
+mask_img = nib.load(snakemake.input.mask)
+mask = mask_img.get_fdata()
+
+
 affine = nifti_img.affine
 
 # Get voxel spacing from the header
@@ -49,7 +56,7 @@ grid.spacing = (1, 1, 1)  # Use unit spacing and zero origin since we will apply
 grid.origin = (0,0,0) 
 
 # Add the scalar field
-grid.cell_data["values"] = np.where(data == 0, np.nan, data).flatten(order="F")
+grid.cell_data["values"] = np.where(mask == 0, np.nan, data).flatten(order="F")
 grid = grid.cells_to_points("values")
 
 # apply the affine
