@@ -2,9 +2,45 @@ import nibabel as nib
 import numpy as np
 import naturalneighbor
 from scipy.stats import zscore
+from scipy.ndimage import generic_filter, binary_dilation
+from astropy.convolution import convolve
 
 logfile = open(snakemake.log[0], "w")
 print(f"Start", file=logfile, flush=True)
+
+
+def extrapolate_with_convolve(input_array, mask_array):
+    """
+    Perform convolution to replace nearby NaN values with interpolated values,
+    while preserving values at all non-NaN voxels.
+
+    Parameters:
+    - input_array: ndarray
+        The input array with possible NaN values to be replaced.
+    - mask_array: ndarray
+        A boolean mask where True indicates regions to preserve in the input array.
+
+    Returns:
+    - output_array: ndarray
+        The array with NaN values replaced using interpolation from the neighborhood.
+    """
+    # 1. Create working array: set to NaN outside mask, else input_array
+    working_array = np.where(mask_array, input_array, np.nan)
+
+    # 2. Define a convolution kernel (3x3x3 Box Kernel)
+    # set up filter (18NN)
+    hl = np.ones([3, 3, 3])
+    hl = hl / np.sum(hl)
+
+
+    # 3. Perform convolution on the working array with NaNs
+    convolved_array = convolve(working_array, hl, nan_treatment='interpolate', preserve_nan=False)
+
+    # 4. Restore original values inside the mask
+    working_array = np.where(mask_array, input_array, convolved_array)
+
+    return working_array
+
 
 
 def convert_warp_to_itk(warp):
@@ -46,6 +82,18 @@ idxgm = np.zeros(lbl.shape)
 for i in snakemake.params.gm_labels:
     idxgm[lbl == i] = 1
 mask = idxgm == 1
+
+#extrapolate coords to widen domain
+coord_ap = extrapolate_with_convolve(coord_ap,mask)
+coord_io = extrapolate_with_convolve(coord_io,mask)
+coord_pd = extrapolate_with_convolve(coord_pd,mask)
+
+
+#then, dilate the mask, to get a larger domain for the warp
+structuring_element = np.ones((3, 3, 3), dtype=bool)
+mask = binary_dilation(mask,structuring_element)
+
+
 num_mask_voxels = np.sum(mask)
 print(f"num_mask_voxels {num_mask_voxels}", file=logfile, flush=True)
 
