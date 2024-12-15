@@ -1,5 +1,8 @@
 surf_thresholds={'inner': 0.05, 'outer':0.95, 'midthickness':0.5}
 
+gm_labels={'hipp': config["laplace_labels"]["AP"]["gm"],
+            'dentate': config["laplace_labels"]["PD"]["sink"]}
+
 
 rule all_nativesurf:
     input:
@@ -12,16 +15,13 @@ rule all_nativesurf:
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
-        ),subject='1425',desc='equivol',hemi='R',label='hipp')
-      
-
+        ),subject='1425',desc='equivol',hemi='R',label='hipp'), # will run for dentate too, but surface has too many holes..
 
 rule get_hipp_mask_for_meshing:
     input:
         labelmap=get_labels_for_laplace,
     params:
-        gm_labels=' '.join([str(lbl) for lbl in config["laplace_labels"]["AP"]["gm"]])
-
+        gm_labels=lambda wildcards: ' '.join([str(lbl) for lbl in gm_labels[wildcards.label]])
     output:
         mask=bids(
             root=root,
@@ -30,7 +30,7 @@ rule get_hipp_mask_for_meshing:
             space="corobl",
             desc="GM",
             hemi="{hemi}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     container:
@@ -40,13 +40,13 @@ rule get_hipp_mask_for_meshing:
 
 
 
-rule gen_native_hipp_mesh:
+rule gen_native_mesh:
     input:
         nii=bids(
             root=work,
             datatype="coords",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="{desc}",
             space="corobl",
@@ -60,7 +60,7 @@ rule gen_native_hipp_mesh:
             space="corobl",
             desc="GM",
             hemi="{hemi}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     params:
@@ -74,7 +74,7 @@ rule gen_native_hipp_mesh:
             space="corobl",
             desc="{desc}nostruct",
             hemi="{hemi}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     group:
@@ -83,7 +83,7 @@ rule gen_native_hipp_mesh:
     script:
         "../scripts/gen_isosurface.py"
 
-rule update_native_hipp_mesh_structure:
+rule update_native_mesh_structure:
     input:
         surf_gii=bids(
             root=root,
@@ -226,14 +226,14 @@ rule resample_native_surf:
             space="corobl",
             desc="{desc}",
             hemi="{hemi}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards
         ),
         ref_unfold=os.path.join(
             workflow.basedir,
             "..",
             "resources",
-            "unfold_template_hipp",
+            "unfold_template_{label}",
             "tpl-avg_space-unfold_den-{density}_{surf_name}.surf.gii",
         ),
         native_unfold=bids(
@@ -255,7 +255,7 @@ rule resample_native_surf:
             den="{density}",
             desc="{desc}",
             hemi="{hemi}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     container: None
@@ -287,7 +287,7 @@ rule compute_halfthick_mask:
             space="corobl",
             desc="GM",
             hemi="{hemi}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     params:
@@ -297,7 +297,7 @@ rule compute_halfthick_mask:
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="mask.nii.gz",
             desc="{desc}",
             to="{inout}",
@@ -314,7 +314,7 @@ rule register_midthickness:
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="mask.nii.gz",
             desc="{desc}",
             to="{inout}",
@@ -329,7 +329,7 @@ rule register_midthickness:
             space="corobl",
             desc="GM",
             hemi="{hemi}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     output:
@@ -337,7 +337,7 @@ rule register_midthickness:
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="xfm.nii.gz",
             desc="{desc}",
             to="{inout}",
@@ -356,7 +356,7 @@ rule apply_halfsurf_warp_to_img:
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="mask.nii.gz",
             desc="{desc}",
             to="{inout}",
@@ -371,14 +371,14 @@ rule apply_halfsurf_warp_to_img:
             space="corobl",
             desc="GM",
             hemi="{hemi}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards
         ),
         warp=bids(
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="xfm.nii.gz",
             desc="{desc}",
             to="{inout}",
@@ -391,7 +391,7 @@ rule apply_halfsurf_warp_to_img:
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="warpedmask.nii.gz",
             desc="{desc}",
             to_="{inout}",
@@ -409,7 +409,7 @@ rule convert_warp_from_itk_to_world:
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="xfm.nii.gz",
             desc="{desc}",
             to="{inout}",
@@ -423,7 +423,7 @@ rule convert_warp_from_itk_to_world:
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="xfmras.nii.gz",
             desc="{desc}",
             to="{inout}",
@@ -451,7 +451,7 @@ rule warp_midthickness_to_inout:
             root=root,
             datatype="surf_",
             dir="IO",
-            label="hipp",
+            label="{label}",
             suffix="xfmras.nii.gz",
             desc="{desc}",
             to="{surfname}",
