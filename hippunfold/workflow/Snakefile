@@ -18,16 +18,12 @@ template_modality = False
 
 
 # set the lists used for output spaces
-if (
-    config["modality"] == "T1w"
-    or "T1w" in config["output_spaces"]
-):
+if config["modality"] == "T1w" or "T1w" in config["output_spaces"]:
     ref_spaces.append("T1w")
     crop_ref_spaces.append("cropT1w")
     limit_to_list.add("T1w")
 if (
-    config["modality"] == "T2w"
-    and "native" in config["output_spaces"]
+    config["modality"] == "T2w" and "native" in config["output_spaces"]
 ) or "T2w" in config["output_spaces"]:
     ref_spaces.append("T2w")
     crop_ref_spaces.append("cropT2w")
