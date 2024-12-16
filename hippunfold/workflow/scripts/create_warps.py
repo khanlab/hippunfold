@@ -29,7 +29,7 @@ def extrapolate_with_convolve(input_array, mask_array):
 
     # 2. Define a convolution kernel (3x3x3 Box Kernel)
     # set up filter (18NN)
-    hl = np.ones([3, 3, 3])
+    hl = np.ones([5, 5, 5])
     hl = hl / np.sum(hl)
 
 
@@ -91,6 +91,7 @@ coord_pd = extrapolate_with_convolve(coord_pd,mask)
 
 #then, dilate the mask, to get a larger domain for the warp
 structuring_element = np.ones((3, 3, 3), dtype=bool)
+mask = binary_dilation(mask,structuring_element)
 mask = binary_dilation(mask,structuring_element)
 
 

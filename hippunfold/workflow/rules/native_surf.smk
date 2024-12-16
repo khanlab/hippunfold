@@ -6,6 +6,31 @@ gm_labels={'hipp': config["laplace_labels"]["AP"]["gm"],
 
 rule all_nativesurf:
     input:
+        label_gii=expand(bids(
+            root=root,
+            datatype="surf_",
+            fromdensity="{density}",
+            desc="{desc}",
+            suffix="subfields.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **inputs.subj_wildcards
+        ),subject='1425',atlas=['bigbrain','multihist7'],desc='equivol',hemi='R',space='corobl',density=['unfoldiso','0p5mm','1mm','2mm']), 
+
+        native_corobl_resampled=expand(bids(
+            root=root,
+            datatype="surf_", #temporarily, to keep things separate for development
+            suffix="{surf_name}.surf.gii",
+            space="{space}",
+            den="{density}",
+            desc="{desc}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),subject='1425',desc='equivol',hemi='R',space='corobl',density=['unfoldiso','0p5mm','1mm','2mm'],surf_name='midthickness',label='hipp'), 
+
         thickness_gii=expand(bids(
             root=root,
             datatype="surf_",
@@ -17,32 +42,9 @@ rule all_nativesurf:
             **inputs.subj_wildcards
         ),subject='1425',desc='equivol',hemi='R',label='hipp'), # will run for dentate too, but surface has too many holes..
 
-rule get_hipp_mask_for_meshing:
+rule prep_hipp_coords_for_meshing:
     input:
-        labelmap=get_labels_for_laplace,
-    params:
-        gm_labels=lambda wildcards: ' '.join([str(lbl) for lbl in gm_labels[wildcards.label]])
-    output:
-        mask=bids(
-            root=root,
-            datatype="anat",
-            suffix="mask.nii.gz",
-            space="corobl",
-            desc="GM",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        'c3d {input} -retain-labels {params} -binarize {output}' 
-
-
-
-rule gen_native_mesh:
-    input:
-        nii=bids(
+        coords=bids(
             root=work,
             datatype="coords",
             dir="IO",
@@ -53,12 +55,98 @@ rule gen_native_mesh:
             hemi="{hemi}",
             **inputs.subj_wildcards
         ),
+        labelmap=get_labels_for_laplace,
+    params:
+        gm_labels=lambda wildcards: config["laplace_labels"]["IO"]["gm"],
+        src_labels=lambda wildcards: config["laplace_labels"]["IO"]["src"],
+        sink_labels=lambda wildcards: config["laplace_labels"]["IO"]["sink"],
+    output:
+        coords=bids(
+            root=root,
+            datatype="surf_",
+            suffix="coords.nii.gz",
+            space="corobl",
+            desc="{desc}formesh",
+            hemi="{hemi}",
+            label="{label,hipp}",
+            **inputs.subj_wildcards
+        ),
         mask=bids(
             root=root,
-            datatype="anat",
+            datatype="surf_",
             suffix="mask.nii.gz",
             space="corobl",
-            desc="GM",
+            desc="{desc}formesh",
+            hemi="{hemi}",
+            label="{label,hipp}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    script: '../scripts/prep_hipp_coords_for_meshing.py'
+
+ 
+rule prep_dentate_coords_for_meshing:
+    input:
+        coords=bids(
+            root=work,
+            datatype="coords",
+            dir="IO",
+            label="{label}",
+            suffix="coords.nii.gz",
+            desc="{desc}",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards
+        ),
+        labelmap=get_labels_for_laplace,
+    params:
+        gm_labels=lambda wildcards: config["laplace_labels"]["IO"]["gm"],
+    output:
+        coords=bids(
+            root=root,
+            datatype="surf_",
+            suffix="coords.nii.gz",
+            space="corobl",
+            desc="{desc}formesh",
+            hemi="{hemi}",
+            label="{label,dentate}",
+            **inputs.subj_wildcards
+        ),
+        mask=bids(
+            root=root,
+            datatype="surf_",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="{desc}formesh",
+            hemi="{hemi}",
+            label="{label,dentate}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    script: '../scripts/prep_dentate_coords_for_meshing.py'
+
+       
+
+rule gen_native_mesh:
+    input:
+        nii=bids(
+            root=root,
+            datatype="surf_",
+            suffix="coords.nii.gz",
+            space="corobl",
+            desc="{desc}formesh",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        mask=bids(
+            root=root,
+            datatype="surf_",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="{desc}formesh",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
@@ -282,7 +370,7 @@ rule compute_halfthick_mask:
         ),
         mask=bids(
             root=root,
-            datatype="anat",
+            datatype="surf_",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",
@@ -324,7 +412,7 @@ rule register_midthickness:
         ),
         moving=bids(
             root=root,
-            datatype="anat",
+            datatype="surf_",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",
@@ -366,7 +454,7 @@ rule apply_halfsurf_warp_to_img:
         ),
         moving=bids(
             root=root,
-            datatype="anat",
+            datatype="surf_",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",
