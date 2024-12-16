@@ -20,14 +20,13 @@ template_modality = False
 # set the lists used for output spaces
 if (
     config["modality"] == "T1w"
-    or config["modality"] == "segT1w"
     or "T1w" in config["output_spaces"]
 ):
     ref_spaces.append("T1w")
     crop_ref_spaces.append("cropT1w")
     limit_to_list.add("T1w")
 if (
-    (config["modality"] == "T2w" or config["modality"] == "segT2w")
+    config["modality"] == "T2w"
     and "native" in config["output_spaces"]
 ) or "T2w" in config["output_spaces"]:
     ref_spaces.append("T2w")
@@ -64,6 +63,7 @@ elif "T1w" in config["modality"]:
 if config["skip_inject_template_labels"]:  # TODO do we need this?
     config["autotop_labels"] = ["hipp"]
 
+limit_to_list.add(config["modality"])
 
 # if atlas doesn't contain alignment features
 if not config["atlas"] == ["multihist7"]:
