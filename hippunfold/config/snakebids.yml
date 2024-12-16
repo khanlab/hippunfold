@@ -366,12 +366,13 @@ cifti_metric_types:
     - curvature.dscalar
 
 # params for detecting and removing outlier vertices
-outlierSmoothDist: 
-  unfoldiso: 15
-  0p5mm: 7
-  1mm: 3
-  2mm: 1
-vertexOutlierThreshold: 3
+outlier_opts:
+  outlierSmoothDist: 
+    unfoldiso: 15
+    0p5mm: 7
+    1mm: 3
+    2mm: 1
+  vertexOutlierThreshold: 3
 
 
 
@@ -627,7 +628,7 @@ unfold_vol_ref:
 unfold_crop_epsilon_fractions:
     - 0
     - 0
-    - 1
+    - 1 #in unfolded space voxels
 
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface
