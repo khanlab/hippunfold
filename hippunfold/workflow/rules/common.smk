@@ -89,7 +89,6 @@ def get_final_spec():
             surfname=config["surf_types"]["dentate"],
             allow_missing=True,
         )
-    )
     return specs
 
 
