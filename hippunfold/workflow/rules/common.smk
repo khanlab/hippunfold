@@ -41,7 +41,7 @@ def get_modality_suffix(modality):
 
 def get_final_spec():
     if len(config["hemi"]) == 2:
-        specs = inputs[get_modality_key(config["modality"])].expand(
+        specs = inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -57,7 +57,7 @@ def get_final_spec():
             allow_missing=True,
         )
     else:
-        specs = inputs[get_modality_key(config["modality"])].expand(
+        specs = inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -80,7 +80,7 @@ def get_final_spec():
 def get_final_surf():
     gii = []
     gii.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -100,7 +100,7 @@ def get_final_surf():
         )
     )
     gii.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -123,7 +123,7 @@ def get_final_surf():
 
 
 def get_final_subfields():
-    return inputs[get_modality_key(config["modality"])].expand(
+    return inputs[config["modality"]].expand(
         bids(
             root=root,
             datatype="anat",
@@ -150,7 +150,7 @@ def get_final_coords():
     coords = []
     # compute all laplace coords by default (incl IO)
     coords.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="coords",
@@ -171,7 +171,7 @@ def get_final_coords():
         )
     )
     coords.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="coords",
@@ -197,7 +197,7 @@ def get_final_transforms():
     xfms = []
 
     xfms.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="warps",
@@ -217,7 +217,7 @@ def get_final_transforms():
     )
 
     xfms.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="warps",
@@ -237,7 +237,7 @@ def get_final_transforms():
     )
 
     xfms.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="warps",
@@ -256,10 +256,9 @@ def get_final_transforms():
 
 def get_final_anat():
     anat = []
-
     if "T1w" in ref_spaces or "T2w" in ref_spaces:
         anat.extend(
-            inputs[get_modality_key(config["modality"])].expand(
+            inputs[config["modality"]].expand(
                 bids(
                     root=root,
                     datatype="anat",
@@ -284,7 +283,7 @@ def get_final_qc():
 
     if not template_modality == False:
         qc.extend(
-            inputs[get_modality_key(config["modality"])].expand(
+            inputs[config["modality"]].expand(
                 bids(
                     root=root,
                     datatype="qc",
@@ -298,7 +297,7 @@ def get_final_qc():
             )
         )
     qc.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="qc",
@@ -316,7 +315,7 @@ def get_final_qc():
         )
     )
     qc.extend(
-        inputs[get_modality_key(config["modality"])].expand(
+        inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="qc",
@@ -337,7 +336,7 @@ def get_final_qc():
     )
     if len(config["hemi"]) == 2:
         qc.extend(
-            inputs[get_modality_key(config["modality"])].expand(
+            inputs[config["modality"]].expand(
                 bids(
                     root=root,
                     datatype="qc",
@@ -355,7 +354,7 @@ def get_final_qc():
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
         if not config["use_template_seg"]:
             qc.extend(
-                inputs[get_modality_key(config["modality"])].expand(
+                inputs[config["modality"]].expand(
                     bids(
                         root=root,
                         datatype="qc",
@@ -392,27 +391,21 @@ def get_final_output():
     final_output = []
 
     modality_suffix = get_modality_suffix(config["modality"])
-    modality_key = get_modality_key(config["modality"])
+    modality_key = config["modality"]
 
     # use a zip list for subject/session:
     zip_list = inputs[modality_key].zip_lists
     if "session" in zip_list:
         zip_list = snakebids.filter_list(
             zip_list,
-            {
-                "session": inputs[get_modality_key(config["modality"])].zip_lists[
-                    "session"
-                ]
-            },
+            {"session": inputs[config["modality"]].zip_lists["session"]},
         )
-
     final_output.extend(
         expand(
             expand(subj_output, zip, allow_missing=True, **zip_list),
             modality_suffix=modality_suffix,
         )
     )
-
     return final_output
 
 
@@ -455,7 +448,7 @@ def get_final_work_tar():
 
 
 def get_work_dir(wildcards):
-    folder_with_file = inputs[get_modality_key(config["modality"])].expand(
+    folder_with_file = inputs[config["modality"]].expand(
         bids(root=work, **inputs.subj_wildcards), **wildcards
     )
     folder_without_file = os.path.dirname(folder_with_file[0])

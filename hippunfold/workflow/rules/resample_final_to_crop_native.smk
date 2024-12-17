@@ -2,7 +2,7 @@ rule create_native_crop_ref:
     """Create ref space for hires crop in native space
     TODO:  expose the resampling factor and size as cmd line args"""
     input:
-        seg=inputs[get_modality_key(config["modality"])].expand(
+        seg=inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="anat",
