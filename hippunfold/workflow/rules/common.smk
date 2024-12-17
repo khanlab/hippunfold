@@ -49,28 +49,27 @@ def get_modality_suffix(modality):
 
 
 def get_final_spec():
-    if len(config["hemi"]) == 2:
-        specs = inputs[get_modality_key(config["modality"])].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                den="{density}",
-                suffix="{surfname}.surf.gii",
-                space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
-                suffix="surfaces.spec",
-                **inputs.subj_wildcards,
-            ),
-            density=config["output_density"],
-            space=ref_spaces,
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["hipp"],
-            allow_missing=True,
-        )
-    else:
-        specs = inputs[get_modality_key(config["modality"])].expand(
+    specs = inputs[get_modality_key(config["modality"])].expand(
+        bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{autotop}",
+            suffix="surfaces.spec",
+            **inputs.subj_wildcards,
+        ),
+        density=config["output_density"],
+        space=ref_spaces,
+        hemi=config["hemi"],
+        autotop=config["autotop_labels"],
+        surfname=config["surf_types"]["hipp"],
+        allow_missing=True,
+    )
+    specs.extent(
+        inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -89,6 +88,7 @@ def get_final_spec():
             surfname=config["surf_types"]["dentate"],
             allow_missing=True,
         )
+    )
     return specs
 
 
