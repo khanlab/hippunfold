@@ -32,7 +32,6 @@ def get_avg_or_cp_scans_cmd(wildcards, input, output):
     return cmd
 
 
-
 def get_modality_suffix(modality):
     if modality[:4] == "hipp":
         return modality[4:]
