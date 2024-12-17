@@ -1331,9 +1331,7 @@ rule create_spec_file_hipp:
             metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
-        subfields=lambda wildcards: inputs[
-            get_modality_key(config["modality"])
-        ].expand(
+        subfields=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1363,9 +1361,7 @@ rule create_spec_file_hipp:
             space=["{space}", "unfold"],
             allow_missing=True,
         ),
-        cifti_metrics=lambda wildcards: inputs[
-            get_modality_key(config["modality"])
-        ].expand(
+        cifti_metrics=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1378,9 +1374,7 @@ rule create_spec_file_hipp:
             cifti=get_cifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
-        cifti_labels=lambda wildcards: inputs[
-            get_modality_key(config["modality"])
-        ].expand(
+        cifti_labels=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
