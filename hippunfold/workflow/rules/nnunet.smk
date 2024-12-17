@@ -133,7 +133,7 @@ rule run_inference:
             suffix="dseg.nii.gz",
             desc="nnunet",
             space="corobl",
-            hemi="{hemi,Lflip|R}"
+            hemi="{hemi}"
         ),
     log:
         bids(
@@ -141,7 +141,7 @@ rule run_inference:
             **inputs.subj_wildcards,
             suffix="nnunet.txt",
             space="corobl",
-            hemi="{hemi,Lflip|R}"
+            hemi="{hemi}"
         ),
     shadow:
         "minimal"
@@ -170,47 +170,6 @@ rule run_inference:
         "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
         "cp {params.temp_lbl} {output.nnunet_seg}"
 
-
-rule unflip_nnunet_nii:
-    """Unflip the Lflip nnunet seg"""
-    input:
-        nnunet_seg=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi}flip"
-        ),
-        unflip_ref=(
-            bids(
-                root=work,
-                datatype="anat",
-                **inputs.subj_wildcards,
-                suffix="{modality}.nii.gz".format(modality=config["modality"]),
-                space="corobl",
-                desc="preproc",
-                hemi="{hemi}",
-            ),
-        ),
-    output:
-        nnunet_seg=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi,L}"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input.nnunet_seg} -flip x -popas FLIPPED "
-        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nnunet_seg} "
 
 
 def get_f3d_ref(wildcards, input):
