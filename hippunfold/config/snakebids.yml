@@ -10,6 +10,7 @@ debug: False
 
 derivatives: False #will search in bids/derivatives if True; can also be path(s) to derivatives datasets
 
+
 #list of analysis levels in the bids app 
 analysis_levels: &analysis_levels
  - participant
@@ -35,8 +36,8 @@ pybids_inputs:
       suffix: 'T2w'
       extension: '.nii.gz'
       datatype: 'anat'
-      invalid_filters: 'allow'
-      space: null
+      # invalid_filters: 'allow'
+      # space: null
     wildcards:
       - subject
       - session
@@ -58,8 +59,8 @@ pybids_inputs:
       suffix: 'T1w'
       extension: '.nii.gz'
       datatype: 'anat'
-      invalid_filters: 'allow'
-      space: null
+      # invalid_filters: 'allow'
+      # space: null
     wildcards:
       - subject
       - session
@@ -75,6 +76,8 @@ pybids_inputs:
     wildcards:
       - subject
       - session
+      - acquisition
+      - run
 
   cropseg:
     filters:
@@ -86,50 +89,15 @@ pybids_inputs:
       - subject
       - session
       - hemi
+      - acquisition
+      - run
+
 
 
 
 #configuration for the command-line parameters to make available
 # passed on the argparse add_argument()
 parse_args:
-
-#---  core BIDS-app options --- (do not modify below) 
-
-  bids_dir:
-    help: The directory with the input dataset formatted according 
-          to the BIDS standard.
-
-  output_dir:
-    help: The directory where the output files 
-          should be stored. If you are running group level analysis
-          this folder should be prepopulated with the results of the
-          participant level analysis.
-
-  analysis_level: 
-    help: Level of the analysis that will be performed. 
-    choices: *analysis_levels
-
-  --participant_label:
-    help: The label(s) of the participant(s) that should be analyzed. The label 
-          corresponds to sub-<participant_label> from the BIDS spec 
-          (so it does not include "sub-"). If this parameter is not 
-          provided all subjects should be analyzed. Multiple 
-          participants can be specified with a space separated list.
-    nargs: '+'
-
-  --exclude_participant_label:
-    help: The label(s) of the participant(s) that should be excluded. The label 
-          corresponds to sub-<participant_label> from the BIDS spec 
-          (so it does not include "sub-"). If this parameter is not 
-          provided all subjects should be analyzed. Multiple 
-          participants can be specified with a space separated list.
-    nargs: '+'
-
-  --version:
-    help: 'Print the version of HippUnfold'
-    action: version
-    version: "1.4.2-pre.42"
-
 
   --modality:
     help: 'Type of image to run hippunfold on. Modality prefixed with seg will import an existing (manual) hippocampal tissue segmentation from that space, instead of running neural network (default: %(default)s)'
@@ -160,6 +128,7 @@ parse_args:
   --inject_template:
     choices:
       - 'upenn'
+      - 'dHCP'
       - 'MBMv2'
       - 'MBMv3'
       - 'CIVM'
@@ -177,17 +146,11 @@ parse_args:
     help: 'Scales the default smoothing sigma for gradient and warp in greedy registration for template-based segmentation. Using a value higher than 1 will use result in a smoother warp. (default: %(default)s)'
     default: 2.0
 
-
-  --derivatives:
-    help: 'Path to the derivatives folder (e.g. for finding manual segs) (default: %(default)s) '
-    default: False
-
   --skip_preproc:
     help: 'Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed (default: %(default)s)'
     default: False
     action: 'store_true'
 
- 
   --skip_coreg:
     help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s)'
     default: False
@@ -330,6 +293,21 @@ parse_args:
       - neonateT1w_v2
 
 
+  --enable-bids-validation:
+    help: |
+      Enable validation of BIDS dataset. BIDS validation would be performed
+      using the bids-validator plugin (if installed/enabled) or with the pybids
+      validator implementation (if bids-validator is not installed/enabled).
+    dest: "plugins.validator.skip"
+    action: "store_false"
+    default: True
+
+
+  --version:
+    help: 'Print the version of HippUnfold'
+    action: version
+    version: "1.5.2-pre.2"
+
 
 # --- surface specific configuration -- 
 
@@ -391,14 +369,22 @@ template_based_segmentation:
     hemi:
       - R
       - L
-  CIVM:
+  dHCP:
     hemi:
       - R
       - L
+
   MBMv2:
     hemi:
       - R
   MBMv3:
+    hemi:
+      - R
+  CIVM:
+    hemi:
+      - R
+      - L
+  upenn:
     hemi:
       - R
   ABAv3:
@@ -428,22 +414,24 @@ template_files:
     crop_ref: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
+    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
+    coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   MBMv2:
     T1w: Template_sym_MTR_80um.nii.gz
     T2w: Template_sym_T2_80um.nii.gz
     xfm_corobl: tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv2_hemi-{hemi}_space-corobl_{modality}.nii.gz
-    Mask_crop: tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    crop_ref: tpl-MBMv2_hemi-R_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-MBMv2_hemi-R_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   MBMv3:
     T1w: tpl-MBMv3_T1w.nii.gz
     T2w: tpl-MBMv3_T2w.nii.gz
     xfm_corobl: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-MBMv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    crop_ref: tpl-MBMv3_hemi-R_space-corobl_T1w.nii.gz
+    Mask_crop: tpl-MBMv3_hemi-R_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-MBMv3_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   CIVM:
     T1w: tpl-CIVM_T1w.nii.gz
     xfm_corobl: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
@@ -471,6 +459,7 @@ template_files:
     dseg: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
     coords: tpl-bigbrain_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
 
+
 atlas_files:
   multihist7:
     label_nii: sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
@@ -489,7 +478,7 @@ atlas_files:
     label_list: magdeburg_labellist.txt
   freesurfer:
     label_nii: sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
-    lut: desc-subfields_atlas-mfreesurfer_dseg.tsv
+    lut: desc-subfields_atlas-freesurfer_dseg.tsv
     label_list: freesurfer_labellist.txt
   macaque:
     label_nii: sub-bigmac_hemi-{hemi}_space-unfold_label-hipp_desc-macaquesubfields_dseg.nii.gz
@@ -528,7 +517,10 @@ tissue_atlas_mapping:
     dg: 6
     srlm: 7
     cyst: 8
-
+  macaque: 
+    dg: 6
+    srlm: 7
+    cyst: 8
 
 rigid_reg_template: False
 no_reg_template: False
@@ -630,6 +622,7 @@ unfold_crop_epsilon_fractions:
     - 0
     - 1 #in unfolded space voxels
 
+
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface
 unfold_mesh_ref:
@@ -700,6 +693,7 @@ output_density:
 
 laminar_coords_method: equivolume
 skip_preproc: False
+plugins.validator.skip: False
 nnunet_enable_tta: False
 use_gpu: False
 skip_coreg: False
