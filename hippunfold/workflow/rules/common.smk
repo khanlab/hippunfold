@@ -32,17 +32,9 @@ def get_avg_or_cp_scans_cmd(wildcards, input, output):
     return cmd
 
 
-def get_modality_key(modality):
-    if modality[:3] == "seg":
-        return "seg"
-    else:
-        return modality
-
 
 def get_modality_suffix(modality):
-    if modality[:3] == "seg":
-        return modality[3:]
-    elif modality[:4] == "hipp":
+    if modality[:4] == "hipp":
         return modality[4:]
     else:
         return modality
