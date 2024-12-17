@@ -17,7 +17,9 @@ rule import_template_shape:
             space="template",
             **inputs.subj_wildcards,
             desc="hipptissue",
-            hemi=config["template_based_segmentation"][config["inject_template"]]["hemi"],
+            hemi=config["template_based_segmentation"][config["inject_template"]][
+                "hemi"
+            ],
             suffix="dseg.nii.gz"
         ),
     group:
@@ -36,7 +38,9 @@ rule flip_template_dseg:
             space="template",
             **inputs.subj_wildcards,
             desc="hipptissue",
-            hemi=config["template_based_segmentation"][config["inject_template"]]["hemi"],
+            hemi=config["template_based_segmentation"][config["inject_template"]][
+                "hemi"
+            ],
             suffix="dseg.nii.gz"
         ),
     output:
@@ -118,7 +122,6 @@ rule prep_segs_for_greedy:
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
-
 
 
 def get_image_pairs(wildcards, input):
@@ -352,7 +355,6 @@ rule inject_init_laplace_coords:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {params.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
-
 rule reinsert_subject_labels:
     input:
         inject_seg=bids(
@@ -385,4 +387,3 @@ rule reinsert_subject_labels:
         config["singularity"]["autotop"]
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -push LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}"
-

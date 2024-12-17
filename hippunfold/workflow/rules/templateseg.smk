@@ -26,7 +26,9 @@ rule import_template_shape:
             space="template",
             **inputs.subj_wildcards,
             desc="hipptissue",
-            hemi=config["template_based_segmentation"][config["inject_template"]]["hemi"],
+            hemi=config["template_based_segmentation"][config["inject_template"]][
+                "hemi"
+            ],
             suffix="dseg.nii.gz"
         ),
     group:
@@ -45,7 +47,9 @@ rule flip_template_dseg:
             space="template",
             **inputs.subj_wildcards,
             desc="hipptissue",
-            hemi=config["template_based_segmentation"][config["inject_template"]]["hemi"],
+            hemi=config["template_based_segmentation"][config["inject_template"]][
+                "hemi"
+            ],
             suffix="dseg.nii.gz"
         ),
     output:
@@ -71,9 +75,9 @@ rule import_template_anat:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         template_anat=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]][get_modality_suffix(config["modality"])].format(
-            **wildcards
-        ),
+        / config["template_files"][config["template"]][
+            get_modality_suffix(config["modality"])
+        ].format(**wildcards),
     output:
         template_anat=bids(
             root=work,
@@ -129,9 +133,7 @@ rule import_template_coords:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         template_coords=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["coords"].format(
-            **wildcards
-        ),
+        / config["template_files"][config["template"]]["coords"].format(**wildcards),
     output:
         template_coords=bids(
             root=work,
@@ -143,7 +145,7 @@ rule import_template_coords:
             desc="init",
             space="template",
             hemi="{hemi}"
-        )
+        ),
     group:
         "subj"
     container:
@@ -163,8 +165,10 @@ rule flip_template_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="template",
-            hemi=config["template_based_segmentation"][config["inject_template"]]["hemi"],
-        )
+            hemi=config["template_based_segmentation"][config["inject_template"]][
+                "hemi"
+            ],
+        ),
     output:
         template_coords=bids(
             root=work,
@@ -394,7 +398,7 @@ rule warp_template_anat:
             suffix=f"{config['modality']}.nii.gz",
             desc="warpedtemplate",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -403,4 +407,3 @@ rule warp_template_anat:
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} -rf {input.ref} -rm {params.template_anat} {output.warped}  -r  {input.warp} {params.xfm_corobl}"
-

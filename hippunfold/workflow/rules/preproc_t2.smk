@@ -412,4 +412,3 @@ rule warp_t2_to_corobl_crop:
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {params.ref}  -t {input.xfm}"
-

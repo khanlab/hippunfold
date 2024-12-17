@@ -171,7 +171,6 @@ rule run_inference:
         "cp {params.temp_lbl} {output.nnunet_seg}"
 
 
-
 def get_f3d_ref(wildcards, input):
     if config["modality"] == "T2w":
         nii = Path(input.template_dir) / config["template_files"][config["template"]][

@@ -35,7 +35,6 @@ rule resample_hippdwi_to_template:
         " -trim 0vox -o {output}"
 
 
-
 rule cp_b500_to_anat_dir:
     input:
         nii=bids(
