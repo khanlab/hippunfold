@@ -32,7 +32,7 @@ def flipped(wildcards):
 
 
 def get_input_for_shape_inject(wildcards):
-    if config["modality"] == "cropseg":
+    if config["modality"] == "manualseg":
         seg = bids(
             root=work,
             datatype="anat",
@@ -41,19 +41,6 @@ def get_input_for_shape_inject(wildcards):
             space="corobl",
             hemi="{hemi}",
         ).format(**wildcards)
-    elif get_modality_key(config["modality"]) == "seg":
-        modality_suffix = get_modality_suffix(config["modality"])
-        seg = (
-            bids(
-                root=work,
-                datatype="anat",
-                **inputs.subj_wildcards,
-                suffix="dseg.nii.gz",
-                space="corobl",
-                hemi="{hemi}",
-                from_="{modality_suffix}",
-            ).format(**wildcards, modality_suffix=modality_suffix),
-        )
     else:
         seg = bids(
             root=work,
@@ -68,7 +55,7 @@ def get_input_for_shape_inject(wildcards):
 
 
 def get_input_splitseg_for_shape_inject(wildcards):
-    if config["modality"] == "cropseg":
+    if config["modality"] == "manualseg":
         seg = bids(
             root=work,
             datatype="anat",
@@ -77,18 +64,6 @@ def get_input_splitseg_for_shape_inject(wildcards):
             space="corobl",
             hemi="{hemi}",
         ).format(**wildcards)
-
-    elif get_modality_key(config["modality"]) == "seg":
-        modality_suffix = get_modality_suffix(config["modality"])
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dsegsplit",
-            space="corobl",
-            hemi="{hemi}",
-            from_="{modality_suffix}",
-        ).format(**wildcards, modality_suffix=modality_suffix)
     else:
         seg = bids(
             root=work,
