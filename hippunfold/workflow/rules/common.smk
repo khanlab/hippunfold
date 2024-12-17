@@ -49,32 +49,33 @@ def get_modality_suffix(modality):
 
 
 def get_final_spec():
-    specs = inputs[get_modality_key(config["modality"])].expand(
-        bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{autotop}",
-            suffix="surfaces.spec",
-            **inputs.subj_wildcards,
-        ),
-        density=config["output_density"],
-        space=ref_spaces,
-        hemi=config["hemi"],
-        autotop=config["autotop_labels"],
-        surfname=config["surf_types"]["hipp"],
-        allow_missing=True,
-    )
-    specs.extent(
+    specs = []
+    specs.extend(
         inputs[get_modality_key(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="surf",
                 den="{density}",
-                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{autotop}",
+                suffix="surfaces.spec",
+                **inputs.subj_wildcards,
+            ),
+            density=config["output_density"],
+            space=ref_spaces,
+            hemi=config["hemi"],
+            autotop=config["autotop_labels"],
+            surfname=config["surf_types"]["hipp"],
+            allow_missing=True,
+        )
+    )
+    specs.extend(
+        inputs[get_modality_key(config["modality"])].expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
                 space="{space}",
                 hemi="{hemi}",
                 label="{autotop}",
@@ -344,7 +345,6 @@ def get_final_qc():
 def get_final_subj_output():
     subj_output = []
     subj_output.extend(get_final_spec())
-    subj_output.extend(get_final_surf())
     subj_output.extend(get_final_subfields())
     subj_output.extend(get_final_coords())
     subj_output.extend(get_final_transforms())
