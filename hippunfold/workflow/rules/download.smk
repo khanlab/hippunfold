@@ -39,7 +39,7 @@ rule download_extract_template:
 hemi_constraints = []
 if config["template"] in config["template_available_hemis"]:
     for hemi in config["hemi"]:
-        if hemi in config["template_available_hemis"][config["template"]]["hemi"]:
+        if hemi in config["template_available_hemis"][config["template"]]:
             hemi_constraints.append(hemi)
 
 hemi_constrained_wildcard = "{{hemi,{constraints}}}".format(

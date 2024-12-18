@@ -343,34 +343,26 @@ xfm_identity_itk: resources/etc/identity_xfm_itk.txt
 # TODO: should also perhaps include modalities avaialble, and any custom crop_native_res settings
 template_available_hemis:
   CITI168:
-    hemi:
-      - R
-      - L
+    - R
+    - L
   dHCP:
-    hemi:
-      - R
-      - L
+    - R
+    - L
   MBMv2:
-    hemi:
-      - R
+    - R
   MBMv3:
-    hemi:
-      - R
+    - R
   CIVM:
-    hemi:
-      - R
-      - L
+    - R
+    - L
   upenn:
-    hemi:
-      - R
+    - R
   ABAv3:
-    hemi:
-      - R
-      - L
+    - R
+    - L
   bigbrain:
-    hemi:
-      - R
-      - L
+    - R
+    - L
 
 template_files:
   CITI168:
