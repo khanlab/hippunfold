@@ -6,6 +6,7 @@ def get_smoothing_opt(wildcards):
 
     return f"-s {gradient_sigma}vox {warp_sigma}vox"
 
+
 rule template_reg:
     input:
         fixed_img=bids(

@@ -67,8 +67,6 @@ rule import_template_dseg:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     shell:
         "cp {params.template_seg} {output.template_seg}"
 
@@ -122,8 +120,6 @@ rule import_template_coords:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     shell:
         "cp {params.template_coords} {output.template_coords}"
 
@@ -161,7 +157,6 @@ rule flip_template_coords:
         "c3d {input.template_coords} -flip x -o {output.template_coords} "
 
 
-
 rule import_template_anat:
     input:
         template_dir=Path(download_dir) / "template" / config["template"],
@@ -183,8 +178,6 @@ rule import_template_anat:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     shell:
         "cp {params.template_anat} {output.template_anat}"
 
@@ -218,4 +211,3 @@ rule flip_template_anat:
         "subj"
     shell:
         "c3d {input.template_anat} -flip x -o {output.template_anat} "
-
