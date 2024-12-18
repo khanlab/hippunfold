@@ -1,0 +1,650 @@
+plugins.version.version: 1.5.2rc2
+bids_dir: /local/scratch/hippunfold/test_data/bids_singleT2w
+output_dir: /local/scratch/hippunfold/test_out
+force: true
+debug: false
+derivatives: false
+analysis_levels:
+- participant
+- group
+targets_by_analysis_level:
+  participant: &id001
+  - ''
+  group:
+  - all_group_tsv
+pybids_inputs:
+  T2w:
+    filters:
+      suffix: T2w
+      extension: .nii.gz
+      datatype: anat
+    wildcards:
+    - subject
+    - session
+    - acquisition
+    - run
+  hippb500:
+    filters:
+      suffix: b500
+      extension: .nii.gz
+      invalid_filters: allow
+      datatype: dwi
+    wildcards:
+    - subject
+    - session
+  T1w:
+    filters:
+      suffix: T1w
+      extension: .nii.gz
+      datatype: anat
+    wildcards:
+    - subject
+    - session
+    - acquisition
+    - run
+  manualseg:
+    filters:
+      suffix: dseg
+      extension: .nii.gz
+      datatype: anat
+      invalid_filters: allow
+    wildcards:
+    - subject
+    - session
+    - hemi
+    - acquisition
+    - run
+parse_args:
+  --modality:
+    help: 'Type of image to run hippunfold on. For manualseg and be sure to match
+      the label scheme applied in the look up table (lut) online. For best performance,
+      please also make sure the input is approximately aligned to the template space,
+      with separate hemi-L|R in the name(s). (default: %(default)s)'
+    required: true
+    choices:
+    - T1w
+    - T2w
+    - hippb500
+    - manualseg
+  --template:
+    choices:
+    - CITI168
+    - dHCP
+    - MBMv2
+    - MBMv3
+    - CIVM
+    - ABAv3
+    - bigbrain
+    default: CITI168
+    help: 'Set the template to use for registration to coronal oblique (and optionally
+      for template-based segmentation if --use-template-seg is enabled). CITI168 is
+      for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo
+      marmoset data, MBMv3 is for in vivo marmoset data, CIVM is for in vivo macaque
+      data, and ABAv3 is for mouse data. When using a non-human template, consider
+      using a corresponding atlas. (default: %(default)s)'
+  --inject_template:
+    choices:
+    - upenn
+    - dHCP
+    - MBMv2
+    - MBMv3
+    - CIVM
+    - ABAv3
+    - bigbrain
+    default: upenn
+    help: 'Set the template to use for shape injection. (default: %(default)s)'
+  --use_template_seg:
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet
+      and shape injection. This is only to be used if nnUnet models are not trained
+      for the data you are using, e.g. for non-human primate data with the MBMv2 (ex
+      vivo marmoset), MBMv3 (in vivo marmoset), or CIVM (ex vivo macaque) template.
+      (default: %(default)s)'
+    default: false
+    action: store_true
+  --template_seg_smoothing_factor:
+    help: 'Scales the default smoothing sigma for gradient and warp in greedy registration
+      for template-based segmentation. Using a value higher than 1 will use result
+      in a smoother warp. (default: %(default)s)'
+    default: 2.0
+  --skip_preproc:
+    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed
+      (default: %(default)s)'
+    default: false
+    action: store_true
+  --skip_coreg:
+    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to
+      T1w space (default: %(default)s)'
+    default: false
+    action: store_true
+  --skip_inject_template_labels:
+    help: 'Set this flag to skip post-processing template injection into CNN segmentation.
+      Note this will disable generation of DG surfaces. (default: %(default)s)'
+    default: false
+    action: store_true
+  --inject_template_smoothing_factor:
+    help: 'Scales the default smoothing sigma for gradient and warp in template shape
+      injection. Using a value higher than 1 will use result in a smoother warp, and
+      greater capacity to patch larger holes in segmentations. Try setting to 2 if
+      nnunet segmentations have large holes. Note: the better solution is to re-train
+      network on the data you are using (default: %(default)s)'
+    default: 1.0
+  --rigid_reg_template:
+    help: 'Use rigid instead of affine for registration to template. Try this if your
+      images are reduced FOV (default: %(default)s)'
+    default: false
+    action: store_true
+  --no_reg_template:
+    help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
+    default: false
+    action: store_true
+  --t1_reg_template:
+    help: 'Use T1w to register to template space, instead of the segmentation modality.
+      Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
+    default: false
+    action: store_true
+  --crop_native_res:
+    help: 'Sets the bounding box resolution for the crop native (e.g. cropT1w space).
+      Under the hood, hippUnfold operates at higher resolution than the native image,
+      so this tries to preserve some of that detail. (default: %(default)s)'
+    default: 0.2x0.2x0.2mm
+  --crop_native_box:
+    help: 'Sets the bounding box size for the crop native (e.g. cropT1w space). Make
+      this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This
+      must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
+    default: 256x256x256vox
+  --atlas:
+    choices:
+    - bigbrain
+    - magdeburg
+    - freesurfer
+    - multihist7
+    - macaque
+    - mouse
+    default:
+    - multihist7
+    nargs: +
+    help: 'Select the atlas (unfolded space) to use for subfield labels. (default:
+      %(default)s)'
+  --no_unfolded_reg:
+    help: 'Do not perform unfolded space (2D) registration based on thickness, curvature,
+      and gyrification for closer alignment to the reference atlas. NOTE: only multihist7
+      has these features currently, so this unfolded_reg is automatically skipped
+      if a different atlas is chosen. (default: %(default)s)'
+    default: false
+    action: store_true
+  --generate_myelin_map:
+    help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon
+      approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
+    default: false
+    action: store_true
+  --use_gpu:
+    help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule
+      (default: %(default)s)'
+    default: false
+    action: store_true
+  --nnunet_enable_tta:
+    help: 'Enable test-time augmentation for nnU-net inference, slows down inference
+      by 8x, but potentially increases accuracy (default: %(default)s)'
+    default: false
+    action: store_true
+  --output_spaces:
+    choices:
+    - native
+    - T1w
+    nargs: +
+    default:
+    - native
+    help: 'Sets output spaces for results (default: %(default)s)'
+  --output_density:
+    choices:
+    - 0p5mm
+    - 1mm
+    - 2mm
+    - unfoldiso
+    default:
+    - 0p5mm
+    nargs: +
+    help: 'Sets the output vertex density for results. Options correspond to approximate
+      vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso
+      (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
+  --hemi:
+    choices:
+    - L
+    - R
+    default:
+    - L
+    - R
+    nargs: +
+    help: 'Hemisphere(s) to process (default: %(default)s)'
+  --laminar_coords_method:
+    choices:
+    - laplace
+    - equivolume
+    default:
+    - equivolume
+    help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering
+      from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)'
+  --autotop_labels:
+    choices:
+    - hipp
+    - dentate
+    default:
+    - hipp
+    - dentate
+    nargs: +
+    help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
+  --keep_work:
+    help: 'Keep work folder intact instead of archiving it for each subject (default:
+      %(default)s)'
+    default: false
+    action: store_true
+  --force_nnunet_model:
+    help: 'Force nnunet model to use (expert option). (default: %(default)s)'
+    default: false
+    choices:
+    - T1w
+    - T2w
+    - T1T2w
+    - b1000
+    - trimodal
+    - hippb500
+    - neonateT1w
+    - synthseg_v0.1
+    - synthseg_v0.2
+    - neonateT1w_v2
+  --enable-bids-validation:
+    help: "Enable validation of BIDS dataset. BIDS validation would be performed\n
+      using the bids-validator plugin (if installed/enabled) or with the pybids\n
+      validator implementation (if bids-validator is not installed/enabled).\n"
+    dest: plugins.validator.skip
+    action: store_false
+    default: true
+  --version:
+    help: Print the version of HippUnfold
+    action: version
+    version: 1.5.2-pre.2
+autotop_labels:
+- hipp
+- dentate
+surf_types:
+  hipp:
+  - midthickness
+  - inner
+  - outer
+  dentate:
+  - midthickness
+gifti_metric_types:
+  hipp:
+  - gyrification.shape
+  - curvature.shape
+  - thickness.shape
+  dentate:
+  - gyrification.shape
+  - curvature.shape
+cifti_metric_types:
+  hipp:
+  - gyrification.dscalar
+  - curvature.dscalar
+  - thickness.dscalar
+  dentate:
+  - gyrification.dscalar
+  - curvature.dscalar
+outlier_opts:
+  outlierSmoothDist:
+    unfoldiso: 15
+    0p5mm: 7
+    1mm: 3
+    2mm: 1
+  vertexOutlierThreshold: 3
+singularity:
+  autotop: docker://khanlab/hippunfold_deps:v0.5.1
+xfm_identity: resources/etc/identity_xfm.txt
+xfm_identity_itk: resources/etc/identity_xfm_itk.txt
+template_based_segmentation:
+  CITI168:
+    hemi:
+    - R
+    - L
+  dHCP:
+    hemi:
+    - R
+    - L
+  MBMv2:
+    hemi:
+    - R
+  MBMv3:
+    hemi:
+    - R
+  CIVM:
+    hemi:
+    - R
+    - L
+  upenn:
+    hemi:
+    - R
+  ABAv3:
+    hemi:
+    - R
+    - L
+  bigbrain:
+    hemi:
+    - R
+    - L
+template_files:
+  CITI168:
+    T1w: T1w_head_700um.nii.gz
+    T2w: T2w_head_700um.nii.gz
+    xfm_corobl: CoronalOblique_rigid.txt
+    crop_ref: T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_refT1w: T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    Mask_crop: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+    dseg: sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz
+    coords: 
+      sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{autotop}_desc-laplace_coords.nii.gz
+  dHCP:
+    T1w: tpl-dHCP_cohort-1_res-1_T1w.nii.gz
+    T2w: tpl-dHCP_cohort-1_res-1_T2w.nii.gz
+    xfm_corobl: tpl-dHCP_cohort-1_to-corobl_affine.txt
+    crop_ref: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
+    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
+    coords: 
+      tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  MBMv2:
+    T1w: Template_sym_MTR_80um.nii.gz
+    T2w: Template_sym_T2_80um.nii.gz
+    xfm_corobl: tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-MBMv2_hemi-R_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-MBMv2_hemi-R_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: 
+      tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  MBMv3:
+    T1w: tpl-MBMv3_T1w.nii.gz
+    T2w: tpl-MBMv3_T2w.nii.gz
+    xfm_corobl: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-MBMv3_hemi-R_space-corobl_T1w.nii.gz
+    Mask_crop: tpl-MBMv3_hemi-R_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-MBMv3_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: 
+      tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  CIVM:
+    T1w: tpl-CIVM_T1w.nii.gz
+    xfm_corobl: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-CIVM_hemi-{hemi}_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-CIVM_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: 
+      tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  upenn:
+    T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
+    dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
+    coords: tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+  ABAv3:
+    T1w: tpl-ABAv3_T1w.nii.gz
+    xfm_corobl: tpl-ABAv3_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-ABAv3_hemi-{hemi}_space-corobl_T1w.nii.gz
+    Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: 
+      tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  bigbrain:
+    T1w: tpl-bigbrain_1mm_merker.nii.gz
+    T2w: tpl-bigbrain_1mm_merker.nii.gz
+    xfm_corobl: tpl-bigbrain_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-bigbrain_hemi-{hemi}_space-corobl_100um_merker.nii.gz
+    Mask_crop: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
+    dseg: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
+    coords: 
+      tpl-bigbrain_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+atlas_files:
+  multihist7:
+    label_nii: sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
+    lut: desc-subfields_atlas-multihist7_dseg.tsv
+    label_list: labellist.txt
+    thickness: thickness.nii.gz
+    curvature: curvature.nii.gz
+    gyrification: gyrification.nii.gz
+  bigbrain:
+    label_nii: sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
+    lut: desc-subfields_atlas-bigbrain_dseg.tsv
+    label_list: sub-bigbrain_labellist.txt
+  magdeburg:
+    label_nii: sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
+    lut: desc-subfields_atlas-magdeburg_dseg.tsv
+    label_list: magdeburg_labellist.txt
+  freesurfer:
+    label_nii: sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
+    lut: desc-subfields_atlas-freesurfer_dseg.tsv
+    label_list: freesurfer_labellist.txt
+  macaque:
+    label_nii: sub-bigmac_hemi-{hemi}_space-unfold_label-hipp_desc-macaquesubfields_dseg.nii.gz
+    lut: desc-subfields_atlas-macaque_dseg.tsv
+    label_list: macaque_labellist.txt
+  mouse:
+    label_nii: sub-ABAv3_space-unfold_label-hipp_desc-mousesubfields_dseg.nii.gz
+    lut: desc-subfields_atlas-mouse_dseg.tsv
+    label_list: mouse_labellist.txt
+tissue_atlas_mapping:
+  tissue:
+    dg: 8
+    srlm: 2
+    cyst: 7
+  bigbrain:
+    dg: 6
+    srlm: 7
+    cyst: 8
+  multihist7:
+    dg: 6
+    srlm: 7
+    cyst: 8
+  magdeburg:
+    dg: 3
+    srlm: 9
+    cyst: 10
+  freesurfer:
+    dg: 209
+    srlm: 227
+    cyst: 228
+  mouse:
+    dg: 6
+    srlm: 7
+    cyst: 8
+  macaque:
+    dg: 6
+    srlm: 7
+    cyst: 8
+rigid_reg_template: false
+no_reg_template: false
+modality: T2w
+inject_template: upenn
+template: CITI168
+atlas:
+- multihist7
+resource_urls:
+  nnunet_model:
+    T1w: 
+      zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar
+    T2w: 
+      zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar
+    hippb500: 
+      zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar
+    neonateT1w: 
+      zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar
+    neonateT1w_v2: 
+      zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar
+    T1T2w: 
+      zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar
+    synthseg_v0.1: 
+      zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar
+    synthseg_v0.2: 
+      zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar
+  atlas:
+    multihist7: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip=
+    bigbrain: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip=
+    magdeburg: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip=
+    freesurfer: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip=
+    macaque: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6661f504d835c42bcb4cddab/?zip=
+    mouse: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666884380f8c80103a3c9569/?zip=
+  template:
+    CITI168: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip=
+    dHCP: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip=
+    MBMv2: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0887852d133ca597dd/?zip=
+    MBMv3: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip=
+    upenn: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip=
+    CIVM: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip=
+    ABAv3: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip=
+    bigbrain: 
+      files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666b1bc765e1de5972893e59/?zip=
+crop_native_box: 256x256x256vox
+crop_native_res: 0.2x0.2x0.2mm
+hippdwi_opts:
+  resample_dim: 734x720x67
+  bbox_x:
+    L: 383 510
+    R: 224 351
+  bbox_y: 198 453
+unfold_vol_ref:
+  hipp:
+    dims:
+    - '256'
+    - '128'
+    - '16'
+    voxdims:
+    - '0.15625'
+    - '0.15625'
+    - '0.15625'
+    origin:
+    - '0'
+    - '200'
+    - '0'
+    extent:
+    - '40'
+    - '20'
+    - '2.5'
+    orient: RPI
+  dentate:
+    dims:
+    - '256'
+    - '32'
+    - '16'
+    voxdims:
+    - '0.15625'
+    - '0.15625'
+    - '0.15625'
+    origin:
+    - '0'
+    - '200'
+    - '0'
+    extent:
+    - '40'
+    - '5'
+    - '2.5'
+    orient: RPI
+unfold_crop_epsilon_fractions:
+- 0
+- 0
+- 1
+unfold_mesh_ref:
+  dims:
+  - 254
+  - 126
+  start:
+  - 0.234375
+  - 0.234375
+  end:
+  - 39.765625
+  - 19.765625
+shape_inject:
+  labels_reg:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 8
+  labels_reinsert:
+  - 7
+  label_smoothing_stdev: 0.5x0.5x0.5mm
+inject_template_smoothing_factor: 1.0
+laplace_labels:
+  AP:
+    gm:
+    - 1
+    - 8
+    src:
+    - 5
+    sink:
+    - 6
+  PD:
+    gm:
+    - 1
+    - 8
+    src:
+    - 3
+    sink:
+    - 8
+  IO:
+    gm:
+    - 1
+    - 8
+    src:
+    - 2
+    - 4
+    - 7
+    sink:
+    - 0
+output_spaces:
+- native
+participant_label:
+exclude_participant_label:
+hemi:
+- L
+- R
+output_density:
+- 0p5mm
+laminar_coords_method:
+- equivolume
+skip_preproc: false
+plugins.validator.skip: true
+nnunet_enable_tta: false
+use_gpu: false
+skip_coreg: false
+keep_work: false
+skip_inject_template_labels: false
+force_nnunet_model: false
+t1_reg_template: false
+generate_myelin_map: false
+no_unfolded_reg: false
+root: .
+use_template_seg: false
+template_seg_smoothing_factor: 2.0
+snakemake_args:
+- -np
+- --use-conda
+pybidsdb_reset: false
+pybidsdb_dir:
+pybids_db_dir:
+pybids_db_reset: <!DEPRECATED!>0<!DEPRECATED!>
+snakemake_target: *id001
+analysis_level: participant
+snakemake_version: 7.32.4
+snakebids_version: 0.13.1
+app_version: 1.5.2rc2
+snakemake_dir: /local/scratch/hippunfold/hippunfold
+snakefile: /local/scratch/hippunfold/hippunfold/workflow/Snakefile
