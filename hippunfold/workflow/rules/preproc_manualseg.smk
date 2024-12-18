@@ -4,9 +4,10 @@ rule import_manualseg_to_corobl:
         in_img=partial(get_single_bids_input, component="manualseg"),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
-        std_to_cor=lambda wildcards: config["template_files"][config["template"]][
-            "xfm_corobl"
-        ].format(**wildcards),
+        std_to_cor=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["xfm_corobl"].format(
+            **wildcards
+        ),
         ref=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     output:
