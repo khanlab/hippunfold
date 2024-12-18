@@ -66,6 +66,8 @@ rule laplace_coords_hipp:
             hemi="{hemi}",
             **inputs.subj_wildcards
         ),
+    conda:
+        "../envs/env1.yaml"
     group:
         "subj"
     resources:
@@ -153,6 +155,8 @@ rule prep_equivolume_coords:
             hemi="{hemi}",
             **inputs.subj_wildcards
         ),
+    conda:
+        "../envs/env1.yaml"
     log:
         bids(
             root="logs",
