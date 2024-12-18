@@ -36,25 +36,34 @@ rule download_extract_template:
 # Template-based segmentation supports templates that have only a single hemisphere
 # by flipping it
 
-hemi_constraints = []
-if config["template"] in config["template_available_hemis"]:
-    for hemi in config["hemi"]:
-        if hemi in config["template_available_hemis"][config["template"]]:
-            hemi_constraints.append(hemi)
 
-hemi_constrained_wildcard = "{{hemi,{constraints}}}".format(
-    constraints="|".join(hemi_constraints)
-)
+def copy_or_flip(wildcards, file_to_process):
+    if wildcards.hemi in config["template_available_hemis"][config["inject_template"]]:
+        cmd = f"cp {file_to_process}"
+    else:
+        cmd = f"c3d {file_to_process} -flip x -o"
+    return cmd
 
 
 rule import_template_dseg:
     input:
         template_dir=Path(download_dir) / "template" / config["inject_template"],
     params:
-        template_seg=lambda wildcards, input: Path(input.template_dir)
+        template_seg=lambda wildcards: Path(download_dir)
+        / "template"
+        / config["inject_template"]
         / config["template_files"][config["inject_template"]]["dseg"].format(
             **wildcards
         ),
+        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
+            wildcards,
+            Path(download_dir)
+            / "template"
+            / config["inject_template"]
+            / config["template_files"][config["inject_template"]]["dseg"].format(
+                **wildcards
+            ),
+        ),
     output:
         template_seg=bids(
             root=work,
@@ -62,50 +71,36 @@ rule import_template_dseg:
             space="template",
             **inputs.subj_wildcards,
             desc="hipptissue",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
             suffix="dseg.nii.gz"
         ),
     group:
         "subj"
-    shell:
-        "cp {params.template_seg} {output.template_seg}"
-
-
-rule flip_template_dseg:
-    input:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            desc="hipptissue",
-            hemi=hemi_constrained_wildcard,
-            suffix="dseg.nii.gz"
-        ),
-    output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="hipptissue",
-            space="template",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
     container:
         config["singularity"]["autotop"]
-    group:
-        "subj"
     shell:
-        "c3d {input.template_seg} -flip x -o {output.nii} "
+        "{params.copy_or_flip_cmd} {output.template_seg}"
 
 
 rule import_template_coords:
     input:
-        template_dir=Path(download_dir) / "template" / config["template"],
+        template_dir=Path(download_dir) / "template" / config["inject_template"],
     params:
-        template_coords=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["coords"].format(**wildcards),
+        template_coords=lambda wildcards: Path(download_dir)
+        / "template"
+        / config["inject_template"]
+        / config["template_files"][config["inject_template"]]["coords"].format(
+            **wildcards
+        ),
+        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
+            wildcards,
+            Path(download_dir)
+            / "template"
+            / config["inject_template"]
+            / config["template_files"][config["inject_template"]]["coords"].format(
+                **wildcards
+            ),
+        ),
     output:
         template_coords=bids(
             root=work,
@@ -116,98 +111,49 @@ rule import_template_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="template",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
         ),
     group:
         "subj"
-    shell:
-        "cp {params.template_coords} {output.template_coords}"
-
-
-rule flip_template_coords:
-    input:
-        template_coords=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="template",
-            hemi=hemi_constrained_wildcard,
-        ),
-    output:
-        template_coords=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="template",
-            hemi="{hemi}"
-        ),
     container:
         config["singularity"]["autotop"]
-    group:
-        "subj"
     shell:
-        "c3d {input.template_coords} -flip x -o {output.template_coords} "
+        "{params.copy_or_flip_cmd} {output.template_coords}"
 
 
 rule import_template_anat:
     input:
-        template_dir=Path(download_dir) / "template" / config["template"],
+        template_dir=Path(download_dir) / "template" / config["inject_template"],
     params:
-        template_anat=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]][
+        template_anat=lambda wildcards: Path(download_dir)
+        / "template"
+        / config["inject_template"]
+        / config["template_files"][config["inject_template"]][
             get_modality_suffix(config["modality"])
         ].format(**wildcards),
+        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
+            wildcards,
+            Path(download_dir)
+            / "template"
+            / config["inject_template"]
+            / config["template_files"][config["inject_template"]][
+                get_modality_suffix(config["modality"])
+            ].format(**wildcards),
+        ),
     output:
         template_anat=bids(
             root=work,
             datatype="anat",
             space="template",
             **inputs.subj_wildcards,
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
             suffix="{modality}.nii.gz".format(
                 modality=get_modality_suffix(config["modality"])
             ),
         ),
     group:
         "subj"
-    shell:
-        "cp {params.template_anat} {output.template_anat}"
-
-
-rule flip_template_anat:
-    input:
-        template_anat=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            hemi=hemi_constrained_wildcard,
-            suffix="{modality}.nii.gz".format(
-                modality=get_modality_suffix(config["modality"])
-            ),
-        ),
-    output:
-        template_anat=bids(
-            root=work,
-            datatype="anat",
-            suffix="{modality}.nii.gz".format(
-                modality=get_modality_suffix(config["modality"])
-            ),
-            space="template",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
     container:
         config["singularity"]["autotop"]
-    group:
-        "subj"
     shell:
-        "c3d {input.template_anat} -flip x -o {output.template_anat} "
+        "{params.copy_or_flip_cmd} {output.template_anat}"
