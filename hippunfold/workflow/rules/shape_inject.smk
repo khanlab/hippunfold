@@ -2,65 +2,6 @@
 # by flipping it
 
 
-rule import_template_shape:
-    input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
-    params:
-        template_seg=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["inject_template"]]["dseg"].format(
-            **wildcards
-        ),
-    output:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            desc="hipptissue",
-            hemi=config["template_based_segmentation"][config["inject_template"]][
-                "hemi"
-            ],
-            suffix="dseg.nii.gz"
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "cp {params.template_seg} {output.template_seg}"
-
-
-rule flip_template_dseg:
-    input:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            desc="hipptissue",
-            hemi=config["template_based_segmentation"][config["inject_template"]][
-                "hemi"
-            ],
-            suffix="dseg.nii.gz"
-        ),
-    output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="hipptissue",
-            space="template",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input.template_seg} -flip x -o {output.nii} "
-
-
 def get_input_for_shape_inject(wildcards):
     if config["modality"] == "manualseg":
         seg = bids(
@@ -317,12 +258,18 @@ rule inject_init_laplace_coords:
             space="corobl",
             hemi="{hemi}",
         ),
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
-    params:
-        coords=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["inject_template"]]["coords"].format(
-            **wildcards
+        coords=bids(
+            root=work,
+            datatype="coords",
+            **inputs.subj_wildcards,
+            dir="{dir}",
+            label="{autotop}",
+            suffix="coords.nii.gz",
+            desc="init",
+            space="template",
+            hemi="{hemi}"
         ),
+    params:
         interp_opt="-ri NN",
     output:
         init_coords=bids(
@@ -352,7 +299,7 @@ rule inject_init_laplace_coords:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {params.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule reinsert_subject_labels:

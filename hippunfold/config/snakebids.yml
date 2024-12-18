@@ -341,7 +341,7 @@ xfm_identity_itk: resources/etc/identity_xfm_itk.txt
 
 #templates enabled for template-based segmentation are here
 # TODO: should also perhaps include modalities avaialble, and any custom crop_native_res settings
-template_based_segmentation:
+template_available_hemis:
   CITI168:
     hemi:
       - R
@@ -350,7 +350,6 @@ template_based_segmentation:
     hemi:
       - R
       - L
-
   MBMv2:
     hemi:
       - R
