@@ -22,6 +22,10 @@ gm_mask = np.zeros(label.shape,dtype=bool)
 for lbl in snakemake.params.gm_labels:
     gm_mask = np.where(label == lbl, True,gm_mask)
 
+gm_noDG_mask = np.zeros(label.shape,dtype=bool)
+for lbl in snakemake.params.gm_noDG_labels:
+    gm_noDG_mask = np.where(label == lbl, True,gm_noDG_mask)
+
 
 
 #set everywhere outside coords mask to be nan, so they don't contribute to extrapolation
@@ -34,8 +38,8 @@ convolved_coords = convolve(coords_withnan, hl, nan_treatment='interpolate', pre
 
 #dilating the mask into the src and sink
 structuring_element = np.ones((3, 3, 3), dtype=bool)
-dilated_mask = binary_dilation(gm_mask,structuring_element)  & (src_mask | sink_mask)
-updated_mask = np.where(dilated_mask,1,gm_mask)
+dilated_mask = binary_dilation(gm_noDG_mask,structuring_element)  & (src_mask | sink_mask)
+updated_mask = np.where(dilated_mask,1,gm_noDG_mask)
 
 #get the updated coords:
 updated_coords = np.where(gm_mask,coords,
