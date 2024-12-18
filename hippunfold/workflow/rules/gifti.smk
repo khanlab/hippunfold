@@ -1,5 +1,5 @@
 # lookup tables for structure:
-hemi_to_structure = {"L": "CORTEX_LEFT", "Lflip": "CORTEX_LEFT", "R": "CORTEX_RIGHT"}
+hemi_to_structure = {"L": "CORTEX_LEFT", "R": "CORTEX_RIGHT"}
 surf_to_secondary_type = {
     "midthickness": "MIDTHICKNESS",
     "inner": "PIAL",
