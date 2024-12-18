@@ -1,10 +1,12 @@
-surf_thresholds={'inner': 0.05, 'outer':0.95, 'midthickness':0.5}
+surf_thresholds={'inner': 0, 'outer':1, 'midthickness':0.5}
 
-gm_labels={'hipp': config["laplace_labels"]["AP"]["gm"],
+#this is for the mapping from inner to outer
+gm_labels={'hipp': config["laplace_labels"]["IO"]["gm_noDG"],
             'dentate': config["laplace_labels"]["PD"]["sink"]}
 
 
 rule all_nativesurf:
+    """target rule for debugging"""
     input:
         label_gii=expand(bids(
             root=root,
@@ -42,6 +44,9 @@ rule all_nativesurf:
             **inputs.subj_wildcards
         ),subject='1425',desc='equivol',hemi='R',label='hipp'), # will run for dentate too, but surface has too many holes..
 
+
+
+
 rule prep_hipp_coords_for_meshing:
     input:
         coords=bids(
@@ -58,6 +63,7 @@ rule prep_hipp_coords_for_meshing:
         labelmap=get_labels_for_laplace,
     params:
         gm_labels=lambda wildcards: config["laplace_labels"]["IO"]["gm"],
+        gm_noDG_labels=lambda wildcards: config["laplace_labels"]["IO"]["gm_noDG"],
         src_labels=lambda wildcards: config["laplace_labels"]["IO"]["src"],
         sink_labels=lambda wildcards: config["laplace_labels"]["IO"]["sink"],
     output:
@@ -127,7 +133,29 @@ rule prep_dentate_coords_for_meshing:
         config["singularity"]["autotop"]
     script: '../scripts/prep_dentate_coords_for_meshing.py'
 
-       
+    
+
+rule get_label_mask:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        gm_labels=lambda wildcards: ' '.join([str(lbl) for lbl in gm_labels[wildcards.label]])
+    output:
+        mask=bids(
+            root=root,
+            datatype="anat",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="GM",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        'c3d {input} -retain-labels {params} -binarize {output}' 
+  
 
 rule gen_native_mesh:
     input:
@@ -358,19 +386,18 @@ rule resample_native_surf:
 rule compute_halfthick_mask:
     input:
         coords=bids(
-            root=work,
-            datatype="coords",
-            dir="IO",
-            label="hipp",
+            root=root,
+            datatype="surf_",
             suffix="coords.nii.gz",
-            desc="{desc}",
             space="corobl",
+            desc="{desc}formesh",
             hemi="{hemi}",
+            label="{label,hipp}",
             **inputs.subj_wildcards
         ),
         mask=bids(
             root=root,
-            datatype="surf_",
+            datatype="anat",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",
@@ -412,7 +439,7 @@ rule register_midthickness:
         ),
         moving=bids(
             root=root,
-            datatype="surf_",
+            datatype="anat",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",
@@ -454,7 +481,7 @@ rule apply_halfsurf_warp_to_img:
         ),
         moving=bids(
             root=root,
-            datatype="surf_",
+            datatype="anat",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",

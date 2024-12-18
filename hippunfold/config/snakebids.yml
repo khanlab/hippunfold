@@ -661,7 +661,8 @@ laplace_labels:
       - 7
     sink:
       - 0 
-
+    gm_noDG:
+      - 1
 
 output_spaces:
   - native
