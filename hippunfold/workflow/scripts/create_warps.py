@@ -32,15 +32,15 @@ def extrapolate_with_convolve(input_array, mask_array):
     hl = np.ones([5, 5, 5])
     hl = hl / np.sum(hl)
 
-
     # 3. Perform convolution on the working array with NaNs
-    convolved_array = convolve(working_array, hl, nan_treatment='interpolate', preserve_nan=False)
+    convolved_array = convolve(
+        working_array, hl, nan_treatment="interpolate", preserve_nan=False
+    )
 
     # 4. Restore original values inside the mask
     working_array = np.where(mask_array, input_array, convolved_array)
 
     return working_array
-
 
 
 def convert_warp_to_itk(warp):
@@ -83,16 +83,16 @@ for i in snakemake.params.gm_labels:
     idxgm[lbl == i] = 1
 mask = idxgm == 1
 
-#extrapolate coords to widen domain
-coord_ap = extrapolate_with_convolve(coord_ap,mask)
-coord_io = extrapolate_with_convolve(coord_io,mask)
-coord_pd = extrapolate_with_convolve(coord_pd,mask)
+# extrapolate coords to widen domain
+coord_ap = extrapolate_with_convolve(coord_ap, mask)
+coord_io = extrapolate_with_convolve(coord_io, mask)
+coord_pd = extrapolate_with_convolve(coord_pd, mask)
 
 
-#then, dilate the mask, to get a larger domain for the warp
+# then, dilate the mask, to get a larger domain for the warp
 structuring_element = np.ones((3, 3, 3), dtype=bool)
-mask = binary_dilation(mask,structuring_element)
-mask = binary_dilation(mask,structuring_element)
+mask = binary_dilation(mask, structuring_element)
+mask = binary_dilation(mask, structuring_element)
 
 
 num_mask_voxels = np.sum(mask)

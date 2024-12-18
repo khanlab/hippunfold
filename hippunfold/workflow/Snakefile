@@ -73,8 +73,9 @@ else:
     limit_to_list.add(config["modality"])
 
 # if atlas doesn't contain alignment features
-if not config["atlas"] == ["multihist7"]:
+if not config["atlas"] == ["multihist7"] or config["native_surf"]:
     config["no_unfolded_reg"] = True
+
 
 inputs = snakebids.generate_inputs(
     bids_dir=config["bids_dir"],
@@ -142,13 +143,29 @@ if config["modality"] == "hippb500":
 
 
 include: "rules/autotop.smk"
+
+
 include: "rules/warps.smk"
+
+
 include: "rules/gifti.smk"
+
+
 include: "rules/subfields.smk"
+
+
 include: "rules/resample_final_to_crop_native.smk"
+
+
 include: "rules/qc.smk"
+
+
 include: "rules/myelin_map.smk"
-include: "rules/native_surf.smk"
+
+
+if config["native_surf"]:
+
+    include: "rules/native_surf.smk"
 
 
 if config["use_template_seg"]:
