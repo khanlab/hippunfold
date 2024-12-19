@@ -1463,6 +1463,8 @@ rule create_spec_file_hipp:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     group:
         "subj"
     shell:

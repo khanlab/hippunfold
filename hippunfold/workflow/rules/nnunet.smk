@@ -206,6 +206,8 @@ rule unflip_nnunet_nii:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     group:
         "subj"
     shell:
@@ -282,6 +284,8 @@ rule qc_nnunet_f3d:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env6.yaml"
     log:
         bids(
             root="logs",
@@ -331,6 +335,8 @@ rule qc_nnunet_dice:
             caption="../report/nnunet_qc.rst",
             category="Segmentation QC",
         ),
+    conda:
+        "../envs/env1.yaml"
     group:
         "subj"
     container:

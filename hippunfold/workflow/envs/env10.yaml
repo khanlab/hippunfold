@@ -1,0 +1,9 @@
+name: env10
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - matplotlib
+  - pandas=2.2.3
+  - seaborn

@@ -1,0 +1,7 @@
+name: env11
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pandas=2.2.3

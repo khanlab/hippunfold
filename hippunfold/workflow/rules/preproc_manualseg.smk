@@ -20,6 +20,8 @@ rule import_manualseg_to_corobl:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     shell:
@@ -48,6 +50,8 @@ rule lr_flip_seg:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     group:
         "subj"
     shell:

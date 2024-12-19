@@ -1,0 +1,10 @@
+name: env15
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - nibabel=5.2.1
+  - numpy=2.1.2
+  - scipy=1.13.1
+  - naturalneighbor

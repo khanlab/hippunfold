@@ -23,6 +23,8 @@ rule resample_hippdwi_to_template:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     group:
         "subj"
     shell:
@@ -56,6 +58,8 @@ rule lr_flip_b500:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     group:
         "subj"
     shell:
