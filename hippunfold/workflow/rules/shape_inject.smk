@@ -1,34 +1,5 @@
 # Template-based segmentation supports templates that have only a single hemisphere
-# by mapping it to the flipped version of the other hemisphere.
-# If a template has both L and R files, then we set hemi_constrained_wildcard to L|R.
-# If a hemisphere is missing data, then we set it to flip that, e.g. if L missing, then use Lflip|R
-
-hemi_constraints = []
-if config["template"] in config["template_based_segmentation"]:
-    for hemi in config["hemi"]:
-        if hemi in config["template_based_segmentation"][config["template"]]["hemi"]:
-            hemi_constraints.append(hemi)
-        else:
-            hemi_constraints.append(f"{hemi}flip")
-
-hemi_constrained_wildcard = "{{hemi,{constraints}}}".format(
-    constraints="|".join(hemi_constraints)
-)
-
-
-def flipped(wildcards):
-    """function to map hemi in wildcards from Lflip to R, or Rflip to L,
-    for use in rules where e.g. the output wildcard is Lflip, but for the input, R is desired, such as
-    when mapping a R hemi dseg to the Lflip hemisphere of a subject."""
-
-    if wildcards.hemi == "L" or wildcards.hemi == "R":
-        return wildcards
-    elif wildcards.hemi == "Lflip":
-        wildcards.hemi = "R"
-        return wildcards
-    elif wildcards.hemi == "Rflip":
-        wildcards.hemi = "L"
-        return wildcard
+# by flipping it
 
 
 def get_input_for_shape_inject(wildcards):
@@ -92,32 +63,6 @@ rule prep_segs_for_greedy:
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
-
-
-rule import_template_shape:
-    input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
-    params:
-        template_seg=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["inject_template"]]["dseg"].format(
-            **flipped(wildcards)
-        ),
-    output:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            desc="hipptissue",
-            hemi=hemi_constrained_wildcard,
-            suffix="dseg.nii.gz"
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "cp {params.template_seg} {output.template_seg}"
 
 
 def get_image_pairs(wildcards, input):
@@ -193,7 +138,7 @@ rule template_shape_reg:
             to="subject",
             space="corobl",
             type_="ras",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
         ),
         warp=bids(
             root=work,
@@ -204,7 +149,7 @@ rule template_shape_reg:
             from_="template",
             to="subject",
             space="corobl",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -215,7 +160,7 @@ rule template_shape_reg:
         bids(
             root="logs",
             **inputs.subj_wildcards,
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
             suffix="templateshapereg.txt"
         ),
     shell:
@@ -269,14 +214,14 @@ rule template_shape_inject:
             suffix="dseg.nii.gz",
             desc="inject",
             space="corobl",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
         ),
     log:
         bids(
             root="logs",
             **inputs.subj_wildcards,
             suffix="templateshapeinject.txt",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -313,12 +258,18 @@ rule inject_init_laplace_coords:
             space="corobl",
             hemi="{hemi}",
         ),
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
-    params:
-        coords=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["inject_template"]]["coords"].format(
-            **wildcards
+        coords=bids(
+            root=work,
+            datatype="coords",
+            **inputs.subj_wildcards,
+            dir="{dir}",
+            label="{autotop}",
+            suffix="coords.nii.gz",
+            desc="init",
+            space="template",
+            hemi="{hemi}"
         ),
+    params:
         interp_opt="-ri NN",
     output:
         init_coords=bids(
@@ -330,7 +281,7 @@ rule inject_init_laplace_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
         ),
     log:
         bids(
@@ -340,7 +291,7 @@ rule inject_init_laplace_coords:
             label="{autotop}",
             suffix="injectcoords.txt",
             desc="init",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -348,43 +299,7 @@ rule inject_init_laplace_coords:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {params.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
-
-
-rule unflip_init_coords:
-    """Unflip the Lflip init coords"""
-    input:
-        nnunet_seg=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="corobl",
-            hemi="{hemi}flip"
-        ),
-        unflip_ref=get_input_for_shape_inject,
-    output:
-        nnunet_seg=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="corobl",
-            hemi="{hemi,L|R}"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input.nnunet_seg} -flip x -popas FLIPPED "
-        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nnunet_seg} "
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule reinsert_subject_labels:
@@ -411,7 +326,7 @@ rule reinsert_subject_labels:
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi=hemi_constrained_wildcard,
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -419,34 +334,3 @@ rule reinsert_subject_labels:
         config["singularity"]["autotop"]
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -push LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}"
-
-
-rule unflip_postproc:
-    input:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="corobl",
-            hemi="{hemi}flip",
-            **inputs.subj_wildcards
-        ),
-        unflip_ref=get_input_for_shape_inject,
-    output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="corobl",
-            hemi="{hemi,L|R}",
-            **inputs.subj_wildcards
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input.nii} -flip x -popas FLIPPED "
-        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nii} "

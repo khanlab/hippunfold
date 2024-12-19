@@ -35,33 +35,6 @@ rule resample_hippdwi_to_template:
         " -trim 0vox -o {output}"
 
 
-rule lr_flip_b500:
-    input:
-        nii=bids(
-            root=work,
-            datatype="dwi",
-            **inputs.subj_wildcards,
-            suffix="b500.nii.gz",
-            space="corobl",
-            hemi="{hemi}"
-        ),
-    output:
-        nii=bids(
-            root=work,
-            datatype="dwi",
-            **inputs.subj_wildcards,
-            suffix="b500.nii.gz",
-            space="corobl",
-            hemi="{hemi,L}flip"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -flip x -o  {output}"
-
-
 rule cp_b500_to_anat_dir:
     input:
         nii=bids(

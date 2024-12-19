@@ -102,32 +102,3 @@ rule warp_t1_to_corobl_crop:
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {params.ref}  -t {input.xfm}"
-
-
-rule lr_flip_t1:
-    input:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="T1w.nii.gz",
-            space="corobl",
-            desc="{desc}",
-            hemi="{hemi}"
-        ),
-    output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="T1w.nii.gz",
-            space="corobl",
-            desc="{desc}",
-            hemi="{hemi,L}flip"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -flip x -o  {output}"
