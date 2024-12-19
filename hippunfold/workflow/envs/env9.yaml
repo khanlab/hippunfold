@@ -4,6 +4,6 @@ channels:
   - defaults
 dependencies:
   - python=3.9
-  - nibabel=5.2.1
-  - numpy=2.1.2
-  - pandas=2.2.3
+  - nibabel>=5.3.2,<6.0.0
+  - numpy
+  - pandas
