@@ -29,6 +29,8 @@ rule divide_t1_by_t2:
             suffix="T1wDividedByT2w.nii.gz",
             **inputs.subj_wildcards
         ),
+    conda:
+        "../envs/env5.yaml"
     group:
         "subj"
     container:
@@ -61,6 +63,8 @@ rule create_ribbon:
             hemi="{hemi}",
             **inputs.subj_wildcards
         ),
+    conda:
+        "../envs/env5.yaml"
     group:
         "subj"
     container:
@@ -133,6 +137,8 @@ rule sample_myelin_map_surf:
             label="{autotop}",
             **inputs.subj_wildcards
         ),
+    conda:
+        "../envs/env2.yaml"
     group:
         "subj"
     container:
