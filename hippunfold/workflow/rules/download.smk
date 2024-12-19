@@ -38,7 +38,10 @@ rule download_extract_template:
 
 
 def copy_or_flip(wildcards, file_to_process):
-    if wildcards.hemi in config["template_available_hemis"][config["inject_template"]]:
+    if (
+        wildcards.hemi
+        in config["template_files"][config["inject_template"]]["hemi_wildcards"]
+    ):
         cmd = f"cp {file_to_process}"
     else:
         cmd = f"c3d {file_to_process} -flip x -o"

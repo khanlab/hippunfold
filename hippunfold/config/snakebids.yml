@@ -354,32 +354,7 @@ singularity:
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
 
-#templates enabled for template-based segmentation are here
 # TODO: should also perhaps include modalities avaialble, and any custom crop_native_res settings
-template_available_hemis:
-  CITI168:
-    - R
-    - L
-  dHCP:
-    - R
-    - L
-  MBMv2:
-    - R
-  MBMv3:
-    - R
-  CIVM:
-    - R
-    - L
-  upenn:
-    - R
-  ABAv3:
-    - R
-    - L
-  bigbrain:
-    - R
-    - L
-
-
 template_files:
   CITI168:
     T1w: T1w_head_700um.nii.gz
@@ -390,6 +365,9 @@ template_files:
     Mask_crop: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
     dseg:  sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz 
     coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{autotop}_desc-laplace_coords.nii.gz 
+    hemi_wildcards:
+      - L
+      - R
   dHCP:
     T1w: tpl-dHCP_cohort-1_res-1_T1w.nii.gz
     T2w: tpl-dHCP_cohort-1_res-1_T2w.nii.gz
@@ -399,6 +377,10 @@ template_files:
     Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
     dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
     coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
   MBMv2:
     T1w: Template_sym_MTR_80um.nii.gz
     T2w: Template_sym_T2_80um.nii.gz
@@ -407,6 +389,9 @@ template_files:
     Mask_crop: tpl-MBMv2_hemi-R_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    hemi_wildcards:
+      - R
+
   MBMv3:
     T1w: tpl-MBMv3_T1w.nii.gz
     T2w: tpl-MBMv3_T2w.nii.gz
@@ -415,6 +400,10 @@ template_files:
     Mask_crop: tpl-MBMv3_hemi-R_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-MBMv3_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    hemi_wildcards:
+      - R
+
+
   CIVM:
     T1w: tpl-CIVM_T1w.nii.gz
     xfm_corobl: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
@@ -422,10 +411,18 @@ template_files:
     Mask_crop: tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-CIVM_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
     coords: tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+    hemi_wildcards:
+      - R
+
   ABAv3:
     T1w: tpl-ABAv3_T1w.nii.gz
     xfm_corobl: tpl-ABAv3_from-native_to-corobl_type-itk_affine.txt
@@ -433,6 +430,10 @@ template_files:
     Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
   bigbrain:
     T1w: tpl-bigbrain_1mm_merker.nii.gz
     T2w: tpl-bigbrain_1mm_merker.nii.gz
@@ -441,6 +442,10 @@ template_files:
     Mask_crop: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
     dseg: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
     coords: tpl-bigbrain_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
 
 
 atlas_files:
