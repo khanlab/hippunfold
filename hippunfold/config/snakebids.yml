@@ -195,6 +195,12 @@ parse_args:
     default: False
     action: store_true
 
+  --native_surf:
+    help: 'Use native surf workflow to generate isosurfaces in native space, and use wb_command tools to resample. Note: this currently disables unfolded registration if applied (until it is implemented).'
+    default: False
+    action: store_true
+
+
   --generate_myelin_map:
     help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
     default: False
@@ -278,6 +284,7 @@ parse_args:
       - synthseg_v0.2
       - neonateT1w_v2
 
+
   --enable-bids-validation:
     help: |
       Enable validation of BIDS dataset. BIDS validation would be performed
@@ -294,7 +301,6 @@ parse_args:
     version: "1.5.2-pre.2"
 
 
-
 # --- surface specific configuration -- 
 
 autotop_labels:
@@ -308,6 +314,8 @@ surf_types:
     - outer
   dentate:
     - midthickness
+#    - inner
+#    - outer
 
 gifti_metric_types:
   hipp:
@@ -327,7 +335,14 @@ cifti_metric_types:
     - gyrification.dscalar
     - curvature.dscalar
 
-
+# params for detecting and removing outlier vertices
+outlier_opts:
+  outlierSmoothDist: 
+    unfoldiso: 15
+    0p5mm: 7
+    1mm: 3
+    2mm: 1
+  vertexOutlierThreshold: 3
 
 
 
@@ -363,6 +378,7 @@ template_available_hemis:
   bigbrain:
     - R
     - L
+
 
 template_files:
   CITI168:
@@ -418,12 +434,14 @@ template_files:
     dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   bigbrain:
-    T1w: tpl-bigbrain_100um_T1w.nii.gz
+    T1w: tpl-bigbrain_1mm_merker.nii.gz
+    T2w: tpl-bigbrain_1mm_merker.nii.gz
     xfm_corobl: tpl-bigbrain_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_40um_dseg.nii.gz
-    Mask_crop: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_40um_dseg.nii.gz
-    dseg: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_40um_dseg.nii.gz
+    crop_ref: tpl-bigbrain_hemi-{hemi}_space-corobl_100um_merker.nii.gz
+    Mask_crop: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
+    dseg: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
     coords: tpl-bigbrain_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+
 
 atlas_files:
   multihist7:
@@ -582,6 +600,11 @@ unfold_vol_ref:
       - '2.5'
     orient: RPI
 
+unfold_crop_epsilon_fractions:
+    - 0
+    - 0
+    - 1 #in unfolded space voxels
+
 
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface
@@ -638,7 +661,8 @@ laplace_labels:
       - 7
     sink:
       - 0 
-
+    gm_noDG:
+      - 1
 
 output_spaces:
   - native
@@ -666,3 +690,4 @@ no_unfolded_reg: False
 root: results
 use_template_seg: False
 template_seg_smoothing_factor: 2
+native_surf: False

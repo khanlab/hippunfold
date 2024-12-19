@@ -2,9 +2,45 @@ import nibabel as nib
 import numpy as np
 import naturalneighbor
 from scipy.stats import zscore
+from scipy.ndimage import generic_filter, binary_dilation
+from astropy.convolution import convolve
 
 logfile = open(snakemake.log[0], "w")
 print(f"Start", file=logfile, flush=True)
+
+
+def extrapolate_with_convolve(input_array, mask_array):
+    """
+    Perform convolution to replace nearby NaN values with interpolated values,
+    while preserving values at all non-NaN voxels.
+
+    Parameters:
+    - input_array: ndarray
+        The input array with possible NaN values to be replaced.
+    - mask_array: ndarray
+        A boolean mask where True indicates regions to preserve in the input array.
+
+    Returns:
+    - output_array: ndarray
+        The array with NaN values replaced using interpolation from the neighborhood.
+    """
+    # 1. Create working array: set to NaN outside mask, else input_array
+    working_array = np.where(mask_array, input_array, np.nan)
+
+    # 2. Define a convolution kernel (3x3x3 Box Kernel)
+    # set up filter (18NN)
+    hl = np.ones([5, 5, 5])
+    hl = hl / np.sum(hl)
+
+    # 3. Perform convolution on the working array with NaNs
+    convolved_array = convolve(
+        working_array, hl, nan_treatment="interpolate", preserve_nan=False
+    )
+
+    # 4. Restore original values inside the mask
+    working_array = np.where(mask_array, input_array, convolved_array)
+
+    return working_array
 
 
 def convert_warp_to_itk(warp):
@@ -46,6 +82,19 @@ idxgm = np.zeros(lbl.shape)
 for i in snakemake.params.gm_labels:
     idxgm[lbl == i] = 1
 mask = idxgm == 1
+
+# extrapolate coords to widen domain
+coord_ap = extrapolate_with_convolve(coord_ap, mask)
+coord_io = extrapolate_with_convolve(coord_io, mask)
+coord_pd = extrapolate_with_convolve(coord_pd, mask)
+
+
+# then, dilate the mask, to get a larger domain for the warp
+structuring_element = np.ones((3, 3, 3), dtype=bool)
+mask = binary_dilation(mask, structuring_element)
+mask = binary_dilation(mask, structuring_element)
+
+
 num_mask_voxels = np.sum(mask)
 print(f"num_mask_voxels {num_mask_voxels}", file=logfile, flush=True)
 
@@ -100,23 +149,30 @@ summary("unfold_grid_phys", unfold_grid_phys)
 # we have points defined by coord_flat_{ap,pd,io}, and corresponding value as native_coords_phys[:,i]
 # and we want to interpolate on a grid in the unfolded space
 
-# unnormalize and add a bit of noise so points don't ever perfectly overlap
-coord_flat_ap_unnorm = coord_flat_ap * unfold_dims[0]
-coord_flat_pd_unnorm = coord_flat_pd * unfold_dims[1]
-coord_flat_io_unnorm = coord_flat_io * unfold_dims[2]
+# add some noise to avoid perfectly overlapping datapoints!
+points = (
+    coord_flat_ap * unfold_dims[0]
+    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+    coord_flat_pd * unfold_dims[1]
+    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+    coord_flat_io * unfold_dims[2]
+    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+)
 
-# get unfolded grid
-
-points = np.stack(
-    [
-        coord_flat_ap * unfold_dims[0]
-        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-        coord_flat_pd * unfold_dims[1]
-        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-        coord_flat_io * unfold_dims[2]
-        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    ],
-    axis=1,
+# get unfolded grid (from 0 to 1, not world coords), using meshgrid:
+#  note: indexing='ij' to swap the ordering of x and y
+epsilon = snakemake.params.epsilon
+(unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(
+    np.linspace(
+        0 + float(epsilon[0]), unfold_dims[0] - float(epsilon[0]), unfold_dims[0]
+    ),
+    np.linspace(
+        0 + float(epsilon[1]), unfold_dims[1] - float(epsilon[1]), unfold_dims[1]
+    ),
+    np.linspace(
+        0 + float(epsilon[2]), unfold_dims[2] - float(epsilon[2]), unfold_dims[2]
+    ),
+    indexing="ij",
 )
 summary("points", points)
 

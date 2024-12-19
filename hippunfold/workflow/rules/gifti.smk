@@ -181,7 +181,7 @@ rule warp_gii_unfold2corobl1:
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            desc="nonancorrect",
+            desc="nobadcorrect",
             space="corobl",
             unfoldreg="none",
             hemi="{hemi}",
@@ -198,21 +198,26 @@ rule warp_gii_unfold2corobl1:
         " -surface-secondary-type {params.secondary_type}"
 
 
-# previous rule seems to be where nan vertices emerge, so we'll correct them here immediately after
-rule correct_nan_vertices1:
+# previous rule seems to be where bad vertices emerge, so we'll correct them here immediately after
+rule correct_bad_vertices1:
     input:
         gii=bids(
             root=work,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            desc="nonancorrect",
+            desc="nobadcorrect",
             space="corobl",
             unfoldreg="none",
             hemi="{hemi}",
             label="hipp",
             **inputs.subj_wildcards
         ),
+    params:
+        dist=lambda wildcards: config["outlier_opts"]["outlierSmoothDist"][
+            wildcards.density
+        ],
+        threshold=config["outlier_opts"]["vertexOutlierThreshold"],
     output:
         gii=bids(
             root=work,
@@ -230,7 +235,7 @@ rule correct_nan_vertices1:
     container:
         config["singularity"]["autotop"]
     script:
-        "../scripts/fillnanvertices.py"
+        "../scripts/fillbadvertices.py"
 
 
 # morphological features, calculated in native space:
@@ -730,7 +735,7 @@ rule warp_gii_unfold2corobl2:
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            desc="nonancorrect",
+            desc="nobadcorrect",
             space="corobl",
             hemi="{hemi}",
             label="{autotop}",
@@ -746,20 +751,25 @@ rule warp_gii_unfold2corobl2:
         " -surface-secondary-type {params.secondary_type}"
 
 
-# previous rule seems to be where nan vertices emerge, so we'll correct them here immediately after
-rule correct_nan_vertices2:
+# previous rule seems to be where bad vertices emerge, so we'll correct them here immediately after
+rule correct_bad_vertices2:
     input:
         gii=bids(
             root=work,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            desc="nonancorrect",
+            desc="nobadcorrect",
             space="corobl",
             hemi="{hemi}",
             label="{autotop}",
             **inputs.subj_wildcards
         ),
+    params:
+        dist=lambda wildcards: config["outlier_opts"]["outlierSmoothDist"][
+            wildcards.density
+        ],
+        threshold=config["outlier_opts"]["vertexOutlierThreshold"],
     output:
         gii=bids(
             root=work,
@@ -776,7 +786,7 @@ rule correct_nan_vertices2:
     container:
         config["singularity"]["autotop"]
     script:
-        "../scripts/fillnanvertices.py"
+        "../scripts/fillbadvertices.py"
 
 
 # needed for if native_modality is corobl
