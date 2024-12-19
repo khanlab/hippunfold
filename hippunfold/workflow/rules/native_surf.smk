@@ -16,9 +16,9 @@ resample_from_density = (
 )
 
 
-# if we aren't doing unfolded reg, then we have these rules override correct_nan_vertices2
-ruleorder: resample_native_surf > correct_nan_vertices2
-ruleorder: warp_midthickness_to_inout > correct_nan_vertices2
+# if we aren't doing unfolded reg, then we have these rules override correct_bad_vertices2
+ruleorder: resample_native_surf > correct_bad_vertices2
+ruleorder: warp_midthickness_to_inout > correct_bad_vertices2
 
 
 rule prep_hipp_coords_for_meshing:
