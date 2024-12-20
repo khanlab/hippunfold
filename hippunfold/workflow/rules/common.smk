@@ -332,7 +332,7 @@ def get_final_qc():
     return qc
 
 
-def get_final_subj_output():
+def get_final_output():
     subj_output = []
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
@@ -341,33 +341,6 @@ def get_final_subj_output():
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
     return subj_output
-
-
-def get_final_output():
-    if config["keep_work"]:
-        subj_output = get_final_subj_output()
-    else:
-        subj_output = get_final_work_tar()
-
-    final_output = []
-
-    modality_suffix = get_modality_suffix(config["modality"])
-    modality_key = config["modality"]
-
-    # use a zip list for subject/session:
-    zip_list = inputs[modality_key].zip_lists
-    if "session" in zip_list:
-        zip_list = snakebids.filter_list(
-            zip_list,
-            {"session": inputs[config["modality"]].zip_lists["session"]},
-        )
-    final_output.extend(
-        expand(
-            expand(subj_output, zip, allow_missing=True, **zip_list),
-            modality_suffix=modality_suffix,
-        )
-    )
-    return final_output
 
 
 if "corobl" in ref_spaces:
@@ -403,18 +376,6 @@ if "corobl" in ref_spaces:
             "cp {input} {output}"
 
 
-def get_final_work_tar():
-    bids = bids_factory(specs.v0_0_0(subject_dir=False, session_dir=False))
-    return bids(root=work, suffix="work.tar.gz", **inputs.subj_wildcards)
-
-
-def get_work_dir(wildcards):
-    folder_with_file = inputs[config["modality"]].expand(
-        bids(root=work, **inputs.subj_wildcards), **wildcards
-    )
-    folder_without_file = os.path.dirname(folder_with_file[0])
-    return folder_without_file
-
 
 def get_download_dir():
     if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
@@ -426,19 +387,3 @@ def get_download_dir():
     return download_dir
 
 
-rule archive_work_after_final:
-    input:
-        get_final_subj_output(),
-    params:
-        work_dir=get_work_dir,
-    output:
-        get_final_work_tar(),
-    group:
-        "subj"
-    shell:
-        #exit code 0 or 1 is acceptable (2 is fatal)
-        "tar -czf {output} {params.work_dir}; "
-        "if [ $? -le 1 ]; then "
-        "  rm -rf {params.work_dir}; "
-        "else exit 1; "
-        "fi"

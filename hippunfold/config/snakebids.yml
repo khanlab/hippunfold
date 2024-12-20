@@ -264,10 +264,10 @@ parse_args:
     nargs: '+'
     help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
 
-  --keep_work:
-    help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
-    default: False
-    action: 'store_true'
+  --workdir:
+    help: 'Folder for storing working files, if not specified, will make a temporary folder with tempfile.mkdtemp() (default: %(default)s)'
+    default: None
+    type: Path
 
   --force_nnunet_model:
     help: 'Force nnunet model to use (expert option). (default: %(default)s)'
@@ -693,6 +693,7 @@ t1_reg_template: False
 generate_myelin_map: False
 no_unfolded_reg: False
 root: results
+workdir: null
 use_template_seg: False
 template_seg_smoothing_factor: 2
 native_surf: False
