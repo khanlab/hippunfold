@@ -264,11 +264,6 @@ parse_args:
     nargs: '+'
     help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
 
-  --workdir:
-    help: 'Folder for storing working files, if not specified, will make a temporary folder with tempfile.mkdtemp() (default: %(default)s)'
-    default: None
-    type: Path
-
   --force_nnunet_model:
     help: 'Force nnunet model to use (expert option). (default: %(default)s)'
     default: False
@@ -293,6 +288,14 @@ parse_args:
     dest: "plugins.validator.skip"
     action: "store_false"
     default: True
+
+  --workdir:
+    help: |
+      Folder for storing working files. If not specified, a temporary folder
+      will be made in your system's temp directory (e.g. /tmp). You can also
+      use environment variables when setting the workdir, e.g. --workdir '$SLURM_TMPDIR'.
+    default: null
+    type: str
 
 
   --version:

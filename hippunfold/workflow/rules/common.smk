@@ -376,7 +376,6 @@ if "corobl" in ref_spaces:
             "cp {input} {output}"
 
 
-
 def get_download_dir():
     if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
         download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
@@ -385,5 +384,3 @@ def get_download_dir():
         dirs = AppDirs("hippunfold", "khanlab")
         download_dir = dirs.user_cache_dir
     return download_dir
-
-
