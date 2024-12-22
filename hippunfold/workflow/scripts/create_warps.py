@@ -149,31 +149,24 @@ summary("unfold_grid_phys", unfold_grid_phys)
 # we have points defined by coord_flat_{ap,pd,io}, and corresponding value as native_coords_phys[:,i]
 # and we want to interpolate on a grid in the unfolded space
 
-# add some noise to avoid perfectly overlapping datapoints!
-points = (
-    coord_flat_ap * unfold_dims[0]
-    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    coord_flat_pd * unfold_dims[1]
-    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    coord_flat_io * unfold_dims[2]
-    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-)
+# unnormalize and add a bit of noise so points don't ever perfectly overlap
+coord_flat_ap_unnorm = coord_flat_ap * unfold_dims[0]
+coord_flat_pd_unnorm = coord_flat_pd * unfold_dims[1]
+coord_flat_io_unnorm = coord_flat_io * unfold_dims[2]
 
-# get unfolded grid (from 0 to 1, not world coords), using meshgrid:
-#  note: indexing='ij' to swap the ordering of x and y
-epsilon = snakemake.params.epsilon
-(unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(
-    np.linspace(
-        0 + float(epsilon[0]), unfold_dims[0] - float(epsilon[0]), unfold_dims[0]
-    ),
-    np.linspace(
-        0 + float(epsilon[1]), unfold_dims[1] - float(epsilon[1]), unfold_dims[1]
-    ),
-    np.linspace(
-        0 + float(epsilon[2]), unfold_dims[2] - float(epsilon[2]), unfold_dims[2]
-    ),
-    indexing="ij",
-)
+# get unfolded grid
+
+points = np.stack(
+    [
+        coord_flat_ap * unfold_dims[0]
+        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+        coord_flat_pd * unfold_dims[1]
+        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+        coord_flat_io * unfold_dims[2]
+        + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+    ],
+    axis=1,
+    )
 summary("points", points)
 
 
