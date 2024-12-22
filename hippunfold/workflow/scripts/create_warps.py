@@ -159,23 +159,6 @@ points = (
     + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
 )
 
-# get unfolded grid (from 0 to 1, not world coords), using meshgrid:
-#  note: indexing='ij' to swap the ordering of x and y
-epsilon = snakemake.params.epsilon
-(unfold_gx, unfold_gy, unfold_gz) = np.meshgrid(
-    np.linspace(
-        0 + float(epsilon[0]), unfold_dims[0] - float(epsilon[0]), unfold_dims[0]
-    ),
-    np.linspace(
-        0 + float(epsilon[1]), unfold_dims[1] - float(epsilon[1]), unfold_dims[1]
-    ),
-    np.linspace(
-        0 + float(epsilon[2]), unfold_dims[2] - float(epsilon[2]), unfold_dims[2]
-    ),
-    indexing="ij",
-)
-summary("points", points)
-
 
 # perform the interpolation
 
