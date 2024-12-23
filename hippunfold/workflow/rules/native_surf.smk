@@ -275,105 +275,6 @@ rule warp_native_mesh_to_unfold:
         "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
-
-rule resample_subfields_to_native_surf:
-    input:
-        label_gii=bids(
-            root=work,
-            datatype="surf",
-            den=resample_from_density,
-            suffix="subfields.label.gii",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-        ref_unfold=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_hipp",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii".format(
-                density=resample_from_density
-            ),
-        ),
-        native_unfold=bids(
-            root=work,
-            datatype="surf",
-            suffix="midthickness.surf.gii",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            **inputs.subj_wildcards
-        ),
-    output:
-        label_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="subfields.label.gii",
-            space="corobl",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-    container:
-        None
-    #        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
-
-
-rule resample_native_surf:
-    input:
-        native_corobl=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-        ref_unfold=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_{label}",
-            "tpl-avg_space-unfold_den-{density}_{surf_name}.surf.gii",
-        ),
-        native_unfold=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    output:
-        native_corobl_resampled=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name,midthickness}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        None
-    #        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-resample {input.native_corobl} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_corobl_resampled} -bypass-sphere-check"
-
-
 rule compute_halfthick_mask:
     input:
         coords=bids(
@@ -770,7 +671,10 @@ rule calculate_thickness_from_surface:
 
 rule pad_unfold_ref:
     """pads the unfolded ref in XY (to improve registration by ensuring zero-displacement at boundaries)
-        and to deal with input vertices that are just slightly outside the original bounding box"""
+        and to deal with input vertices that are just slightly outside the original bounding box. 
+       The ribbon-constrained method will be used to resample surface metrics into this reference, then
+        to get a 2D slice we will take the central slice (the next rule creates the single-slice reference
+        for this)."""
     input:
         atlas_dir=Path(download_dir) / "atlas" / "multihist7",
     params:
@@ -796,6 +700,37 @@ rule pad_unfold_ref:
         "c3d {params.ref_nii} -scale 0 -shift 1 -pad 64x64x0vox 64x64x0vox 0 -o {output.ref_nii}"
 
 
+rule extract_unfold_ref_slice:
+    """This gets the central-most slice of the unfold volume, for obtaining a 2D slice"""
+    input:
+        ref_3d_nii=bids(
+            root=work,
+            datatype="anat",
+            suffix="refvol.nii.gz",
+            space="unfold",
+            desc="padded",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    output:
+        ref_2d_nii=bids(
+            root=work,
+            datatype="anat",
+            suffix="refvol.nii.gz",
+            space="unfold",
+            desc="slice",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
+
 rule native_metric_to_unfold_nii:
     """converts metric .gii files to .nii for use in ANTs"""
     input:
@@ -808,10 +743,28 @@ rule native_metric_to_unfold_nii:
             label="{label}",
             **inputs.subj_wildcards
         ),
-        unfoldedsurf=bids(
+        inner_surf=bids(
             root=work,
             datatype="surf",
-            suffix="inner.surf.gii", #inner is because the multihist 2d slices are there, but ideally this should be midthickness
+            suffix="inner.surf.gii", 
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        midthickness_surf=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii", 
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        outer_surf=bids(
+            root=work,
+            datatype="surf",
+            suffix="outer.surf.gii", 
             space="unfold",
             hemi="{hemi}",
             label="{label}",
@@ -822,13 +775,13 @@ rule native_metric_to_unfold_nii:
             datatype="anat",
             suffix="refvol.nii.gz",
             space="unfold",
-            desc="padded",
+            desc="slice",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
         ),
     params:
-        interp="-nearest-vertex 1",
+        interp="-nearest-vertex 0.3",
     output:
         metric_nii=bids(
             root=work,
@@ -844,7 +797,8 @@ rule native_metric_to_unfold_nii:
     group:
         "subj"
     shell:
-        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.unfoldedsurf} {input.ref_nii} {output.metric_nii} {params.interp}"
+        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
+        " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
 
 
 print(bids(
@@ -926,8 +880,8 @@ rule unfoldreg:
             label="{label}",
             **inputs.subj_wildcards
         ),
-    shadow:
-        "minimal"
+#    shadow:
+#        "minimal"
     threads: 16
     resources:
         mem_mb=16000,
@@ -1029,6 +983,7 @@ rule convert_unfoldreg_warp_from_itk_to_world:
 
 
 rule warp_unfold_native_to_unfoldreg:
+    """ TODO: verify that this transformation is being correctly applied! """
     input:
         surf_gii=bids(
             root=work,
@@ -1061,7 +1016,8 @@ rule warp_unfold_native_to_unfoldreg:
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="unfold{atlas}",
+            space="unfoldreg",
+            atlas="{atlas}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
@@ -1076,4 +1032,158 @@ rule warp_unfold_native_to_unfoldreg:
         " -surface-secondary-type {params.secondary_type}"
 
 
-       
+      
+#now we have native vertices, warped to unfoldreg atlas space, so we can now use these to resample our meshes and metrics
+rule resample_subfields_to_native_surf:
+    input:
+        label_gii=bids(
+            root=work,
+            datatype="surf",
+            den=resample_from_density,
+            suffix="subfields.label.gii",
+            space="unfold",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **inputs.subj_wildcards
+        ),
+        ref_unfold=os.path.join(  #this uses the standard unfoldiso space - we should replace this with an atlas-specific gifti
+            workflow.basedir,
+            "..",
+            "resources",
+            "unfold_template_hipp",
+            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii".format(
+                density=resample_from_density
+            ),
+        ),
+        native_unfold=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfoldreg",
+            atlas="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    output:
+        label_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="subfields.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        None
+    #        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
+
+
+rule resample_native_surf:
+    input:
+        native_corobl=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surf_name}.surf.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        ref_unfold=os.path.join(
+            workflow.basedir,
+            "..",
+            "resources",
+            "unfold_template_{label}",
+            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        ),
+        native_unfold=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfoldreg",
+            atlas="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+
+    output:
+        native_corobl_resampled=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surf_name,midthickness}.surf.gii",
+            space="{space}",
+            den="{density}",
+            hemi="{hemi}",
+            atlas="{atlas}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        None
+    #        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-resample {input.native_corobl} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_corobl_resampled} -bypass-sphere-check"
+
+
+rule resample_native_metric:
+    input:
+        native_metric=bids(
+            root=work,
+            datatype="surf",
+            suffix="{metric}.{metrictype}.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        ref_unfold=os.path.join(
+            workflow.basedir,
+            "..",
+            "resources",
+            "unfold_template_{label}",
+            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        ),
+        native_unfold=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfoldreg",
+            atlas="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+
+    output:
+        metric_resampled=bids(
+            root=work,
+            datatype="surf",
+            suffix="{metric}.{metrictype,shape|func}.gii",
+            space="{space}",
+            den="{density}",
+            atlas="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        None
+    #        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
+
+
+
