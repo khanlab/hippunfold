@@ -335,11 +335,11 @@ def get_final_qc():
 def get_final_subj_output():
     subj_output = []
     subj_output.extend(get_final_spec())
-    subj_output.extend(get_final_subfields())
-    subj_output.extend(get_final_coords())
-    subj_output.extend(get_final_transforms())
-    subj_output.extend(get_final_anat())
-    subj_output.extend(get_final_qc())
+   # subj_output.extend(get_final_subfields())
+  #  subj_output.extend(get_final_coords())
+   # subj_output.extend(get_final_transforms())
+   # subj_output.extend(get_final_anat())
+   # subj_output.extend(get_final_qc())
     return subj_output
 
 
@@ -349,25 +349,7 @@ def get_final_output():
     else:
         subj_output = get_final_work_tar()
 
-    final_output = []
-
-    modality_suffix = get_modality_suffix(config["modality"])
-    modality_key = config["modality"]
-
-    # use a zip list for subject/session:
-    zip_list = inputs[modality_key].zip_lists
-    if "session" in zip_list:
-        zip_list = snakebids.filter_list(
-            zip_list,
-            {"session": inputs[config["modality"]].zip_lists["session"]},
-        )
-    final_output.extend(
-        expand(
-            expand(subj_output, zip, allow_missing=True, **zip_list),
-            modality_suffix=modality_suffix,
-        )
-    )
-    return final_output
+    return subj_output
 
 
 if "corobl" in ref_spaces:

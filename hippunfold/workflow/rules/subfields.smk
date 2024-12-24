@@ -73,6 +73,8 @@ def skip_unfoldreg_option_subfields(wildcards):
     return label_nii
 
 
+#TODO: replace this with a function that operates on the label gifti instead for native_warp workflow
+# to avoid use of the unfold2native warps  
 rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and atlas subfield labels"""
     input:

@@ -62,7 +62,7 @@ if config["skip_inject_template_labels"]:  # TODO do we need this?
 limit_to_list.add(config["modality"])
 
 # if atlas doesn't contain alignment features
-if not config["atlas"] == ["multihist7"] or config["native_surf"]:
+if not config["atlas"] == ["multihist7"]: 
     config["no_unfolded_reg"] = True
 
 
@@ -171,7 +171,6 @@ if config["use_template_seg"]:
 else:
 
     include: "rules/shape_inject.smk"
-
 
 rule all:
     input:
