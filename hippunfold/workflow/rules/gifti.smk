@@ -214,98 +214,6 @@ rule affine_gii_to_native:
     shell:
         "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"
 
-rule resample_atlas_to_refvol:
-    """this is just done in case the atlas has a different unfolded config than the current run"""
-    input:
-        refvol=bids(
-            root=root,
-            space="unfold",
-            label="hipp",
-            datatype="warps",
-            suffix="refvol.nii.gz",
-            **inputs.subj_wildcards
-        ),
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
-    params:
-        atlas=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["label_nii"].format(**wildcards),
-    output:
-        label_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-    log:
-        bids(
-            root="logs",
-            suffix="resamplesubfieldrefvol",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "antsApplyTransforms -d 3 -n MultiLabel -i {params.atlas} -r {input.refvol} -o {output.label_nii} -v &> {log}"
-
-
-rule nii_to_label_gii:
-    input:
-        label_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-        surf=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_hipp",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
-        ),
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
-    params:
-        label_list=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["label_list"].format(**wildcards),
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
-    output:
-        label_gii=bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            suffix="subfields.label.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    shadow:
-        "minimal"
-    shell:
-        "wb_command -volume-to-surface-mapping {input.label_nii} {input.surf} temp.shape.gii -enclosing  && "
-        "wb_command -metric-label-import temp.shape.gii {params.label_list} {output.label_gii} && "
-        "wb_command -set-structure {output.label_gii} {params.structure_type}"
-
-
 def get_cmd_cifti_metric(wildcards, input, output):
     cmd = f"wb_command  -cifti-create-dense-scalar {output}"
     if "L" in config["hemi"]:
@@ -505,8 +413,7 @@ rule create_spec_file_hipp:
                 **inputs.subj_wildcards
             ),
             surfname=["midthickness"],
-            space="{space}",
-            #space=["{space}", "unfold"],
+            space=["{space}", "unfold","unfoldreg"],
             allow_missing=True,
         ),
         cifti_metrics=lambda wildcards: inputs[config["modality"]].expand(

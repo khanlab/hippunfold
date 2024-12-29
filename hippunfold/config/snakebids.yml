@@ -187,11 +187,10 @@ parse_args:
       - 'mouse'
     default: 
       - 'multihist7'
-    nargs: '+'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
-    help: 'Do not perform unfolded space (2D) registration based on thickness, curvature, and gyrification for closer alignment to the reference atlas. NOTE: only multihist7 has these features currently, so this unfolded_reg is automatically skipped if a different atlas is chosen. (default: %(default)s)'
+    help: 'Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. NOTE: only multihist7 has these features currently, so this unfolded_reg is automatically skipped if a different atlas is chosen. (default: %(default)s)'
     default: False
     action: store_true
 
@@ -450,12 +449,21 @@ template_files:
 
 atlas_files:
   multihist7:
-    label_nii: sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
-    lut: desc-subfields_atlas-multihist7_dseg.tsv
-    label_list: labellist.txt
-    thickness: thickness.nii.gz
-    curvature: curvature.nii.gz
-    gyrification: gyrification.nii.gz
+    lut: desc-subfields_atlas-multihist7_dseg.tsv #<-- perhaps generate this from the cifti instead of having user provide it
+    surf_gii: hemi-{hemi}_space-unfold_label-{label}_{surf_type}.surf.gii
+    metric_gii: hemi-{hemi}_label-{label}_{metric}.shape.gii
+    label_gii: hemi-{hemi}_label-{label}_dseg.label.gii
+    label_wildcards:
+     - hipp
+    hemi_wildcards:
+     - L
+     - R
+    metric_wildcards:
+     - thickness
+     - gyrification
+     - curvature
+
+
   bigbrain:
     label_nii: sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
     lut: desc-subfields_atlas-bigbrain_dseg.tsv
@@ -536,6 +544,7 @@ resource_urls:
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
   atlas:
+    fakeatlas: 'this.is.a/fake/url'
     multihist7: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
     magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
@@ -691,7 +700,6 @@ skip_inject_template_labels: False
 force_nnunet_model: False
 t1_reg_template: False
 generate_myelin_map: False
-no_unfolded_reg: False
 root: results
 use_template_seg: False
 template_seg_smoothing_factor: 2

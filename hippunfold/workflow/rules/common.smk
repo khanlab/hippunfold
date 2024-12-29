@@ -155,67 +155,6 @@ def get_final_coords():
     return coords
 
 
-def get_final_transforms():
-    xfms = []
-
-    xfms.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="warps",
-                **inputs.subj_wildcards,
-                label="{autotop}",
-                suffix="xfm.nii.gz",
-                hemi="{hemi}",
-                from_="{space}",
-                to="unfold",
-                mode="image",
-            ),
-            space=ref_spaces,
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            allow_missing=True,
-        )
-    )
-
-    xfms.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="warps",
-                **inputs.subj_wildcards,
-                label="{autotop}",
-                suffix="xfm.nii.gz",
-                hemi="{hemi}",
-                from_="unfold",
-                to="{space}",
-                mode="image",
-            ),
-            space=ref_spaces,
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            allow_missing=True,
-        )
-    )
-
-    xfms.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="warps",
-                **inputs.subj_wildcards,
-                label="{autotop}",
-                suffix="refvol.nii.gz",
-                space="unfold",
-            ),
-            autotop=config["autotop_labels"],
-            allow_missing=True,
-        )
-    )
-
-    return xfms
-
-
 def get_final_anat():
     anat = []
     if "T1w" in ref_spaces or "T2w" in ref_spaces:
@@ -335,11 +274,10 @@ def get_final_qc():
 def get_final_subj_output():
     subj_output = []
     subj_output.extend(get_final_spec())
-   # subj_output.extend(get_final_subfields())
-  #  subj_output.extend(get_final_coords())
-   # subj_output.extend(get_final_transforms())
-   # subj_output.extend(get_final_anat())
-   # subj_output.extend(get_final_qc())
+    subj_output.extend(get_final_subfields())
+    subj_output.extend(get_final_coords())
+    subj_output.extend(get_final_anat())
+    subj_output.extend(get_final_qc())
     return subj_output
 
 
