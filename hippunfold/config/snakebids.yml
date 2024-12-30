@@ -185,8 +185,7 @@ parse_args:
       - 'multihist7'
       - 'macaque'
       - 'mouse'
-    default: 
-      - 'multihist7'
+    default: 'multihist7'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
