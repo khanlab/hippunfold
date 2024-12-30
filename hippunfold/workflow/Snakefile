@@ -144,9 +144,7 @@ include: "rules/qc.smk"
 include: "rules/myelin_map.smk"
 
 
-if config["native_surf"]:
-
-    include: "rules/native_surf.smk"
+include: "rules/native_surf.smk"
 
 
 if config["use_template_seg"]:

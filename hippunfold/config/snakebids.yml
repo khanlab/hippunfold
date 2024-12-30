@@ -194,12 +194,6 @@ parse_args:
     default: False
     action: store_true
 
-  --native_surf:
-    help: 'Use native surf workflow to generate isosurfaces in native space, and use wb_command tools to resample. Note: this currently disables unfolded registration if applied (until it is implemented).'
-    default: False
-    action: store_true
-
-
   --generate_myelin_map:
     help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
     default: False
@@ -703,4 +697,3 @@ generate_myelin_map: False
 root: results
 use_template_seg: False
 template_seg_smoothing_factor: 2
-native_surf: False
