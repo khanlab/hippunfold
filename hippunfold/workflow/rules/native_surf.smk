@@ -4,12 +4,6 @@
 # --- parameters - will put these in config eventually
 
 
-wildcard_constraints:
-    label="[0-9a-zA-Z]+",
-    metric="[0-9a-zA-Z]+",
-    native_modality="[0-9a-zA-Z]+",
-
-
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
 # this is for the mapping from inner to outer
@@ -23,17 +17,8 @@ desc_io = {
     "dentate": "laplace",
 }
 
-resample_from_density = (
-    "unfoldiso"  # what density to resample metrics (ie subfields) from
-)
-
-
-# could allow user to select additional metrics (e.g. from bold, dwi ...)
-unfoldreg_metrics = ["thickness", "curvature", "gyrification"]
-
 
 ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
-ruleorder: unfold_spring_model > warp_unfold_native_to_unfoldreg
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii  #temporary until we change from subfields.nii to desc-subfields_dseg.nii for unfold space   
 
 
@@ -568,38 +553,6 @@ rule affine_gii_corobl_to_modality:
         "subj"
     shell:
         "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"
-
-
-# --- WIP rule for adjusting mesh in unfolded space
-
-
-rule unfold_spring_model:
-    input:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldspring",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    script:
-        "../scripts/unfold_spring_model.py"
 
 
 # --- calculating metrics on native anatomical surfaces
