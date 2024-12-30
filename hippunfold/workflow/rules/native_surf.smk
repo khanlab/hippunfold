@@ -1,12 +1,14 @@
-# This is one big rules file for now, but could split it up according to the 
+# This is one big rules file for now, but could split it up according to the
 # dividers ( --- ) that describe each conceptual part of the pipeline
 
 # --- parameters - will put these in config eventually
 
+
 wildcard_constraints:
-  label='[0-9a-zA-Z]+',
-  metric='[0-9a-zA-Z]+',
-  native_modality='[0-9a-zA-Z]+'
+    label="[0-9a-zA-Z]+",
+    metric="[0-9a-zA-Z]+",
+    native_modality="[0-9a-zA-Z]+",
+
 
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
@@ -27,14 +29,15 @@ resample_from_density = (
 
 
 # could allow user to select additional metrics (e.g. from bold, dwi ...)
-unfoldreg_metrics = [ 'thickness', 'curvature', 'gyrification']  
+unfoldreg_metrics = ["thickness", "curvature", "gyrification"]
 
 
-ruleorder: resample_native_surf_to_std_density >  cp_template_to_unfold
+ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
 ruleorder: unfold_spring_model > warp_unfold_native_to_unfoldreg
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii  #temporary until we change from subfields.nii to desc-subfields_dseg.nii for unfold space   
 
-#--- isosurface generation ---
+
+# --- isosurface generation ---
 
 
 rule prep_hipp_coords_for_meshing:
@@ -240,7 +243,9 @@ rule update_native_mesh_structure:
         "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
-#--- creating unfold surface from native anatomical
+
+# --- creating unfold surface from native anatomical
+
 
 rule warp_native_mesh_to_unfold:
     input:
@@ -289,6 +294,7 @@ rule warp_native_mesh_to_unfold:
 
 
 # --- creating inner/outer surfaces from native anatomical (using 3d label deformable registration)
+
 
 rule compute_halfthick_mask:
     input:
@@ -432,7 +438,8 @@ rule apply_halfsurf_warp_to_img:
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
-#TODO: rename the warps here according to existing custom (type=itk -> type=ras)
+
+# TODO: rename the warps here according to existing custom (type=itk -> type=ras)
 rule convert_inout_warp_from_itk_to_world:
     input:
         warp=bids(
@@ -514,6 +521,7 @@ rule warp_midthickness_to_inout:
 
 # --- affine transforming anatomical surfaces from corobl to other (T1w, T2w) spaces
 
+
 # warp native surface from corobl to T1w/T2w
 rule affine_gii_corobl_to_modality:
     input:
@@ -554,8 +562,8 @@ rule affine_gii_corobl_to_modality:
         "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"
 
 
+# --- WIP rule for adjusting mesh in unfolded space
 
-# --- WIP rule for adjusting mesh in unfolded space 
 
 rule unfold_spring_model:
     input:
@@ -582,7 +590,8 @@ rule unfold_spring_model:
         config["singularity"]["autotop"]
     group:
         "subj"
-    script: '../scripts/unfold_spring_model.py'
+    script:
+        "../scripts/unfold_spring_model.py"
 
 
 # --- calculating metrics on native anatomical surfaces
@@ -728,8 +737,9 @@ rule calculate_thickness_from_surface:
 # --- unfolded registration
 
 
-#for unfold_reg, need to get data into 2d image - Jordan's previous code used metric-to-volume-mapping with unfoldiso inner and outer surfaces
+# for unfold_reg, need to get data into 2d image - Jordan's previous code used metric-to-volume-mapping with unfoldiso inner and outer surfaces
 # we can use same approach, just calculating the metrics on native, and using the unfold inner/outer as ribbon
+
 
 rule pad_unfold_ref:
     """pads the unfolded ref in XY (to improve registration by ensuring zero-displacement at boundaries)
@@ -798,7 +808,7 @@ rule extract_unfold_ref_slice:
         "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
 
 
-#TODO - if we add density wildcard here then it will make use of the template unfold standard densities
+# TODO - if we add density wildcard here then it will make use of the template unfold standard densities
 rule native_metric_to_unfold_nii:
     """converts metric .gii files to .nii for use in ANTs"""
     input:
@@ -814,7 +824,7 @@ rule native_metric_to_unfold_nii:
         inner_surf=bids(
             root=work,
             datatype="surf",
-            suffix="inner.surf.gii", 
+            suffix="inner.surf.gii",
             space="unfold",
             hemi="{hemi}",
             label="{label}",
@@ -823,7 +833,7 @@ rule native_metric_to_unfold_nii:
         midthickness_surf=bids(
             root=work,
             datatype="surf",
-            suffix="midthickness.surf.gii", 
+            suffix="midthickness.surf.gii",
             space="unfold",
             hemi="{hemi}",
             label="{label}",
@@ -832,7 +842,7 @@ rule native_metric_to_unfold_nii:
         outer_surf=bids(
             root=work,
             datatype="surf",
-            suffix="outer.surf.gii", 
+            suffix="outer.surf.gii",
             space="unfold",
             hemi="{hemi}",
             label="{label}",
@@ -869,11 +879,11 @@ rule native_metric_to_unfold_nii:
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
 
 
-
-#TODO - if we add density wildcard for inputs here, then it will make use of the template unfold standard densities, 
+# TODO - if we add density wildcard for inputs here, then it will make use of the template unfold standard densities,
 # if no density wildcard, then will use the native mesh
 #
-# native metric, resampled to a standard density 
+# native metric, resampled to a standard density
+
 
 rule atlas_metric_to_unfold_nii:
     """converts metric .gii files to .nii for use in ANTs. 
@@ -889,12 +899,22 @@ rule atlas_metric_to_unfold_nii:
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
-        ), #we use ref_nii defined in this workflow so that parameters like spacing and padding of unfolded space can be defined on the fly
+        ),
     params:
-        metric_gii = lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['metric_gii'].format(**wildcards),
-        inner_surf=lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['surf_gii'].format(surf_type='inner',**wildcards),
-        outer_surf=lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['surf_gii'].format(surf_type='outer',**wildcards),
-        midthickness_surf=lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['surf_gii'].format(surf_type='midthickness',**wildcards),
+        metric_gii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["metric_gii"].format(**wildcards),
+        inner_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="inner", **wildcards
+        ),
+        outer_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="outer", **wildcards
+        ),
+        midthickness_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="midthickness", **wildcards
+        ),
     output:
         metric_nii=bids(
             root=work,
@@ -903,7 +923,7 @@ rule atlas_metric_to_unfold_nii:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            atlas='{atlas}',
+            atlas="{atlas}",
             **inputs.subj_wildcards
         ),
     container:
@@ -916,9 +936,10 @@ rule atlas_metric_to_unfold_nii:
 
 
 def get_fixed_images_unfoldreg(wildcards):
-    unfoldreg_metrics = config['atlas_files'][wildcards.atlas]['metric_wildcards']
+    unfoldreg_metrics = config["atlas_files"][wildcards.atlas]["metric_wildcards"]
 
-    return expand(bids(
+    return expand(
+        bids(
             root=work,
             datatype="anat",
             suffix="{metric}.nii.gz",
@@ -926,12 +947,16 @@ def get_fixed_images_unfoldreg(wildcards):
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
-            ),
-            metric=unfoldreg_metrics,**wildcards)
+        ),
+        metric=unfoldreg_metrics,
+        **wildcards
+    )
+
 
 def get_moving_images_unfoldreg(wildcards):
-    unfoldreg_metrics = config['atlas_files'][wildcards.atlas]['metric_wildcards']
-    return expand(bids(
+    unfoldreg_metrics = config["atlas_files"][wildcards.atlas]["metric_wildcards"]
+    return expand(
+        bids(
             root=work,
             datatype="anat",
             suffix="{metric}.nii.gz",
@@ -940,26 +965,32 @@ def get_moving_images_unfoldreg(wildcards):
             label="{label}",
             atlas="{atlas}",
             **inputs.subj_wildcards
-            ),
-            metric=unfoldreg_metrics,**wildcards)
+        ),
+        metric=unfoldreg_metrics,
+        **wildcards
+    )
 
 
- 
 rule unfoldreg:
     """performs 2D registration in unfolded space as in [reference paper]
     this is done in a shadow directory to get rid of the tmp files generated by ants."""
     input:
         fixed_images=get_fixed_images_unfoldreg,
-        moving_images=get_moving_images_unfoldreg
+        moving_images=get_moving_images_unfoldreg,
     params:
         antsparams="-d 2 -t so -o tmp",
-        fixed_args=lambda wildcards, input:
-            ' '.join(['-f {img}'.format(img=img) for img in  input.fixed_images]),
-        moving_args=lambda wildcards, input:
-            ' '.join(['-m {img}'.format(img=img) for img in  input.moving_images]),
-        cmd_copy_warps=lambda wildcards, output:
-            ' && '.join([f"cp tmp1Warp.nii.gz {output.warp}",
-                            f"cp tmp1InverseWarp.nii.gz {output.invwarp}"])
+        fixed_args=lambda wildcards, input: " ".join(
+            ["-f {img}".format(img=img) for img in input.fixed_images]
+        ),
+        moving_args=lambda wildcards, input: " ".join(
+            ["-m {img}".format(img=img) for img in input.moving_images]
+        ),
+        cmd_copy_warps=lambda wildcards, output: " && ".join(
+            [
+                f"cp tmp1Warp.nii.gz {output.warp}",
+                f"cp tmp1InverseWarp.nii.gz {output.invwarp}",
+            ]
+        ),
     output:
         warp=bids(
             root=work,
@@ -1007,8 +1038,7 @@ rule unfoldreg:
         mem_mb=16000,
         time=10,
     shell:
-        #"antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args}  &> {log} && "
-        "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args}  && "
+        "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args}  &> {log} && "
         "{params.cmd_copy_warps}"
 
 
@@ -1062,7 +1092,8 @@ rule extend_warp_2d_to_3d:
         config["singularity"]["autotop"]
     group:
         "subj"
-    script: '../scripts/convert_warp_2d_to_3d.py'
+    script:
+        "../scripts/convert_warp_2d_to_3d.py"
 
 
 rule convert_unfoldreg_warp_from_itk_to_world:
@@ -1072,10 +1103,8 @@ rule convert_unfoldreg_warp_from_itk_to_world:
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="{desc}",
-    #        from_="{to}", #swapped around since surf needs opposite direction
-    #        to="{from}",
-            from_="{from}",
-            to="{to}",
+            from_="{to}",
+            to="{from}",
             space="{space}",
             type_="itk",
             hemi="{hemi}",
@@ -1103,10 +1132,13 @@ rule convert_unfoldreg_warp_from_itk_to_world:
 
 
 def get_unfold_ref(wildcards):
-    """ function to return either unfoldreg or unfold ref mesh, depending on whether
+    """function to return either unfoldreg or unfold ref mesh, depending on whether
     unfoldreg can be performed (based on atlas wildcards)"""
 
-    if wildcards.label in config['atlas_files'][config['atlas']]['label_wildcards'] and config['no_unfolded_reg'] == False:
+    if (
+        wildcards.label in config["atlas_files"][config["atlas"]]["label_wildcards"]
+        and config["no_unfolded_reg"] == False
+    ):
         return bids(
             root=work,
             datatype="surf",
@@ -1146,7 +1178,7 @@ rule warp_unfold_native_to_unfoldreg:
             datatype="warps",
             desc="SyN",
             from_="native",
-            to=config['atlas'],
+            to=config["atlas"],
             space="unfold",
             type_="surface",
             hemi="{hemi}",
@@ -1176,6 +1208,7 @@ rule warp_unfold_native_to_unfoldreg:
         "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
+
 # --- resampling using the unfoldreg surface to standard densities (0p5mm, 1mm, 2mm, unfoldiso)
 #
 rule resample_atlas_subfields_to_std_density:
@@ -1191,9 +1224,12 @@ rule resample_atlas_subfields_to_std_density:
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
     params:
-        label_gii = lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['label_gii'].format(**wildcards),
-        atlas_unfold=lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['surf_gii'].format(surf_type='midthickness',**wildcards),
-
+        label_gii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
+        atlas_unfold=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="midthickness", **wildcards
+        ),
     output:
         label_gii=bids(
             root=root,
@@ -1215,8 +1251,6 @@ rule resample_atlas_subfields_to_std_density:
         "wb_command -label-resample {params.label_gii} {params.atlas_unfold} {input.ref_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
 
-
-
 rule resample_native_surf_to_std_density:
     input:
         native=bids(
@@ -1235,8 +1269,7 @@ rule resample_native_surf_to_std_density:
             "unfold_template_{label}",
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
-        native_unfold=get_unfold_ref
-
+        native_unfold=get_unfold_ref,
     output:
         native_resampled=bids(
             root=work,
@@ -1256,13 +1289,14 @@ rule resample_native_surf_to_std_density:
     shell:
         "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
 
+
 rule resample_native_metric_to_std_density:
     input:
         native_metric=bids(
             root=work,
             datatype="surf",
             suffix="{metric}.{metrictype}.gii",
-            space="corobl", #metrics always calculated in corobl
+            space="corobl",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
@@ -1274,8 +1308,7 @@ rule resample_native_metric_to_std_density:
             "unfold_template_{label}",
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
-        native_unfold=get_unfold_ref
-
+        native_unfold=get_unfold_ref,
     output:
         metric_resampled=bids(
             root=root,
@@ -1294,6 +1327,7 @@ rule resample_native_metric_to_std_density:
         "subj"
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
+
 
 rule cp_surf_to_root:
     input:
@@ -1321,16 +1355,19 @@ rule cp_surf_to_root:
     shell:
         "cp {input} {output}"
 
- 
+
 # --- resampling from atlasnative to native vertices
 rule resample_atlas_subfields_to_native_surf:
     input:
         atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
-        native_unfold=get_unfold_ref
+        native_unfold=get_unfold_ref,
     params:
-        label_gii = lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['label_gii'].format(**wildcards),
-        ref_unfold=lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['surf_gii'].format(surf_type='midthickness',**wildcards),
-
+        label_gii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
+        ref_unfold=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="midthickness", **wildcards
+        ),
     output:
         label_gii=bids(
             root=work,
@@ -1350,6 +1387,7 @@ rule resample_atlas_subfields_to_native_surf:
     shell:
         "wb_command -label-resample {params.label_gii} {params.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
+
 # --- rule for converting atlasnative subfields to unfold nii (e.g. analogous to unfoldiso standard space)
 rule atlas_label_to_unfold_nii:
     """converts metric .gii files to .nii - this is a band-aid fix since we make use of the volumetric
@@ -1359,7 +1397,6 @@ rule atlas_label_to_unfold_nii:
         ALSO - this has issues (with ribbon mapping) since the most inner and outer coords are missing.. 
              -- maybe nearest-vertex works better? 
 """
-
     input:
         atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         ref_nii=bids(
@@ -1371,10 +1408,20 @@ rule atlas_label_to_unfold_nii:
             **inputs.subj_wildcards
         ),
     params:
-        label_gii = lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['label_gii'].format(**wildcards),
-        inner_surf=lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['surf_gii'].format(surf_type='inner',**wildcards),
-        outer_surf=lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['surf_gii'].format(surf_type='outer',**wildcards),
-        midthickness_surf=lambda wildcards, input: Path(input.atlas_dir) / config["atlas_files"][wildcards.atlas]['surf_gii'].format(surf_type='midthickness',**wildcards),
+        label_gii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
+        inner_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="inner", **wildcards
+        ),
+        outer_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="outer", **wildcards
+        ),
+        midthickness_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="midthickness", **wildcards
+        ),
     output:
         label_nii=bids(
             root=work,
@@ -1383,7 +1430,7 @@ rule atlas_label_to_unfold_nii:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            atlas='{atlas}',
+            atlas="{atlas}",
             **inputs.subj_wildcards
         ),
     container:
@@ -1392,8 +1439,8 @@ rule atlas_label_to_unfold_nii:
         "subj"
     shell:
         "wb_command -label-to-volume-mapping {params.label_gii} {params.midthickness_surf} {input.ref_nii} {output.label_nii} "
-        " -nearest-vertex 1000" #use really large distance to ensure all voxels labelled
+        " -nearest-vertex 1000"
+        #use really large distance to ensure all voxels labelled
+
+
 #        " -ribbon-constrained {params.inner_surf} {params.outer_surf}"
-
-
-

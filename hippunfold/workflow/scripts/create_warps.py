@@ -166,7 +166,7 @@ points = np.stack(
         + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
     ],
     axis=1,
-    )
+)
 summary("points", points)
 
 

@@ -1,4 +1,3 @@
-
 ### A) we will run the following rules once for unfoldreg-none and again later (with no unfoldreg wildcard, as in previous version)
 
 
@@ -535,7 +534,6 @@ rule dentate_skip_unfoldreg:
         "cp {input} {output}"
 
 
-
 ### C) We will now repeat A), then continue below
 
 
@@ -793,6 +791,7 @@ rule normalize_curvature2:
     script:
         "../scripts/normalize_tanh.py"
 
+
 rule calculate_thickness_from_surface2:
     input:
         inner=bids(
@@ -833,8 +832,8 @@ rule calculate_thickness_from_surface2:
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
 
-### D) now continue as in previous version
 
+### D) now continue as in previous version
 
 
 rule cp_unfolded_noconstrain:
@@ -858,7 +857,9 @@ rule cp_unfolded_noconstrain:
     shell:
         "cp {input} {output}"
 
-#--- from subfields.smk
+
+# --- from subfields.smk
+
 
 rule resample_unfoldreg_subfields:
     input:
@@ -906,5 +907,3 @@ rule resample_unfoldreg_subfields:
         "for fn in $(ls tmp*.nii.gz); do antsApplyTransforms -d 2 -i $fn -r $fn -o $fn -n MultiLabel -t {input.warp}; done && "
         "c3d tmp*.nii.gz -tile z -o recombined.nii.gz && "
         "c3d {input.label_nii} recombined.nii.gz -copy-transform -o {output}"
-
-

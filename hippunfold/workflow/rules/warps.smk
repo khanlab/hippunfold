@@ -551,5 +551,3 @@ rule create_warps_dentate:
         config["singularity"]["autotop"]
     script:
         "../scripts/create_warps.py"
-
-

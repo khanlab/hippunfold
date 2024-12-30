@@ -141,6 +141,7 @@ rule constrain_surf_to_bbox:
     script:
         "../scripts/constrain_surf_to_bbox.py"
 
+
 # needed for if native_modality is corobl
 rule cp_corobl_root:
     input:
@@ -213,6 +214,7 @@ rule affine_gii_to_native:
         "subj"
     shell:
         "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"
+
 
 def get_cmd_cifti_metric(wildcards, input, output):
     cmd = f"wb_command  -cifti-create-dense-scalar {output}"
@@ -370,6 +372,7 @@ def get_gifti_metric_types(label):
         types_list.append("myelin.shape")
     return types_list
 
+
 rule create_spec_file_hipp:
     input:
         metrics=lambda wildcards: expand(
@@ -413,7 +416,7 @@ rule create_spec_file_hipp:
                 **inputs.subj_wildcards
             ),
             surfname=["midthickness"],
-            space=["{space}", "unfold","unfoldreg"],
+            space=["{space}", "unfold", "unfoldreg"],
             allow_missing=True,
         ),
         cifti_metrics=lambda wildcards: inputs[config["modality"]].expand(

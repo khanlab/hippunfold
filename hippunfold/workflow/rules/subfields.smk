@@ -1,9 +1,9 @@
-#TODO: replace this with a function that operates on the label gifti instead for native_warp workflow
-# to avoid use of the unfold2native warps  
+# TODO: replace this with a function that operates on the label gifti instead for native_warp workflow
+# to avoid use of the unfold2native warps
 rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and atlas subfield labels"""
     input:
-        label_nii = bids(
+        label_nii=bids(
             root=work,
             datatype="anat",
             suffix="subfields.nii.gz",
@@ -65,7 +65,7 @@ def get_tissue_atlas_remapping(wildcards):
 
     for label in mapping["tissue"].keys():
         in_label = mapping["tissue"][label]
-        out_label = mapping.get(wildcards.atlas,mapping.get('default'))[label]
+        out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
 
         remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
 
