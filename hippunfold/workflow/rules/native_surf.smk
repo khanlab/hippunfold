@@ -1448,7 +1448,3 @@ rule atlas_label_to_unfold_nii:
     shell:
         "wb_command -label-to-volume-mapping {params.label_gii} {params.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " -nearest-vertex 1000"
-        #use really large distance to ensure all voxels labelled
-
-
-#        " -ribbon-constrained {params.inner_surf} {params.outer_surf}"
