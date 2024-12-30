@@ -338,6 +338,8 @@ rule compute_halfthick_mask:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -381,6 +383,8 @@ rule register_midthickness:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "greedy -d 3 -i {input.fixed} {input.moving} -n 30 -o {output.warp}"
 
@@ -435,6 +439,8 @@ rule apply_halfsurf_warp_to_img:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
@@ -469,6 +475,8 @@ rule convert_inout_warp_from_itk_to_world:
         ),
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 

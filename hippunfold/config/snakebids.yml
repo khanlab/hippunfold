@@ -257,11 +257,6 @@ parse_args:
     nargs: '+'
     help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
 
-  --keep_work:
-    help: 'Keep work folder intact instead of archiving it for each subject (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
   --force_nnunet_model:
     help: 'Force nnunet model to use (expert option). (default: %(default)s)'
     default: False
@@ -286,6 +281,14 @@ parse_args:
     dest: "plugins.validator.skip"
     action: "store_false"
     default: True
+
+  --workdir:
+    help: |
+      Folder for storing working files. If not specified, a temporary folder
+      will be made in your system's temp directory (e.g. /tmp). You can also
+      use environment variables when setting the workdir, e.g. --workdir '$SLURM_TMPDIR'.
+    default: null
+    type: str
 
 
   --version:
@@ -608,11 +611,6 @@ unfold_vol_ref:
       - '2.5'
     orient: RPI
 
-unfold_crop_epsilon_fractions:
-    - 0
-    - 0
-    - 1 #in unfolded space voxels
-
 
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface
@@ -695,5 +693,6 @@ force_nnunet_model: False
 t1_reg_template: False
 generate_myelin_map: False
 root: results
+workdir: null
 use_template_seg: False
 template_seg_smoothing_factor: 2

@@ -2,6 +2,7 @@
 
 import snakebids
 from snakebids import bids, set_bids_spec
+from tempfile import mkdtemp
 
 
 configfile: "config/snakebids.yml"
@@ -90,8 +91,10 @@ wildcard_constraints:
     template="[a-zA-Z0-9]+",
 
 
-root = os.path.normpath(os.path.join(config["root"], "hippunfold"))
-work = os.path.normpath(os.path.join(config["root"], "work"))
+if config["workdir"] == None:
+    config["workdir"] = mkdtemp()
+work = os.path.expandvars(config["workdir"])
+root = os.path.expandvars(config["root"])
 
 
 include: "rules/common.smk"
