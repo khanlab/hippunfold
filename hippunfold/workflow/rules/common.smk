@@ -280,6 +280,7 @@ def get_final_output():
     subj_output.extend(get_final_qc())
     return subj_output
 
+
 if "corobl" in ref_spaces:
 
     rule copy_coords_to_results:

@@ -142,38 +142,6 @@ rule constrain_surf_to_bbox:
         "../scripts/constrain_surf_to_bbox.py"
 
 
-# needed for if native_modality is corobl
-rule cp_corobl_root:
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="corobl",
-            hemi="{hemi}",
-            label="{autotop}",
-            **inputs.subj_wildcards
-        ),
-    output:
-        gii=bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="corobl",
-            hemi="{hemi}",
-            label="{autotop}",
-            **inputs.subj_wildcards
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "cp {input} {output}"
-
-
 # warp from corobl to native
 rule affine_gii_to_native:
     input:
