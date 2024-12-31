@@ -149,15 +149,22 @@ summary("unfold_grid_phys", unfold_grid_phys)
 # we have points defined by coord_flat_{ap,pd,io}, and corresponding value as native_coords_phys[:,i]
 # and we want to interpolate on a grid in the unfolded space
 
+
+# unnormalize and add a bit of noise so points don't ever perfectly overlap
+coord_flat_ap_unnorm = coord_flat_ap * unfold_dims[0]
+coord_flat_pd_unnorm = coord_flat_pd * unfold_dims[1]
+coord_flat_io_unnorm = coord_flat_io * unfold_dims[2]
+
 # add some noise to avoid perfectly overlapping datapoints!
-points = (
-    coord_flat_ap * unfold_dims[0]
-    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    coord_flat_pd * unfold_dims[1]
-    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    coord_flat_io * unfold_dims[2]
-    + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+points = np.stack(
+    [
+        coord_flat_ap_unnorm + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+        coord_flat_pd_unnorm + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+        coord_flat_io_unnorm + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
+    ],
+    axis=1,
 )
+summary("points", points)
 
 
 # perform the interpolation
