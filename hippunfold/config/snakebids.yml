@@ -36,8 +36,6 @@ pybids_inputs:
       suffix: 'T2w'
       extension: '.nii.gz'
       datatype: 'anat'
-      # invalid_filters: 'allow'
-      # space: null
     wildcards:
       - subject
       - session
@@ -48,7 +46,6 @@ pybids_inputs:
     filters:
       suffix: 'b500'
       extension: '.nii.gz'
-      invalid_filters: 'allow'
       datatype: 'dwi'
     wildcards:
       - subject
@@ -59,8 +56,6 @@ pybids_inputs:
       suffix: 'T1w'
       extension: '.nii.gz'
       datatype: 'anat'
-      # invalid_filters: 'allow'
-      # space: null
     wildcards:
       - subject
       - session
@@ -72,7 +67,6 @@ pybids_inputs:
       suffix: 'dseg'
       extension: '.nii.gz'
       datatype: 'anat'
-      invalid_filters: 'allow'
     wildcards:
       - subject
       - session
@@ -540,7 +534,6 @@ resource_urls:
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
   atlas:
-    fakeatlas: 'this.is.a/fake/url'
     multihist7: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
     magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
