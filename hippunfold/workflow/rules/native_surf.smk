@@ -3,7 +3,6 @@
 
 # --- parameters - will put these in config eventually
 
-
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
 # this is for the mapping from inner to outer
@@ -245,6 +244,39 @@ rule update_native_mesh_structure:
     shell:
         "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
+
+
+rule smooth_surface:
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    params:
+        smoothing_strength=0.8,
+        smoothing_iterations=10,
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="corobl",
+            desc="smoothed",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-smoothing {input} {params.smoothing_strength} {params.smoothing_iterations} {output}"
 
 
 # --- creating unfold surface from native anatomical
@@ -654,6 +686,7 @@ rule calculate_curvature_from_surface:
             datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
+            desc="smoothed",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
