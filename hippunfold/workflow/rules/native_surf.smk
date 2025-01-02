@@ -12,6 +12,23 @@ gm_labels = {
     "dentate": config["laplace_labels"]["PD"]["sink"],
 }
 
+# appends the coords with these regions set to +1.1 for the meshing
+sink_labels = {"hipp": config["laplace_labels"]["IO"]["sink"], "dentate": [2]}
+
+# appends the coords with these regions set to +1.1 for the meshing
+src_labels = {"hipp": config["laplace_labels"]["IO"]["src"], "dentate": [1]}
+
+# sets these to nan in the coords for the meshing
+nan_labels = {
+    "hipp": config["laplace_labels"]["AP"]["sink"]
+    + config["laplace_labels"]["AP"]["src"]
+    + config["laplace_labels"]["PD"]["sink"]
+    + config["laplace_labels"]["PD"]["src"],
+    "dentate": [
+        0
+    ],  # TODO: this requires labels we don't produce yet -- namely, those at the boundary between  PDcoord~0.9-1  and SRLM, and between PDcoord~0.9-1 and BG
+}
+
 desc_io = {
     "hipp": "equivol" if "equivolume" in config["laminar_coords_method"] else "laplace",
     "dentate": "laplace",
@@ -23,103 +40,6 @@ ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii  #temporary un
 
 
 # --- isosurface generation ---
-
-
-rule prep_hipp_coords_for_meshing:
-    input:
-        coords=lambda wildcards: bids(
-            root=work,
-            datatype="coords",
-            dir="IO",
-            label="{label}",
-            suffix="coords.nii.gz",
-            desc=desc_io[wildcards.label],
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
-        labelmap=get_labels_for_laplace,
-    params:
-        gm_labels=lambda wildcards: config["laplace_labels"]["IO"]["gm"],
-        gm_noDG_labels=lambda wildcards: config["laplace_labels"]["IO"]["gm_noDG"],
-        src_labels=lambda wildcards: config["laplace_labels"]["IO"]["src"],
-        sink_labels=lambda wildcards: config["laplace_labels"]["IO"]["sink"],
-    output:
-        coords=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                suffix="coords.nii.gz",
-                space="corobl",
-                desc="formesh",
-                hemi="{hemi}",
-                label="{label,hipp}",
-                **inputs.subj_wildcards
-            )
-        ),
-        mask=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                suffix="mask.nii.gz",
-                space="corobl",
-                desc="formesh",
-                hemi="{hemi}",
-                label="{label,hipp}",
-                **inputs.subj_wildcards
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    script:
-        "../scripts/prep_hipp_coords_for_meshing.py"
-
-
-rule prep_dentate_coords_for_meshing:
-    input:
-        coords=lambda wildcards: bids(
-            root=work,
-            datatype="coords",
-            dir="IO",
-            label="{label}",
-            suffix="coords.nii.gz",
-            desc=desc_io[wildcards.label],
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
-        labelmap=get_labels_for_laplace,
-    params:
-        gm_labels=lambda wildcards: config["laplace_labels"]["IO"]["gm"],
-    output:
-        coords=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                suffix="coords.nii.gz",
-                space="corobl",
-                desc="formesh",
-                hemi="{hemi}",
-                label="{label,dentate}",
-                **inputs.subj_wildcards
-            )
-        ),
-        mask=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                suffix="mask.nii.gz",
-                space="corobl",
-                desc="formesh",
-                hemi="{hemi}",
-                label="{label,dentate}",
-                **inputs.subj_wildcards
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    script:
-        "../scripts/prep_dentate_coords_for_meshing.py"
 
 
 rule get_label_mask:
@@ -145,12 +65,90 @@ rule get_label_mask:
     container:
         config["singularity"]["autotop"]
     shell:
-        "c3d {input} -retain-labels {params} -binarize {output}"
+        "c3d -background -1 {input} -retain-labels {params} -binarize {output}"
+
+
+rule get_sink_mask:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in sink_labels[wildcards.label]]
+        ),
+    output:
+        mask=temp(
+            bids(
+                root=work,
+                datatype="anat",
+                suffix="mask.nii.gz",
+                space="corobl",
+                desc="sink",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
+rule get_src_mask:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in src_labels[wildcards.label]]
+        ),
+    output:
+        mask=temp(
+            bids(
+                root=work,
+                datatype="anat",
+                suffix="mask.nii.gz",
+                space="corobl",
+                desc="src",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
+rule get_nan_mask:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in nan_labels[wildcards.label]]
+        ),
+    output:
+        mask=temp(
+            bids(
+                root=work,
+                datatype="anat",
+                suffix="mask.nii.gz",
+                space="corobl",
+                desc="nan",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
 
 rule gen_native_mesh:
     input:
-        nii=lambda wildcards: bids(
+        coords=lambda wildcards: bids(
             root=work,
             datatype="coords",
             dir="IO",
@@ -161,12 +159,32 @@ rule gen_native_mesh:
             hemi="{hemi}",
             **inputs.subj_wildcards
         ),
-        mask=bids(
+        nan_mask=bids(
             root=work,
             datatype="anat",
             suffix="mask.nii.gz",
             space="corobl",
-            desc="GM",
+            desc="nan",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        sink_mask=bids(
+            root=work,
+            datatype="anat",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="sink",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        src_mask=bids(
+            root=work,
+            datatype="anat",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="src",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
@@ -283,14 +301,15 @@ rule warp_native_mesh_to_unfold:
 
 rule compute_halfthick_mask:
     input:
-        coords=bids(
+        coords=lambda wildcards: bids(
             root=work,
-            datatype="surf",
-            suffix="coords.nii.gz",
-            space="corobl",
-            desc="formesh",
-            hemi="{hemi}",
+            datatype="coords",
+            dir="IO",
             label="{label}",
+            suffix="coords.nii.gz",
+            desc=desc_io[wildcards.label],
+            space="corobl",
+            hemi="{hemi}",
             **inputs.subj_wildcards
         ),
         mask=bids(
