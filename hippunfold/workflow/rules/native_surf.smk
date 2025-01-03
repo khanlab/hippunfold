@@ -5,6 +5,7 @@
 
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
+
 # this is for the mapping from inner to outer
 gm_labels = {
     "hipp": config["laplace_labels"]["IO"]["gm"],
@@ -63,6 +64,7 @@ rule get_label_mask:
         ),
     container:
         config["singularity"]["autotop"]
+    group: 'subj'
     shell:
         "c3d -background -1 {input} -retain-labels {params} -binarize {output}"
 
@@ -89,6 +91,7 @@ rule get_sink_mask:
         ),
     container:
         config["singularity"]["autotop"]
+    group: 'subj'
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -115,6 +118,7 @@ rule get_src_mask:
         ),
     container:
         config["singularity"]["autotop"]
+    group: 'subj'
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -141,6 +145,7 @@ rule get_nan_mask:
         ),
     container:
         config["singularity"]["autotop"]
+    group: 'subj'
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -207,6 +212,7 @@ rule gen_native_mesh:
     group:
         "subj"
     # container (will need pyvista dependency)
+    container: None
     script:
         "../scripts/gen_isosurface.py"
 
@@ -1139,7 +1145,9 @@ rule convert_unfoldreg_warp_from_itk_to_world:
             **inputs.subj_wildcards,
         ),
     group:
-        "subj"
+        "subj" 
+    container:
+        config["singularity"]["autotop"]
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -1256,8 +1264,7 @@ rule resample_atlas_subfields_to_std_density:
             **inputs.subj_wildcards
         ),
     container:
-        None
-    #        config["singularity"]["autotop"]
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
@@ -1295,8 +1302,7 @@ rule resample_native_surf_to_std_density:
             **inputs.subj_wildcards,
         ),
     container:
-        None
-    #        config["singularity"]["autotop"]
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
@@ -1334,8 +1340,7 @@ rule resample_native_metric_to_std_density:
             **inputs.subj_wildcards,
         ),
     container:
-        None
-    #        config["singularity"]["autotop"]
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
@@ -1365,6 +1370,7 @@ rule cp_surf_to_root:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    group: 'subj'
     shell:
         "cp {input} {output}"
 
@@ -1393,8 +1399,7 @@ rule resample_atlas_subfields_to_native_surf:
             **inputs.subj_wildcards
         ),
     container:
-        None
-    #        config["singularity"]["autotop"]
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:

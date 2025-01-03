@@ -338,7 +338,7 @@ outlier_opts:
 #--- workflow specific configuration -- 
 
 singularity:
-  autotop: 'docker://khanlab/hippunfold_deps:v0.5.1'
+  autotop: 'docker://khanlab/hippunfold_deps:workbench-2.0.1'
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
