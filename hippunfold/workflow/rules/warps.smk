@@ -369,17 +369,6 @@ rule create_warps_hipp:
     resources:
         mem_mb=16000,
     output:
-        warp_unfold2native=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            label="hipp",
-            suffix="xfm.nii.gz",
-            hemi="{hemi}",
-            from_="unfold",
-            to="corobl",
-            mode="surface"
-        ),
         warp_native2unfold=bids(
             root=work,
             datatype="warps",
@@ -400,17 +389,6 @@ rule create_warps_hipp:
             hemi="{hemi}",
             from_="unfold",
             to="corobl",
-            mode="image"
-        ),
-        warpitk_native2unfold=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            label="hipp",
-            suffix="xfm.nii.gz",
-            hemi="{hemi}",
-            from_="corobl",
-            to="unfold",
             mode="image"
         ),
     group:
@@ -494,17 +472,6 @@ rule create_warps_dentate:
     resources:
         mem_mb=16000,
     output:
-        warp_unfold2native=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            label="dentate",
-            suffix="xfm.nii.gz",
-            hemi="{hemi}",
-            from_="unfold",
-            to="corobl",
-            mode="surface"
-        ),
         warp_native2unfold=bids(
             root=work,
             datatype="warps",
@@ -525,17 +492,6 @@ rule create_warps_dentate:
             hemi="{hemi}",
             from_="unfold",
             to="corobl",
-            mode="image"
-        ),
-        warpitk_native2unfold=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            label="dentate",
-            suffix="xfm.nii.gz",
-            hemi="{hemi}",
-            from_="corobl",
-            to="unfold",
             mode="image"
         ),
     group:
