@@ -81,6 +81,25 @@ def get_final_spec():
             allow_missing=True,
         )
     )
+    specs.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="surf",
+                space="{space}",
+                hemi="{hemi}",
+                label="{autotop}",
+                suffix="surfaces.spec",
+                **inputs.subj_wildcards,
+            ),
+            space="corobl",
+            hemi=config["hemi"],
+            autotop=config["autotop_labels"],
+            surfname=config["surf_types"]["hipp"],
+            allow_missing=True,
+        )
+    )
+
     return specs
 
 
