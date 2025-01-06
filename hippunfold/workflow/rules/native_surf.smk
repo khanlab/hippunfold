@@ -1350,35 +1350,6 @@ rule resample_native_metric_to_std_density:
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
 
-"""
-rule cp_surf_to_root:
-    input:
-        native_resampled=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        native_resampled=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name,midthickness}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    group: 'subj'
-    shell:
-        "cp {input} {output}"
-"""
-
 
 # --- resampling from atlasnative to native vertices
 rule resample_atlas_subfields_to_native_surf:
@@ -1722,31 +1693,3 @@ rule create_spec_file_dentate_native:
         "subj"
     shell:
         "{params.cmds}"
-
-
-"""
-rule cp_native_surf_to_root:
-    input:
-        native=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        native=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    group: 'subj'
-    shell:
-        "cp {input} {output}"
-"""
