@@ -173,12 +173,7 @@ parse_args:
 
   --atlas:
     choices:
-      - 'bigbrain'
-      - 'magdeburg'
-      - 'freesurfer'
       - 'multihist7'
-      - 'macaque'
-      - 'mouse'
       - 'bbhist'
     default: 'multihist7'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
