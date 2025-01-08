@@ -179,11 +179,12 @@ parse_args:
       - 'multihist7'
       - 'macaque'
       - 'mouse'
+      - 'bbhist'
     default: 'multihist7'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
-    help: 'Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. NOTE: only multihist7 has these features currently, so this unfolded_reg is automatically skipped if a different atlas is chosen. (default: %(default)s)'
+    help: 'Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. NOTE: unfolded_reg is automatically skipped if an atlas without metrics is chosen. (default: %(default)s)'
     default: False
     action: store_true
 
@@ -331,6 +332,7 @@ outlier_opts:
     0p5mm: 7
     1mm: 3
     2mm: 1
+    default: 15
   vertexOutlierThreshold: 3
 
 
@@ -453,6 +455,20 @@ atlas_files:
      - gyrification
      - curvature
 
+  bbhist:
+    lut: sub-bbhist_labellist.txt
+    surf_gii: sub-bbhist_hemi-{hemi}_space-unfold_label-{label}_{surf_type}.surf.gii
+    metric_gii: sub-bbhist_hemi-{hemi}_space-corobl_label-{label}_{metric}.shape.gii
+    label_gii: sub-bbhist_hemi-{hemi}_space-corobl_label-{label}_desc-manual_subfields.label.gii
+    label_wildcards:
+     - hipp
+    hemi_wildcards:
+     - L
+     - R
+    metric_wildcards:
+     - thickness
+     - gyrification
+     - curvature
 
   bigbrain:
     label_nii: sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
@@ -483,14 +499,6 @@ tissue_atlas_mapping:
     dg: 8
     srlm: 2
     cyst: 7
-  bigbrain:
-    dg: 6
-    srlm: 7
-    cyst: 8
-  multihist7:
-    dg: 6
-    srlm: 7
-    cyst: 8
   magdeburg:
     dg: 3
     srlm: 9
@@ -499,14 +507,11 @@ tissue_atlas_mapping:
     dg: 209
     srlm: 227
     cyst: 228
-  mouse: 
+  default: #this is used for any other atlases
     dg: 6
     srlm: 7
     cyst: 8
-  macaque: 
-    dg: 6
-    srlm: 7
-    cyst: 8
+   
 
 rigid_reg_template: False
 no_reg_template: False
@@ -534,6 +539,7 @@ resource_urls:
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
   atlas:
+    bbhist: 'fake.url'
     multihist7: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
     magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='

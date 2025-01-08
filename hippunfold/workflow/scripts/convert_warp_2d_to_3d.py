@@ -23,6 +23,9 @@ xfm3d_vol = np.zeros((Nx, Ny, Nz, 1, 3), dtype=xfm2d_vol.dtype)
 
 # Insert the original array, which replicates in each zslice. Leaves the z-displacement untouched (as zero)
 xfm3d_vol[..., :2] = xfm2d_vol
+xfm3d_vol[:, :, :, :, 1] = -xfm3d_vol[
+    :, :, :, :, 1
+]  # apply flip to y (seems to be needed for some reason - not sure why)..
 
 # Save as nifti
 nib.Nifti1Image(

@@ -34,9 +34,13 @@ desc_io = {
     "dentate": "laplace",
 }
 
+unfoldreg_method = "greedy"  # choices: ["greedy","SyN"]
+
+unfoldreg_padding = "64x64x0vox"
+
 
 ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
-ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii  #temporary until we change from subfields.nii to desc-subfields_dseg.nii for unfold space   
+ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
 
 
 # --- isosurface generation ---
@@ -215,9 +219,8 @@ rule gen_native_mesh:
         ),
     group:
         "subj"
-    # container (will need pyvista dependency)
     container:
-        None
+        config["singularity"]["autotop"]
     script:
         "../scripts/gen_isosurface.py"
 
@@ -240,7 +243,7 @@ rule update_native_mesh_structure:
         surface_type="ANATOMICAL",
     output:
         surf_gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             suffix="{surfname,midthickness}.surf.gii",
             space="corobl",
@@ -258,6 +261,7 @@ rule update_native_mesh_structure:
 
 
 rule smooth_surface:
+    """ slight smoothing of surface to improve curvature estimation """
     input:
         surf_gii=bids(
             root=root,
@@ -290,7 +294,7 @@ rule smooth_surface:
         "wb_command -surface-smoothing {input} {params.smoothing_strength} {params.smoothing_iterations} {output}"
 
 
-# --- creating unfold surface from native anatomical
+# --- creating unfold surface from native anatomical, including post-processing
 
 
 rule warp_native_mesh_to_unfold:
@@ -321,10 +325,10 @@ rule warp_native_mesh_to_unfold:
         surface_type="FLAT",
     output:
         surf_gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="unfold",
+            space="unfoldraw",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
@@ -337,6 +341,150 @@ rule warp_native_mesh_to_unfold:
         "wb_command -surface-apply-warpfield {input.surf_gii} {input.warp_native2unfold} {output.surf_gii} && "
         "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
+
+
+def get_unfold_z_level(wildcards):
+    extent = float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
+    return surf_thresholds[wildcards.surfname] * extent
+
+
+rule squash_unfold_mesh_to_plane:
+    """ this new rule squashes the mesh to be a perfect z-plane, so that any laminar 
+    irregularities in the unfold surfaces (ie bumpiness) don't affect the resulting 
+    voxelized representations that will be used for 2D registration"""
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldraw",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    params:
+        z_level=get_unfold_z_level,
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    script:
+        "../scripts/squash_unfold_mesh_to_plane.py"
+
+
+# ---currently unused post-processing rules here :
+rule correct_bad_vertices:
+    input:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldraw",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    params:
+        dist=lambda wildcards: config["outlier_opts"]["outlierSmoothDist"][
+            wildcards.density
+        ]
+        if "density" in wildcards
+        else config["outlier_opts"]["outlierSmoothDist"]["default"],
+        threshold=config["outlier_opts"]["vertexOutlierThreshold"],
+    output:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldfillbad",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    script:
+        "../scripts/fillbadvertices.py"
+
+
+rule replace_outlier_vertices:
+    """ WIP alternative implementation to fillbadvertices """
+    input:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldraw",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    output:
+        gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldreplaceoutliers",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    script:
+        "../scripts/replace_outlier_vertices.py"
+
+
+rule heavy_smooth_unfold_surf:
+    """ this irons out the surface to result in more even
+        vertex spacing. the resulting shape will be more 
+        individual (e.g. the surface area in unfolded space 
+        would be similar to native) -- TODO: maybe this is a good 
+        way to determine smoothing strenghth and iterations, e.g. 
+        use the surface area and vertex spacing as objectives.."""
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldsquash",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    params:
+        strength=0.1,
+        iterations=1000,
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldsmoothed",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-smoothing {input} {params.strength} {params.iterations} {output}"
 
 
 # --- creating inner/outer surfaces from native anatomical (using 3d label deformable registration)
@@ -556,7 +704,7 @@ rule warp_midthickness_to_inout:
         surface_type="ANATOMICAL",
     output:
         surf_gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             suffix="{surfname,inner|outer}.surf.gii",
             space="corobl",
@@ -649,7 +797,7 @@ rule calculate_surface_area:
         "wb_command -surface-vertex-areas {input} {output}"
 
 
-rule calculate_gyrification:
+rule calculate_legacy_gyrification:
     """new gyrification is ratio of nativearea to unfoldarea (e.g. surface scaling or distortion factor.
     this should be proportional by a constant, to the earlier gyrification on 32k surfaces."""
     input:
@@ -690,7 +838,7 @@ rule calculate_gyrification:
         " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea}"
 
 
-rule calculate_curvature_from_surface:
+rule calculate_curvature:
     input:
         gii=bids(
             root=work,
@@ -720,7 +868,7 @@ rule calculate_curvature_from_surface:
         "wb_command -surface-curvature {input} -mean {output}"
 
 
-rule calculate_thickness_from_surface:
+rule calculate_thickness:
     input:
         inner=bids(
             root=root,
@@ -780,6 +928,8 @@ rule pad_unfold_ref:
             suffix="refvol.nii.gz",
             **inputs.subj_wildcards
         ),
+    params:
+        padding=f"-pad {unfoldreg_padding} {unfoldreg_padding}",
     output:
         ref_nii=bids(
             root=work,
@@ -796,8 +946,7 @@ rule pad_unfold_ref:
     group:
         "subj"
     shell:
-        #"c3d {input.ref_nii} -scale 0 -shift 1 -pad 16x16x0vox 16x16x0vox 0 -o {output.ref_nii}"
-        "c3d {input.ref_nii} -scale 0 -shift 1 -pad 64x64x0vox 64x64x0vox 0 -o {output.ref_nii}"
+        "c3d {input.ref_nii} -scale 0 -shift 1 {params.padding} 0 -o {output.ref_nii}"
 
 
 rule extract_unfold_ref_slice:
@@ -902,12 +1051,6 @@ rule native_metric_to_unfold_nii:
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
 
 
-# TODO - if we add density wildcard for inputs here, then it will make use of the template unfold standard densities,
-# if no density wildcard, then will use the native mesh
-#
-# native metric, resampled to a standard density
-
-
 rule atlas_metric_to_unfold_nii:
     """converts metric .gii files to .nii for use in ANTs. 
         This rule is for the surface template"""
@@ -994,9 +1137,16 @@ def get_moving_images_unfoldreg(wildcards):
     )
 
 
-rule unfoldreg:
+rule unfoldreg_antsquick:
     """performs 2D registration in unfolded space as in [reference paper]
-    this is done in a shadow directory to get rid of the tmp files generated by ants."""
+    this is done in a shadow directory to get rid of the tmp files generated by ants.
+
+    Note: fixed and moving are swapped as compared to v1 unfoldreg.
+
+    TODO: this currently uses NMI as a metric, which doesn't work very well for
+        deformable registraiton (won't warp very much).. should also use the 
+        antsRegistration tool directly instead of the simple wrapper to provide
+        more flexibility with specifying parameters. """
     input:
         fixed_images=get_fixed_images_unfoldreg,
         moving_images=get_moving_images_unfoldreg,
@@ -1061,8 +1211,62 @@ rule unfoldreg:
         mem_mb=16000,
         time=10,
     shell:
-        "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args}  &> {log} && "
+        "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args} &> {log} && "
         "{params.cmd_copy_warps}"
+
+
+rule unfoldreg_greedy:
+    """performs 2D registration in unfolded space using greedy.
+    Greedy produces the forward map (can optionally produce inverse maps)
+    so is not symmetric, but can usually produce more precise warps
+    if symmetry isn't desired"""
+    input:
+        fixed_images=get_fixed_images_unfoldreg,
+        moving_images=get_moving_images_unfoldreg,
+    params:
+        in_images=lambda wildcards, input: " ".join(
+            [
+                f"-i {fix} {mov}"
+                for fix, mov in zip(input.fixed_images, input.moving_images)
+            ]
+        ),
+        metric="-m NCC 4x4x4",  #4x4x4 implies a 9x9x9 window (ie 4 on either side)
+        regularization="-s 1.732vox 0.707vox",  #gradient sigma, warp sigma (defaults: 1.732vox, 0.707vox)
+    output:
+        warp=bids(
+            root=work,
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc="greedy",
+            from_="{atlas}",
+            to="native",
+            space="unfold",
+            type_="itk2d",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    log:
+        bids(
+            root="logs",
+            suffix="unfoldreg_greedy.txt",
+            atlas="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    shadow:
+        "minimal"
+    threads: 16
+    resources:
+        mem_mb=16000,
+        time=10,
+    shell:
+        "greedy -d 2 {params.metric} {params.regularization} {params.in_images} -o {output.warp}"
 
 
 rule extend_warp_2d_to_3d:
@@ -1186,7 +1390,6 @@ def get_unfold_ref(wildcards):
 
 
 rule warp_unfold_native_to_unfoldreg:
-    """ TODO: verify that this transformation is being correctly applied! """
     input:
         surf_gii=bids(
             root=root,
@@ -1201,7 +1404,7 @@ rule warp_unfold_native_to_unfoldreg:
             root=work,
             suffix="xfm.nii.gz",
             datatype="warps",
-            desc="SyN",
+            desc=unfoldreg_method,
             from_="native",
             to=config["atlas"],
             space="unfold",
@@ -1216,7 +1419,7 @@ rule warp_unfold_native_to_unfoldreg:
         surface_type="FLAT",
     output:
         surf_gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
             space="unfoldreg",
@@ -1234,8 +1437,7 @@ rule warp_unfold_native_to_unfoldreg:
         " -surface-secondary-type {params.secondary_type}"
 
 
-# --- resampling using the unfoldreg surface to standard densities (0p5mm, 1mm, 2mm, unfoldiso)
-#
+# --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
 rule resample_atlas_subfields_to_std_density:
     """ resamples subfields from a custom atlas mesh (e.g. from an atlas anatomical/native mesh
     warped to unfold space) to a standard density"""
@@ -1278,7 +1480,7 @@ rule resample_atlas_subfields_to_std_density:
 rule resample_native_surf_to_std_density:
     input:
         native=bids(
-            root=root,
+            root=work,
             datatype="surf",
             suffix="{surf_name}.surf.gii",
             space="{space}",
@@ -1296,7 +1498,7 @@ rule resample_native_surf_to_std_density:
         native_unfold=get_unfold_ref,
     output:
         native_resampled=bids(
-            root=root,
+            root=work,
             datatype="surf",
             suffix="{surf_name,midthickness}.surf.gii",
             space="{space,unfoldreg|corobl}",
@@ -1351,6 +1553,35 @@ rule resample_native_metric_to_std_density:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
 
 
+rule cp_surf_to_root:
+    input:
+        native_resampled=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surf_name}.surf.gii",
+            space="{space}",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        native_resampled=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surf_name,midthickness}.surf.gii",
+            space="{space}",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "subj"
+    shell:
+        "cp {input} {output}"
+
+
 # --- resampling from atlasnative to native vertices
 rule resample_atlas_subfields_to_native_surf:
     input:
@@ -1388,8 +1619,6 @@ rule atlas_label_to_unfold_nii:
         subfield labels in unfold space for painting the native volumetric dseg. Ie this uses the unfold volumetric (or effectively unfoldiso)
         to perform mapping from atlas to subject. better approach would be to adjust the downstream  volumetric dseg function to 
         make use of gifti labels instead.. 
-        ALSO - this has issues (with ribbon mapping) since the most inner and outer coords are missing.. 
-             -- maybe nearest-vertex works better? 
 """
     input:
         atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
@@ -1544,8 +1773,9 @@ rule create_dlabel_cifti_subfields_native:
         "{params.cmd}"
 
 
-# --- create spec file (adapted from rule in gifti.smk
-#
+# --- create spec file (adapted from rule in gifti.smk)
+
+
 rule create_spec_file_hipp_native:
     input:
         metrics=lambda wildcards: expand(
@@ -1693,3 +1923,30 @@ rule create_spec_file_dentate_native:
         "subj"
     shell:
         "{params.cmds}"
+
+
+rule cp_native_surf_to_root:
+    input:
+        native=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surf_name}.surf.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        native=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surf_name}.surf.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "subj"
+    shell:
+        "cp {input} {output}"
