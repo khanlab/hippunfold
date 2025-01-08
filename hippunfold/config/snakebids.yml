@@ -179,7 +179,7 @@ parse_args:
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
-    help: 'Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. NOTE: unfolded_reg is automatically skipped if an atlas without metrics is chosen. (default: %(default)s)'
+    help: "Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. (default: %(default)s)"
     default: False
     action: store_true
 
