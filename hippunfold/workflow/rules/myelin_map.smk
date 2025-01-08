@@ -83,9 +83,8 @@ rule sample_myelin_map_surf:
             **inputs.subj_wildcards
         ),
         mid=bids(
-            root=root,
+            root=work,
             datatype="surf",
-            den="{density}",
             suffix="midthickness.surf.gii",
             space="corobl",
             hemi="{hemi}",
@@ -93,9 +92,8 @@ rule sample_myelin_map_surf:
             **inputs.subj_wildcards
         ),
         inner=bids(
-            root=root,
+            root=work,
             datatype="surf",
-            den="{density}",
             suffix="inner.surf.gii",
             space="corobl",
             hemi="{hemi}",
@@ -103,9 +101,8 @@ rule sample_myelin_map_surf:
             **inputs.subj_wildcards
         ),
         outer=bids(
-            root=root,
+            root=work,
             datatype="surf",
-            den="{density}",
             suffix="outer.surf.gii",
             space="corobl",
             hemi="{hemi}",
@@ -126,9 +123,8 @@ rule sample_myelin_map_surf:
         metric=bids(
             root=root,
             datatype="surf",
-            den="{density}",
             suffix="myelin.shape.gii",
-            space="{space}",
+            space="corobl",
             hemi="{hemi}",
             label="{autotop}",
             **inputs.subj_wildcards
