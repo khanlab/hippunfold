@@ -456,7 +456,7 @@ atlas_files:
      - curvature
 
   bbhist:
-    lut: sub-bbhist_labellist.txt
+    lut: desc-subfields_dseg.tsv
     surf_gii: sub-bbhist_hemi-{hemi}_space-unfold_label-{label}_{surf_type}.surf.gii
     metric_gii: sub-bbhist_hemi-{hemi}_space-corobl_label-{label}_{metric}.shape.gii
     label_gii: sub-bbhist_hemi-{hemi}_space-corobl_label-{label}_desc-manual_subfields.label.gii
@@ -522,8 +522,7 @@ inject_template: upenn
 
 template: CITI168
 
-atlas: 
-  - multihist7
+atlas: multihist7
 
 
 
@@ -539,8 +538,8 @@ resource_urls:
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
   atlas:
-    bbhist: 'www.dropbox.com/scl/fi/aq59eggbrt719fs33q9t4/atlas-bbhist_20250108.zip?rlkey=vkf5jybhmummhboi8juc2zg2e&st=8y09t5zz&dl=0'
-    multihist7: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
+    bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
+    multihist7: 'www.dropbox.com/scl/fi/g07u7la7v1kwfgsty6ujc/atlas-multihist7_20250108.zip?rlkey=bi7wbdsm93upgnn3bmlv4f1hx&st=5iv33isc&dl=0'
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
     magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
     freesurfer: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
