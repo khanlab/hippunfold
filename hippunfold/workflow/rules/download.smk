@@ -13,7 +13,7 @@ rule download_extract_atlas:
     shadow:
         "minimal"
     shell:
-        "wget https://{params.url} -O temp.zip && "
+        "wget 'https://{params.url}' -O temp.zip && "
         " unzip -d {output.unzip_dir} temp.zip"
 
 
@@ -27,7 +27,7 @@ rule download_extract_template:
     shadow:
         "minimal"
     shell:
-        "wget https://{params.url} -O temp.zip && "
+        "wget 'https://{params.url}' -O temp.zip && "
         " unzip -d {output.unzip_dir} temp.zip"
 
 
