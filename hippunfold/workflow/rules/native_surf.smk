@@ -921,7 +921,7 @@ rule pad_unfold_ref:
         for this)."""
     input:
         ref_nii=bids(
-            root=root,
+            root=work,
             space="unfold",
             label="{label}",
             datatype="warps",
@@ -1360,33 +1360,29 @@ rule convert_unfoldreg_warp_from_itk_to_world:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
 
-def get_unfold_ref(wildcards):
-    """function to return either unfoldreg or unfold ref mesh, depending on whether
-    unfoldreg can be performed (based on atlas wildcards)"""
-
+def get_unfold_ref_name(wildcards):
     if (
         wildcards.label in config["atlas_files"][config["atlas"]]["label_wildcards"]
         and config["no_unfolded_reg"] == False
     ):
-        return bids(
-            root=root,
-            datatype="surf",
-            suffix="midthickness.surf.gii",
-            space="unfoldreg",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        )
+        return "unfoldreg"
     else:
-        return bids(
-            root=root,
-            datatype="surf",
-            suffix="midthickness.surf.gii",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        )
+        return "unfold"
+
+
+def get_unfold_ref(wildcards):
+    """function to return either unfoldreg or unfold ref mesh, depending on whether
+    unfoldreg can be performed (based on atlas wildcards)"""
+
+    return bids(
+        root=root,
+        datatype="surf",
+        suffix="midthickness.surf.gii",
+        space=get_unfold_ref_name(wildcards),
+        hemi="{hemi}",
+        label="{label}",
+        **inputs.subj_wildcards
+    )
 
 
 rule warp_unfold_native_to_unfoldreg:
@@ -1623,7 +1619,7 @@ rule atlas_label_to_unfold_nii:
     input:
         atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         ref_nii=bids(
-            root=root,
+            root=work,
             space="unfold",
             label="{label}",
             datatype="warps",
@@ -1805,7 +1801,7 @@ rule create_spec_file_hipp_native:
             atlas=config["atlas"],
             allow_missing=True,
         ),
-        surfs=expand(
+        surfs=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1816,7 +1812,7 @@ rule create_spec_file_hipp_native:
                 **inputs.subj_wildcards
             ),
             surfname=["midthickness"],
-            space=["{space}", "unfold", "unfoldreg"],
+            space=["{space}", get_unfold_ref_name(wildcards)],
             allow_missing=True,
         ),
         cifti_metrics=lambda wildcards: inputs[config["modality"]].expand(
@@ -1879,7 +1875,7 @@ rule create_spec_file_dentate_native:
             metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
         ),
-        surfs=expand(
+        surfs=lambda wildcards: expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -1890,7 +1886,7 @@ rule create_spec_file_dentate_native:
                 **inputs.subj_wildcards
             ),
             surfname=["midthickness"],
-            space=["{space}", "unfold", "unfoldreg"],
+            space=["{space}", get_unfold_ref_name(wildcards)],
             allow_missing=True,
         ),
         cifti_metrics=lambda wildcards: inputs[config["modality"]].expand(
@@ -1923,6 +1919,72 @@ rule create_spec_file_dentate_native:
         "subj"
     shell:
         "{params.cmds}"
+
+
+rule merge_lr_spec_file:
+    input:
+        spec_files=expand(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="surfaces.spec",
+                hemi="{hemi}",
+                space="{space}",
+                label="{autotop}",
+                **inputs.subj_wildcards
+            ),
+            hemi=config["hemi"],
+            allow_missing=True,
+        ),
+    params:
+        cmd=get_cmd_merge_spec,
+    output:
+        spec_file=bids(
+            root=root,
+            datatype="surf",
+            space="{space}",
+            suffix="surfaces.spec",
+            label="{autotop}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "{params.cmd}"
+
+
+rule merge_hipp_dentate_spec_file:
+    input:
+        spec_files=expand(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="surfaces.spec",
+                space="{space}",
+                label="{autotop}",
+                **inputs.subj_wildcards
+            ),
+            autotop=config["autotop_labels"],
+            allow_missing=True,
+        ),
+    params:
+        cmd=get_cmd_merge_spec,
+    output:
+        spec_file=bids(
+            root=root,
+            datatype="surf",
+            space="{space}",
+            suffix="surfaces.spec",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "{params.cmd}"
 
 
 rule cp_native_surf_to_root:
