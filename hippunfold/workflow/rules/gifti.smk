@@ -34,6 +34,8 @@ rule cp_template_to_unfold:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -73,6 +75,8 @@ rule calc_unfold_template_coords:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     shadow:
         "minimal"  #this is required to use the temporary files defined as params
     group:
@@ -138,6 +142,8 @@ rule constrain_surf_to_bbox:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env1.yaml"
     script:
         "../scripts/constrain_surf_to_bbox.py"
 
@@ -190,6 +196,8 @@ rule warp_gii_unfold2corobl1:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -234,6 +242,8 @@ rule correct_bad_vertices1:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env1.yaml"
     script:
         "../scripts/fillbadvertices.py"
 
@@ -266,6 +276,8 @@ rule calculate_surface_area1:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -319,6 +331,8 @@ rule calculate_gyrification1:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -354,6 +368,8 @@ rule calculate_curvature_from_surface1:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -390,6 +406,8 @@ rule normalize_curvature1:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env1.yaml"
     script:
         "../scripts/normalize_tanh.py"
 
@@ -432,6 +450,8 @@ rule calculate_thickness_from_surface1:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -486,6 +506,8 @@ rule metric_to_nii:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -568,6 +590,8 @@ rule unfolded_registration:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     log:
@@ -640,6 +664,8 @@ rule warp_gii_unfoldreg:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env1.yaml"
     script:
         "../scripts/warp_flatsurf.py"
 
@@ -743,6 +769,8 @@ rule warp_gii_unfold2corobl2:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -785,6 +813,8 @@ rule correct_bad_vertices2:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env1.yaml"
     script:
         "../scripts/fillbadvertices.py"
 
@@ -857,6 +887,8 @@ rule affine_gii_to_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -889,6 +921,8 @@ rule calculate_surface_area2:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -939,6 +973,8 @@ rule calculate_gyrification2:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -972,6 +1008,8 @@ rule calculate_curvature_from_surface2:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -1006,6 +1044,8 @@ rule normalize_curvature2:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env1.yaml"
     script:
         "../scripts/normalize_tanh.py"
 
@@ -1045,6 +1085,8 @@ rule calculate_thickness_from_surface2:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -1092,6 +1134,8 @@ rule resample_atlas_to_refvol:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     shell:
@@ -1138,6 +1182,8 @@ rule nii_to_label_gii:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     shadow:
         "minimal"
     shell:
@@ -1203,6 +1249,8 @@ rule create_dscalar_metric_cifti:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -1269,6 +1317,8 @@ rule create_dlabel_cifti_subfields:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -1413,6 +1463,8 @@ rule create_spec_file_hipp:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -1478,6 +1530,8 @@ rule create_spec_file_dentate:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:
@@ -1512,6 +1566,8 @@ rule merge_lr_spec_file:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env3.yaml"
     group:
         "subj"
     shell:

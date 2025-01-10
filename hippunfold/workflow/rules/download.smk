@@ -81,6 +81,8 @@ rule import_template_dseg:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -120,6 +122,8 @@ rule import_template_coords:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_coords}"
 
@@ -158,5 +162,7 @@ rule import_template_anat:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_anat}"

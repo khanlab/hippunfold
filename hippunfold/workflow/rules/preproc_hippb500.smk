@@ -23,6 +23,8 @@ rule resample_hippdwi_to_template:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     group:
         "subj"
     shell:

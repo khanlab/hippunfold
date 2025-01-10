@@ -55,6 +55,8 @@ rule template_reg:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     threads: 8
     shell:
         "greedy -threads {threads} {params.general_opts} "
@@ -109,6 +111,8 @@ rule warp_template_dseg:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"
@@ -166,6 +170,8 @@ rule warp_template_coords:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.ref} -rm {input.template_coords} {output.init_coords}  -r {input.warp}"
@@ -222,6 +228,8 @@ rule warp_template_anat:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} -rf {input.ref} -rm {params.template_anat} {output.warped}  -r  {input.warp} {params.xfm_corobl}"

@@ -240,6 +240,8 @@ rule qc_nnunet_f3d:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env6.yaml"
     log:
         bids(
             root="logs",
@@ -293,5 +295,7 @@ rule qc_nnunet_dice:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env1.yaml"
     script:
         "../scripts/dice.py"

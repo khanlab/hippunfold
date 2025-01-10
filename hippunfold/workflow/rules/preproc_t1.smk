@@ -52,6 +52,8 @@ else:
         threads: 8
         container:
             config["singularity"]["autotop"]
+        conda:
+            "../envs/env4.yaml"
         group:
             "subj"
         shell:
@@ -97,6 +99,8 @@ rule warp_t1_to_corobl_crop:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     shell:

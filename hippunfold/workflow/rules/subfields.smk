@@ -36,6 +36,8 @@ rule resample_unfoldreg_subfields:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     shadow:
         "minimal"
     group:
@@ -118,6 +120,8 @@ rule label_subfields_from_vol_coords_corobl:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env1.yaml"
     script:
         "../scripts/label_subfields_from_vol_coords.py"
 
@@ -171,6 +175,8 @@ rule combine_tissue_subfield_labels_corobl:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     group:
         "subj"
     shell:
@@ -220,6 +226,8 @@ rule resample_subfields_to_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     shell:
@@ -268,6 +276,8 @@ rule resample_postproc_to_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     shell:
@@ -316,6 +326,8 @@ rule resample_unet_to_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     shell:
@@ -359,6 +371,8 @@ rule resample_subfields_to_unfold:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     shell:

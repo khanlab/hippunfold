@@ -21,6 +21,8 @@ rule import_manualseg_to_corobl:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env4.yaml"
     group:
         "subj"
     shell:

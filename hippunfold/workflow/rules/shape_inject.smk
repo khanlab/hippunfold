@@ -60,6 +60,8 @@ rule prep_segs_for_greedy:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
@@ -155,6 +157,8 @@ rule template_shape_reg:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     threads: 8
     log:
         bids(
@@ -227,6 +231,8 @@ rule template_shape_inject:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
@@ -297,6 +303,8 @@ rule inject_init_laplace_coords:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env5.yaml"
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
@@ -332,5 +340,7 @@ rule reinsert_subject_labels:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env2.yaml"
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -push LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}"
