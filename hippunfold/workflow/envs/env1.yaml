@@ -18,5 +18,5 @@ dependencies:
   - matplotlib=3.4.2
   - pytorch=1.10.0
   - pyvista>=0.44.2
-  - naturalneighbor>=0.2.1
+#  - naturalneighbor>=0.2.1
   - vtk
