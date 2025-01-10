@@ -48,36 +48,11 @@ def get_final_spec():
                 datatype="surf",
                 den="{density}",
                 space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
             density=config["output_density"],
             space=ref_spaces,
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["hipp"],
-            allow_missing=True,
-        )
-    )
-    specs.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                den="{density}",
-                space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
-                suffix="surfaces.spec",
-                **inputs.subj_wildcards,
-            ),
-            density=config["output_density"],
-            space=ref_spaces,
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["dentate"],
             allow_missing=True,
         )
     )
@@ -87,15 +62,10 @@ def get_final_spec():
                 root=root,
                 datatype="surf",
                 space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
             space="corobl",
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["hipp"],
             allow_missing=True,
         )
     )
@@ -306,7 +276,7 @@ if "corobl" in ref_spaces:
         input:
             os.path.join(work, "{pre}_space-corobl_{post}{suffix}.{ext}"),
         output:
-            os.path.join(root, "{pre}_space-corobl_{post}{suffix,coords}.{ext}"),
+            os.path.join(root, "{pre,[^/].+}_space-corobl_{post}{suffix,coords}.{ext}"),
         group:
             "subj"
         shell:
@@ -316,7 +286,9 @@ if "corobl" in ref_spaces:
         input:
             os.path.join(work, "{pre}_{fromto,from|to}-corobl_{post}{suffix}.{ext}"),
         output:
-            os.path.join(root, "{pre}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"),
+            os.path.join(
+                root, "{pre,[^/].+}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"
+            ),
         group:
             "subj"
         shell:
@@ -326,7 +298,7 @@ if "corobl" in ref_spaces:
         input:
             os.path.join(work, "{pre}_desc-subfields_{post}{suffix}.{ext}"),
         output:
-            os.path.join(root, "{pre}_desc-subfields_{post}{suffix,dseg}.{ext}"),
+            os.path.join(root, "{pre,[^/].+}_desc-subfields_{post}{suffix,dseg}.{ext}"),
         group:
             "subj"
         shell:
