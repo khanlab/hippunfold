@@ -238,7 +238,7 @@ rule update_native_mesh_structure:
             **inputs.subj_wildcards
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="ANATOMICAL",
     output:
@@ -320,7 +320,7 @@ rule warp_native_mesh_to_unfold:
             mode="surface"
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
     output:
@@ -699,7 +699,7 @@ rule warp_midthickness_to_inout:
             **inputs.subj_wildcards
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="ANATOMICAL",
     output:
@@ -1414,7 +1414,7 @@ rule warp_unfold_native_to_unfoldreg:
             **inputs.subj_wildcards,
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
     output:
