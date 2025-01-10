@@ -1,9 +1,24 @@
 # lookup tables for structure:
 hemi_to_structure = {"L": "CORTEX_LEFT", "R": "CORTEX_RIGHT"}
+
+
+def get_structure(hemi, label):
+    if label == "hipp":
+        if hemi == "L":
+            return "HIPPOCAMPUS_LEFT"
+        elif hemi == "R":
+            return "HIPPOCAMPUS_RIGHT"
+    elif label == "dentate":
+        if hemi == "L":
+            return "HIPPOCAMPUS_DENTATE_LEFT"
+        elif hemi == "R":
+            return "HIPPOCAMPUS_DENTATE_RIGHT"
+
+
 surf_to_secondary_type = {
     "midthickness": "MIDTHICKNESS",
-    "inner": "PIAL",
-    "outer": "GRAY_WHITE",
+    "inner": "INNER",
+    "outer": "OUTER",
 }
 
 
@@ -18,7 +33,9 @@ rule cp_template_to_unfold:
             "tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii",
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(
+            wildcards.hemi, wildcards.autotop
+        ),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
     output:
@@ -59,7 +76,9 @@ rule calc_unfold_template_coords:
         coord_IO="coord-IO.shape.gii",
         origin=lambda wildcards: config["{autotop}"]["origin"],
         extent=lambda wildcards: config["{autotop}"]["extent"],
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(
+            wildcards.hemi, wildcards.autotop
+        ),
     output:
         coords_gii=bids(
             root=work,
