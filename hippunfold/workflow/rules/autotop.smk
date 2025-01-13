@@ -126,98 +126,152 @@ rule laplace_coords_dentate:
     shell:
         "cp {input} {output}"
 
-
-rule prep_equivolume_coords:
+rule morphclose_dg:
     input:
-        get_labels_for_laplace,
-    params:
-        src_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["src"],
+        dseg_tissue=get_labels_for_laplace,
     output:
-        outerbin=bids(
+        dseg_tissue=bids(
             root=work,
-            datatype="coords",
-            dir="{dir}",
-            desc="all",
-            suffix="mask.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
-        innerbin=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            desc="SRLM",
-            suffix="mask.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
-    log:
-        bids(
-            root="logs",
+            datatype="anat",
             **inputs.subj_wildcards,
-            dir="{dir}",
-            hemi="{hemi}",
-            suffix="binarize.txt"
+            suffix="dseg.nii.gz",
+            desc="closeDG",
+            space="corobl",
+            hemi="{hemi}"
         ),
-    group:
-        "subj"
+    group: 'subj'
     container:
         config["singularity"]["autotop"]
-    script:
-        "../scripts/prep_equivolume_coords.py"
+    shell: 
+        "c3d {input} -as DSEG -retain-labels 8 -binarize -dilate 1 3x3x3vox -erode 1 3x3x3vox -scale 100 -push DSEG -max -replace 100 8 -o {output}"
 
-
-rule equivolume_coords:
+rule prep_dseg_for_laynii_hipp:
     input:
-        outerbin=bids(
+        dseg_tissue=bids(
             root=work,
-            datatype="coords",
-            dir="{dir}",
-            desc="all",
-            suffix="mask.nii.gz",
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="closeDG",
             space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
-        innerbin=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            desc="SRLM",
-            suffix="mask.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
+            hemi="{hemi}"
         ),
     params:
-        script=os.path.join(workflow.basedir, "scripts/equivolume_coords.py"),
+        gm_labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in config["laplace_labels"][wildcards.dir]["gm_noDG"]]
+        ),
+        src_labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in config["laplace_labels"][wildcards.dir]["src"]]
+        ),
+        sink_labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in config["laplace_labels"][wildcards.dir]["sink"]]
+        ),
     output:
-        coords=bids(
+        dseg_rim=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            dir="{dir,IO}",
+            desc="laynii",
+            label="{autotop,hipp}",
+            space="corobl",
+            hemi="{hemi}"
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "c3d -background -1 {input} -as DSEG -retain-labels {params.gm_labels} -binarize -scale 3 -popas GM -push DSEG -retain-labels {params.src_labels} -binarize -scale 2 -popas WM -push DSEG -retain-labels {params.sink_labels} -binarize -scale 1 -popas PIAL -push GM -push WM -add -push PIAL -add -o {output}"
+
+
+rule prep_dseg_for_laynii_dentate:
+    input:
+        dseg_tissue=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="closeDG",
+            space="corobl",
+            hemi="{hemi}"
+        ),
+    params:
+        gm_labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in [8]]
+        ),
+        src_labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in [2,4,7,0] ]
+        ),
+        sink_labels=lambda wildcards: " ".join(
+            [str(lbl) for lbl in [1]]
+        ),
+    output:
+        dseg_rim=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            dir="{dir,IO}",
+            desc="laynii",
+            label="{autotop,dentate}",
+            space="corobl",
+            hemi="{hemi}"
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "c3d -background -1 {input} -as DSEG -retain-labels {params.gm_labels} -binarize -scale 3 -popas GM -push DSEG -retain-labels {params.src_labels} -binarize -scale 2 -popas WM -push DSEG -retain-labels {params.sink_labels} -binarize -scale 1 -popas PIAL -push GM -push WM -add -push PIAL -add -o {output}"
+
+
+
+rule laynii_layers:
+    input:
+        dseg_rim=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            dir="{dir}",
+            desc="laynii",
+            label="{autotop}",
+            space="corobl",
+            hemi="{hemi}"
+        ),
+    output:
+        equivol=bids(
             root=work,
             datatype="coords",
-            dir="{dir}",
-            label="hipp",
+            dir="{dir,IO}",
+            label="{autotop}",
             suffix="coords.nii.gz",
             desc="equivol",
             space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards
         ),
+        equidist=bids(
+            root=work,
+            datatype="coords",
+            dir="{dir,IO}",
+            label="{autotop}",
+            suffix="coords.nii.gz",
+            desc="equidist",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards
+        ),
+    shadow:
+        "minimal"
+    container:
+        config["singularity"]["autotop"] 
     group:
         "subj"
-    resources:
-        time=30,
-    log:
-        bids(
-            root="logs",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            hemi="{hemi}",
-            suffix="equivolume.txt"
-        ),
-    container:
-        config["singularity"]["autotop"]
     shell:
-        "python {params.script} {resources.tmpdir} {input.innerbin} {input.outerbin} {output.coords} &> {log}"
+        "cp {input} dseg.nii.gz && "
+        "LN2_LAYERS  -rim dseg.nii.gz -equivol && "
+        "cp dseg_metric_equidist.nii.gz {output.equidist} && "
+        "cp dseg_metric_equivol.nii.gz {output.equivol}"

@@ -286,31 +286,18 @@ rule create_unfold_coord_map:
 
 
 def get_laminar_coords(wildcards):
-    if "laplace" in config["laminar_coords_method"]:
-        coords_io = bids(
+    
+    return bids(
             root=work,
             datatype="coords",
             dir="IO",
             label="hipp",
             suffix="coords.nii.gz",
-            desc="laplace",
+            desc=config["laminar_coords_method"],
             space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards
         )
-    elif "equivolume" in config["laminar_coords_method"]:
-        coords_io = bids(
-            root=work,
-            datatype="coords",
-            dir="IO",
-            label="hipp",
-            suffix="coords.nii.gz",
-            desc="equivol",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        )
-    return coords_io
 
 
 rule create_warps_hipp:

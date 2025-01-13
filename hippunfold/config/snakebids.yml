@@ -231,10 +231,10 @@ parse_args:
   --laminar_coords_method:
     choices:
       - 'laplace'
-      - 'equivolume'
-    default:
-      - 'equivolume'
-    help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)' 
+      - 'equivol'
+      - 'equidist'
+    default: 'equivol'
+    help: 'Method to use for laminar coordinates. Equivol and equidist are from the laynii LN2_LAYERS tool. (default: %(default)s)' 
 
   --autotop_labels:
     choices:

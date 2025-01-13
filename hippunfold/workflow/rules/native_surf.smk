@@ -30,7 +30,7 @@ nan_labels = {
 }
 
 desc_io = {
-    "hipp": "equivol" if "equivolume" in config["laminar_coords_method"] else "laplace",
+    "hipp": config["laminar_coords_method"],
     "dentate": "laplace",
 }
 

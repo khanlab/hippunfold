@@ -123,11 +123,6 @@ def get_final_subfields():
 
 
 def get_final_coords():
-    if "laplace" in config["laminar_coords_method"]:
-        desc_io = "laplace"
-    elif "equivolume" in config["laminar_coords_method"]:
-        desc_io = "equivol"
-
     coords = []
     # compute all laplace coords by default (incl IO)
     coords.extend(
@@ -144,7 +139,7 @@ def get_final_coords():
                 **inputs.subj_wildcards,
             ),
             desc="laplace",
-            dir=["AP", "PD", "IO"],
+            dir=["AP", "PD"],
             autotop=config["autotop_labels"],
             hemi=config["hemi"],
             space=crop_ref_spaces,
@@ -164,7 +159,7 @@ def get_final_coords():
                 label="hipp",
                 **inputs.subj_wildcards,
             ),
-            desc=[desc_io],
+            desc=config['laminar_coords_method'],
             dir=["IO"],
             hemi=config["hemi"],
             space=crop_ref_spaces,
