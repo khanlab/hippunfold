@@ -5,3 +5,4 @@ channels:
 dependencies:
   - python=3.9
   - convert3d
+  - libitk=5.4.0

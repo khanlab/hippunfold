@@ -251,7 +251,7 @@ parse_args:
       - 'laplace'
       - 'equivolume'
     default:
-      - 'equivolume'
+      - 'laplace'
     help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)' 
 
   --autotop_labels:
