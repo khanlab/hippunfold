@@ -4,4 +4,5 @@ channels:
   - defaults
 dependencies:
   - python=3.9
-  - ants=2.5.4
+  - ants=2.5.1
+  - libitk=5.3.0=h26001f5_8
