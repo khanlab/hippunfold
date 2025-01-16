@@ -34,7 +34,7 @@ rule qc_reg_to_template:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/env9.yaml"
     script:
         "../scripts/vis_regqc.py"
 
@@ -110,7 +110,7 @@ rule plot_subj_subfields:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/env9.yaml"
     script:
         "../scripts/plot_subj_subfields.py"
 
@@ -195,7 +195,7 @@ rule qc_subfield:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/env9.yaml"
     script:
         "../scripts/vis_qc_dseg.py"
 
@@ -233,7 +233,7 @@ rule qc_subfield_surf:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/env9.yaml"
     script:
         "../scripts/vis_qc_surf.py"
 
@@ -271,6 +271,6 @@ rule concat_subj_vols_tsv:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/9.yaml"
     script:
         "../scripts/concat_tsv.py"

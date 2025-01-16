@@ -154,6 +154,8 @@ rule run_inference:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/env11.yaml"
     shell:
         #create temp folders
         #cp input image to temp folder

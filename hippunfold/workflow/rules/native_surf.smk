@@ -193,7 +193,7 @@ rule gen_native_mesh:
         "subj"
     # container (will need pyvista dependency)
     conda:
-        "../envs/env1.yaml"
+        "../envs/env8.yaml"
     script:
         "../scripts/gen_isosurface.py"
 

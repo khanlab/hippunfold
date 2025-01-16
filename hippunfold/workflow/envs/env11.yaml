@@ -1,8 +1,7 @@
-name: env5
+name: env11
 channels:
-  - khanlab
   - conda-forge
   - defaults
 dependencies:
   - python=3.9
-  - greedyreg
+  - nnunet=1.7.1

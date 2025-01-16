@@ -4,3 +4,7 @@ channels:
   - defaults
 dependencies:
   - python=3.9
+  - numpy=1.21.2
+  - nibabel>=3.2.1
+  - pyvista>=0.44.2
+  - vtk
