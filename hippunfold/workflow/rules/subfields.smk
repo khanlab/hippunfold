@@ -37,14 +37,14 @@ rule resample_unfoldreg_subfields:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/env12.yaml"
     shadow:
         "minimal"
     group:
         "subj"
     shell:
         "c3d {input.label_nii} -slice z 0:15 -oo tmp0%d.nii.gz && "
-        "for fn in $(ls tmp*.nii.gz); do antsApplyTransforms -d 2 -i $fn -r $fn -o $fn -n MultiLabel -t {input.warp}; done && "
+        "for fn in $(ls tmp*.nii.gz); do greedy -d 2 -rf $fn -rm $fn $fn -r {input.warp}; done && "
         "c3d tmp*.nii.gz -tile z -o recombined.nii.gz && "
         "c3d {input.label_nii} recombined.nii.gz -copy-transform -o {output}"
 

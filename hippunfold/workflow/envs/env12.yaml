@@ -1,0 +1,9 @@
+name: env2
+channels:
+  - conda-forge
+  - khanlab
+  - defaults
+dependencies:
+  - python=3.9
+  - convert3d
+  - greedyreg
