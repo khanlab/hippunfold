@@ -441,7 +441,7 @@ rule create_warps_hipp:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/env10.yaml"
     script:
         "../scripts/create_warps.py"
 
@@ -568,7 +568,7 @@ rule create_warps_dentate:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/env10.yaml"
     script:
         "../scripts/create_warps.py"
 
