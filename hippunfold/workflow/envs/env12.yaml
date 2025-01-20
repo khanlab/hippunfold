@@ -1,4 +1,4 @@
-name: env2
+name: env12
 channels:
   - conda-forge
   - khanlab

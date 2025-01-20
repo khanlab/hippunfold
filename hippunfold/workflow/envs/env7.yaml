@@ -1,4 +1,4 @@
-name: env6
+name: env7
 channels:
   - conda-forge
   - defaults
