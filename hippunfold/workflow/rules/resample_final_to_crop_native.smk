@@ -31,7 +31,7 @@ rule create_native_crop_ref:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -80,7 +80,7 @@ rule resample_unet_native_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -130,7 +130,7 @@ rule resample_postproc_native_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -182,7 +182,7 @@ rule resample_subfields_native_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -236,7 +236,7 @@ rule resample_coords_native_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -274,7 +274,7 @@ rule resample_native_to_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -334,7 +334,7 @@ rule resample_t2_to_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

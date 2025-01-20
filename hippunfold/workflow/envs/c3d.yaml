@@ -1,8 +1,8 @@
-name: env5
+name: c3d
 channels:
-  - khanlab
   - conda-forge
   - defaults
 dependencies:
   - python=3.9
-  - greedyreg
+  - convert3d
+  - libitk=5.4.0

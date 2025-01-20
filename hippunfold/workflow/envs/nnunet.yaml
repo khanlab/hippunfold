@@ -1,8 +1,7 @@
-name: env2
+name: nnunet
 channels:
   - conda-forge
   - defaults
 dependencies:
   - python=3.9
-  - convert3d
-  - libitk=5.4.0
+  - nnunet=1.7.1

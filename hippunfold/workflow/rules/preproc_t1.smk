@@ -53,7 +53,7 @@ else:
         container:
             config["singularity"]["autotop"]
         conda:
-            "../envs/env4.yaml"
+            "../envs/ants.yaml"
         group:
             "subj"
         shell:
@@ -100,7 +100,7 @@ rule warp_t1_to_corobl_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

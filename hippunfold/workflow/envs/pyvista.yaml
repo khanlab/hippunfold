@@ -1,4 +1,4 @@
-name: env8
+name: pyvista
 channels:
   - conda-forge
   - defaults

@@ -68,7 +68,7 @@ rule prep_hipp_coords_for_meshing:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/pyunfold.yaml"
     script:
         "../scripts/prep_hipp_coords_for_meshing.py"
 
@@ -117,7 +117,7 @@ rule prep_dentate_coords_for_meshing:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/pyunfold.yaml"
     script:
         "../scripts/prep_dentate_coords_for_meshing.py"
 
@@ -145,7 +145,7 @@ rule get_label_mask:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     shell:
         "c3d {input} -retain-labels {params} -binarize {output}"
 
@@ -193,7 +193,7 @@ rule gen_native_mesh:
         "subj"
     # container (will need pyvista dependency)
     conda:
-        "../envs/env8.yaml"
+        "../envs/pyvista.yaml"
     script:
         "../scripts/gen_isosurface.py"
 
@@ -227,7 +227,7 @@ rule update_native_mesh_structure:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env3.yaml"
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -274,7 +274,7 @@ rule warp_native_mesh_to_unfold:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env3.yaml"
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -329,7 +329,7 @@ rule resample_subfields_to_native_surf:
         None
     #        config["singularity"]["autotop"]
     conda:
-        "../envs/env3.yaml"
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -378,7 +378,7 @@ rule resample_native_surf:
         None
     #        config["singularity"]["autotop"]
     conda:
-        "../envs/env3.yaml"
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -430,7 +430,7 @@ rule compute_halfthick_mask:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -477,7 +477,7 @@ rule register_midthickness:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env5.yaml"
+        "../envs/greedy.yaml"
     shell:
         "greedy -d 3 -i {input.fixed} {input.moving} -n 30 -o {output.warp}"
 
@@ -535,7 +535,7 @@ rule apply_halfsurf_warp_to_img:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env5.yaml"
+        "../envs/greedy.yaml"
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
@@ -572,7 +572,7 @@ rule convert_warp_from_itk_to_world:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env3.yaml"
+        "../envs/workbench.yaml"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -618,7 +618,7 @@ rule warp_midthickness_to_inout:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env3.yaml"
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:

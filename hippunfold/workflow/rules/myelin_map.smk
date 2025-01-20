@@ -34,7 +34,7 @@ rule divide_t1_by_t2:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     shell:
         "c3d {input.t1} {input.t2} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
 
@@ -68,7 +68,7 @@ rule create_ribbon:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     shell:
         "c3d {input} -binarize -o {output}"
 
@@ -142,6 +142,6 @@ rule sample_myelin_map_surf:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env3.yaml"
+        "../envs/workbench.yaml"
     shell:
         "wb_command -volume-to-surface-mapping {input.vol} {input.mid} {output.metric} -ribbon-constrained {input.outer} {input.inner} -volume-roi {input.ribbon}"

@@ -60,7 +60,7 @@ rule reg_to_template:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env6.yaml"
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
@@ -93,7 +93,7 @@ rule convert_template_xfm_ras2itk:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -133,7 +133,7 @@ rule compose_template_xfm_corobl:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -166,7 +166,7 @@ rule invert_template_xfm_itk2ras:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -199,7 +199,7 @@ rule template_xfm_itk2ras:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -234,7 +234,7 @@ rule create_native_coord_ref:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     shell:
         "c3d {input} -cmp -omc {output}"
 
@@ -266,7 +266,7 @@ rule create_unfold_ref:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     shell:
         "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}"
 
@@ -296,7 +296,7 @@ rule create_unfold_coord_map:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     shell:
         "c3d {input.nii} -cmp -omc {output.nii}"
 
@@ -614,7 +614,7 @@ rule expand_unfolded_warps:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/pyunfold.yaml"
     script:
         "../scripts/expand_2Dwarp.py"
 
@@ -699,7 +699,7 @@ rule compose_warps_native_to_unfold:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -804,7 +804,7 @@ rule compose_warps_unfold_to_crop_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

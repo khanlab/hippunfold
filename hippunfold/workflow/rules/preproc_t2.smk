@@ -34,7 +34,7 @@ rule n4_t2:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -184,7 +184,7 @@ else:
         container:
             config["singularity"]["autotop"]
         conda:
-            "../envs/env2.yaml"
+            "../envs/c3d.yaml"
         group:
             "subj"
         shell:
@@ -354,7 +354,7 @@ rule compose_t2_xfm_corobl:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env2.yaml"
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -418,7 +418,7 @@ rule warp_t2_to_corobl_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env4.yaml"
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

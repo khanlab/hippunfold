@@ -1,4 +1,4 @@
-name: env1
+name: pyunfold
 channels:
   - conda-forge
   - defaults

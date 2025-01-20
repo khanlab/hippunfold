@@ -1,4 +1,4 @@
-name: env9
+name: neurovis
 channels:
   - conda-forge
   - defaults

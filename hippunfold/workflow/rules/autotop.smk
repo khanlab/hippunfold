@@ -81,7 +81,7 @@ rule laplace_coords_hipp:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/pyunfold.yaml"
     script:
         get_cmd_laplace_coords()
 
@@ -168,7 +168,7 @@ rule prep_equivolume_coords:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env1.yaml"
+        "../envs/pyunfold.yaml"
     script:
         "../scripts/prep_equivolume_coords.py"
 
