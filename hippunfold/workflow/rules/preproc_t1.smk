@@ -1,4 +1,3 @@
-ruleorder: compose_template_xfm_corobl > convert_template_xfm_ras2itk
 
 
 rule import_t1:

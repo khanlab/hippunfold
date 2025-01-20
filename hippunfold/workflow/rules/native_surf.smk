@@ -297,6 +297,51 @@ rule smooth_surface:
 # --- creating unfold surface from native anatomical, including post-processing
 
 
+rule laplace_beltrami:
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        seg=get_labels_for_laplace,
+    params:
+        src_labels=lambda wildcards: config["laplace_labels"],
+    output:
+        coords_AP=bids(
+            root=work,
+            datatype="coords",
+            dir="AP",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        coords_PD=bids(
+            root=work,
+            datatype="coords",
+            dir="PD",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),    
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    script:
+        "../scripts/laplace-beltrami.py"
+
+
 rule warp_native_mesh_to_unfold:
     input:
         surf_gii=bids(
@@ -308,17 +353,28 @@ rule warp_native_mesh_to_unfold:
             label="{label}",
             **inputs.subj_wildcards
         ),
-        warp_native2unfold=bids(
+        coords_AP=bids(
             root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
+            datatype="coords",
+            dir="AP",
             label="{label}",
-            suffix="xfm.nii.gz",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
             hemi="{hemi}",
-            from_="corobl",
-            to="unfold",
-            mode="surface"
+            **inputs.subj_wildcards
         ),
+        coords_PD=bids(
+            root=work,
+            datatype="coords",
+            dir="PD",
+            label="{label}",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards
+        ),    
     params:
         structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -338,7 +394,7 @@ rule warp_native_mesh_to_unfold:
     group:
         "subj"
     shell:
-        "wb_command -surface-apply-warpfield {input.surf_gii} {input.warp_native2unfold} {output.surf_gii} && "
+        "python ../scripts/overwrite_vertices.py && "
         "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 

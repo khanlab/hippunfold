@@ -122,57 +122,6 @@ def get_final_subfields():
     )
 
 
-def get_final_coords():
-    if "laplace" in config["laminar_coords_method"]:
-        desc_io = "laplace"
-    elif "equivolume" in config["laminar_coords_method"]:
-        desc_io = "equivol"
-
-    coords = []
-    # compute all laplace coords by default (incl IO)
-    coords.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="coords",
-                dir="{dir}",
-                suffix="coords.nii.gz",
-                desc="{desc}",
-                space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
-                **inputs.subj_wildcards,
-            ),
-            desc="laplace",
-            dir=["AP", "PD", "IO"],
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            space=crop_ref_spaces,
-            allow_missing=True,
-        )
-    )
-    coords.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="coords",
-                dir="{dir}",
-                suffix="coords.nii.gz",
-                desc="{desc}",
-                space="{space}",
-                hemi="{hemi}",
-                label="hipp",
-                **inputs.subj_wildcards,
-            ),
-            desc=[desc_io],
-            dir=["IO"],
-            hemi=config["hemi"],
-            space=crop_ref_spaces,
-            allow_missing=True,
-        )
-    )
-    return coords
-
 
 def get_final_anat():
     anat = []
@@ -294,7 +243,6 @@ def get_final_output():
     subj_output = []
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
-    subj_output.extend(get_final_coords())
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
     return subj_output

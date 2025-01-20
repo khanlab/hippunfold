@@ -1,44 +1,39 @@
-# TODO: replace this with a function that operates on the label gifti instead for native_warp workflow
-# to avoid use of the unfold2native warps
+
+
 rule label_subfields_from_vol_coords_corobl:
-    """ Label subfields using the volumetric coords and atlas subfield labels"""
     input:
-        label_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-        nii_ap=bids(
-            root=work,
-            datatype="coords",
-            dir="AP",
-            label="hipp",
-            suffix="coords.nii.gz",
-            desc="laplace",
+        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
+        ref_nii=get_labels_for_laplace,
+        midthickness_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
-        nii_pd=bids(
-            root=work,
-            datatype="coords",
-            dir="PD",
-            label="hipp",
-            suffix="coords.nii.gz",
-            desc="laplace",
+        inner_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="inner.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
-        nii_io=get_laminar_coords,
-        labelmap=get_labels_for_laplace,
+        outer_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="outer.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     params:
-        gm_labels=lambda wildcards: config["laplace_labels"]["AP"]["gm"],
+        label_gii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
     output:
         nii_label=bids(
             root=work,
@@ -48,14 +43,16 @@ rule label_subfields_from_vol_coords_corobl:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
+            label="{label,hipp}",
             **inputs.subj_wildcards
         ),
-    group:
-        "subj"
     container:
         config["singularity"]["autotop"]
-    script:
-        "../scripts/label_subfields_from_vol_coords.py"
+    group:
+        "subj"
+    shell:
+        "wb_command -label-to-volume-mapping {params.label_gii} {input.midthickness_surf} {input.ref_nii} {output.nii_label} "
+        " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
 
 
 def get_tissue_atlas_remapping(wildcards):
@@ -90,6 +87,7 @@ rule combine_tissue_subfield_labels_corobl:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
+            label="hipp",
             **inputs.subj_wildcards
         ),
     params:

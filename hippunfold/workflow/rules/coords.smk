@@ -45,43 +45,6 @@ def get_inputs_laplace(wildcards):
     return files
 
 
-rule laplace_coords_hipp:
-    input:
-        unpack(get_inputs_laplace),
-    params:
-        gm_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["gm"],
-        src_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["src"],
-        sink_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["sink"],
-        convergence_threshold=1e-5,
-        max_iters=10000,
-    output:
-        coords=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            label="hipp",
-            suffix="coords.nii.gz",
-            desc="laplace",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
-    group:
-        "subj"
-    resources:
-        time=30,
-    log:
-        bids(
-            root="logs",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            hemi="{hemi}",
-            suffix="laplace-hipp.txt"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    script:
-        get_cmd_laplace_coords()
 
 
 rule laplace_coords_dentate:
