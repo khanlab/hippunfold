@@ -122,7 +122,6 @@ def get_final_subfields():
     )
 
 
-
 def get_final_anat():
     anat = []
     if "T1w" in ref_spaces or "T2w" in ref_spaces:

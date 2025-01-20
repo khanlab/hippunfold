@@ -6,41 +6,47 @@ from collections import defaultdict
 
 
 surf = nib.load(snakemake.input.surf_gii)
-vertices = surf.agg_data('NIFTI_INTENT_POINTSET')
-faces = surf.agg_data('NIFTI_INTENT_TRIANGLE')
+vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
+faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
 
 # get source/sink vertices by nearest neighbour (only of edge vertices)
 boundary_vertices = find_boundary_vertices(vertices, faces)
 seg = nib.load(snakemake.input.seg)
-src_AP = np.array(np.where(seg.get_fdata()==snakemake.params.src_labels['AP']['src']))
-sink_AP = np.array(np.where(seg.get_fdata()==snakemake.params.src_labels['AP']['sink']))
-src_PD = np.array(np.where(seg.get_fdata()==snakemake.params.src_labels['PD']['src']))
-sink_PD = np.array(np.where(seg.get_fdata()==snakemake.params.src_labels['PD']['sink']))
+src_AP = np.array(np.where(seg.get_fdata() == snakemake.params.src_labels["AP"]["src"]))
+sink_AP = np.array(
+    np.where(seg.get_fdata() == snakemake.params.src_labels["AP"]["sink"])
+)
+src_PD = np.array(np.where(seg.get_fdata() == snakemake.params.src_labels["PD"]["src"]))
+sink_PD = np.array(
+    np.where(seg.get_fdata() == snakemake.params.src_labels["PD"]["sink"])
+)
 # apply affine
-src_AP = (seg.affine @ np.vstack([src_AP, np.ones([1,src_AP.shape[1]])]))[:3,:]
-sink_AP = (seg.affine @ np.vstack([sink_APprox, np.ones([1,sink_AP.shape[1]])]))[:3,:]
-src_PD = (seg.affine @ np.vstack([src_PD, np.ones([1,src_PD.shape[1]])]))[:3,:]
-sink_PD = (seg.affine @ np.vstack([sink_PD, np.ones([1,sink_PD.shape[1]])]))[:3,:]
+src_AP = (seg.affine @ np.vstack([src_AP, np.ones([1, src_AP.shape[1]])]))[:3, :]
+sink_AP = (seg.affine @ np.vstack([sink_APprox, np.ones([1, sink_AP.shape[1]])]))[:3, :]
+src_PD = (seg.affine @ np.vstack([src_PD, np.ones([1, src_PD.shape[1]])]))[:3, :]
+sink_PD = (seg.affine @ np.vstack([sink_PD, np.ones([1, sink_PD.shape[1]])]))[:3, :]
 
-vals = np.hstack([np.ones([src_AP.shape[1]])*1,
-        np.ones([sink_AP.shape[1]])*2,
-        np.ones([src_PD.shape[1]])*3,
-        np.ones([sink_PD.shape[1]])*4,
-        ])
-interpol = NearestNDInterpolator(np.hstack([src_AP,sink_AP,src_PD,sink_PD]).T, vals)
-boundary_values = interpol(vertices[boundary_vertices,:])
+vals = np.hstack(
+    [
+        np.ones([src_AP.shape[1]]) * 10,
+        np.ones([sink_AP.shape[1]]) * 11,
+        np.ones([src_PD.shape[1]]) * 20,
+        np.ones([sink_PD.shape[1]]) * 21,
+    ]
+)
+interpol = NearestNDInterpolator(np.hstack([src_AP, sink_AP, src_PD, sink_PD]).T, vals)
+boundary_values = interpol(vertices[boundary_vertices, :])
 
-APinds = vals<3
-boundary_conditions = dict(zip(boundary_vertices[APinds],
-    boundary_values[APinds]-1))
-APcoords = solve_laplace_beltrami_open_mesh(vertices,faces, boundary_conditions)
-PDinds = vals>2
-boundary_conditions = dict(zip(boundary_vertices[PDinds],
-    boundary_values[PDinds]-3))
-PDcoords = solve_laplace_beltrami_open_mesh(vertices,faces, boundary_conditions)
+APinds = vals < 12
+boundary_conditions = dict(zip(boundary_vertices[APinds], boundary_values[APinds] - 10))
+APcoords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
+PDinds = vals > 12
+boundary_conditions = dict(zip(boundary_vertices[PDinds], boundary_values[PDinds] - 20))
+PDcoords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 
 nib.save(APcoords, snakemake.output.coords_AP)
 nib.save(PDcoords, snakemake.output.coords_PD)
+
 
 def find_boundary_vertices(vertices, faces):
     """
@@ -62,7 +68,7 @@ def find_boundary_vertices(vertices, faces):
         edges = [
             tuple(sorted((face[0], face[1]))),
             tuple(sorted((face[1], face[2]))),
-            tuple(sorted((face[2], face[0])))
+            tuple(sorted((face[2], face[0]))),
         ]
         for edge in edges:
             edge_count[edge] += 1
@@ -77,7 +83,7 @@ def find_boundary_vertices(vertices, faces):
 
     # Convert the set to a sorted list (array)
     return sorted(boundary_vertices)
-    
+
 
 def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     """
@@ -155,7 +161,10 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
 
     if len(free_indices) > 0:
         free_laplacian = laplacian[free_indices][:, free_indices]
-        free_b = b[free_indices] - laplacian[free_indices][:, boundary_indices] @ boundary_values
+        free_b = (
+            b[free_indices]
+            - laplacian[free_indices][:, boundary_indices] @ boundary_values
+        )
 
         solution[boundary_indices] = boundary_values
         try:
@@ -167,4 +176,3 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
         solution[boundary_indices] = boundary_values
 
     return solution
-

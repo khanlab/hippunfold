@@ -45,8 +45,6 @@ def get_inputs_laplace(wildcards):
     return files
 
 
-
-
 rule laplace_coords_dentate:
     input:
         coords=bids(

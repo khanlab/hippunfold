@@ -333,7 +333,7 @@ rule laplace_beltrami:
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
-        ),    
+        ),
     group:
         "subj"
     container:
@@ -374,7 +374,7 @@ rule warp_native_mesh_to_unfold:
             space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards
-        ),    
+        ),
     params:
         structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],

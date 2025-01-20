@@ -42,7 +42,6 @@ def get_nnunet_input(wildcards):
         raise ValueError("modality not supported for nnunet!")
 
 
-
 def parse_task_from_tar(wildcards, input):
     match = re.search("Task[0-9]{3}_[\w]+", input.model_tar)
     if match:
