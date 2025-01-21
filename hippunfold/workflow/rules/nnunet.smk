@@ -82,6 +82,34 @@ def get_cmd_copy_inputs(wildcards, input):
         return " && ".join(cmd)
 
 
+def get_model_tar():
+    if config["force_nnunet_model"]:
+        model_name = config["force_nnunet_model"]
+    else:
+        model_name = config["modality"]
+
+    local_tar = config["resource_urls"]["nnunet_model"].get(model_name, None)
+    if local_tar == None:
+        print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
+
+    return (Path(download_dir) / "model" / Path(local_tar).name).absolute()
+
+
+rule download_extract_nnunet_model:
+    params:
+        url=config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
+        if config["force_nnunet_model"]
+        else config["resource_urls"]["nnunet_model"][config["modality"]],
+        model_dir=Path(download_dir) / "model",
+    output:
+        model_tar=get_model_tar(),
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "mkdir -p {params.model_dir} && wget https://{params.url} -O {output} && "
+        "tar -xf {output} -C {params.model_dir}"
+
+
 rule run_inference:
     """ This rule uses either GPU or CPU .
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
