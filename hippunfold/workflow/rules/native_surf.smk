@@ -342,6 +342,12 @@ rule laplace_beltrami:
         "../scripts/laplace-beltrami.py"
 
 
+
+def get_unfold_z_level(wildcards):
+    extent = float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
+    return surf_thresholds[wildcards.surfname] * extent
+
+    
 rule warp_native_mesh_to_unfold:
     input:
         surf_gii=bids(
@@ -379,46 +385,6 @@ rule warp_native_mesh_to_unfold:
         structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
-    output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "python ../scripts/overwrite_vertices.py && "
-        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
-
-
-def get_unfold_z_level(wildcards):
-    extent = float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
-    return surf_thresholds[wildcards.surfname] * extent
-
-
-rule squash_unfold_mesh_to_plane:
-    """ this new rule squashes the mesh to be a perfect z-plane, so that any laminar 
-    irregularities in the unfold surfaces (ie bumpiness) don't affect the resulting 
-    voxelized representations that will be used for 2D registration"""
-    input:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    params:
         z_level=get_unfold_z_level,
     output:
         surf_gii=bids(
@@ -434,75 +400,10 @@ rule squash_unfold_mesh_to_plane:
         config["singularity"]["autotop"]
     group:
         "subj"
-    script:
-        "../scripts/squash_unfold_mesh_to_plane.py"
-
-
-# ---currently unused post-processing rules here :
-rule correct_bad_vertices:
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    params:
-        dist=lambda wildcards: config["outlier_opts"]["outlierSmoothDist"][
-            wildcards.density
-        ]
-        if "density" in wildcards
-        else config["outlier_opts"]["outlierSmoothDist"]["default"],
-        threshold=config["outlier_opts"]["vertexOutlierThreshold"],
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldfillbad",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    script:
-        "../scripts/fillbadvertices.py"
-
-
-rule replace_outlier_vertices:
-    """ WIP alternative implementation to fillbadvertices """
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldreplaceoutliers",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    script:
-        "../scripts/replace_outlier_vertices.py"
+    shell:
+        "python ../scripts/overwrite_vertices.py && "
+        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        " -surface-secondary-type {params.secondary_type}"
 
 
 rule heavy_smooth_unfold_surf:

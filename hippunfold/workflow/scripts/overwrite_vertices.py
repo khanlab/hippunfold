@@ -8,6 +8,6 @@ pd = nib.load(snakemake.input.coords_PD).darrays[0].data
 
 vertices[:, 0] = ap
 vertices[:, 1] = pd
-vertices[:, 2] = 0  # TODO include IO?
+vertices[:, 2] = snakemake.params.z_level
 
 nib.save(gii, snakemake.output.surf_gii)
