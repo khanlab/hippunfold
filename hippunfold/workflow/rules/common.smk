@@ -48,16 +48,11 @@ def get_final_spec():
                 datatype="surf",
                 den="{density}",
                 space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
             density=config["output_density"],
             space=ref_spaces,
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["hipp"],
             allow_missing=True,
         )
     )
@@ -66,21 +61,15 @@ def get_final_spec():
             bids(
                 root=root,
                 datatype="surf",
-                den="{density}",
                 space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
-            density=config["output_density"],
-            space=ref_spaces,
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["dentate"],
+            space="corobl",
             allow_missing=True,
         )
     )
+
     return specs
 
 
@@ -153,67 +142,6 @@ def get_final_coords():
         )
     )
     return coords
-
-
-def get_final_transforms():
-    xfms = []
-
-    xfms.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="warps",
-                **inputs.subj_wildcards,
-                label="{autotop}",
-                suffix="xfm.nii.gz",
-                hemi="{hemi}",
-                from_="{space}",
-                to="unfold",
-                mode="image",
-            ),
-            space=ref_spaces,
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            allow_missing=True,
-        )
-    )
-
-    xfms.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="warps",
-                **inputs.subj_wildcards,
-                label="{autotop}",
-                suffix="xfm.nii.gz",
-                hemi="{hemi}",
-                from_="unfold",
-                to="{space}",
-                mode="image",
-            ),
-            space=ref_spaces,
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            allow_missing=True,
-        )
-    )
-
-    xfms.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="warps",
-                **inputs.subj_wildcards,
-                label="{autotop}",
-                suffix="refvol.nii.gz",
-                space="unfold",
-            ),
-            autotop=config["autotop_labels"],
-            allow_missing=True,
-        )
-    )
-
-    return xfms
 
 
 def get_final_anat():
@@ -337,7 +265,6 @@ def get_final_output():
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
     subj_output.extend(get_final_coords())
-    subj_output.extend(get_final_transforms())
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
     return subj_output
@@ -349,7 +276,7 @@ if "corobl" in ref_spaces:
         input:
             os.path.join(work, "{pre}_space-corobl_{post}{suffix}.{ext}"),
         output:
-            os.path.join(root, "{pre}_space-corobl_{post}{suffix,coords}.{ext}"),
+            os.path.join(root, "{pre,[^/].+}_space-corobl_{post}{suffix,coords}.{ext}"),
         group:
             "subj"
         shell:
@@ -359,7 +286,9 @@ if "corobl" in ref_spaces:
         input:
             os.path.join(work, "{pre}_{fromto,from|to}-corobl_{post}{suffix}.{ext}"),
         output:
-            os.path.join(root, "{pre}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"),
+            os.path.join(
+                root, "{pre,[^/].+}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"
+            ),
         group:
             "subj"
         shell:
@@ -369,7 +298,7 @@ if "corobl" in ref_spaces:
         input:
             os.path.join(work, "{pre}_desc-subfields_{post}{suffix}.{ext}"),
         output:
-            os.path.join(root, "{pre}_desc-subfields_{post}{suffix,dseg}.{ext}"),
+            os.path.join(root, "{pre,[^/].+}_desc-subfields_{post}{suffix,dseg}.{ext}"),
         group:
             "subj"
         shell:
