@@ -62,10 +62,6 @@ if config["skip_inject_template_labels"]:  # TODO do we need this?
 
 limit_to_list.add(config["modality"])
 
-# if atlas doesn't contain alignment features
-if not config["atlas"] == ["multihist7"] or config["native_surf"]:
-    config["no_unfolded_reg"] = True
-
 
 inputs = snakebids.generate_inputs(
     bids_dir=config["bids_dir"],
@@ -149,9 +145,7 @@ include: "rules/qc.smk"
 include: "rules/myelin_map.smk"
 
 
-if config["native_surf"]:
-
-    include: "rules/native_surf.smk"
+include: "rules/native_surf.smk"
 
 
 if config["use_template_seg"]:

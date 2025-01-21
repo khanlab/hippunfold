@@ -13,7 +13,7 @@ rule create_native_crop_ref:
                 atlas="{atlas}",
                 **inputs.subj_wildcards
             ),
-            atlas=config["atlas"][0],
+            atlas=config["atlas"],
             allow_missing=True,
         ),
     params:

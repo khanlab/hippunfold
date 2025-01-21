@@ -1,84 +1,18 @@
-
-rule resample_unfoldreg_subfields:
-    input:
-        label_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-        warp=bids(
-            root=work,
-            **inputs.subj_wildcards,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="SyN",
-            from_="{atlas}",
-            to="subject",
-            space="unfold",
-            type_="itk",
-            hemi="{hemi}"
-        ),
-    output:
-        label_nii=bids(
-            root=root,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        "../envs/env12.yaml"
-    shadow:
-        "minimal"
-    group:
-        "subj"
-    shell:
-        "c3d {input.label_nii} -slice z 0:15 -oo tmp0%d.nii.gz && "
-        "for fn in $(ls tmp*.nii.gz); do greedy -d 2 -rf $fn -rm $fn $fn -r {input.warp}; done && "
-        "c3d tmp*.nii.gz -tile z -o recombined.nii.gz && "
-        "c3d {input.label_nii} recombined.nii.gz -copy-transform -o {output}"
-
-
-def skip_unfoldreg_option_subfields(wildcards):
-    if config["no_unfolded_reg"]:
-        label_nii = bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        )
-    else:
-        label_nii = bids(
-            root=root,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **inputs.subj_wildcards
-        )
-    return label_nii
-
-
+# TODO: replace this with a function that operates on the label gifti instead for native_warp workflow
+# to avoid use of the unfold2native warps
 rule label_subfields_from_vol_coords_corobl:
     """ Label subfields using the volumetric coords and atlas subfield labels"""
     input:
-        label_nii=skip_unfoldreg_option_subfields,
+        label_nii=bids(
+            root=work,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="hipp",
+            atlas="{atlas}",
+            **inputs.subj_wildcards
+        ),
         nii_ap=bids(
             root=work,
             datatype="coords",
@@ -133,7 +67,7 @@ def get_tissue_atlas_remapping(wildcards):
 
     for label in mapping["tissue"].keys():
         in_label = mapping["tissue"][label]
-        out_label = mapping[wildcards.atlas][label]
+        out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
 
         remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
 
