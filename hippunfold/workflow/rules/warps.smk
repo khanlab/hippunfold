@@ -242,7 +242,7 @@ rule create_unfold_ref:
         orient=lambda wildcards: config["unfold_vol_ref"][wildcards.autotop]["orient"],
     output:
         nii=bids(
-            root=root,
+            root=work,
             space="unfold",
             label="{autotop}",
             datatype="warps",
@@ -261,7 +261,7 @@ rule create_unfold_ref:
 rule create_unfold_coord_map:
     input:
         nii=bids(
-            root=root,
+            root=work,
             space="unfold",
             label="{autotop}",
             datatype="warps",
@@ -316,7 +316,7 @@ def get_laminar_coords(wildcards):
 rule create_warps_hipp:
     input:
         unfold_ref_nii=bids(
-            root=root,
+            root=work,
             space="unfold",
             label="hipp",
             datatype="warps",
@@ -409,7 +409,7 @@ rule create_warps_hipp:
 rule create_warps_dentate:
     input:
         unfold_ref_nii=bids(
-            root=root,
+            root=work,
             space="unfold",
             label="dentate",
             datatype="warps",
