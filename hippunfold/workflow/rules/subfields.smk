@@ -40,7 +40,7 @@ rule label_subfields_from_vol_coords_corobl:
             label="{label}",
             atlas="{atlas}",
             **inputs.subj_wildcards
-        )
+        ),
     output:
         nii_label=bids(
             root=work,

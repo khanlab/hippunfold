@@ -342,12 +342,11 @@ rule laplace_beltrami:
         "../scripts/laplace-beltrami.py"
 
 
-
 def get_unfold_z_level(wildcards):
     extent = float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
     return surf_thresholds[wildcards.surfname] * extent
 
-    
+
 rule warp_native_mesh_to_unfold:
     input:
         surf_gii=bids(
@@ -383,7 +382,7 @@ rule warp_native_mesh_to_unfold:
         ),
     params:
         z_level=get_unfold_z_level,
-        vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label]
+        vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
     output:
         surf_gii=bids(
             root=work,
@@ -412,7 +411,7 @@ rule update_unfold_mesh_structure:
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
-        )
+        ),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],

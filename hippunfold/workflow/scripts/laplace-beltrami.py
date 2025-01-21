@@ -5,7 +5,6 @@ from scipy.interpolate import NearestNDInterpolator
 from collections import defaultdict
 
 
-
 def find_boundary_vertices(vertices, faces):
     """
     Find boundary vertices of a 3D mesh.
@@ -109,7 +108,6 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     else:
         solution[boundary_indices] = boundary_values
     return solution
-
 
 
 surf = nib.load(snakemake.input.surf_gii)
