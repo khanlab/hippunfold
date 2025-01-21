@@ -398,7 +398,7 @@ rule warp_native_mesh_to_unfold:
     group:
         "subj"
     script:
-        "../scripts/overwrite_vertices.py"
+        "../scripts/rewrite_vertices_to_flat.py"
 
 
 rule update_unfold_mesh_structure:
