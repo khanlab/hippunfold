@@ -78,7 +78,7 @@ def get_floating_n4_t2(wildcards):
     return t2_imgs[int(wildcards.idx)]
 
 
-rule reg_t2_to_ref_part1:
+rule reg_t2_to_ref:
     input:
         ref=get_ref_n4_t2,
         flo=get_floating_n4_t2,
@@ -110,7 +110,8 @@ rule reg_t2_to_ref_part1:
     shell:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac"
 
-rule reg_t2_to_ref_part2:
+
+rule ras_to_itk_reg_t2:
     input:
         xfm_ras=bids(
             root=work,
@@ -141,7 +142,6 @@ rule reg_t2_to_ref_part2:
         "subj"
     shell:
         "c3d_affine_tool  {input.xfm_ras} -oitk {output.xfm_itk}"
-
 
 
 def get_aligned_n4_t2(wildcards):
@@ -266,6 +266,7 @@ rule reg_t2_to_t1_part1:
         "subj"
     shell:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log}"
+
 
 rule reg_t2_to_t1_part2:
     input:
