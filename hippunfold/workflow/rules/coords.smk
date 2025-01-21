@@ -1,14 +1,6 @@
 import os
 
 
-def get_cmd_laplace_coords():
-    if config["skip_inject_template_labels"]:
-        cmd = "../scripts/laplace_coords.py"
-    else:
-        cmd = "../scripts/laplace_coords_withinit.py"
-    return cmd
-
-
 def get_labels_for_laplace(wildcards):
     if config["skip_inject_template_labels"]:
         seg = get_input_for_shape_inject(wildcards)
