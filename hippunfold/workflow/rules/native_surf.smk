@@ -238,7 +238,7 @@ rule update_native_mesh_structure:
             **inputs.subj_wildcards
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="ANATOMICAL",
     output:
@@ -382,10 +382,41 @@ rule warp_native_mesh_to_unfold:
             **inputs.subj_wildcards
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        z_level=get_unfold_z_level,
+        vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label]
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldraw",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    script:
+        "../scripts/overwrite_vertices.py"
+
+
+rule update_unfold_mesh_structure:
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldraw",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        )
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
-        z_level=get_unfold_z_level,
     output:
         surf_gii=bids(
             root=work,
@@ -401,8 +432,7 @@ rule warp_native_mesh_to_unfold:
     group:
         "subj"
     shell:
-        "python ../scripts/overwrite_vertices.py && "
-        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
 
@@ -418,7 +448,7 @@ rule heavy_smooth_unfold_surf:
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="unfoldsquash",
+            space="unfold",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
@@ -656,7 +686,7 @@ rule warp_midthickness_to_inout:
             **inputs.subj_wildcards
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="ANATOMICAL",
     output:
@@ -1371,7 +1401,7 @@ rule warp_unfold_native_to_unfoldreg:
             **inputs.subj_wildcards,
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
     output:

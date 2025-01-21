@@ -31,9 +31,16 @@ rule label_subfields_from_vol_coords_corobl:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        label_gii=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
+        label_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="subfields.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            atlas="{atlas}",
+            **inputs.subj_wildcards
+        )
     output:
         nii_label=bids(
             root=work,
@@ -51,7 +58,7 @@ rule label_subfields_from_vol_coords_corobl:
     group:
         "subj"
     shell:
-        "wb_command -label-to-volume-mapping {params.label_gii} {input.midthickness_surf} {input.ref_nii} {output.nii_label} "
+        "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.nii_label} "
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
 
 

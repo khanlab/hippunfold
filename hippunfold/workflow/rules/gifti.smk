@@ -1,9 +1,21 @@
-# lookup tables for structure:
-hemi_to_structure = {"L": "CORTEX_LEFT", "R": "CORTEX_RIGHT"}
+# lookup mappings for structure and surface type:
+def get_structure(hemi, label):
+    if label == "hipp":
+        if hemi == "L":
+            return "HIPPOCAMPUS_LEFT"
+        elif hemi == "R":
+            return "HIPPOCAMPUS_RIGHT"
+    elif label == "dentate":
+        if hemi == "L":
+            return "HIPPOCAMPUS_DENTATE_LEFT"
+        elif hemi == "R":
+            return "HIPPOCAMPUS_DENTATE_RIGHT"
+
+
 surf_to_secondary_type = {
     "midthickness": "MIDTHICKNESS",
-    "inner": "PIAL",
-    "outer": "GRAY_WHITE",
+    "inner": "INNER",
+    "outer": "OUTER",
 }
 
 
@@ -18,7 +30,9 @@ rule cp_template_to_unfold:
             "tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii",
         ),
     params:
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(
+            wildcards.hemi, wildcards.autotop
+        ),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
     output:
@@ -59,7 +73,9 @@ rule calc_unfold_template_coords:
         coord_IO="coord-IO.shape.gii",
         origin=lambda wildcards: config["{autotop}"]["origin"],
         extent=lambda wildcards: config["{autotop}"]["extent"],
-        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        structure_type=lambda wildcards: get_structure(
+            wildcards.hemi, wildcards.autotop
+        ),
     output:
         coords_gii=bids(
             root=work,
@@ -104,7 +120,7 @@ rule constrain_surf_to_bbox:
             **inputs.subj_wildcards
         ),
         ref_nii=bids(
-            root=root,
+            root=work,
             datatype="warps",
             space="unfold",
             label="{autotop}",
@@ -316,7 +332,7 @@ rule create_dlabel_cifti_subfields:
 def get_cmd_spec_file(wildcards, input, output):
     specfile = output.spec_file
     if "hemi" in wildcards._names:
-        structure = hemi_to_structure[wildcards.hemi]
+        structure = get_structure(wildcards.hemi, wildcards.label)
     else:
         structure = "INVALID"
     cmds = list()
@@ -500,7 +516,14 @@ rule create_spec_file_dentate:
         "{params.cmds}"
 
 
-rule merge_lr_spec_file:
+def get_cmd_merge_spec(wildcards, input, output):
+    if len(input.spec_files) == 1:
+        return f"cp {input} {output}"
+    else:
+        return f"wb_command -spec-file-merge {input.spec_files} {output}"
+
+
+rule merge_lr_spec_file_native:
     input:
         spec_files=expand(
             bids(
@@ -513,9 +536,11 @@ rule merge_lr_spec_file:
                 label="{autotop}",
                 **inputs.subj_wildcards
             ),
-            hemi=["L", "R"],
+            hemi=config["hemi"],
             allow_missing=True,
         ),
+    params:
+        cmd=get_cmd_merge_spec,
     output:
         spec_file=bids(
             root=root,
@@ -531,4 +556,38 @@ rule merge_lr_spec_file:
     group:
         "subj"
     shell:
-        "wb_command -spec-file-merge {input.spec_files} {output}"
+        "{params.cmd}"
+
+
+rule merge_hipp_dentate_spec_file_native:
+    input:
+        spec_files=expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="surfaces.spec",
+                space="{space}",
+                label="{autotop}",
+                **inputs.subj_wildcards
+            ),
+            autotop=config["autotop_labels"],
+            allow_missing=True,
+        ),
+    params:
+        cmd=get_cmd_merge_spec,
+    output:
+        spec_file=bids(
+            root=root,
+            datatype="surf",
+            den="{density}",
+            space="{space}",
+            suffix="surfaces.spec",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "{params.cmd}"
