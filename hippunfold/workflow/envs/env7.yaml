@@ -1,9 +1,0 @@
-name: env7
-channels:
-  - conda-forge
-  - defaults
-dependencies:
-  - python=3.9
-  - niftyreg
-  - convert3d
-  - libitk=5.4.0

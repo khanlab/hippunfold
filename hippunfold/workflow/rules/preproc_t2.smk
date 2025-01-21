@@ -78,7 +78,7 @@ def get_floating_n4_t2(wildcards):
     return t2_imgs[int(wildcards.idx)]
 
 
-rule reg_t2_to_ref:
+rule reg_t2_to_ref_part1:
     input:
         ref=get_ref_n4_t2,
         flo=get_floating_n4_t2,
@@ -93,16 +93,6 @@ rule reg_t2_to_ref:
             desc="rigid",
             type_="ras"
         ),
-        xfm_itk=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="T2w{idx}",
-            to="T2w0",
-            desc="rigid",
-            type_="itk"
-        ),
         warped=bids(
             root=work,
             datatype="anat",
@@ -114,12 +104,44 @@ rule reg_t2_to_ref:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env7.yaml"
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
-        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac && "
-        "c3d_affine_tool  {output.xfm_ras} -oitk {output.xfm_itk}"
+        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac"
+
+rule reg_t2_to_ref_part2:
+    input:
+        xfm_ras=bids(
+            root=work,
+            datatype="warps",
+            **inputs.subj_wildcards,
+            suffix="xfm.txt",
+            from_="T2w{idx}",
+            to="T2w0",
+            desc="rigid",
+            type_="ras"
+        ),
+    output:
+        xfm_itk=bids(
+            root=work,
+            datatype="warps",
+            **inputs.subj_wildcards,
+            suffix="xfm.txt",
+            from_="T2w{idx}",
+            to="T2w0",
+            desc="rigid",
+            type_="itk"
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d_affine_tool  {input.xfm_ras} -oitk {output.xfm_itk}"
+
 
 
 def get_aligned_n4_t2(wildcards):
@@ -191,7 +213,7 @@ else:
             "{params.cmd}"
 
 
-rule reg_t2_to_t1:
+rule reg_t2_to_t1_part1:
     input:
         flo=bids(
             root=root,
@@ -226,16 +248,6 @@ rule reg_t2_to_t1:
             desc="rigid",
             type_="ras"
         ),
-        xfm_itk=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="T2w",
-            to="T1w",
-            desc="rigid",
-            type_="itk"
-        ),
     log:
         bids(
             root="logs",
@@ -249,12 +261,43 @@ rule reg_t2_to_t1:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/env7.yaml"
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
-        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log} && "
-        "c3d_affine_tool  {output.xfm_ras} -oitk {output.xfm_itk}"
+        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log}"
+
+rule reg_t2_to_t1_part2:
+    input:
+        xfm_ras=bids(
+            root=work,
+            datatype="warps",
+            **inputs.subj_wildcards,
+            suffix="xfm.txt",
+            from_="T2w",
+            to="T1w",
+            desc="rigid",
+            type_="ras"
+        ),
+    output:
+        xfm_itk=bids(
+            root=work,
+            datatype="warps",
+            **inputs.subj_wildcards,
+            suffix="xfm.txt",
+            from_="T2w",
+            to="T1w",
+            desc="rigid",
+            type_="itk"
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d_affine_tool {input.xfm_ras} -oitk {output.xfm_itk}"
 
 
 def get_inputs_compose_t2_xfm_corobl(wildcards):
