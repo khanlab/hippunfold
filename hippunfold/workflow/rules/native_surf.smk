@@ -1371,6 +1371,55 @@ def get_unfold_ref(wildcards):
     )
 
 
+rule warp_unfold_native_to_unfoldreg_NOTWORKING:
+    """this seems to give bounding box errors for no good reason.."""
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        warp=bids(
+            root=work,
+            suffix="xfm.nii.gz",
+            datatype="warps",
+            desc=unfoldreg_method,
+            from_="native",
+            to=config["atlas"],
+            space="unfold",
+            type_="surface",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type="FLAT",
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldregNOTWORKING",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-apply-warpfield {input.surf_gii} {input.warp} {output.surf_gii} && "
+        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        " -surface-secondary-type {params.secondary_type}"
+
+
 rule warp_unfold_native_to_unfoldreg:
     input:
         surf_gii=bids(
@@ -1413,10 +1462,13 @@ rule warp_unfold_native_to_unfoldreg:
         config["singularity"]["autotop"]
     group:
         "subj"
+    shadow:
+        "minimal"
     shell:
-        "wb_command -surface-apply-warpfield {input.surf_gii} {input.warp} {output.surf_gii} && "
-        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
+        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear && "
+        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
+        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
+        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
 
 
 # --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
