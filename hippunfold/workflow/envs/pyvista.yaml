@@ -8,3 +8,4 @@ dependencies:
   - nibabel>=3.2.1
   - pyvista>=0.44.2
   - vtk
+  - scipy
