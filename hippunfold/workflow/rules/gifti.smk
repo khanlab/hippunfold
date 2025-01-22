@@ -187,7 +187,7 @@ rule affine_gii_to_native:
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            space="{native_modality}",
+            space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
             label="{autotop,hipp|dentate}",
             **inputs.subj_wildcards
