@@ -219,6 +219,8 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
+    ruleorder: equivolume_coords > laplace_coords_hipp > laplace_coords_dentate > copy_coords_to_results
+
     rule copy_coords_to_results:
         input:
             os.path.join(work, "{pre}_space-corobl_{post}{suffix}.{ext}"),
@@ -231,7 +233,7 @@ if "corobl" in ref_spaces:
 
     rule copy_xfm_to_results:
         input:
-            os.path.join(work, "{pre}_{fromto,from|to}-corobl_{post}{suffix}.{ext}"),
+            os.path.join(work, "{pre}_{fromto}-corobl_{post}{suffix}.{ext}"),
         output:
             os.path.join(
                 root, "{pre,[^/].+}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"

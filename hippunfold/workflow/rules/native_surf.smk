@@ -738,7 +738,7 @@ rule affine_gii_corobl_to_modality:
             root=root,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="{native_modality}",
+            space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
             label="{autotop,hipp|dentate}",
             **inputs.subj_wildcards
