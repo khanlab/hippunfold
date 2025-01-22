@@ -192,13 +192,13 @@ boundary_values = np.array(interpol(vertices[boundary_vertices, :])).astype(int)
 
 APinds = np.array(np.where(boundary_values < 12)[0]).astype(int)
 boundary_conditions = dict(zip(boundary_vertices[APinds], boundary_values[APinds] - 10))
-APcoords = np.ones((len(vertices_orig)))*np.nan
+APcoords = np.ones((len(vertices_orig))) * np.nan
 APcoords[i_concomp] = solve_laplace_beltrami_open_mesh(
     vertices, faces, boundary_conditions
 )
 PDinds = np.array(np.where(boundary_values > 12)[0]).astype(int)
 boundary_conditions = dict(zip(boundary_vertices[PDinds], boundary_values[PDinds] - 20))
-PDcoords = np.ones((len(vertices_orig)))*np.nan
+PDcoords = np.ones((len(vertices_orig))) * np.nan
 PDcoords[i_concomp] = solve_laplace_beltrami_open_mesh(
     vertices, faces, boundary_conditions
 )
