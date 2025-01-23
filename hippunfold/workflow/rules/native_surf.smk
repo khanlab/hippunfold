@@ -205,6 +205,7 @@ rule gen_native_mesh:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_percent=0,  # not enabled
         morph_openclose_dist=2,  # mm
+        coords_epsilon=0.1,
     output:
         surf_gii=temp(
             bids(
