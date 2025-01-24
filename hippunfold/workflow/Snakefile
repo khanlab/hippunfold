@@ -124,7 +124,7 @@ if config["modality"] == "hippb500":
     include: "rules/preproc_hippb500.smk"
 
 
-include: "rules/autotop.smk"
+include: "rules/coords.smk"
 
 
 include: "rules/warps.smk"
