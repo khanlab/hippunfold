@@ -171,7 +171,7 @@ for i in range(len(V)):
 
 # keep vertices that are in a nice coordinate range
 epsilon - snakemake.params.coords_epsilon
-good_v = np.where(np.logical_and(coord_at_V < (1-epsilon), coord_at_V > epsilon))[0]
+good_v = np.where(np.logical_and(coord_at_V < (1 - epsilon), coord_at_V > epsilon))[0]
 
 # morphological open
 maxdist = compute_geodesic_distances(points, faces, good_v)
