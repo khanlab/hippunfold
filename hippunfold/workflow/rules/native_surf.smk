@@ -299,6 +299,56 @@ rule smooth_surface:
 # --- creating unfold surface from native anatomical, including post-processing
 
 
+rule laplace_beltrami:
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        seg=get_labels_for_laplace,
+    params:
+        src_labels=lambda wildcards: config["laplace_labels"],
+    output:
+        coords_AP=bids(
+            root=work,
+            datatype="coords",
+            dir="AP",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+        coords_PD=bids(
+            root=work,
+            datatype="coords",
+            dir="PD",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    script:
+        "../scripts/laplace_beltrami.py"
+
+
+def get_unfold_z_level(wildcards):
+    extent = float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
+    return surf_thresholds[wildcards.surfname] * extent
+
+
 rule warp_native_mesh_to_unfold:
     input:
         surf_gii=bids(
@@ -310,21 +360,31 @@ rule warp_native_mesh_to_unfold:
             label="{label}",
             **inputs.subj_wildcards
         ),
-        warp_native2unfold=bids(
+        coords_AP=bids(
             root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
+            datatype="coords",
+            dir="AP",
             label="{label}",
-            suffix="xfm.nii.gz",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
             hemi="{hemi}",
-            from_="corobl",
-            to="unfold",
-            mode="surface"
+            **inputs.subj_wildcards
+        ),
+        coords_PD=bids(
+            root=work,
+            datatype="coords",
+            dir="PD",
+            label="{label}",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards
         ),
     params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="FLAT",
+        z_level=get_unfold_z_level,
+        vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
     output:
         surf_gii=bids(
             root=work,
@@ -339,21 +399,11 @@ rule warp_native_mesh_to_unfold:
         config["singularity"]["autotop"]
     group:
         "subj"
-    shell:
-        "wb_command -surface-apply-warpfield {input.surf_gii} {input.warp_native2unfold} {output.surf_gii} && "
-        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
+    script:
+        "../scripts/rewrite_vertices_to_flat.py"
 
 
-def get_unfold_z_level(wildcards):
-    extent = float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
-    return surf_thresholds[wildcards.surfname] * extent
-
-
-rule squash_unfold_mesh_to_plane:
-    """ this new rule squashes the mesh to be a perfect z-plane, so that any laminar 
-    irregularities in the unfold surfaces (ie bumpiness) don't affect the resulting 
-    voxelized representations that will be used for 2D registration"""
+rule update_unfold_mesh_structure:
     input:
         surf_gii=bids(
             root=work,
@@ -365,7 +415,9 @@ rule squash_unfold_mesh_to_plane:
             **inputs.subj_wildcards
         ),
     params:
-        z_level=get_unfold_z_level,
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type="FLAT",
     output:
         surf_gii=bids(
             root=work,
@@ -380,75 +432,9 @@ rule squash_unfold_mesh_to_plane:
         config["singularity"]["autotop"]
     group:
         "subj"
-    script:
-        "../scripts/squash_unfold_mesh_to_plane.py"
-
-
-# ---currently unused post-processing rules here :
-rule correct_bad_vertices:
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    params:
-        dist=lambda wildcards: config["outlier_opts"]["outlierSmoothDist"][
-            wildcards.density
-        ]
-        if "density" in wildcards
-        else config["outlier_opts"]["outlierSmoothDist"]["default"],
-        threshold=config["outlier_opts"]["vertexOutlierThreshold"],
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldfillbad",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    script:
-        "../scripts/fillbadvertices.py"
-
-
-rule replace_outlier_vertices:
-    """ WIP alternative implementation to fillbadvertices """
-    input:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldreplaceoutliers",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    script:
-        "../scripts/replace_outlier_vertices.py"
+    shell:
+        "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        " -surface-secondary-type {params.secondary_type}"
 
 
 rule heavy_smooth_unfold_surf:
@@ -463,7 +449,7 @@ rule heavy_smooth_unfold_surf:
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="unfoldsquash",
+            space="unfold",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards
@@ -1411,10 +1397,6 @@ rule warp_unfold_native_to_unfoldreg:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="FLAT",
     output:
         surf_gii=bids(
             root=work,
@@ -1429,10 +1411,13 @@ rule warp_unfold_native_to_unfoldreg:
         config["singularity"]["autotop"]
     group:
         "subj"
+    shadow:
+        "minimal"
     shell:
-        "wb_command -surface-apply-warpfield {input.surf_gii} {input.warp} {output.surf_gii} && "
-        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
+        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear && "
+        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
+        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
+        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
 
 
 # --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
