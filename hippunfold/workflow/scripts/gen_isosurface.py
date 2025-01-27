@@ -2,6 +2,7 @@ import pyvista as pv
 import nibabel as nib
 import numpy as np
 from copy import deepcopy
+import networkx as nx
 
 
 def write_surface_to_gifti(points, faces, out_surf_gii):
@@ -19,6 +20,48 @@ def write_surface_to_gifti(points, faces, out_surf_gii):
     gifti.add_gifti_data_array(tri_darray)
 
     gifti.to_filename(out_surf_gii)
+
+
+def largest_connected_component(vertices: np.ndarray, faces: np.ndarray):
+    """
+    Returns the vertices, faces, and original indices of the largest connected component of a 3D surface mesh.
+
+    Parameters:
+    vertices (np.ndarray): Array of vertex coordinates (N x 3).
+    faces (np.ndarray): Array of face indices (M x 3).
+
+    Returns:
+    tuple: (new_vertices, new_faces, largest_component), where new_vertices are the vertex coordinates of the largest component,
+           new_faces are the face indices adjusted to the new vertex order, and largest_component contains the indices of the original vertices.
+    """
+    # Build adjacency graph from face connectivity
+    G = nx.Graph()
+    for face in faces:
+        G.add_edges_from(
+            [(face[i], face[j]) for i in range(3) for j in range(i + 1, 3)]
+        )
+
+    # Find connected components
+    components = list(nx.connected_components(G))
+
+    # Select the largest connected component
+    largest_component = max(components, key=len)
+    largest_component = np.array(list(largest_component))
+
+    # Create a mapping from old vertex indices to new ones
+    index_map = {old_idx: new_idx for new_idx, old_idx in enumerate(largest_component)}
+
+    # Filter the vertices and faces
+    new_vertices = vertices[largest_component]
+    new_faces = np.array(
+        [
+            [index_map[v] for v in face]
+            for face in faces
+            if all(v in index_map for v in face)
+        ]
+    )
+
+    return new_vertices, new_faces, largest_component
 
 
 def remove_nan_vertices(vertices, faces):
@@ -184,6 +227,10 @@ bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
 # toss bad vertices
 points[bad_v, :] = np.nan
 points, faces = remove_nan_vertices(points, faces)
+
+
+# apply largest connected component
+points, faces, i_concomp = largest_connected_component(vertices_orig, faces)
 
 
 # write to gifti
