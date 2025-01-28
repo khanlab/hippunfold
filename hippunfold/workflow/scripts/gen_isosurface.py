@@ -213,7 +213,7 @@ for i in range(len(V)):
     ]  # really hope there's no x-y switching fuckery here!
 
 # keep vertices that are in a nice coordinate range
-epsilon - snakemake.params.coords_epsilon
+epsilon = snakemake.params.coords_epsilon
 good_v = np.where(np.logical_and(coord_at_V < (1 - epsilon), coord_at_V > epsilon))[0]
 
 # morphological open
