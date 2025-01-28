@@ -230,7 +230,7 @@ points, faces = remove_nan_vertices(points, faces)
 
 
 # apply largest connected component
-points, faces, i_concomp = largest_connected_component(vertices_orig, faces)
+points, faces, i_concomp = largest_connected_component(points, faces)
 
 
 # write to gifti
