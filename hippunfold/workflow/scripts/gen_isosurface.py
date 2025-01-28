@@ -54,29 +54,73 @@ def remove_nan_points_faces(vertices, faces):
     return (new_vertices, new_faces)
 
 
-# Load the NIfTI file
-nifti_img = nib.load(snakemake.input.nii)
-data = nifti_img.get_fdata()
+from scipy.ndimage import binary_dilation
 
 
-# Load the mask
-mask_img = nib.load(snakemake.input.mask)
-mask = mask_img.get_fdata()
+def get_adjacent_voxels(mask_a, mask_b):
+    """
+    Create a mask for voxels where label A is adjacent to label B.
+
+    Parameters:
+    - mask_a (np.ndarray): A 3D binary mask for label A.
+    - mask_b (np.ndarray): A 3D binary mask for label B.
+
+    Returns:
+    - np.ndarray: A 3D mask where adjacent voxels for label A and label B are marked as True.
+    """
+    # Dilate each mask to identify neighboring regions
+    dilated_a = binary_dilation(mask_a)
+    dilated_b = binary_dilation(mask_b)
+
+    # Find adjacency: voxels of A touching B and B touching A
+    adjacency_mask = (dilated_a.astype("bool") & mask_b.astype("bool")) | (
+        dilated_b.astype("bool") & mask_a.astype("bool")
+    )
+
+    return adjacency_mask
 
 
-affine = nifti_img.affine
+# Load the coords image
+coords_img = nib.load(snakemake.input.coords)
+coords = coords_img.get_fdata()
+
+
+# Load the nan mask
+nan_mask_img = nib.load(snakemake.input.nan_mask)
+nan_mask = nan_mask_img.get_fdata()
+
+# Load the sink mask
+sink_mask_img = nib.load(snakemake.input.sink_mask)
+sink_mask = sink_mask_img.get_fdata()
+
+# Load the src mask
+src_mask_img = nib.load(snakemake.input.src_mask)
+src_mask = src_mask_img.get_fdata()
+
+
+affine = coords_img.affine
 
 # Get voxel spacing from the header
-voxel_spacing = nifti_img.header.get_zooms()[:3]
+voxel_spacing = coords_img.header.get_zooms()[:3]
 
 # Create a PyVista grid
 grid = pv.ImageData()
-grid.dimensions = np.array(data.shape) + 1  # Add 1 to include the boundary voxels
+grid.dimensions = np.array(coords.shape) + 1  # Add 1 to include the boundary voxels
 grid.spacing = (1, 1, 1)  # Use unit spacing and zero origin since we will apply affine
 grid.origin = (0, 0, 0)
 
+# update the coords data to add the nans and sink
+coords[nan_mask == 1] = np.nan
+coords[sink_mask == 1] = 1.1  # since sink being zero creates a false boundary
+
+# we also need to use a nan mask for the voxels where src and sink meet directly
+# (since this is another false boundary)..
+src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
+coords[src_sink_nan_mask == 1] = np.nan
+
+
 # Add the scalar field
-grid.cell_data["values"] = np.where(mask == 0, np.nan, data).flatten(order="F")
+grid.cell_data["values"] = coords.flatten(order="F")
 grid = grid.cells_to_points("values")
 
 # apply the affine

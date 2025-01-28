@@ -1,0 +1,106 @@
+hippunfold_dir = "/localscratch/hippunfold_khanlab"
+hipp_dseg = "sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz"
+labellist = "labellist_withdg.txt"
+
+hemis = ["L", "R"]
+metrics = ["thickness", "curvature", "gyrification"]
+surftypes = ["midthickness", "inner", "outer"]
+
+hemi_to_structure = {"L": "CORTEX_LEFT", "R": "CORTEX_RIGHT"}
+surf_to_secondary_type = {
+    "midthickness": "MIDTHICKNESS",
+    "inner": "PIAL",
+    "outer": "GRAY_WHITE",
+}
+
+
+rule all:
+    input:
+        expand(
+            "hemi-{hemi}_label-{label}_dseg.label.gii",
+            label=["hipp", "dentate"],
+            hemi=hemis,
+        ),
+        expand(
+            "hemi-{hemi}_label-{label}_{metric}.shape.gii",
+            label=["hipp"],
+            hemi=hemis,
+            metric=metrics,
+        ),
+        expand(
+            "hemi-{hemi}_space-unfold_label-{label}_{surftype}.surf.gii",
+            label=["hipp", "dentate"],
+            hemi=hemis,
+            surftype=surftypes,
+        ),
+
+
+rule hipp_dseg:
+    input:
+        hipp_dseg,
+    output:
+        temp("hipp_dseg.nii.gz"),
+    shell:
+        "cp {input} {output}"
+
+
+rule dentate_dseg:
+    input:
+        hipp_dseg,
+    params:
+        dg_label=6,
+    output:
+        temp("dentate_dseg.nii.gz"),
+    shell:
+        "c3d {input} -scale 0 -shift {params.dg_label} -o {output}"
+
+
+rule surf_gifti:
+    input:
+        surf_gii=Path(hippunfold_dir)
+        / "hippunfold"
+        / "resources"
+        / "unfold_template_{label}"
+        / "tpl-avg_space-unfold_den-unfoldiso_{surftype}.surf.gii",
+    params:
+        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surftype],
+        surface_type="FLAT",
+    output:
+        surf_gii="hemi-{hemi}_space-unfold_label-{label}_{surftype}.surf.gii",
+    shell:
+        "cp {input} {output} && "
+        "wb_command -set-structure {output} {params.structure_type} -surface-type {params.surface_type}"
+        " -surface-secondary-type {params.secondary_type}"
+
+
+rule label_gifti:
+    input:
+        dseg_nii="{label}_dseg.nii.gz",
+        lut=labellist,
+        surf_gii="hemi-{hemi}_space-unfold_label-{label}_midthickness.surf.gii",
+    params:
+        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+    output:
+        label_gii="hemi-{hemi}_label-{label}_dseg.label.gii",
+    shadow:
+        "minimal"
+    shell:
+        "wb_command -volume-label-import {input.dseg_nii} {input.lut} label_vol.nii && "
+        "wb_command -volume-label-to-surface-mapping label_vol.nii {input.surf_gii} {output.label_gii} && "
+        "wb_command -set-structure {output} {params.structure_type}"
+
+
+rule metric_gifti:
+    input:
+        metric_nii="{metric}.nii.gz",
+        surf_gii="hemi-{hemi}_space-unfold_label-{label}_inner.surf.gii",  #existing metric niftis are on inner space
+    params:
+        structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
+    output:
+        metric_gii="hemi-{hemi}_label-{label}_{metric}.shape.gii",
+    shadow:
+        "minimal"
+    shell:
+        "wb_command -volume-to-surface-mapping {input.metric_nii} {input.surf_gii} {output.metric_gii} -trilinear && "
+        "wb_command -set-structure {output} {params.structure_type}"

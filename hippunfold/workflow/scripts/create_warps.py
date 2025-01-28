@@ -1,6 +1,5 @@
 import nibabel as nib
 import numpy as np
-import naturalneighbor
 from scipy.stats import zscore
 from scipy.ndimage import generic_filter, binary_dilation
 from astropy.convolution import convolve
@@ -154,74 +153,6 @@ summary("unfold_grid_phys", unfold_grid_phys)
 coord_flat_ap_unnorm = coord_flat_ap * unfold_dims[0]
 coord_flat_pd_unnorm = coord_flat_pd * unfold_dims[1]
 coord_flat_io_unnorm = coord_flat_io * unfold_dims[2]
-
-# add some noise to avoid perfectly overlapping datapoints!
-points = np.stack(
-    [
-        coord_flat_ap_unnorm + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-        coord_flat_pd_unnorm + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-        coord_flat_io_unnorm + (np.random.rand(coord_flat_ap.shape[0]) - 0.5) * 1e-6,
-    ],
-    axis=1,
-)
-summary("points", points)
-
-
-# perform the interpolation
-
-interp_ap = naturalneighbor.griddata(
-    points,
-    native_coords_phys[:, 0],
-    [[0, unfold_dims[0], 1], [0, unfold_dims[1], 1], [0, unfold_dims[2], 1]],
-)
-interp_pd = naturalneighbor.griddata(
-    points,
-    native_coords_phys[:, 1],
-    [[0, unfold_dims[0], 1], [0, unfold_dims[1], 1], [0, unfold_dims[2], 1]],
-)
-interp_io = naturalneighbor.griddata(
-    points,
-    native_coords_phys[:, 2],
-    [[0, unfold_dims[0], 1], [0, unfold_dims[1], 1], [0, unfold_dims[2], 1]],
-)
-
-
-# prepare maps for writing as warp file:
-
-# combine and reshape interpolated map to 5d (4th dim singleton)
-mapToNative = np.zeros(unfold_grid_phys.shape)
-mapToNative[:, :, :, 0, 0] = interp_ap
-mapToNative[:, :, :, 0, 1] = interp_pd
-mapToNative[:, :, :, 0, 2] = interp_io
-summary("mapToNative", mapToNative)
-
-mapToNative[np.isnan(mapToNative)] = 0
-
-
-# mapToNative has the absolute coordinates, but we want them relative to the
-# unfolded grid, so we subtract it out:
-displacementToNative = mapToNative - unfold_grid_phys
-summary("dispacementToNative", displacementToNative)
-
-
-# write to file
-dt = unfold_phys_coords_nib.get_fdata()
-dt = dt.dtype.name
-warp_unfold2native_nib = nib.Nifti1Image(
-    displacementToNative.astype(dt),
-    unfold_phys_coords_nib.affine,
-    unfold_phys_coords_nib.header,
-)
-warp_unfold2native_nib.to_filename(snakemake.output.warp_unfold2native)
-
-# write itk transform to file
-f = convert_warp_to_itk(displacementToNative)
-warpitk_native2unfold_nib = nib.Nifti1Image(
-    f.astype(dt), unfold_phys_coords_nib.affine, unfold_phys_coords_nib.header
-)
-
-warpitk_native2unfold_nib.to_filename(snakemake.output.warpitk_native2unfold)
-
 
 # Part 2: native2unfold warps
 

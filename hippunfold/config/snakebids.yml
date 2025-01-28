@@ -36,8 +36,6 @@ pybids_inputs:
       suffix: 'T2w'
       extension: '.nii.gz'
       datatype: 'anat'
-      # invalid_filters: 'allow'
-      # space: null
     wildcards:
       - subject
       - session
@@ -48,7 +46,6 @@ pybids_inputs:
     filters:
       suffix: 'b500'
       extension: '.nii.gz'
-      invalid_filters: 'allow'
       datatype: 'dwi'
     wildcards:
       - subject
@@ -59,8 +56,6 @@ pybids_inputs:
       suffix: 'T1w'
       extension: '.nii.gz'
       datatype: 'anat'
-      # invalid_filters: 'allow'
-      # space: null
     wildcards:
       - subject
       - session
@@ -72,7 +67,6 @@ pybids_inputs:
       suffix: 'dseg'
       extension: '.nii.gz'
       datatype: 'anat'
-      invalid_filters: 'allow'
     wildcards:
       - subject
       - session
@@ -179,27 +173,15 @@ parse_args:
 
   --atlas:
     choices:
-      - 'bigbrain'
-      - 'magdeburg'
-      - 'freesurfer'
       - 'multihist7'
-      - 'macaque'
-      - 'mouse'
-    default: 
-      - 'multihist7'
-    nargs: '+'
+      - 'bbhist'
+    default: 'multihist7'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
-    help: 'Do not perform unfolded space (2D) registration based on thickness, curvature, and gyrification for closer alignment to the reference atlas. NOTE: only multihist7 has these features currently, so this unfolded_reg is automatically skipped if a different atlas is chosen. (default: %(default)s)'
+    help: "Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. (default: %(default)s)"
     default: False
     action: store_true
-
-  --native_surf:
-    help: 'Use native surf workflow to generate isosurfaces in native space, and use wb_command tools to resample. Note: this currently disables unfolded registration if applied (until it is implemented).'
-    default: False
-    action: store_true
-
 
   --generate_myelin_map:
     help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
@@ -291,10 +273,10 @@ parse_args:
 
   --workdir:
     help: |
-      Folder for storing working files. If not specified, a temporary folder
-      will be made in your system's temp directory (e.g. /tmp). You can also
-      use environment variables when setting the workdir, e.g. --workdir '$SLURM_TMPDIR'.
-    default: null
+      Folder for storing working files. If not specified, will be in "work/" subfolder 
+      in the output folder. You can also use environment variables when setting the 
+      workdir, e.g. --workdir '$SLURM_TMPDIR'.
+    default: work
     type: str
 
 
@@ -345,6 +327,7 @@ outlier_opts:
     0p5mm: 7
     1mm: 3
     2mm: 1
+    default: 15
   vertexOutlierThreshold: 3
 
 
@@ -352,7 +335,7 @@ outlier_opts:
 #--- workflow specific configuration -- 
 
 singularity:
-  autotop: 'docker://khanlab/hippunfold_deps:v0.5.1'
+  autotop: 'docker://khanlab/hippunfold_deps:workbench-2.0.1'
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
@@ -453,12 +436,35 @@ template_files:
 
 atlas_files:
   multihist7:
-    label_nii: sub-maxprob_label-hipp_desc-manualsubfieldsunfoldaligned_dseg.nii.gz
-    lut: desc-subfields_atlas-multihist7_dseg.tsv
-    label_list: labellist.txt
-    thickness: thickness.nii.gz
-    curvature: curvature.nii.gz
-    gyrification: gyrification.nii.gz
+    lut: desc-subfields_atlas-multihist7_dseg.tsv #<-- perhaps generate this from the cifti instead of having user provide it
+    surf_gii: hemi-{hemi}_space-unfold_label-{label}_{surf_type}.surf.gii
+    metric_gii: hemi-{hemi}_label-{label}_{metric}.shape.gii
+    label_gii: hemi-{hemi}_label-{label}_dseg.label.gii
+    label_wildcards:
+     - hipp
+    hemi_wildcards:
+     - L
+     - R
+    metric_wildcards:
+     - thickness
+     - gyrification
+     - curvature
+
+  bbhist:
+    lut: desc-subfields_dseg.tsv
+    surf_gii: sub-bbhist_hemi-{hemi}_space-unfold_label-{label}_{surf_type}.surf.gii
+    metric_gii: sub-bbhist_hemi-{hemi}_space-corobl_label-{label}_{metric}.shape.gii
+    label_gii: sub-bbhist_hemi-{hemi}_space-corobl_label-{label}_desc-manual_subfields.label.gii
+    label_wildcards:
+     - hipp
+    hemi_wildcards:
+     - L
+     - R
+    metric_wildcards:
+     - thickness
+     - gyrification
+     - curvature
+
   bigbrain:
     label_nii: sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
     lut: desc-subfields_atlas-bigbrain_dseg.tsv
@@ -488,14 +494,6 @@ tissue_atlas_mapping:
     dg: 8
     srlm: 2
     cyst: 7
-  bigbrain:
-    dg: 6
-    srlm: 7
-    cyst: 8
-  multihist7:
-    dg: 6
-    srlm: 7
-    cyst: 8
   magdeburg:
     dg: 3
     srlm: 9
@@ -504,14 +502,11 @@ tissue_atlas_mapping:
     dg: 209
     srlm: 227
     cyst: 228
-  mouse: 
+  default: #this is used for any other atlases
     dg: 6
     srlm: 7
     cyst: 8
-  macaque: 
-    dg: 6
-    srlm: 7
-    cyst: 8
+   
 
 rigid_reg_template: False
 no_reg_template: False
@@ -522,8 +517,7 @@ inject_template: upenn
 
 template: CITI168
 
-atlas: 
-  - multihist7
+atlas: multihist7
 
 
 
@@ -539,7 +533,8 @@ resource_urls:
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
   atlas:
-    multihist7: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
+    bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
+    multihist7: 'www.dropbox.com/scl/fi/g07u7la7v1kwfgsty6ujc/atlas-multihist7_20250108.zip?rlkey=bi7wbdsm93upgnn3bmlv4f1hx&st=5iv33isc&dl=0'
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
     magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
     freesurfer: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
@@ -689,9 +684,7 @@ skip_inject_template_labels: False
 force_nnunet_model: False
 t1_reg_template: False
 generate_myelin_map: False
-no_unfolded_reg: False
 root: results
 workdir: null
 use_template_seg: False
 template_seg_smoothing_factor: 2
-native_surf: False
