@@ -84,7 +84,9 @@ rule prep_equivolume_coords:
     input:
         get_labels_for_laplace,
     params:
-        src_labels=lambda wildcards: config["laplace_labels"][wildcards.dir]["src"],
+        src_labels=lambda wildcards: config["laplace_labels"][wildcards.label][
+            wildcards.dir
+        ]["src"],
     output:
         outerbin=bids(
             root=work,

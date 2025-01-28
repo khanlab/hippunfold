@@ -5,38 +5,43 @@
 
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
-
-# this is for the mapping from inner to outer
-gm_labels = {
-    "hipp": config["laplace_labels"]["IO"]["gm"],
-    "dentate": config["laplace_labels"]["PD"]["sink"],
-}
-
-# appends the coords with these regions set to +1.1 for the meshing
-sink_labels = {"hipp": config["laplace_labels"]["IO"]["sink"], "dentate": [2]}
-
-# appends the coords with these regions set to +1.1 for the meshing
-src_labels = {"hipp": config["laplace_labels"]["IO"]["src"], "dentate": [1]}
-
-# sets these to nan in the coords for the meshing
-nan_labels = {
-    "hipp": config["laplace_labels"]["AP"]["sink"]
-    + config["laplace_labels"]["AP"]["src"]
-    + config["laplace_labels"]["PD"]["sink"]
-    + config["laplace_labels"]["PD"]["src"],
-    "dentate": [
-        0
-    ],  # TODO: this requires labels we don't produce yet -- namely, those at the boundary between  PDcoord~0.9-1  and SRLM, and between PDcoord~0.9-1 and BG
-}
-
-desc_io = {
-    "hipp": "equivol" if "equivolume" in config["laminar_coords_method"] else "laplace",
-    "dentate": "laplace",
-}
-
 unfoldreg_method = "greedy"  # choices: ["greedy","SyN"]
 
 unfoldreg_padding = "64x64x0vox"
+
+
+def get_gm_labels(wildcards):
+    lbl_list = " ".join(
+        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["gm"]]
+    )
+    return lbl_list
+
+
+def get_sink_labels(wildcards):
+    lbl_list = " ".join(
+        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["sink"]]
+    )
+    return lbl_list
+
+
+def get_src_labels(wildcards):
+    lbl_list = " ".join(
+        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["src"]]
+    )
+    return lbl_list
+
+
+def get_nan_labels(wildcards):
+    lbl_list = " ".join(
+        [
+            str(lbl)
+            for lbl in config["laplace_labels"][wildcards.label]["AP"]["sink"]
+            + config["laplace_labels"][wildcards.label]["AP"]["src"]
+            + config["laplace_labels"][wildcards.label]["PD"]["sink"]
+            + config["laplace_labels"][wildcards.label]["PD"]["src"]
+        ]
+    )
+    return lbl_list
 
 
 ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
@@ -50,9 +55,7 @@ rule get_label_mask:
     input:
         labelmap=get_labels_for_laplace,
     params:
-        gm_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in gm_labels[wildcards.label]]
-        ),
+        gm_labels=get_gm_labels,
     output:
         mask=temp(
             bids(
@@ -78,9 +81,7 @@ rule get_sink_mask:
     input:
         labelmap=get_labels_for_laplace,
     params:
-        labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in sink_labels[wildcards.label]]
-        ),
+        labels=get_sink_labels,
     output:
         mask=temp(
             bids(
@@ -106,9 +107,7 @@ rule get_src_mask:
     input:
         labelmap=get_labels_for_laplace,
     params:
-        labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in src_labels[wildcards.label]]
-        ),
+        labels=get_src_labels,
     output:
         mask=temp(
             bids(
@@ -134,9 +133,7 @@ rule get_nan_mask:
     input:
         labelmap=get_labels_for_laplace,
     params:
-        labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in nan_labels[wildcards.label]]
-        ),
+        labels=get_nan_labels,
     output:
         mask=temp(
             bids(
@@ -166,7 +163,7 @@ rule gen_native_mesh:
             dir="IO",
             label="{label}",
             suffix="coords.nii.gz",
-            desc=desc_io[wildcards.label],
+            desc="equivol",
             space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards
@@ -310,7 +307,7 @@ rule laplace_beltrami:
         ),
         seg=get_labels_for_laplace,
     params:
-        src_labels=lambda wildcards: config["laplace_labels"],
+        srcsink_labels=lambda wildcards: config["laplace_labels"][wildcards.label],
     output:
         coords_AP=bids(
             root=work,
@@ -484,7 +481,7 @@ rule compute_halfthick_mask:
             dir="IO",
             label="{label}",
             suffix="coords.nii.gz",
-            desc=desc_io[wildcards.label],
+            desc="equivol",
             space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards

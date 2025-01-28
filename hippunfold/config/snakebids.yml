@@ -633,34 +633,61 @@ shape_inject:
 inject_template_smoothing_factor: 1.0
 
 laplace_labels:
-  AP: 
-    gm:
-      - 1
-      - 8
-    src:
-      - 5
-    sink:
-      - 6
-  PD:
-    gm:
-      - 1
-      - 8
-    src:
-      - 3
-    sink:
-      - 8   
-  IO:
-    gm:
-      - 1
-      - 8
-    src:
-      - 2
-      - 4
-      - 7
-    sink:
-      - 0 
-    gm_noDG:
-      - 1
+  hipp:
+    AP: 
+      gm:
+        - 1
+        - 8
+      src:
+        - 5
+      sink:
+        - 6
+    PD:
+      gm:
+        - 1
+        - 8
+      src:
+        - 3
+      sink:
+        - 8   
+    IO:
+      gm:
+        - 1
+        - 8
+      src:
+        - 2
+        - 4
+        - 7
+        - 9
+      sink:
+        - 0 
+        - 10
+  dentate:
+    AP:
+      gm:
+        - 8
+      src:
+        - 5
+      sink:
+        - 6
+    PD:
+      gm:
+        - 8
+      src:
+        - 9
+      sink:
+        - 10
+    IO:
+      gm:
+        - 8
+      src:
+        - 2
+        - 4
+        - 7
+        - 9
+      sink:
+        - 0 
+        - 10
 
 output_spaces:
   - native
