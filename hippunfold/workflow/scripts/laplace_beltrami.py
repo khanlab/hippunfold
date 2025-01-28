@@ -147,14 +147,10 @@ boundary_values = np.array(interpol(vertices[boundary_vertices, :])).astype(int)
 
 APinds = np.array(np.where(boundary_values < 12)[0]).astype(int)
 boundary_conditions = dict(zip(boundary_vertices[APinds], boundary_values[APinds] - 10))
-APcoords = solve_laplace_beltrami_open_mesh(
-    vertices, faces, boundary_conditions
-)
+APcoords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 PDinds = np.array(np.where(boundary_values > 12)[0]).astype(int)
 boundary_conditions = dict(zip(boundary_vertices[PDinds], boundary_values[PDinds] - 20))
-PDcoords = solve_laplace_beltrami_open_mesh(
-    vertices, faces, boundary_conditions
-)
+PDcoords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 
 data_array = nib.gifti.GiftiDataArray(data=APcoords.astype(np.float32))
 image = nib.gifti.GiftiImage()
