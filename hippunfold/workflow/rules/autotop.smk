@@ -147,15 +147,7 @@ rule morphclose_dg:
 
 rule prep_dseg_for_laynii_hipp:
     input:
-        dseg_tissue=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="closeDG",
-            space="corobl",
-            hemi="{hemi}"
-        ),
+        dseg_tissue=get_labels_for_laplace,
     params:
         gm_labels=lambda wildcards: " ".join(
             [str(lbl) for lbl in config["laplace_labels"][wildcards.dir]["gm_noDG"]]
@@ -275,3 +267,83 @@ rule laynii_layers:
         "LN2_LAYERS  -rim dseg.nii.gz -equivol && "
         "cp dseg_metric_equidist.nii.gz {output.equidist} && "
         "cp dseg_metric_equivol.nii.gz {output.equivol}"
+
+
+
+rule laynii_equidist_renzo:
+    """Renzo implementation of equidist, using LN_GROW_LAYERS"""
+    input:
+        dseg_rim=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            dir="{dir}",
+            desc="laynii",
+            label="{autotop}",
+            space="corobl",
+            hemi="{hemi}"
+        ),
+    output:
+        equivol=bids(
+            root=work,
+            datatype="coords",
+            dir="{dir,IO}",
+            label="{autotop}",
+            suffix="coords.nii.gz",
+            desc="equidistrenzo",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards
+        ),
+    shadow:
+        "minimal"
+    container:
+        config["singularity"]["autotop"] 
+    group:
+        "subj"
+    shell:
+        "cp {input} dseg.nii.gz && "
+        "LN_GROW_LAYERS  -rim dseg.nii.gz && "
+        "cp dseg_metric_equidist.nii.gz {output.equidist}" # TODO: naming
+
+
+
+rule laynii_equivol_renzo:
+    """Renzo implementation of equivol, using LN_GROW_LAYERS"""
+    input:
+        dseg_rim=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            dir="{dir}",
+            desc="laynii",
+            label="{autotop}",
+            space="corobl",
+            hemi="{hemi}"
+        ),
+    output:
+        equivol=bids(
+            root=work,
+            datatype="coords",
+            dir="{dir,IO}",
+            label="{autotop}",
+            suffix="coords.nii.gz",
+            desc="equivolrenzo",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards
+        ),
+    shadow:
+        "minimal"
+    container:
+        config["singularity"]["autotop"] 
+    group:
+        "subj"
+    shell:
+        "cp {input} dseg.nii.gz && "
+        "LN_GROW_LAYERS  -rim dseg.nii.gz -N 1000 -vinc 60 -threeD && "
+        "LN_LEAKY_LAYERS  -rim dseg.nii.gz -nr_layers 1000 -iterations 100 && "
+        "LN_LOITUMA  -equidist sc_rim_layers.nii -leaky sc_rim_leaky_layers.nii -FWHM 1 -nr_layers 10 && "
+        "cp dseg_metric_equivol.nii.gz {output.equivol}" #-- TODO naming
