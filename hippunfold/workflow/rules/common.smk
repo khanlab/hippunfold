@@ -48,36 +48,11 @@ def get_final_spec():
                 datatype="surf",
                 den="{density}",
                 space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
             density=config["output_density"],
             space=ref_spaces,
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["hipp"],
-            allow_missing=True,
-        )
-    )
-    specs.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                den="{density}",
-                space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
-                suffix="surfaces.spec",
-                **inputs.subj_wildcards,
-            ),
-            density=config["output_density"],
-            space=ref_spaces,
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["dentate"],
             allow_missing=True,
         )
     )
@@ -87,15 +62,10 @@ def get_final_spec():
                 root=root,
                 datatype="surf",
                 space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
             space="corobl",
-            hemi=config["hemi"],
-            autotop=config["autotop_labels"],
-            surfname=config["surf_types"]["hipp"],
             allow_missing=True,
         )
     )
@@ -120,54 +90,6 @@ def get_final_subfields():
         atlas=config["atlas"],
         allow_missing=True,
     )
-
-
-def get_final_coords():
-    coords = []
-    # compute all laplace coords by default (incl IO)
-    coords.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="coords",
-                dir="{dir}",
-                suffix="coords.nii.gz",
-                desc="{desc}",
-                space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
-                **inputs.subj_wildcards,
-            ),
-            desc="laplace",
-            dir=["AP", "PD"],
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            space=crop_ref_spaces,
-            allow_missing=True,
-        )
-    )
-    coords.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="coords",
-                dir="{dir}",
-                suffix="coords.nii.gz",
-                desc="{desc}",
-                space="{space}",
-                hemi="{hemi}",
-                label="hipp",
-                **inputs.subj_wildcards,
-            ),
-            desc=config['laminar_coords_method'],
-            dir=["IO"],
-            hemi=config["hemi"],
-            space=crop_ref_spaces,
-            allow_missing=True,
-        )
-    )
-    return coords
-
 
 def get_final_anat():
     anat = []
@@ -289,7 +211,6 @@ def get_final_output():
     subj_output = []
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
-    subj_output.extend(get_final_coords())
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
     return subj_output
@@ -297,21 +218,13 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    rule copy_coords_to_results:
-        input:
-            os.path.join(work, "{pre}_space-corobl_{post}{suffix}.{ext}"),
-        output:
-            os.path.join(root, "{pre}_space-corobl_{post}{suffix,coords}.{ext}"),
-        group:
-            "subj"
-        shell:
-            "cp {input} {output}"
-
     rule copy_xfm_to_results:
         input:
-            os.path.join(work, "{pre}_{fromto,from|to}-corobl_{post}{suffix}.{ext}"),
+            os.path.join(work, "{pre}_{fromto}-corobl_{post}{suffix}.{ext}"),
         output:
-            os.path.join(root, "{pre}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"),
+            os.path.join(
+                root, "{pre,[^/].+}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"
+            ),
         group:
             "subj"
         shell:
@@ -321,7 +234,7 @@ if "corobl" in ref_spaces:
         input:
             os.path.join(work, "{pre}_desc-subfields_{post}{suffix}.{ext}"),
         output:
-            os.path.join(root, "{pre}_desc-subfields_{post}{suffix,dseg}.{ext}"),
+            os.path.join(root, "{pre,[^/].+}_desc-subfields_{post}{suffix,dseg}.{ext}"),
         group:
             "subj"
         shell:
