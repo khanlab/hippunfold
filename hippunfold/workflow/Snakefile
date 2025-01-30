@@ -91,9 +91,8 @@ wildcard_constraints:
     template="[a-zA-Z0-9]+",
 
 
-work = os.path.expandvars(config["workdir"])
-root = os.path.expandvars(config["root"])
-
+work = os.path.abspath(os.path.expandvars(config["workdir"]))
+root = os.path.abspath(os.path.expandvars(config["root"]))
 
 include: "rules/common.smk"
 include: "rules/download.smk"
