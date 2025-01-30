@@ -1,14 +1,12 @@
 import pyvista as pv
 import nibabel as nib
 import numpy as np
-from vtk import vtkNIFTIImageReader
+from copy import deepcopy
+import pyvista as pv
+import pygeodesic.geodesic as geodesic
 
 
-def write_surface_to_gifti(in_surface, out_surf_gii):
-
-    faces = in_surface.faces
-    faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
-    points = in_surface.points
+def write_surface_to_gifti(points, faces, out_surf_gii):
 
     points_darray = nib.gifti.GiftiDataArray(
         data=points, intent="NIFTI_INTENT_POINTSET", datatype="NIFTI_TYPE_FLOAT32"
@@ -25,65 +23,42 @@ def write_surface_to_gifti(in_surface, out_surf_gii):
     gifti.to_filename(out_surf_gii)
 
 
-def remove_nan_points_faces(vertices, faces):
-    # Step 1: Identify valid vertices (no NaN values)
-    nan_mask = np.isnan(vertices).any(axis=1)
-    valid_vertices = ~nan_mask  # True for valid rows
-    valid_indices = np.where(valid_vertices)[0]
-
-    # Step 2: Create a mapping from old to new indices
-    new_indices_map = -np.ones(
-        vertices.shape[0], dtype=int
-    )  # Default to -1 for invalid vertices
-    new_indices_map[valid_indices] = np.arange(len(valid_indices))
-
-    # Step 3: Update the faces array to remove references to invalid vertices
-    # Replace old indices with new ones, and remove faces with invalid vertices
-    new_faces = []
-    for face in faces:
-        # Map old indices to new ones
-        mapped_face = new_indices_map[face]
-        if np.all(mapped_face >= 0):  # Include only faces with all valid vertices
-            new_faces.append(mapped_face)
-
-    new_faces = np.array(new_faces)
-
-    # Step 4: Remove invalid vertices from the array
-    new_vertices = vertices[valid_vertices]
-
-    return (new_vertices, new_faces)
-
-
-from scipy.ndimage import binary_dilation
-
-
-def get_adjacent_voxels(mask_a, mask_b):
+def remove_nan_vertices(vertices, faces):
     """
-    Create a mask for voxels where label A is adjacent to label B.
+    Removes vertices containing NaNs and updates faces accordingly.
 
     Parameters:
-    - mask_a (np.ndarray): A 3D binary mask for label A.
-    - mask_b (np.ndarray): A 3D binary mask for label B.
+    - vertices (np.ndarray): (N, 3) array of vertex positions.
+    - faces (np.ndarray): (M, 3) array of triangular face indices.
 
     Returns:
-    - np.ndarray: A 3D mask where adjacent voxels for label A and label B are marked as True.
+    - new_vertices (np.ndarray): Filtered (N', 3) array of valid vertex positions.
+    - new_faces (np.ndarray): Filtered (M', 3) array of updated face indices.
     """
-    # Dilate each mask to identify neighboring regions
-    dilated_a = binary_dilation(mask_a)
-    dilated_b = binary_dilation(mask_b)
+    # Identify valid (non-NaN) vertices
+    valid_mask = ~np.isnan(vertices).any(axis=1)
 
-    # Find adjacency: voxels of A touching B and B touching A
-    adjacency_mask = (dilated_a.astype("bool") & mask_b.astype("bool")) | (
-        dilated_b.astype("bool") & mask_a.astype("bool")
-    )
+    # Create a mapping from old indices to new indices
+    new_indices = np.full(
+        vertices.shape[0], -1, dtype=int
+    )  # Default -1 for invalid ones
+    new_indices[valid_mask] = np.arange(valid_mask.sum())  # Renumber valid vertices
 
-    return adjacency_mask
+    # Filter out faces that reference removed vertices
+    valid_faces_mask = np.all(
+        valid_mask[faces], axis=1
+    )  # Keep only faces with valid vertices
+    new_faces = new_indices[faces[valid_faces_mask]]  # Remap face indices
+
+    # Filter vertices
+    new_vertices = vertices[valid_mask]
+
+    return new_vertices, new_faces
 
 
 # Load the coords image
 coords_img = nib.load(snakemake.input.coords)
 coords = coords_img.get_fdata()
-
 
 # Load the nan mask
 nan_mask_img = nib.load(snakemake.input.nan_mask)
@@ -111,12 +86,8 @@ grid.origin = (0, 0, 0)
 
 # update the coords data to add the nans and sink
 coords[nan_mask == 1] = np.nan
-coords[sink_mask == 1] = 1.1  # since sink being zero creates a false boundary
-
-# we also need to use a nan mask for the voxels where src and sink meet directly
-# (since this is another false boundary)..
-src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
-coords[src_sink_nan_mask == 1] = np.nan
+coords[src_mask == 1] = -0.1
+coords[sink_mask == 1] = 1.1
 
 
 # Add the scalar field
@@ -130,41 +101,57 @@ tfm_grid = grid.transform(
 
 
 # the contour function produces the isosurface
-
-surface = tfm_grid.contour([snakemake.params.threshold], method="contour").decimate(
-    0.9
-)  # fill_holes(snakemake.params.max_hole_size)
-# surface = tfm_grid.contour([snakemake.params.threshold],method='contour').fill_holes(snakemake.params.max_hole_size)
-
-# surface = surface.decimate(float(snakemake.params.decimate_percent) / 100.0)
-
+surface = tfm_grid.contour([snakemake.params.threshold], method="contour").decimate(0.9)
 # faces from pyvista surface are formatted with number of verts each row
 # reshape and remove the first col to get Nx3
 faces = surface.faces
 faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
-
 points = surface.points
+points, faces = remove_nan_vertices(points, faces)
+
+## JD clean - instead of trimming surfaces with a nan mask, we
+# keep vertices that overlap with good coord values. We then apply
+# some surface-based morphological opening and closing to keep
+# vertices along holes in the dg
+
+# this is equivalent to wb_command -volume-to-surface-mapping -enclosing
+# apply inverse affine to surface to get back to matrix space
+V = deepcopy(points)
+V[:, :] = V - affine[:3, 3].T
+for xyz in range(3):
+    V[:, xyz] = V[:, xyz] * (1 / affine[xyz, xyz])
+V = V.astype(int)
+# sample coords
+coord_at_V = np.zeros((len(V)))
+for i in range(len(V)):
+    coord_at_V[i] = coords[
+        V[i, 0], V[i, 1], V[i, 2]
+    ]  # really hope there's no x-y switching fuckery here!
+
+# keep vertices that are in a nice coordinate range
+epsilon = snakemake.params.coords_epsilon
+good_v = np.where(np.logical_and(coord_at_V < (1 - epsilon), coord_at_V > epsilon))[0]
+
+geoalg = geodesic.PyGeodesicAlgorithmExact(points, faces)
+# morphological open
+maxdist, _ = geoalg.geodesicDistances(good_v, None)
+bad_v = np.where(maxdist > snakemake.params.morph_openclose_dist)[0]
+# morphological close
+maxdist, _ = geoalg.geodesicDistances(bad_v, None)
+bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
+
+# toss bad vertices
+points[bad_v, :] = np.nan
+points, faces = remove_nan_vertices(points, faces)
 
 
-# with nans in background we end up with nan vertices, we can remove
-# these to end up with an open contour..
-new_points, new_faces = remove_nan_points_faces(points, faces)
-
-
-# Step 1: Prepare the PolyData
-# PyVista expects faces in a flat array with the number of points in each face as the first value
-faces_flat = np.hstack(
-    [[3] + list(face) for face in new_faces]
-)  # Add '3' for triangular faces
-
-# Create a new PolyData object
-polydata = pv.PolyData(new_points, faces_flat)
-
-#  Ensure the PolyData is clean (optional)
-# polydata.clean(inplace=True)  # Removes unused points, degenerate cells, etc.
-
-#  Apply decimation (optional)
-# polydata.decimate_pro(snakemake.params.decimate_percent / 100.0, inplace=True)
+# apply largest connected component
+faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])
+mesh = pv.PolyData(points, faces_pv)
+mesh_cc = mesh.extract_largest()
+points = mesh_cc.points  # This gives you the vertices
+faces = mesh_cc.faces
+faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
 
 # write to gifti
-write_surface_to_gifti(polydata, snakemake.output.surf_gii)
+write_surface_to_gifti(points, faces, snakemake.output.surf_gii)
