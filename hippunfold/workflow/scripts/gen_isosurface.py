@@ -2,7 +2,6 @@ import pyvista as pv
 import nibabel as nib
 import numpy as np
 from copy import deepcopy
-import networkx as nx
 import pyvista as pv
 import pygeodesic.geodesic as geodesic
 
@@ -151,7 +150,8 @@ faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])
 mesh = pv.PolyData(points, faces_pv)
 mesh_cc = mesh.extract_largest()
 points = mesh_cc.points  # This gives you the vertices
-points = mesh.faces.reshape(-1, 4)[:, 1:]
+faces = mesh_cc.faces
+faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
 
 # write to gifti
 write_surface_to_gifti(points, faces, snakemake.output.surf_gii)
