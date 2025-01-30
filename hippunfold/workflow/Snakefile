@@ -55,11 +55,6 @@ elif "T1w" in config["modality"]:
     template_modality = "T1w"
 
 
-# only generate hipp surface if skipping template injection
-#   i.e. drop dentate
-if config["skip_inject_template_labels"]:  # TODO do we need this?
-    config["autotop_labels"] = ["hipp"]
-
 limit_to_list.add(config["modality"])
 
 
