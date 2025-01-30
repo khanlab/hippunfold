@@ -717,7 +717,7 @@ rule affine_gii_corobl_to_modality:
             suffix="{surfname}.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards
         ),
         xfm=bids(
@@ -737,7 +737,7 @@ rule affine_gii_corobl_to_modality:
             suffix="{surfname}.surf.gii",
             space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
-            label="{autotop,hipp|dentate}",
+            label="{label,hipp|dentate}",
             **inputs.subj_wildcards
         ),
     container:
@@ -1656,7 +1656,7 @@ def get_inputs_cifti_metric_native(wildcards):
                 suffix="{metric}.shape.gii",
                 space="{space}",
                 hemi="L",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards,
             ).format(**wildcards),
         )
@@ -1668,7 +1668,7 @@ def get_inputs_cifti_metric_native(wildcards):
                 suffix="{metric}.shape.gii",
                 space="{space}",
                 hemi="R",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards,
             ).format(**wildcards),
         )
@@ -1686,7 +1686,7 @@ rule create_dscalar_metric_cifti_native:
             datatype="surf",
             suffix="{metric}.dscalar.nii",
             space="{space}",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     container:
@@ -1912,7 +1912,7 @@ rule merge_lr_spec_file:
                 suffix="surfaces.spec",
                 hemi="{hemi}",
                 space="{space}",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards
             ),
             hemi=config["hemi"],
@@ -1926,7 +1926,7 @@ rule merge_lr_spec_file:
             datatype="surf",
             space="{space}",
             suffix="surfaces.spec",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     container:
@@ -1945,10 +1945,10 @@ rule merge_hipp_dentate_spec_file:
                 datatype="surf",
                 suffix="surfaces.spec",
                 space="{space}",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards
             ),
-            autotop=config["autotop_labels"],
+            label=config["autotop_labels"],
             allow_missing=True,
         ),
     params:

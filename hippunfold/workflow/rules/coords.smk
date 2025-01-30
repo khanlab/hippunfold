@@ -37,49 +37,6 @@ def get_inputs_laplace(wildcards):
     return files
 
 
-rule laplace_coords_dentate:
-    input:
-        coords=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="dentate",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="corobl",
-            hemi="{hemi}"
-        ),
-    output:
-        coords=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            label="dentate",
-            suffix="coords.nii.gz",
-            desc="laplace",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards
-        ),
-    group:
-        "subj"
-    resources:
-        time=30,
-    log:
-        bids(
-            root="logs",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            hemi="{hemi}",
-            suffix="laplace-dentate.txt"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "cp {input} {output}"
-
-
 rule prep_equivolume_coords:
     input:
         get_labels_for_laplace,
@@ -92,6 +49,7 @@ rule prep_equivolume_coords:
             root=work,
             datatype="coords",
             dir="{dir}",
+            label="{label}",
             desc="all",
             suffix="mask.nii.gz",
             space="corobl",
@@ -102,6 +60,7 @@ rule prep_equivolume_coords:
             root=work,
             datatype="coords",
             dir="{dir}",
+            label="{label}",
             desc="SRLM",
             suffix="mask.nii.gz",
             space="corobl",
@@ -114,6 +73,7 @@ rule prep_equivolume_coords:
             **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
+            label="{label}",
             suffix="binarize.txt"
         ),
     group:
@@ -130,6 +90,7 @@ rule equivolume_coords:
             root=work,
             datatype="coords",
             dir="{dir}",
+            label="{label}",
             desc="all",
             suffix="mask.nii.gz",
             space="corobl",
@@ -140,6 +101,7 @@ rule equivolume_coords:
             root=work,
             datatype="coords",
             dir="{dir}",
+            label="{label}",
             desc="SRLM",
             suffix="mask.nii.gz",
             space="corobl",
@@ -153,7 +115,7 @@ rule equivolume_coords:
             root=work,
             datatype="coords",
             dir="{dir}",
-            label="hipp",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="equivol",
             space="corobl",
@@ -170,6 +132,7 @@ rule equivolume_coords:
             **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
+            label="{label}",
             suffix="equivolume.txt"
         ),
     container:

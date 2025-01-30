@@ -56,7 +56,7 @@ rule sample_myelin_map_surf:
             suffix="midthickness.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards
         ),
         inner=bids(
@@ -65,7 +65,7 @@ rule sample_myelin_map_surf:
             suffix="inner.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards
         ),
         outer=bids(
@@ -74,7 +74,7 @@ rule sample_myelin_map_surf:
             suffix="outer.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     output:
@@ -84,7 +84,7 @@ rule sample_myelin_map_surf:
             suffix="myelin.shape.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     group:

@@ -201,7 +201,7 @@ rule qc_subfield_surf:
             den="{density}",
             space="{ref_spaces}",
             hemi="{hemi}",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards
         ),
     output:
@@ -214,7 +214,7 @@ rule qc_subfield_surf:
                 desc="subfields",
                 space="{ref_spaces}",
                 hemi="{hemi}",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards
             ),
             caption="../report/subfield_qc.rst",
