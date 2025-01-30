@@ -171,6 +171,11 @@ parse_args:
     help: 'Sets the bounding box size for the crop native (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
     default: '256x256x256vox'
 
+  --resample_manualseg:
+    help: 'Resample the manual segmentation (for --modality manualseg), keeping the bounding box the same, but changing the number of voxels in the image. This can be specified as voxels ("300x300x300"), or a percentage ("20%%") or percentage in each direction ("20x20x40%%"). Note: the segmentation will always be subsequently cropped around the segmentation, with a padding of 5 voxels.  (default: %(default)s)'
+    default: null
+
+
   --atlas:
     choices:
       - 'multihist7'
@@ -715,3 +720,4 @@ root: results
 workdir: null
 use_template_seg: False
 template_seg_smoothing_factor: 2
+resample_manualseg: null
