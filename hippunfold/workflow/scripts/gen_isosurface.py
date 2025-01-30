@@ -3,6 +3,8 @@ import nibabel as nib
 import numpy as np
 from copy import deepcopy
 import networkx as nx
+import pyvista as pv
+import pygeodesic.geodesic as geodesic
 
 
 def write_surface_to_gifti(points, faces, out_surf_gii):
@@ -20,48 +22,6 @@ def write_surface_to_gifti(points, faces, out_surf_gii):
     gifti.add_gifti_data_array(tri_darray)
 
     gifti.to_filename(out_surf_gii)
-
-
-def largest_connected_component(vertices: np.ndarray, faces: np.ndarray):
-    """
-    Returns the vertices, faces, and original indices of the largest connected component of a 3D surface mesh.
-
-    Parameters:
-    vertices (np.ndarray): Array of vertex coordinates (N x 3).
-    faces (np.ndarray): Array of face indices (M x 3).
-
-    Returns:
-    tuple: (new_vertices, new_faces, largest_component), where new_vertices are the vertex coordinates of the largest component,
-           new_faces are the face indices adjusted to the new vertex order, and largest_component contains the indices of the original vertices.
-    """
-    # Build adjacency graph from face connectivity
-    G = nx.Graph()
-    for face in faces:
-        G.add_edges_from(
-            [(face[i], face[j]) for i in range(3) for j in range(i + 1, 3)]
-        )
-
-    # Find connected components
-    components = list(nx.connected_components(G))
-
-    # Select the largest connected component
-    largest_component = max(components, key=len)
-    largest_component = np.array(list(largest_component))
-
-    # Create a mapping from old vertex indices to new ones
-    index_map = {old_idx: new_idx for new_idx, old_idx in enumerate(largest_component)}
-
-    # Filter the vertices and faces
-    new_vertices = vertices[largest_component]
-    new_faces = np.array(
-        [
-            [index_map[v] for v in face]
-            for face in faces
-            if all(v in index_map for v in face)
-        ]
-    )
-
-    return new_vertices, new_faces, largest_component
 
 
 def remove_nan_vertices(vertices, faces):
@@ -95,49 +55,6 @@ def remove_nan_vertices(vertices, faces):
     new_vertices = vertices[valid_mask]
 
     return new_vertices, new_faces
-
-
-import scipy.sparse as sp
-from scipy.sparse.csgraph import dijkstra
-
-
-def compute_geodesic_distances(vertices, faces, source_indices):
-    """
-    Computes geodesic distances from a set of source vertices to all other vertices on a 3D surface mesh.
-
-    Parameters:
-    - vertices (np.ndarray): (N, 3) array of vertex positions.
-    - faces (np.ndarray): (M, 3) array of triangular face indices.
-    - source_indices (list or np.ndarray): Indices of source vertices.
-
-    Returns:
-    - distances (np.ndarray): (N,) array of geodesic distances from the source vertices.
-    """
-    num_vertices = len(vertices)
-
-    # Create adjacency matrix
-    row, col, weight = [], [], []
-    for f in faces:
-        for i in range(3):
-            v1, v2 = f[i], f[(i + 1) % 3]  # Pairwise edges in the triangle
-            dist = np.linalg.norm(vertices[v1] - vertices[v2])  # Euclidean edge length
-            row.append(v1)
-            col.append(v2)
-            weight.append(dist)
-            row.append(v2)
-            col.append(v1)
-            weight.append(dist)  # Ensure symmetry
-
-    graph = sp.csr_matrix((weight, (row, col)), shape=(num_vertices, num_vertices))
-
-    # Compute geodesic distances using Dijkstra's algorithm
-    distances = dijkstra(csgraph=graph, directed=False, indices=source_indices)
-
-    # If multiple sources, take the minimum distance to any of them
-    if isinstance(source_indices, (list, np.ndarray)) and len(source_indices) > 1:
-        distances = np.min(distances, axis=0)
-
-    return distances
 
 
 # Load the coords image
@@ -216,12 +133,12 @@ for i in range(len(V)):
 epsilon = snakemake.params.coords_epsilon
 good_v = np.where(np.logical_and(coord_at_V < (1 - epsilon), coord_at_V > epsilon))[0]
 
+geoalg = geodesic.PyGeodesicAlgorithmExact(points, faces)
 # morphological open
-maxdist = compute_geodesic_distances(points, faces, good_v)
+maxdist,_ = geoalg.geodesicDistances(good_v, None)
 bad_v = np.where(maxdist > snakemake.params.morph_openclose_dist)[0]
-
 # morphological close
-maxdist = compute_geodesic_distances(points, faces, bad_v)
+maxdist,_ = geoalg.geodesicDistances(bad_v, None)
 bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
 
 # toss bad vertices
@@ -230,8 +147,11 @@ points, faces = remove_nan_vertices(points, faces)
 
 
 # apply largest connected component
-points, faces, i_concomp = largest_connected_component(points, faces)
-
+faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])
+mesh = pv.PolyData(points, faces_pv)
+mesh_cc = mesh.extract_largest()
+points = mesh_cc.points  # This gives you the vertices
+points = mesh.faces.reshape(-1, 4)[:, 1:]
 
 # write to gifti
 write_surface_to_gifti(points, faces, snakemake.output.surf_gii)
