@@ -30,9 +30,7 @@ rule cp_template_to_unfold:
             "tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii",
         ),
     params:
-        structure_type=lambda wildcards: get_structure(
-            wildcards.hemi, wildcards.label
-        ),
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
     output:
@@ -73,9 +71,7 @@ rule calc_unfold_template_coords:
         coord_IO="coord-IO.shape.gii",
         origin=lambda wildcards: config["{label}"]["origin"],
         extent=lambda wildcards: config["{label}"]["extent"],
-        structure_type=lambda wildcards: get_structure(
-            wildcards.hemi, wildcards.label
-        ),
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
     output:
         coords_gii=bids(
             root=work,
@@ -104,7 +100,6 @@ rule calc_unfold_template_coords:
         "wb_command -file-information {params.coord_IO} && "
         "wb_command -metric-merge {output.coords_gii}  -metric {params.coord_AP} -metric {params.coord_PD} -metric {params.coord_IO} && "
         "wb_command -set-structure {output.coords_gii} {params.structure_type}"
-
 
 
 # warp from corobl to native
