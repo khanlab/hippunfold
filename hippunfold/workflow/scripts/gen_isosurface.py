@@ -135,10 +135,10 @@ good_v = np.where(np.logical_and(coord_at_V < (1 - epsilon), coord_at_V > epsilo
 
 geoalg = geodesic.PyGeodesicAlgorithmExact(points, faces)
 # morphological open
-maxdist,_ = geoalg.geodesicDistances(good_v, None)
+maxdist, _ = geoalg.geodesicDistances(good_v, None)
 bad_v = np.where(maxdist > snakemake.params.morph_openclose_dist)[0]
 # morphological close
-maxdist,_ = geoalg.geodesicDistances(bad_v, None)
+maxdist, _ = geoalg.geodesicDistances(bad_v, None)
 bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
 
 # toss bad vertices
