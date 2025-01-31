@@ -686,14 +686,14 @@ laplace_labels:
       gm:
         - 8
       src:
+        - 1
+      sink:
         - 2
         - 4
         - 7
         - 9
-      sink:
-        - 0 
         - 10
-
+        - 0
 output_spaces:
   - native
 

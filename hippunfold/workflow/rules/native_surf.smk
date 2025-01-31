@@ -10,149 +10,11 @@ unfoldreg_method = "greedy"  # choices: ["greedy","SyN"]
 unfoldreg_padding = "64x64x0vox"
 
 
-def get_gm_labels(wildcards):
-    lbl_list = " ".join(
-        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["gm"]]
-    )
-    return lbl_list
-
-
-def get_sink_labels(wildcards):
-    lbl_list = " ".join(
-        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["sink"]]
-    )
-    return lbl_list
-
-
-def get_src_labels(wildcards):
-    lbl_list = " ".join(
-        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["src"]]
-    )
-    return lbl_list
-
-
-def get_nan_labels(wildcards):
-    lbl_list = " ".join(
-        [
-            str(lbl)
-            for lbl in config["laplace_labels"][wildcards.label]["AP"]["sink"]
-            + config["laplace_labels"][wildcards.label]["AP"]["src"]
-            + config["laplace_labels"][wildcards.label]["PD"]["sink"]
-            + config["laplace_labels"][wildcards.label]["PD"]["src"]
-        ]
-    )
-    return lbl_list
-
-
 ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
 
 
 # --- isosurface generation ---
-
-
-rule get_label_mask:
-    input:
-        labelmap=get_labels_for_laplace,
-    params:
-        gm_labels=get_gm_labels,
-    output:
-        mask=temp(
-            bids(
-                root=work,
-                datatype="anat",
-                suffix="mask.nii.gz",
-                space="corobl",
-                desc="GM",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d -background -1 {input} -retain-labels {params} -binarize {output}"
-
-
-rule get_sink_mask:
-    input:
-        labelmap=get_labels_for_laplace,
-    params:
-        labels=get_sink_labels,
-    output:
-        mask=temp(
-            bids(
-                root=work,
-                datatype="anat",
-                suffix="mask.nii.gz",
-                space="corobl",
-                desc="sink",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
-
-
-rule get_src_mask:
-    input:
-        labelmap=get_labels_for_laplace,
-    params:
-        labels=get_src_labels,
-    output:
-        mask=temp(
-            bids(
-                root=work,
-                datatype="anat",
-                suffix="mask.nii.gz",
-                space="corobl",
-                desc="src",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
-
-
-rule get_nan_mask:
-    input:
-        labelmap=get_labels_for_laplace,
-    params:
-        labels=get_nan_labels,
-    output:
-        mask=temp(
-            bids(
-                root=work,
-                datatype="anat",
-                suffix="mask.nii.gz",
-                space="corobl",
-                desc="nan",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
 
 rule gen_native_mesh:
@@ -170,9 +32,10 @@ rule gen_native_mesh:
         ),
         nan_mask=bids(
             root=work,
-            datatype="anat",
+            datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
+            dir="IO",
             desc="nan",
             hemi="{hemi}",
             label="{label}",
@@ -180,9 +43,10 @@ rule gen_native_mesh:
         ),
         sink_mask=bids(
             root=work,
-            datatype="anat",
+            datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
+            dir="IO",
             desc="sink",
             hemi="{hemi}",
             label="{label}",
@@ -190,9 +54,10 @@ rule gen_native_mesh:
         ),
         src_mask=bids(
             root=work,
-            datatype="anat",
+            datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
+            dir="IO",
             desc="src",
             hemi="{hemi}",
             label="{label}",
@@ -490,7 +355,7 @@ rule compute_halfthick_mask:
         ),
         mask=bids(
             root=work,
-            datatype="anat",
+            datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",
@@ -539,7 +404,7 @@ rule register_midthickness:
         ),
         moving=bids(
             root=work,
-            datatype="anat",
+            datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",
@@ -584,7 +449,7 @@ rule apply_halfsurf_warp_to_img:
         ),
         moving=bids(
             root=work,
-            datatype="anat",
+            datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
             desc="GM",
