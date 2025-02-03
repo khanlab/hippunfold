@@ -89,7 +89,7 @@ rule reg_t2_to_ref:
             from_="T2w{idx}",
             to="T2w0",
             desc="rigid",
-            type_="ras"
+            type_="ras",
         ),
         xfm_itk=bids(
             root=work,
@@ -99,7 +99,7 @@ rule reg_t2_to_ref:
             from_="T2w{idx}",
             to="T2w0",
             desc="rigid",
-            type_="itk"
+            type_="itk",
         ),
         warped=bids(
             root=work,
@@ -153,7 +153,7 @@ if config["skip_preproc"]:
                 datatype="anat",
                 **inputs.subj_wildcards,
                 suffix="T2w.nii.gz",
-                desc="preproc"
+                desc="preproc",
             ),
         group:
             "subj"
@@ -175,7 +175,7 @@ else:
                 datatype="anat",
                 **inputs.subj_wildcards,
                 suffix="T2w.nii.gz",
-                desc="preproc"
+                desc="preproc",
             ),
         container:
             config["singularity"]["autotop"]
@@ -192,14 +192,14 @@ rule reg_t2_to_t1:
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="T2w.nii.gz",
-            desc="preproc"
+            desc="preproc",
         ),
         ref=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="T1w.nii.gz"
+            suffix="T1w.nii.gz",
         ),
     output:
         warped=bids(
@@ -208,7 +208,7 @@ rule reg_t2_to_t1:
             **inputs.subj_wildcards,
             suffix="T2w.nii.gz",
             desc="preproc",
-            space="T1w"
+            space="T1w",
         ),
         xfm_ras=bids(
             root=work,
@@ -218,7 +218,7 @@ rule reg_t2_to_t1:
             from_="T2w",
             to="T1w",
             desc="rigid",
-            type_="ras"
+            type_="ras",
         ),
         xfm_itk=bids(
             root=work,
@@ -228,7 +228,7 @@ rule reg_t2_to_t1:
             from_="T2w",
             to="T1w",
             desc="rigid",
-            type_="itk"
+            type_="itk",
         ),
     log:
         bids(
@@ -238,7 +238,7 @@ rule reg_t2_to_t1:
             from_="T2w",
             to="T1w",
             desc="rigid",
-            type_="ras"
+            type_="ras",
         ),
     container:
         config["singularity"]["autotop"]
@@ -331,7 +331,7 @@ rule compose_t2_xfm_corobl:
             from_="T2w",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
     log:
         bids(
@@ -341,7 +341,7 @@ rule compose_t2_xfm_corobl:
             from_="T2w",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
     container:
         config["singularity"]["autotop"]
@@ -362,7 +362,7 @@ def get_xfm_to_corobl():
             from_="T1w",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         )
     else:
         xfm = (
@@ -374,7 +374,7 @@ def get_xfm_to_corobl():
                 from_="T2w",
                 to="corobl",
                 desc="affine",
-                type_="itk"
+                type_="itk",
             ),
         )
     return xfm
@@ -388,7 +388,7 @@ rule warp_t2_to_corobl_crop:
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="T2w.nii.gz",
-            desc="preproc"
+            desc="preproc",
         ),
         xfm=get_xfm_to_corobl(),
         template_dir=Path(download_dir) / "template" / config["template"],
@@ -403,7 +403,7 @@ rule warp_t2_to_corobl_crop:
             suffix="T2w.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi,L|R}"
+            hemi="{hemi,L|R}",
         ),
     container:
         config["singularity"]["autotop"]

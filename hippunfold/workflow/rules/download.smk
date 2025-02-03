@@ -75,7 +75,7 @@ rule import_template_dseg:
             **inputs.subj_wildcards,
             desc="hipptissue",
             hemi="{hemi}",
-            suffix="dseg.nii.gz"
+            suffix="dseg.nii.gz",
         ),
     group:
         "subj"

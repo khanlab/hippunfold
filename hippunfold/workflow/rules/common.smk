@@ -219,7 +219,7 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    ruleorder: equivolume_coords > copy_coords_to_results
+    ruleorder: laplace_beltrami > equivolume_coords > copy_coords_to_results
 
     rule copy_coords_to_results:
         input:

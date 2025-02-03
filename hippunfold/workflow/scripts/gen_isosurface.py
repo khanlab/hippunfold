@@ -23,9 +23,6 @@ def write_surface_to_gifti(points, faces, out_surf_gii):
     gifti.to_filename(out_surf_gii)
 
 
-import numpy as np
-
-
 def apply_affine_transform(vertices, affine_matrix, inverse=False):
     """
     Apply an affine transformation to a 3D mesh.

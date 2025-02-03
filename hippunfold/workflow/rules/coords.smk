@@ -12,7 +12,7 @@ def get_labels_for_laplace(wildcards):
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ).format(**wildcards)
     return seg
 
@@ -61,7 +61,7 @@ rule get_label_mask:
     input:
         labelmap=get_labels_for_laplace,
     params:
-        gm_labels=get_gm_labels,
+        labels=get_gm_labels,
     output:
         mask=bids(
             root=work,
@@ -71,14 +71,34 @@ rule get_label_mask:
             desc="GM",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
     group:
         "subj"
     shell:
-        "c3d -background -1 {input} -retain-labels {params} -binarize {output}"
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
+def get_inputs_laplace(wildcards):
+    files = dict()
+    files["lbl"] = get_labels_for_laplace(wildcards)
+    if not config["skip_inject_template_labels"]:
+        files["init_coords"] = (
+            bids(
+                root=work,
+                datatype="coords",
+                **inputs.subj_wildcards,
+                dir="{dir}",
+                label="hipp",
+                suffix="coords.nii.gz",
+                desc="init",
+                space="corobl",
+                hemi="{hemi}",
+            ),
+        )
+    return files
 
 
 rule get_sink_mask:
@@ -96,7 +116,7 @@ rule get_sink_mask:
             desc="sink",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -121,7 +141,7 @@ rule get_src_mask:
             desc="src",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -146,7 +166,7 @@ rule get_nan_mask:
             desc="nan",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -167,7 +187,7 @@ rule equivolume_coords:
             desc="src",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         gm=bids(
             root=work,
@@ -177,7 +197,7 @@ rule equivolume_coords:
             desc="GM",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         edges=bids(
             root=work,
@@ -188,7 +208,7 @@ rule equivolume_coords:
             desc="nan",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         script=os.path.join(workflow.basedir, "scripts/equivolume_coords.py"),
@@ -202,7 +222,7 @@ rule equivolume_coords:
             desc="equivol",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         srcgm=bids(
             root=work,
@@ -213,7 +233,7 @@ rule equivolume_coords:
             desc="srcGM",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"
@@ -226,7 +246,7 @@ rule equivolume_coords:
             dir="{dir}",
             hemi="{hemi}",
             label="{label}",
-            suffix="equivolume.txt"
+            suffix="equivolume.txt",
         ),
     container:
         config["singularity"]["autotop"]
