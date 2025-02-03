@@ -28,6 +28,7 @@ pandas = [
 ]
 nibabel = "^5.3.2"
 pyvista = "^0.44.2"
+pygeodesic = "^0.1.11"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"

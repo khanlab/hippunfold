@@ -2,29 +2,6 @@
 # by flipping it
 
 
-def get_input_for_shape_inject(wildcards):
-    if config["modality"] == "manualseg":
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-        ).format(**wildcards)
-    else:
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi}",
-        ).format(**wildcards)
-    return seg
-
-
 def get_input_splitseg_for_shape_inject(wildcards):
     if config["modality"] == "manualseg":
         seg = bids(
@@ -234,7 +211,16 @@ rule template_shape_inject:
 
 rule inject_init_laplace_coords:
     input:
-        subject_seg=get_input_for_shape_inject,
+        upsampled_ref=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            space="corobl",
+            hemi="{hemi}",
+            label="{autotop}"
+        ),
         matrix=bids(
             root=work,
             **inputs.subj_wildcards,
@@ -270,7 +256,7 @@ rule inject_init_laplace_coords:
             hemi="{hemi}"
         ),
     params:
-        interp_opt="-ri NN",
+        interp_opt="-ri LIN",
     output:
         init_coords=bids(
             root=work,
@@ -299,7 +285,7 @@ rule inject_init_laplace_coords:
         config["singularity"]["autotop"]
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule reinsert_subject_labels:

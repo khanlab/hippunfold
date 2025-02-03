@@ -172,8 +172,18 @@ parse_args:
     default: '256x256x256vox'
 
   --resample_manualseg:
-    help: 'Resample the manual segmentation (for --modality manualseg), keeping the bounding box the same, but changing the number of voxels in the image. This can be specified as voxels ("300x300x300"), or a percentage ("20%%") or percentage in each direction ("20x20x40%%"). Note: the segmentation will always be subsequently cropped around the segmentation, with a padding of 5 voxels.  (default: %(default)s)'
+    help: 'Resample the manual segmentation (for --modality manualseg), keeping the bounding box the same, but changing the number of voxels in the image. This can be specified as voxels ("300x300x300"), or a percentage ("20%%") or percentage in each direction ("20x20x40%%"). Note: the segmentation will always be subsequently cropped around the segmentation.  (default: %(default)s)'
     default: null
+
+  --laminar_coords_res_hipp:
+    help: 'Set the resolution that the laminar (IO) coords will be computed with for hippocampus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
+    default: '0.3x0.3x0.3mm'
+    dest: "laminar_coords_res.hipp"
+
+  --laminar_coords_res_dentate:
+    help: 'Set the resolution that the laminar (IO) coords will be computed with for the dentate gyrus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
+    default: '0.1x0.1x0.1mm'
+    dest: "laminar_coords_res.dentate"
 
 
   --atlas:
@@ -238,7 +248,10 @@ parse_args:
       - 'laplace'
       - 'equivol'
       - 'equidist'
-    default: 'equivol'
+      - 'equivolrenzo'
+      - 'equidistrenzo'
+      - 'laplacerenzo'
+    default: 'equidist'
     help: 'Method to use for laminar coordinates. Equivol and equidist are from the laynii LN2_LAYERS tool. (default: %(default)s)' 
 
   --autotop_labels:
@@ -410,6 +423,7 @@ template_files:
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
+    dseg_dentate: tpl-upenn_desc-DGtissue_dseg.nii.gz
     coords: tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
     hemi_wildcards:
       - R
@@ -638,34 +652,64 @@ shape_inject:
 inject_template_smoothing_factor: 1.0
 
 laplace_labels:
-  AP: 
-    gm:
-      - 1
-      - 8
-    src:
-      - 5
-    sink:
-      - 6
-  PD:
-    gm:
-      - 1
-      - 8
-    src:
-      - 3
-    sink:
-      - 8   
-  IO:
-    gm:
-      - 1
-      - 8
-    src:
-      - 2
-      - 4
-      - 7
-    sink:
-      - 0 
-    gm_noDG:
-      - 1
+  hipp:
+    AP: 
+      gm:
+        - 1
+        - 8
+      src:
+        - 5
+      sink:
+        - 6
+    PD:
+      gm:
+        - 1
+        - 8
+      src:
+        - 3
+      sink:
+        - 8   
+    IO:
+      gm:
+        - 1
+        - 8
+      src:
+        - 2
+        - 4
+        - 7
+      sink:
+        - 0 
+      gm_noDG:
+        - 1
+  dentate:      
+    AP: 
+      gm:
+        - 8
+      src:
+        - 5
+      sink:
+        - 6
+    PD:
+      gm:
+        - 8
+      src:
+        - 1
+      sink:
+        - 2   
+    IO:
+      gm:
+        - 8
+      src:
+        - 3
+      sink:
+        - 4
+
+      
+tight_crop_labels: #defines what labels to use for tight cropping (for upsampled ref)
+  hipp:
+    - 1
+  dentate:
+    - 8
 
 output_spaces:
   - native
@@ -694,3 +738,6 @@ workdir: null
 use_template_seg: False
 template_seg_smoothing_factor: 2
 resample_manualseg: null
+laminar_coords_res:
+  hipp: 0.3x0.3x0.3mm
+  dentate: 0.1x0.1x0.1mm

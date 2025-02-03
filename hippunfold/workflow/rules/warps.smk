@@ -224,4 +224,3 @@ rule create_unfold_ref:
         config["singularity"]["autotop"]
     shell:
         "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}"
-

@@ -7,31 +7,31 @@ surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
 
 # this is for the mapping from inner to outer
-gm_labels = {
-    "hipp": config["laplace_labels"]["IO"]["gm"],
-    "dentate": config["laplace_labels"]["PD"]["sink"],
-}
+# gm_labels = {
+#    "hipp": config["laplace_labels"]["IO"]["gm"],
+#    "dentate": config["laplace_labels"]["PD"]["sink"],
+# }
 
 # appends the coords with these regions set to +1.1 for the meshing
-sink_labels = {"hipp": config["laplace_labels"]["IO"]["sink"], "dentate": [2]}
+# sink_labels = {"hipp": config["laplace_labels"]["IO"]["sink"], "dentate": [2]}
 
 # appends the coords with these regions set to +1.1 for the meshing
-src_labels = {"hipp": config["laplace_labels"]["IO"]["src"], "dentate": [1]}
+# src_labels = {"hipp": config["laplace_labels"]["IO"]["src"], "dentate": [1]}
 
 # sets these to nan in the coords for the meshing
-nan_labels = {
-    "hipp": config["laplace_labels"]["AP"]["sink"]
-    + config["laplace_labels"]["AP"]["src"]
-    + config["laplace_labels"]["PD"]["sink"]
-    + config["laplace_labels"]["PD"]["src"],
-    "dentate": [
-        0
-    ],  # TODO: this requires labels we don't produce yet -- namely, those at the boundary between  PDcoord~0.9-1  and SRLM, and between PDcoord~0.9-1 and BG
-}
+# nan_labels = {
+#    "hipp": config["laplace_labels"]["AP"]["sink"]
+#    + config["laplace_labels"]["AP"]["src"]
+#    + config["laplace_labels"]["PD"]["sink"]
+#    + config["laplace_labels"]["PD"]["src"],
+#    "dentate": [
+#        0
+#    ],  # TODO: this requires labels we don't produce yet -- namely, those at the boundary between  PDcoord~0.9-1  and SRLM, and between PDcoord~0.9-1 and BG
+# }
 
 desc_io = {
     "hipp": config["laminar_coords_method"],
-    "dentate": "laplace",
+    "dentate": config["laminar_coords_method"],
 }
 
 unfoldreg_method = "greedy"  # choices: ["greedy","SyN"]
@@ -51,7 +51,7 @@ rule get_label_mask:
         labelmap=get_labels_for_laplace,
     params:
         gm_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in gm_labels[wildcards.label]]
+            [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["gm"]]
         ),
     output:
         mask=temp(
@@ -79,7 +79,10 @@ rule get_sink_mask:
         labelmap=get_labels_for_laplace,
     params:
         labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in sink_labels[wildcards.label]]
+            [
+                str(lbl)
+                for lbl in config["laplace_labels"][wildcards.label]["IO"]["sink"]
+            ]
         ),
     output:
         mask=temp(
@@ -107,7 +110,10 @@ rule get_src_mask:
         labelmap=get_labels_for_laplace,
     params:
         labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in src_labels[wildcards.label]]
+            [
+                str(lbl)
+                for lbl in config["laplace_labels"][wildcards.label]["IO"]["src"]
+            ]
         ),
     output:
         mask=temp(
@@ -135,7 +141,13 @@ rule get_nan_mask:
         labelmap=get_labels_for_laplace,
     params:
         labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in nan_labels[wildcards.label]]
+            [
+                str(lbl)
+                for lbl in config["laplace_labels"][wildcards.label]["AP"]["sink"]
+                + config["laplace_labels"][wildcards.label]["AP"]["src"]
+                + config["laplace_labels"][wildcards.label]["PD"]["sink"]
+                + config["laplace_labels"][wildcards.label]["PD"]["src"]
+            ]
         ),
     output:
         mask=temp(
@@ -204,6 +216,8 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_percent=0,  # not enabled
+        morph_openclose_dist=2,  # mm
+        coords_epsilon=0.1,
     output:
         surf_gii=temp(
             bids(
@@ -220,7 +234,8 @@ rule gen_native_mesh:
     group:
         "subj"
     container:
-        config["singularity"]["autotop"]
+        None
+        #config["singularity"]["autotop"]
     script:
         "../scripts/gen_isosurface.py"
 
@@ -310,7 +325,7 @@ rule laplace_beltrami:
         ),
         seg=get_labels_for_laplace,
     params:
-        src_labels=lambda wildcards: config["laplace_labels"],
+        srcsink_labels=lambda wildcards: config["laplace_labels"][wildcards.label],
     output:
         coords_AP=bids(
             root=work,

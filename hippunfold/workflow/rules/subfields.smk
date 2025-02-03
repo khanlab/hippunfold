@@ -1,3 +1,4 @@
+#
 
 
 rule label_subfields_from_vol_coords_corobl:
@@ -85,7 +86,7 @@ rule combine_tissue_subfield_labels_corobl:
     then, we just need to add those in, using max(old,new) to override old with new in case of conflict
     """
     input:
-        tissue=get_labels_for_laplace,
+        tissue=get_labels_for_laplace_hipp,
         subfields=bids(
             root=work,
             datatype="anat",

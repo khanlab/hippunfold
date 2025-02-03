@@ -91,6 +91,7 @@ def get_final_subfields():
         allow_missing=True,
     )
 
+
 def get_final_anat():
     anat = []
     if "T1w" in ref_spaces or "T2w" in ref_spaces:
@@ -249,3 +250,26 @@ def get_download_dir():
         dirs = AppDirs("hippunfold", "khanlab")
         download_dir = dirs.user_cache_dir
     return download_dir
+
+
+def get_input_for_shape_inject(wildcards):
+    if config["modality"] == "manualseg":
+        seg = bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            space="corobl",
+            hemi="{hemi}",
+        ).format(**wildcards)
+    else:
+        seg = bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="nnunet",
+            space="corobl",
+            hemi="{hemi}",
+        ).format(**wildcards)
+    return seg
