@@ -17,6 +17,70 @@ def get_labels_for_laplace(wildcards):
     return seg
 
 
+def get_gm_labels(wildcards):
+    lbl_list = " ".join(
+        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["gm"]]
+    )
+    return lbl_list
+
+
+def get_sink_labels(wildcards):
+    lbl_list = " ".join(
+        [
+            str(lbl)
+            for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["sink"]
+        ]
+    )
+    return lbl_list
+
+
+def get_src_labels(wildcards):
+    lbl_list = " ".join(
+        [
+            str(lbl)
+            for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["src"]
+        ]
+    )
+    return lbl_list
+
+
+def get_nan_labels(wildcards):
+    lbl_list = " ".join(
+        [
+            str(lbl)
+            for lbl in config["laplace_labels"][wildcards.label]["AP"]["sink"]
+            + config["laplace_labels"][wildcards.label]["AP"]["src"]
+            + config["laplace_labels"][wildcards.label]["PD"]["sink"]
+            + config["laplace_labels"][wildcards.label]["PD"]["src"]
+        ]
+    )
+    return lbl_list
+
+
+rule get_label_mask:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=get_gm_labels,
+    output:
+        mask=bids(
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="GM",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
 def get_inputs_laplace(wildcards):
     files = dict()
     files["lbl"] = get_labels_for_laplace(wildcards)
@@ -37,68 +101,80 @@ def get_inputs_laplace(wildcards):
     return files
 
 
-rule laplace_coords_dentate:
+rule get_sink_mask:
     input:
-        coords=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="dentate",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="corobl",
-            hemi="{hemi}",
-        ),
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=get_sink_labels,
     output:
-        coords=bids(
+        mask=bids(
             root=work,
             datatype="coords",
-            dir="{dir}",
-            label="dentate",
-            suffix="coords.nii.gz",
-            desc="laplace",
+            suffix="mask.nii.gz",
             space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
-        ),
-    group:
-        "subj"
-    resources:
-        time=30,
-    log:
-        bids(
-            root="logs",
-            **inputs.subj_wildcards,
             dir="{dir}",
+            desc="sink",
             hemi="{hemi}",
-            suffix="laplace-dentate.txt",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
-    shell:
-        "cp {input} {output}"
-
-
-rule morphclose_dg:
-    input:
-        dseg_tissue=get_labels_for_laplace,
-    output:
-        dseg_tissue=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="closeDG",
-            space="corobl",
-            hemi="{hemi}",
-        ),
     group:
         "subj"
+    shell:
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
+rule get_src_mask:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=get_src_labels,
+    output:
+        mask=bids(
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="src",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     container:
         config["singularity"]["autotop"]
+    group:
+        "subj"
     shell:
-        "c3d {input} -as DSEG -retain-labels 8 -binarize -dilate 1 3x3x3vox -erode 1 3x3x3vox -scale 100 -push DSEG -max -replace 100 8 -o {output}"
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
+rule get_nan_mask:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=get_nan_labels,
+    output:
+        mask=bids(
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="nan",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    group:
+        "subj"
+    shell:
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
 
 
 rule prep_dseg_for_laynii_hipp:
