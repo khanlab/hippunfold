@@ -51,6 +51,7 @@ rule get_subfield_vols_subj:
                 space="{crop_ref_spaces}",
                 desc="subfields",
                 atlas="{atlas}",
+                label="hipp",
                 suffix="dseg.nii.gz",
             ),
             hemi=config["hemi"],
@@ -173,6 +174,7 @@ rule qc_subfield:
             space="{space}",
             hemi="{hemi}",
             atlas="{atlas}",
+            label="hipp",
             **inputs.subj_wildcards,
         ),
     output:

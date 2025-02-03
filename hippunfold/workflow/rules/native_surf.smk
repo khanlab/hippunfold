@@ -5,6 +5,7 @@
 
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
+
 unfoldreg_method = "greedy"  # choices: ["greedy","SyN"]
 
 unfoldreg_padding = "64x64x0vox"

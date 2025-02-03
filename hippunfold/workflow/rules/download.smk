@@ -87,6 +87,43 @@ rule import_template_dseg:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
 
+rule import_template_dseg_dentate:
+    input:
+        template_dir=Path(download_dir) / "template" / config["inject_template"],
+    params:
+        template_seg=lambda wildcards: Path(download_dir)
+        / "template"
+        / config["inject_template"]
+        / config["template_files"][config["inject_template"]]["dseg_dentate"].format(
+            **wildcards
+        ),
+        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
+            wildcards,
+            Path(download_dir)
+            / "template"
+            / config["inject_template"]
+            / config["template_files"][config["inject_template"]][
+                "dseg_dentate"
+            ].format(**wildcards),
+        ),
+    output:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="dentatetissue",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz"
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "{params.copy_or_flip_cmd} {output.template_seg}"
+
+
 rule import_template_coords:
     input:
         template_dir=Path(download_dir) / "template" / config["inject_template"],

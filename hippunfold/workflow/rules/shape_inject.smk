@@ -2,29 +2,6 @@
 # by flipping it
 
 
-def get_input_for_shape_inject(wildcards):
-    if config["modality"] == "dsegtissue":
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-        ).format(**wildcards)
-    else:
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi}",
-        ).format(**wildcards)
-    return seg
-
-
 def get_input_splitseg_for_shape_inject(wildcards):
     if config["modality"] == "dsegtissue":
         seg = bids(
@@ -184,7 +161,16 @@ rule template_shape_inject:
             hemi="{hemi}",
             suffix="dseg.nii.gz",
         ),
-        subject_seg=get_input_for_shape_inject,
+        upsampled_ref=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            label="{label}",
+            space="corobl",
+            hemi="{hemi}",
+        ),
         matrix=bids(
             root=work,
             **inputs.subj_wildcards,
@@ -209,7 +195,7 @@ rule template_shape_inject:
             hemi="{hemi}",
         ),
     params:
-        interp_opt="-ri LABEL 0.2vox",
+        interp_opt="-ri LABEL 0.1mm", # smoothing sigma = 100micron
     output:
         inject_seg=bids(
             root=work,
@@ -219,6 +205,7 @@ rule template_shape_inject:
             desc="inject",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ),
     log:
         bids(
@@ -226,6 +213,7 @@ rule template_shape_inject:
             **inputs.subj_wildcards,
             suffix="templateshapeinject.txt",
             hemi="{hemi}",
+            label="{label}",
         ),
     group:
         "subj"
@@ -235,12 +223,22 @@ rule template_shape_inject:
         "../envs/greedy.yaml"
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule inject_init_laplace_coords:
+    """ TODO: this may not be needed anymore """
     input:
-        subject_seg=get_input_for_shape_inject,
+        upsampled_ref=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}"
+        ),
         matrix=bids(
             root=work,
             **inputs.subj_wildcards,
@@ -276,7 +274,7 @@ rule inject_init_laplace_coords:
             hemi="{hemi}",
         ),
     params:
-        interp_opt="-ri NN",
+        interp_opt="-ri LIN",
     output:
         init_coords=bids(
             root=work,
@@ -307,7 +305,7 @@ rule inject_init_laplace_coords:
         "../envs/greedy.yaml"
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule reinsert_subject_labels:
@@ -320,6 +318,7 @@ rule reinsert_subject_labels:
             desc="inject",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ),
         subject_seg=get_input_for_shape_inject,
     params:
@@ -335,6 +334,7 @@ rule reinsert_subject_labels:
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ),
     group:
         "subj"
@@ -343,4 +343,7 @@ rule reinsert_subject_labels:
     conda:
         "../envs/c3d.yaml"
     shell:
-        "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -push LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}"
+        "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL " #get the labels to retain
+        " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE " #reslice to injected seg
+        "-push LBL_RESLICE -threshold 0 0 1 0 -push SEG -multiply " # set injected seg to zero where retained labels are
+        "-push LBL_RESLICE -add -o {output.postproc_seg}" #and add this to retained labels

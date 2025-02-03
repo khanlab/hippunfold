@@ -83,6 +83,7 @@ def get_final_subfields():
             space="{space}",
             hemi="{hemi}",
             atlas="{atlas}",
+            label="hipp",
             **inputs.subj_wildcards,
         ),
         hemi=config["hemi"],
@@ -331,3 +332,26 @@ def get_create_template_output():
             )
         )
     return files
+
+
+def get_input_for_shape_inject(wildcards):
+    if config["modality"] == "dsegtissue":
+        seg = bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            space="corobl",
+            hemi="{hemi}",
+        ).format(**wildcards)
+    else:
+        seg = bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="nnunet",
+            space="corobl",
+            hemi="{hemi}",
+        ).format(**wildcards)
+    return seg

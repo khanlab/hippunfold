@@ -11,6 +11,7 @@ rule create_native_crop_ref:
                 space="{native_modality}",
                 hemi="{hemi}",
                 atlas="{atlas}",
+                label='hipp',
                 **inputs.subj_wildcards,
             ),
             atlas=config["atlas"],
@@ -98,6 +99,7 @@ rule resample_postproc_native_crop:
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
+            label=config['autotop_labels'][-1],  #uses dentate if defined, as is higher res
         ),
         xfm=bids(
             root=work,
@@ -148,6 +150,7 @@ rule resample_subfields_native_crop:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
+            label="{label}",
             **inputs.subj_wildcards,
         ),
         xfm=bids(
@@ -177,6 +180,7 @@ rule resample_subfields_native_crop:
             space="crop{native_modality}",
             hemi="{hemi}",
             atlas="{atlas}",
+            label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
     container:

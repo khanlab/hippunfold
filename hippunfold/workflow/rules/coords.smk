@@ -13,6 +13,7 @@ def get_labels_for_laplace(wildcards):
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ).format(**wildcards)
     return seg
 
@@ -95,6 +96,33 @@ def get_inputs_laplace(wildcards):
     return files
 
 
+rule get_nan_mask:
+    input:
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=get_nan_labels,
+    output:
+        mask=bids(
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="nan",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
 rule get_src_sink_mask:
     input:
         labelmap=get_labels_for_laplace,
@@ -120,6 +148,7 @@ rule get_src_sink_mask:
         "subj"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
 
 
 rule get_src_sink_sdt:
@@ -158,22 +187,22 @@ rule get_src_sink_sdt:
         "c3d {input} -sdt -o {output}"
 
 
-rule get_nan_mask:
+rule create_upsampled_coords_ref:
     input:
-        labelmap=get_labels_for_laplace,
+        seg=get_input_for_shape_inject,
     params:
-        labels=get_nan_labels,
+        tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
+        resample_res=lambda wildcards: config["laminar_coords_res"][wildcards.label],
     output:
-        mask=bids(
+        upsampled_ref=bids(
             root=work,
-            datatype="coords",
-            suffix="mask.nii.gz",
-            space="corobl",
-            dir="{dir}",
-            desc="nan",
-            hemi="{hemi}",
-            label="{label}",
+            datatype="anat",
             **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            space="corobl",
+            label="{label}",
+            hemi="{hemi}",
         ),
     container:
         config["singularity"]["autotop"]
@@ -181,8 +210,10 @@ rule get_nan_mask:
         "../envs/c3d.yaml"
     group:
         "subj"
+    container:
+        config["singularity"]["autotop"]
     shell:
-        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+        "c3d {input} -retain-labels {params.tight_crop_labels} -trim 10vox -resample-mm {params.resample_res} -o {output}"
 
 
 rule prep_dseg_for_laynii:
@@ -311,3 +342,4 @@ rule laynii_layers_equivol:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz -equivol && "
         "cp dseg_metric_equivol.nii.gz {output.equivol}"
+

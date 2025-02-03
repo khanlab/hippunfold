@@ -50,7 +50,7 @@ rule subfields_to_label_gifti:
             suffix="subfields.label.gii",
             space="corobl",
             hemi="{hemi}",
-            label="hipp",
+            label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
     conda:
@@ -157,7 +157,7 @@ rule combine_tissue_subfield_labels_corobl:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            label="hipp",
+            label="{label}",
             **inputs.subj_wildcards,
         ),
     params:
@@ -170,6 +170,7 @@ rule combine_tissue_subfield_labels_corobl:
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
+            label="{label,hipp}",
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
@@ -194,6 +195,7 @@ rule resample_subfields_to_native:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
+            label="{label}",
             **inputs.subj_wildcards,
         ),
         xfm=bids(
@@ -222,6 +224,7 @@ rule resample_subfields_to_native:
             space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
             atlas="{atlas}",
+            label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
     container:
@@ -246,6 +249,7 @@ rule resample_postproc_to_native:
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
+            label=config['autotop_labels'][-1],  #uses dentate if defined, as is higher res
         ),
         xfm=bids(
             root=work,
