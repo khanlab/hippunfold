@@ -200,20 +200,20 @@ rule template_xfm_itk2ras:
 rule create_unfold_ref:
     params:
         dims=lambda wildcards: "x".join(
-            config["unfold_vol_ref"][wildcards.autotop]["dims"]
+            config["unfold_vol_ref"][wildcards.label]["dims"]
         ),
         voxdims=lambda wildcards: "x".join(
-            config["unfold_vol_ref"][wildcards.autotop]["voxdims"]
+            config["unfold_vol_ref"][wildcards.label]["voxdims"]
         ),
         origin=lambda wildcards: "x".join(
-            config["unfold_vol_ref"][wildcards.autotop]["origin"]
+            config["unfold_vol_ref"][wildcards.label]["origin"]
         ),
-        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.autotop]["orient"],
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
     output:
         nii=bids(
             root=work,
             space="unfold",
-            label="{autotop}",
+            label="{label}",
             datatype="warps",
             suffix="refvol.nii.gz",
             **inputs.subj_wildcards,

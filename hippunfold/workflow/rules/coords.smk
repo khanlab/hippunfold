@@ -182,13 +182,13 @@ rule prep_dseg_for_laynii_hipp:
         dseg_tissue=get_labels_for_laplace,
     params:
         gm_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in config["laplace_labels"][wildcards.dir]["gm_noDG"]]
+            [str(lbl) for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["gm"]]  #was gm_noDG
         ),
         src_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in config["laplace_labels"][wildcards.dir]["src"]]
+            [str(lbl) for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["src"]]
         ),
         sink_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in config["laplace_labels"][wildcards.dir]["sink"]]
+            [str(lbl) for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["sink"]]
         ),
     output:
         dseg_rim=bids(
@@ -198,7 +198,7 @@ rule prep_dseg_for_laynii_hipp:
             suffix="dseg.nii.gz",
             dir="{dir,IO}",
             desc="laynii",
-            label="{autotop,hipp}",
+            label="{label,hipp}",
             space="corobl",
             hemi="{hemi}",
         ),
@@ -212,15 +212,7 @@ rule prep_dseg_for_laynii_hipp:
 
 rule prep_dseg_for_laynii_dentate:
     input:
-        dseg_tissue=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="closeDG",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
-        ),
+        dseg_tissue=get_labels_for_laplace,
     params:
         gm_labels=lambda wildcards: " ".join([str(lbl) for lbl in [8]]),
         src_labels=lambda wildcards: " ".join([str(lbl) for lbl in [2, 4, 7, 0]]),
@@ -233,7 +225,7 @@ rule prep_dseg_for_laynii_dentate:
             suffix="dseg.nii.gz",
             dir="{dir,IO}",
             desc="laynii",
-            label="{autotop,dentate}",
+            label="{label,dentate}",
             space="corobl",
             hemi="{hemi}",
         ),

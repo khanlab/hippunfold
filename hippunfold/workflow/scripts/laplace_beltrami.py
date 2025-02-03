@@ -119,13 +119,17 @@ faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
 boundary_vertices = np.array(find_boundary_vertices(vertices, faces))
 seg = nib.load(snakemake.input.seg)
 
-src_AP = np.array(np.where(seg.get_fdata() == snakemake.params.src_labels["AP"]["src"]))
-sink_AP = np.array(
-    np.where(seg.get_fdata() == snakemake.params.src_labels["AP"]["sink"])
+src_AP = np.array(
+    np.where(seg.get_fdata() == snakemake.params.srcsink_labels["AP"]["src"])
 )
-src_PD = np.array(np.where(seg.get_fdata() == snakemake.params.src_labels["PD"]["src"]))
+sink_AP = np.array(
+    np.where(seg.get_fdata() == snakemake.params.srcsink_labels["AP"]["sink"])
+)
+src_PD = np.array(
+    np.where(seg.get_fdata() == snakemake.params.srcsink_labels["PD"]["src"])
+)
 sink_PD = np.array(
-    np.where(seg.get_fdata() == snakemake.params.src_labels["PD"]["sink"])
+    np.where(seg.get_fdata() == snakemake.params.srcsink_labels["PD"]["sink"])
 )
 
 # apply affine

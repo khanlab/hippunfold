@@ -162,11 +162,11 @@ def get_final_qc():
                 desc="subfields",
                 space="{space}",
                 hemi="{hemi}",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards,
             ),
             hemi=config["hemi"],
-            autotop=config["autotop_labels"],
+            label=config["autotop_labels"],
             density=config["output_density"],
             space=ref_spaces,
             allow_missing=True,
@@ -219,7 +219,7 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    ruleorder: laplace_beltrami > laynii_layers > laplace_coords_dentate > copy_coords_to_results
+    ruleorder: laplace_beltrami > laynii_layers >  copy_coords_to_results
 
     rule copy_coords_to_results:
         input:
