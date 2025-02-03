@@ -110,7 +110,7 @@ rule import_template_coords:
             datatype="coords",
             **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="init",
             space="template",

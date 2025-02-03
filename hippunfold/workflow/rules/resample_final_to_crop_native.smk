@@ -188,7 +188,7 @@ rule resample_coords_native_crop:
             root=work,
             datatype="coords",
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="{desc}",
             space="corobl",
@@ -222,7 +222,7 @@ rule resample_coords_native_crop:
             desc="{desc}",
             space="crop{native_modality}",
             hemi="{hemi}",
-            label="{autotop}",
+            label="{label}",
             **inputs.subj_wildcards,
         ),
     container:
