@@ -12,7 +12,7 @@ def get_labels_for_laplace(wildcards):
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ).format(**wildcards)
     return seg
 
@@ -31,7 +31,7 @@ def get_inputs_laplace(wildcards):
                 suffix="coords.nii.gz",
                 desc="init",
                 space="corobl",
-                hemi="{hemi}"
+                hemi="{hemi}",
             ),
         )
     return files
@@ -48,7 +48,7 @@ rule laplace_coords_dentate:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     output:
         coords=bids(
@@ -60,7 +60,7 @@ rule laplace_coords_dentate:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"
@@ -72,7 +72,7 @@ rule laplace_coords_dentate:
             **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
-            suffix="laplace-dentate.txt"
+            suffix="laplace-dentate.txt",
         ),
     container:
         config["singularity"]["autotop"]
@@ -94,7 +94,7 @@ rule prep_equivolume_coords:
             suffix="mask.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         innerbin=bids(
             root=work,
@@ -104,7 +104,7 @@ rule prep_equivolume_coords:
             suffix="mask.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     log:
         bids(
@@ -112,7 +112,7 @@ rule prep_equivolume_coords:
             **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
-            suffix="binarize.txt"
+            suffix="binarize.txt",
         ),
     group:
         "subj"
@@ -132,7 +132,7 @@ rule equivolume_coords:
             suffix="mask.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         innerbin=bids(
             root=work,
@@ -142,7 +142,7 @@ rule equivolume_coords:
             suffix="mask.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         script=os.path.join(workflow.basedir, "scripts/equivolume_coords.py"),
@@ -156,7 +156,7 @@ rule equivolume_coords:
             desc="equivol",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"
@@ -168,7 +168,7 @@ rule equivolume_coords:
             **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
-            suffix="equivolume.txt"
+            suffix="equivolume.txt",
         ),
     container:
         config["singularity"]["autotop"]

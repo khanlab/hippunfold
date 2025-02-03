@@ -57,9 +57,11 @@ def get_model_tar():
 
 rule download_nnunet_model:
     params:
-        url=config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
-        if config["force_nnunet_model"]
-        else config["resource_urls"]["nnunet_model"][config["modality"]],
+        url=(
+            config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
+            if config["force_nnunet_model"]
+            else config["resource_urls"]["nnunet_model"][config["modality"]]
+        ),
         model_dir=Path(download_dir) / "model",
     output:
         model_tar=get_model_tar(),
@@ -70,7 +72,7 @@ rule download_nnunet_model:
 
 
 def parse_task_from_tar(wildcards, input):
-    match = re.search("Task[0-9]{3}_[\w]+", input.model_tar)
+    match = re.search(r"Task[0-9]{3}_[\w]+", input.model_tar)
     if match:
         task = match.group(0)
     else:
@@ -79,7 +81,7 @@ def parse_task_from_tar(wildcards, input):
 
 
 def parse_chkpnt_from_tar(wildcards, input):
-    match = re.search("^.*\.(\w+)\.tar", input.model_tar)
+    match = re.search(r"^.*\.(\w+)\.tar", input.model_tar)
     if match:
         chkpnt = match.group(1)
     else:
@@ -88,7 +90,7 @@ def parse_chkpnt_from_tar(wildcards, input):
 
 
 def parse_trainer_from_tar(wildcards, input):
-    match = re.search("^.*\.(\w+)\..*.tar", input.model_tar)
+    match = re.search(r"^.*\.(\w+)\..*.tar", input.model_tar)
     if match:
         trainer = match.group(1)
     else:
@@ -133,7 +135,7 @@ rule run_inference:
             suffix="dseg.nii.gz",
             desc="nnunet",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     log:
         bids(
@@ -141,7 +143,7 @@ rule run_inference:
             **inputs.subj_wildcards,
             suffix="nnunet.txt",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     shadow:
         "minimal"
@@ -205,7 +207,7 @@ rule qc_nnunet_f3d:
             suffix="dseg.nii.gz",
             desc="nnunet",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
@@ -218,7 +220,7 @@ rule qc_nnunet_f3d:
             suffix="cpp.nii.gz",
             desc="f3d",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         res=bids(
             root=work,
@@ -227,7 +229,7 @@ rule qc_nnunet_f3d:
             suffix="{modality}.nii.gz".format(modality=config["modality"]),
             desc="f3d",
             space="template",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         res_mask=bids(
             root=work,
@@ -236,7 +238,7 @@ rule qc_nnunet_f3d:
             suffix="mask.nii.gz",
             desc="f3d",
             space="template",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     container:
         config["singularity"]["autotop"]
@@ -247,7 +249,7 @@ rule qc_nnunet_f3d:
             suffix="qcreg.txt",
             desc="f3d",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -265,7 +267,7 @@ rule qc_nnunet_dice:
             suffix="mask.nii.gz",
             desc="f3d",
             space="template",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
@@ -284,7 +286,7 @@ rule qc_nnunet_dice:
                 suffix="dice.tsv",
                 desc="unetf3d",
                 hemi="{hemi}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             caption="../report/nnunet_qc.rst",
             category="Segmentation QC",
