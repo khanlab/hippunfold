@@ -12,7 +12,7 @@ def get_labels_for_laplace(wildcards):
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ).format(**wildcards)
     return seg
 
@@ -31,7 +31,7 @@ def get_inputs_laplace(wildcards):
                 suffix="coords.nii.gz",
                 desc="init",
                 space="corobl",
-                hemi="{hemi}"
+                hemi="{hemi}",
             ),
         )
     return files
@@ -48,7 +48,7 @@ rule laplace_coords_dentate:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     output:
         coords=bids(
@@ -60,7 +60,7 @@ rule laplace_coords_dentate:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"
@@ -72,7 +72,7 @@ rule laplace_coords_dentate:
             **inputs.subj_wildcards,
             dir="{dir}",
             hemi="{hemi}",
-            suffix="laplace-dentate.txt"
+            suffix="laplace-dentate.txt",
         ),
     container:
         config["singularity"]["autotop"]
@@ -121,7 +121,7 @@ rule prep_dseg_for_laynii_hipp:
             desc="laynii",
             label="{autotop,hipp}",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     container:
         config["singularity"]["autotop"]
@@ -136,11 +136,11 @@ rule prep_dseg_for_laynii_dentate:
         dseg_tissue=bids(
             root=work,
             datatype="anat",
-            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="closeDG",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
+            **inputs.subj_wildcards,
         ),
     params:
         gm_labels=lambda wildcards: " ".join(
@@ -196,7 +196,7 @@ rule laynii_layers:
             desc="equivol",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         equidist=bids(
             root=work,
@@ -207,7 +207,7 @@ rule laynii_layers:
             desc="equidist",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     shadow:
         "minimal"
@@ -247,7 +247,7 @@ rule laynii_equidist_renzo:
             desc="equidistrenzo",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     shadow:
         "minimal"

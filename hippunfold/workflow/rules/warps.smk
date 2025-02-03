@@ -22,7 +22,7 @@ rule reg_to_template:
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{modality}.nii.gz"
+            suffix="{modality}.nii.gz",
         ),
         xfm_identity=os.path.join(workflow.basedir, "..", config["xfm_identity"]),
         template_dir=Path(download_dir) / "template" / config["template"],
@@ -35,7 +35,7 @@ rule reg_to_template:
             **inputs.subj_wildcards,
             suffix="{modality,T1w|T2w}.nii.gz",
             space=config["template"],
-            desc="affine"
+            desc="affine",
         ),
         xfm_ras=bids(
             root=work,
@@ -45,7 +45,7 @@ rule reg_to_template:
             from_="{modality,T1w|T2w}",
             to=config["template"],
             desc="affine",
-            type_="ras"
+            type_="ras",
         ),
     log:
         bids(
@@ -55,7 +55,7 @@ rule reg_to_template:
             from_="{modality,T1w|T2w}",
             to=config["template"],
             desc="affine",
-            type_="ras"
+            type_="ras",
         ),
     container:
         config["singularity"]["autotop"]
@@ -75,7 +75,7 @@ rule convert_template_xfm_ras2itk:
             from_="{reg_suffix}",
             to=config["template"],
             desc="affine",
-            type_="ras"
+            type_="ras",
         ),
     output:
         bids(
@@ -86,7 +86,7 @@ rule convert_template_xfm_ras2itk:
             from_="{reg_suffix}",
             to=config["template"],
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
     container:
         config["singularity"]["autotop"]
@@ -107,7 +107,7 @@ rule compose_template_xfm_corobl:
             from_="T1w",
             to=config["template"],
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
@@ -124,7 +124,7 @@ rule compose_template_xfm_corobl:
             from_="T1w",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
     container:
         config["singularity"]["autotop"]
@@ -144,7 +144,7 @@ rule invert_template_xfm_itk2ras:
             from_="T1w",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
     output:
         xfm_ras=bids(
@@ -155,7 +155,7 @@ rule invert_template_xfm_itk2ras:
             from_="T1w",
             to="corobl",
             desc="affineInverse",
-            type_="ras"
+            type_="ras",
         ),
     container:
         config["singularity"]["autotop"]
@@ -175,7 +175,7 @@ rule template_xfm_itk2ras:
             from_="{native_modality}",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
     output:
         xfm_ras=bids(
@@ -186,7 +186,7 @@ rule template_xfm_itk2ras:
             from_="{native_modality,T1w|T2w}",
             to="corobl",
             desc="affine",
-            type_="ras"
+            type_="ras",
         ),
     container:
         config["singularity"]["autotop"]
@@ -216,7 +216,7 @@ rule create_unfold_ref:
             label="{autotop}",
             datatype="warps",
             suffix="refvol.nii.gz",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"

@@ -63,7 +63,7 @@ rule get_label_mask:
                 desc="GM",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     container:
@@ -91,7 +91,7 @@ rule get_sink_mask:
                 desc="sink",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     container:
@@ -119,7 +119,7 @@ rule get_src_mask:
                 desc="src",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     container:
@@ -147,7 +147,7 @@ rule get_nan_mask:
                 desc="nan",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     container:
@@ -169,7 +169,7 @@ rule gen_native_mesh:
             desc=desc_io[wildcards.label],
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         nan_mask=bids(
             root=work,
@@ -179,7 +179,7 @@ rule gen_native_mesh:
             desc="nan",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         sink_mask=bids(
             root=work,
@@ -189,7 +189,7 @@ rule gen_native_mesh:
             desc="sink",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         src_mask=bids(
             root=work,
@@ -199,11 +199,13 @@ rule gen_native_mesh:
             desc="src",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_percent=0,  # not enabled
+        morph_openclose_dist=2,  # mm
+        coords_epsilon=0.1,
     output:
         surf_gii=temp(
             bids(
@@ -214,7 +216,7 @@ rule gen_native_mesh:
                 desc="nostruct",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     group:
@@ -235,7 +237,7 @@ rule update_native_mesh_structure:
             desc="nostruct",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
@@ -249,7 +251,7 @@ rule update_native_mesh_structure:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -270,7 +272,7 @@ rule smooth_surface:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         smoothing_strength=0.8,
@@ -284,7 +286,7 @@ rule smooth_surface:
             desc="smoothed",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -306,7 +308,7 @@ rule laplace_beltrami:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         seg=get_labels_for_laplace,
     params:
@@ -321,7 +323,7 @@ rule laplace_beltrami:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         coords_PD=bids(
             root=work,
@@ -332,7 +334,7 @@ rule laplace_beltrami:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"
@@ -356,7 +358,7 @@ rule warp_native_mesh_to_unfold:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         coords_AP=bids(
             root=work,
@@ -367,7 +369,7 @@ rule warp_native_mesh_to_unfold:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         coords_PD=bids(
             root=work,
@@ -378,7 +380,7 @@ rule warp_native_mesh_to_unfold:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         z_level=get_unfold_z_level,
@@ -391,7 +393,7 @@ rule warp_native_mesh_to_unfold:
             space="unfoldraw",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -410,7 +412,7 @@ rule update_unfold_mesh_structure:
             space="unfoldraw",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
@@ -424,7 +426,7 @@ rule update_unfold_mesh_structure:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -450,7 +452,7 @@ rule heavy_smooth_unfold_surf:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         strength=0.1,
@@ -463,7 +465,7 @@ rule heavy_smooth_unfold_surf:
             space="unfoldsmoothed",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -487,7 +489,7 @@ rule compute_halfthick_mask:
             desc=desc_io[wildcards.label],
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         mask=bids(
             root=work,
@@ -497,12 +499,12 @@ rule compute_halfthick_mask:
             desc="GM",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
-        threshold_tofrom=lambda wildcards: "0.5 1"
-        if wildcards.inout == "inner"
-        else "0 0.5",
+        threshold_tofrom=lambda wildcards: (
+            "0.5 1" if wildcards.inout == "inner" else "0 0.5"
+        ),
     output:
         nii=temp(
             bids(
@@ -514,7 +516,7 @@ rule compute_halfthick_mask:
                 to="{inout}",
                 space="corobl",
                 hemi="{hemi}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     group:
@@ -536,7 +538,7 @@ rule register_midthickness:
             to="{inout}",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         moving=bids(
             root=work,
@@ -546,7 +548,7 @@ rule register_midthickness:
             desc="GM",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         warp=temp(
@@ -559,7 +561,7 @@ rule register_midthickness:
                 to="{inout}",
                 space="corobl",
                 hemi="{hemi}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     group:
@@ -581,7 +583,7 @@ rule apply_halfsurf_warp_to_img:
             to="{inout}",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         moving=bids(
             root=work,
@@ -591,7 +593,7 @@ rule apply_halfsurf_warp_to_img:
             desc="GM",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         warp=bids(
             root=work,
@@ -602,7 +604,7 @@ rule apply_halfsurf_warp_to_img:
             to="{inout}",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         warped=temp(
@@ -615,7 +617,7 @@ rule apply_halfsurf_warp_to_img:
                 to_="{inout}",
                 space="corobl",
                 hemi="{hemi}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     group:
@@ -638,7 +640,7 @@ rule convert_inout_warp_from_itk_to_world:
             to="{inout}",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         warp=temp(
@@ -651,7 +653,7 @@ rule convert_inout_warp_from_itk_to_world:
                 to="{inout}",
                 space="corobl",
                 hemi="{hemi}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             )
         ),
     group:
@@ -671,7 +673,7 @@ rule warp_midthickness_to_inout:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         warp=bids(
             root=work,
@@ -682,7 +684,7 @@ rule warp_midthickness_to_inout:
             to="{surfname}",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
@@ -696,7 +698,7 @@ rule warp_midthickness_to_inout:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -721,7 +723,7 @@ rule affine_gii_corobl_to_modality:
             space="corobl",
             hemi="{hemi}",
             label="{autotop}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         xfm=bids(
             root=work,
@@ -731,7 +733,7 @@ rule affine_gii_corobl_to_modality:
             from_="{native_modality}",
             to="corobl",
             desc="affine",
-            type_="ras"
+            type_="ras",
         ),
     output:
         gii=bids(
@@ -741,7 +743,7 @@ rule affine_gii_corobl_to_modality:
             space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
             label="{autotop,hipp|dentate}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -763,7 +765,7 @@ rule calculate_surface_area:
             space="{space}",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         gii=bids(
@@ -773,7 +775,7 @@ rule calculate_surface_area:
             space="{space}",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -794,7 +796,7 @@ rule calculate_legacy_gyrification:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         unfold_surfarea=bids(
             root=work,
@@ -803,7 +805,7 @@ rule calculate_legacy_gyrification:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         gii=bids(
@@ -813,7 +815,7 @@ rule calculate_legacy_gyrification:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -834,7 +836,7 @@ rule calculate_curvature:
             desc="smoothed",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         gii=bids(
@@ -844,7 +846,7 @@ rule calculate_curvature:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -863,7 +865,7 @@ rule calculate_thickness:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         outer=bids(
             root=root,
@@ -872,7 +874,7 @@ rule calculate_thickness:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         gii=bids(
@@ -882,7 +884,7 @@ rule calculate_thickness:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -912,7 +914,7 @@ rule pad_unfold_ref:
             label="{label}",
             datatype="warps",
             suffix="refvol.nii.gz",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         padding=f"-pad {unfoldreg_padding} {unfoldreg_padding}",
@@ -925,7 +927,7 @@ rule pad_unfold_ref:
             desc="padded",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -946,7 +948,7 @@ rule extract_unfold_ref_slice:
             desc="padded",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         ref_2d_nii=bids(
@@ -957,7 +959,7 @@ rule extract_unfold_ref_slice:
             desc="slice",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -977,7 +979,7 @@ rule native_metric_to_unfold_nii:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         inner_surf=bids(
             root=root,
@@ -986,7 +988,7 @@ rule native_metric_to_unfold_nii:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         midthickness_surf=bids(
             root=root,
@@ -995,7 +997,7 @@ rule native_metric_to_unfold_nii:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         outer_surf=bids(
             root=root,
@@ -1004,7 +1006,7 @@ rule native_metric_to_unfold_nii:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         ref_nii=bids(
             root=work,
@@ -1014,7 +1016,7 @@ rule native_metric_to_unfold_nii:
             desc="slice",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         interp="-nearest-vertex 0.3",
@@ -1026,7 +1028,7 @@ rule native_metric_to_unfold_nii:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1050,7 +1052,7 @@ rule atlas_metric_to_unfold_nii:
             desc="slice",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         metric_gii=lambda wildcards, input: Path(input.atlas_dir)
@@ -1076,7 +1078,7 @@ rule atlas_metric_to_unfold_nii:
             hemi="{hemi}",
             label="{label}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1098,10 +1100,10 @@ def get_fixed_images_unfoldreg(wildcards):
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         metric=unfoldreg_metrics,
-        **wildcards
+        **wildcards,
     )
 
 
@@ -1116,10 +1118,10 @@ def get_moving_images_unfoldreg(wildcards):
             hemi="{hemi}",
             label="{label}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         metric=unfoldreg_metrics,
-        **wildcards
+        **wildcards,
     )
 
 
@@ -1188,7 +1190,7 @@ rule unfoldreg_antsquick:
             atlas="{atlas}",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     shadow:
         "minimal"
@@ -1243,7 +1245,7 @@ rule unfoldreg_greedy:
             atlas="{atlas}",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     shadow:
         "minimal"
@@ -1285,7 +1287,7 @@ rule extend_warp_2d_to_3d:
             desc="padded",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         warp=bids(
@@ -1367,7 +1369,7 @@ def get_unfold_ref(wildcards):
         space=get_unfold_ref_name(wildcards),
         hemi="{hemi}",
         label="{label}",
-        **inputs.subj_wildcards
+        **inputs.subj_wildcards,
     )
 
 
@@ -1380,7 +1382,7 @@ rule warp_unfold_native_to_unfoldreg:
             space="unfold",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         warp=bids(
             root=work,
@@ -1403,7 +1405,7 @@ rule warp_unfold_native_to_unfoldreg:
             space="unfoldreg",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1448,7 +1450,7 @@ rule resample_atlas_subfields_to_std_density:
             hemi="{hemi}",
             label="{label}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1467,7 +1469,7 @@ rule resample_native_surf_to_std_density:
             space="{space}",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         ref_unfold=os.path.join(
             workflow.basedir,
@@ -1505,7 +1507,7 @@ rule resample_native_metric_to_std_density:
             space="corobl",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         ref_unfold=os.path.join(
             workflow.basedir,
@@ -1584,7 +1586,7 @@ rule resample_atlas_subfields_to_native_surf:
             hemi="{hemi}",
             label="{label,hipp}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1609,7 +1611,7 @@ rule atlas_label_to_unfold_nii:
             label="{label}",
             datatype="warps",
             suffix="refvol.nii.gz",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         label_gii=lambda wildcards, input: Path(input.atlas_dir)
@@ -1635,7 +1637,7 @@ rule atlas_label_to_unfold_nii:
             hemi="{hemi}",
             label="{label}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1690,7 +1692,7 @@ rule create_dscalar_metric_cifti_native:
             suffix="{metric}.dscalar.nii",
             space="{space}",
             label="{autotop}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1744,7 +1746,7 @@ rule create_dlabel_cifti_subfields_native:
             suffix="subfields.dlabel.nii",
             space="{space}",
             label="hipp",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1767,7 +1769,7 @@ rule create_spec_file_hipp_native:
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
@@ -1781,7 +1783,7 @@ rule create_spec_file_hipp_native:
                 hemi="{hemi}",
                 label="{label}",
                 atlas="{atlas}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             atlas=config["atlas"],
             allow_missing=True,
@@ -1794,7 +1796,7 @@ rule create_spec_file_hipp_native:
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             surfname=["midthickness"],
             space=["{space}", get_unfold_ref_name(wildcards)],
@@ -1807,7 +1809,7 @@ rule create_spec_file_hipp_native:
                 suffix="{cifti}.nii",
                 space="{space}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             cifti=get_cifti_metric_types(wildcards.label),
             allow_missing=True,
@@ -1820,7 +1822,7 @@ rule create_spec_file_hipp_native:
                 atlas="{atlas}",
                 space="{space}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             atlas=config["atlas"],
             allow_missing=True,
@@ -1835,7 +1837,7 @@ rule create_spec_file_hipp_native:
             hemi="{hemi,L|R}",
             space="{space}",
             label="{label,hipp}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1855,7 +1857,7 @@ rule create_spec_file_dentate_native:
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
@@ -1868,7 +1870,7 @@ rule create_spec_file_dentate_native:
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             surfname=["midthickness"],
             space=["{space}", get_unfold_ref_name(wildcards)],
@@ -1881,7 +1883,7 @@ rule create_spec_file_dentate_native:
                 suffix="{cifti}.nii",
                 space="{space}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             cifti=get_cifti_metric_types(wildcards.label),
             allow_missing=True,
@@ -1896,7 +1898,7 @@ rule create_spec_file_dentate_native:
             hemi="{hemi,L|R}",
             space="{space}",
             label="{label,dentate}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1916,7 +1918,7 @@ rule merge_lr_spec_file:
                 hemi="{hemi}",
                 space="{space}",
                 label="{autotop}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             hemi=config["hemi"],
             allow_missing=True,
@@ -1930,7 +1932,7 @@ rule merge_lr_spec_file:
             space="{space}",
             suffix="surfaces.spec",
             label="{autotop}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1949,7 +1951,7 @@ rule merge_hipp_dentate_spec_file:
                 suffix="surfaces.spec",
                 space="{space}",
                 label="{autotop}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             autotop=config["autotop_labels"],
             allow_missing=True,
@@ -1962,7 +1964,7 @@ rule merge_hipp_dentate_spec_file:
             datatype="surf",
             space="{space}",
             suffix="surfaces.spec",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
