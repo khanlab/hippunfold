@@ -79,6 +79,7 @@ rule laplace_coords_dentate:
     shell:
         "cp {input} {output}"
 
+
 rule morphclose_dg:
     input:
         dseg_tissue=get_labels_for_laplace,
@@ -90,13 +91,15 @@ rule morphclose_dg:
             suffix="dseg.nii.gz",
             desc="closeDG",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
-    group: 'subj'
+    group:
+        "subj"
     container:
         config["singularity"]["autotop"]
-    shell: 
+    shell:
         "c3d {input} -as DSEG -retain-labels 8 -binarize -dilate 1 3x3x3vox -erode 1 3x3x3vox -scale 100 -push DSEG -max -replace 100 8 -o {output}"
+
 
 rule prep_dseg_for_laynii_hipp:
     input:
@@ -143,15 +146,9 @@ rule prep_dseg_for_laynii_dentate:
             **inputs.subj_wildcards,
         ),
     params:
-        gm_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in [8]]
-        ),
-        src_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in [2,4,7,0] ]
-        ),
-        sink_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in [1]]
-        ),
+        gm_labels=lambda wildcards: " ".join([str(lbl) for lbl in [8]]),
+        src_labels=lambda wildcards: " ".join([str(lbl) for lbl in [2, 4, 7, 0]]),
+        sink_labels=lambda wildcards: " ".join([str(lbl) for lbl in [1]]),
     output:
         dseg_rim=bids(
             root=work,
@@ -162,7 +159,7 @@ rule prep_dseg_for_laynii_dentate:
             desc="laynii",
             label="{autotop,dentate}",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     container:
         config["singularity"]["autotop"]
@@ -170,7 +167,6 @@ rule prep_dseg_for_laynii_dentate:
         "subj"
     shell:
         "c3d -background -1 {input} -as DSEG -retain-labels {params.gm_labels} -binarize -scale 3 -popas GM -push DSEG -retain-labels {params.src_labels} -binarize -scale 2 -popas WM -push DSEG -retain-labels {params.sink_labels} -binarize -scale 1 -popas PIAL -push GM -push WM -add -push PIAL -add -o {output}"
-
 
 
 rule laynii_layers:
@@ -184,7 +180,7 @@ rule laynii_layers:
             desc="laynii",
             label="{autotop}",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     output:
         equivol=bids(
@@ -212,7 +208,7 @@ rule laynii_layers:
     shadow:
         "minimal"
     container:
-        config["singularity"]["autotop"] 
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
@@ -220,7 +216,6 @@ rule laynii_layers:
         "LN2_LAYERS  -rim dseg.nii.gz -equivol && "
         "cp dseg_metric_equidist.nii.gz {output.equidist} && "
         "cp dseg_metric_equivol.nii.gz {output.equivol}"
-
 
 
 rule laynii_equidist_renzo:
@@ -235,7 +230,7 @@ rule laynii_equidist_renzo:
             desc="laynii",
             label="{autotop}",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     output:
         equivol=bids(
@@ -252,14 +247,14 @@ rule laynii_equidist_renzo:
     shadow:
         "minimal"
     container:
-        config["singularity"]["autotop"] 
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
         "cp {input} dseg.nii.gz && "
         "LN_GROW_LAYERS  -rim dseg.nii.gz && "
-        "cp dseg_metric_equidist.nii.gz {output.equidist}" # TODO: naming
-
+        "cp dseg_metric_equidist.nii.gz {output.equidist}"
+        # TODO: naming
 
 
 rule laynii_equivol_renzo:
@@ -274,7 +269,7 @@ rule laynii_equivol_renzo:
             desc="laynii",
             label="{autotop}",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     output:
         equivol=bids(
@@ -286,12 +281,12 @@ rule laynii_equivol_renzo:
             desc="equivolrenzo",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     shadow:
         "minimal"
     container:
-        config["singularity"]["autotop"] 
+        config["singularity"]["autotop"]
     group:
         "subj"
     shell:
@@ -299,4 +294,5 @@ rule laynii_equivol_renzo:
         "LN_GROW_LAYERS  -rim dseg.nii.gz -N 1000 -vinc 60 -threeD && "
         "LN_LEAKY_LAYERS  -rim dseg.nii.gz -nr_layers 1000 -iterations 100 && "
         "LN_LOITUMA  -equidist sc_rim_layers.nii -leaky sc_rim_leaky_layers.nii -FWHM 1 -nr_layers 10 && "
-        "cp dseg_metric_equivol.nii.gz {output.equivol}" #-- TODO naming
+        "cp dseg_metric_equivol.nii.gz {output.equivol}"
+        #-- TODO naming

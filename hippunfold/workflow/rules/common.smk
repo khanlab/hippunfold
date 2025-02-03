@@ -91,6 +91,7 @@ def get_final_subfields():
         allow_missing=True,
     )
 
+
 def get_final_anat():
     anat = []
     if "T1w" in ref_spaces or "T2w" in ref_spaces:
@@ -218,7 +219,7 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    ruleorder: laplace_beltrami >  laynii_layers > laplace_coords_dentate > copy_coords_to_results
+    ruleorder: laplace_beltrami > laynii_layers > laplace_coords_dentate > copy_coords_to_results
 
     rule copy_coords_to_results:
         input:
