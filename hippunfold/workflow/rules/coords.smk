@@ -26,14 +26,20 @@ def get_gm_labels(wildcards):
 
 def get_sink_labels(wildcards):
     lbl_list = " ".join(
-        [str(lbl) for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["sink"]]
+        [
+            str(lbl)
+            for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["sink"]
+        ]
     )
     return lbl_list
 
 
 def get_src_labels(wildcards):
     lbl_list = " ".join(
-        [str(lbl) for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["src"]]
+        [
+            str(lbl)
+            for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["src"]
+        ]
     )
     return lbl_list
 
@@ -58,14 +64,14 @@ rule get_label_mask:
         gm_labels=get_gm_labels,
     output:
         mask=bids(
-                root=work,
-                datatype="coords",
-                suffix="mask.nii.gz",
-                space="corobl",
-                desc="GM",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="GM",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -82,15 +88,15 @@ rule get_sink_mask:
         labels=get_sink_labels,
     output:
         mask=bids(
-                root=work,
-                datatype="coords",
-                suffix="mask.nii.gz",
-                space="corobl",
-                dir="{dir}",
-                desc="sink",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="sink",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -107,15 +113,15 @@ rule get_src_mask:
         labels=get_src_labels,
     output:
         mask=bids(
-                root=work,
-                datatype="coords",
-                suffix="mask.nii.gz",
-                space="corobl",
-                dir="{dir}",
-                desc="src",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="src",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -132,15 +138,15 @@ rule get_nan_mask:
         labels=get_nan_labels,
     output:
         mask=bids(
-                root=work,
-                datatype="coords",
-                suffix="mask.nii.gz",
-                space="corobl",
-                dir="{dir}",
-                desc="nan",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="nan",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
         ),
     container:
         config["singularity"]["autotop"]
@@ -153,36 +159,36 @@ rule get_nan_mask:
 rule equivolume_coords:
     input:
         source=bids(
-                root=work,
-                datatype="coords",
-                suffix="mask.nii.gz",
-                space="corobl",
-                dir="{dir}",
-                desc="src",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="src",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
         ),
         gm=bids(
-                root=work,
-                datatype="coords",
-                suffix="mask.nii.gz",
-                space="corobl",
-                desc="GM",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            desc="GM",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
         ),
         edges=bids(
-                root=work,
-                datatype="coords",
-                suffix="mask.nii.gz",
-                space="corobl",
-                dir="{dir}",
-                desc="nan",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="nan",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
         ),
     params:
         script=os.path.join(workflow.basedir, "scripts/equivolume_coords.py"),
@@ -199,15 +205,15 @@ rule equivolume_coords:
             **inputs.subj_wildcards
         ),
         srcgm=bids(
-                root=work,
-                datatype="coords",
-                suffix="mask.nii.gz",
-                dir="{dir}",
-                space="corobl",
-                desc="srcGM",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            dir="{dir}",
+            space="corobl",
+            desc="srcGM",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards
         ),
     group:
         "subj"

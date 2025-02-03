@@ -23,6 +23,37 @@ def write_surface_to_gifti(points, faces, out_surf_gii):
     gifti.to_filename(out_surf_gii)
 
 
+import numpy as np
+
+
+def apply_affine_transform(vertices, affine_matrix, inverse=False):
+    """
+    Apply an affine transformation to a 3D mesh.
+
+    Parameters:
+    - vertices (np.ndarray): (N, 3) array of vertex coordinates.
+    - affine_matrix (np.ndarray): (4, 4) affine transformation matrix.
+    - inverse (bool): If True, applies the inverse transformation.
+
+    Returns:
+    - transformed_vertices (np.ndarray): (N, 3) array of transformed vertex coordinates.
+    """
+    if inverse:
+        affine_matrix = np.linalg.inv(affine_matrix)
+
+    # Convert vertices to homogeneous coordinates
+    ones = np.ones((vertices.shape[0], 1))
+    homogeneous_vertices = np.hstack([vertices, ones])
+
+    # Apply affine transformation
+    transformed_homogeneous = homogeneous_vertices @ affine_matrix.T
+
+    # Convert back to Cartesian coordinates
+    transformed_vertices = transformed_homogeneous[:, :3]
+
+    return transformed_vertices
+
+
 def remove_nan_vertices(vertices, faces):
     """
     Removes vertices containing NaNs and updates faces accordingly.
@@ -116,10 +147,7 @@ points, faces = remove_nan_vertices(points, faces)
 
 # this is equivalent to wb_command -volume-to-surface-mapping -enclosing
 # apply inverse affine to surface to get back to matrix space
-V = deepcopy(points)
-V[:, :] = V - affine[:3, 3].T
-for xyz in range(3):
-    V[:, xyz] = V[:, xyz] * (1 / affine[xyz, xyz])
+V = apply_affine_transform(points, affine, inverse=True)
 V = V.astype(int)
 # sample coords
 coord_at_V = np.zeros((len(V)))
