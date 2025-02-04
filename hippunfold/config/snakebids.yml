@@ -236,10 +236,10 @@ parse_args:
   --laminar_coords_method:
     choices:
       - 'laplace'
-      - 'equivolume'
-    default:
-      - 'equivolume'
-    help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)' 
+      - 'equivol'
+      - 'equidist'
+    default: 'equidist'
+    help: 'Method to use for laminar coordinates. Equivol and equidist are from the laynii LN2_LAYERS tool.  (default: %(default)s)' 
 
   --autotop_labels:
     choices:
@@ -304,8 +304,8 @@ surf_types:
     - outer
   dentate:
     - midthickness
-#    - inner
-#    - outer
+    - inner
+    - outer
 
 gifti_metric_types:
   hipp:
@@ -315,6 +315,7 @@ gifti_metric_types:
   dentate:
     - gyrification.shape 
     - curvature.shape
+    - thickness.shape
   
 cifti_metric_types: 
   hipp:
@@ -324,6 +325,7 @@ cifti_metric_types:
   dentate:
     - gyrification.dscalar
     - curvature.dscalar
+    - thickness.dscalar
 
 # params for detecting and removing outlier vertices
 outlier_opts:
@@ -705,7 +707,7 @@ hemi:
 output_density:
   - 0p5mm
 
-laminar_coords_method: equivolume
+laminar_coords_method: equivol
 skip_preproc: False
 plugins.validator.skip: False
 nnunet_enable_tta: False
