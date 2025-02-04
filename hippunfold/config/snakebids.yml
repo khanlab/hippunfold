@@ -238,7 +238,7 @@ parse_args:
       - 'laplace'
       - 'equivol'
       - 'equidist'
-    default: 'equivol'
+    default: 'equidist'
     help: 'Method to use for laminar coordinates. Equivol and equidist are from the laynii LN2_LAYERS tool.  (default: %(default)s)' 
 
   --autotop_labels:
