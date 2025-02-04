@@ -55,11 +55,6 @@ elif "T1w" in config["modality"]:
     template_modality = "T1w"
 
 
-# only generate hipp surface if skipping template injection
-#   i.e. drop dentate
-if config["skip_inject_template_labels"]:  # TODO do we need this?
-    config["autotop_labels"] = ["hipp"]
-
 limit_to_list.add(config["modality"])
 
 
@@ -87,7 +82,7 @@ wildcard_constraints:
     modality="[a-zA-Z0-9]+",
     density="[a-zA-Z0-9]+",
     atlas="[a-zA-Z0-9]+",
-    autotop="[a-zA-Z0-9]+",
+    label="[a-zA-Z0-9]+",
     template="[a-zA-Z0-9]+",
 
 
@@ -124,27 +119,13 @@ if config["modality"] == "hippb500":
     include: "rules/preproc_hippb500.smk"
 
 
-include: "rules/autotop.smk"
-
-
+include: "rules/coords.smk"
 include: "rules/warps.smk"
-
-
 include: "rules/gifti.smk"
-
-
 include: "rules/subfields.smk"
-
-
 include: "rules/resample_final_to_crop_native.smk"
-
-
 include: "rules/qc.smk"
-
-
 include: "rules/myelin_map.smk"
-
-
 include: "rules/native_surf.smk"
 
 

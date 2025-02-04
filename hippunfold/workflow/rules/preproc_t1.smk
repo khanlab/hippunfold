@@ -1,4 +1,3 @@
-ruleorder: compose_template_xfm_corobl > convert_template_xfm_ras2itk
 
 
 rule import_t1:
@@ -24,7 +23,7 @@ if config["skip_preproc"]:
                 datatype="anat",
                 **inputs.subj_wildcards,
                 suffix="T1w.nii.gz",
-                desc="preproc"
+                desc="preproc",
             ),
         group:
             "subj"
@@ -39,7 +38,7 @@ else:
                 root=work,
                 datatype="anat",
                 **inputs.subj_wildcards,
-                suffix="T1w.nii.gz"
+                suffix="T1w.nii.gz",
             ),
         output:
             t1=bids(
@@ -47,7 +46,7 @@ else:
                 datatype="anat",
                 **inputs.subj_wildcards,
                 desc="preproc",
-                suffix="T1w.nii.gz"
+                suffix="T1w.nii.gz",
             ),
         threads: 8
         container:
@@ -69,7 +68,7 @@ rule warp_t1_to_corobl_crop:
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="T1w.nii.gz"
+            suffix="T1w.nii.gz",
         ),
         xfm=bids(
             root=work,
@@ -79,7 +78,7 @@ rule warp_t1_to_corobl_crop:
             from_="T1w",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
@@ -95,7 +94,7 @@ rule warp_t1_to_corobl_crop:
             suffix="T1w.nii.gz",
             space="corobl",
             desc="preproc",
-            hemi="{hemi,L|R}"
+            hemi="{hemi,L|R}",
         ),
     container:
         config["singularity"]["autotop"]

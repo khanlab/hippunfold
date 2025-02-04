@@ -1,15 +1,14 @@
 
-rule import_manualseg_to_corobl:
+rule import_manualseg_with_resample:
     input:
         in_img=partial(get_single_bids_input, component="manualseg"),
-        template_dir=Path(download_dir) / "template" / config["template"],
     params:
-        std_to_cor=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["xfm_corobl"].format(
-            **wildcards
+        resample_cmd=(
+            ""
+            if config["resample_manualseg"] == None
+            else "-resample {res}".format(res=config["resample_manualseg"])
         ),
-        ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
+        crop_cmd="-trim 5vox",  #leave 5 voxel padding
     output:
         nii=bids(
             root=work,
@@ -22,9 +21,8 @@ rule import_manualseg_to_corobl:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
-        "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
-        "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.in_img} -o {output.nii} -r {params.ref} -t {params.std_to_cor}"
+        "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"

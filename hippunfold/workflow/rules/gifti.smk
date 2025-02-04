@@ -26,13 +26,11 @@ rule cp_template_to_unfold:
             workflow.basedir,
             "..",
             "resources",
-            "unfold_template_{autotop}",
+            "unfold_template_{label}",
             "tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii",
         ),
     params:
-        structure_type=lambda wildcards: get_structure(
-            wildcards.hemi, wildcards.autotop
-        ),
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="FLAT",
     output:
@@ -43,8 +41,8 @@ rule cp_template_to_unfold:
             suffix="{surfname}.surf.gii",
             space="unfold",
             hemi="{hemi}",
-            label="{autotop}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -58,6 +56,56 @@ rule cp_template_to_unfold:
         " -surface-secondary-type {params.secondary_type}"
 
 
+rule calc_unfold_template_coords:
+    """ Creates a coords.shape.gii from the unfolded template """
+    input:
+        midthickness_gii=os.path.join(
+            workflow.basedir,
+            "..",
+            "resources",
+            "unfold_template",
+            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        ),
+    params:
+        coords_xyz="coords-XYZ.shape.gii",
+        coord_AP="coord-AP.shape.gii",
+        coord_PD="coord-PD.shape.gii",
+        coord_IO="coord-IO.shape.gii",
+        origin=lambda wildcards: config["{label}"]["origin"],
+        extent=lambda wildcards: config["{label}"]["extent"],
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+    output:
+        coords_gii=bids(
+            root=work,
+            datatype="surf",
+            den="{density}",
+            suffix="coords.shape.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    shadow:
+        "minimal"  #this is required to use the temporary files defined as params
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-coordinates-to-metric {input.midthickness_gii} {params.coords_xyz} && "
+        "wb_command -file-information {params.coords_xyz} && "
+        "wb_command -metric-math '({params.origin[0]}-X)/{params.extent[0]}' {params.coord_AP} -var X {params.coords_xyz} -column 1 && "
+        "wb_command -file-information {params.coord_AP} && "
+        "wb_command -metric-math '({params.origin[1]}+Y)/{params.extent[1]}' {params.coord_PD} -var Y {params.coords_xyz} -column 2 && "
+        "wb_command -file-information {params.coord_PD} && "
+        "wb_command -metric-math '({params.origin[2]}+Z)/{params.extent[2]}' {params.coord_IO} -var Z {params.coords_xyz} -column 3 && "
+        "wb_command -file-information {params.coord_IO} && "
+        "wb_command -metric-merge {output.coords_gii}  -metric {params.coord_AP} -metric {params.coord_PD} -metric {params.coord_IO} && "
+        "wb_command -set-structure {output.coords_gii} {params.structure_type}"
+
+
 # warp from corobl to native
 rule affine_gii_to_native:
     input:
@@ -68,8 +116,8 @@ rule affine_gii_to_native:
             suffix="{surfname}.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
         xfm=bids(
             root=work,
@@ -79,7 +127,7 @@ rule affine_gii_to_native:
             from_="{native_modality}",
             to="corobl",
             desc="affine",
-            type_="ras"
+            type_="ras",
         ),
     output:
         gii=bids(
@@ -87,10 +135,10 @@ rule affine_gii_to_native:
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
-            space="{native_modality}",
+            space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
-            label="{autotop,hipp|dentate}",
-            **inputs.subj_wildcards
+            label="{label,hipp|dentate}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -122,7 +170,7 @@ def get_inputs_cifti_metric(wildcards):
                 suffix="{metric}.shape.gii",
                 space="{space}",
                 hemi="L",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards,
             ).format(**wildcards),
         )
@@ -135,7 +183,7 @@ def get_inputs_cifti_metric(wildcards):
                 suffix="{metric}.shape.gii",
                 space="{space}",
                 hemi="R",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards,
             ).format(**wildcards),
         )
@@ -154,8 +202,8 @@ rule create_dscalar_metric_cifti:
             den="{density}",
             suffix="{metric}.dscalar.nii",
             space="{space}",
-            label="{autotop}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -223,7 +271,7 @@ rule create_dlabel_cifti_subfields:
             suffix="subfields.dlabel.nii",
             space="{space}",
             label="hipp",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -274,7 +322,7 @@ rule create_spec_file_hipp:
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
@@ -289,7 +337,7 @@ rule create_spec_file_hipp:
                 hemi="{hemi}",
                 label="{label}",
                 atlas="{atlas}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             atlas=config["atlas"],
             allow_missing=True,
@@ -303,7 +351,7 @@ rule create_spec_file_hipp:
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             surfname=["midthickness"],
             space=["{space}", "unfold", "unfoldreg"],
@@ -317,7 +365,7 @@ rule create_spec_file_hipp:
                 suffix="{cifti}.nii",
                 space="{space}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             cifti=get_cifti_metric_types(wildcards.label),
             allow_missing=True,
@@ -331,7 +379,7 @@ rule create_spec_file_hipp:
                 atlas="{atlas}",
                 space="{space}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             atlas=config["atlas"],
             allow_missing=True,
@@ -347,7 +395,7 @@ rule create_spec_file_hipp:
             hemi="{hemi,L|R}",
             space="{space}",
             label="{label,hipp}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -370,7 +418,7 @@ rule create_spec_file_dentate:
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             metric=get_gifti_metric_types(wildcards.label),
             allow_missing=True,
@@ -384,7 +432,7 @@ rule create_spec_file_dentate:
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             surfname=["midthickness"],
             space=["{space}", "unfold"],
@@ -398,7 +446,7 @@ rule create_spec_file_dentate:
                 suffix="{cifti}.nii",
                 space="{space}",
                 label="{label}",
-                **inputs.subj_wildcards
+                **inputs.subj_wildcards,
             ),
             cifti=get_cifti_metric_types(wildcards.label),
             allow_missing=True,
@@ -414,7 +462,7 @@ rule create_spec_file_dentate:
             hemi="{hemi,L|R}",
             space="{space}",
             label="{label,dentate}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -443,8 +491,8 @@ rule merge_lr_spec_file_native:
                 suffix="surfaces.spec",
                 hemi="{hemi}",
                 space="{space}",
-                label="{autotop}",
-                **inputs.subj_wildcards
+                label="{label}",
+                **inputs.subj_wildcards,
             ),
             hemi=config["hemi"],
             allow_missing=True,
@@ -458,8 +506,8 @@ rule merge_lr_spec_file_native:
             den="{density}",
             space="{space}",
             suffix="surfaces.spec",
-            label="{autotop}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -480,10 +528,10 @@ rule merge_hipp_dentate_spec_file_native:
                 den="{density}",
                 suffix="surfaces.spec",
                 space="{space}",
-                label="{autotop}",
-                **inputs.subj_wildcards
+                label="{label}",
+                **inputs.subj_wildcards,
             ),
-            autotop=config["autotop_labels"],
+            label=config["autotop_labels"],
             allow_missing=True,
         ),
     params:
@@ -495,7 +543,7 @@ rule merge_hipp_dentate_spec_file_native:
             den="{density}",
             space="{space}",
             suffix="surfaces.spec",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]

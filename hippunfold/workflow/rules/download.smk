@@ -75,7 +75,7 @@ rule import_template_dseg:
             **inputs.subj_wildcards,
             desc="hipptissue",
             hemi="{hemi}",
-            suffix="dseg.nii.gz"
+            suffix="dseg.nii.gz",
         ),
     group:
         "subj"
@@ -112,7 +112,7 @@ rule import_template_coords:
             datatype="coords",
             **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="init",
             space="template",

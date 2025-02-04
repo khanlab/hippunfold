@@ -19,7 +19,7 @@ rule resample_hippdwi_to_template:
             hemi="{hemi,L|R}",
             space="corobl",
             suffix="b500.nii.gz",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -45,7 +45,7 @@ rule cp_b500_to_anat_dir:
             **inputs.subj_wildcards,
             suffix="b500.nii.gz",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     output:
         nii=bids(
@@ -55,7 +55,7 @@ rule cp_b500_to_anat_dir:
             suffix="hippb500.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"

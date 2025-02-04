@@ -92,58 +92,6 @@ def get_final_subfields():
     )
 
 
-def get_final_coords():
-    if "laplace" in config["laminar_coords_method"]:
-        desc_io = "laplace"
-    elif "equivolume" in config["laminar_coords_method"]:
-        desc_io = "equivol"
-
-    coords = []
-    # compute all laplace coords by default (incl IO)
-    coords.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="coords",
-                dir="{dir}",
-                suffix="coords.nii.gz",
-                desc="{desc}",
-                space="{space}",
-                hemi="{hemi}",
-                label="{autotop}",
-                **inputs.subj_wildcards,
-            ),
-            desc="laplace",
-            dir=["AP", "PD", "IO"],
-            autotop=config["autotop_labels"],
-            hemi=config["hemi"],
-            space=crop_ref_spaces,
-            allow_missing=True,
-        )
-    )
-    coords.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="coords",
-                dir="{dir}",
-                suffix="coords.nii.gz",
-                desc="{desc}",
-                space="{space}",
-                hemi="{hemi}",
-                label="hipp",
-                **inputs.subj_wildcards,
-            ),
-            desc=[desc_io],
-            dir=["IO"],
-            hemi=config["hemi"],
-            space=crop_ref_spaces,
-            allow_missing=True,
-        )
-    )
-    return coords
-
-
 def get_final_anat():
     anat = []
     if "T1w" in ref_spaces or "T2w" in ref_spaces:
@@ -214,11 +162,11 @@ def get_final_qc():
                 desc="subfields",
                 space="{space}",
                 hemi="{hemi}",
-                label="{autotop}",
+                label="{label}",
                 **inputs.subj_wildcards,
             ),
             hemi=config["hemi"],
-            autotop=config["autotop_labels"],
+            label=config["autotop_labels"],
             density=config["output_density"],
             space=ref_spaces,
             allow_missing=True,
@@ -264,13 +212,14 @@ def get_final_output():
     subj_output = []
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
-    subj_output.extend(get_final_coords())
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
     return subj_output
 
 
 if "corobl" in ref_spaces:
+
+    ruleorder: laplace_beltrami > laynii_layers > copy_coords_to_results
 
     rule copy_coords_to_results:
         input:
@@ -284,7 +233,7 @@ if "corobl" in ref_spaces:
 
     rule copy_xfm_to_results:
         input:
-            os.path.join(work, "{pre}_{fromto,from|to}-corobl_{post}{suffix}.{ext}"),
+            os.path.join(work, "{pre}_{fromto}-corobl_{post}{suffix}.{ext}"),
         output:
             os.path.join(
                 root, "{pre,[^/].+}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"

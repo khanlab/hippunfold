@@ -28,16 +28,17 @@ pandas = [
 ]
 nibabel = "^5.3.2"
 pyvista = "^0.44.2"
+pygeodesic = "^0.1.11"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
 pytest-console-scripts = "^1.2.1"
 pytest = "^6.2.5"
-black = ">=22.1.0,<23.0.0"
+black = "^24.0.0"
 pylint = "^2.11.1"
 isort = "^5.10.1"
 poethepoet = "^0.10.0"
-snakefmt = ">=0.5.0"
+snakefmt = "^0.10.0"
 [tool.poetry.scripts]
 hippunfold = "hippunfold.run:app.run"
 
