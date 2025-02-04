@@ -16,7 +16,7 @@ snakemake = [
     { version=">=7.20,<8", python = "<3.11" },
     { version=">=8.1.2", python = ">=3.11" },
 ]
-snakebids = ">=0.13.1"
+snakebids = "0.14.0"
 appdirs = "^1.4.4"
 Jinja2 = "^3.0.3"
 pygraphviz = "1.7"
