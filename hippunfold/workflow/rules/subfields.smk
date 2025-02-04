@@ -39,7 +39,7 @@ rule label_subfields_from_vol_coords_corobl:
             hemi="{hemi}",
             label="{label}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         nii_label=bids(
@@ -51,7 +51,7 @@ rule label_subfields_from_vol_coords_corobl:
             hemi="{hemi}",
             atlas="{atlas}",
             label="{label,hipp}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -95,7 +95,7 @@ rule combine_tissue_subfield_labels_corobl:
             hemi="{hemi}",
             atlas="{atlas}",
             label="hipp",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         remap=get_tissue_atlas_remapping,
@@ -108,7 +108,7 @@ rule combine_tissue_subfield_labels_corobl:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -129,7 +129,7 @@ rule resample_subfields_to_native:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         xfm=bids(
             root=work,
@@ -139,14 +139,14 @@ rule resample_subfields_to_native:
             from_="{native_modality}",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz"
+            suffix="{native_modality}.nii.gz",
         ),
     output:
         nii=bids(
@@ -157,7 +157,7 @@ rule resample_subfields_to_native:
             space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -178,7 +178,7 @@ rule resample_postproc_to_native:
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         xfm=bids(
             root=work,
@@ -188,14 +188,14 @@ rule resample_postproc_to_native:
             from_="{native_modality}",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz"
+            suffix="{native_modality}.nii.gz",
         ),
     output:
         nii=bids(
@@ -205,7 +205,7 @@ rule resample_postproc_to_native:
             desc="postproc",
             space="{native_modality,T2w|T2w}",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -226,7 +226,7 @@ rule resample_unet_to_native:
             suffix="dseg.nii.gz",
             desc="nnunet",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         xfm=bids(
             root=work,
@@ -236,14 +236,14 @@ rule resample_unet_to_native:
             from_="{native_modality}",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz"
+            suffix="{native_modality}.nii.gz",
         ),
     output:
         nii=bids(
@@ -253,7 +253,7 @@ rule resample_unet_to_native:
             desc="unet",
             space="{native_modality,T1w|T2w}",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -275,7 +275,7 @@ rule resample_subfields_to_unfold:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         xfm=bids(
             root=work,
@@ -285,7 +285,7 @@ rule resample_subfields_to_unfold:
             hemi="{hemi}",
             from_="corobl",
             to="unfold",
-            mode="image"
+            mode="image",
         ),
     output:
         nii=bids(
@@ -296,7 +296,7 @@ rule resample_subfields_to_unfold:
             space="unfold",
             hemi="{hemi}",
             atlas="{atlas}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]

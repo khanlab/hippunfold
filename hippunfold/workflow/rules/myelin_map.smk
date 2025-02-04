@@ -8,7 +8,7 @@ rule divide_t1_by_t2:
             space="corobl",
             desc="preproc",
             suffix="T1w.nii.gz",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         t2=bids(
             root=work,
@@ -17,7 +17,7 @@ rule divide_t1_by_t2:
             space="corobl",
             desc="preproc",
             suffix="T2w.nii.gz",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     output:
         t1overt2=bids(
@@ -27,7 +27,7 @@ rule divide_t1_by_t2:
             space="corobl",
             desc="preproc",
             suffix="T1wDividedByT2w.nii.gz",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"
@@ -48,7 +48,7 @@ rule sample_myelin_map_surf:
             hemi="{hemi}",
             desc="preproc",
             suffix="T1wDividedByT2w.nii.gz",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         mid=bids(
             root=work,
@@ -56,8 +56,8 @@ rule sample_myelin_map_surf:
             suffix="midthickness.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
         inner=bids(
             root=work,
@@ -65,8 +65,8 @@ rule sample_myelin_map_surf:
             suffix="inner.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
         outer=bids(
             root=work,
@@ -74,8 +74,8 @@ rule sample_myelin_map_surf:
             suffix="outer.surf.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     output:
         metric=bids(
@@ -84,8 +84,8 @@ rule sample_myelin_map_surf:
             suffix="myelin.shape.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{autotop}",
-            **inputs.subj_wildcards
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"

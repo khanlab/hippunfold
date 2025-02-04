@@ -3,49 +3,6 @@ from scipy.sparse import diags, linalg, lil_matrix
 import nibabel as nib
 from scipy.interpolate import NearestNDInterpolator
 from collections import defaultdict
-import networkx as nx
-
-
-def largest_connected_component(vertices: np.ndarray, faces: np.ndarray):
-    """
-    Returns the vertices, faces, and original indices of the largest connected component of a 3D surface mesh.
-
-    Parameters:
-    vertices (np.ndarray): Array of vertex coordinates (N x 3).
-    faces (np.ndarray): Array of face indices (M x 3).
-
-    Returns:
-    tuple: (new_vertices, new_faces, largest_component), where new_vertices are the vertex coordinates of the largest component,
-           new_faces are the face indices adjusted to the new vertex order, and largest_component contains the indices of the original vertices.
-    """
-    # Build adjacency graph from face connectivity
-    G = nx.Graph()
-    for face in faces:
-        G.add_edges_from(
-            [(face[i], face[j]) for i in range(3) for j in range(i + 1, 3)]
-        )
-
-    # Find connected components
-    components = list(nx.connected_components(G))
-
-    # Select the largest connected component
-    largest_component = max(components, key=len)
-    largest_component = np.array(list(largest_component))
-
-    # Create a mapping from old vertex indices to new ones
-    index_map = {old_idx: new_idx for new_idx, old_idx in enumerate(largest_component)}
-
-    # Filter the vertices and faces
-    new_vertices = vertices[largest_component]
-    new_faces = np.array(
-        [
-            [index_map[v] for v in face]
-            for face in faces
-            if all(v in index_map for v in face)
-        ]
-    )
-
-    return new_vertices, new_faces, largest_component
 
 
 def find_boundary_vertices(vertices, faces):
@@ -154,23 +111,25 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
 
 
 surf = nib.load(snakemake.input.surf_gii)
-vertices_orig = surf.agg_data("NIFTI_INTENT_POINTSET")
+vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
 faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
-
-vertices, faces, i_concomp = largest_connected_component(vertices_orig, faces)
 
 
 # get source/sink vertices by nearest neighbour (only of edge vertices)
 boundary_vertices = np.array(find_boundary_vertices(vertices, faces))
 seg = nib.load(snakemake.input.seg)
 
-src_AP = np.array(np.where(seg.get_fdata() == snakemake.params.src_labels["AP"]["src"]))
-sink_AP = np.array(
-    np.where(seg.get_fdata() == snakemake.params.src_labels["AP"]["sink"])
+src_AP = np.array(
+    np.where(seg.get_fdata() == snakemake.params.srcsink_labels["AP"]["src"])
 )
-src_PD = np.array(np.where(seg.get_fdata() == snakemake.params.src_labels["PD"]["src"]))
+sink_AP = np.array(
+    np.where(seg.get_fdata() == snakemake.params.srcsink_labels["AP"]["sink"])
+)
+src_PD = np.array(
+    np.where(seg.get_fdata() == snakemake.params.srcsink_labels["PD"]["src"])
+)
 sink_PD = np.array(
-    np.where(seg.get_fdata() == snakemake.params.src_labels["PD"]["sink"])
+    np.where(seg.get_fdata() == snakemake.params.srcsink_labels["PD"]["sink"])
 )
 
 # apply affine
@@ -192,16 +151,10 @@ boundary_values = np.array(interpol(vertices[boundary_vertices, :])).astype(int)
 
 APinds = np.array(np.where(boundary_values < 12)[0]).astype(int)
 boundary_conditions = dict(zip(boundary_vertices[APinds], boundary_values[APinds] - 10))
-APcoords = np.ones((len(vertices_orig))) * np.nan
-APcoords[i_concomp] = solve_laplace_beltrami_open_mesh(
-    vertices, faces, boundary_conditions
-)
+APcoords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 PDinds = np.array(np.where(boundary_values > 12)[0]).astype(int)
 boundary_conditions = dict(zip(boundary_vertices[PDinds], boundary_values[PDinds] - 20))
-PDcoords = np.ones((len(vertices_orig))) * np.nan
-PDcoords[i_concomp] = solve_laplace_beltrami_open_mesh(
-    vertices, faces, boundary_conditions
-)
+PDcoords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 
 data_array = nib.gifti.GiftiDataArray(data=APcoords.astype(np.float32))
 image = nib.gifti.GiftiImage()

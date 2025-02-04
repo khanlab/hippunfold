@@ -119,7 +119,7 @@ rule template_shape_reg:
             **inputs.subj_wildcards,
             desc="hipptissue",
             hemi="{hemi}",
-            suffix="dsegsplit"
+            suffix="dsegsplit",
         ),
         subject_seg=get_input_splitseg_for_shape_inject,
     params:
@@ -161,7 +161,7 @@ rule template_shape_reg:
             root="logs",
             **inputs.subj_wildcards,
             hemi="{hemi}",
-            suffix="templateshapereg.txt"
+            suffix="templateshapereg.txt",
         ),
     shell:
         #affine (with moments), then greedy
@@ -178,7 +178,7 @@ rule template_shape_inject:
             **inputs.subj_wildcards,
             desc="hipptissue",
             hemi="{hemi}",
-            suffix="dseg.nii.gz"
+            suffix="dseg.nii.gz",
         ),
         subject_seg=get_input_for_shape_inject,
         matrix=bids(
@@ -263,11 +263,11 @@ rule inject_init_laplace_coords:
             datatype="coords",
             **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="init",
             space="template",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     params:
         interp_opt="-ri NN",
@@ -277,7 +277,7 @@ rule inject_init_laplace_coords:
             datatype="coords",
             **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
@@ -288,7 +288,7 @@ rule inject_init_laplace_coords:
             root="logs",
             **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="injectcoords.txt",
             desc="init",
             hemi="{hemi}",

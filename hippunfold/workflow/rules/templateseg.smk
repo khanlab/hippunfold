@@ -18,7 +18,7 @@ rule template_reg:
             ),
             space="corobl",
             desc="preproc",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         moving_img=bids(
             root=work,
@@ -28,7 +28,7 @@ rule template_reg:
             ),
             space="template",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
@@ -49,7 +49,7 @@ rule template_reg:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -82,7 +82,7 @@ rule warp_template_dseg:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         template_dseg=bids(
             root=work,
@@ -91,7 +91,7 @@ rule warp_template_dseg:
             desc="hipptissue",
             space="template",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         interp_opt="-ri LABEL 0.2vox",
@@ -103,7 +103,7 @@ rule warp_template_dseg:
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -135,18 +135,18 @@ rule warp_template_coords:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         template_coords=bids(
             root=work,
             datatype="coords",
             **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="init",
             space="template",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     params:
         interp_opt="-ri NN",
@@ -156,11 +156,11 @@ rule warp_template_coords:
             datatype="coords",
             **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -191,7 +191,7 @@ rule warp_template_anat:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         template_anat=bids(
             root=work,
@@ -201,7 +201,7 @@ rule warp_template_anat:
             ),
             space="template",
             hemi="{hemi}",
-            **inputs.subj_wildcards
+            **inputs.subj_wildcards,
         ),
     params:
         xfm_corobl=lambda wildcards, input: Path(input.template_dir)

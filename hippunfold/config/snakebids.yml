@@ -236,10 +236,10 @@ parse_args:
   --laminar_coords_method:
     choices:
       - 'laplace'
-      - 'equivolume'
-    default:
-      - 'equivolume'
-    help: 'Method to use for laminar coordinates. Equivolume uses equivolumetric layering from Waehnert et al 2014 (Nighres implementation). (default: %(default)s)' 
+      - 'equivol'
+      - 'equidist'
+    default: 'equidist'
+    help: 'Method to use for laminar coordinates. Equivol and equidist are from the laynii LN2_LAYERS tool.  (default: %(default)s)' 
 
   --autotop_labels:
     choices:
@@ -304,8 +304,8 @@ surf_types:
     - outer
   dentate:
     - midthickness
-#    - inner
-#    - outer
+    - inner
+    - outer
 
 gifti_metric_types:
   hipp:
@@ -315,6 +315,7 @@ gifti_metric_types:
   dentate:
     - gyrification.shape 
     - curvature.shape
+    - thickness.shape
   
 cifti_metric_types: 
   hipp:
@@ -324,6 +325,7 @@ cifti_metric_types:
   dentate:
     - gyrification.dscalar
     - curvature.dscalar
+    - thickness.dscalar
 
 # params for detecting and removing outlier vertices
 outlier_opts:
@@ -355,7 +357,7 @@ template_files:
     crop_refT1w: T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
     dseg:  sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz 
-    coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{autotop}_desc-laplace_coords.nii.gz 
+    coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{label}_desc-laplace_coords.nii.gz 
     hemi_wildcards:
       - L
       - R
@@ -367,7 +369,7 @@ template_files:
     crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
     dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
-    coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
       - R
@@ -379,7 +381,7 @@ template_files:
     crop_ref: tpl-MBMv2_hemi-R_space-corobl_{modality}.nii.gz
     Mask_crop: tpl-MBMv2_hemi-R_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    coords: tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - R
 
@@ -390,7 +392,7 @@ template_files:
     crop_ref: tpl-MBMv3_hemi-R_space-corobl_T1w.nii.gz
     Mask_crop: tpl-MBMv3_hemi-R_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-MBMv3_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - R
 
@@ -401,7 +403,7 @@ template_files:
     crop_ref: tpl-CIVM_hemi-{hemi}_space-corobl_{modality}.nii.gz
     Mask_crop: tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-CIVM_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    coords: tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
       - R
@@ -410,7 +412,7 @@ template_files:
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
-    coords: tpl-upenn_dir-{dir}_label-{autotop}_coords.nii.gz
+    coords: tpl-upenn_dir-{dir}_label-{label}_coords.nii.gz
     hemi_wildcards:
       - R
 
@@ -420,7 +422,7 @@ template_files:
     crop_ref: tpl-ABAv3_hemi-{hemi}_space-corobl_T1w.nii.gz
     Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
       - R
@@ -432,7 +434,7 @@ template_files:
     crop_ref: tpl-bigbrain_hemi-{hemi}_space-corobl_100um_merker.nii.gz
     Mask_crop: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
     dseg: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
-    coords: tpl-bigbrain_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    coords: tpl-bigbrain_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
       - R
@@ -638,35 +640,62 @@ shape_inject:
 inject_template_smoothing_factor: 1.0
 
 laplace_labels:
-  AP: 
-    gm:
-      - 1
-      - 8
-    src:
-      - 5
-    sink:
-      - 6
-  PD:
-    gm:
-      - 1
-      - 8
-    src:
-      - 3
-    sink:
-      - 8   
-  IO:
-    gm:
-      - 1
-      - 8
-    src:
-      - 2
-      - 4
-      - 7
-    sink:
-      - 0 
-    gm_noDG:
-      - 1
-
+  hipp:
+    AP: 
+      gm:
+        - 1
+        - 8
+      src:
+        - 5
+      sink:
+        - 6
+    PD:
+      gm:
+        - 1
+        - 8
+      src:
+        - 3
+      sink:
+        - 8   
+    IO:
+      gm:
+        - 1
+        - 8
+      src:
+        - 2
+        - 4
+        - 7
+        - 9
+      sink:
+        - 0 
+        - 10
+  dentate:
+    AP:
+      gm:
+        - 8
+      src:
+        - 5
+      sink:
+        - 6
+    PD:
+      gm:
+        - 8
+      src:
+        - 9
+      sink:
+        - 10
+    IO:
+      gm:
+        - 8
+      src:
+        - 1
+      sink:
+        - 2
+        - 4
+        - 7
+        - 9
+        - 10
+        - 0
 output_spaces:
   - native
 
@@ -678,7 +707,7 @@ hemi:
 output_density:
   - 0p5mm
 
-laminar_coords_method: equivolume
+laminar_coords_method: equivol
 skip_preproc: False
 plugins.validator.skip: False
 nnunet_enable_tta: False
