@@ -1,6 +1,3 @@
-import os
-
-
 def get_labels_for_laplace(wildcards):
     if config["skip_inject_template_labels"]:
         seg = get_input_for_shape_inject(wildcards)
@@ -176,19 +173,33 @@ rule get_nan_mask:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
 
-
-rule prep_dseg_for_laynii_hipp:
+rule prep_dseg_for_laynii:
     input:
         dseg_tissue=get_labels_for_laplace,
     params:
         gm_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["gm"]]  #was gm_noDG
+            [
+                str(lbl)
+                for lbl in config["laplace_labels"][wildcards.label][wildcards.dir][
+                    "gm"
+                ]
+            ]
         ),
         src_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["src"]]
+            [
+                str(lbl)
+                for lbl in config["laplace_labels"][wildcards.label][wildcards.dir][
+                    "src"
+                ]
+            ]
         ),
         sink_labels=lambda wildcards: " ".join(
-            [str(lbl) for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["sink"]]
+            [
+                str(lbl)
+                for lbl in config["laplace_labels"][wildcards.label][wildcards.dir][
+                    "sink"
+                ]
+            ]
         ),
     output:
         dseg_rim=bids(
@@ -198,34 +209,7 @@ rule prep_dseg_for_laynii_hipp:
             suffix="dseg.nii.gz",
             dir="{dir,IO}",
             desc="laynii",
-            label="{label,hipp}",
-            space="corobl",
-            hemi="{hemi}",
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d -background -1 {input} -as DSEG -retain-labels {params.gm_labels} -binarize -scale 3 -popas GM -push DSEG -retain-labels {params.src_labels} -binarize -scale 2 -popas WM -push DSEG -retain-labels {params.sink_labels} -binarize -scale 1 -popas PIAL -push GM -push WM -add -push PIAL -add -o {output}"
-
-
-rule prep_dseg_for_laynii_dentate:
-    input:
-        dseg_tissue=get_labels_for_laplace,
-    params:
-        gm_labels=lambda wildcards: " ".join([str(lbl) for lbl in [8]]),
-        src_labels=lambda wildcards: " ".join([str(lbl) for lbl in [2, 4, 7, 0]]),
-        sink_labels=lambda wildcards: " ".join([str(lbl) for lbl in [1]]),
-    output:
-        dseg_rim=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            dir="{dir,IO}",
-            desc="laynii",
-            label="{label,dentate}",
+            label="{label}",
             space="corobl",
             hemi="{hemi}",
         ),
@@ -287,7 +271,7 @@ rule laynii_layers:
 
 
 rule laynii_equidist_renzo:
-    """Renzo implementation of equidist, using LN_GROW_LAYERS"""
+    """Renzo implementation of equidist, using LN_GROW_LAYERS.  TODO: fix file names"""
     input:
         dseg_rim=bids(
             root=work,
@@ -322,11 +306,10 @@ rule laynii_equidist_renzo:
         "cp {input} dseg.nii.gz && "
         "LN_GROW_LAYERS  -rim dseg.nii.gz && "
         "cp dseg_metric_equidist.nii.gz {output.equidist}"
-        # TODO: naming
 
 
 rule laynii_equivol_renzo:
-    """Renzo implementation of equivol, using LN_GROW_LAYERS"""
+    """Renzo implementation of equivol, using LN_GROW_LAYERS. TODO: fix filenames"""
     input:
         dseg_rim=bids(
             root=work,
@@ -363,4 +346,3 @@ rule laynii_equivol_renzo:
         "LN_LEAKY_LAYERS  -rim dseg.nii.gz -nr_layers 1000 -iterations 100 && "
         "LN_LOITUMA  -equidist sc_rim_layers.nii -leaky sc_rim_leaky_layers.nii -FWHM 1 -nr_layers 10 && "
         "cp dseg_metric_equivol.nii.gz {output.equivol}"
-        #-- TODO naming
