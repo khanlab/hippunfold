@@ -1,0 +1,7 @@
+name: nnunet
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - nnunet=1.7.1

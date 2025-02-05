@@ -20,6 +20,8 @@ rule import_manualseg_with_resample:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:

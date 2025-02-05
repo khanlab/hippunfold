@@ -74,6 +74,8 @@ rule get_label_mask:
         config["singularity"]["autotop"]
     group:
         "subj"
+    conda:
+        "../envs/c3d.yaml"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -117,6 +119,8 @@ rule get_sink_mask:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -142,6 +146,8 @@ rule get_src_mask:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -167,6 +173,8 @@ rule get_nan_mask:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -215,6 +223,8 @@ rule prep_dseg_for_laynii:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -261,6 +271,8 @@ rule laynii_layers:
         "minimal"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/laynii.yaml"
     group:
         "subj"
     shell:
@@ -300,6 +312,8 @@ rule laynii_equidist_renzo:
         "minimal"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/laynii.yaml"
     group:
         "subj"
     shell:
@@ -338,6 +352,8 @@ rule laynii_equivol_renzo:
         "minimal"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/laynii.yaml"
     group:
         "subj"
     shell:

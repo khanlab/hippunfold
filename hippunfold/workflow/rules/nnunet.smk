@@ -156,6 +156,8 @@ rule run_inference:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/nnunet.yaml"
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -242,6 +244,8 @@ rule qc_nnunet_f3d:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/niftyreg.yaml"
     log:
         bids(
             root="logs",
@@ -295,5 +299,7 @@ rule qc_nnunet_dice:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/pyunfold.yaml"
     script:
         "../scripts/dice.py"

@@ -1,0 +1,8 @@
+name: c3d
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - convert3d
+  - libitk=5.4.0
