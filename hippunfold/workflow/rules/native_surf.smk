@@ -367,7 +367,7 @@ rule compute_halfthick_mask:
             dir="IO",
             label="{label}",
             suffix="coords.nii.gz",
-            desc="equivol",
+            desc=config["laminar_coords_method"],
             space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards,
