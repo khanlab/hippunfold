@@ -4,6 +4,29 @@ import numpy as np
 from copy import deepcopy
 import pyvista as pv
 import pygeodesic.geodesic as geodesic
+from scipy.ndimage import binary_dilation
+
+
+def get_adjacent_voxels(mask_a, mask_b):
+    """
+    Create a mask for voxels where label A is adjacent to label B.
+    Parameters:
+    - mask_a (np.ndarray): A 3D binary mask for label A.
+    - mask_b (np.ndarray): A 3D binary mask for label B.
+
+    Returns:
+    - np.ndarray: A 3D mask where adjacent voxels for label A and label B are marked as True.
+    """
+    # Dilate each mask to identify neighboring regions
+    dilated_a = binary_dilation(mask_a)
+    dilated_b = binary_dilation(mask_b)
+
+    # Find adjacency: voxels of A touching B and B touching A
+    adjacency_mask = (dilated_a.astype("bool") & mask_b.astype("bool")) | (
+        dilated_b.astype("bool") & mask_a.astype("bool")
+    )
+
+    return adjacency_mask
 
 
 def write_surface_to_gifti(points, faces, out_surf_gii):
@@ -118,6 +141,14 @@ coords[src_mask == 1] = -0.1
 coords[sink_mask == 1] = 1.1
 
 
+# we also need to use a nan mask for the voxels where src and sink meet directly
+# (since this is another false boundary)..
+if snakemake.params.clean_method == "cleanAK":
+
+    src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
+    coords[src_sink_nan_mask == 1] = np.nan
+
+
 # Add the scalar field
 grid.cell_data["values"] = coords.flatten(order="F")
 grid = grid.cells_to_points("values")
@@ -129,54 +160,62 @@ tfm_grid = grid.transform(
 
 
 # the contour function produces the isosurface
-surface = tfm_grid.contour([snakemake.params.threshold], method="contour").decimate(0.9)
+surface = tfm_grid.contour([snakemake.params.threshold], method="contour")
+surface = surface.decimate_pro(**snakemake.params.decimate_opts)
+
 # faces from pyvista surface are formatted with number of verts each row
 # reshape and remove the first col to get Nx3
 faces = surface.faces
 faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
 points = surface.points
-points, faces = remove_nan_vertices(points, faces)
 
-## JD clean - instead of trimming surfaces with a nan mask, we
-# keep vertices that overlap with good coord values. We then apply
-# some surface-based morphological opening and closing to keep
-# vertices along holes in the dg
-
-# this is equivalent to wb_command -volume-to-surface-mapping -enclosing
-# apply inverse affine to surface to get back to matrix space
-V = apply_affine_transform(points, affine, inverse=True)
-V = V.astype(int)
-# sample coords
-coord_at_V = np.zeros((len(V)))
-for i in range(len(V)):
-    coord_at_V[i] = coords[
-        V[i, 0], V[i, 1], V[i, 2]
-    ]  # really hope there's no x-y switching fuckery here!
-
-# keep vertices that are in a nice coordinate range
-epsilon = snakemake.params.coords_epsilon
-good_v = np.where(np.logical_and(coord_at_V < (1 - epsilon), coord_at_V > epsilon))[0]
-
-geoalg = geodesic.PyGeodesicAlgorithmExact(points, faces)
-# morphological open
-maxdist, _ = geoalg.geodesicDistances(good_v, None)
-bad_v = np.where(maxdist > snakemake.params.morph_openclose_dist)[0]
-# morphological close
-maxdist, _ = geoalg.geodesicDistances(bad_v, None)
-bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
-
-# toss bad vertices
-points[bad_v, :] = np.nan
 points, faces = remove_nan_vertices(points, faces)
 
 
-# apply largest connected component
-faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])
-mesh = pv.PolyData(points, faces_pv)
-mesh_cc = mesh.extract_largest()
-points = mesh_cc.points  # This gives you the vertices
-faces = mesh_cc.faces
-faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
+if snakemake.params.clean_method == "cleanJD":
+
+    ## JD clean - instead of trimming surfaces with a nan mask, we
+    # keep vertices that overlap with good coord values. We then apply
+    # some surface-based morphological opening and closing to keep
+    # vertices along holes in the dg
+
+    # this is equivalent to wb_command -volume-to-surface-mapping -enclosing
+    # apply inverse affine to surface to get back to matrix space
+    V = apply_affine_transform(points, affine, inverse=True)
+    V = V.astype(int)
+    # sample coords
+    coord_at_V = np.zeros((len(V)))
+    for i in range(len(V)):
+        coord_at_V[i] = coords[
+            V[i, 0], V[i, 1], V[i, 2]
+        ]  # really hope there's no x-y switching fuckery here!
+
+    # keep vertices that are in a nice coordinate range
+    epsilon = snakemake.params.coords_epsilon
+    good_v = np.where(np.logical_and(coord_at_V < (1 - epsilon), coord_at_V > epsilon))[
+        0
+    ]
+
+    geoalg = geodesic.PyGeodesicAlgorithmExact(points, faces)
+    # morphological open
+    maxdist, _ = geoalg.geodesicDistances(good_v, None)
+    bad_v = np.where(maxdist > snakemake.params.morph_openclose_dist)[0]
+    # morphological close
+    maxdist, _ = geoalg.geodesicDistances(bad_v, None)
+    bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
+
+    # toss bad vertices
+    points[bad_v, :] = np.nan
+    points, faces = remove_nan_vertices(points, faces)
+
+    # apply largest connected component
+    faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])
+    mesh = pv.PolyData(points, faces_pv)
+    mesh_cc = mesh.extract_largest()
+    points = mesh_cc.points  # This gives you the vertices
+    faces = mesh_cc.faces
+    faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
+
 
 # write to gifti
 write_surface_to_gifti(points, faces, snakemake.output.surf_gii)
