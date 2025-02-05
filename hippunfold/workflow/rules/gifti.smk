@@ -46,6 +46,8 @@ rule cp_template_to_unfold:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -85,6 +87,8 @@ rule calc_unfold_template_coords:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     shadow:
         "minimal"  #this is required to use the temporary files defined as params
     group:
@@ -138,6 +142,8 @@ rule affine_gii_to_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -201,6 +207,8 @@ rule create_dscalar_metric_cifti:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -267,6 +275,8 @@ rule create_dlabel_cifti_subfields:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -389,6 +399,8 @@ rule create_spec_file_hipp:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -454,6 +466,8 @@ rule create_spec_file_dentate:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -497,6 +511,8 @@ rule merge_lr_spec_file_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -531,6 +547,8 @@ rule merge_hipp_dentate_spec_file_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:

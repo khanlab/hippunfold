@@ -1,0 +1,8 @@
+name: ants
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - ants=2.5.4
+  - libitk=5.4.0

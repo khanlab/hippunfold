@@ -25,7 +25,7 @@ rule gen_native_mesh:
             dir="IO",
             label="{label}",
             suffix="coords.nii.gz",
-            desc="equivol",
+            desc=config["laminar_coords_method"],
             space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards,
@@ -85,6 +85,8 @@ rule gen_native_mesh:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/pyvista.yaml"
     script:
         "../scripts/gen_isosurface.py"
 
@@ -117,6 +119,8 @@ rule update_native_mesh_structure:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -152,6 +156,8 @@ rule smooth_surface:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -202,6 +208,8 @@ rule laplace_beltrami:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/pyvista.yaml"
     script:
         "../scripts/laplace_beltrami.py"
 
@@ -259,6 +267,8 @@ rule warp_native_mesh_to_unfold:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/pyunfold.yaml"
     group:
         "subj"
     script:
@@ -292,6 +302,8 @@ rule update_unfold_mesh_structure:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -331,6 +343,8 @@ rule heavy_smooth_unfold_surf:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -385,6 +399,8 @@ rule compute_halfthick_mask:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -430,6 +446,8 @@ rule register_midthickness:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/greedy.yaml"
     shell:
         "greedy -d 3 -i {input.fixed} {input.moving} -n 30 -o {output.warp}"
 
@@ -486,6 +504,8 @@ rule apply_halfsurf_warp_to_img:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/greedy.yaml"
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
@@ -522,6 +542,8 @@ rule convert_inout_warp_from_itk_to_world:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -564,6 +586,8 @@ rule warp_midthickness_to_inout:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -609,6 +633,8 @@ rule affine_gii_corobl_to_modality:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -641,6 +667,8 @@ rule calculate_surface_area:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -681,6 +709,8 @@ rule calculate_legacy_gyrification:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -712,6 +742,8 @@ rule calculate_curvature:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -750,6 +782,8 @@ rule calculate_thickness:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -793,6 +827,8 @@ rule pad_unfold_ref:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -825,6 +861,8 @@ rule extract_unfold_ref_slice:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -894,6 +932,8 @@ rule native_metric_to_unfold_nii:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -944,6 +984,8 @@ rule atlas_metric_to_unfold_nii:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1043,6 +1085,8 @@ rule unfoldreg_antsquick:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/ants.yaml"
     group:
         "subj"
     log:
@@ -1098,6 +1142,8 @@ rule unfoldreg_greedy:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/greedy.yaml"
     group:
         "subj"
     log:
@@ -1167,6 +1213,8 @@ rule extend_warp_2d_to_3d:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/neurovis.yaml"
     group:
         "subj"
     script:
@@ -1206,6 +1254,8 @@ rule convert_unfoldreg_warp_from_itk_to_world:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -1271,6 +1321,8 @@ rule warp_unfold_native_to_unfoldreg:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shadow:
@@ -1316,6 +1368,8 @@ rule resample_atlas_subfields_to_std_density:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1354,6 +1408,8 @@ rule resample_native_surf_to_std_density:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1392,6 +1448,8 @@ rule resample_native_metric_to_std_density:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1452,6 +1510,8 @@ rule resample_atlas_subfields_to_native_surf:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1503,6 +1563,8 @@ rule atlas_label_to_unfold_nii:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1558,6 +1620,8 @@ rule create_dscalar_metric_cifti_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1612,6 +1676,8 @@ rule create_dlabel_cifti_subfields_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1703,6 +1769,8 @@ rule create_spec_file_hipp_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1764,6 +1832,8 @@ rule create_spec_file_dentate_native:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1798,6 +1868,8 @@ rule merge_lr_spec_file:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1830,6 +1902,8 @@ rule merge_hipp_dentate_spec_file:
         ),
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
