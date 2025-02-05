@@ -66,7 +66,7 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.2,
+            "reduction": 0.4,
             "preserve_topology": True,
             "boundary_vertex_deletion": False,
         },

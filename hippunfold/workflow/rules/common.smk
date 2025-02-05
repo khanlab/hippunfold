@@ -219,7 +219,7 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    ruleorder: laplace_beltrami > laynii_layers > copy_coords_to_results
+    ruleorder: laplace_beltrami > laynii_layers_equidist > laynii_layers_equivol > copy_coords_to_results
 
     rule copy_coords_to_results:
         input:
@@ -262,3 +262,57 @@ def get_download_dir():
         dirs = AppDirs("hippunfold", "khanlab")
         download_dir = dirs.user_cache_dir
     return download_dir
+
+
+def get_cifti_metric_types(label):
+    types_list = config["cifti_metric_types"][label]
+    if config["generate_myelin_map"]:
+        types_list.append("myelin.dscalar")
+    return types_list
+
+
+def get_gifti_metric_types(label):
+    types_list = config["gifti_metric_types"][label]
+    if config["generate_myelin_map"]:
+        types_list.append("myelin.shape")
+    return types_list
+
+
+def get_create_template_output():
+
+    files = []
+    for label in config["autotop_labels"]:
+        files.extend(
+            inputs[config["modality"]].expand(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    suffix="{metric}.gii",
+                    space="{space}",
+                    hemi="{hemi_}",
+                    label=label,
+                    **inputs.subj_wildcards,
+                ),
+                metric=get_gifti_metric_types(label),
+                space="corobl",
+                hemi_=config["hemi"],
+            )
+        )
+        files.extend(
+            inputs[config["modality"]].expand(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    suffix="{surftype}.surf.gii",
+                    space="{space}",
+                    hemi="{hemi_}",
+                    label=label,
+                    **inputs.subj_wildcards,
+                ),
+                metric=get_gifti_metric_types(label),
+                space=["corobl", "unfold"],
+                surftype=["inner", "outer", "midthickness"],
+                hemi_=config["hemi"],
+            )
+        )
+    return files

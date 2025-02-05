@@ -14,6 +14,7 @@ derivatives: False #will search in bids/derivatives if True; can also be path(s)
 #list of analysis levels in the bids app 
 analysis_levels: &analysis_levels
  - participant
+ - participant_create_template
  - group
   
 
@@ -21,6 +22,8 @@ analysis_levels: &analysis_levels
 targets_by_analysis_level:
   participant:
     - ''  # if '', then the first rule is run
+  participant_create_template:
+    - 'all_create_template'
   group:
     - 'all_group_tsv'
 

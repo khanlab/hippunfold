@@ -297,20 +297,6 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-def get_cifti_metric_types(label):
-    types_list = config["cifti_metric_types"][label]
-    if config["generate_myelin_map"]:
-        types_list.append("myelin.dscalar")
-    return types_list
-
-
-def get_gifti_metric_types(label):
-    types_list = config["gifti_metric_types"][label]
-    if config["generate_myelin_map"]:
-        types_list.append("myelin.shape")
-    return types_list
-
-
 rule create_spec_file_hipp:
     input:
         metrics=lambda wildcards: expand(

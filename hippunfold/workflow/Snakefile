@@ -154,6 +154,11 @@ rule all:
         get_final_output(),
 
 
+rule all_create_template:
+    input:
+        get_create_template_output(),
+
+
 rule all_group_tsv:
     input:
         tsv=expand(
