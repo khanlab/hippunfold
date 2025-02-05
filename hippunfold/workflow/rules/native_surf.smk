@@ -66,10 +66,10 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.1,
+            "reduction": 0.2,
             "preserve_topology": True,
             "boundary_vertex_deletion": False,
-        },  #0.3 reduction seems to solve resampling memory issue
+        },
         clean_method="cleanAK",  #cleanAK or cleanJD 
         morph_openclose_dist=2,  # mm
         coords_epsilon=0.1,
