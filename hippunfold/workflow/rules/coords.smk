@@ -268,4 +268,3 @@ rule laynii_layers:
         "LN2_LAYERS  -rim dseg.nii.gz -equivol && "
         "cp dseg_metric_equidist.nii.gz {output.equidist} && "
         "cp dseg_metric_equivol.nii.gz {output.equivol}"
-
