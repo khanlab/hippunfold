@@ -192,11 +192,7 @@ if snakemake.params.clean_method == "cleanJD":
     V = apply_affine_transform(points, affine, inverse=True)
     V = V.astype(int)
     # sample coords
-    coord_at_V = np.zeros((len(V)))
-    for i in range(len(V)):
-        coord_at_V[i] = coords[
-            V[i, 0], V[i, 1], V[i, 2]
-        ]  # really hope there's no x-y switching fuckery here!
+    coord_at_V = coords[V[:, 0], V[:, 1], V[:, 2]]
 
     # keep vertices that are in a nice coordinate range
     epsilon = snakemake.params.coords_epsilon
