@@ -208,13 +208,14 @@ if snakemake.params.clean_method == "cleanJD":
     points[bad_v, :] = np.nan
     points, faces = remove_nan_vertices(points, faces)
 
-    # apply largest connected component
-    faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])
-    mesh = pv.PolyData(points, faces_pv)
-    mesh_cc = mesh.extract_largest()
-    points = mesh_cc.points  # This gives you the vertices
-    faces = mesh_cc.faces
-    faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
+
+# apply largest connected component
+faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])
+mesh = pv.PolyData(points, faces_pv)
+mesh_cc = mesh.extract_largest()
+points = mesh_cc.points  # This gives you the vertices
+faces = mesh_cc.faces
+faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
 
 
 # write to gifti
