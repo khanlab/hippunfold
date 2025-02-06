@@ -119,9 +119,17 @@ surface = tfm_grid.contour(
 )
 logger.info(surface)
 
+# remove the nan-valued vertices - this isn't handled in PolyData.clean()
+logger.info("Removing nan-valued vertices")
+surface = remove_nan_vertices(surface)
+logger.info(surface)
 
 logger.info("Cleaning surface")
 surface = surface.clean(point_merging=False)
+logger.info(surface)
+
+logger.info("Extracting largest connected component")
+surface = surface.extract_largest()
 logger.info(surface)
 
 """
@@ -136,12 +144,12 @@ surface = surface.smooth_taubin(#normalize_coordinates=True,
 logger.info(surface)
 """
 
-logger.info("Filling holes up to radius {snakemake.params.hole_fill_radius}")
+logger.info(f"Filling holes up to radius {snakemake.params.hole_fill_radius}")
 surface = surface.fill_holes(snakemake.params.hole_fill_radius)
 logger.info(surface)
 
 # reduce # of vertices with decimation
-logger.info("Decimating surface")
+logger.info(f"Decimating surface with {snakemake.params.decimate_opts}")
 surface = surface.decimate_pro(**snakemake.params.decimate_opts)
 logger.info(surface)
 
@@ -180,10 +188,6 @@ if snakemake.params.clean_method == "cleanJD":
     surface.points[bad_v, :] = np.nan
     surface = remove_nan_vertices(surface)
 
-# Extract the largest connected component
-logger.info("Extracting largest connected component")
-surface = surface.extract_largest()
-logger.info(surface)
 
 # Save the final mesh
 write_surface_to_gifti(surface, snakemake.output.surf_gii)
