@@ -70,6 +70,7 @@ rule gen_native_mesh:
             "preserve_topology": True,
             "boundary_vertex_deletion": False,
         },
+	decimation_target = 0.1 #mm
         clean_method="cleanAK",  #cleanAK or cleanJD 
         morph_openclose_dist=2,  # mm
         coords_epsilon=0.1,

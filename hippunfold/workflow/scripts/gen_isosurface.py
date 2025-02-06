@@ -161,6 +161,12 @@ tfm_grid = grid.transform(
 
 # the contour function produces the isosurface
 surface = tfm_grid.contour([snakemake.params.threshold], method="contour")
+if snakemake.params.decimation_target
+    faces = surface.faces
+    faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
+    points = surface.points
+    edge_lengths = np.linalg.norm(points[faces[:, 0]] - points[faces[:, 1]], axis=1)
+    snakemake.params.decimate_opts["reduction"] = (snakemake.params.decimation_target / np.mean(edge_lengths))**2
 surface = surface.decimate_pro(**snakemake.params.decimate_opts)
 
 # faces from pyvista surface are formatted with number of verts each row
