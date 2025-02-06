@@ -2,9 +2,12 @@ import pyvista as pv
 import nibabel as nib
 import numpy as np
 from copy import deepcopy
-import pyvista as pv
 import pygeodesic.geodesic as geodesic
 from scipy.ndimage import binary_dilation
+from lib.utils import setup_logger
+
+log_file = snakemake.log[0] if snakemake.log else None
+logger = setup_logger(log_file)
 
 
 def get_adjacent_voxels(mask_a, mask_b):
@@ -29,7 +32,12 @@ def get_adjacent_voxels(mask_a, mask_b):
     return adjacency_mask
 
 
-def write_surface_to_gifti(points, faces, out_surf_gii):
+def write_surface_to_gifti(mesh, out_surf_gii):
+    """
+    Writes a PyVista mesh to a GIFTI surface file.
+    """
+    points = mesh.points
+    faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
 
     points_darray = nib.gifti.GiftiDataArray(
         data=points, intent="NIFTI_INTENT_POINTSET", datatype="NIFTI_TYPE_FLOAT32"
@@ -42,104 +50,55 @@ def write_surface_to_gifti(points, faces, out_surf_gii):
     gifti = nib.GiftiImage()
     gifti.add_gifti_data_array(points_darray)
     gifti.add_gifti_data_array(tri_darray)
-
     gifti.to_filename(out_surf_gii)
 
 
-def apply_affine_transform(vertices, affine_matrix, inverse=False):
+def apply_affine_transform(mesh, affine_matrix, inverse=False):
     """
-    Apply an affine transformation to a 3D mesh.
-
-    Parameters:
-    - vertices (np.ndarray): (N, 3) array of vertex coordinates.
-    - affine_matrix (np.ndarray): (4, 4) affine transformation matrix.
-    - inverse (bool): If True, applies the inverse transformation.
-
-    Returns:
-    - transformed_vertices (np.ndarray): (N, 3) array of transformed vertex coordinates.
+    Applies an affine transformation to a PyVista mesh.
     """
     if inverse:
         affine_matrix = np.linalg.inv(affine_matrix)
 
-    # Convert vertices to homogeneous coordinates
-    ones = np.ones((vertices.shape[0], 1))
-    homogeneous_vertices = np.hstack([vertices, ones])
-
-    # Apply affine transformation
-    transformed_homogeneous = homogeneous_vertices @ affine_matrix.T
-
-    # Convert back to Cartesian coordinates
-    transformed_vertices = transformed_homogeneous[:, :3]
-
-    return transformed_vertices
+    transformed_points = (
+        np.hstack([mesh.points, np.ones((mesh.n_points, 1))]) @ affine_matrix.T
+    )[:, :3]
+    transformed_mesh = pv.PolyData(transformed_points, mesh.faces)
+    return transformed_mesh
 
 
-def remove_nan_vertices(vertices, faces):
+def remove_nan_vertices(mesh):
     """
-    Removes vertices containing NaNs and updates faces accordingly.
-
-    Parameters:
-    - vertices (np.ndarray): (N, 3) array of vertex positions.
-    - faces (np.ndarray): (M, 3) array of triangular face indices.
-
-    Returns:
-    - new_vertices (np.ndarray): Filtered (N', 3) array of valid vertex positions.
-    - new_faces (np.ndarray): Filtered (M', 3) array of updated face indices.
+    Removes NaN vertices from a PyVista mesh and updates faces accordingly.
     """
-    # Identify valid (non-NaN) vertices
-    valid_mask = ~np.isnan(vertices).any(axis=1)
+    valid_mask = ~np.isnan(mesh.points).any(axis=1)
+    new_indices = np.full(mesh.n_points, -1, dtype=int)
+    new_indices[valid_mask] = np.arange(valid_mask.sum())
 
-    # Create a mapping from old indices to new indices
-    new_indices = np.full(
-        vertices.shape[0], -1, dtype=int
-    )  # Default -1 for invalid ones
-    new_indices[valid_mask] = np.arange(valid_mask.sum())  # Renumber valid vertices
+    faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
+    valid_faces_mask = np.all(valid_mask[faces], axis=1)
+    new_faces = new_indices[faces[valid_faces_mask]]
+    new_faces_pv = np.hstack([np.full((new_faces.shape[0], 1), 3), new_faces])
 
-    # Filter out faces that reference removed vertices
-    valid_faces_mask = np.all(
-        valid_mask[faces], axis=1
-    )  # Keep only faces with valid vertices
-    new_faces = new_indices[faces[valid_faces_mask]]  # Remap face indices
-
-    # Filter vertices
-    new_vertices = vertices[valid_mask]
-
-    return new_vertices, new_faces
+    cleaned_mesh = pv.PolyData(mesh.points[valid_mask], new_faces_pv)
+    return cleaned_mesh
 
 
-# Load the coords image
+# Load data
 coords_img = nib.load(snakemake.input.coords)
 coords = coords_img.get_fdata()
-
-# Load the nan mask
-nan_mask_img = nib.load(snakemake.input.nan_mask)
-nan_mask = nan_mask_img.get_fdata()
-
-# Load the sink mask
-sink_mask_img = nib.load(snakemake.input.sink_mask)
-sink_mask = sink_mask_img.get_fdata()
-
-# Load the src mask
-src_mask_img = nib.load(snakemake.input.src_mask)
-src_mask = src_mask_img.get_fdata()
-
-
+nan_mask = nib.load(snakemake.input.nan_mask).get_fdata()
+sink_mask = nib.load(snakemake.input.sink_mask).get_fdata()
+src_mask = nib.load(snakemake.input.src_mask).get_fdata()
 affine = coords_img.affine
 
-# Get voxel spacing from the header
-voxel_spacing = coords_img.header.get_zooms()[:3]
-
-# Create a PyVista grid
-grid = pv.ImageData()
-grid.dimensions = np.array(coords.shape) + 1  # Add 1 to include the boundary voxels
-grid.spacing = (1, 1, 1)  # Use unit spacing and zero origin since we will apply affine
-grid.origin = (0, 0, 0)
-
-# update the coords data to add the nans and sink
+# Prepare grid and apply transformations
+grid = pv.ImageData(
+    dimensions=np.array(coords.shape) + 1, spacing=(1, 1, 1), origin=(0, 0, 0)
+)
 coords[nan_mask == 1] = np.nan
 coords[src_mask == 1] = -0.1
 coords[sink_mask == 1] = 1.1
-
 
 # we also need to use a nan mask for the voxels where src and sink meet directly
 # (since this is another false boundary)..
@@ -149,35 +108,47 @@ if snakemake.params.clean_method == "cleanAK":
     coords[src_sink_nan_mask == 1] = np.nan
 
 
-# Add the scalar field
 grid.cell_data["values"] = coords.flatten(order="F")
 grid = grid.cells_to_points("values")
+tfm_grid = grid.transform(affine, inplace=False)
 
-# apply the affine
-tfm_grid = grid.transform(
-    affine, inplace=False
-)  # Apply the rotation part of the affine
+# Generate isosurface
+logger.info("Generating isosurface")
+surface = tfm_grid.contour(
+    [snakemake.params.threshold], method="contour", compute_scalars=True
+)
+logger.info(surface)
 
 
-# the contour function produces the isosurface
-surface = tfm_grid.contour([snakemake.params.threshold], method="contour")
-if snakemake.params.decimation_target:
-    faces = surface.faces
-    faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
-    points = surface.points
-    edge_lengths = np.linalg.norm(points[faces[:, 0]] - points[faces[:, 1]], axis=1)
-    snakemake.params.decimate_opts["reduction"] = (
-        snakemake.params.decimation_target / np.mean(edge_lengths)
-    ) ** 2
+logger.info("Cleaning surface")
+surface = surface.clean(point_merging=False)
+logger.info(surface)
+
+"""
+#still experimenting with this..
+
+logger.info("Applying surface smoothing")  
+surface = surface.smooth_taubin(#normalize_coordinates=True,
+                                #boundary_smoothing=True,
+                                #feature_smoothing=True,
+                                n_iter=20,
+                                pass_band=0.1)  #n_iter=30, pass_band=0.1)
+logger.info(surface)
+"""
+
+logger.info("Filling holes up to radius {snakemake.params.hole_fill_radius}")
+surface = surface.fill_holes(snakemake.params.hole_fill_radius)
+logger.info(surface)
+
+# reduce # of vertices with decimation
+logger.info("Decimating surface")
 surface = surface.decimate_pro(**snakemake.params.decimate_opts)
+logger.info(surface)
 
-# faces from pyvista surface are formatted with number of verts each row
-# reshape and remove the first col to get Nx3
-faces = surface.faces
-faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
-points = surface.points
 
-points, faces = remove_nan_vertices(points, faces)
+# logger.info("applying surface smoothing") # -- still experimenting with smoothing before/after decimation
+# surface = surface.smooth_taubin()
+# logger.info(surface)
 
 
 if snakemake.params.clean_method == "cleanJD":
@@ -196,31 +167,23 @@ if snakemake.params.clean_method == "cleanJD":
 
     # keep vertices that are in a nice coordinate range
     epsilon = snakemake.params.coords_epsilon
-    good_v = np.where(np.logical_and(coord_at_V < (1 - epsilon), coord_at_V > epsilon))[
-        0
-    ]
+    good_v = np.where((coord_at_V < (1 - epsilon)) & (coord_at_V > epsilon))[0]
 
-    geoalg = geodesic.PyGeodesicAlgorithmExact(points, faces)
-    # morphological open
+    geoalg = geodesic.PyGeodesicAlgorithmExact(
+        surface.points, surface.faces.reshape((-1, 4))[:, 1:4]
+    )
     maxdist, _ = geoalg.geodesicDistances(good_v, None)
     bad_v = np.where(maxdist > snakemake.params.morph_openclose_dist)[0]
-    # morphological close
     maxdist, _ = geoalg.geodesicDistances(bad_v, None)
     bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
 
-    # toss bad vertices
-    points[bad_v, :] = np.nan
-    points, faces = remove_nan_vertices(points, faces)
+    surface.points[bad_v, :] = np.nan
+    surface = remove_nan_vertices(surface)
 
+# Extract the largest connected component
+logger.info("Extracting largest connected component")
+surface = surface.extract_largest()
+logger.info(surface)
 
-# apply largest connected component
-faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])
-mesh = pv.PolyData(points, faces_pv)
-mesh_cc = mesh.extract_largest()
-points = mesh_cc.points  # This gives you the vertices
-faces = mesh_cc.faces
-faces = faces.reshape((int(faces.shape[0] / 4), 4))[:, 1:4]
-
-
-# write to gifti
-write_surface_to_gifti(points, faces, snakemake.output.surf_gii)
+# Save the final mesh
+write_surface_to_gifti(surface, snakemake.output.surf_gii)
