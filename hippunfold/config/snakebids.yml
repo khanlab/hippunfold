@@ -753,8 +753,9 @@ skip_inject_template_labels: False
 force_nnunet_model: False
 t1_reg_template: False
 generate_myelin_map: False
+no_unfolded_reg: False
 root: results
-workdir: null
+workdir: .
 use_template_seg: False
 template_seg_smoothing_factor: 2
 resample_dsegtissue: null
