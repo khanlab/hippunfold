@@ -3,7 +3,7 @@
 
 
 def get_input_for_shape_inject(wildcards):
-    if config["modality"] == "manualseg":
+    if config["modality"] == "dsegtissue":
         seg = bids(
             root=work,
             datatype="anat",
@@ -26,7 +26,7 @@ def get_input_for_shape_inject(wildcards):
 
 
 def get_input_splitseg_for_shape_inject(wildcards):
-    if config["modality"] == "manualseg":
+    if config["modality"] == "dsegtissue":
         seg = bids(
             root=work,
             datatype="anat",

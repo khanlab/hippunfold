@@ -65,7 +65,7 @@ pybids_inputs:
       - acquisition
       - run
 
-  manualseg:
+  dsegtissue:
     filters:
       suffix: 'dseg'
       extension: '.nii.gz'
@@ -78,6 +78,17 @@ pybids_inputs:
       - run
 
 
+  dsegsubfields:
+    filters:
+      suffix: 'dseg'
+      extension: '.nii.gz'
+      datatype: 'anat'
+    wildcards:
+      - subject
+      - session
+      - hemi
+      - acquisition
+      - run
 
 
 #configuration for the command-line parameters to make available
@@ -85,13 +96,13 @@ pybids_inputs:
 parse_args:
 
   --modality:
-    help: 'Type of image to run hippunfold on. For manualseg and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with separate hemi-L|R in the name(s). (default: %(default)s)'
+    help: 'Type of image to run hippunfold on. For dsegtissue and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with separate hemi-L|R in the name(s). (default: %(default)s)'
     required: True
     choices:
       - T1w
       - T2w
       - hippb500
-      - manualseg
+      - dsegtissue
 
 
   --template:
@@ -174,8 +185,8 @@ parse_args:
     help: 'Sets the bounding box size for the crop native (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
     default: '256x256x256vox'
 
-  --resample_manualseg:
-    help: 'Resample the manual segmentation (for --modality manualseg), keeping the bounding box the same, but changing the number of voxels in the image. This can be specified as voxels ("300x300x300"), or a percentage ("20%%") or percentage in each direction ("20x20x40%%"). Note: the segmentation will always be subsequently cropped around the segmentation, with a padding of 5 voxels.  (default: %(default)s)'
+  --resample_dsegtissue:
+    help: 'Resample the manual segmentation (for --modality dsegtissue), keeping the bounding box the same, but changing the number of voxels in the image. This can be specified as voxels ("300x300x300"), or a percentage ("20%%") or percentage in each direction ("20x20x40%%"). Note: the segmentation will always be subsequently cropped around the segmentation, with a padding of 5 voxels.  (default: %(default)s)'
     default: null
 
 
@@ -371,7 +382,7 @@ template_files:
     crop_ref: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
-    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
+    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuedsegtissue_dseg.nii.gz
     coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
@@ -725,4 +736,4 @@ root: results
 workdir: null
 use_template_seg: False
 template_seg_smoothing_factor: 2
-resample_manualseg: null
+resample_dsegtissue: null

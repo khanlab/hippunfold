@@ -126,7 +126,7 @@ def get_bg_img_for_subfield_qc(wildcards):
             hemi="{hemi}",
             **inputs.subj_wildcards,
         )
-    elif config["modality"] == "manualseg":
+    elif config["modality"] == "dsegtissue":
         # blank image as bg
         return bids(
             root=work,

@@ -31,7 +31,7 @@ if (
     limit_to_list.add("T2w")
 if (
     config["modality"] == "hippb500"
-    or config["modality"] == "manualseg"
+    or config["modality"] == "dsegtissue"
     or "corobl" in config["output_spaces"]
 ):
     ref_spaces.append("corobl")
@@ -53,7 +53,6 @@ if "T2w" in config["modality"]:
 
 elif "T1w" in config["modality"]:
     template_modality = "T1w"
-
 
 limit_to_list.add(config["modality"])
 
@@ -100,9 +99,9 @@ if "T1w" in limit_to_list:
 
 
 # include rules only as they are needed..
-if config["modality"] == "manualseg":
+if config["modality"] == "dsegtissue":
 
-    include: "rules/preproc_manualseg.smk"
+    include: "rules/preproc_dsegtissue.smk"
 
 else:
 
