@@ -66,10 +66,9 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.1,
+            "reduction": 0.5,
             "feature_angle": 25,
             "preserve_topology": True,
-            "boundary_vertex_deletion": False,
         },
         hole_fill_radius=0.1,
         clean_method="cleanAK",  #cleanAK or cleanJD 

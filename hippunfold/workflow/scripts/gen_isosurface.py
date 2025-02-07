@@ -104,6 +104,7 @@ coords[sink_mask == 1] = 1.1
 # (since this is another false boundary)..
 if snakemake.params.clean_method == "cleanAK":
 
+    logger.info("Using cleanAK method")
     src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
     coords[src_sink_nan_mask == 1] = np.nan
 
@@ -165,11 +166,13 @@ if snakemake.params.clean_method == "cleanJD":
     # keep vertices that overlap with good coord values. We then apply
     # some surface-based morphological opening and closing to keep
     # vertices along holes in the dg
+    logger.info("Using cleanJD method")
 
     # this is equivalent to wb_command -volume-to-surface-mapping -enclosing
     # apply inverse affine to surface to get back to matrix space
-    V = apply_affine_transform(points, affine, inverse=True)
-    V = V.astype(int)
+    surface = apply_affine_transform(surface, affine, inverse=True)
+
+    V = np.round(surface.points).astype("int") - 1
     # sample coords
     coord_at_V = coords[V[:, 0], V[:, 1], V[:, 2]]
 
@@ -186,7 +189,14 @@ if snakemake.params.clean_method == "cleanJD":
     bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
 
     surface.points[bad_v, :] = np.nan
+
+    logger.info("Removing nan-valued vertices")
     surface = remove_nan_vertices(surface)
+    logger.info(surface)
+
+    logger.info("Extracting largest connected component")
+    surface = surface.extract_largest()
+    logger.info(surface)
 
 
 # Save the final mesh
