@@ -231,7 +231,46 @@ rule prep_dseg_for_laynii:
         "c3d -background -1 {input} -as DSEG -retain-labels {params.gm_labels} -binarize -scale 3 -popas GM -push DSEG -retain-labels {params.src_labels} -binarize -scale 2 -popas WM -push DSEG -retain-labels {params.sink_labels} -binarize -scale 1 -popas PIAL -push GM -push WM -add -push PIAL -add -o {output}"
 
 
-rule laynii_layers:
+rule laynii_layers_equidist:
+    input:
+        dseg_rim=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            dir="{dir}",
+            desc="laynii",
+            label="{autotop}",
+            space="corobl",
+            hemi="{hemi}",
+        ),
+    output:
+        equidist=bids(
+            root=work,
+            datatype="coords",
+            dir="{dir,IO}",
+            label="{autotop}",
+            suffix="coords.nii.gz",
+            desc="equidist",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards,
+        ),
+    shadow:
+        "minimal"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/laynii.yaml"
+    group:
+        "subj"
+    shell:
+        "cp {input} dseg.nii.gz && "
+        "LN2_LAYERS  -rim dseg.nii.gz && "
+        "cp dseg_metric_equidist.nii.gz {output.equidist}"
+
+
+rule laynii_layers_equivol:
     input:
         dseg_rim=bids(
             root=work,
@@ -256,17 +295,6 @@ rule laynii_layers:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-        equidist=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir,IO}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            desc="equidist",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
-        ),
     shadow:
         "minimal"
     container:
@@ -278,5 +306,4 @@ rule laynii_layers:
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz -equivol && "
-        "cp dseg_metric_equidist.nii.gz {output.equidist} && "
         "cp dseg_metric_equivol.nii.gz {output.equivol}"

@@ -65,7 +65,13 @@ rule gen_native_mesh:
         ),
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
-        decimate_percent=0,  # not enabled
+        decimate_opts={
+            "reduction": 0.5,
+            "feature_angle": 25,
+            "preserve_topology": True,
+        },
+        hole_fill_radius=1.0,
+        clean_method="cleanAK",  #cleanAK or cleanJD 
         morph_openclose_dist=2,  # mm
         coords_epsilon=0.1,
     output:
@@ -362,7 +368,7 @@ rule compute_halfthick_mask:
             dir="IO",
             label="{label}",
             suffix="coords.nii.gz",
-            desc="equivol",
+            desc=config["laminar_coords_method"],
             space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards,
