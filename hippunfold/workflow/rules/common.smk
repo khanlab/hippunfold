@@ -219,7 +219,7 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    ruleorder: laplace_beltrami > laynii_layers > copy_coords_to_results
+    ruleorder: laplace_beltrami > laynii_layers_equidist > laynii_layers_equivol > copy_coords_to_results
 
     rule copy_coords_to_results:
         input:
