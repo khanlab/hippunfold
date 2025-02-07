@@ -170,9 +170,9 @@ if snakemake.params.clean_method == "cleanJD":
 
     # this is equivalent to wb_command -volume-to-surface-mapping -enclosing
     # apply inverse affine to surface to get back to matrix space
-    surface = apply_affine_transform(surface, affine, inverse=True)
+    xfm_surface = apply_affine_transform(surface, affine, inverse=True)
 
-    V = np.round(surface.points).astype("int") - 1
+    V = np.round(xfm_surface.points).astype("int") - 1
     # sample coords
     coord_at_V = coords[V[:, 0], V[:, 1], V[:, 2]]
 
