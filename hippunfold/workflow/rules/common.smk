@@ -315,4 +315,19 @@ def get_create_template_output():
                 hemi_=config["hemi"],
             )
         )
+        files.extend(
+            inputs[config["modality"]].expand(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    suffix="subfields.label.gii",
+                    space="corobl",
+                    hemi="{hemi_}",
+                    label="hipp",
+                    **inputs.subj_wildcards,
+                ),
+                space="corobl",
+                hemi_=config["hemi"],
+            )
+        )
     return files
