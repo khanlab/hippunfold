@@ -24,21 +24,13 @@ def get_gm_labels(wildcards):
     return lbl_list
 
 
-def get_sink_labels(wildcards):
+def get_src_sink_labels(wildcards):
     lbl_list = " ".join(
         [
             str(lbl)
-            for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["sink"]
-        ]
-    )
-    return lbl_list
-
-
-def get_src_labels(wildcards):
-    lbl_list = " ".join(
-        [
-            str(lbl)
-            for lbl in config["laplace_labels"][wildcards.label][wildcards.dir]["src"]
+            for lbl in config["laplace_labels"][wildcards.label][wildcards.dir][
+                wildcards.srcsink
+            ]
         ]
     )
     return lbl_list
@@ -103,11 +95,11 @@ def get_inputs_laplace(wildcards):
     return files
 
 
-rule get_sink_mask:
+rule get_src_sink_mask:
     input:
         labelmap=get_labels_for_laplace,
     params:
-        labels=get_sink_labels,
+        labels=get_src_sink_labels,
     output:
         mask=bids(
             root=work,
@@ -115,7 +107,7 @@ rule get_sink_mask:
             suffix="mask.nii.gz",
             space="corobl",
             dir="{dir}",
-            desc="sink",
+            desc="{srcsink,src|sink}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -130,19 +122,28 @@ rule get_sink_mask:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
 
-rule get_src_mask:
+rule get_src_sink_sdt:
+    """calculate signed distance transform (negative inside, positive outside)"""
     input:
-        labelmap=get_labels_for_laplace,
-    params:
-        labels=get_src_labels,
-    output:
         mask=bids(
             root=work,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
             dir="{dir}",
-            desc="src",
+            desc="{srcsink}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        sdt=bids(
+            root=work,
+            datatype="coords",
+            suffix="sdt.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="{srcsink}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -154,7 +155,7 @@ rule get_src_mask:
     group:
         "subj"
     shell:
-        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+        "c3d {input} -sdt -o {output}"
 
 
 rule get_nan_mask:
