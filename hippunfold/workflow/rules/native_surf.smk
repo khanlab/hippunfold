@@ -66,7 +66,7 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.5,
+            "reduction": 0.9,
             "feature_angle": 25,
             "preserve_topology": True,
         },
@@ -173,6 +173,82 @@ rule smooth_surface:
 # --- creating unfold surface from native anatomical, including post-processing
 
 
+rule get_boundary_vertices:
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        label_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="boundary.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/pyvista.yaml"
+    script:
+        "../scripts/get_boundary_vertices.py"
+
+
+rule map_src_sink_sdt_to_surf:
+    """ Maps the distance to src/sink mask """
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        sdt=bids(
+            root=work,
+            datatype="coords",
+            suffix="sdt.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="{srcsink}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        sdt=bids(
+            root=work,
+            datatype="surf",
+            suffix="sdt.shape.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="{dir}",
+            desc="{srcsink}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "wb_command -volume-to-surface-mapping {input.sdt} {input.surf_gii} {output.sdt} -trilinear"
+
+
 rule laplace_beltrami:
     input:
         surf_gii=bids(
@@ -184,25 +260,46 @@ rule laplace_beltrami:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-        seg=get_labels_for_laplace,
-    params:
-        srcsink_labels=lambda wildcards: config["laplace_labels"][wildcards.label],
-    output:
-        coords_AP=bids(
+        src_sdt=bids(
             root=work,
-            datatype="coords",
-            dir="AP",
-            suffix="coords.shape.gii",
-            desc="laplace",
+            datatype="surf",
+            suffix="sdt.shape.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="{dir}",
+            desc="src",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        sink_sdt=bids(
+            root=work,
+            datatype="surf",
+            suffix="sdt.shape.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="{dir}",
+            desc="sink",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        boundary=bids(
+            root=work,
+            datatype="surf",
+            suffix="boundary.label.gii",
             space="corobl",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
-        coords_PD=bids(
+    params:
+        min_dist_threshold=0.3,
+        max_dist_threshold=1,
+        min_terminal_vertices=5,
+    output:
+        coords=bids(
             root=work,
             datatype="coords",
-            dir="PD",
+            dir="{dir}",
             suffix="coords.shape.gii",
             desc="laplace",
             space="corobl",
