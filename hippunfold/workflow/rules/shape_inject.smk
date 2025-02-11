@@ -232,7 +232,7 @@ rule template_shape_inject:
             datatype="anat",
             space="template",
             **inputs.subj_wildcards,
-            desc="hipptissue",
+            desc="{label}tissue",
             hemi="{hemi}",
             suffix="dseg.nii.gz",
         ),

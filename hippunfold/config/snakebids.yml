@@ -121,14 +121,7 @@ parse_args:
 
   --inject_template:
     choices:
-      - 'bbhist'
       - 'upenn'
-      - 'dHCP'
-      - 'MBMv2'
-      - 'MBMv3'
-      - 'CIVM'
-      - 'ABAv3'
-      - 'bigbrain'
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
@@ -436,7 +429,8 @@ template_files:
 
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
-    dseg: tpl-upenn_desc-hippdentate_dseg.nii.gz
+    dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
+    dseg_dentate: tpl-upenn_desc-hippdentate_dseg.nii.gz # hack: separate files for DG
     coords: tpl-upenn_dir-{dir}_label-{label}_coords.nii.gz
     hemi_wildcards:
       - R
