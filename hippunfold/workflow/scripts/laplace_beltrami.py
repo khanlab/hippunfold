@@ -11,9 +11,12 @@ import numpy as np
 import numpy as np
 from scipy.signal import argrelextrema
 
-def get_terminal_indices_firstminima(sdt, min_vertices, boundary_mask, bins=100, smoothing_window=5):
+
+def get_terminal_indices_firstminima(
+    sdt, min_vertices, boundary_mask, bins=100, smoothing_window=5
+):
     """
-    Gets the terminal (src/sink) vertex indices by determining an adaptive threshold 
+    Gets the terminal (src/sink) vertex indices by determining an adaptive threshold
     using the first local minimum of the histogram of `sdt` values.
 
     Parameters:
@@ -38,7 +41,9 @@ def get_terminal_indices_firstminima(sdt, min_vertices, boundary_mask, bins=100,
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
 
     # Smooth the histogram using a simple moving average
-    smoothed_hist = np.convolve(hist, np.ones(smoothing_window) / smoothing_window, mode='same')
+    smoothed_hist = np.convolve(
+        hist, np.ones(smoothing_window) / smoothing_window, mode="same"
+    )
 
     # Find local minima
     minima_indices = argrelextrema(smoothed_hist, np.less)[0]
@@ -48,7 +53,7 @@ def get_terminal_indices_firstminima(sdt, min_vertices, boundary_mask, bins=100,
 
     # Select the first local minimum after the first peak
     first_minimum_bin = bin_centers[minima_indices[0]]
-    
+
     # Select indices where SDT is below this threshold
     indices = np.where((sdt < first_minimum_bin) & (boundary_mask == 1))[0].tolist()
 
@@ -60,7 +65,9 @@ def get_terminal_indices_firstminima(sdt, min_vertices, boundary_mask, bins=100,
     )
 
 
-def get_terminal_indices_percentile(sdt, min_percentile, max_percentile, min_vertices, boundary_mask):
+def get_terminal_indices_percentile(
+    sdt, min_percentile, max_percentile, min_vertices, boundary_mask
+):
     """
     Gets the terminal (src/sink) vertex indices by sweeping a percentile-based threshold
     of the signed distance transform (sdt), ensuring at least `min_vertices` are selected.
@@ -81,13 +88,15 @@ def get_terminal_indices_percentile(sdt, min_percentile, max_percentile, min_ver
     Raises:
     - ValueError: If the minimum number of vertices cannot be found.
     """
-    
+
     for percentile in np.arange(min_percentile, max_percentile, 0.5):
         dist_threshold = np.percentile(sdt[boundary_mask == 1], percentile)
         indices = np.where((sdt < dist_threshold) & (boundary_mask == 1))[0].tolist()
 
         if len(indices) >= min_vertices:
-            logger.info(f"Using {percentile}-th percentile to obtain sdt threshold of {dist_threshold}, with {len(indices)} vertices")
+            logger.info(
+                f"Using {percentile}-th percentile to obtain sdt threshold of {dist_threshold}, with {len(indices)} vertices"
+            )
             return indices
 
     raise ValueError(
@@ -95,7 +104,9 @@ def get_terminal_indices_percentile(sdt, min_percentile, max_percentile, min_ver
     )
 
 
-def get_terminal_indices_threshold(sdt, min_dist, max_dist, min_vertices, boundary_mask):
+def get_terminal_indices_threshold(
+    sdt, min_dist, max_dist, min_vertices, boundary_mask
+):
     """
     Gets the terminal (src/sink) vertex indices based on distance to the src/sink mask,
     a boundary mask, and a minumum number of vertices. The distance from the mask is
@@ -109,6 +120,7 @@ def get_terminal_indices_threshold(sdt, min_dist, max_dist, min_vertices, bounda
     raise ValueError(
         f"Unable to find minimum of {min_vertices} vertices on boundary, within {max_dist}mm of the terminal mask"
     )
+
 
 def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     """
@@ -220,7 +232,6 @@ if snakemake.params.threshold_method == "percentile":
     )
 
 
-
 elif snakemake.params.threshold_method == "firstminima":
     src_indices = get_terminal_indices_firstminima(
         src_sdt,
@@ -232,7 +243,6 @@ elif snakemake.params.threshold_method == "firstminima":
         snakemake.params.min_terminal_vertices,
         boundary_mask,
     )
-
 
 
 logger.info(f"# of src boundary vertices: {len(src_indices)}")

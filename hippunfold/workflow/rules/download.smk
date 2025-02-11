@@ -114,7 +114,7 @@ rule import_template_dseg_dentate:
             **inputs.subj_wildcards,
             desc="dentatetissue",
             hemi="{hemi}",
-            suffix="dseg.nii.gz"
+            suffix="dseg.nii.gz",
         ),
     group:
         "subj"

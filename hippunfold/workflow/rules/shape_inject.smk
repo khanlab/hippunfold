@@ -88,7 +88,7 @@ def get_inject_scaling_opt(wildcards):
 
     return f"-s {gradient_sigma}vox {warp_sigma}vox"
 
-       
+
 rule resample_template_dseg_tissue_for_reg:
     input:
         template_seg=bids(
@@ -101,7 +101,9 @@ rule resample_template_dseg_tissue_for_reg:
             suffix="dseg.nii.gz",
         ),
     params:
-        resample_cmd="-resample-mm {res}".format(res=config["resample_dseg_for_templatereg"]),
+        resample_cmd="-resample-mm {res}".format(
+            res=config["resample_dseg_for_templatereg"]
+        ),
         crop_cmd="-trim 5vox",  #leave 5 voxel padding
     output:
         template_seg=bids(
@@ -121,8 +123,6 @@ rule resample_template_dseg_tissue_for_reg:
         "subj"
     shell:
         "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
-
-
 
 
 rule template_shape_reg:
@@ -186,7 +186,6 @@ rule template_shape_reg:
         "greedy -threads {threads} {params.general_opts} {params.greedy_opts} {params.img_pairs} -it {output.matrix} -o {output.warp} &>> {log}"
 
 
-
 rule dilate_dentate_pd_src_sink:
     """ The PD src/sink labels can disappear after label propagation
     as they are very small. This dilates them into relative background labels"""
@@ -201,11 +200,11 @@ rule dilate_dentate_pd_src_sink:
             suffix="dseg.nii.gz",
         ),
     params:
-        src_label=config['laplace_labels']['dentate']['PD']['src'][0],
-        sink_label=config['laplace_labels']['dentate']['PD']['sink'][0],
+        src_label=config["laplace_labels"]["dentate"]["PD"]["src"][0],
+        sink_label=config["laplace_labels"]["dentate"]["PD"]["sink"][0],
         src_bg=2,
         sink_bg=10,
-        struc_elem_size=3
+        struc_elem_size=3,
     output:
         template_seg=bids(
             root=work,
@@ -225,8 +224,6 @@ rule dilate_dentate_pd_src_sink:
     script:
         "../scripts/dilate_dentate_pd_src_sink.py"
 
-        
-        
 
 rule template_shape_inject:
     input:
@@ -273,7 +270,7 @@ rule template_shape_inject:
             hemi="{hemi}",
         ),
     params:
-        interp_opt="-ri LABEL 0.1mm", # smoothing sigma = 100micron
+        interp_opt="-ri LABEL 0.1mm",  # smoothing sigma = 100micron
     output:
         inject_seg=bids(
             root=work,
@@ -315,7 +312,7 @@ rule inject_init_laplace_coords:
             desc="resampled",
             space="corobl",
             hemi="{hemi}",
-            label="{label}"
+            label="{label}",
         ),
         matrix=bids(
             root=work,
@@ -387,6 +384,11 @@ rule inject_init_laplace_coords:
 
 
 rule reinsert_subject_labels:
+    """ c3d command to:
+                1) get the labels to retain
+                2) reslice to injected seg
+                3) set injected seg to zero where retained labels are
+                4) and add this to retained labels"""
     input:
         inject_seg=bids(
             root=work,
@@ -421,7 +423,7 @@ rule reinsert_subject_labels:
     conda:
         "../envs/c3d.yaml"
     shell:
-        "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL " #get the labels to retain
-        " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE " #reslice to injected seg
-        "-push LBL_RESLICE -threshold 0 0 1 0 -push SEG -multiply " # set injected seg to zero where retained labels are
-        "-push LBL_RESLICE -add -o {output.postproc_seg}" #and add this to retained labels
+        "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
+        " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "
+        "-push LBL_RESLICE -threshold 0 0 1 0 -push SEG -multiply "
+        "-push LBL_RESLICE -add -o {output.postproc_seg}"

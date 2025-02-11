@@ -295,8 +295,10 @@ rule laplace_beltrami:
     params:
         min_dist_percentile=1,
         max_dist_percentile=10,
-        min_terminal_vertices=lambda wildcards: 5 if wildcards.dir == "AP" else 100, #TODO, instead of # of vertices, we should compute the total length of the segment
-        threshold_method=lambda wildcards: 'percentile' if wildcards.dir == "AP" else 'firstminima'
+        min_terminal_vertices=lambda wildcards: 5 if wildcards.dir == "AP" else 100,  #TODO, instead of # of vertices, we should compute the total length of the segment
+        threshold_method=lambda wildcards: (
+            "percentile" if wildcards.dir == "AP" else "firstminima"
+        ),
     output:
         coords=bids(
             root=work,

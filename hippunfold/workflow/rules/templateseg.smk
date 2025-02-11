@@ -74,7 +74,7 @@ rule warp_template_dseg:
             desc="resampled",
             space="corobl",
             hemi="{hemi}",
-            label="{label}"
+            label="{label}",
         ),
         warp=bids(
             root=work,
@@ -107,7 +107,7 @@ rule warp_template_dseg:
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
-            label="{label}"
+            label="{label}",
         ),
     group:
         "subj"

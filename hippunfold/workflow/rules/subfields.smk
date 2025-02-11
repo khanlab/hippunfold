@@ -249,7 +249,7 @@ rule resample_postproc_to_native:
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
-            label=config['autotop_labels'][-1],  #uses dentate if defined, as is higher res
+            label=config["autotop_labels"][-1],
         ),
         xfm=bids(
             root=work,

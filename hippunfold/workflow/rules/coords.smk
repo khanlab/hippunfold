@@ -150,7 +150,6 @@ rule get_src_sink_mask:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
 
-
 rule get_src_sink_sdt:
     """calculate signed distance transform (negative inside, positive outside)"""
     input:
@@ -193,7 +192,7 @@ rule create_upsampled_coords_ref:
     params:
         tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
         resample_res=lambda wildcards: config["laminar_coords_res"][wildcards.label],
-        trim_padding='3mm'
+        trim_padding="3mm",
     output:
         upsampled_ref=bids(
             root=work,
@@ -343,4 +342,3 @@ rule laynii_layers_equivol:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz -equivol && "
         "cp dseg_metric_equivol.nii.gz {output.equivol}"
-
