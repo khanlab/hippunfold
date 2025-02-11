@@ -88,8 +88,8 @@ def get_inject_scaling_opt(wildcards):
 
     return f"-s {gradient_sigma}vox {warp_sigma}vox"
 
-
-rule template_shape_reg:
+       
+rule resample_template_dseg_tissue_for_reg:
     input:
         template_seg=bids(
             root=work,
@@ -98,12 +98,48 @@ rule template_shape_reg:
             **inputs.subj_wildcards,
             desc="hipptissue",
             hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    params:
+        resample_cmd="-resample-mm {res}".format(res=config["resample_dseg_for_templatereg"]),
+        crop_cmd="-trim 5vox",  #leave 5 voxel padding
+    output:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissueresampled",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
+
+
+
+
+rule template_shape_reg:
+    input:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissueresampled",
+            hemi="{hemi}",
             suffix="dsegsplit",
         ),
         subject_seg=get_input_splitseg_for_shape_inject,
     params:
         general_opts="-d 3 -m SSD",
-        affine_opts="-moments 2",
+        affine_opts="-moments 2 -det 1",
         greedy_opts=get_inject_scaling_opt,
         img_pairs=get_image_pairs,
     output:
@@ -149,6 +185,48 @@ rule template_shape_reg:
         "greedy -threads {threads} {params.general_opts} {params.affine_opts} {params.img_pairs} -o {output.matrix}  &> {log} && "
         "greedy -threads {threads} {params.general_opts} {params.greedy_opts} {params.img_pairs} -it {output.matrix} -o {output.warp} &>> {log}"
 
+
+
+rule dilate_dentate_pd_src_sink:
+    """ The PD src/sink labels can disappear after label propagation
+    as they are very small. This dilates them into relative background labels"""
+    input:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissue",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    params:
+        src_label=config['laplace_labels']['dentate']['PD']['src'][0],
+        sink_label=config['laplace_labels']['dentate']['PD']['sink'][0],
+        src_bg=2,
+        sink_bg=10,
+        struc_elem_size=3
+    output:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissuedilated",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/neurovis.yaml"
+    script:
+        "../scripts/dilate_dentate_pd_src_sink.py"
+
+        
+        
 
 rule template_shape_inject:
     input:

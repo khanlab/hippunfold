@@ -193,6 +193,7 @@ rule create_upsampled_coords_ref:
     params:
         tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
         resample_res=lambda wildcards: config["laminar_coords_res"][wildcards.label],
+        trim_padding='3mm'
     output:
         upsampled_ref=bids(
             root=work,
@@ -213,7 +214,7 @@ rule create_upsampled_coords_ref:
     container:
         config["singularity"]["autotop"]
     shell:
-        "c3d {input} -retain-labels {params.tight_crop_labels} -trim 10vox -resample-mm {params.resample_res} -o {output}"
+        "c3d {input} -retain-labels {params.tight_crop_labels} -trim {params.trim_padding} -resample-mm {params.resample_res} -o {output}"
 
 
 rule prep_dseg_for_laynii:

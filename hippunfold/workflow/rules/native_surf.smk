@@ -67,7 +67,7 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.9,
+            "reduction": 0.5,
             "feature_angle": 25,
             "preserve_topology": True,
         },
@@ -293,9 +293,9 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
     params:
-        min_dist_threshold=0.3,
-        max_dist_threshold=1,
-        min_terminal_vertices=5,
+        min_dist_threshold=1,
+        max_dist_threshold=3,
+        min_terminal_vertices=1,
     output:
         coords=bids(
             root=work,

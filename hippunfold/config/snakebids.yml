@@ -436,7 +436,7 @@ template_files:
 
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
-    dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
+    dseg: tpl-upenn_desc-hippdentate_dseg.nii.gz
     coords: tpl-upenn_dir-{dir}_label-{label}_coords.nii.gz
     hemi_wildcards:
       - R
@@ -767,3 +767,5 @@ resample_dsegtissue: null
 laminar_coords_res:
   hipp: 0.3x0.3x0.3mm
   dentate: 0.1x0.1x0.1mm
+resample_dseg_for_templatereg: 0.3x0.3x0.3mm
+
