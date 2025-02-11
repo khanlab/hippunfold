@@ -67,7 +67,7 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.5,
+            "reduction": 0.7,
             "feature_angle": 25,
             "preserve_topology": True,
         },
@@ -293,9 +293,10 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
     params:
-        min_dist_threshold=1,
-        max_dist_threshold=3,
-        min_terminal_vertices=1,
+        min_dist_percentile=1,
+        max_dist_percentile=10,
+        min_terminal_vertices=lambda wildcards: 5 if wildcards.dir == "AP" else 100, #TODO, instead of # of vertices, we should compute the total length of the segment
+        threshold_method=lambda wildcards: 'percentile' if wildcards.dir == "AP" else 'firstminima'
     output:
         coords=bids(
             root=work,
