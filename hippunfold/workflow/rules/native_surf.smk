@@ -696,7 +696,8 @@ rule warp_midthickness_to_inout:
         config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
-    shadow: 'minimal'
+    shadow:
+        "minimal"
     group:
         "subj"
     shell:
@@ -704,7 +705,6 @@ rule warp_midthickness_to_inout:
         "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
         "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
         "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
-
 
 
 # --- affine transforming anatomical surfaces from corobl to other (T1w, T2w) spaces

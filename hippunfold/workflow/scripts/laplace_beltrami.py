@@ -107,7 +107,6 @@ def get_terminal_indices_percentile(
 def get_terminal_indices_threshold(
     sdt, min_dist, max_dist, min_vertices, boundary_mask
 ):
-
     """
     Gets the terminal (src/sink) vertex indices based on distance to the src/sink mask,
     a boundary mask, and a minumum number of vertices. The distance from the mask is
