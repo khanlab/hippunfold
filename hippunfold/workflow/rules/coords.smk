@@ -96,11 +96,11 @@ def get_inputs_laplace(wildcards):
     return files
 
 
-rule get_nan_mask:
+rule get_src_sink_mask:
     input:
         labelmap=get_labels_for_laplace,
     params:
-        labels=get_nan_labels,
+        labels=get_src_sink_labels,
     output:
         mask=bids(
             root=work,
@@ -159,28 +159,19 @@ rule get_src_sink_sdt:
         "c3d {input} -sdt -o {output}"
 
 
-rule get_src_sink_sdt:
-    """calculate signed distance transform (negative inside, positive outside)"""
+rule get_nan_mask:
     input:
+        labelmap=get_labels_for_laplace,
+    params:
+        labels=get_nan_labels,
+    output:
         mask=bids(
             root=work,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
             dir="{dir}",
-            desc="{srcsink}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        sdt=bids(
-            root=work,
-            datatype="coords",
-            suffix="sdt.nii.gz",
-            space="corobl",
-            dir="{dir}",
-            desc="{srcsink}",
+            desc="nan",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -192,7 +183,7 @@ rule get_src_sink_sdt:
     group:
         "subj"
     shell:
-        "c3d {input} -sdt -o {output}"
+        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
 
 rule create_upsampled_coords_ref:
