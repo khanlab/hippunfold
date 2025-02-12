@@ -108,33 +108,6 @@ rule get_nan_mask:
             suffix="mask.nii.gz",
             space="corobl",
             dir="{dir}",
-            desc="nan",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        "../envs/c3d.yaml"
-    group:
-        "subj"
-    shell:
-        "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
-
-
-rule get_src_sink_mask:
-    input:
-        labelmap=get_labels_for_laplace,
-    params:
-        labels=get_src_sink_labels,
-    output:
-        mask=bids(
-            root=work,
-            datatype="coords",
-            suffix="mask.nii.gz",
-            space="corobl",
-            dir="{dir}",
             desc="{srcsink,src|sink}",
             hemi="{hemi}",
             label="{label}",
@@ -148,6 +121,42 @@ rule get_src_sink_mask:
         "subj"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
+rule get_src_sink_sdt:
+    """calculate signed distance transform (negative inside, positive outside)"""
+    input:
+        mask=bids(
+            root=work,
+            datatype="coords",
+            suffix="mask.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="{srcsink}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        sdt=bids(
+            root=work,
+            datatype="coords",
+            suffix="sdt.nii.gz",
+            space="corobl",
+            dir="{dir}",
+            desc="{srcsink}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d {input} -sdt -o {output}"
 
 
 rule get_src_sink_sdt:

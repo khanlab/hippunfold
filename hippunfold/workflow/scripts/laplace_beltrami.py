@@ -107,6 +107,7 @@ def get_terminal_indices_percentile(
 def get_terminal_indices_threshold(
     sdt, min_dist, max_dist, min_vertices, boundary_mask
 ):
+
     """
     Gets the terminal (src/sink) vertex indices based on distance to the src/sink mask,
     a boundary mask, and a minumum number of vertices. The distance from the mask is
@@ -247,6 +248,7 @@ elif snakemake.params.threshold_method == "firstminima":
 
 logger.info(f"# of src boundary vertices: {len(src_indices)}")
 logger.info(f"# of sink boundary vertices: {len(sink_indices)}")
+
 
 src_vals = [0 for i in range(len(src_indices))]
 sink_vals = [1 for i in range(len(sink_indices))]
