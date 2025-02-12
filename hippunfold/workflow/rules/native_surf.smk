@@ -549,10 +549,11 @@ rule register_midthickness:
         "subj"
     container:
         config["singularity"]["autotop"]
+    threads: 16
     conda:
         "../envs/greedy.yaml"
     shell:
-        "greedy -d 3 -i {input.fixed} {input.moving} -n 30 -o {output.warp}"
+        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp}"
 
 
 rule apply_halfsurf_warp_to_img:

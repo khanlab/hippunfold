@@ -1,12 +1,12 @@
 
-rule import_manualseg_with_resample:
+rule import_dseg_tissue:
     input:
-        in_img=partial(get_single_bids_input, component="manualseg"),
+        in_img=partial(get_single_bids_input, component="dsegtissue"),
     params:
         resample_cmd=(
             ""
-            if config["resample_manualseg"] == None
-            else "-resample {res}".format(res=config["resample_manualseg"])
+            if config["resample_dsegtissue"] == None
+            else "-resample {res}".format(res=config["resample_dsegtissue"])
         ),
         crop_cmd="-trim 5vox",  #leave 5 voxel padding
     output:

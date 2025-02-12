@@ -1,3 +1,64 @@
+rule import_dseg_subfields:
+    """read in volumetric subfield dseg, used for participant_create_template only"""
+    input:
+        vol_dseg=partial(get_single_bids_input, component="dsegsubfields"),
+        label_list=Path(workflow.basedir) / "../resources/atlas-v2/labellist_withdg.txt",
+    output:
+        label_dseg=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            desc="subfields",
+            suffix="dseg.nii.gz",
+            space="corobl",
+            hemi="{hemi}",
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "wb_command -volume-label-import {input.vol_dseg} {input.label_list} {output.label_dseg}"
+
+
+rule subfields_to_label_gifti:
+    input:
+        vol=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            desc="subfields",
+            suffix="dseg.nii.gz",
+            space="corobl",
+            hemi="{hemi}",
+        ),
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        label_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="subfields.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards,
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
 
 
 rule label_subfields_from_vol_coords_corobl:
