@@ -196,9 +196,9 @@ parse_args:
 
   --atlas:
     choices:
-#      - 'multihist7'
+      - 'multihist7'
       - 'bbhist'
-    default: 'bbhist'
+    default: 'multihist7'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 
   --no_unfolded_reg:
