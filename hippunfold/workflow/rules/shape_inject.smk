@@ -2,29 +2,6 @@
 # by flipping it
 
 
-def get_input_for_shape_inject(wildcards):
-    if config["modality"] == "dsegtissue":
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-        ).format(**wildcards)
-    else:
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi}",
-        ).format(**wildcards)
-    return seg
-
-
 def get_input_splitseg_for_shape_inject(wildcards):
     if config["modality"] == "dsegtissue":
         seg = bids(
@@ -112,7 +89,7 @@ def get_inject_scaling_opt(wildcards):
     return f"-s {gradient_sigma}vox {warp_sigma}vox"
 
 
-rule template_shape_reg:
+rule resample_template_dseg_tissue_for_reg:
     input:
         template_seg=bids(
             root=work,
@@ -121,12 +98,48 @@ rule template_shape_reg:
             **inputs.subj_wildcards,
             desc="hipptissue",
             hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    params:
+        resample_cmd="-resample-mm {res}".format(
+            res=config["resample_dseg_for_templatereg"]
+        ),
+        crop_cmd="-trim 5vox",  #leave 5 voxel padding
+    output:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissueresampled",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
+
+
+rule template_shape_reg:
+    input:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissueresampled",
+            hemi="{hemi}",
             suffix="dsegsplit",
         ),
         subject_seg=get_input_splitseg_for_shape_inject,
     params:
         general_opts="-d 3 -m SSD",
-        affine_opts="-moments 2",
+        affine_opts="-moments 2 -det 1",
         greedy_opts=get_inject_scaling_opt,
         img_pairs=get_image_pairs,
     output:
@@ -173,7 +186,9 @@ rule template_shape_reg:
         "greedy -threads {threads} {params.general_opts} {params.greedy_opts} {params.img_pairs} -it {output.matrix} -o {output.warp} &>> {log}"
 
 
-rule template_shape_inject:
+rule dilate_dentate_pd_src_sink:
+    """ The PD src/sink labels can disappear after label propagation
+    as they are very small. This dilates them into relative background labels"""
     input:
         template_seg=bids(
             root=work,
@@ -184,7 +199,53 @@ rule template_shape_inject:
             hemi="{hemi}",
             suffix="dseg.nii.gz",
         ),
-        subject_seg=get_input_for_shape_inject,
+    params:
+        src_label=config["laplace_labels"]["dentate"]["PD"]["src"][0],
+        sink_label=config["laplace_labels"]["dentate"]["PD"]["sink"][0],
+        src_bg=2,
+        sink_bg=10,
+        struc_elem_size=3,
+    output:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissuedilated",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/neurovis.yaml"
+    script:
+        "../scripts/dilate_dentate_pd_src_sink.py"
+
+
+rule template_shape_inject:
+    input:
+        template_seg=bids(
+            root=work,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="{label}tissue",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+        upsampled_ref=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            label="{label}",
+            space="corobl",
+            hemi="{hemi}",
+        ),
         matrix=bids(
             root=work,
             **inputs.subj_wildcards,
@@ -209,7 +270,7 @@ rule template_shape_inject:
             hemi="{hemi}",
         ),
     params:
-        interp_opt="-ri LABEL 0.2vox",
+        interp_opt="-ri LABEL 0.1mm",  # smoothing sigma = 100micron
     output:
         inject_seg=bids(
             root=work,
@@ -219,6 +280,7 @@ rule template_shape_inject:
             desc="inject",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ),
     log:
         bids(
@@ -226,6 +288,7 @@ rule template_shape_inject:
             **inputs.subj_wildcards,
             suffix="templateshapeinject.txt",
             hemi="{hemi}",
+            label="{label}",
         ),
     group:
         "subj"
@@ -235,12 +298,22 @@ rule template_shape_inject:
         "../envs/greedy.yaml"
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule inject_init_laplace_coords:
+    """ TODO: this may not be needed anymore """
     input:
-        subject_seg=get_input_for_shape_inject,
+        upsampled_ref=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+        ),
         matrix=bids(
             root=work,
             **inputs.subj_wildcards,
@@ -276,7 +349,7 @@ rule inject_init_laplace_coords:
             hemi="{hemi}",
         ),
     params:
-        interp_opt="-ri NN",
+        interp_opt="-ri LIN",
     output:
         init_coords=bids(
             root=work,
@@ -307,10 +380,15 @@ rule inject_init_laplace_coords:
         "../envs/greedy.yaml"
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule reinsert_subject_labels:
+    """ c3d command to:
+                1) get the labels to retain
+                2) reslice to injected seg
+                3) set injected seg to zero where retained labels are
+                4) and add this to retained labels"""
     input:
         inject_seg=bids(
             root=work,
@@ -320,6 +398,7 @@ rule reinsert_subject_labels:
             desc="inject",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ),
         subject_seg=get_input_for_shape_inject,
     params:
@@ -335,6 +414,7 @@ rule reinsert_subject_labels:
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ),
     group:
         "subj"
@@ -343,4 +423,7 @@ rule reinsert_subject_labels:
     conda:
         "../envs/c3d.yaml"
     shell:
-        "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -push LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}"
+        "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
+        " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "
+        "-push LBL_RESLICE -threshold 0 0 1 0 -push SEG -multiply "
+        "-push LBL_RESLICE -add -o {output.postproc_seg}"

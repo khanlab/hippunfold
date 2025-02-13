@@ -66,14 +66,15 @@ rule template_reg:
 
 rule warp_template_dseg:
     input:
-        ref=bids(
+        upsampled_ref=bids(
             root=work,
             datatype="anat",
             **inputs.subj_wildcards,
-            suffix=f"{config['modality']}.nii.gz",
+            suffix="ref.nii.gz",
+            desc="resampled",
             space="corobl",
-            desc="preproc",
             hemi="{hemi}",
+            label="{label}",
         ),
         warp=bids(
             root=work,
@@ -106,6 +107,7 @@ rule warp_template_dseg:
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ),
     group:
         "subj"

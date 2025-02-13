@@ -5,6 +5,7 @@
 
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
+
 unfoldreg_method = "greedy"  # choices: ["greedy","SyN"]
 
 unfoldreg_padding = "64x64x0vox"
@@ -66,7 +67,7 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.9,
+            "reduction": 0.7,
             "feature_angle": 25,
             "preserve_topology": True,
         },
@@ -292,9 +293,12 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
     params:
-        min_dist_threshold=0.3,
-        max_dist_threshold=1,
-        min_terminal_vertices=5,
+        min_dist_percentile=1,
+        max_dist_percentile=10,
+        min_terminal_vertices=lambda wildcards: 5 if wildcards.dir == "AP" else 100,  #TODO, instead of # of vertices, we should compute the total length of the segment
+        threshold_method=lambda wildcards: (
+            "percentile" if wildcards.dir == "AP" else "firstminima"
+        ),
     output:
         coords=bids(
             root=work,
@@ -692,12 +696,15 @@ rule warp_midthickness_to_inout:
         config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
+    shadow:
+        "minimal"
     group:
         "subj"
     shell:
-        "wb_command -surface-apply-warpfield {input.surf_gii} {input.warp} {output.surf_gii} && "
-        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
+        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear && "
+        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
+        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
+        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
 
 
 # --- affine transforming anatomical surfaces from corobl to other (T1w, T2w) spaces

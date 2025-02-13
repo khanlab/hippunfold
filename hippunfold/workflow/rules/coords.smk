@@ -13,6 +13,7 @@ def get_labels_for_laplace(wildcards):
             desc="postproc",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ).format(**wildcards)
     return seg
 
@@ -183,6 +184,36 @@ rule get_nan_mask:
         "subj"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
+
+
+rule create_upsampled_coords_ref:
+    input:
+        seg=get_input_for_shape_inject,
+    params:
+        tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
+        resample_res=lambda wildcards: config["laminar_coords_res"][wildcards.label],
+        trim_padding="3mm",
+    output:
+        upsampled_ref=bids(
+            root=work,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            space="corobl",
+            label="{label}",
+            hemi="{hemi}",
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    shell:
+        "c3d {input} -retain-labels {params.tight_crop_labels} -trim {params.trim_padding} -resample-mm {params.resample_res} -o {output}"
 
 
 rule prep_dseg_for_laynii:
