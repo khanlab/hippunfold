@@ -35,8 +35,7 @@ rule prep_segs_for_greedy:
         directory("{prefix}_dsegsplit"),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:
@@ -168,8 +167,7 @@ rule template_shape_reg:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -292,8 +290,7 @@ rule template_shape_inject:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -374,8 +371,7 @@ rule inject_init_laplace_coords:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -418,8 +414,7 @@ rule reinsert_subject_labels:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:

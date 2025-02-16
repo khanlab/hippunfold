@@ -18,8 +18,7 @@ rule import_dseg_tissue:
             space="corobl",
             hemi="{hemi,L|R}",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:

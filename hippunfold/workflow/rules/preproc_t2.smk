@@ -31,8 +31,7 @@ rule n4_t2:
             **inputs["T2w"].wildcards,
         ),
     threads: 8
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -101,8 +100,7 @@ rule reg_t2_to_ref:
             floating="{idx}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("niftyreg")
     group:
@@ -134,8 +132,7 @@ rule ras_to_itk_reg_t2:
             desc="rigid",
             type_="itk",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -203,8 +200,6 @@ else:
                 suffix="T2w.nii.gz",
                 desc="preproc",
             ),
-        container:
-            config["singularity"]["autotop"]
         conda:
             conda_env("c3d")
         group:
@@ -258,8 +253,7 @@ rule reg_t2_to_t1_part1:
             desc="rigid",
             type_="ras",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("niftyreg")
     group:
@@ -291,8 +285,7 @@ rule reg_t2_to_t1_part2:
             desc="rigid",
             type_="itk",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -395,8 +388,7 @@ rule compose_t2_xfm_corobl:
             desc="affine",
             type_="itk",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -459,8 +451,7 @@ rule warp_t2_to_corobl_crop:
             desc="preproc",
             hemi="{hemi,L|R}",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:

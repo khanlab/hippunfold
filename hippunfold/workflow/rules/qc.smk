@@ -31,8 +31,7 @@ rule qc_reg_to_template:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("neurovis")
     script:
@@ -73,8 +72,7 @@ rule get_subfield_vols_subj:
             suffix="volumes.tsv",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("pyunfold")
     script:
@@ -108,8 +106,7 @@ rule plot_subj_subfields:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("neurovis")
     script:
@@ -194,8 +191,7 @@ rule qc_subfield:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("neurovis")
     script:
@@ -232,8 +228,7 @@ rule qc_subfield_surf:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("neurovis")
     script:
@@ -270,8 +265,7 @@ rule concat_subj_vols_tsv:
             from_="{modality}",
             suffix="volumes.tsv",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("neurovis")
     script:

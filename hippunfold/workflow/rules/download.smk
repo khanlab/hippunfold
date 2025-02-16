@@ -8,8 +8,7 @@ rule download_extract_atlas:
         url=lambda wildcards: config["resource_urls"]["atlas"][wildcards.atlas],
     output:
         unzip_dir=directory(Path(download_dir) / "atlas" / "{atlas}"),
-    container:
-        config["singularity"]["autotop"]
+
     shadow:
         "minimal"
     shell:
@@ -22,8 +21,7 @@ rule download_extract_template:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
         unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
-    container:
-        config["singularity"]["autotop"]
+
     shadow:
         "minimal"
     shell:
@@ -79,8 +77,7 @@ rule import_template_dseg:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:
@@ -159,8 +156,7 @@ rule import_template_coords:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:
@@ -199,8 +195,7 @@ rule import_template_anat:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:
