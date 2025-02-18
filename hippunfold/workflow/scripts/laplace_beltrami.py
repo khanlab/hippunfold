@@ -3,124 +3,6 @@ import nibabel as nib
 from scipy.sparse import diags, linalg, lil_matrix
 from lib.utils import setup_logger
 
-log_file = snakemake.log[0] if snakemake.log else None
-logger = setup_logger(log_file)
-
-import numpy as np
-
-import numpy as np
-from scipy.signal import argrelextrema
-
-
-def get_terminal_indices_firstminima(
-    sdt, min_vertices, boundary_mask, bins=100, smoothing_window=5
-):
-    """
-    Gets the terminal (src/sink) vertex indices by determining an adaptive threshold
-    using the first local minimum of the histogram of `sdt` values.
-
-    Parameters:
-    - sdt: Signed distance transform array.
-    - min_vertices: The minimum number of vertices required.
-    - boundary_mask: Boolean or binary mask indicating boundary regions.
-    - bins: Number of bins to use in the histogram (default: 100).
-    - smoothing_window: Window size for moving average smoothing (default: 5).
-
-    Returns:
-    - indices: List of terminal vertex indices.
-
-    Raises:
-    - ValueError: If the minimum number of vertices cannot be found.
-    """
-
-    # Extract SDT values within the boundary mask
-    sdt_values = sdt[boundary_mask == 1]
-
-    # Compute histogram
-    hist, bin_edges = np.histogram(sdt_values, bins=bins, density=True)
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
-
-    # Smooth the histogram using a simple moving average
-    smoothed_hist = np.convolve(
-        hist, np.ones(smoothing_window) / smoothing_window, mode="same"
-    )
-
-    # Find local minima
-    minima_indices = argrelextrema(smoothed_hist, np.less)[0]
-
-    if len(minima_indices) == 0:
-        raise ValueError("No local minima found in the histogram.")
-
-    # Select the first local minimum after the first peak
-    first_minimum_bin = bin_centers[minima_indices[0]]
-
-    # Select indices where SDT is below this threshold
-    indices = np.where((sdt < first_minimum_bin) & (boundary_mask == 1))[0].tolist()
-
-    if len(indices) >= min_vertices:
-        return indices
-
-    raise ValueError(
-        f"Unable to find minimum of {min_vertices} vertices on boundary within the first local minimum threshold."
-    )
-
-
-def get_terminal_indices_percentile(
-    sdt, min_percentile, max_percentile, min_vertices, boundary_mask
-):
-    """
-    Gets the terminal (src/sink) vertex indices by sweeping a percentile-based threshold
-    of the signed distance transform (sdt), ensuring at least `min_vertices` are selected.
-
-    Instead of a fixed distance range, this function dynamically determines the threshold
-    by scanning from `min_percentile` to `max_percentile`.
-
-    Parameters:
-    - sdt: Signed distance transform array.
-    - min_percentile: Starting percentile for thresholding (0-100).
-    - max_percentile: Maximum percentile for thresholding (0-100).
-    - min_vertices: The minimum number of vertices required.
-    - boundary_mask: Boolean or binary mask indicating boundary regions.
-
-    Returns:
-    - indices: List of terminal vertex indices.
-
-    Raises:
-    - ValueError: If the minimum number of vertices cannot be found.
-    """
-
-    for percentile in np.arange(min_percentile, max_percentile, 0.5):
-        dist_threshold = np.percentile(sdt[boundary_mask == 1], percentile)
-        indices = np.where((sdt < dist_threshold) & (boundary_mask == 1))[0].tolist()
-
-        if len(indices) >= min_vertices:
-            logger.info(
-                f"Using {percentile}-th percentile to obtain sdt threshold of {dist_threshold}, with {len(indices)} vertices"
-            )
-            return indices
-
-    raise ValueError(
-        f"Unable to find minimum of {min_vertices} vertices on boundary within the {max_percentile}th percentile of distances"
-    )
-
-
-def get_terminal_indices_threshold(
-    sdt, min_dist, max_dist, min_vertices, boundary_mask
-):
-    """
-    Gets the terminal (src/sink) vertex indices based on distance to the src/sink mask,
-    a boundary mask, and a minumum number of vertices. The distance from the mask is
-    swept from min_dist to max_dist, until the min_vertices is achieved, else an
-    exception is thrown."""
-
-    for dist in np.linspace(min_dist, max_dist, 20):
-        indices = np.where((sdt < dist) & (boundary_mask == 1))[0].tolist()
-        if len(indices) >= min_vertices:
-            return indices
-    raise ValueError(
-        f"Unable to find minimum of {min_vertices} vertices on boundary, within {max_dist}mm of the terminal mask"
-    )
-
 
 def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     """
@@ -211,38 +93,9 @@ surf = nib.load(snakemake.input.surf_gii)
 vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
 faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
 
-boundary_mask = nib.load(snakemake.input.boundary).agg_data()
-src_sdt = nib.load(snakemake.input.src_sdt).agg_data()
-sink_sdt = nib.load(snakemake.input.sink_sdt).agg_data()
-
-if snakemake.params.threshold_method == "percentile":
-    src_indices = get_terminal_indices_percentile(
-        src_sdt,
-        snakemake.params.min_dist_percentile,
-        snakemake.params.max_dist_percentile,
-        snakemake.params.min_terminal_vertices,
-        boundary_mask,
-    )
-    sink_indices = get_terminal_indices_percentile(
-        sink_sdt,
-        snakemake.params.min_dist_percentile,
-        snakemake.params.max_dist_percentile,
-        snakemake.params.min_terminal_vertices,
-        boundary_mask,
-    )
-
-
-elif snakemake.params.threshold_method == "firstminima":
-    src_indices = get_terminal_indices_firstminima(
-        src_sdt,
-        snakemake.params.min_terminal_vertices,
-        boundary_mask,
-    )
-    sink_indices = get_terminal_indices_firstminima(
-        sink_sdt,
-        snakemake.params.min_terminal_vertices,
-        boundary_mask,
-    )
+src_sink_mask = nib.load(snakemake.input.src_sink_mask).agg_data()
+src_indices = np.where(src_sink_mask == 1)[0]
+sink_indices = np.where(src_sink_mask == 2)[0]
 
 
 logger.info(f"# of src boundary vertices: {len(src_indices)}")
