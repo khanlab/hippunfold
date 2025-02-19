@@ -54,15 +54,14 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     laplacian = diags(diagonal) - weights
     if boundary_conditions is None:
         boundary_conditions = {}
-    boundary_indices = list(boundary_conditions.keys())
+    boundary_indices = np.array(list(boundary_conditions.keys()))
     boundary_values = np.array(list(boundary_conditions.values()))
     free_indices = np.setdiff1d(np.arange(n_vertices), boundary_indices)
     logger.info("Setting boundary conditions")
+    laplacian[boundary_indices, :] = 0  # Zero out entire rows
+    laplacian[boundary_indices, boundary_indices] = 1  # Set diagonal entries to 1
     b = np.zeros(n_vertices)
-    for idx, value in boundary_conditions.items():
-        laplacian[idx, :] = 0
-        laplacian[idx, idx] = 1
-        b[idx] = value
+    b[boundary_indices] = boundary_values
     # Step 3: Solve the Laplace-Beltrami equation
     logger.info("Solve the Laplace-Beltrami equation")
     solution = np.zeros(n_vertices)

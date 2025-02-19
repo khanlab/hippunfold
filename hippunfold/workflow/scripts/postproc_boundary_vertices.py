@@ -34,9 +34,9 @@ for _ in range(max_iterations):
 
     # Count occurrences per label
     unique, counts = np.unique(labels, return_counts=True)
-    label_counts = {
-        k: counts[i] if k in unique else 0 for i, k in enumerate(range(num_labels))
-    }
+    label_counts = dict(zip(unique, counts))
+    # Ensure all labels in range(num_labels) are present, setting missing ones to 0
+    label_counts = {k: label_counts.get(k, 0) for k in range(num_labels)}
 
     # Check if all labels meet nmin
     if all(count >= nmin for count in label_counts.values()):
