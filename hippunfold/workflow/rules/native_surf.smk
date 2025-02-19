@@ -188,7 +188,7 @@ rule get_boundary_vertices:
     output:
         label_gii=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="boundary.label.gii",
             space="corobl",
             hemi="{hemi}",
@@ -231,7 +231,7 @@ rule map_src_sink_sdt_to_surf:
     output:
         sdt=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -250,12 +250,12 @@ rule map_src_sink_sdt_to_surf:
         "wb_command -volume-to-surface-mapping {input.sdt} {input.surf_gii} {output.sdt} -trilinear"
 
 
-rule joint_smooth_ap_pd_edges:
+rule postproc_boundary_vertices:
     """ ensures non-overlapping and full labelling of AP/PD edges """
     input:
         ap_src=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -266,7 +266,7 @@ rule joint_smooth_ap_pd_edges:
         ),
         ap_sink=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -277,7 +277,7 @@ rule joint_smooth_ap_pd_edges:
         ),
         pd_src=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -288,7 +288,7 @@ rule joint_smooth_ap_pd_edges:
         ),
         pd_sink=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -299,7 +299,7 @@ rule joint_smooth_ap_pd_edges:
         ),
         edges=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="boundary.label.gii",
             space="corobl",
             hemi="{hemi}",
@@ -311,7 +311,7 @@ rule joint_smooth_ap_pd_edges:
     output:
         ap=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="mask.label.gii",
             space="corobl",
             hemi="{hemi}",
@@ -322,7 +322,7 @@ rule joint_smooth_ap_pd_edges:
         ),
         pd=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="mask.label.gii",
             space="corobl",
             hemi="{hemi}",
@@ -354,7 +354,7 @@ rule laplace_beltrami:
         ),
         src_sink_mask=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="mask.label.gii",
             space="corobl",
             hemi="{hemi}",

@@ -67,14 +67,31 @@ logger.info(
     f"Boundary scalar array created. {np.sum(boundary_scalars)} boundary vertices marked."
 )
 
+
 # Find the largest connected component within this sub-mesh
+logger.info("Applying largest connected components")
+
+# Extract points that are within the boundary scalars
 sub_mesh = pv.PolyData(surface.points, surface.faces).extract_points(
     boundary_scalars.astype(bool), adjacent_cells=True
 )
-largest_component_indices = sub_mesh.connectivity(largest=True).point_data["RegionId"]
-boundary_scalars = np.zeros(surface.n_points, dtype=int)
-boundary_scalars[largest_component.point_data["vtkOriginalPointIds"]] = 1
-logger.info("Applying largest connected components")
+
+# Compute connectivity to find the largest connected component
+connected_sub_mesh = sub_mesh.connectivity("largest")
+
+# Get indices of the largest component in the sub-mesh
+largest_component_mask = (
+    connected_sub_mesh.point_data["RegionId"] == 0
+)  # Largest component has RegionId 0
+largest_component_indices = connected_sub_mesh.point_data["vtkOriginalPointIds"][
+    largest_component_mask
+]
+
+# Create an array for all points in the original surface
+boundary_scalars = np.zeros(surface.n_points, dtype=np.int32)
+
+# Keep only the largest component
+boundary_scalars[largest_component_indices] = 1
 
 
 logger.info("Saving GIFTI label file...")

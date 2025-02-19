@@ -105,7 +105,9 @@ logger.info(f"# of sink boundary vertices: {len(sink_indices)}")
 src_vals = [0 for i in range(len(src_indices))]
 sink_vals = [1 for i in range(len(sink_indices))]
 
-boundary_conditions = dict(zip(src_indices + sink_indices, src_vals + sink_vals))
+boundary_conditions = dict(
+    zip(list(src_indices) + list(sink_indices), src_vals + sink_vals)
+)
 
 
 coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
