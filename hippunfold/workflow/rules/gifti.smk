@@ -14,6 +14,8 @@ def get_structure(hemi, label):
 
 surf_to_secondary_type = {
     "midthickness": "MIDTHICKNESS",
+    "closed": "MIDTHICKNESS",
+    "degyrified": "OUTER",
     "inner": "INNER",
     "outer": "OUTER",
 }

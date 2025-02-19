@@ -4,7 +4,7 @@
 # --- parameters - will put these in config eventually
 
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
-
+tofrom_thresholds = {"inner": "0.5 1", "outer": "0 0.5", "full": "0 1"}
 
 unfoldreg_method = "greedy"  # choices: ["greedy","SyN"]
 
@@ -139,7 +139,7 @@ rule smooth_surface:
     """ slight smoothing of surface to improve curvature estimation """
     input:
         surf_gii=bids(
-            root=root,
+            root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
             space="corobl",
@@ -154,9 +154,8 @@ rule smooth_surface:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
+            suffix="{surfname}smooth.surf.gii",
             space="corobl",
-            desc="smoothed",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -485,9 +484,8 @@ rule compute_halfthick_mask:
             **inputs.subj_wildcards,
         ),
     params:
-        threshold_tofrom=lambda wildcards: (
-            "0.5 1" if wildcards.inout == "inner" else "0 0.5"
-        ),
+        threshold_tofrom=lambda wildcards: tofrom_thresholds[wildcards.inout],
+        resample="50%",  #set to 50% for cpu/mem efficiency for voxelizing for gyrification (and greedy)
     output:
         nii=temp(
             bids(
@@ -496,7 +494,7 @@ rule compute_halfthick_mask:
                 dir="IO",
                 label="{label}",
                 suffix="mask.nii.gz",
-                to="{inout}",
+                to="{inout,inner|outer|full|closed}",
                 space="corobl",
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
@@ -509,7 +507,7 @@ rule compute_halfthick_mask:
     conda:
         "../envs/c3d.yaml"
     shell:
-        "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
+        "c3d -int 0 {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -resample {params.resample} -o {output}"
 
 
 rule register_midthickness:
@@ -527,12 +525,13 @@ rule register_midthickness:
         ),
         moving=bids(
             root=work,
-            datatype="coords",
-            suffix="mask.nii.gz",
-            space="corobl",
-            desc="GM",
-            hemi="{hemi}",
+            datatype="surf",
+            dir="IO",
             label="{label}",
+            suffix="mask.nii.gz",
+            to="full",
+            space="corobl",
+            hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
     output:
@@ -543,7 +542,7 @@ rule register_midthickness:
                 dir="IO",
                 label="{label}",
                 suffix="xfm.nii.gz",
-                to="{inout}",
+                to="{inout,inner|outer}",
                 space="corobl",
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
@@ -558,6 +557,21 @@ rule register_midthickness:
         "../envs/greedy.yaml"
     shell:
         "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp}"
+
+
+print(
+    bids(
+        root=work,
+        datatype="surf",
+        dir="IO",
+        label="{label}",
+        suffix="warpedmask.nii.gz",
+        to_="{inout}",
+        space="corobl",
+        hemi="{hemi}",
+        **inputs.subj_wildcards,
+    )
+)
 
 
 rule apply_halfsurf_warp_to_img:
@@ -575,12 +589,13 @@ rule apply_halfsurf_warp_to_img:
         ),
         moving=bids(
             root=work,
-            datatype="coords",
-            suffix="mask.nii.gz",
-            space="corobl",
-            desc="GM",
-            hemi="{hemi}",
+            datatype="surf",
+            dir="IO",
             label="{label}",
+            suffix="mask.nii.gz",
+            to="full",
+            space="corobl",
+            hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
         warp=bids(
@@ -602,7 +617,7 @@ rule apply_halfsurf_warp_to_img:
                 dir="IO",
                 label="{label}",
                 suffix="warpedmask.nii.gz",
-                to_="{inout}",
+                to_="{inout,inner|outer}",
                 space="corobl",
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
@@ -686,7 +701,7 @@ rule warp_midthickness_to_inout:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname,inner|outer}.surf.gii",
+            suffix="{surfname,inner|outer|closed}.surf.gii",
             space="corobl",
             hemi="{hemi}",
             label="{label}",
@@ -760,7 +775,7 @@ rule calculate_surface_area:
         gii=bids(
             root=root,
             datatype="surf",
-            suffix="midthickness.surf.gii",
+            suffix="{surfname}.surf.gii",
             space="{space}",
             hemi="{hemi}",
             label="{label}",
@@ -771,6 +786,7 @@ rule calculate_surface_area:
             root=work,
             datatype="surf",
             suffix="surfarea.shape.gii",
+            from_="{surfname}",
             space="{space}",
             hemi="{hemi}",
             label="{label}",
@@ -812,7 +828,7 @@ rule calculate_legacy_gyrification:
         gii=bids(
             root=root,
             datatype="surf",
-            suffix="gyrification.shape.gii",
+            suffix="legacygyrification.shape.gii",
             space="corobl",
             hemi="{hemi}",
             label="{label}",
@@ -834,9 +850,8 @@ rule calculate_curvature:
         gii=bids(
             root=work,
             datatype="surf",
-            suffix="midthickness.surf.gii",
+            suffix="midthicknesssmooth.surf.gii",
             space="corobl",
-            desc="smoothed",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -899,6 +914,431 @@ rule calculate_thickness:
         "subj"
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
+
+
+# --- gyrification v2
+rule gen_surface_closed:
+    input:
+        mask=bids(
+            root=work,
+            datatype="surf",
+            dir="IO",
+            label="{label}",
+            suffix="mask.nii.gz",
+            to="full",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        threshold=0.5,
+        decimate_opts={
+            "reduction": 0.7,
+            "feature_angle": 25,
+            "preserve_topology": True,
+        },
+        hole_fill_radius=1.0,
+    output:
+        surf_gii=temp(
+            bids(
+                root=work,
+                datatype="surf",
+                suffix="closedinit.surf.gii",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/pyvista.yaml"
+    script:
+        "../scripts/gen_surface_closed.py"
+
+
+rule smooth_surface_pregyr:
+    """strongly smooth the closed original surface to create a un-gyrified 
+    shape which we will use to calculate gyrification. Note, this smoothing causes
+    the surface to drift, so we voxelize and correct the drift before estimating the 
+    warp to calculate gyrification. TODO: alternatively could create a standard smoothed
+    hippocampus instead of doing this for each hippocampus separately, e.g. to replace the
+    output of the inject_smooth_shape rule"""
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="closedinit.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        smoothing_params={
+            "n_iter": 200,
+            "relaxation_factor": 0.5,
+            "boundary_smoothing": False,
+            "feature_smoothing": False,
+        },
+    output:
+        smoothed_surf_gii=temp(
+            bids(
+                root=work,
+                datatype="surf",
+                suffix="closedsmoothheavy.surf.gii",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/pyvista.yaml"
+    script:
+        "../scripts/smooth_surface.py"
+
+
+rule voxelize_closed_surface:
+    """ This voxelizes the surface so we can use non-linear volumetric
+    registration to bring it into better global correspondence with the original surface"""
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="closedsmoothheavy.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        ref_nii=get_input_for_shape_inject,
+    output:
+        mask_nii=temp(
+            bids(
+                root=work,
+                datatype="surf",
+                suffix="closedsmooth.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/pyvista.yaml"
+    script:
+        "../scripts/voxelize_closed_surface.py"
+
+
+rule inject_smooth_shape:
+    """ this init reg is to bring smoothed, voxelized hipp into better global correspondance with original, since the
+    smoothing can cause the vertices to drift. 
+    i.e. a highly-regularized warp is used to deform the image. That image would then be used to to obtain the 
+    warp for quantifying gyrification"""
+    input:
+        fixed=bids(
+            root=work,
+            datatype="surf",
+            dir="IO",
+            label="{label}",
+            suffix="mask.nii.gz",
+            to="full",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards,
+        ),
+        moving=bids(
+            root=work,
+            datatype="surf",
+            suffix="closedsmooth.nii.gz",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        warped=temp(
+            bids(
+                root=work,
+                datatype="surf",
+                suffix="closedinject.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    threads: 16
+    shadow:
+        "minimal"
+    conda:
+        "../envs/greedy.yaml"
+    shell:
+        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0x0 -s 3vox 1.5vox -o warp.nii.gz && "
+        "greedy -threads {threads} -d 3 -rf {input.fixed} -rm {input.moving} {output.warped}  -r warp.nii.gz"
+
+
+rule register_closed_voxelized_for_gyrification:
+    """ This produces the warp field that we will use to deform the original (gyrified) surface 
+    to a smoothed analogue, for quantifying gyrification"""
+    input:
+        fixed=bids(
+            root=work,
+            datatype="surf",
+            dir="IO",
+            label="{label}",
+            suffix="mask.nii.gz",
+            to="full",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards,
+        ),
+        moving=bids(
+            root=work,
+            datatype="surf",
+            suffix="closedinject.nii.gz",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        warp=temp(
+            bids(
+                root=work,
+                datatype="surf",
+                suffix="xfm.nii.gz",
+                space="corobl",
+                from_="orig",
+                to_="closedinject",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    threads: 16
+    conda:
+        "../envs/greedy.yaml"
+    shell:
+        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x30x30 -o {output.warp}"
+
+
+rule apply_gyr_warp_to_img:
+    """ this is a rule only for inspecting the warped image, not used downstream"""
+    input:
+        moving=bids(
+            root=work,
+            datatype="surf",
+            suffix="closedinject.nii.gz",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        fixed=bids(
+            root=work,
+            datatype="surf",
+            dir="IO",
+            label="{label}",
+            suffix="mask.nii.gz",
+            to_="full",
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards,
+        ),
+        warp=bids(
+            root=work,
+            datatype="surf",
+            suffix="xfm.nii.gz",
+            space="corobl",
+            from_="orig",
+            to_="closedinject",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        warped=temp(
+            bids(
+                root=work,
+                datatype="surf",
+                suffix="closedwarped.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/greedy.yaml"
+    shell:
+        "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
+
+
+rule warp_outer_to_smoothed:
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="outer.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        warp=bids(
+            root=work,
+            datatype="surf",
+            suffix="xfm.nii.gz",
+            space="corobl",
+            from_="orig",
+            to_="closedinject",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type="ANATOMICAL",
+    output:
+        surf_gii=temp(
+            bids(
+                root=work,
+                datatype="surf",
+                suffix="{surfname,degyrified}.surf.gii",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    shadow:
+        "minimal"
+    group:
+        "subj"
+    shell:
+        "wb_command -convert-warpfield -from-itk {input.warp} -to-world warp_world.nii.gz && "
+        "wb_command -volume-to-surface-mapping warp_world.nii.gz {input.surf_gii} warp.shape.gii -trilinear && "
+        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
+        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
+        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
+
+
+rule smooth_surfarea_metric:
+    input:
+        surfarea=bids(
+            root=work,
+            datatype="surf",
+            suffix="surfarea.shape.gii",
+            from_="{from}",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        fwhm_mm=5,
+    output:
+        surfarea=bids(
+            root=work,
+            datatype="surf",
+            suffix="surfareasmooth.shape.gii",
+            from_="{from}",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "wb_command -metric-smoothing {input.surf_gii} {input.surfarea} {params.fwhm_mm} {output.surfarea} -fwhm"
+
+
+rule calculate_gyrification:
+    """ratio of orig surface area to degyrified surface area, on slightly smoothed surfaces """
+    input:
+        orig_surfarea=bids(
+            root=work,
+            datatype="surf",
+            suffix="surfareasmooth.shape.gii",
+            from_="outer",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        degyrified_surfarea=bids(
+            root=work,
+            datatype="surf",
+            suffix="surfareasmooth.shape.gii",
+            from_="degyrified",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="gyrification.shape.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        'wb_command -metric-math "ORIG/DEGYRIFIED" {output.gii}'
+        " -var ORIG {input.orig_surfarea} -var DEGYRIFIED {input.degyrified_surfarea}"
 
 
 # --- unfolded registration
