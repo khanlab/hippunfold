@@ -158,7 +158,9 @@ rule all:
 
 
 if config["use_template_seg"]:
+
     include: "rules/atlas_gen.smk"
+
     config["atlas"] = config["gen_template_name"]
 
 
