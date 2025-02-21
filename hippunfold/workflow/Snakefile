@@ -129,6 +129,7 @@ include: "rules/resample_final_to_crop_native.smk"
 include: "rules/qc.smk"
 include: "rules/myelin_map.smk"
 include: "rules/native_surf.smk"
+include: "rules/unfold_reg.smk"
 
 
 if config["use_template_seg"]:
@@ -154,6 +155,11 @@ else:
 rule all:
     input:
         get_final_output(),
+
+
+if config["use_template_seg"]:
+    include: "rules/atlas_gen.smk"
+    config["atlas"] = config["gen_template_name"]
 
 
 rule all_create_template:
