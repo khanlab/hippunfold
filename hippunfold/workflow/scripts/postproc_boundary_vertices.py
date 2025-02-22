@@ -5,6 +5,41 @@ import nibabel.gifti as gifti
 from collections import Counter
 from scipy.signal import argrelextrema
 
+
+def write_src_sink_label_gifti(label_data, out_label_gifti):
+
+    # Create a Label Table (LUT)
+    label_table = gifti.GiftiLabelTable()
+
+    # Define Background label (key 0)
+    background_label = gifti.GiftiLabel(
+        key=0, red=1.0, green=1.0, blue=1.0, alpha=0.0
+    )  # Transparent
+    background_label.label = "Background"
+    label_table.labels.append(background_label)
+
+    # Define src label (key 1)
+    src_label = gifti.GiftiLabel(
+        key=1, red=1.0, green=0.0, blue=0.0, alpha=1.0
+    )  # Red color
+    src_label.label = "Source"
+    label_table.labels.append(src_label)
+
+    # Define sink label (key 2)
+    sink_label = gifti.GiftiLabel(
+        key=1, red=1.0, green=0.0, blue=0.0, alpha=1.0
+    )  # Red color
+    sink_label.label = "Sink"
+    label_table.labels.append(sink_label)
+
+    # write the data and the label table to gifti
+    gii_img = gifti.GiftiImage(
+        darrays=[gifti.GiftiDataArray(label_data, intent="NIFTI_INTENT_LABEL")],
+        labeltable=label_table,
+    )
+    nib.save(gii_img, out_label_gifti)
+
+
 nmin = snakemake.params.min_terminal_vertices
 
 logger.info("Loading surface from GIFTI...")
@@ -50,19 +85,18 @@ for _ in range(max_iterations):
 # Ensure all labels are represented
 logger.info(["Final label counts:", label_counts])
 
+if 0 in label_counts.values():
+    raise ValueError("Encountered a src/sink label with zero vertices, {label_counts}")
+
 ap_srcsink = np.zeros((len(edges)), dtype=np.int32)
 idx_edges = np.where(edges == 1)[0]
 ap_srcsink[idx_edges[labels == 0]] = 1
 ap_srcsink[idx_edges[labels == 1]] = 2
-gii_img = gifti.GiftiImage(
-    darrays=[gifti.GiftiDataArray(ap_srcsink, intent="NIFTI_INTENT_LABEL")]
-)
-nib.save(gii_img, snakemake.output.ap)
 
 pd_srcsink = np.zeros((len(edges)), dtype=np.int32)
 pd_srcsink[idx_edges[labels == 2]] = 1
 pd_srcsink[idx_edges[labels == 3]] = 2
-gii_img = gifti.GiftiImage(
-    darrays=[gifti.GiftiDataArray(pd_srcsink, intent="NIFTI_INTENT_LABEL")]
-)
-nib.save(gii_img, snakemake.output.pd)
+
+# save to gifti:
+write_src_sink_label_gifti(ap_srcsink, snakemake.output.ap)
+write_src_sink_label_gifti(pd_srcsink, snakemake.output.pd)
