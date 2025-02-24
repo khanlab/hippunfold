@@ -3,6 +3,9 @@
 
 # for unfold_reg, need to get data into 2d image - Jordan's previous code used metric-to-volume-mapping with unfoldiso inner and outer surfaces
 # we can use same approach, just calculating the metrics on native, and using the unfold inner/outer as ribbon
+unfoldreg_method = "SyN"  # choices: ["greedy","SyN"]
+
+unfoldreg_padding = "64x64x0vox"
 
 
 rule pad_unfold_ref:
@@ -506,31 +509,6 @@ rule convert_unfoldreg_warp_from_itk_to_world:
         "../envs/workbench.yaml"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
-
-
-def get_unfold_ref_name(wildcards):
-    if (
-        wildcards.label in config["atlas_files"][config["atlas"]]["label_wildcards"]
-        and config["no_unfolded_reg"] == False
-    ):
-        return "unfoldreg"
-    else:
-        return "unfold"
-
-
-def get_unfold_ref(wildcards):
-    """function to return either unfoldreg or unfold ref mesh, depending on whether
-    unfoldreg can be performed (based on atlas wildcards)"""
-
-    return bids(
-        root=root,
-        datatype="surf",
-        suffix="midthickness.surf.gii",
-        space=get_unfold_ref_name(wildcards),
-        hemi="{hemi}",
-        label="{label}",
-        **inputs.subj_wildcards,
-    )
 
 
 rule warp_unfold_native_to_unfoldreg:

@@ -6,11 +6,6 @@
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
 
-unfoldreg_method = "greedy"  # choices: ["greedy","SyN"]
-
-unfoldreg_padding = "64x64x0vox"
-
-
 ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
 
@@ -926,6 +921,32 @@ rule calculate_thickness:
 
 
 # --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
+
+def get_unfold_ref_name(wildcards):
+    if (
+        wildcards.label in config["atlas_files"][config["atlas"]]["label_wildcards"]
+        and config["no_unfolded_reg"] == False
+    ):
+        return "unfoldreg"
+    else:
+        return "unfold"
+
+
+def get_unfold_ref(wildcards):
+    """function to return either unfoldreg or unfold ref mesh, depending on whether
+    unfoldreg can be performed (based on atlas wildcards)"""
+
+    return bids(
+        root=root,
+        datatype="surf",
+        suffix="midthickness.surf.gii",
+        space=get_unfold_ref_name(wildcards),
+        hemi="{hemi}",
+        label="{label}",
+        **inputs.subj_wildcards,
+    )
+
+    
 rule resample_atlas_subfields_to_std_density:
     """ resamples subfields from a custom atlas mesh (e.g. from an atlas anatomical/native mesh
     warped to unfold space) to a standard density"""

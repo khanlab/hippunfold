@@ -470,7 +470,7 @@ template_files:
       - R
 
 
-gen_template_name = 'mytemplate'
+gen_template_name: mytemplate
 
 #NOTE this will need to be set by the user when generating a template!
 atlas_files:

@@ -157,7 +157,7 @@ rule all:
         get_final_output(),
 
 
-if config["use_template_seg"]:
+if config["analysis_level"] == "participant_create_template":
 
     include: "rules/atlas_gen.smk"
 

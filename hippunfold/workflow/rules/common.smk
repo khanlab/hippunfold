@@ -332,12 +332,11 @@ def get_create_template_output():
             )
         )
         files.extend(
-            inputs[config["modality"]].expand(
-                "template/pairs_{hemi}_{label}.csv",
-                hemi=config["hemi"],
-                label=config["atlas_files"]["mytemplate"]["label_wildcards"],
-            )
-        ),
+            expand(
+            "template/pairs_{hemi}_{label}.csv",
+            hemi=config["hemi"],
+            label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+        )),
     return files
 
 
