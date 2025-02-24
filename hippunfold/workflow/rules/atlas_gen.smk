@@ -1,23 +1,23 @@
-ruleorder: resample_metric_to_atlas > atlas_metric_to_unfold_nii
+#ruleorder: resample_metric_to_atlas > atlas_metric_to_unfold_nii
 
 
 rule write_image_pairs_csv:
     input:
-        metric_nii=expand(bids(
-            root=work,
-            datatype="anat",
-            suffix="{metric}.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        )),
-    output:
-        images_csv=expand(
-            "template/pairs_{hemi}_{label}.csv",
-            hemi="{hemi}",
-            label="{label}",
+        metric_nii = lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=work,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
         ),
+            metric=['gyrification','curvature','thickness'],
+            hemi=wildcards.hemi,
+            label=wildcards.label)
+    output:
+        images_csv="template/pairs_{hemi}_{label}.csv",
     group:
         "subj"
     run:
@@ -39,7 +39,7 @@ rule gen_atlas_reg_ants:
         ),
     params:
         num_modalities=len(
-            congif["atlas_files"][config["gen_template_name"]]["metric_wildcards"]
+            config["atlas_files"][config["gen_template_name"]]["metric_wildcards"]
         ),
     output:
         warp_prefix=expand(
