@@ -187,7 +187,7 @@ rule get_boundary_vertices:
     output:
         label_gii=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="boundary.label.gii",
             space="corobl",
             hemi="{hemi}",
@@ -230,7 +230,7 @@ rule map_src_sink_sdt_to_surf:
     output:
         sdt=bids(
             root=work,
-            datatype="surf",
+            datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -249,6 +249,108 @@ rule map_src_sink_sdt_to_surf:
         "wb_command -volume-to-surface-mapping {input.sdt} {input.surf_gii} {output.sdt} -trilinear"
 
 
+rule postproc_boundary_vertices:
+    """ ensures non-overlapping and full labelling of AP/PD edges """
+    input:
+        ap_src=bids(
+            root=work,
+            datatype="coords",
+            suffix="sdt.shape.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="AP",
+            desc="src",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        ap_sink=bids(
+            root=work,
+            datatype="coords",
+            suffix="sdt.shape.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="AP",
+            desc="sink",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        pd_src=bids(
+            root=work,
+            datatype="coords",
+            suffix="sdt.shape.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="PD",
+            desc="src",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        pd_sink=bids(
+            root=work,
+            datatype="coords",
+            suffix="sdt.shape.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="PD",
+            desc="sink",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        edges=bids(
+            root=work,
+            datatype="coords",
+            suffix="boundary.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        min_terminal_vertices=5,  # min number of vertices per src/sink
+        max_iterations=100,
+        shifting_epsilon=0.1,  #could be proportional to voxel spacing
+    output:
+        ap=bids(
+            root=work,
+            datatype="coords",
+            suffix="mask.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="AP",
+            desc="srcsink",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        pd=bids(
+            root=work,
+            datatype="coords",
+            suffix="mask.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="PD",
+            desc="srcsink",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    log:
+        bids(
+            root="logs",
+            datatype="postproc_boundary_vertices",
+            suffix="log.txt",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    conda:
+        "../envs/pyvista.yaml"
+    group:
+        "subj"
+    script:
+        "../scripts/postproc_boundary_vertices.py"
+
+
 rule laplace_beltrami:
     input:
         surf_gii=bids(
@@ -260,43 +362,16 @@ rule laplace_beltrami:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-        src_sdt=bids(
+        src_sink_mask=bids(
             root=work,
-            datatype="surf",
-            suffix="sdt.shape.gii",
+            datatype="coords",
+            suffix="mask.label.gii",
             space="corobl",
             hemi="{hemi}",
             dir="{dir}",
-            desc="src",
+            desc="srcsink",
             label="{label}",
             **inputs.subj_wildcards,
-        ),
-        sink_sdt=bids(
-            root=work,
-            datatype="surf",
-            suffix="sdt.shape.gii",
-            space="corobl",
-            hemi="{hemi}",
-            dir="{dir}",
-            desc="sink",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-        boundary=bids(
-            root=work,
-            datatype="surf",
-            suffix="boundary.label.gii",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    params:
-        min_dist_percentile=1,
-        max_dist_percentile=10,
-        min_terminal_vertices=lambda wildcards: 5 if wildcards.dir == "AP" else 100,  #TODO, instead of # of vertices, we should compute the total length of the segment
-        threshold_method=lambda wildcards: (
-            "percentile" if wildcards.dir == "AP" else "firstminima"
         ),
     output:
         coords=bids(
@@ -307,6 +382,16 @@ rule laplace_beltrami:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    log:
+        bids(
+            root="logs",
+            datatype="laplace_beltrami",
+            suffix="log.txt",
+            hemi="{hemi}",
+            dir="{dir}",
             label="{label}",
             **inputs.subj_wildcards,
         ),

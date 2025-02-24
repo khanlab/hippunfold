@@ -2,6 +2,7 @@ import pyvista as pv
 import numpy as np
 import nibabel as nib
 import nibabel.gifti as gifti
+from nibabel.gifti.gifti import intent_codes
 from collections import defaultdict
 from lib.utils import setup_logger
 
@@ -50,11 +51,24 @@ def read_surface_from_gifti(surf_gii):
     faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
     faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])  # PyVista format
 
-    return pv.PolyData(vertices, faces_pv)
+    # Find the first darray that represents vertices (NIFTI_INTENT_POINTSET)
+    vertices_darray = next(
+        (
+            darray
+            for darray in surf.darrays
+            if darray.intent == intent_codes["NIFTI_INTENT_POINTSET"]
+        ),
+        None,
+    )
+
+    # Extract metadata as a dictionary (return empty dict if no metadata)
+    metadata = dict(vertices_darray.meta) if vertices_darray else {}
+
+    return pv.PolyData(vertices, faces_pv), metadata
 
 
 logger.info("Loading surface from GIFTI...")
-surface = read_surface_from_gifti(snakemake.input.surf_gii)
+surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
 logger.info(f"Surface loaded: {surface.n_points} vertices, {surface.n_faces} faces.")
 
 
@@ -66,6 +80,33 @@ boundary_scalars[boundary_indices] = 1  # Set boundary vertices to 1
 logger.info(
     f"Boundary scalar array created. {np.sum(boundary_scalars)} boundary vertices marked."
 )
+
+
+# Find the largest connected component within this sub-mesh
+logger.info("Applying largest connected components")
+
+# Extract points that are within the boundary scalars
+sub_mesh = pv.PolyData(surface.points, surface.faces).extract_points(
+    boundary_scalars.astype(bool), adjacent_cells=True
+)
+
+# Compute connectivity to find the largest connected component
+connected_sub_mesh = sub_mesh.connectivity("largest")
+
+# Get indices of the largest component in the sub-mesh
+largest_component_mask = (
+    connected_sub_mesh.point_data["RegionId"] == 0
+)  # Largest component has RegionId 0
+largest_component_indices = connected_sub_mesh.point_data["vtkOriginalPointIds"][
+    largest_component_mask
+]
+
+# Create an array for all points in the original surface
+boundary_scalars = np.zeros(surface.n_points, dtype=np.int32)
+
+# Keep only the largest component
+boundary_scalars[largest_component_indices] = 1
+
 
 logger.info("Saving GIFTI label file...")
 
@@ -91,6 +132,10 @@ label_table.labels.append(boundary_label)
 
 # Assign label table to GIFTI image
 gii_img = gifti.GiftiImage(darrays=[gii_data], labeltable=label_table)
+
+# set structure metadata
+gii_img.meta["AnatomicalStructurePrimary"] = metadata["AnatomicalStructurePrimary"]
+
 
 # Save the label file
 gii_img.to_filename(snakemake.output.label_gii)
