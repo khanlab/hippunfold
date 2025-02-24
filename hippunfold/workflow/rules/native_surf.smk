@@ -922,6 +922,7 @@ rule calculate_thickness:
 
 # --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
 
+
 def get_unfold_ref_name(wildcards):
     if (
         wildcards.label in config["atlas_files"][config["atlas"]]["label_wildcards"]
@@ -946,7 +947,7 @@ def get_unfold_ref(wildcards):
         **inputs.subj_wildcards,
     )
 
-    
+
 rule resample_atlas_subfields_to_std_density:
     """ resamples subfields from a custom atlas mesh (e.g. from an atlas anatomical/native mesh
     warped to unfold space) to a standard density"""
