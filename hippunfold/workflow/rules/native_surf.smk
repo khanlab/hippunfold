@@ -308,7 +308,8 @@ rule postproc_boundary_vertices:
         ),
     params:
         min_terminal_vertices=5,  # min number of vertices per src/sink
-        stepsize=0.5,  # mm
+        max_iterations=100,
+        shifting_epsilon=0.1,  #could be proportional to voxel spacing
     output:
         ap=bids(
             root=work,
@@ -334,6 +335,15 @@ rule postproc_boundary_vertices:
         ),
     container:
         config["singularity"]["autotop"]
+    log:
+        bids(
+            root="logs",
+            datatype="postproc_boundary_vertices",
+            suffix="log.txt",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     conda:
         "../envs/pyvista.yaml"
     group:
@@ -373,6 +383,16 @@ rule laplace_beltrami:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    log:
+        bids(
+            root="logs",
+            datatype="laplace_beltrami",
+            suffix="log.txt",
+            hemi="{hemi}",
+            dir="{dir}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
