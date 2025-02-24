@@ -18,6 +18,8 @@ rule write_image_pairs_csv:
             hemi="{hemi}",
             label="{label}",
         ),
+    group:
+        "subj"
     run:
         with open(output.images_csv, "w") as f:
             subjects = sorted(
@@ -32,25 +34,32 @@ rule gen_atlas_reg_ants:
     input:
         images_csv=expand(
             "template/pairs_{hemi}_{label}.csv",
-            hemi=config["hemi"],
-            label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+            hemi="{hemi}",
+            label="{label}",
         ),
     params:
         num_modalities=len(
             congif["atlas_files"][config["gen_template_name"]]["metric_wildcards"]
         ),
     output:
-        warp=expand(
-            "template/warp_hemi-{hemi}_label-{label}_"
+        warp_prefix=expand(
+            "template/warp_hemi-{hemi}_label-{label}_",
             hemi="{hemi}",
             label="{label}",
         ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"] # note antsMultivariateTemplateConstruction2 is not in the container right now!
+    conda:
+        "../envs/ants.yaml"
     shell:
-        "antsMultivariateTemplateConstruction2.sh -d 2 -o {output} -n 0 -l 0 -k {params.num_modalities} {input}"
+        "antsMultivariateTemplateConstruction2.sh -d 2 -o {output.warp_prefix} -n 0 -l 0 -k {params.num_modalities} {input}"
+
 
 def warp_names(wildcards,input):
     # TODO: get the actual filename output by ants template creation
-    warp_file=f"template/warp_hemi-{hemi}_label-{label}_sub-{}"
+    warp_file=f"template/warp_hemi-{wildcards.hemi}_label-{wildcards.label}_sub-{wildcards.subject}"
     return warp_file
 
 # # Now we can plug into unfold_reg.smk to out everything in space-unfolreg
@@ -81,6 +90,7 @@ def warp_names(wildcards,input):
 #         ),
 #     shell:
 #         "mv {params.filename} {output.warp}"
+
 
 # rule: gen_atlas_surfs
 # # this should output to our atlas directory. Should also generate variious densities (decimation to target?)
