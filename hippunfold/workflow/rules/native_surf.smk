@@ -308,6 +308,7 @@ rule postproc_boundary_vertices:
         ),
     params:
         min_terminal_vertices=5,  # min number of vertices per src/sink
+        stepsize=0.5,  # mm
     output:
         ap=bids(
             root=work,

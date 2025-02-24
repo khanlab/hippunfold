@@ -56,13 +56,13 @@ logger.info("Assigning labels apsrc, apsink, pdsrc, pdsink")
 distances = np.vstack(
     (ap_src[edges == 1], ap_sink[edges == 1], pd_src[edges == 1], pd_sink[edges == 1])
 ).T
-scaling_factors = np.ones((4))
+scaling_factors = np.zeros((4))
 num_labels = 4  # starts at 0
 
 max_iterations = 10  # Prevent infinite loops
 for _ in range(max_iterations):
     # Scale distances
-    scaled_distances = distances * scaling_factors
+    scaled_distances = distances + scaling_factors
 
     # Assign labels based on min scaled distance
     labels = np.argmin(scaled_distances, axis=1)
@@ -80,7 +80,9 @@ for _ in range(max_iterations):
     # Update scaling factors for underrepresented labels
     for k in range(num_labels):
         if label_counts[k] < nmin:
-            scaling_factors[k] *= 0.9  # Increase competitiveness of the label
+            scaling_factors[
+                k
+            ] -= snakemake.params.stepsize  # decrease distance of the label
 
 # Ensure all labels are represented
 logger.info(["Final label counts:", label_counts])
