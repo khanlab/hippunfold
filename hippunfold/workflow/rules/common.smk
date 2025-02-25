@@ -13,11 +13,23 @@ def conda_env(env_name):
     Returns:
         str or None: Path to the Conda YAML file or None.
     """
+    import snakemake
+    from packaging.version import parse
 
-    from snakemake.settings.types import DeploymentMethod
+    # Get Snakemake version
+    snakemake_version = parse(snakemake.__version__)
 
-    if DeploymentMethod.CONDA in workflow.deployment_settings.deployment_method:
-        return f"../envs/{env_name}.yaml"
+    if snakemake_version >= parse("8.0.0"):
+        # Snakemake >= 8.0
+        from snakemake.settings.types import DeploymentMethod
+
+        if DeploymentMethod.CONDA in workflow.deployment_settings.deployment_method:
+            return f"../envs/{env_name}.yaml"
+    else:
+        # Snakemake < 8.0
+        if workflow.use_conda:
+            return f"../envs/{env_name}.yaml"
+
     return None
 
 
