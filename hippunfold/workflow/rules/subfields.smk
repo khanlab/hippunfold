@@ -16,7 +16,7 @@ rule import_dseg_subfields:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -54,7 +54,7 @@ rule subfields_to_label_gifti:
             **inputs.subj_wildcards,
         ),
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     container:
         config["singularity"]["autotop"]
     shell:
@@ -117,7 +117,7 @@ rule label_subfields_from_vol_coords_corobl:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -177,7 +177,7 @@ rule combine_tissue_subfield_labels_corobl:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -230,7 +230,7 @@ rule resample_subfields_to_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     group:
         "subj"
     shell:
@@ -281,7 +281,7 @@ rule resample_postproc_to_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     group:
         "subj"
     shell:
@@ -331,7 +331,7 @@ rule resample_unet_to_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     group:
         "subj"
     shell:
@@ -376,7 +376,7 @@ rule resample_subfields_to_unfold:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     group:
         "subj"
     shell:
