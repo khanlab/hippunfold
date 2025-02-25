@@ -486,7 +486,7 @@ rule update_unfold_mesh_structure:
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="unfold",
+            space="unfoldnosmooth",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -501,7 +501,6 @@ rule update_unfold_mesh_structure:
         "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
-
 rule heavy_smooth_unfold_surf:
     """ this irons out the surface to result in more even
         vertex spacing. the resulting shape will be more 
@@ -514,7 +513,7 @@ rule heavy_smooth_unfold_surf:
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="unfold",
+            space="unfoldnosmooth",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -527,7 +526,7 @@ rule heavy_smooth_unfold_surf:
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="unfoldsmoothed",
+            space="unfold",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -540,6 +539,45 @@ rule heavy_smooth_unfold_surf:
         "subj"
     shell:
         "wb_command -surface-smoothing {input} {params.strength} {params.iterations} {output}"
+
+
+rule heavy_smooth_unfold_surf_alt:
+    """alternate version using pyvista"""
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldnosmooth",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        smoothing_params={
+            "n_iter": 20000,
+            #"relaxation_factor": 1,
+            #            "boundary_smoothing": False,
+            #   "feature_smoothing": False,
+        },
+    output:
+        smoothed_surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldalt",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/pyvista.yaml"
+    script:
+        "../scripts/smooth_surface.py"
 
 
 # --- creating inner/outer surfaces from native anatomical (using 3d label deformable registration)
