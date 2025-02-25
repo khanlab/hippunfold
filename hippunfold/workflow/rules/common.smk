@@ -333,7 +333,7 @@ def get_create_template_output():
         )
         files.extend(
             expand(
-                "template/pairs_{hemi}_{label}.csv",
+                "template/warp_hemi-{hemi}_label-{label}_template0.nii.gz",
                 hemi=config["hemi"],
                 label=config["atlas_files"]["mytemplate"]["label_wildcards"],
             )
