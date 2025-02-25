@@ -60,7 +60,7 @@ rule reg_to_template:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/niftyreg.yaml"
+        conda_env("niftyreg")
     group:
         "subj"
     shell:
@@ -93,7 +93,7 @@ rule convert_template_xfm_ras2itk:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -133,7 +133,7 @@ rule compose_template_xfm_corobl:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -166,7 +166,7 @@ rule invert_template_xfm_itk2ras:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -199,7 +199,7 @@ rule template_xfm_itk2ras:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -233,6 +233,6 @@ rule create_unfold_ref:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     shell:
         "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}"

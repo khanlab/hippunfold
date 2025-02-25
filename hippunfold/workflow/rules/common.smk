@@ -1,7 +1,24 @@
 from appdirs import AppDirs
 from snakebids.paths import bids_factory, specs
-
 from functools import partial
+
+
+def conda_env(env_name):
+    """
+    Returns the path to the Conda environment file if --use-conda is set, otherwise returns None.
+
+    Args:
+        env_name (str): The name of the environment.
+
+    Returns:
+        str or None: Path to the Conda YAML file or None.
+    """
+
+    from snakemake.settings.types import DeploymentMethod
+
+    if DeploymentMethod.CONDA in workflow.deployment_settings.deployment_method:
+        return f"../envs/{env_name}.yaml"
+    return None
 
 
 def get_single_bids_input(wildcards, component):

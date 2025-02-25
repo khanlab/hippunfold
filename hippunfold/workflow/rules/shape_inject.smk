@@ -38,7 +38,7 @@ rule prep_segs_for_greedy:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
@@ -118,7 +118,7 @@ rule resample_template_dseg_tissue_for_reg:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -171,7 +171,7 @@ rule template_shape_reg:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/greedy.yaml"
+        conda_env("greedy")
     threads: 8
     log:
         bids(
@@ -220,7 +220,7 @@ rule dilate_dentate_pd_src_sink:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/neurovis.yaml"
+        conda_env("neurovis")
     script:
         "../scripts/dilate_dentate_pd_src_sink.py"
 
@@ -295,7 +295,7 @@ rule template_shape_inject:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/greedy.yaml"
+        conda_env("greedy")
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
@@ -377,7 +377,7 @@ rule inject_init_laplace_coords:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/greedy.yaml"
+        conda_env("greedy")
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
@@ -421,7 +421,7 @@ rule reinsert_subject_labels:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
         " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "

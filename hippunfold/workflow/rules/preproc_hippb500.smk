@@ -24,7 +24,7 @@ rule resample_hippdwi_to_template:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:

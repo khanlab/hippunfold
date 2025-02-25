@@ -93,7 +93,7 @@ rule gen_native_mesh:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/pyvista.yaml"
+        conda_env("pyvista")
     script:
         "../scripts/gen_isosurface.py"
 
@@ -127,7 +127,7 @@ rule update_native_mesh_structure:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -164,7 +164,7 @@ rule smooth_surface:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -200,7 +200,7 @@ rule get_boundary_vertices:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/pyvista.yaml"
+        conda_env("pyvista")
     script:
         "../scripts/get_boundary_vertices.py"
 
@@ -243,7 +243,7 @@ rule map_src_sink_sdt_to_surf:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -345,7 +345,7 @@ rule postproc_boundary_vertices:
             **inputs.subj_wildcards,
         ),
     conda:
-        "../envs/pyvista.yaml"
+        conda_env("pyvista")
     group:
         "subj"
     script:
@@ -401,7 +401,7 @@ rule laplace_beltrami:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/pyvista.yaml"
+        conda_env("pyvista")
     script:
         "../scripts/laplace_beltrami.py"
 
@@ -460,7 +460,7 @@ rule warp_native_mesh_to_unfold:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/pyunfold.yaml"
+        conda_env("pyunfold")
     group:
         "subj"
     script:
@@ -495,7 +495,7 @@ rule update_unfold_mesh_structure:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -536,7 +536,7 @@ rule heavy_smooth_unfold_surf:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -592,7 +592,7 @@ rule compute_halfthick_mask:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -640,7 +640,7 @@ rule register_midthickness:
         config["singularity"]["autotop"]
     threads: 16
     conda:
-        "../envs/greedy.yaml"
+        conda_env("greedy")
     shell:
         "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp}"
 
@@ -698,7 +698,7 @@ rule apply_halfsurf_warp_to_img:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/greedy.yaml"
+        conda_env("greedy")
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
@@ -736,7 +736,7 @@ rule convert_inout_warp_from_itk_to_world:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -780,7 +780,7 @@ rule warp_midthickness_to_inout:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     shadow:
         "minimal"
     group:
@@ -830,7 +830,7 @@ rule affine_gii_corobl_to_modality:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -864,7 +864,7 @@ rule calculate_surface_area:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -906,7 +906,7 @@ rule calculate_legacy_gyrification:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -939,7 +939,7 @@ rule calculate_curvature:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -979,7 +979,7 @@ rule calculate_thickness:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1024,7 +1024,7 @@ rule pad_unfold_ref:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -1058,7 +1058,7 @@ rule extract_unfold_ref_slice:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -1129,7 +1129,7 @@ rule native_metric_to_unfold_nii:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1181,7 +1181,7 @@ rule atlas_metric_to_unfold_nii:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1282,7 +1282,7 @@ rule unfoldreg_antsquick:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     group:
         "subj"
     log:
@@ -1339,7 +1339,7 @@ rule unfoldreg_greedy:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/greedy.yaml"
+        conda_env("greedy")
     group:
         "subj"
     log:
@@ -1410,7 +1410,7 @@ rule extend_warp_2d_to_3d:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/neurovis.yaml"
+        conda_env("neurovis")
     group:
         "subj"
     script:
@@ -1451,7 +1451,7 @@ rule convert_unfoldreg_warp_from_itk_to_world:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -1518,7 +1518,7 @@ rule warp_unfold_native_to_unfoldreg:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shadow:
@@ -1565,7 +1565,7 @@ rule resample_atlas_subfields_to_std_density:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1605,7 +1605,7 @@ rule resample_native_surf_to_std_density:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1645,7 +1645,7 @@ rule resample_native_metric_to_std_density:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1707,7 +1707,7 @@ rule resample_atlas_subfields_to_native_surf:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1760,7 +1760,7 @@ rule atlas_label_to_unfold_nii:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1817,7 +1817,7 @@ rule create_dscalar_metric_cifti_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1873,7 +1873,7 @@ rule create_dlabel_cifti_subfields_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -1966,7 +1966,7 @@ rule create_spec_file_hipp_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -2029,7 +2029,7 @@ rule create_spec_file_dentate_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -2065,7 +2065,7 @@ rule merge_lr_spec_file:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -2099,7 +2099,7 @@ rule merge_hipp_dentate_spec_file:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        conda_env("workbench")
     group:
         "subj"
     shell:
