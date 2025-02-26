@@ -1,5 +1,5 @@
 #ruleorder: resample_metric_to_atlas > atlas_metric_to_unfold_nii
-import glob.glob
+# import glob.glob
 
 rule slice3d_to_2d:
     # this is needed so antsMultivariateTemplateConstruction2 will believe the data is truly 2d
@@ -8,7 +8,7 @@ rule slice3d_to_2d:
                 root=work,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfold",
+                space="unfoldeven",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -18,7 +18,7 @@ rule slice3d_to_2d:
                 root=work,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfoldslice2d",
+                space="unfoldeven2d",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -38,7 +38,7 @@ rule write_image_pairs_csv:
                 root=work,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfoldslice2d",
+                space="unfoldeven2d",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -80,41 +80,41 @@ rule gen_atlas_reg_ants:
         "antsMultivariateTemplateConstruction2.sh -d 2 -o {params.warp_prefix} -n 0 -l 0 -k {params.num_modalities} {input}"
 
 
-def warp_names(wildcards,input):
-    # TODO: this currently won't work with wildcards.session
-    warp_file=glob(f"template/warp_hemi-{hemi}_label-{label}_*_sub-{wildcards.subject}_*1Warp.nii.gz")
-    return warp_file
+# def warp_names(wildcards,input):
+#     # TODO: this currently won't work with wildcards.session
+#     warp_file=glob(f"template/warp_hemi-{hemi}_label-{label}_*_sub-{wildcards.subject}_*1Warp.nii.gz")
+#     return warp_file
 
-# Now we can plug into unfold_reg.smk to out everything in space-unfolreg
-rule mv_unfold_reg:
-    input:
-        warp_example="template/warp_hemi-{hemi}_label-{label}_template0.nii.gz",
-    params:
-        filename = warp_names
-    output:
-        warp=bids(
-            root=work,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="{desc}",
-            from_="{from}",
-            to="{to}",
-            space="{space}",
-            type_="itk2d",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    shell:
-        "mv {params.filename} {output.warp}"
+# # Now we can plug into unfold_reg.smk to out everything in space-unfolreg
+# rule mv_unfold_reg:
+#     input:
+#         warp_example="template/warp_hemi-{hemi}_label-{label}_template0.nii.gz",
+#     params:
+#         filename = warp_names
+#     output:
+#         warp=bids(
+#             root=work,
+#             suffix="xfm.nii.gz",
+#             datatype="warps",
+#             desc="{desc}",
+#             from_="{from}",
+#             to="{to}",
+#             space="{space}",
+#             type_="itk2d",
+#             hemi="{hemi}",
+#             label="{label}",
+#             **inputs.subj_wildcards,
+#         ),
+#     shell:
+#         "mv {params.filename} {output.warp}"
 
 
-rule: gen_atlas_surfs
-# this should output to our atlas directory. Should also generate variious densities (decimation to target?)
+# rule: gen_atlas_surfs
+# # this should output to our atlas directory. Should also generate variious densities (decimation to target?)
 
-rule: avg_metrics:
-# this should output to our atlas directory
+# rule: avg_metrics:
+# # this should output to our atlas directory
 
-rule: maxprob_subfields
-# this should output to our atlas directory
+# rule: maxprob_subfields
+# # this should output to our atlas directory
 
