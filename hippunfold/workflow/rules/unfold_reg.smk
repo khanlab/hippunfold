@@ -98,7 +98,7 @@ rule space_unfold_vertices_evenly:
             **inputs.subj_wildcards,
         ),
     params:
-        step_size=.1,
+        step_size=0.1,
         max_iterations=10000,
     output:
         surf_gii=bids(

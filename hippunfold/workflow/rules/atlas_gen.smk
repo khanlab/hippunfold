@@ -1,39 +1,40 @@
-#ruleorder: resample_metric_to_atlas > atlas_metric_to_unfold_nii
+# ruleorder: resample_metric_to_atlas > atlas_metric_to_unfold_nii
 # import glob.glob
+
 
 rule slice3d_to_2d:
     # this is needed so antsMultivariateTemplateConstruction2 will believe the data is truly 2d
     input:
-        img = bids(
-                root=work,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfoldeven",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
+        img=bids(
+            root=work,
+            datatype="anat",
+            suffix="{metric}.nii.gz",
+            space="unfoldeven",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     output:
-        img = bids(
-                root=work,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfoldeven2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
+        img=bids(
+            root=work,
+            datatype="anat",
+            suffix="{metric}.nii.gz",
+            space="unfoldeven2d",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     run:
         import nibabel as nib
+
         img = nib.load(input.img)
-        matrix=img.get_fdata()[:,:,0]
-        nib.Nifti1Image(
-            matrix, img.affine).to_filename(output.img)
+        matrix = img.get_fdata()[:, :, 0]
+        nib.Nifti1Image(matrix, img.affine).to_filename(output.img)
 
 
 rule write_image_pairs_csv:
     input:
-        metric_nii = lambda wildcards: inputs[config["modality"]].expand(
+        metric_nii=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=work,
                 datatype="anat",
@@ -42,10 +43,11 @@ rule write_image_pairs_csv:
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
-        ),
-            metric=['gyrification','curvature','thickness'],
+            ),
+            metric=["gyrification", "curvature", "thickness"],
             hemi=wildcards.hemi,
-            label=wildcards.label)
+            label=wildcards.label,
+        ),
     output:
         images_csv="template/pairs_{hemi}_{label}.csv",
     group:
@@ -73,7 +75,7 @@ rule gen_atlas_reg_ants:
     group:
         "subj"
     container:
-        config["singularity"]["autotop"] # note antsMultivariateTemplateConstruction2 is not in the container right now!
+        config["singularity"]["autotop"]  # note antsMultivariateTemplateConstruction2 is not in the container right now!
     conda:
         "../envs/ants.yaml"
     shell:
@@ -117,4 +119,3 @@ rule gen_atlas_reg_ants:
 
 # rule: maxprob_subfields
 # # this should output to our atlas directory
-
