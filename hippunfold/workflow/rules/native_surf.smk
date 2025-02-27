@@ -68,7 +68,6 @@ rule gen_native_mesh:
             "preserve_topology": True,
         },
         hole_fill_radius=1.0,
-        clean_method="cleanAK",  #cleanAK or cleanJD 
         morph_openclose_dist=2,  # mm
         coords_epsilon=0.1,
     output:

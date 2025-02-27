@@ -1,7 +1,46 @@
 import numpy as np
 import nibabel as nib
-from scipy.sparse import diags, linalg, lil_matrix
+from scipy.sparse import diags, linalg, lil_matrix, csr_matrix
 from lib.utils import setup_logger
+
+log_file = snakemake.log[0] if snakemake.log else None
+logger = setup_logger(log_file)
+
+def cotangent_laplacian(vertices, faces):
+    """Computes the cotangent-weighted Laplacian matrix using a fully vectorized approach."""
+    n = len(vertices)
+
+    # Extract vertex indices for each triangle
+    i1, i2, i3 = faces[:, 0], faces[:, 1], faces[:, 2]
+
+    # Get corresponding vertex positions
+    v1, v2, v3 = vertices[i1], vertices[i2], vertices[i3]
+
+    # Compute edge vectors
+    e1 = v2 - v1
+    e2 = v3 - v1
+    e3 = v3 - v2
+
+    # Compute cotangents of angles using cross and dot product
+    cross_e1e2 = np.cross(e1, e2)  # Normal of triangle
+    norm_cross = np.linalg.norm(cross_e1e2, axis=1)  # Triangle area factor
+    norm_cross[norm_cross<1e-6] = 1e-6
+
+    # Cotangent weights
+    cot_alpha = np.einsum('ij,ij->i', e1, e2) / norm_cross
+    cot_beta = np.einsum('ij,ij->i', -e2, e3) / norm_cross
+    cot_gamma = np.einsum('ij,ij->i', -e3, e1) / norm_cross
+
+    # Construct sparse Laplacian matrix
+    I = np.hstack([i1, i2, i2, i3, i3, i1])
+    J = np.hstack([i2, i1, i3, i2, i1, i3])
+    W = np.hstack([cot_alpha, cot_alpha, cot_beta, cot_beta, cot_gamma, cot_gamma])
+
+    L = csr_matrix((W, (I, J)), shape=(n, n))
+    D = L.sum(axis=1).A1
+    L = L - diags(D)  # Ensure row sum is zero
+
+    return L
 
 
 def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
@@ -21,37 +60,9 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     logger.info(f"n_vertices: {n_vertices}")
     # Step 1: Compute cotangent weights
     logger.info("Computing cotangent weights")
-    weights = lil_matrix((n_vertices, n_vertices))
-    for tri in faces:
-        v0, v1, v2 = vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]
-        e0 = v1 - v2
-        e1 = v2 - v0
-        e2 = v0 - v1
-        # Compute cross products and norms
-        cross0 = np.cross(e1, -e2)
-        cross1 = np.cross(e2, -e0)
-        cross2 = np.cross(e0, -e1)
-        norm0 = np.linalg.norm(cross0)
-        norm1 = np.linalg.norm(cross1)
-        norm2 = np.linalg.norm(cross2)
-        # Avoid division by zero
-        cot0 = np.dot(e1, -e2) / norm0 if norm0 > 1e-12 else 0.0
-        cot1 = np.dot(e2, -e0) / norm1 if norm1 > 1e-12 else 0.0
-        cot2 = np.dot(e0, -e1) / norm2 if norm2 > 1e-12 else 0.0
-        weights[tri[0], tri[1]] += cot2 / 2
-        weights[tri[1], tri[0]] += cot2 / 2
-        weights[tri[1], tri[2]] += cot0 / 2
-        weights[tri[2], tri[1]] += cot0 / 2
-        weights[tri[2], tri[0]] += cot1 / 2
-        weights[tri[0], tri[2]] += cot1 / 2
-    logger.info("weights.tocsr()")
-    weights = weights.tocsr()
+    laplacian = cotangent_laplacian(vertices, faces)
     # Step 2: Handle boundaries for open meshes
     logger.info("Handle boundaries for open meshes")
-    diagonal = weights.sum(axis=1).A1
-    # Ensure no zero entries in diagonal to avoid singular matrix issues
-    diagonal[diagonal < 1e-12] = 1e-12
-    laplacian = diags(diagonal) - weights
     if boundary_conditions is None:
         boundary_conditions = {}
     boundary_indices = np.array(list(boundary_conditions.keys()))

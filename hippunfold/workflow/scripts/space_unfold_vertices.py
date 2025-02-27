@@ -35,70 +35,21 @@ def write_surface_to_gifti(mesh, out_surf_gii):
     gifti.to_filename(out_surf_gii)
 
 
-def spring_based_smoothing(mesh, iterations=10, step_size=0.1):
-    """
-    Perform spring-based smoothing on a 2D projected mesh, aiming for uniform edge lengths.
-
-    Parameters:
-        mesh (pv.PolyData): Input 2D mesh.
-        iterations (int): Number of smoothing iterations.
-        step_size (float): Controls how much vertices move per step.
-
-    Returns:
-        pv.PolyData: Smoothed mesh.
-    """
-    points = mesh.points
-    # points += (np.random.rand(points.shape[0],points.shape[1])-.5) *1e-6 # add some noise to avoid perfectly overlapping points
-    faces = mesh.faces.reshape(-1, 4)[
-        :, 1:4
-    ]  # Extract edges as pairs of vertex indices
-    edges = np.concatenate(
-        [faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]], axis=0
-    )
-    edges = np.sort(edges, axis=1)  # Ensure ordering for uniqueness
-    edges = np.unique(edges, axis=0)
-    edge_vectors = points[edges[:, 1]] - points[edges[:, 0]]
-    logger.info(edges.shape)
-
-    current_lengths = np.linalg.norm(edge_vectors, axis=1)
-    target_length = np.zeros_like(current_lengths)
-    target_length[:] = np.mean(current_lengths)
-    logger.info(f"target edge length: {np.mean(current_lengths)}")
-
-    for _ in range(iterations):
-        # Compute current edge lengths and stretching forces
-        edge_vectors = points[edges[:, 1]] - points[edges[:, 0]]
-        current_lengths = np.linalg.norm(edge_vectors, axis=1)
-        mask = current_lengths > 1e-6  # Avoid division by zero
-
-        forces = np.zeros_like(edge_vectors)
-        forces[mask] = (
-            (target_length[mask] - current_lengths[mask])[:, None]
-            * edge_vectors[mask]
-            / current_lengths[mask][:, None]
-        )
-        logger.info(f"max force size {np.max(forces,axis=0)}")
-        logger.info(f"min force size {np.min(forces,axis=0)}")
-
-        # Accumulate forces at each vertex
-        displacement = np.zeros_like(points)
-        np.add.at(displacement, edges[:, 0], -step_size * forces)
-        np.add.at(displacement, edges[:, 1], step_size * forces)
-
-        # Update vertex positions
-        points += displacement
-
-        if np.sum(np.abs(displacement)) < 1e-6:
-            logger.info("stopping early")
-            break
-
-    return mesh
-
-
 # Run the processing pipeline
 mesh = read_surface_from_gifti(snakemake.input.surf_gii)
 mesh_native = read_surface_from_gifti(snakemake.input.native_gii)
 
+#check for bad vertices
+orig_points = mesh.points
+# mesh = mesh.clean()
+# if not mesh.points.shape == mesh_native.points.shape:
+#     logger.info("unfolded surface contained degenerate vertices. removing them for now, but the native surf will also need to be modified accordingly!")
+#     tree = KDTree(orig_points)
+#     _, retained_indices = tree.query(mesh.points, k=1)  # Find closest match indices
+#     mesh_native = mesh_native.extract_points(retained_indices)
+
+vertices = mesh.points
+faces = mesh.faces.reshape(-1, 4)[:, 1:4]  # Extract edges as pairs of vertex indices
 
 """
 Perform spring-based smoothing on a 2D projected mesh, aiming for uniform edge lengths.
