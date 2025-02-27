@@ -1,7 +1,8 @@
 name: nnunet
 channels:
+  - khanlab
   - conda-forge
   - defaults
 dependencies:
   - python=3.9
-  - nnunet=1.7.1
+  - nnunet-inference-on-cpu-and-gpu=1.6.6
