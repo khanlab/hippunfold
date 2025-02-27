@@ -40,16 +40,13 @@ mesh = read_surface_from_gifti(snakemake.input.surf_gii)
 mesh_native = read_surface_from_gifti(snakemake.input.native_gii)
 
 # check for bad vertices
-orig_points = mesh.points
+# orig_points = mesh.points
 # mesh = mesh.clean()
 # if not mesh.points.shape == mesh_native.points.shape:
 #     logger.info("unfolded surface contained degenerate vertices. removing them for now, but the native surf will also need to be modified accordingly!")
 #     tree = KDTree(orig_points)
 #     _, retained_indices = tree.query(mesh.points, k=1)  # Find closest match indices
 #     mesh_native = mesh_native.extract_points(retained_indices)
-
-vertices = mesh.points
-faces = mesh.faces.reshape(-1, 4)[:, 1:4]  # Extract edges as pairs of vertex indices
 
 """
 Perform spring-based smoothing on a 2D projected mesh, aiming for uniform edge lengths.

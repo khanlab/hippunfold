@@ -83,6 +83,16 @@ rule gen_native_mesh:
                 **inputs.subj_wildcards,
             )
         ),
+    log:
+        surf_gii=bids(
+            root="logs",
+            suffix="{surfname,midthickness}.txt",
+            space="corobl",
+            desc="gen_isosurf",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     group:
         "subj"
     container:

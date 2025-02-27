@@ -3,6 +3,9 @@ import nibabel as nib
 from scipy.sparse import diags, linalg, lil_matrix
 from lib.utils import setup_logger
 
+log_file = snakemake.log[0] if snakemake.log else None
+logger = setup_logger(log_file)
+
 
 def cotangent_laplaceian(vertices, faces):
     n_vertices = vertices.shape[0]
@@ -52,6 +55,7 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     Returns:
         solution (np.ndarray): Array of shape (n_vertices,) with the solution values.
     """
+    n_vertices = vertices.shape[0]
     logger.info("solve_laplace_beltrami_open_mesh")
     laplacian = cotangent_laplaceian(vertices, faces)
 
