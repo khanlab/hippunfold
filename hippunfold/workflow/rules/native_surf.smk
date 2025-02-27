@@ -8,7 +8,7 @@ surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
 ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
-
+ruleorder: gen_inner_outer_unfoldeven > warp_native_mesh_to_unfold
 
 # --- isosurface generation ---
 
@@ -99,7 +99,7 @@ rule update_native_mesh_structure:
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="corobl",
+            space="{space}",
             desc="nostruct",
             hemi="{hemi}",
             label="{label}",
@@ -113,8 +113,8 @@ rule update_native_mesh_structure:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname,midthickness}.surf.gii",
-            space="corobl",
+            suffix="{surfname}.surf.gii",
+            space="{space}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -390,7 +390,7 @@ rule warp_native_mesh_to_unfold:
         surf_gii=bids(
             root=root,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
+            suffix="midthickness.surf.gii",
             space="corobl",
             hemi="{hemi}",
             label="{label}",
@@ -419,14 +419,15 @@ rule warp_native_mesh_to_unfold:
             **inputs.subj_wildcards,
         ),
     params:
-        z_level=get_unfold_z_level,
         vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
+        z_level = get_unfold_z_level
     output:
         surf_gii=bids(
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="unfoldraw",
+            desc="nostruct",
+            space="unfold",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -440,28 +441,43 @@ rule warp_native_mesh_to_unfold:
     script:
         "../scripts/rewrite_vertices_to_flat.py"
 
-
-rule update_unfold_mesh_structure:
+rule space_unfold_vertices_evenly:
+    """ this irons out the surface to result in more even
+        vertex spacing. the resulting shape will be more 
+        individual (e.g. the surface area in unfolded space 
+        would be similar to native) -- TODO: maybe this is a good 
+        way to determine smoothing strenghth and iterations, e.g. 
+        use the surface area and vertex spacing as objectives.."""
     input:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        native_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
     params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="FLAT",
+        step_size=0.1,
+        iterations=1000,
     output:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfold",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfoldeven",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -469,12 +485,53 @@ rule update_unfold_mesh_structure:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/workbench.yaml"
+        "../envs/pyvista.yaml"
     group:
         "subj"
-    shell:
-        "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
+    log:
+        surf_gii=bids(
+            root="logs",
+            suffix=".txt",
+            space="unfoldeven",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    script:
+        "../scripts/space_unfold_vertices.py"
+
+
+rule gen_inner_outer_unfoldeven:
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfoldeven",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params: 
+        z_level=get_unfold_z_level,
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname,inner|outer}.surf.gii",
+            desc="nostruct",
+            space="unfoldeven",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    run:
+        import nibabel as nib
+        surf = nib.load(input.surf_gii)
+        vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
+        vertices[:,2] = params.z_level
+        nib.save(surf, output.surf_gii)
 
 
 # --- creating inner/outer surfaces from native anatomical (using 3d label deformable registration)
