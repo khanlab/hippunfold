@@ -97,9 +97,18 @@ rule space_unfold_vertices_evenly:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+        native_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     params:
         step_size=0.1,
-        max_iterations=10000,
+        max_iterations=100,
     output:
         surf_gii=bids(
             root=work,

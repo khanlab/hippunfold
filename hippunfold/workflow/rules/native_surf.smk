@@ -62,7 +62,7 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.7,
+            "reduction": 0.05,
             "feature_angle": 25,
             "preserve_topology": True,
         },
