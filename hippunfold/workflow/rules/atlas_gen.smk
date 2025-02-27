@@ -86,7 +86,6 @@ rule gen_atlas_reg_ants:
 #     # TODO: this currently won't work with wildcards.session
 #     warp_file=glob(f"template/warp_hemi-{hemi}_label-{label}_*_sub-{wildcards.subject}_*1Warp.nii.gz")
 #     return warp_file
-
 # # Now we can plug into unfold_reg.smk to out everything in space-unfolreg
 # rule mv_unfold_reg:
 #     input:

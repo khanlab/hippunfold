@@ -157,7 +157,7 @@ logger.info(surface)
 # logger.info(surface)
 
 logger.info(f"final surface clean to remove overlapping vertices, etc.")
-surface - surface.clean()
+surface = surface.clean()
 
 # Save the final mesh
 write_surface_to_gifti(surface, snakemake.output.surf_gii)
