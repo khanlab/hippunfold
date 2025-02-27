@@ -109,8 +109,6 @@ rule gen_atlas_reg_ants:
 #         ),
 #     shell:
 #         "mv {params.filename} {output.warp}"
-
-
 # rule: gen_atlas_surfs
 # # this should output to our atlas directory. Should also generate variious densities (decimation to target?)
 # rule: avg_metrics:

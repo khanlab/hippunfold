@@ -39,7 +39,7 @@ def write_surface_to_gifti(mesh, out_surf_gii):
 mesh = read_surface_from_gifti(snakemake.input.surf_gii)
 mesh_native = read_surface_from_gifti(snakemake.input.native_gii)
 
-#check for bad vertices
+# check for bad vertices
 orig_points = mesh.points
 # mesh = mesh.clean()
 # if not mesh.points.shape == mesh_native.points.shape:

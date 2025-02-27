@@ -6,6 +6,7 @@ from lib.utils import setup_logger
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
+
 def cotangent_laplacian(vertices, faces):
     """Computes the cotangent-weighted Laplacian matrix using a fully vectorized approach."""
     n = len(vertices)
@@ -24,12 +25,12 @@ def cotangent_laplacian(vertices, faces):
     # Compute cotangents of angles using cross and dot product
     cross_e1e2 = np.cross(e1, e2)  # Normal of triangle
     norm_cross = np.linalg.norm(cross_e1e2, axis=1)  # Triangle area factor
-    norm_cross[norm_cross<1e-6] = 1e-6
+    norm_cross[norm_cross < 1e-6] = 1e-6
 
     # Cotangent weights
-    cot_alpha = np.einsum('ij,ij->i', e1, e2) / norm_cross
-    cot_beta = np.einsum('ij,ij->i', -e2, e3) / norm_cross
-    cot_gamma = np.einsum('ij,ij->i', -e3, e1) / norm_cross
+    cot_alpha = np.einsum("ij,ij->i", e1, e2) / norm_cross
+    cot_beta = np.einsum("ij,ij->i", -e2, e3) / norm_cross
+    cot_gamma = np.einsum("ij,ij->i", -e3, e1) / norm_cross
 
     # Construct sparse Laplacian matrix
     I = np.hstack([i1, i2, i2, i3, i3, i1])
