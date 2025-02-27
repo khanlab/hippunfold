@@ -10,6 +10,7 @@ ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
 ruleorder: gen_inner_outer_unfoldeven > warp_native_mesh_to_unfold
 
+
 # --- isosurface generation ---
 
 
@@ -420,7 +421,7 @@ rule warp_native_mesh_to_unfold:
         ),
     params:
         vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
-        z_level = get_unfold_z_level
+        z_level=get_unfold_z_level,
     output:
         surf_gii=bids(
             root=work,
@@ -440,6 +441,7 @@ rule warp_native_mesh_to_unfold:
         "subj"
     script:
         "../scripts/rewrite_vertices_to_flat.py"
+
 
 rule space_unfold_vertices_evenly:
     """ this irons out the surface to result in more even
@@ -513,7 +515,7 @@ rule gen_inner_outer_unfoldeven:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params: 
+    params:
         z_level=get_unfold_z_level,
     output:
         surf_gii=bids(
@@ -528,9 +530,10 @@ rule gen_inner_outer_unfoldeven:
         ),
     run:
         import nibabel as nib
+
         surf = nib.load(input.surf_gii)
         vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
-        vertices[:,2] = params.z_level
+        vertices[:, 2] = params.z_level
         nib.save(surf, output.surf_gii)
 
 
