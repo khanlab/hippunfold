@@ -108,7 +108,7 @@ rule space_unfold_vertices_evenly:
         ),
     params:
         step_size=0.1,
-        max_iterations=100,
+        iterations=100,
     output:
         surf_gii=bids(
             root=work,

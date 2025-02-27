@@ -116,6 +116,5 @@ rule gen_atlas_reg_ants:
 
 # rule: avg_metrics:
 # # this should output to our atlas directory
-
 # rule: maxprob_subfields
 # # this should output to our atlas directory
