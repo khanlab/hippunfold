@@ -92,7 +92,7 @@ for i in range(snakemake.params.max_iterations):
     # Update vertex positions
     points += displacement
 
-    if i%100 == 0:
+    if i % 100 == 0:
         mae = np.mean(np.abs(displacement))
         logger.info(f"iteration {i} mean absolute error: {mae}")
         if mae < 1e-6:
