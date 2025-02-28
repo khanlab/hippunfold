@@ -380,6 +380,17 @@ rule laplace_beltrami:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    log:
+        coords=bids(
+            root="logs",
+            dir="{dir}",
+            suffix="coords.txt",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     group:
         "subj"
     container:
@@ -481,7 +492,7 @@ rule space_unfold_vertices_evenly:
         ),
     params:
         step_size=0.1,
-        iterations=1000,
+        max_iterations=10000,
     output:
         surf_gii=bids(
             root=work,
@@ -631,6 +642,19 @@ rule register_midthickness:
                 dir="IO",
                 label="{label}",
                 suffix="xfm.nii.gz",
+                to="{inout}",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    log:
+        warp=temp(
+            bids(
+                root="logs",
+                dir="IO",
+                label="{label}",
+                suffix="xfm.txt",
                 to="{inout}",
                 space="corobl",
                 hemi="{hemi}",

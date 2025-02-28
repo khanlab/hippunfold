@@ -7,7 +7,7 @@ log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
 
-def cotangent_laplaceian(vertices, faces):
+def cotangent_laplacian(vertices, faces):
     n_vertices = vertices.shape[0]
     # Step 1: Compute cotangent weights
     logger.info("Computing cotangent weights")
@@ -57,7 +57,7 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     """
     n_vertices = vertices.shape[0]
     logger.info("solve_laplace_beltrami_open_mesh")
-    laplacian = cotangent_laplaceian(vertices, faces)
+    laplacian = cotangent_laplacian(vertices, faces)
 
     # Step 2: Handle boundaries for open meshes
     logger.info("Handle boundaries for open meshes")
