@@ -2,6 +2,7 @@ import pyvista as pv
 import numpy as np
 import nibabel as nib
 import nibabel.gifti as gifti
+from nibabel.gifti.gifti import intent_codes
 from collections import defaultdict
 from lib.utils import setup_logger
 
@@ -50,11 +51,24 @@ def read_surface_from_gifti(surf_gii):
     faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
     faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])  # PyVista format
 
-    return pv.PolyData(vertices, faces_pv)
+    # Find the first darray that represents vertices (NIFTI_INTENT_POINTSET)
+    vertices_darray = next(
+        (
+            darray
+            for darray in surf.darrays
+            if darray.intent == intent_codes["NIFTI_INTENT_POINTSET"]
+        ),
+        None,
+    )
+
+    # Extract metadata as a dictionary (return empty dict if no metadata)
+    metadata = dict(vertices_darray.meta) if vertices_darray else {}
+
+    return pv.PolyData(vertices, faces_pv), metadata
 
 
 logger.info("Loading surface from GIFTI...")
-surface = read_surface_from_gifti(snakemake.input.surf_gii)
+surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
 logger.info(f"Surface loaded: {surface.n_points} vertices, {surface.n_faces} faces.")
 
 
@@ -118,6 +132,10 @@ label_table.labels.append(boundary_label)
 
 # Assign label table to GIFTI image
 gii_img = gifti.GiftiImage(darrays=[gii_data], labeltable=label_table)
+
+# set structure metadata
+gii_img.meta["AnatomicalStructurePrimary"] = metadata["AnatomicalStructurePrimary"]
+
 
 # Save the label file
 gii_img.to_filename(snakemake.output.label_gii)

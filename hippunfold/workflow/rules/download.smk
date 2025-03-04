@@ -120,6 +120,8 @@ rule import_template_dseg_dentate:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
