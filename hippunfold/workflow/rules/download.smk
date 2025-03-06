@@ -115,8 +115,6 @@ rule import_template_dseg_dentate:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     shell:

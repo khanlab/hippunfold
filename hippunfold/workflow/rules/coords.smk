@@ -200,14 +200,10 @@ rule create_upsampled_coords_ref:
             label="{label}",
             hemi="{hemi}",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     shell:
         "c3d {input} -retain-labels {params.tight_crop_labels} -trim {params.trim_padding} -resample-mm {params.resample_res} -o {output}"
 
@@ -288,8 +284,6 @@ rule laynii_layers_equidist:
         ),
     shadow:
         "minimal"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
     group:

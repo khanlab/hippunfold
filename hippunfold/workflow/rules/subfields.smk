@@ -13,8 +13,6 @@ rule import_dseg_subfields:
             space="corobl",
             hemi="{hemi}",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -55,8 +53,6 @@ rule subfields_to_label_gifti:
         ),
     conda:
         conda_env("workbench")
-    container:
-        config["singularity"]["autotop"]
     shell:
         "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
 

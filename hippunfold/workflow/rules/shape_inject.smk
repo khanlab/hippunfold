@@ -114,8 +114,6 @@ rule resample_template_dseg_tissue_for_reg:
             hemi="{hemi}",
             suffix="dseg.nii.gz",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -215,8 +213,6 @@ rule dilate_dentate_pd_src_sink:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:

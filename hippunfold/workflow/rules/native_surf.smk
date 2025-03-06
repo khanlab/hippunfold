@@ -194,8 +194,6 @@ rule get_boundary_vertices:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
     script:
@@ -237,8 +235,6 @@ rule map_src_sink_sdt_to_surf:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -330,8 +326,6 @@ rule postproc_boundary_vertices:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     log:
         bids(
             root="logs",
