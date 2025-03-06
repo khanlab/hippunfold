@@ -34,7 +34,7 @@ rule qc_reg_to_template:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/neurovis.yaml"
+        conda_env("neurovis")
     script:
         "../scripts/vis_regqc.py"
 
@@ -76,7 +76,7 @@ rule get_subfield_vols_subj:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/pyunfold.yaml"
+        conda_env("pyunfold")
     script:
         "../scripts/gen_volume_tsv.py"
 
@@ -111,7 +111,7 @@ rule plot_subj_subfields:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/neurovis.yaml"
+        conda_env("neurovis")
     script:
         "../scripts/plot_subj_subfields.py"
 
@@ -197,7 +197,7 @@ rule qc_subfield:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/neurovis.yaml"
+        conda_env("neurovis")
     script:
         "../scripts/vis_qc_dseg.py"
 
@@ -235,7 +235,7 @@ rule qc_subfield_surf:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/neurovis.yaml"
+        conda_env("neurovis")
     script:
         "../scripts/vis_qc_surf.py"
 
@@ -273,6 +273,6 @@ rule concat_subj_vols_tsv:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/neurovis.yaml"
+        conda_env("neurovis")
     script:
         "../scripts/concat_tsv.py"

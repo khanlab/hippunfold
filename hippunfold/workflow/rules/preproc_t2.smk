@@ -34,7 +34,7 @@ rule n4_t2:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     group:
         "subj"
     shell:
@@ -104,7 +104,7 @@ rule reg_t2_to_ref:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/niftyreg.yaml"
+        conda_env("niftyreg")
     group:
         "subj"
     shell:
@@ -137,7 +137,7 @@ rule ras_to_itk_reg_t2:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -206,7 +206,7 @@ else:
         container:
             config["singularity"]["autotop"]
         conda:
-            "../envs/c3d.yaml"
+            conda_env("c3d")
         group:
             "subj"
         shell:
@@ -261,7 +261,7 @@ rule reg_t2_to_t1_part1:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/niftyreg.yaml"
+        conda_env("niftyreg")
     group:
         "subj"
     shell:
@@ -294,7 +294,7 @@ rule reg_t2_to_t1_part2:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -398,7 +398,7 @@ rule compose_t2_xfm_corobl:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -462,7 +462,7 @@ rule warp_t2_to_corobl_crop:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     group:
         "subj"
     shell:
