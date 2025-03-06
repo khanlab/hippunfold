@@ -310,6 +310,15 @@ def get_gifti_metric_types(label):
 
 def get_create_template_output():
 
+    if "hemi" in inputs[config["modality"]].zip_lists:
+        # hemi is an input wildcard,
+        #  so it will be already included when we expand
+        expand_hemi = {}
+    else:
+        # hemi is not an input wildcard,
+        # so we additionally expand using the config hemi
+        expand_hemi = {"hemi": config["hemi"]}
+
     files = []
     for label in config["autotop_labels"]:
         files.extend(
@@ -319,13 +328,13 @@ def get_create_template_output():
                     datatype="surf",
                     suffix="{metric}.gii",
                     space="{space}",
-                    hemi="{hemi_}",
+                    hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
                 ),
                 metric=get_gifti_metric_types(label),
                 space="corobl",
-                hemi_=config["hemi"],
+                **expand_hemi,
             )
         )
         files.extend(
@@ -335,14 +344,14 @@ def get_create_template_output():
                     datatype="surf",
                     suffix="{surftype}.surf.gii",
                     space="{space}",
-                    hemi="{hemi_}",
+                    hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
                 ),
                 metric=get_gifti_metric_types(label),
                 space=["corobl", "unfold"],
                 surftype=["inner", "outer", "midthickness"],
-                hemi_=config["hemi"],
+                **expand_hemi,
             )
         )
         files.extend(
@@ -352,22 +361,24 @@ def get_create_template_output():
                     datatype="surf",
                     suffix="subfields.label.gii",
                     space="corobl",
-                    hemi="{hemi_}",
+                    hemi="{hemi}",
                     label="hipp",
                     **inputs.subj_wildcards,
                 ),
                 space="corobl",
-                hemi_=config["hemi"],
+                **expand_hemi,
             )
         )
-        files.extend(
-            expand(
-                "template/warp_hemi-{hemi}_label-{label}_template0.nii.gz",
-                hemi=config["hemi"],
-                label=config["atlas_files"]["mytemplate"]["label_wildcards"],
-            )
-        ),
-    return files
+
+
+#        files.extend(  #TODO AK to fix this later
+#            expand(
+#                "template/warp_hemi-{hemi}_label-{label}_template0.nii.gz",
+#                hemi=config["hemi"],
+#                label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+#            )
+#        ),
+return files
 
 
 def get_input_for_shape_inject(wildcards):
