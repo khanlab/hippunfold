@@ -532,7 +532,7 @@ rule space_unfold_vertices:
     script:
         "../scripts/space_unfold_vertices.py"
 
-        
+
 rule unfold_surface_smoothing:
     input:
         surf_gii=bids(

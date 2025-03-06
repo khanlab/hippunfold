@@ -32,7 +32,6 @@ rule slice3d_to_2d:
         nib.Nifti1Image(matrix, img.affine).to_filename(output.img)
 
 
-
 rule write_image_pairs_csv:
     input:
         metric_nii=lambda wildcards: inputs[config["modality"]].expand(
@@ -40,15 +39,15 @@ rule write_image_pairs_csv:
                 root=work,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-
                 space="unfold",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
-        ),
-            metric=['gyrification','curvature','thickness'],
+            ),
+            metric=["gyrification", "curvature", "thickness"],
             hemi=wildcards.hemi,
-            label=wildcards.label)
+            label=wildcards.label,
+        ),
     output:
         images_csv="template/pairs_{hemi}_{label}.csv",
     group:
