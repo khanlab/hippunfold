@@ -532,7 +532,7 @@ rule space_unfold_vertices:
     script:
         "../scripts/space_unfold_vertices.py"
 
-
+        
 rule unfold_surface_smoothing:
     input:
         surf_gii=bids(
@@ -1086,6 +1086,9 @@ def get_unfold_ref(wildcards):
         label="{label}",
         **inputs.subj_wildcards,
     )
+
+
+# --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
 
 
 rule resample_atlas_subfields_to_std_density:

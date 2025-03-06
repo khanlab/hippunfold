@@ -32,6 +32,7 @@ rule slice3d_to_2d:
         nib.Nifti1Image(matrix, img.affine).to_filename(output.img)
 
 
+
 rule write_image_pairs_csv:
     input:
         metric_nii=lambda wildcards: inputs[config["modality"]].expand(
@@ -39,15 +40,15 @@ rule write_image_pairs_csv:
                 root=work,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfoldeven2d",
+
+                space="unfold",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
-            ),
-            metric=["gyrification", "curvature", "thickness"],
-            hemi=wildcards.hemi,
-            label=wildcards.label,
         ),
+            metric=['gyrification','curvature','thickness'],
+            hemi=wildcards.hemi,
+            label=wildcards.label)
     output:
         images_csv="template/pairs_{hemi}_{label}.csv",
     group:
@@ -64,7 +65,11 @@ rule write_image_pairs_csv:
 
 rule gen_atlas_reg_ants:
     input:
-        images_csv="template/pairs_{hemi}_{label}.csv",
+        images_csv=expand(
+            "template/pairs_{hemi}_{label}.csv",
+            hemi="{hemi}",
+            label="{label}",
+        ),
     params:
         num_modalities=len(
             config["atlas_files"][config["gen_template_name"]]["metric_wildcards"]
