@@ -1063,6 +1063,7 @@ rule calculate_thickness:
 
 # --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
 
+
 def get_unfold_ref_name(wildcards):
     if (
         wildcards.label in config["atlas_files"][config["atlas"]]["label_wildcards"]
