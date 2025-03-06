@@ -174,11 +174,10 @@ rule template_shape_reg:
         conda_env("greedy")
     threads: 8
     log:
-        bids(
-            root="logs",
+        bids_log_wrapper(
+            "template_shape_reg",
             **inputs.subj_wildcards,
-            hemi="{hemi}",
-            suffix="templateshapereg.txt",
+            hemi="{hemi}"
         ),
     shell:
         #affine (with moments), then greedy
@@ -284,9 +283,8 @@ rule template_shape_inject:
         ),
     log:
         bids(
-            root="logs",
+            "template_shape_inject",
             **inputs.subj_wildcards,
-            suffix="templateshapeinject.txt",
             hemi="{hemi}",
             label="{label}",
         ),
@@ -364,12 +362,10 @@ rule inject_init_laplace_coords:
         ),
     log:
         bids(
-            root="logs",
+            "inject_init_laplace_coords",
             **inputs.subj_wildcards,
             dir="{dir}",
             label="{label}",
-            suffix="injectcoords.txt",
-            desc="init",
             hemi="{hemi}",
         ),
     group:

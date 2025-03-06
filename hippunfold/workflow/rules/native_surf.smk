@@ -336,13 +336,11 @@ rule postproc_boundary_vertices:
     container:
         config["singularity"]["autotop"]
     log:
-        bids(
-            root="logs",
-            datatype="postproc_boundary_vertices",
-            suffix="log.txt",
-            hemi="{hemi}",
-            label="{label}",
+        bids_log_wrapper(
+            "postproc_boundary_verticies",
             **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}"
         ),
     conda:
         conda_env("pyvista")
@@ -383,16 +381,6 @@ rule laplace_beltrami:
             desc="laplace",
             space="corobl",
             hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    log:
-        bids(
-            root="logs",
-            datatype="laplace_beltrami",
-            suffix="log.txt",
-            hemi="{hemi}",
-            dir="{dir}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
@@ -1286,14 +1274,12 @@ rule unfoldreg_antsquick:
     group:
         "subj"
     log:
-        bids(
-            root="logs",
-            suffix="unfoldreg.txt",
-            atlas="{atlas}",
-            hemi="{hemi}",
-            label="{label}",
+        bids_log_wrapper(
+            "unfoldreg_antsquick", 
             **inputs.subj_wildcards,
-        ),
+            hemi="{hemi}", 
+            label="{label}", 
+            to="{atlas}",)
     shadow:
         "minimal"
     threads: 16
@@ -1343,14 +1329,13 @@ rule unfoldreg_greedy:
     group:
         "subj"
     log:
-        bids(
-            root="logs",
-            suffix="unfoldreg_greedy.txt",
-            atlas="{atlas}",
+        bids_log_wrapper(
+            "unfoldreg_greedy",
+            **inputs.subj_wildcards, 
             hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
+            label="{label}", 
+            from_="{atlas}"
+        )
     shadow:
         "minimal"
     threads: 16
