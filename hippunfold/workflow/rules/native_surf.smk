@@ -62,12 +62,11 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.7,
+            "reduction": 0.5,
             "feature_angle": 25,
             "preserve_topology": True,
         },
         hole_fill_radius=1.0,
-        clean_method="cleanAK",  #cleanAK or cleanJD 
         morph_openclose_dist=2,  # mm
         coords_epsilon=0.1,
     output:
@@ -82,6 +81,16 @@ rule gen_native_mesh:
                 label="{label}",
                 **inputs.subj_wildcards,
             )
+        ),
+    log:
+        surf_gii=bids(
+            root="logs",
+            suffix="{surfname,midthickness}.txt",
+            space="corobl",
+            desc="gen_isosurf",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"
@@ -99,7 +108,7 @@ rule update_native_mesh_structure:
             root=work,
             datatype="surf",
             suffix="{surfname}.surf.gii",
-            space="corobl",
+            space="{space}",
             desc="nostruct",
             hemi="{hemi}",
             label="{label}",
@@ -113,8 +122,8 @@ rule update_native_mesh_structure:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname,midthickness}.surf.gii",
-            space="corobl",
+            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+            space="{space,corobl|unfold}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -395,6 +404,9 @@ rule laplace_beltrami:
         "subj"
     container:
         config["singularity"]["autotop"]
+    threads: 1
+    resources:
+        mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
     conda:
         conda_env("pyvista")
     script:
@@ -411,7 +423,7 @@ rule warp_native_mesh_to_unfold:
         surf_gii=bids(
             root=root,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
+            suffix="midthickness.surf.gii",
             space="corobl",
             hemi="{hemi}",
             label="{label}",
@@ -440,14 +452,15 @@ rule warp_native_mesh_to_unfold:
             **inputs.subj_wildcards,
         ),
     params:
-        z_level=get_unfold_z_level,
         vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
+        z_level=get_unfold_z_level,
     output:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
+            suffix="{surfname,midthickness}.surf.gii",
+            desc="nostruct",
+            space="unfolduneven",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -462,26 +475,85 @@ rule warp_native_mesh_to_unfold:
         "../scripts/rewrite_vertices_to_flat.py"
 
 
-rule update_unfold_mesh_structure:
+rule space_unfold_vertices:
+    """ this irons out the surface to result in more even
+        vertex spacing. the resulting shape will be more 
+        individual (e.g. the surface area in unfolded space 
+        would be similar to native) """
     input:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldraw",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfolduneven",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        native_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
     params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="FLAT",
+        step_size=0.1,
+        max_iterations=10000,
     output:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfoldspringmodel",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("pyvista")
+    group:
+        "subj"
+    log:
+        bids(
+            root="logs",
+            suffix="log.txt",
+            datatype="space_unfold_vertices",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    script:
+        "../scripts/space_unfold_vertices.py"
+
+
+rule unfold_surface_smoothing:
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfoldspringmodel",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        strength=1,
+        iterations=5,
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
             space="unfold",
             hemi="{hemi}",
             label="{label}",
@@ -494,10 +566,44 @@ rule update_unfold_mesh_structure:
     group:
         "subj"
     shell:
-        "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
+        "wb_command -surface-smoothing {input} {params} {output}"
 
-        
+
+rule set_surface_z_level:
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        z_level=get_unfold_z_level,
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surfname,inner|outer}.surf.gii",
+            desc="nostruct",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("pyvista")
+    script:
+        "../scripts/set_surface_z_level.py"
+
+
 # --- creating inner/outer surfaces from native anatomical (using 3d label deformable registration)
 
 
@@ -583,6 +689,19 @@ rule register_midthickness:
                 dir="IO",
                 label="{label}",
                 suffix="xfm.nii.gz",
+                to="{inout}",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    log:
+        warp=temp(
+            bids(
+                root="logs",
+                dir="IO",
+                label="{label}",
+                suffix="xfm.txt",
                 to="{inout}",
                 space="corobl",
                 hemi="{hemi}",
@@ -941,6 +1060,7 @@ rule calculate_thickness:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
 
 
+# --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
 
 
 def get_unfold_ref_name(wildcards):
@@ -967,7 +1087,7 @@ def get_unfold_ref(wildcards):
         **inputs.subj_wildcards,
     )
 
-  
+
 # --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
 
 

@@ -80,46 +80,6 @@ rule extract_unfold_ref_slice:
         "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
 
 
-rule heavy_smooth_unfold_surf:
-    """ this irons out the surface to result in more even
-        vertex spacing. the resulting shape will be more 
-        individual (e.g. the surface area in unfolded space 
-        would be similar to native) -- TODO: maybe this is a good 
-        way to determine smoothing strenghth and iterations, e.g. 
-        use the surface area and vertex spacing as objectives.."""
-    input:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    params:
-        strength=0.1,
-        iterations=1000,
-    output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldsmoothed",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        "../envs/workbench.yaml"
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-smoothing {input} {params.strength} {params.iterations} {output}"
-
-
 rule native_metric_to_unfold_nii:
     """converts metric .gii files to .nii for use in ANTs"""
     input:
@@ -136,7 +96,7 @@ rule native_metric_to_unfold_nii:
             root=root,
             datatype="surf",
             suffix="inner.surf.gii",
-            space="unfoldsmoothed",
+            space="unfold",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -145,7 +105,7 @@ rule native_metric_to_unfold_nii:
             root=root,
             datatype="surf",
             suffix="midthickness.surf.gii",
-            space="unfoldsmoothed",
+            space="unfold",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -154,7 +114,7 @@ rule native_metric_to_unfold_nii:
             root=root,
             datatype="surf",
             suffix="outer.surf.gii",
-            space="unfoldsmoothed",
+            space="unfold",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
