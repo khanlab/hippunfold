@@ -63,7 +63,7 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.05,
+            "reduction": 0.5,
             "feature_angle": 25,
             "preserve_topology": True,
         },
@@ -405,6 +405,9 @@ rule laplace_beltrami:
         "subj"
     container:
         config["singularity"]["autotop"]
+    threads: 1
+    resources:
+        mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
     conda:
         "../envs/pyvista.yaml"
     script:
@@ -473,13 +476,11 @@ rule warp_native_mesh_to_unfold:
         "../scripts/rewrite_vertices_to_flat.py"
 
 
-rule space_unfold_vertices_evenly:
+rule space_unfold_vertices:
     """ this irons out the surface to result in more even
         vertex spacing. the resulting shape will be more 
         individual (e.g. the surface area in unfolded space 
-        would be similar to native) -- TODO: maybe this is a good 
-        way to determine smoothing strenghth and iterations, e.g. 
-        use the surface area and vertex spacing as objectives.."""
+        would be similar to native) """
     input:
         surf_gii=bids(
             root=work,
@@ -509,7 +510,7 @@ rule space_unfold_vertices_evenly:
             datatype="surf",
             suffix="midthickness.surf.gii",
             desc="nostruct",
-            space="unfold",
+            space="unfoldspringmodel",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -521,10 +522,10 @@ rule space_unfold_vertices_evenly:
     group:
         "subj"
     log:
-        surf_gii=bids(
+        bids(
             root="logs",
-            suffix=".txt",
-            space="unfoldeven",
+            suffix="log.txt",
+            datatype="space_unfold_vertices",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -533,7 +534,43 @@ rule space_unfold_vertices_evenly:
         "../scripts/space_unfold_vertices.py"
 
 
-rule gen_inner_outer_unfoldeven:
+rule unfold_surface_smoothing:
+    input:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfoldspringmodel",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        strength=1,
+        iterations=5,
+    output:
+        surf_gii=bids(
+            root=work,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-smoothing {input} {params} {output}"
+
+
+rule set_surface_z_level:
     input:
         surf_gii=bids(
             root=work,
@@ -558,13 +595,14 @@ rule gen_inner_outer_unfoldeven:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    run:
-        import nibabel as nib
-
-        surf = nib.load(input.surf_gii)
-        vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
-        vertices[:, 2] = params.z_level
-        nib.save(surf, output.surf_gii)
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/pyvista.yaml"
+    script:
+        "../scripts/set_surface_z_level.py"
 
 
 # --- creating inner/outer surfaces from native anatomical (using 3d label deformable registration)
