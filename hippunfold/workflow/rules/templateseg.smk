@@ -53,8 +53,7 @@ rule template_reg:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -111,8 +110,7 @@ rule warp_template_dseg:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -170,8 +168,7 @@ rule warp_template_coords:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -228,8 +225,7 @@ rule warp_template_anat:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8

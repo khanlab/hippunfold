@@ -13,8 +13,6 @@ rule import_dseg_subfields:
             space="corobl",
             hemi="{hemi}",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -55,8 +53,6 @@ rule subfields_to_label_gifti:
         ),
     conda:
         conda_env("workbench")
-    container:
-        config["singularity"]["autotop"]
     shell:
         "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
 
@@ -114,8 +110,7 @@ rule label_subfields_from_vol_coords_corobl:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -174,8 +169,7 @@ rule combine_tissue_subfield_labels_corobl:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -227,8 +221,7 @@ rule resample_subfields_to_native:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -278,8 +271,7 @@ rule resample_postproc_to_native:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -328,8 +320,7 @@ rule resample_unet_to_native:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -373,8 +364,7 @@ rule resample_subfields_to_unfold:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:

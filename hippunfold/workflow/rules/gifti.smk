@@ -44,8 +44,7 @@ rule cp_template_to_unfold:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -85,8 +84,7 @@ rule calc_unfold_template_coords:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     shadow:
@@ -140,8 +138,7 @@ rule affine_gii_to_native:
             label="{label,hipp|dentate}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -205,8 +202,7 @@ rule create_dscalar_metric_cifti:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -273,8 +269,7 @@ rule create_dlabel_cifti_subfields:
             label="hipp",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -383,8 +378,7 @@ rule create_spec_file_hipp:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -450,8 +444,7 @@ rule create_spec_file_dentate:
             label="{label,dentate}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -495,8 +488,7 @@ rule merge_lr_spec_file_native:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -531,8 +523,7 @@ rule merge_hipp_dentate_spec_file_native:
             suffix="surfaces.spec",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:

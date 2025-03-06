@@ -12,6 +12,8 @@ set_bids_spec("v0_0_0")
 
 # consider moving this logic to another smk file to clean-up
 
+container: "docker://dhananjhay/hippunfold_conda:2.0.0"
+
 limit_to_list = set()
 ref_spaces = []
 crop_ref_spaces = []

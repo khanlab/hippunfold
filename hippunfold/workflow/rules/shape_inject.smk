@@ -35,8 +35,7 @@ rule prep_segs_for_greedy:
         directory("{prefix}_dsegsplit"),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:
@@ -115,8 +114,6 @@ rule resample_template_dseg_tissue_for_reg:
             hemi="{hemi}",
             suffix="dseg.nii.gz",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -168,8 +165,7 @@ rule template_shape_reg:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -217,8 +213,6 @@ rule dilate_dentate_pd_src_sink:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:
@@ -292,8 +286,7 @@ rule template_shape_inject:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -374,8 +367,7 @@ rule inject_init_laplace_coords:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     threads: 8
@@ -418,8 +410,7 @@ rule reinsert_subject_labels:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:

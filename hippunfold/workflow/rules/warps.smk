@@ -57,8 +57,7 @@ rule reg_to_template:
             desc="affine",
             type_="ras",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("niftyreg")
     group:
@@ -90,8 +89,7 @@ rule convert_template_xfm_ras2itk:
             desc="affine",
             type_="itk",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -130,8 +128,7 @@ rule compose_template_xfm_corobl:
             desc="affine",
             type_="itk",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -163,8 +160,7 @@ rule invert_template_xfm_itk2ras:
             desc="affineInverse",
             type_="ras",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -196,8 +192,7 @@ rule template_xfm_itk2ras:
             desc="affine",
             type_="ras",
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -230,8 +225,7 @@ rule create_unfold_ref:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:

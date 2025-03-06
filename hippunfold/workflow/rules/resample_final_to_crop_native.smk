@@ -29,8 +29,7 @@ rule create_native_crop_ref:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -78,8 +77,7 @@ rule resample_unet_native_crop:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -129,8 +127,7 @@ rule resample_postproc_native_crop:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -183,8 +180,7 @@ rule resample_subfields_native_crop:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -237,8 +233,7 @@ rule resample_coords_native_crop:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -275,8 +270,7 @@ rule resample_native_to_crop:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -335,8 +329,7 @@ rule resample_t2_to_crop:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:

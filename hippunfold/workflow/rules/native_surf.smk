@@ -90,8 +90,7 @@ rule gen_native_mesh:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("pyvista")
     script:
@@ -124,8 +123,7 @@ rule update_native_mesh_structure:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -161,8 +159,7 @@ rule smooth_surface:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -197,8 +194,6 @@ rule get_boundary_vertices:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
     script:
@@ -240,8 +235,6 @@ rule map_src_sink_sdt_to_surf:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -333,8 +326,6 @@ rule postproc_boundary_vertices:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     log:
         bids(
             root="logs",
@@ -398,8 +389,7 @@ rule laplace_beltrami:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("pyvista")
     script:
@@ -457,8 +447,7 @@ rule warp_native_mesh_to_unfold:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("pyunfold")
     group:
@@ -492,8 +481,7 @@ rule update_unfold_mesh_structure:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -533,8 +521,7 @@ rule heavy_smooth_unfold_surf:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -589,8 +576,7 @@ rule compute_halfthick_mask:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     shell:
@@ -636,9 +622,7 @@ rule register_midthickness:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
-    threads: 16
+
     conda:
         conda_env("greedy")
     shell:
@@ -695,8 +679,7 @@ rule apply_halfsurf_warp_to_img:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     shell:
@@ -733,8 +716,7 @@ rule convert_inout_warp_from_itk_to_world:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     shell:
@@ -777,8 +759,7 @@ rule warp_midthickness_to_inout:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     shadow:
@@ -827,8 +808,7 @@ rule affine_gii_corobl_to_modality:
             label="{label,hipp|dentate}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -861,8 +841,7 @@ rule calculate_surface_area:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -903,8 +882,7 @@ rule calculate_legacy_gyrification:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -936,8 +914,7 @@ rule calculate_curvature:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -976,8 +953,7 @@ rule calculate_thickness:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1021,8 +997,7 @@ rule pad_unfold_ref:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -1055,8 +1030,7 @@ rule extract_unfold_ref_slice:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("c3d")
     group:
@@ -1126,8 +1100,7 @@ rule native_metric_to_unfold_nii:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1178,8 +1151,7 @@ rule atlas_metric_to_unfold_nii:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1279,8 +1251,7 @@ rule unfoldreg_antsquick:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("ants")
     group:
@@ -1336,8 +1307,7 @@ rule unfoldreg_greedy:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("greedy")
     group:
@@ -1407,8 +1377,7 @@ rule extend_warp_2d_to_3d:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("neurovis")
     group:
@@ -1448,8 +1417,7 @@ rule convert_unfoldreg_warp_from_itk_to_world:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     shell:
@@ -1515,8 +1483,7 @@ rule warp_unfold_native_to_unfoldreg:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1562,8 +1529,7 @@ rule resample_atlas_subfields_to_std_density:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1602,8 +1568,7 @@ rule resample_native_surf_to_std_density:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1642,8 +1607,7 @@ rule resample_native_metric_to_std_density:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1704,8 +1668,7 @@ rule resample_atlas_subfields_to_native_surf:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1757,8 +1720,7 @@ rule atlas_label_to_unfold_nii:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1814,8 +1776,7 @@ rule create_dscalar_metric_cifti_native:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1870,8 +1831,7 @@ rule create_dlabel_cifti_subfields_native:
             label="hipp",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -1963,8 +1923,7 @@ rule create_spec_file_hipp_native:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -2026,8 +1985,7 @@ rule create_spec_file_dentate_native:
             label="{label,dentate}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -2062,8 +2020,7 @@ rule merge_lr_spec_file:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
@@ -2096,8 +2053,7 @@ rule merge_hipp_dentate_spec_file:
             suffix="surfaces.spec",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+
     conda:
         conda_env("workbench")
     group:
