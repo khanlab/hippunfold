@@ -71,7 +71,7 @@ rule get_label_mask:
     group:
         "subj"
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -116,7 +116,7 @@ rule get_src_sink_mask:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -152,7 +152,7 @@ rule get_src_sink_sdt:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -179,7 +179,7 @@ rule get_nan_mask:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -207,7 +207,7 @@ rule create_upsampled_coords_ref:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     container:
@@ -259,7 +259,7 @@ rule prep_dseg_for_laynii:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     group:
         "subj"
     shell:
@@ -296,7 +296,7 @@ rule laynii_layers_equidist:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/laynii.yaml"
+        conda_env("laynii")
     group:
         "subj"
     shell:
@@ -335,7 +335,7 @@ rule laynii_layers_equivol:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/laynii.yaml"
+        conda_env("laynii")
     group:
         "subj"
     shell:

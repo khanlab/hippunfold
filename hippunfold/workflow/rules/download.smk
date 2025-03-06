@@ -82,7 +82,7 @@ rule import_template_dseg:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -120,6 +120,8 @@ rule import_template_dseg_dentate:
         "subj"
     container:
         config["singularity"]["autotop"]
+    conda:
+        conda_env("c3d")
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -160,7 +162,7 @@ rule import_template_coords:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     shell:
         "{params.copy_or_flip_cmd} {output.template_coords}"
 
@@ -200,6 +202,6 @@ rule import_template_anat:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/c3d.yaml"
+        conda_env("c3d")
     shell:
         "{params.copy_or_flip_cmd} {output.template_anat}"

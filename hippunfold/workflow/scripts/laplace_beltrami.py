@@ -3,6 +3,9 @@ import nibabel as nib
 from scipy.sparse import diags, linalg, lil_matrix
 from lib.utils import setup_logger
 
+log_file = snakemake.log[0] if snakemake.log else None
+logger = setup_logger(log_file)
+
 
 def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     """
@@ -96,6 +99,11 @@ src_sink_mask = nib.load(snakemake.input.src_sink_mask).agg_data()
 src_indices = np.where(src_sink_mask == 1)[0]
 sink_indices = np.where(src_sink_mask == 2)[0]
 
+# get structure metadata from src/sink mask
+structure_metadata = nib.load(snakemake.input.src_sink_mask).meta[
+    "AnatomicalStructurePrimary"
+]
+
 
 logger.info(f"# of src boundary vertices: {len(src_indices)}")
 logger.info(f"# of sink boundary vertices: {len(sink_indices)}")
@@ -113,5 +121,10 @@ coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 
 data_array = nib.gifti.GiftiDataArray(data=coords.astype(np.float32))
 image = nib.gifti.GiftiImage()
+
+# set structure metadata
+image.meta["AnatomicalStructurePrimary"] = structure_metadata
+
+
 image.add_gifti_data_array(data_array)
 nib.save(image, snakemake.output.coords)
