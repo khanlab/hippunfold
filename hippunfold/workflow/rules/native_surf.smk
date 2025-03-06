@@ -8,7 +8,6 @@ surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
 ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
-ruleorder: gen_inner_outer_unfoldeven > warp_native_mesh_to_unfold
 
 
 # --- isosurface generation ---
@@ -459,7 +458,7 @@ rule warp_native_mesh_to_unfold:
         surf_gii=bids(
             root=work,
             datatype="surf",
-            suffix="{surfname}.surf.gii",
+            suffix="{surfname,midthickness}.surf.gii",
             desc="nostruct",
             space="unfolduneven",
             hemi="{hemi}",
