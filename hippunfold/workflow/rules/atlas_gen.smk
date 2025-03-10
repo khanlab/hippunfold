@@ -184,6 +184,8 @@ rule copy_avgtemplate_warps:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    group:
+        "subj"
     shell:
         "cp {params.glob_input_warp} {output.warp} && "
         "cp {params.glob_input_invwarp} {output.invwarp}"
@@ -228,6 +230,14 @@ def get_metric_template(wildcards, input):
     return metrics
 
 
+### final atlas files ###
+
+
+ruleorder: gen_atlas_surfs > download_extract_atlas
+ruleorder: avg_metrics > download_extract_atlas
+ruleorder: maxprob_subfields > download_extract_atlas
+
+
 rule gen_atlas_surfs:
     input:
         metric_nii=expand(
@@ -238,27 +248,85 @@ rule gen_atlas_surfs:
     params:
         z_level=get_unfold_z_level,
     output:
-        surf_gii="template/avgtemplate_space-unfold_label-{label}_{surfname,midthickness|inner|outer}.surf.gii",
+        midthickness_surf=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["surf_gii"],
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("pyvista")
     script:
         "../scripts/surf_gen.py"
 
 
-rule avgtemplate_metric_vol_to_surf:
+rule gen_atlas_densities:
     input:
-        metric_nii="template/avgtemplate_label-{label}_{metric}.nii.gz",
-        midthickness="template/avgtemplate_space-unfold_label-{label}_midthickness.surf.gii",
+        midthickness_surf=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["surf_gii"],
     output:
-        metric_gii="template/avgtemplate_label-{label}_{metric}.shape.gii",
+        ref_unfold=os.path.join(
+            workflow.basedir,
+            "..",
+            "resources",
+            "unfold_template_{label}",
+            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        ),
     shell:
-        "wb_command -volume-to-surface-mapping {input.metric_nii} {input.midthickness} {output.metric_gii} -trilinear"
+        "cp {input} {output}"  # TODO get actual densities
+
+
+rule avg_metrics:
+    input:
+        metric_nii=get_metric_template,
+        surf=expand(
+            directory(Path(download_dir) / "atlas" / config["gen_template_name"])
+            + "/"
+            + config["atlas_files"]["mytemplate"]["surf_gii"],
+            label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+        ),
+    output:
+        metric=expand(
+            directory(Path(download_dir) / "atlas" / config["gen_template_name"])
+            + "/"
+            + config["atlas_files"]["mytemplate"]["metric_gii"],
+            label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+            metric=config["atlas_files"]["mytemplate"]["metric_wildcards"],
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("c3d")
+    shell:
+        "c3d {input.metric_nii} -mean tmp.nii.gz && "
+        "wb_command -volume-to-surface-mapping tmp.nii.gz {input.surf} {output} -nearest"
 
 
 """
 rule maxprob_subfields:
     input:
-        in_img=partial(get_single_bids_input, component="dsegsubfields"),
+        in_img=inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="subfields.label.gii",
+                space="unfold",
+                den="{density}",
+                hemi="{hemi}",
+                label="{label}",
+                atlas="{atlas}",
+                **inputs.subj_wildcards,
+            ),
+            hemi=config["hemi"],
+            label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+            atlas=config["gen_template_name"],
+            density="unfoldiso",
+        ),
     output:
-        maxprob_subfields=config["atlas_files"]["mytemplate"]["label_gii"],
+        label_gii=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["label_gii"],
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("c3d")
     shell:
         "c3d {input} -vote -type uchar -o {output}"
 """

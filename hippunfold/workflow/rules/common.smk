@@ -369,12 +369,31 @@ def get_create_template_output():
                 **expand_hemi,
             )
         )
-
         files.extend(
-            # TODO AK to fix this later with final targets
-            expand("template/avgtemplate_{label}", label=config["autotop_labels"])
+            expand(
+                directory(Path(download_dir) / "atlas" / config["gen_template_name"])
+                + "/"
+                + config["atlas_files"]["mytemplate"]["surf_gii"],
+                label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+            )
         )
-
+        files.extend(
+            expand(
+                directory(Path(download_dir) / "atlas" / config["gen_template_name"])
+                + "/"
+                + config["atlas_files"]["mytemplate"]["metric_gii"],
+                label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+                metric=config["atlas_files"]["mytemplate"]["metric_wildcards"],
+            )
+        )
+        files.extend(
+            expand(
+                directory(Path(download_dir) / "atlas" / config["gen_template_name"])
+                + "/"
+                + config["atlas_files"]["mytemplate"]["label_gii"],
+                label=config["atlas_files"]["mytemplate"]["label_wildcards"],
+            )
+        )
     return files
 
 

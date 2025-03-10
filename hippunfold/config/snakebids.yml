@@ -21,7 +21,7 @@ analysis_levels: &analysis_levels
 #mapping from analysis_level to set of target rules or files
 targets_by_analysis_level:
   participant:
-    - ''  # if '', then the first rule is run
+    - 'all'  # if '', then the first rule is run
   participant_create_template:
     - 'all_create_template'
   group:
@@ -476,9 +476,9 @@ gen_template_name: mytemplate
 atlas_files:
   mytemplate:
     lut: desc-subfields_atlas-mytemplate_dseg.tsv 
-    surf_gii: hemi-{hemi}_space-unfold_label-{label}_{surf_type}.surf.gii
-    metric_gii: hemi-{hemi}_label-{label}_{metric}.shape.gii
-    label_gii: hemi-{hemi}_label-{label}_dseg.label.gii
+    surf_gii: _space-unfold_label-{label}_{surf_type}.surf.gii
+    metric_gii: _label-{label}_{metric}.shape.gii
+    label_gii: _label-{label}_dseg.label.gii
     label_wildcards:
      - hipp
     hemi_wildcards:

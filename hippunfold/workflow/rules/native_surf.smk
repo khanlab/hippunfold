@@ -1095,7 +1095,6 @@ rule resample_atlas_subfields_to_std_density:
     """ resamples subfields from a custom atlas mesh (e.g. from an atlas anatomical/native mesh
     warped to unfold space) to a standard density"""
     input:
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         ref_unfold=os.path.join(
             workflow.basedir,
             "..",
@@ -1103,13 +1102,10 @@ rule resample_atlas_subfields_to_std_density:
             "unfold_template_{label}",
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
-    params:
-        label_gii=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
-        atlas_unfold=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
-            surf_type="midthickness", **wildcards
-        ),
+        label_gii=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["label_gii"],
+        atlas_unfold=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["surf_gii"],
     output:
         label_gii=bids(
             root=root,
@@ -1129,7 +1125,7 @@ rule resample_atlas_subfields_to_std_density:
     group:
         "subj"
     shell:
-        "wb_command -label-resample {params.label_gii} {params.atlas_unfold} {input.ref_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
+        "wb_command -label-resample {input.label_gii} {input.atlas_unfold} {input.ref_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
 
 rule resample_native_surf_to_std_density:
@@ -1244,14 +1240,17 @@ rule cp_surf_to_root:
 # --- resampling from atlasnative to native vertices
 rule resample_atlas_subfields_to_native_surf:
     input:
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         native_unfold=get_unfold_ref,
-    params:
-        label_gii=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
-        ref_unfold=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
-            surf_type="midthickness", **wildcards
+        label_gii=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["label_gii"],
+        atlas_unfold=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["surf_gii"],
+        ref_unfold=os.path.join(
+            workflow.basedir,
+            "..",
+            "resources",
+            "unfold_template_{label}",
+            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
     output:
         label_gii=bids(
@@ -1271,7 +1270,7 @@ rule resample_atlas_subfields_to_native_surf:
     group:
         "subj"
     shell:
-        "wb_command -label-resample {params.label_gii} {params.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
+        "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
 
 # --- rule for converting atlasnative subfields to unfold nii (e.g. analogous to unfoldiso standard space)
@@ -1282,7 +1281,6 @@ rule atlas_label_to_unfold_nii:
         make use of gifti labels instead.. 
 """
     input:
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         ref_nii=bids(
             root=work,
             space="unfold",
@@ -1291,19 +1289,12 @@ rule atlas_label_to_unfold_nii:
             suffix="refvol.nii.gz",
             **inputs.subj_wildcards,
         ),
-    params:
-        label_gii=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
-        inner_surf=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
-            surf_type="inner", **wildcards
-        ),
-        outer_surf=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
-            surf_type="outer", **wildcards
-        ),
-        midthickness_surf=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+        label_gii=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["label_gii"],
+        atlas_unfold=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["surf_gii"],
+        midthickness_surf=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["surf_gii"].format(
             surf_type="midthickness", **wildcards
         ),
     output:
@@ -1324,7 +1315,7 @@ rule atlas_label_to_unfold_nii:
     group:
         "subj"
     shell:
-        "wb_command -label-to-volume-mapping {params.label_gii} {params.midthickness_surf} {input.ref_nii} {output.label_nii} "
+        "wb_command -label-to-volume-mapping {input.label_gii} {params.midthickness_surf} {input.ref_nii} {input.label_nii} "
         " -nearest-vertex 1000"
 
 

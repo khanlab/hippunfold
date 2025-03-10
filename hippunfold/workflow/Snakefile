@@ -130,7 +130,6 @@ include: "rules/qc.smk"
 include: "rules/myelin_map.smk"
 include: "rules/native_surf.smk"
 include: "rules/unfold_reg.smk"
-include: "rules/atlas_gen.smk"
 
 
 if config["use_template_seg"]:
