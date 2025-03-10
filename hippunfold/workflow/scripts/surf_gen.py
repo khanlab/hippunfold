@@ -9,19 +9,30 @@ all_metrics = np.stack(metric_files, axis=2)
 # Create a meshgrid spanning the metric space
 x = np.linspace(0, all_metrics.shape[0] - 1, all_metrics.shape[0])
 y = np.linspace(0, all_metrics.shape[1] - 1, all_metrics.shape[1])
-coords_x, coords_y = np.meshgrid(y, x)
+
+
+coords_y, coords_x = np.meshgrid(y, x)
 all_points = np.column_stack((coords_x.ravel(), coords_y.ravel()))
 
 # Perform Delaunay triangulation
 tri = Delaunay(all_points)
 
-# Add z-values
-z_level = snakemake.params.z_level
-points = np.column_stack((all_points, np.full(all_points.shape[0], z_level)))
+# Add placeholder z-value (will update after transformation)
+points = np.column_stack((all_points, np.full(all_points.shape[0], 0)))
 
 # Identify valid vertices (non-zero and finite values across all metrics)
 valid_mask = ~np.all((all_metrics < 1e-6) | (all_metrics > 1e6), axis=2).ravel()
 filtered_points = points[valid_mask]
+
+
+# apply transformation from vox to phys
+affine = nib.load(snakemake.input.metric_nii[0]).affine
+coords = np.hstack((filtered_points, np.ones((filtered_points.shape[0], 1))))
+transformed = affine @ coords.T
+filtered_points = transformed.T[:, :3]
+
+# now set z-level based on params
+filtered_points[:, 2] = snakemake.params.z_level
 
 # Remap indices for triangulation
 new_indices = np.full(points.shape[0], -1, dtype=int)
@@ -43,4 +54,4 @@ tri_darray = nib.gifti.GiftiDataArray(
 gifti = nib.GiftiImage()
 gifti.add_gifti_data_array(points_darray)
 gifti.add_gifti_data_array(tri_darray)
-gifti.to_filename(snakemake.output.surf)
+gifti.to_filename(snakemake.output.surf_gii)
