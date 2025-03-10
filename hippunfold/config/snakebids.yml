@@ -198,6 +198,7 @@ parse_args:
     choices:
       - 'multihist7'
       - 'bbhist'
+      - 'mytemplate'
     default: 'multihist7'
     help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
 

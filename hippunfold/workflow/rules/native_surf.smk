@@ -1102,10 +1102,10 @@ rule resample_atlas_subfields_to_std_density:
             "unfold_template_{label}",
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
-        label_gii=directory(Path(download_dir) / "atlas" / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["label_gii"],
-        atlas_unfold=directory(Path(download_dir) / "atlas" / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["surf_gii"],
+        label_gii=directory(Path(download_dir) / "atlas" / config["atlas"])
+        / config["atlas_files"][config["atlas"]]["label_gii"],
+        atlas_unfold=directory(Path(download_dir) / "atlas" / config["atlas"])
+        / config["atlas_files"][config["atlas"]]["surf_gii"],
     output:
         label_gii=bids(
             root=root,
@@ -1241,10 +1241,10 @@ rule cp_surf_to_root:
 rule resample_atlas_subfields_to_native_surf:
     input:
         native_unfold=get_unfold_ref,
-        label_gii=directory(Path(download_dir) / "atlas" / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["label_gii"],
-        atlas_unfold=directory(Path(download_dir) / "atlas" / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["surf_gii"],
+        label_gii=directory(Path(download_dir) / "atlas" / config["atlas"])
+        / config["atlas_files"][config["atlas"]]["label_gii"],
+        atlas_unfold=directory(Path(download_dir) / "atlas" / config["atlas"])
+        / config["atlas_files"][config["atlas"]]["surf_gii"],
         ref_unfold=os.path.join(
             workflow.basedir,
             "..",
@@ -1289,14 +1289,14 @@ rule atlas_label_to_unfold_nii:
             suffix="refvol.nii.gz",
             **inputs.subj_wildcards,
         ),
-        label_gii=directory(Path(download_dir) / "atlas" / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["label_gii"],
-        atlas_unfold=directory(Path(download_dir) / "atlas" / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["surf_gii"],
-        midthickness_surf=directory(Path(download_dir) / "atlas" / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["surf_gii"].format(
+        label_gii=directory(Path(download_dir) / "atlas" / config["atlas"])
+        / config["atlas_files"][config["atlas"]]["label_gii"],
+        atlas_unfold=directory(Path(download_dir) / "atlas" / config["atlas"])
+        / config["atlas_files"][config["atlas"]]["surf_gii"],
+        midthickness_surf=directory(Path(download_dir) / "atlas" / config["atlas"])
+        / config["atlas_files"][config["atlas"]]["surf_gii"].format(
             surf_type="midthickness", **wildcards
-        ),
+        )
     output:
         label_nii=bids(
             root=work,

@@ -11,7 +11,7 @@ rule import_dseg_subfields:
             desc="subfields",
             suffix="dseg.nii.gz",
             space="corobl",
-            hemi="{hemi}",
+            hemi="{hemi,L|R}",
         ),
     container:
         config["singularity"]["autotop"]
@@ -63,7 +63,6 @@ rule subfields_to_label_gifti:
 
 rule label_subfields_from_vol_coords_corobl:
     input:
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         ref_nii=get_labels_for_laplace,
         midthickness_surf=bids(
             root=root,

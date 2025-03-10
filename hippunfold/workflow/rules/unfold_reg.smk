@@ -156,7 +156,6 @@ rule atlas_metric_to_unfold_nii:
     """converts metric .gii files to .nii for use in ANTs. 
         This rule is for the surface template"""
     input:
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         ref_nii=bids(
             root=work,
             datatype="anat",
@@ -167,8 +166,7 @@ rule atlas_metric_to_unfold_nii:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        metric_gii=lambda wildcards, input: Path(input.atlas_dir)
+        metric_gii=Path(input.atlas_dir)
         / config["atlas_files"][wildcards.atlas]["metric_gii"].format(**wildcards),
         inner_surf=lambda wildcards, input: Path(input.atlas_dir)
         / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
@@ -178,10 +176,10 @@ rule atlas_metric_to_unfold_nii:
         / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
             surf_type="outer", **wildcards
         ),
-        midthickness_surf=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+        midthickness_surf=directory(Path(download_dir) / "atlas" / "{atlas}")
+        / config["atlas_files"]["{atlas}"]["surf_gii"].format(
             surf_type="midthickness", **wildcards
-        ),
+        )
     output:
         metric_nii=bids(
             root=work,
