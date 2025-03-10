@@ -370,12 +370,9 @@ def get_create_template_output():
             )
         )
 
-        files.extend(  
-                     # TODO AK to fix this later with final targets
-            expand(
-                "template/avgtemplate_{label}",
-                label=config["autotop_labels"]
-            )
+        files.extend(
+            # TODO AK to fix this later with final targets
+            expand("template/avgtemplate_{label}", label=config["autotop_labels"])
         )
 
     return files
