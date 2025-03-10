@@ -370,15 +370,15 @@ def get_create_template_output():
             )
         )
 
+        files.extend(  
+                     # TODO AK to fix this later with final targets
+            expand(
+                "template/avgtemplate_{label}",
+                label=config["autotop_labels"]
+            )
+        )
 
-#        files.extend(  #TODO AK to fix this later
-#            expand(
-#                "template/warp_hemi-{hemi}_label-{label}_template0.nii.gz",
-#                hemi=config["hemi"],
-#                label=config["atlas_files"]["mytemplate"]["label_wildcards"],
-#            )
-#        ),
-return files
+    return files
 
 
 def get_input_for_shape_inject(wildcards):
