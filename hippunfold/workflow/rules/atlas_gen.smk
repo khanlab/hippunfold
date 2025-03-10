@@ -185,83 +185,42 @@ rule rename_output_warp:
         "cp {params.glob_input_invwarp} {output.invwarp}"
 
 
-rule warp_surf_to_avg_template:
-    """ added this to verify the warped surfaces --
-    NOTE: this isn't working currently, since the warps are now strictly 2D """
+
+def get_metric_template(wildcards, input):
+ 
+    num_modalities=len(
+            config["atlas_files"][config["gen_template_name"]]["metric_wildcards"]
+        ),
+   
+    warp_prefix="template/warp_label-{label}_"
+    matrics=sorted(glob(f'{warp_prefix}_template?.nii.gz'))
+    return matrics
+
+
+rule: gen_atlas_surfs:
     input:
-        surf_gii=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-        warp=bids(
-            root=work,
-            datatype="warps",
-            suffix="warp.nii.gz",
-            from_="unfold",
-            to="avgunfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
+        metric_nii=get_metric_template
+    params:
+        z_level=get_unfold_z_level,
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="avgunfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        "../envs/workbench.yaml"
-    group:
-        "subj"
-    shadow:
-        "minimal"
+        surf = config['atlas_files']['mytemplate']['surf_gii']
+    script:
+        "../scripts/surf_gen.py"
+
+rule: avg_metrics:
+    input: 
+        metric_nii=get_metric_template
+    output: 
+        metric=config['atlas_files']['mytemplate']['metric_gii']
     shell:
-        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear && "
-        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
-        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
-        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
+        "c3d {input} -mean tmp.nii.gz && "
+        "wb_command -volume-to-surface-mapping tmp.nii.gz {output} -trilinear"
 
+rule: maxprob_subfields
+    input:
+        in_img=partial(get_single_bids_input, component="dsegsubfields")
+    output: 
+        maxprob_subfields=config['atlas_files']['mytemplate']['label_gii']
+    shell:
+        "c3d {input} -vote -type uchar -o {output}"
 
-# def warp_names(wildcards,input):
-#     # TODO: this currently won't work with wildcards.session
-#     warp_file=glob(f"template/warp_hemi-{hemi}_label-{label}_*_sub-{wildcards.subject}_*1Warp.nii.gz")
-#     return warp_file
-# # Now we can plug into unfold_reg.smk to out everything in space-unfolreg
-# rule mv_unfold_reg:
-#     input:
-#         warp_example="template/warp_hemi-{hemi}_label-{label}_template0.nii.gz",
-#     params:
-#         filename = warp_names
-#     output:
-#         warp=bids(
-#             root=work,
-#             suffix="xfm.nii.gz",
-#             datatype="warps",
-#             desc="{desc}",
-#             from_="{from}",
-#             to="{to}",
-#             space="{space}",
-#             type_="itk2d",
-#             hemi="{hemi}",
-#             label="{label}",
-#             **inputs.subj_wildcards,
-#         ),
-#     shell:
-#         "mv {params.filename} {output.warp}"
-# rule: gen_atlas_surfs
-# # this should output to our atlas directory. Should also generate variious densities (decimation to target?)
-# rule: avg_metrics:
-# # this should output to our atlas directory
-# rule: maxprob_subfields
-# # this should output to our atlas directory
