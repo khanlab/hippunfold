@@ -185,42 +185,42 @@ rule rename_output_warp:
         "cp {params.glob_input_invwarp} {output.invwarp}"
 
 
-
 def get_metric_template(wildcards, input):
- 
-    num_modalities=len(
-            config["atlas_files"][config["gen_template_name"]]["metric_wildcards"]
-        ),
-   
-    warp_prefix="template/warp_label-{label}_"
-    matrics=sorted(glob(f'{warp_prefix}_template?.nii.gz'))
+
+    num_modalities = (
+        len(config["atlas_files"][config["gen_template_name"]]["metric_wildcards"]),
+    )
+
+    warp_prefix = "template/warp_label-{label}_"
+    matrics = sorted(glob(f"{warp_prefix}_template?.nii.gz"))
     return matrics
 
 
-rule: gen_atlas_surfs:
+rule gen_atlas_surfs:
     input:
-        metric_nii=get_metric_template
+        metric_nii=get_metric_template,
     params:
         z_level=get_unfold_z_level,
     output:
-        surf = config['atlas_files']['mytemplate']['surf_gii']
+        surf=config["atlas_files"]["mytemplate"]["surf_gii"],
     script:
         "../scripts/surf_gen.py"
 
-rule: avg_metrics:
-    input: 
-        metric_nii=get_metric_template
-    output: 
-        metric=config['atlas_files']['mytemplate']['metric_gii']
+
+rule avg_metrics:
+    input:
+        metric_nii=get_metric_template,
+    output:
+        metric=config["atlas_files"]["mytemplate"]["metric_gii"],
     shell:
         "c3d {input} -mean tmp.nii.gz && "
         "wb_command -volume-to-surface-mapping tmp.nii.gz {output} -trilinear"
 
-rule: maxprob_subfields
+
+rule maxprob_subfields:
     input:
-        in_img=partial(get_single_bids_input, component="dsegsubfields")
-    output: 
-        maxprob_subfields=config['atlas_files']['mytemplate']['label_gii']
+        in_img=partial(get_single_bids_input, component="dsegsubfields"),
+    output:
+        maxprob_subfields=config["atlas_files"]["mytemplate"]["label_gii"],
     shell:
         "c3d {input} -vote -type uchar -o {output}"
-
