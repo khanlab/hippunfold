@@ -1,7 +1,7 @@
 def get_labels_for_laplace(wildcards):
     if (
         config["skip_inject_template_labels"]
-        or config["analysis_level"] == "participant_create_template"
+        or config["analysis_level"] == "group_create_atlas"
     ):
         seg = get_input_for_shape_inject(wildcards)
     else:

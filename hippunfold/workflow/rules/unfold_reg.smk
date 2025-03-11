@@ -166,20 +166,37 @@ rule atlas_metric_to_unfold_nii:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-        metric_gii=Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["metric_gii"].format(**wildcards),
-        inner_surf=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
-            surf_type="inner", **wildcards
+        metric_gii=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            suffix="{metric}.shape.gii",
         ),
-        outer_surf=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
-            surf_type="outer", **wildcards
+        midthickness_surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            space="unfold",
+            suffix="midthickness.surf.gii",
         ),
-        midthickness_surf=directory(Path(download_dir) / "atlas" / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["surf_gii"].format(
-            surf_type="midthickness", **wildcards
-        )
+        inner_surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            space="unfold",
+            suffix="inner.surf.gii",
+        ),
+        outer_surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            space="unfold",
+            suffix="outer.surf.gii",
+        ),
     output:
         metric_nii=bids(
             root=work,
@@ -198,8 +215,8 @@ rule atlas_metric_to_unfold_nii:
     group:
         "subj"
     shell:
-        "wb_command -metric-to-volume-mapping {params.metric_gii} {params.midthickness_surf} {input.ref_nii} {output.metric_nii} "
-        " -ribbon-constrained {params.inner_surf} {params.outer_surf}"
+        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
+        " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
 
 
 def get_fixed_images_unfoldreg(wildcards):

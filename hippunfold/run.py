@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
+import atlas_plugin
 from snakebids import bidsapp, plugins
 
 if "__file__" not in globals():
@@ -14,6 +15,7 @@ app = bidsapp.app(
         plugins.Version(distribution="hippunfold"),
         plugins.CliConfig("parse_args"),
         plugins.ComponentEdit("pybids_inputs"),
+        atlas_plugin.AtlasConfig(argument_group="ATLASES"),
     ]
 )
 

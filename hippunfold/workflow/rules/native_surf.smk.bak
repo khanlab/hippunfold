@@ -8,6 +8,7 @@ surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
 ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
+ruleorder: gen_inner_outer_unfoldeven > warp_native_mesh_to_unfold
 
 
 # --- isosurface generation ---
@@ -62,7 +63,7 @@ rule gen_native_mesh:
     params:
         threshold=lambda wildcards: surf_thresholds[wildcards.surfname],
         decimate_opts={
-            "reduction": 0.5,
+            "reduction": 0.05,
             "feature_angle": 25,
             "preserve_topology": True,
         },
@@ -97,7 +98,7 @@ rule gen_native_mesh:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     script:
         "../scripts/gen_isosurface.py"
 
@@ -131,7 +132,7 @@ rule update_native_mesh_structure:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -168,7 +169,7 @@ rule smooth_surface:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -204,7 +205,7 @@ rule get_boundary_vertices:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     script:
         "../scripts/get_boundary_vertices.py"
 
@@ -247,7 +248,7 @@ rule map_src_sink_sdt_to_surf:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -312,8 +313,6 @@ rule postproc_boundary_vertices:
         ),
     params:
         min_terminal_vertices=5,  # min number of vertices per src/sink
-        max_iterations=100,
-        shifting_epsilon=0.1,  #could be proportional to voxel spacing
     output:
         ap=bids(
             root=work,
@@ -339,17 +338,8 @@ rule postproc_boundary_vertices:
         ),
     container:
         config["singularity"]["autotop"]
-    log:
-        bids(
-            root="logs",
-            datatype="postproc_boundary_vertices",
-            suffix="log.txt",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     group:
         "subj"
     script:
@@ -391,12 +381,13 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
     log:
-        bids(
+        coords=bids(
             root="logs",
-            datatype="laplace_beltrami",
-            suffix="log.txt",
-            hemi="{hemi}",
             dir="{dir}",
+            suffix="coords.txt",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
@@ -404,11 +395,8 @@ rule laplace_beltrami:
         "subj"
     container:
         config["singularity"]["autotop"]
-    threads: 1
-    resources:
-        mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     script:
         "../scripts/laplace_beltrami.py"
 
@@ -455,31 +443,33 @@ rule warp_native_mesh_to_unfold:
         vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
         z_level=get_unfold_z_level,
     output:
-        surf_gii=bids(
+        surf_gii=temp(bids(
             root=work,
             datatype="surf",
-            suffix="{surfname,midthickness}.surf.gii",
+            suffix="{surfname}.surf.gii",
             desc="nostruct",
             space="unfolduneven",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
-        ),
+        )),
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("pyunfold")
+        "../envs/pyunfold.yaml"
     group:
         "subj"
     script:
         "../scripts/rewrite_vertices_to_flat.py"
 
 
-rule space_unfold_vertices:
+rule space_unfold_vertices_evenly:
     """ this irons out the surface to result in more even
         vertex spacing. the resulting shape will be more 
         individual (e.g. the surface area in unfolded space 
-        would be similar to native) """
+        would be similar to native) -- TODO: maybe this is a good 
+        way to determine smoothing strenghth and iterations, e.g. 
+        use the surface area and vertex spacing as objectives.."""
     input:
         surf_gii=bids(
             root=work,
@@ -501,53 +491,8 @@ rule space_unfold_vertices:
             **inputs.subj_wildcards,
         ),
     params:
-        step_size=0.1,
-        max_iterations=10000,
-    output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="midthickness.surf.gii",
-            desc="nostruct",
-            space="unfoldspringmodel",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("pyvista")
-    group:
-        "subj"
-    log:
-        bids(
-            root="logs",
-            suffix="log.txt",
-            datatype="space_unfold_vertices",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    script:
-        "../scripts/space_unfold_vertices.py"
-
-
-rule unfold_surface_smoothing:
-    input:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="midthickness.surf.gii",
-            desc="nostruct",
-            space="unfoldspringmodel",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    params:
-        strength=1,
-        iterations=5,
+        step_size=0.05,
+        max_iterations=1000,
     output:
         surf_gii=bids(
             root=work,
@@ -562,14 +507,23 @@ rule unfold_surface_smoothing:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/pyvista.yaml"
     group:
         "subj"
-    shell:
-        "wb_command -surface-smoothing {input} {params} {output}"
+#    log:
+#        surf_gii=bids(
+#            root="logs",
+#            suffix=".txt",
+#            space="unfoldeven",
+#            hemi="{hemi}",
+#            label="{label}",
+#            **inputs.subj_wildcards,
+#        ),
+    script:
+        "../scripts/space_unfold_vertices.py"
 
 
-rule set_surface_z_level:
+rule gen_inner_outer_unfoldeven:
     input:
         surf_gii=bids(
             root=work,
@@ -594,14 +548,13 @@ rule set_surface_z_level:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("pyvista")
-    script:
-        "../scripts/set_surface_z_level.py"
+    run:
+        import nibabel as nib
+
+        surf = nib.load(input.surf_gii)
+        vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
+        vertices[:, 2] = params.z_level
+        nib.save(surf, output.surf_gii)
 
 
 # --- creating inner/outer surfaces from native anatomical (using 3d label deformable registration)
@@ -653,7 +606,7 @@ rule compute_halfthick_mask:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -714,7 +667,7 @@ rule register_midthickness:
         config["singularity"]["autotop"]
     threads: 16
     conda:
-        conda_env("greedy")
+        "../envs/greedy.yaml"
     shell:
         "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp}"
 
@@ -772,7 +725,7 @@ rule apply_halfsurf_warp_to_img:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("greedy")
+        "../envs/greedy.yaml"
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
@@ -810,7 +763,7 @@ rule convert_inout_warp_from_itk_to_world:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -854,7 +807,7 @@ rule warp_midthickness_to_inout:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shadow:
         "minimal"
     group:
@@ -904,7 +857,7 @@ rule affine_gii_corobl_to_modality:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -938,7 +891,7 @@ rule calculate_surface_area:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -980,7 +933,7 @@ rule calculate_legacy_gyrification:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1013,7 +966,7 @@ rule calculate_curvature:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1053,7 +1006,7 @@ rule calculate_thickness:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1088,13 +1041,11 @@ def get_unfold_ref(wildcards):
     )
 
 
-# --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
-
-
 rule resample_atlas_subfields_to_std_density:
     """ resamples subfields from a custom atlas mesh (e.g. from an atlas anatomical/native mesh
     warped to unfold space) to a standard density"""
     input:
+        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         ref_unfold=os.path.join(
             workflow.basedir,
             "..",
@@ -1102,20 +1053,12 @@ rule resample_atlas_subfields_to_std_density:
             "unfold_template_{label}",
             "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
         ),
-        label_gii=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            suffix="dseg.label.gii",
-        ),
-        atlas_unfold=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            space="unfold",
-            suffix="midthickness.surf.gii",
+    params:
+        label_gii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
+        atlas_unfold=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="midthickness", **wildcards
         ),
     output:
         label_gii=bids(
@@ -1132,11 +1075,11 @@ rule resample_atlas_subfields_to_std_density:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
-        "wb_command -label-resample {input.label_gii} {input.atlas_unfold} {input.ref_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
+        "wb_command -label-resample {params.label_gii} {params.atlas_unfold} {input.ref_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
 
 rule resample_native_surf_to_std_density:
@@ -1172,7 +1115,7 @@ rule resample_native_surf_to_std_density:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1212,7 +1155,7 @@ rule resample_native_metric_to_std_density:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1251,21 +1194,14 @@ rule cp_surf_to_root:
 # --- resampling from atlasnative to native vertices
 rule resample_atlas_subfields_to_native_surf:
     input:
+        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         native_unfold=get_unfold_ref,
-        label_gii=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            suffix="dseg.label.gii",
-        ),
-        ref_unfold=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            space="unfold",
-            suffix="midthickness.surf.gii",
+    params:
+        label_gii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
+        ref_unfold=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="midthickness", **wildcards
         ),
     output:
         label_gii=bids(
@@ -1281,11 +1217,11 @@ rule resample_atlas_subfields_to_native_surf:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
-        "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
+        "wb_command -label-resample {params.label_gii} {params.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
 
 # --- rule for converting atlasnative subfields to unfold nii (e.g. analogous to unfoldiso standard space)
@@ -1296,6 +1232,7 @@ rule atlas_label_to_unfold_nii:
         make use of gifti labels instead.. 
 """
     input:
+        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
         ref_nii=bids(
             root=work,
             space="unfold",
@@ -1304,20 +1241,20 @@ rule atlas_label_to_unfold_nii:
             suffix="refvol.nii.gz",
             **inputs.subj_wildcards,
         ),
-        label_gii=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            suffix="dseg.label.gii",
+    params:
+        label_gii=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["label_gii"].format(**wildcards),
+        inner_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="inner", **wildcards
         ),
-        midthickness_surf=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            space="unfold",
-            suffix="midthickness.surf.gii",
+        outer_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="outer", **wildcards
+        ),
+        midthickness_surf=lambda wildcards, input: Path(input.atlas_dir)
+        / config["atlas_files"][wildcards.atlas]["surf_gii"].format(
+            surf_type="midthickness", **wildcards
         ),
     output:
         label_nii=bids(
@@ -1333,11 +1270,11 @@ rule atlas_label_to_unfold_nii:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
-        "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
+        "wb_command -label-to-volume-mapping {params.label_gii} {params.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " -nearest-vertex 1000"
 
 
@@ -1390,7 +1327,7 @@ rule create_dscalar_metric_cifti_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1446,7 +1383,7 @@ rule create_dlabel_cifti_subfields_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1539,7 +1476,7 @@ rule create_spec_file_hipp_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1602,7 +1539,7 @@ rule create_spec_file_dentate_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1638,7 +1575,7 @@ rule merge_lr_spec_file:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -1672,7 +1609,7 @@ rule merge_hipp_dentate_spec_file:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:

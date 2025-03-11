@@ -57,10 +57,12 @@ rule get_subfield_vols_subj:
             hemi=config["hemi"],
             allow_missing=True,
         ),
-        atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
-    params:
-        lookup_tsv=lambda wildcards, input: Path(input.atlas_dir)
-        / config["atlas_files"][wildcards.atlas]["lut"].format(**wildcards),
+        lookup_tsv=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            desc="subfields",
+            suffix="dseg.tsv",
+        ),
     group:
         "subj"
     output:

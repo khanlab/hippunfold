@@ -1,5 +1,5 @@
 rule import_dseg_subfields:
-    """read in volumetric subfield dseg, used for participant_create_template only"""
+    """read in volumetric subfield dseg, used for group_create_atlas only"""
     input:
         vol_dseg=partial(get_single_bids_input, component="dsegsubfields"),
         label_list=Path(workflow.basedir) / "../resources/atlas-v2/labellist_withdg.txt",

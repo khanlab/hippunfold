@@ -2,7 +2,7 @@ import nibabel as nib
 import pandas as pd
 import numpy as np
 
-lookup_df = pd.read_table(snakemake.params.lookup_tsv, index_col="index")
+lookup_df = pd.read_table(snakemake.input.lookup_tsv, index_col="index")
 
 # get indices and names from lookup table
 indices = lookup_df.index.to_list()
