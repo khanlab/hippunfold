@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
-import atlas_plugin
 from snakebids import bidsapp, plugins
+
+try:
+    from . import atlas_plugin  # Works when run as a package
+except ImportError:
+    import atlas_plugin  # Works when run directly
+
 
 if "__file__" not in globals():
     __file__ = "../hippunfold/run.py"
