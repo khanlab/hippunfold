@@ -1206,7 +1206,7 @@ rule resample_native_metric_to_atlas_density:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
 
 
-# --- resampling from atlasnative to native vertices
+# --- resampling from avgatlas to native vertices
 rule resample_atlas_subfields_to_native_surf:
     input:
         native_unfold=get_unfold_ref,
@@ -1230,7 +1230,37 @@ rule resample_atlas_subfields_to_native_surf:
             root=root,
             datatype="surf",
             suffix="subfields.label.gii",
-            space="{space,corobl|T1w}",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label,hipp}",
+            atlas="{atlas}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
+
+
+rule cp_atlas_subfields_label_gii:
+    input:
+        label_gii=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            suffix="dseg.label.gii",
+        ),
+    output:
+        label_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="subfields.label.gii",
+            space="{space}",
             hemi="{hemi}",
             label="{label,hipp}",
             den="{atlas}",
@@ -1243,7 +1273,7 @@ rule resample_atlas_subfields_to_native_surf:
     group:
         "subj"
     shell:
-        "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
+        "cp {input} {output}"
 
 
 # --- rule for converting atlasnative subfields to unfold nii (e.g. analogous to unfoldiso standard space)
