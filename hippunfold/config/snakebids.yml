@@ -277,24 +277,6 @@ parse_args:
       - synthseg_v0.2
       - neonateT1w_v2
 
-  --atlas_metrics:
-    choices:
-      - 'gyrification'
-      - 'curvature'
-      - 'thickness'
-    default:
-      - 'gyrification'
-      - 'curvature'
-      - 'thickness'
-    nargs: '+'
-    help: 'Surface metrics to use when creating new atlas (default: %(default)s)'
-
-
-
-  --new_atlas_name:
-    help: 'When using group_create_atlas, what shall we name it'
-
-
   --enable-bids-validation:
     help: |
       Enable validation of BIDS dataset. BIDS validation would be performed

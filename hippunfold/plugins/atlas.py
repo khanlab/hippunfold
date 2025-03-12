@@ -37,15 +37,13 @@ def sync_atlas_repo():
     try:
         if atlas_dir.exists() and (atlas_dir / ".git").exists():
             # If the directory exists and is a git repo, update it
-            print(f"Updating atlas repository in {atlas_dir}...")
             repo = Repo(atlas_dir)
             repo.remotes.origin.pull()
         else:
             # If the directory does not exist, clone the repo
-            print(f"Cloning atlas repository into {atlas_dir}...")
             Repo.clone_from(repo_url, atlas_dir)
     except GitCommandError as e:
-        print(f"Error syncing atlas repository: {e}")
+        logger.info(f"Error syncing atlas repository: {e}")
 
 
 def load_atlas_configs(atlas_dirs):
@@ -135,7 +133,6 @@ class AtlasConfig(PluginBase):
         self.try_add_argument(
             group,
             "--atlas",
-            "--atlas",
             choices=list(self.atlas_config.keys()),
             action="store",
             type=str,
@@ -146,9 +143,43 @@ class AtlasConfig(PluginBase):
             ),
         )
 
+        self.try_add_argument(
+            group,
+            "--new_atlas_name",
+            "--new-atlas-name",
+            type=str,
+            dest="new_atlas_name",
+            help=("Name to use for the atlas created with group_create_atlas."),
+        )
+        self.try_add_argument(
+            group,
+            "--atlas-metrics",
+            "--atlas_metrics",
+            choices=["curvature", "gyrification", "thickness"],
+            action="store",
+            type=str,
+            dest="atlas_metrics",
+            default=["curvature", "gyrification", "thickness"],
+            nargs="+",
+            help=(
+                "Surface metrics to use when creating new atlas (default: %(default)s)"
+            ),
+        )
+
     @bidsapp.hookimpl
     def update_cli_namespace(self, namespace: dict[str, Any], config: dict[str, Any]):
         """Add atlas to config."""
         atlas = self.pop(namespace, "atlas")
+        new_atlas_name = self.pop(namespace, "new_atlas_name")
+
+        if (
+            namespace["analysis_level"] == "group_create_atlas"
+            and new_atlas_name == None
+        ):
+            raise TypeError(
+                "--new_atlas_name must be specified when using group_create_atlas"
+            )
+
         config["atlas"] = atlas
+        config["new_atlas_name"] = new_atlas_name
         config["atlas_files"] = self.atlas_config
