@@ -7,7 +7,7 @@ import subprocess
 def gen_parser():
     parser = ArgumentParser(description="Run hippunfold for a single subject.")
 
-    # command line arguments for hippunfold-singlesubject
+    # command line arguments for hippunfold-quick
     parser.add_argument(
         "--input", 
         required=True, 
