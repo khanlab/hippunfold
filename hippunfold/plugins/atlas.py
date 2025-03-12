@@ -138,7 +138,7 @@ class AtlasConfig(PluginBase):
             action="store",
             type=str,
             dest="atlas",
-            default="multihist7old",
+            default="multihist7",
             help=(
                 "Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)"
             ),
