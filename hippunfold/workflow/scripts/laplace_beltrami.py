@@ -48,22 +48,28 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
         cot1 = np.dot(e2, -e0) / norm1 if norm1 > 1e-12 else 0.0
         cot2 = np.dot(e0, -e1) / norm2 if norm2 > 1e-12 else 0.0
 
-        for (i, j, cot) in [(tri[0], tri[1], cot2), (tri[1], tri[0], cot2),
-                            (tri[1], tri[2], cot0), (tri[2], tri[1], cot0),
-                            (tri[2], tri[0], cot1), (tri[0], tri[2], cot1)]:
+        for i, j, cot in [
+            (tri[0], tri[1], cot2),
+            (tri[1], tri[0], cot2),
+            (tri[1], tri[2], cot0),
+            (tri[2], tri[1], cot0),
+            (tri[2], tri[0], cot1),
+            (tri[0], tri[2], cot1),
+        ]:
             row_indices.append(i)
             col_indices.append(j)
             values.append(cot / 2)
 
     # Construct sparse matrix directly
-    weights = sp.coo_matrix((values, (row_indices, col_indices)), shape=(n_vertices, n_vertices)).tocsr()
+    weights = sp.coo_matrix(
+        (values, (row_indices, col_indices)), shape=(n_vertices, n_vertices)
+    ).tocsr()
 
     diagonal = np.array(weights.sum(axis=1)).flatten()
     diagonal[diagonal < 1e-12] = 1e-12  # Ensure no zero entries
 
     laplacian = sp.diags(diagonal) - weights
     return laplacian
-
 
 
 def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
