@@ -57,12 +57,7 @@ rule get_subfield_vols_subj:
             hemi=config["hemi"],
             allow_missing=True,
         ),
-        lookup_tsv=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            desc="subfields",
-            suffix="dseg.tsv",
-        ),
+        lookup_tsv=Path(workflow.basedir) / "../resources/label_lut/subfields_dseg.tsv",
     group:
         "subj"
     output:
