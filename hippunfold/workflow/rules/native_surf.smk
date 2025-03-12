@@ -6,7 +6,6 @@
 surf_thresholds = {"inner": 0, "outer": 1, "midthickness": 0.5}
 
 
-ruleorder: resample_native_surf_to_std_density > cp_template_to_unfold
 ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
 
 
@@ -1091,134 +1090,6 @@ def get_unfold_ref(wildcards):
 # --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
 
 
-rule resample_atlas_subfields_to_std_density:
-    """ resamples subfields from a custom atlas mesh (e.g. from an atlas anatomical/native mesh
-    warped to unfold space) to a standard density"""
-    input:
-        ref_unfold=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_{label}",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
-        ),
-        label_gii=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            suffix="dseg.label.gii",
-        ),
-        atlas_unfold=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            space="unfold",
-            suffix="midthickness.surf.gii",
-        ),
-    output:
-        label_gii=bids(
-            root=root,
-            datatype="surf",
-            suffix="subfields.label.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            atlas="{atlas}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("workbench")
-    group:
-        "subj"
-    shell:
-        "wb_command -label-resample {input.label_gii} {input.atlas_unfold} {input.ref_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
-
-
-rule resample_native_surf_to_std_density:
-    input:
-        native=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-        ref_unfold=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_{label}",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
-        ),
-        native_unfold=get_unfold_ref,
-    output:
-        native_resampled=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name,midthickness}.surf.gii",
-            space="{space,unfoldreg|corobl}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("workbench")
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
-
-
-rule resample_native_metric_to_std_density:
-    input:
-        native_metric=bids(
-            root=root,
-            datatype="surf",
-            suffix="{metric}.{metrictype}.gii",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-        ref_unfold=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_{label}",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
-        ),
-        native_unfold=get_unfold_ref,
-    output:
-        metric_resampled=bids(
-            root=root,
-            datatype="surf",
-            suffix="{metric}.{metrictype,shape|func}.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("workbench")
-    group:
-        "subj"
-    shell:
-        "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
-
-
 rule cp_surf_to_root:
     input:
         native_resampled=bids(
@@ -1248,6 +1119,93 @@ rule cp_surf_to_root:
         "cp {input} {output}"
 
 
+# --resampling subject native surfs, metrics to new avgatlas mesh:
+
+
+rule resample_native_surf_to_atlas_density:
+    """ TODO: currently density set to atlas name, should fix this later
+    """
+    input:
+        native=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surf_name}.surf.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        ref_unfold=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            space="unfold",
+            suffix="{surf_name}.surf.gii",
+        ),
+        native_unfold=get_unfold_ref,
+    output:
+        native_resampled=bids(
+            root=work,
+            datatype="surf",
+            suffix="{surf_name,midthickness|inner|outer}.surf.gii",
+            space="{space,unfoldreg|corobl}",
+            den=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
+
+
+rule resample_native_metric_to_atlas_density:
+    input:
+        native_metric=bids(
+            root=root,
+            datatype="surf",
+            suffix="{metric}.{metrictype}.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        ref_unfold=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            space="unfold",
+            suffix="midthickness.surf.gii",
+        ),
+        native_unfold=get_unfold_ref,
+    output:
+        metric_resampled=bids(
+            root=root,
+            datatype="surf",
+            suffix="{metric}.{metrictype,shape|func}.gii",
+            space="{space}",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
+
+
 # --- resampling from atlasnative to native vertices
 rule resample_atlas_subfields_to_native_surf:
     input:
@@ -1272,10 +1230,10 @@ rule resample_atlas_subfields_to_native_surf:
             root=root,
             datatype="surf",
             suffix="subfields.label.gii",
-            space="corobl",
+            space="{space,corobl|T1w}",
             hemi="{hemi}",
             label="{label,hipp}",
-            atlas="{atlas}",
+            den="{atlas}",
             **inputs.subj_wildcards,
         ),
     container:
