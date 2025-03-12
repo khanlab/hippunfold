@@ -94,6 +94,14 @@ rule gen_native_mesh:
         config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
+    log:
+        bids_log_wrapper(
+            "gen_native_mesh",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            desc="{surfname,midthickness}"
+        ),
     script:
         "../scripts/gen_isosurface.py"
 
@@ -201,6 +209,13 @@ rule get_boundary_vertices:
         config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
+    log: 
+        bids_log_wrapper(
+            "get_boundary_verticies",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}"
+        ),
     script:
         "../scripts/get_boundary_vertices.py"
 
@@ -390,6 +405,14 @@ rule laplace_beltrami:
         config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
+    log:
+        bids_log_wrapper(
+            "laplace_beltrami",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            dir="{dir}"
+        ),
     script:
         "../scripts/laplace_beltrami.py"
 
@@ -527,8 +550,16 @@ rule heavy_smooth_unfold_surf:
         conda_env("workbench")
     group:
         "subj"
+    log:
+        bids_log_wrapper(
+            "heavy_smooth_unfold_surf",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            desc="{surfname}"
+        ),
     shell:
-        "wb_command -surface-smoothing {input} {params.strength} {params.iterations} {output}"
+        "wb_command -surface-smoothing {input} {params.strength} {params.iterations} {output} &> {log}"
 
 
 # --- creating inner/outer surfaces from native anatomical (using 3d label deformable registration)
@@ -629,8 +660,16 @@ rule register_midthickness:
     threads: 16
     conda:
         conda_env("greedy")
+    log:
+        bids_log_wrapper(
+            "register_midthickness", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}", 
+            to="{inout}"
+        )
     shell:
-        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp}"
+        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp} &> {log}"
 
 
 rule apply_halfsurf_warp_to_img:
@@ -1279,7 +1318,8 @@ rule unfoldreg_antsquick:
             **inputs.subj_wildcards,
             hemi="{hemi}", 
             label="{label}", 
-            to="{atlas}",)
+            to="{atlas}",
+        )
     shadow:
         "minimal"
     threads: 16
@@ -1343,7 +1383,7 @@ rule unfoldreg_greedy:
         mem_mb=16000,
         time=10,
     shell:
-        "greedy -d 2 {params.metric} {params.regularization} {params.in_images} -o {output.warp}"
+        "greedy -d 2 {params.metric} {params.regularization} {params.in_images} -o {output.warp} &> {log}"
 
 
 rule extend_warp_2d_to_3d:

@@ -297,11 +297,19 @@ rule laynii_layers_equidist:
         config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
+    log: 
+        bids_log_wrapper(
+            "laynii_layers_equidist",
+            **inputs.subj_wildcards,
+            dir="{dir, IO}",
+            label="{autotop}",
+            hemi="{hemi}",
+        ),
     group:
         "subj"
     shell:
         "cp {input} dseg.nii.gz && "
-        "LN2_LAYERS  -rim dseg.nii.gz && "
+        "LN2_LAYERS  -rim dseg.nii.gz &> {log} && "
         "cp dseg_metric_equidist.nii.gz {output.equidist}"
 
 
@@ -336,9 +344,17 @@ rule laynii_layers_equivol:
         config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
+    log: 
+        bids_log_wrapper(
+            "laynii_layers_equivol",
+            **inputs.subj_wildcards,
+            dir="{dir, IO}",
+            label="{autotop}",
+            hemi="{hemi}",
+        ),
     group:
         "subj"
     shell:
         "cp {input} dseg.nii.gz && "
-        "LN2_LAYERS  -rim dseg.nii.gz -equivol && "
+        "LN2_LAYERS  -rim dseg.nii.gz -equivol &> {log} && "
         "cp dseg_metric_equivol.nii.gz {output.equivol}"
