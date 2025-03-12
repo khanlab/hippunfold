@@ -10,6 +10,7 @@ from git import GitCommandError, Repo
 from snakebids import bidsapp
 from snakebids.bidsapp.args import ArgumentGroups
 from snakebids.plugins.base import PluginBase
+from appdirs import AppDirs
 
 logger = logging.getLogger(__name__)
 
