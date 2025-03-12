@@ -1,6 +1,6 @@
 import numpy as np
 import nibabel as nib
-from scipy.sparse import diags, linalg, lil_matrix
+import scipy.sparse as sp
 from lib.utils import setup_logger
 
 log_file = snakemake.log[0] if snakemake.log else None
@@ -22,39 +22,68 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     logger.info("solve_laplace_beltrami_open_mesh")
     n_vertices = vertices.shape[0]
     logger.info(f"n_vertices: {n_vertices}")
+
     # Step 1: Compute cotangent weights
-    logger.info("Computing cotangent weights")
-    weights = lil_matrix((n_vertices, n_vertices))
+    row_indices = []
+    col_indices = []
+    values = []
+
     for tri in faces:
         v0, v1, v2 = vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]
         e0 = v1 - v2
         e1 = v2 - v0
         e2 = v0 - v1
+
         # Compute cross products and norms
         cross0 = np.cross(e1, -e2)
         cross1 = np.cross(e2, -e0)
         cross2 = np.cross(e0, -e1)
+
         norm0 = np.linalg.norm(cross0)
         norm1 = np.linalg.norm(cross1)
         norm2 = np.linalg.norm(cross2)
-        # Avoid division by zero
+
+        # Compute cotangent weights safely
         cot0 = np.dot(e1, -e2) / norm0 if norm0 > 1e-12 else 0.0
         cot1 = np.dot(e2, -e0) / norm1 if norm1 > 1e-12 else 0.0
         cot2 = np.dot(e0, -e1) / norm2 if norm2 > 1e-12 else 0.0
-        weights[tri[0], tri[1]] += cot2 / 2
-        weights[tri[1], tri[0]] += cot2 / 2
-        weights[tri[1], tri[2]] += cot0 / 2
-        weights[tri[2], tri[1]] += cot0 / 2
-        weights[tri[2], tri[0]] += cot1 / 2
-        weights[tri[0], tri[2]] += cot1 / 2
-    logger.info("weights.tocsr()")
-    weights = weights.tocsr()
+
+        for (i, j, cot) in [(tri[0], tri[1], cot2), (tri[1], tri[0], cot2),
+                            (tri[1], tri[2], cot0), (tri[2], tri[1], cot0),
+                            (tri[2], tri[0], cot1), (tri[0], tri[2], cot1)]:
+            row_indices.append(i)
+            col_indices.append(j)
+            values.append(cot / 2)
+
+    # Construct sparse matrix directly
+    weights = sp.coo_matrix((values, (row_indices, col_indices)), shape=(n_vertices, n_vertices)).tocsr()
+
+    diagonal = np.array(weights.sum(axis=1)).flatten()
+    diagonal[diagonal < 1e-12] = 1e-12  # Ensure no zero entries
+
+    laplacian = sp.diags(diagonal) - weights
+    return laplacian
+
+
+
+def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
+    """
+    Solve the Laplace-Beltrami equation on a 3D open-faced surface mesh. No islands please!
+
+    Parameters:
+        vertices (np.ndarray): Array of shape (n_vertices, 3) containing vertex coordinates.
+        faces (np.ndarray): Array of shape (n_faces, 3) containing indices of vertices forming each triangular face.
+        boundary_conditions (dict, optional): Dictionary where keys are vertex indices with fixed values.
+
+    Returns:
+        solution (np.ndarray): Array of shape (n_vertices,) with the solution values.
+    """
+    n_vertices = vertices.shape[0]
+    logger.info("solve_laplace_beltrami_open_mesh")
+    laplacian = cotangent_laplacian(vertices, faces)
+
     # Step 2: Handle boundaries for open meshes
     logger.info("Handle boundaries for open meshes")
-    diagonal = weights.sum(axis=1).A1
-    # Ensure no zero entries in diagonal to avoid singular matrix issues
-    diagonal[diagonal < 1e-12] = 1e-12
-    laplacian = diags(diagonal) - weights
     if boundary_conditions is None:
         boundary_conditions = {}
     boundary_indices = np.array(list(boundary_conditions.keys()))
@@ -77,9 +106,9 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
         solution[boundary_indices] = boundary_values
         try:
             logger.info("about to solve")
-            solution[free_indices] = linalg.spsolve(free_laplacian, free_b)
+            solution[free_indices] = sp.linalg.spsolve(free_laplacian, free_b)
             logger.info("done solve")
-        except linalg.MatrixRankWarning:
+        except sp.linalg.MatrixRankWarning:
             logger.info("Warning: Laplacian matrix is singular or ill-conditioned.")
             solution[free_indices] = np.zeros(len(free_indices))
     else:
