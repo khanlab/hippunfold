@@ -155,7 +155,7 @@ class AtlasConfig(PluginBase):
             group,
             "--atlas-metrics",
             "--atlas_metrics",
-            choices=["curvature", "gyrification", "thickness"],
+            choices=["curvature", "gyrification", "thickness", "subfields"],
             action="store",
             type=str,
             dest="atlas_metrics",

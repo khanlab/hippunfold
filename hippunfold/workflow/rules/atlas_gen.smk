@@ -71,31 +71,26 @@ rule templategen_subj_csv:
         "{params.cmd}"
 
 
-def get_inputs_templategen_combined_csv(wildcards):
-
-    return inputs[config["modality"]].expand(
-        bids(
-            root=work,
-            datatype="anat",
-            suffix="metrics.csv",
-            space="unfold2d",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-        label=wildcards.label,
-        **expand_hemi(),
-    )
-
-
 rule template_gen_combined_csv:
     input:
-        metrics_csvs=get_inputs_templategen_combined_csv,
+        metrics_csvs=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=work,
+                datatype="anat",
+                suffix="metrics.csv",
+                space="unfold2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            label=wildcards.label,
+            **expand_hemi(),
+        ),
     params:
         cmd=lambda wildcards, input, output: f"cat {input.metrics_csvs} > {output.metrics_csv}",
     output:
         metrics_csv=bids_atlas(
-            root=get_atlas_dir(),
+            root=work,
             template=config["new_atlas_name"],
             label="{label}",
             desc="combined",
@@ -108,7 +103,7 @@ rule template_gen_combined_csv:
 rule gen_atlas_reg_ants:
     input:
         metrics_csv=bids_atlas(
-            root=get_atlas_dir(),
+            root=work,
             template=config["new_atlas_name"],
             label="{label}",
             desc="combined",
@@ -122,7 +117,7 @@ rule gen_atlas_reg_ants:
     output:
         avgtemplate_dir=directory(
             bids_atlas(
-                root=get_atlas_dir(),
+                root=work,
                 template=config["new_atlas_name"],
                 label="{label}",
                 suffix="antstemplate",
@@ -152,11 +147,11 @@ rule copy_avgtemplate_warps:
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
-            metric=["gyrification", "curvature", "thickness"],
+            metric=config["atlas_metrics"],
             allow_missing=True,
         ),
         avgtemplate_dir=bids_atlas(
-            root=get_atlas_dir(),
+            root=work,
             template=config["new_atlas_name"],
             label="{label}",
             suffix="antstemplate",
@@ -203,7 +198,7 @@ rule copy_avgtemplate_metric:
      (since this seems to get garbled in z by ants)"""
     input:
         avgtemplate_dir=bids_atlas(
-            root=get_atlas_dir(),
+            root=work,
             template=config["new_atlas_name"],
             label="{label}",
             suffix="antstemplate",
@@ -229,9 +224,10 @@ rule copy_avgtemplate_metric:
         ),
     output:
         metric=bids_atlas(
-            root=get_atlas_dir(),
+            root=work,
             template=config["new_atlas_name"],
             label="{label}",
+            hemi="{hemi}",
             suffix="{metric}.nii.gz",
         ),
     script:
@@ -242,9 +238,10 @@ rule gen_atlas_surfs:
     input:
         metric_nii=expand(
             bids_atlas(
-                root=get_atlas_dir(),
+                root=work,
                 template=config["new_atlas_name"],
                 label="{label}",
+                hemi="{hemi}",
                 suffix="{metric}.nii.gz",
             ),
             metric=config["atlas_metrics"],
@@ -258,6 +255,7 @@ rule gen_atlas_surfs:
             template=config["new_atlas_name"],
             label="{label}",
             space="unfold",
+            hemi="{hemi}",
             suffix="{surfname,midthickness|inner|outer}.surf.gii",
         ),
     container:
@@ -271,9 +269,10 @@ rule gen_atlas_surfs:
 rule avgtemplate_metric_vol_to_surf:
     input:
         metric_nii=bids_atlas(
-            root=get_atlas_dir(),
+            root=work,
             template=config["new_atlas_name"],
             label="{label}",
+            hemi="{hemi}",
             suffix="{metric}.nii.gz",
         ),
         midthickness=bids_atlas(
@@ -281,6 +280,7 @@ rule avgtemplate_metric_vol_to_surf:
             template=config["new_atlas_name"],
             label="{label}",
             space="unfold",
+            hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
     output:
@@ -288,6 +288,7 @@ rule avgtemplate_metric_vol_to_surf:
             root=get_atlas_dir(),
             template=config["new_atlas_name"],
             label="{label}",
+            hemi="{hemi}",
             suffix="{metric}.shape.gii",
         ),
     container:
@@ -298,37 +299,106 @@ rule avgtemplate_metric_vol_to_surf:
         "wb_command -volume-to-surface-mapping {input.metric_nii} {input.midthickness} {output.metric_gii} -trilinear"
 
 
-# TODO: label voting and mesh resampling..
-
-
-"""
-
-rule maxprob_subfields:
+rule warp_subfields_to_avg:
     input:
-        in_img=inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                suffix="subfields.label.gii",
-                space="unfold",
-                den="{density}",
-                hemi="{hemi}",
-                label="{label}",
-                atlas="{atlas}",
-                **inputs.subj_wildcards,
-            ),
-            hemi=config["hemi"],
-            label=config["atlas_files"]["mytemplate"]["label_wildcards"],
-            atlas=config["new_atlas_name"],
-            density="unfoldiso",
+        img=bids(
+            root=work,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold2d",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        warp=bids(
+            root=work,
+            datatype="warps",
+            suffix="warp.nii.gz",
+            from_="unfold",
+            to=config["new_atlas_name"],
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     output:
-        label_gii=directory(get_atlas_dir() / "{atlas}")
-        / config["atlas_files"]["{atlas}"]["label_gii"],
+        img=bids(
+            root=work,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space=config["new_atlas_name"],
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/ants.yaml"
     shell:
-        "c3d {input} -vote -type uchar -o {output}"
-"""
+        "antsApplyTransforms -d 2 -i {input.img} -o {output.img} -t {input.warp} -r {input.img} -n NearestNeighbor -v"
+
+
+rule vote_subfield_labels:
+    input:
+        subfield_niis=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=work,
+                datatype="anat",
+                suffix="subfields.nii.gz",
+                space=config["new_atlas_name"],
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            label=wildcards.label,
+            **expand_hemi(),
+        ),
+    output:
+        subfields_voted=bids_atlas(
+            root=work,
+            template=config["new_atlas_name"],
+            desc="subfields",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+            label="{label}",
+        ),
+    shell:
+        # simple averaging for now as a quick check
+        "c3d {input} -mean -o {output}"
+
+
+rule avgtemplate_subfield_voted_vol_to_surf:
+    input:
+        subfields_nii=bids_atlas(
+            root=work,
+            template=config["new_atlas_name"],
+            desc="subfields",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+            label="{label}",
+        ),
+        midthickness=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            space="unfold",
+            hemi="{hemi}",
+            suffix="midthickness.surf.gii",
+        ),
+    output:
+        metric_gii=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            suffix="dseg.label.gii",
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    shell:
+        "wb_command -volume-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii} -enclosing"
+
+
+# TODO: mesh resampling..

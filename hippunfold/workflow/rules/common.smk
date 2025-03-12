@@ -333,6 +333,7 @@ def get_gifti_metric_types(label):
 def get_create_atlas_output():
 
     files = []
+    ## -> these are the subject data that feed into the average atlas - might be useful to keep with the avgatlas...
     for label in config["autotop_labels"]:
         files.extend(
             inputs[config["modality"]].expand(
@@ -383,17 +384,48 @@ def get_create_atlas_output():
             )
         )
 
+        ## -> these are the avgatlas files:
         files.extend(
-            # TODO AK to fix this later with final targets
             expand(
                 bids_atlas(
                     root=get_atlas_dir(),
                     template=config["new_atlas_name"],
                     label="{label}",
+                    hemi="{hemi}",
                     suffix="{metric}.shape.gii",
                 ),
+                hemi=config["hemi"],
                 label=config["autotop_labels"],
                 metric=config["atlas_metrics"],
+            )
+        )
+
+        files.extend(
+            expand(
+                bids_atlas(
+                    root=get_atlas_dir(),
+                    template=config["new_atlas_name"],
+                    label="{label}",
+                    hemi="{hemi}",
+                    space="unfold",
+                    suffix="{surfname}.surf.gii",
+                ),
+                hemi=config["hemi"],
+                label=config["autotop_labels"],
+                surfname=["inner", "outer", "midthickness"],
+            )
+        )
+
+        files.extend(
+            expand(
+                bids_atlas(
+                    root=get_atlas_dir(),
+                    template=config["new_atlas_name"],
+                    label="hipp",
+                    hemi="{hemi}",
+                    suffix="dseg.label.gii",
+                ),
+                hemi=config["hemi"],
             )
         )
 

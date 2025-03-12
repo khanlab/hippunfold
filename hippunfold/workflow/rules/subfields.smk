@@ -61,6 +61,78 @@ rule subfields_to_label_gifti:
         "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
 
 
+rule native_label_gii_to_unfold_nii:
+    """converts subfields label .gii files to .nii for applying with 2D ANTS transform (when creating a template)"""
+    input:
+        label_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="subfields.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label,hipp}",
+            **inputs.subj_wildcards,
+        ),
+        inner_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="inner.surf.gii",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        midthickness_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        outer_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="outer.surf.gii",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        ref_nii=bids(
+            root=work,
+            datatype="anat",
+            suffix="refvol.nii.gz",
+            space="unfold",
+            desc="slice",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        interp="-nearest-vertex 0.3",
+    output:
+        label_nii=bids(
+            root=work,
+            datatype="anat",
+            suffix="subfields.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
+        " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
+
+
 rule label_subfields_from_vol_coords_corobl:
     input:
         ref_nii=get_labels_for_laplace,
