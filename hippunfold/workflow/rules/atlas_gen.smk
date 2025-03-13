@@ -1,6 +1,6 @@
 
-rule slice3d_to_2d:
-    # this is needed so antsMultivariateTemplateConstruction2 will believe the data is truly 2d
+rule slice_3d_to_2d:
+    """This is needed so antsMultivariateTemplateConstruction2 will believe the data is truly 2d"""
     input:
         img=bids(
             root=work,
@@ -21,12 +21,12 @@ rule slice3d_to_2d:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    run:
-        import nibabel as nib
-
-        img = nib.load(input.img)
-        matrix = img.get_fdata()[:, :, 0]
-        nib.Nifti1Image(matrix, img.affine).to_filename(output.img)
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("neurovis")
+    script:
+        "../scripts/slice_3d_to_2d.py"
 
 
 def get_cmd_templategen_subj_csv(wildcards, input, output):
@@ -123,12 +123,10 @@ rule gen_atlas_reg_ants:
                 suffix="antstemplate",
             )
         ),
-    group:
-        "subj"
     container:
         config["singularity"]["autotop"]  # note antsMultivariateTemplateConstruction2 is not in the container right now!
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     shell:
         "antsMultivariateTemplateConstruction2.sh "
         " {params.multires} "
@@ -186,8 +184,6 @@ rule copy_avgtemplate_warps:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     shell:
         "cp {params.glob_input_warp} {output.warp} && "
         "cp {params.glob_input_invwarp} {output.invwarp}"
@@ -256,6 +252,10 @@ rule reset_header_2d_metric_nii:
             hemi="{hemi}",
             suffix="{metric,[a-zA-Z0-9]+}.nii.gz",
         ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("neurovis")
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -359,7 +359,7 @@ rule warp_subfields_to_avg:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/ants.yaml"
+        conda_env("ants")
     shell:
         "antsApplyTransforms -d 2 -i {input.img} -o {output.img} -t {input.warp} -r {input.img} -n NearestNeighbor -v"
 
@@ -433,6 +433,10 @@ rule reset_header_2d_subfields_nii:
             desc="subfieldsfixhdr",
             suffix="dseg.nii.gz",
         ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("neurovis")
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -502,4 +506,66 @@ rule avgtemplate_subfield_voted_vol_to_surf:
         "wb_command -volume-label-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii}"
 
 
-# TODO: mesh resampling..
+rule write_template_json:
+    input:
+        metrics=expand(
+            bids_atlas(
+                root=get_atlas_dir(),
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                suffix="{metric}.shape.gii",
+            ),
+            hemi=config["hemi"],
+            label=config["autotop_labels"],
+            metric=config["atlas_metrics"],
+        ),
+        surfs=expand(
+            bids_atlas(
+                root=get_atlas_dir(),
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                space="unfold",
+                suffix="{surfname}.surf.gii",
+            ),
+            hemi=config["hemi"],
+            label=config["autotop_labels"],
+            surfname=["inner", "outer", "midthickness"],
+        ),
+        labels=expand(
+            bids_atlas(
+                root=get_atlas_dir(),
+                template=config["new_atlas_name"],
+                label="hipp",
+                hemi="{hemi}",
+                suffix="dseg.label.gii",
+            ),
+            hemi=config["hemi"],
+        ),
+    params:
+        template_description={
+            "Identifier": config["new_atlas_name"],
+            "metric_wildcards": config["atlas_metrics"],
+            "label_wildcards": config["autotop_labels"],
+            "hemi_wildcards": config["hemi"],
+            "Authors": [""],
+            "Acknowledgements": "",
+            "BIDSVersion": "",
+            "HowToAcknowledge": "",
+            "License": "MIT",
+            "Name": "HippUnfold surface-based template and subfield atlas",
+            "RRID": "",
+            "ReferencesAndLinks": [""],
+            "TemplateFlowVersion": "",
+        },
+    output:
+        json=str(
+            Path(
+                bids(
+                    root=get_atlas_dir(),
+                    tpl=config["new_atlas_name"],
+                )
+            )
+            / "template_description.json"
+        ),

@@ -383,52 +383,17 @@ def get_create_atlas_output():
                 **expand_hemi(),
             )
         )
-
-        ## -> these are the avgatlas files:
-        files.extend(
-            expand(
-                bids_atlas(
+    files.append(
+        str(
+            Path(
+                bids(
                     root=get_atlas_dir(),
-                    template=config["new_atlas_name"],
-                    label="{label}",
-                    hemi="{hemi}",
-                    suffix="{metric}.shape.gii",
-                ),
-                hemi=config["hemi"],
-                label=config["autotop_labels"],
-                metric=config["atlas_metrics"],
+                    tpl=config["new_atlas_name"],
+                )
             )
+            / "template_description.json"
         )
-
-        files.extend(
-            expand(
-                bids_atlas(
-                    root=get_atlas_dir(),
-                    template=config["new_atlas_name"],
-                    label="{label}",
-                    hemi="{hemi}",
-                    space="unfold",
-                    suffix="{surfname}.surf.gii",
-                ),
-                hemi=config["hemi"],
-                label=config["autotop_labels"],
-                surfname=["inner", "outer", "midthickness"],
-            )
-        )
-
-        files.extend(
-            expand(
-                bids_atlas(
-                    root=get_atlas_dir(),
-                    template=config["new_atlas_name"],
-                    label="hipp",
-                    hemi="{hemi}",
-                    suffix="dseg.label.gii",
-                ),
-                hemi=config["hemi"],
-            )
-        )
-
+    )
     return files
 
 

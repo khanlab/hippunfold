@@ -220,7 +220,7 @@ rule atlas_metric_to_unfold_nii:
 
 
 def get_fixed_images_unfoldreg(wildcards):
-    unfoldreg_metrics = config["atlas_files"][wildcards.atlas]["metric_wildcards"]
+    unfoldreg_metrics = config["atlas_metadata"][wildcards.atlas]["metric_wildcards"]
 
     return expand(
         bids(
@@ -238,7 +238,7 @@ def get_fixed_images_unfoldreg(wildcards):
 
 
 def get_moving_images_unfoldreg(wildcards):
-    unfoldreg_metrics = config["atlas_files"][wildcards.atlas]["metric_wildcards"]
+    unfoldreg_metrics = config["atlas_metadata"][wildcards.atlas]["metric_wildcards"]
     return expand(
         bids(
             root=work,

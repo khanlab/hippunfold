@@ -1064,7 +1064,7 @@ rule calculate_thickness:
 
 def get_unfold_ref_name(wildcards):
     if (
-        wildcards.label in config["atlas_files"][config["atlas"]]["label_wildcards"]
+        wildcards.label in config["atlas_metadata"][config["atlas"]]["label_wildcards"]
         and config["no_unfolded_reg"] == False
     ):
         return "unfoldreg"
