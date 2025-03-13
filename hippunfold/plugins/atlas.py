@@ -67,16 +67,16 @@ def load_atlas_configs(atlas_dirs):
 
         for subdir in atlas_path.iterdir():
             if subdir.is_dir():
-                config_file = subdir / "config.json"
-                if config_file.exists():
+                template_json = subdir / "template_description.json"
+                if template_json.exists():
                     try:
-                        with open(config_file, "r") as f:
+                        with open(template_json, "r") as f:
                             config_data = json.load(f)
                         atlas[subdir.name.removeprefix("tpl-")] = (
                             config_data  # Override existing atlas if needed
                         )
                     except (json.JSONDecodeError, IOError) as e:
-                        print(f"Warning: Failed to load {config_file}: {e}")
+                        print(f"Warning: Failed to load {template_json}: {e}")
 
     return atlas
 
@@ -183,4 +183,4 @@ class AtlasConfig(PluginBase):
 
         config["atlas"] = atlas
         config["new_atlas_name"] = new_atlas_name
-        config["atlas_files"] = self.atlas_config
+        config["atlas_metadata"] = self.atlas_config

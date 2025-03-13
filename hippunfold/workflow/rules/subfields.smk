@@ -70,7 +70,7 @@ rule native_label_gii_to_unfold_nii:
             suffix="subfields.label.gii",
             space="corobl",
             hemi="{hemi}",
-            label="{label,hipp}",
+            label="{label}",
             **inputs.subj_wildcards,
         ),
         inner_surf=bids(

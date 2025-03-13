@@ -22,7 +22,7 @@ rule slice_3d_to_2d:
             **inputs.subj_wildcards,
         ),
     container:
-        config["singularity"]["autotop"]  
+        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:
@@ -253,9 +253,9 @@ rule reset_header_2d_metric_nii:
             suffix="{metric,[a-zA-Z0-9]+}.nii.gz",
         ),
     container:
-        config["singularity"]["autotop"]  
+        config["singularity"]["autotop"]
     conda:
-        conda_env("neurovis")        
+        conda_env("neurovis")
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -434,7 +434,7 @@ rule reset_header_2d_subfields_nii:
             suffix="dseg.nii.gz",
         ),
     container:
-        config["singularity"]["autotop"]  
+        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:
@@ -504,3 +504,68 @@ rule avgtemplate_subfield_voted_vol_to_surf:
         conda_env("workbench")
     shell:
         "wb_command -volume-label-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii}"
+
+
+rule write_template_json:
+    input:
+        metrics=expand(
+            bids_atlas(
+                root=get_atlas_dir(),
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                suffix="{metric}.shape.gii",
+            ),
+            hemi=config["hemi"],
+            label=config["autotop_labels"],
+            metric=config["atlas_metrics"],
+        ),
+        surfs=expand(
+            bids_atlas(
+                root=get_atlas_dir(),
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                space="unfold",
+                suffix="{surfname}.surf.gii",
+            ),
+            hemi=config["hemi"],
+            label=config["autotop_labels"],
+            surfname=["inner", "outer", "midthickness"],
+        ),
+        labels=expand(
+            bids_atlas(
+                root=get_atlas_dir(),
+                template=config["new_atlas_name"],
+                label="hipp",
+                hemi="{hemi}",
+                suffix="dseg.label.gii",
+            ),
+            hemi=config["hemi"],
+        ),
+    params:
+        template_description={
+            "Identifier": config["new_atlas_name"],
+            "metric_wildcards": config["atlas_metrics"],
+            "label_wildcards": config["autotop_labels"],
+            "hemi_wildcards": config["hemi"],
+            "Authors": [""],
+            "Acknowledgements": "",
+            "BIDSVersion": "",
+            "HowToAcknowledge": "",
+            "License": "MIT",
+            "Name": "HippUnfold surface-based template and subfield atlas",
+            "RRID": "",
+            "ReferencesAndLinks": [""],
+            "TemplateFlowVersion": "",
+        },
+    output:
+        json=str(
+            Path(
+                bids(
+                    root=get_atlas_dir(),
+                    tpl=config["new_atlas_name"],
+                )
+            )
+            / "template_description.json"
+        ),
