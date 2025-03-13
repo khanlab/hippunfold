@@ -96,7 +96,7 @@ jobs:
 
       - name: Test manualseg bids, with path override
         run: |
-          poetry run hippunfold test_data/bids_dsegtissue test_out participant -np --modality dsegtissue --path_dsegtissue test_data/bids_dsegtissue/sub-{subject}_hemi-{hemi}_dseg.nii.gz
+          poetry run hippunfold test_data/bids_dsegtissue test_out participant -np --modality dsegtissue --path_dsegtissue test_data/bids_dsegtissue/sub-{subject}_hemi-{hemi}_desc-tissue_dseg.nii.gz
 
       - name: Test manualseg bids, one hemisphere hemi
         run: |

@@ -102,11 +102,8 @@ coords[sink_mask == 1] = 1.1
 
 # we also need to use a nan mask for the voxels where src and sink meet directly
 # (since this is another false boundary)..
-if snakemake.params.clean_method == "cleanAK":
-
-    logger.info("Using cleanAK method")
-    src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
-    coords[src_sink_nan_mask == 1] = np.nan
+src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
+coords[src_sink_nan_mask == 1] = np.nan
 
 
 grid.cell_data["values"] = coords.flatten(order="F")
@@ -159,45 +156,8 @@ logger.info(surface)
 # surface = surface.smooth_taubin()
 # logger.info(surface)
 
-
-if snakemake.params.clean_method == "cleanJD":
-
-    ## JD clean - instead of trimming surfaces with a nan mask, we
-    # keep vertices that overlap with good coord values. We then apply
-    # some surface-based morphological opening and closing to keep
-    # vertices along holes in the dg
-    logger.info("Using cleanJD method")
-
-    # this is equivalent to wb_command -volume-to-surface-mapping -enclosing
-    # apply inverse affine to surface to get back to matrix space
-    xfm_surface = apply_affine_transform(surface, affine, inverse=True)
-
-    V = np.round(xfm_surface.points).astype("int") - 1
-    # sample coords
-    coord_at_V = coords[V[:, 0], V[:, 1], V[:, 2]]
-
-    # keep vertices that are in a nice coordinate range
-    epsilon = snakemake.params.coords_epsilon
-    good_v = np.where((coord_at_V < (1 - epsilon)) & (coord_at_V > epsilon))[0]
-
-    geoalg = geodesic.PyGeodesicAlgorithmExact(
-        surface.points, surface.faces.reshape((-1, 4))[:, 1:4]
-    )
-    maxdist, _ = geoalg.geodesicDistances(good_v, None)
-    bad_v = np.where(maxdist > snakemake.params.morph_openclose_dist)[0]
-    maxdist, _ = geoalg.geodesicDistances(bad_v, None)
-    bad_v = np.where(maxdist < snakemake.params.morph_openclose_dist)[0]
-
-    surface.points[bad_v, :] = np.nan
-
-    logger.info("Removing nan-valued vertices")
-    surface = remove_nan_vertices(surface)
-    logger.info(surface)
-
-    logger.info("Extracting largest connected component")
-    surface = surface.extract_largest()
-    logger.info(surface)
-
+logger.info(f"final surface clean to remove overlapping vertices, etc.")
+surface = surface.clean()
 
 # Save the final mesh
 write_surface_to_gifti(surface, snakemake.output.surf_gii)

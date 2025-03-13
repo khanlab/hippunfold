@@ -33,6 +33,31 @@ def conda_env(env_name):
     return None
 
 
+def get_download_dir():
+    if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
+        download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
+    else:
+        # create local download dir if it doesn't exist
+        dirs = AppDirs("hippunfold", "khanlab")
+        download_dir = dirs.user_cache_dir
+    return download_dir
+
+
+def get_atlas_dir():
+    return Path(get_download_dir()) / "hippunfold-atlases"
+
+
+def expand_hemi():
+    if "hemi" in inputs[config["modality"]].zip_lists:
+        # hemi is an input wildcard,
+        #  so it will be already included when we expand
+        return {}
+    else:
+        # hemi is not an input wildcard,
+        # so we additionally expand using the config hemi
+        return {"hemi": config["hemi"]}
+
+
 def get_single_bids_input(wildcards, component):
     """Generic input function for getting the first instance of a bids component
     from a dataset, and throw an error if more than one are found.
@@ -50,6 +75,13 @@ def get_single_bids_input(wildcards, component):
         )
     else:
         return subj_inputs[0]
+
+
+def bids_atlas(root, template, **entities):
+    """bids() wrapper for files in tpl-template folder"""
+    return str(
+        Path(bids(root=root, tpl=template)) / bids(prefix=f"tpl-{template}", **entities)
+    )
 
 
 # take mean of all scans if >1, otherwise just copy the one scan
@@ -284,16 +316,6 @@ if "corobl" in ref_spaces:
             "cp {input} {output}"
 
 
-def get_download_dir():
-    if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
-        download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
-    else:
-        # create local download dir if it doesn't exist
-        dirs = AppDirs("hippunfold", "khanlab")
-        download_dir = dirs.user_cache_dir
-    return download_dir
-
-
 def get_cifti_metric_types(label):
     types_list = config["cifti_metric_types"][label]
     if config["generate_myelin_map"]:
@@ -308,9 +330,10 @@ def get_gifti_metric_types(label):
     return types_list
 
 
-def get_create_template_output():
+def get_create_atlas_output():
 
     files = []
+    ## -> these are the subject data that feed into the average atlas - might be useful to keep with the avgatlas...
     for label in config["autotop_labels"]:
         files.extend(
             inputs[config["modality"]].expand(
@@ -319,13 +342,13 @@ def get_create_template_output():
                     datatype="surf",
                     suffix="{metric}.gii",
                     space="{space}",
-                    hemi="{hemi_}",
+                    hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
                 ),
                 metric=get_gifti_metric_types(label),
                 space="corobl",
-                hemi_=config["hemi"],
+                **expand_hemi(),
             )
         )
         files.extend(
@@ -335,14 +358,14 @@ def get_create_template_output():
                     datatype="surf",
                     suffix="{surftype}.surf.gii",
                     space="{space}",
-                    hemi="{hemi_}",
+                    hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
                 ),
                 metric=get_gifti_metric_types(label),
                 space=["corobl", "unfold"],
                 surftype=["inner", "outer", "midthickness"],
-                hemi_=config["hemi"],
+                **expand_hemi(),
             )
         )
         files.extend(
@@ -352,14 +375,60 @@ def get_create_template_output():
                     datatype="surf",
                     suffix="subfields.label.gii",
                     space="corobl",
-                    hemi="{hemi_}",
+                    hemi="{hemi}",
                     label="hipp",
                     **inputs.subj_wildcards,
                 ),
                 space="corobl",
-                hemi_=config["hemi"],
+                **expand_hemi(),
             )
         )
+
+        ## -> these are the avgatlas files:
+        files.extend(
+            expand(
+                bids_atlas(
+                    root=get_atlas_dir(),
+                    template=config["new_atlas_name"],
+                    label="{label}",
+                    hemi="{hemi}",
+                    suffix="{metric}.shape.gii",
+                ),
+                hemi=config["hemi"],
+                label=config["autotop_labels"],
+                metric=config["atlas_metrics"],
+            )
+        )
+
+        files.extend(
+            expand(
+                bids_atlas(
+                    root=get_atlas_dir(),
+                    template=config["new_atlas_name"],
+                    label="{label}",
+                    hemi="{hemi}",
+                    space="unfold",
+                    suffix="{surfname}.surf.gii",
+                ),
+                hemi=config["hemi"],
+                label=config["autotop_labels"],
+                surfname=["inner", "outer", "midthickness"],
+            )
+        )
+
+        files.extend(
+            expand(
+                bids_atlas(
+                    root=get_atlas_dir(),
+                    template=config["new_atlas_name"],
+                    label="hipp",
+                    hemi="{hemi}",
+                    suffix="dseg.label.gii",
+                ),
+                hemi=config["hemi"],
+            )
+        )
+
     return files
 
 
