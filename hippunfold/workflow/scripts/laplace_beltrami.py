@@ -7,14 +7,13 @@ log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
 
-def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
+def cotangent_laplacian(vertices, faces):
     """
     Solve the Laplace-Beltrami equation on a 3D open-faced surface mesh. No islands please!
 
     Parameters:
         vertices (np.ndarray): Array of shape (n_vertices, 3) containing vertex coordinates.
         faces (np.ndarray): Array of shape (n_faces, 3) containing indices of vertices forming each triangular face.
-        boundary_conditions (dict, optional): Dictionary where keys are vertex indices with fixed values.
 
     Returns:
         solution (np.ndarray): Array of shape (n_vertices,) with the solution values.
