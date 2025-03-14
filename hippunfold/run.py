@@ -4,7 +4,7 @@ from pathlib import Path
 from snakebids import bidsapp, plugins
 
 try:
-    from .plugins import atlas as atlas_plugin  # Works when run as a package
+    from hippunfold.plugins import atlas as atlas_plugin  # Works when run as a package
 except ImportError:
     from plugins import atlas as atlas_plugin  # Works when run directly
 
