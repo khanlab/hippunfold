@@ -8,20 +8,7 @@ logger = setup_logger(log_file)
 
 
 def cotangent_laplacian(vertices, faces):
-    """
-    Solve the Laplace-Beltrami equation on a 3D open-faced surface mesh. No islands please!
-
-    Parameters:
-        vertices (np.ndarray): Array of shape (n_vertices, 3) containing vertex coordinates.
-        faces (np.ndarray): Array of shape (n_faces, 3) containing indices of vertices forming each triangular face.
-
-    Returns:
-        solution (np.ndarray): Array of shape (n_vertices,) with the solution values.
-    """
-    logger.info("solve_laplace_beltrami_open_mesh")
     n_vertices = vertices.shape[0]
-    logger.info(f"n_vertices: {n_vertices}")
-
     # Step 1: Compute cotangent weights
     row_indices = []
     col_indices = []
@@ -46,28 +33,18 @@ def cotangent_laplacian(vertices, faces):
         cot0 = np.dot(e1, -e2) / norm0 if norm0 > 1e-12 else 0.0
         cot1 = np.dot(e2, -e0) / norm1 if norm1 > 1e-12 else 0.0
         cot2 = np.dot(e0, -e1) / norm2 if norm2 > 1e-12 else 0.0
-
-        for i, j, cot in [
-            (tri[0], tri[1], cot2),
-            (tri[1], tri[0], cot2),
-            (tri[1], tri[2], cot0),
-            (tri[2], tri[1], cot0),
-            (tri[2], tri[0], cot1),
-            (tri[0], tri[2], cot1),
-        ]:
-            row_indices.append(i)
-            col_indices.append(j)
-            values.append(cot / 2)
-
-    # Construct sparse matrix directly
-    weights = sp.coo_matrix(
-        (values, (row_indices, col_indices)), shape=(n_vertices, n_vertices)
-    ).tocsr()
-
-    diagonal = np.array(weights.sum(axis=1)).flatten()
-    diagonal[diagonal < 1e-12] = 1e-12  # Ensure no zero entries
-
-    laplacian = sp.diags(diagonal) - weights
+        weights[tri[0], tri[1]] += cot2 / 2
+        weights[tri[1], tri[0]] += cot2 / 2
+        weights[tri[1], tri[2]] += cot0 / 2
+        weights[tri[2], tri[1]] += cot0 / 2
+        weights[tri[2], tri[0]] += cot1 / 2
+        weights[tri[0], tri[2]] += cot1 / 2
+    logger.info("weights.tocsr()")
+    weights = weights.tocsr()
+    diagonal = weights.sum(axis=1).A1
+    # Ensure no zero entries in diagonal to avoid singular matrix issues
+    diagonal[diagonal < 1e-12] = 1e-12
+    laplacian = diags(diagonal) - weights
     return laplacian
 
 
