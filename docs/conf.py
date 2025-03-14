@@ -11,9 +11,16 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 # import os
-# import sys
 # sys.path.insert(0, os.path.abspath('.'))
+
+import sys
+from pathlib import Path
 import sphinx_rtd_theme
+
+# Add the hippunfold package directory to sys.path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+
 
 
 # -- Project information -----------------------------------------------------
