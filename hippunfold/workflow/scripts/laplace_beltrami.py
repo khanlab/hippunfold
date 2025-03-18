@@ -2,7 +2,7 @@ import numpy as np
 import nibabel as nib
 import scipy.sparse as sp
 from lib.utils import setup_logger
-from scipy.sparse import coo_matrix, diags
+from scipy.sparse import coo_matrix, diags, lil_matrix
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
@@ -11,10 +11,7 @@ logger = setup_logger(log_file)
 def cotangent_laplacian(vertices, faces):
     n_vertices = vertices.shape[0]
     # Step 1: Compute cotangent weights
-    row_indices = []
-    col_indices = []
-    values = []
-    weights = coo_matrix((n_vertices, n_vertices), dtype=np.float64).tocsr() #Initialize sparse matrix.
+    weights = lil_matrix((n_vertices, n_vertices), dtype=np.float64)  # Use LIL format from the start
 
     for tri in faces:
         v0, v1, v2 = vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]
@@ -35,18 +32,19 @@ def cotangent_laplacian(vertices, faces):
         cot0 = np.dot(e1, -e2) / norm0 if norm0 > 1e-12 else 0.0
         cot1 = np.dot(e2, -e0) / norm1 if norm1 > 1e-12 else 0.0
         cot2 = np.dot(e0, -e1) / norm2 if norm2 > 1e-12 else 0.0
+
         weights[tri[0], tri[1]] += cot2 / 2
         weights[tri[1], tri[0]] += cot2 / 2
         weights[tri[1], tri[2]] += cot0 / 2
         weights[tri[2], tri[1]] += cot0 / 2
         weights[tri[2], tri[0]] += cot1 / 2
         weights[tri[0], tri[2]] += cot1 / 2
-    logger.info("weights.tocsr()")
-    weights = weights.tocsr()
-    diagonal = weights.sum(axis=1).A1
-    # Ensure no zero entries in diagonal to avoid singular matrix issues
-    diagonal[diagonal < 1e-12] = 1e-12
-    laplacian = diags(diagonal) - weights
+
+    logger.info("Computing Laplacian matrix")
+    diagonal = np.array(weights.sum(axis=1)).flatten()
+    diagonal[diagonal < 1e-12] = 1e-12  # Avoid singular matrices
+
+    laplacian = diags(diagonal, format="lil") - weights  # Keep LIL format
     return laplacian
 
 
@@ -64,29 +62,37 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     """
     n_vertices = vertices.shape[0]
     logger.info("solve_laplace_beltrami_open_mesh")
-    laplacian = cotangent_laplacian(vertices, faces)
+    laplacian = cotangent_laplacian(vertices, faces)  # Returns LIL format
 
     # Step 2: Handle boundaries for open meshes
     logger.info("Handle boundaries for open meshes")
     if boundary_conditions is None:
         boundary_conditions = {}
+
     boundary_indices = np.array(list(boundary_conditions.keys()))
     boundary_values = np.array(list(boundary_conditions.values()))
     free_indices = np.setdiff1d(np.arange(n_vertices), boundary_indices)
+
     logger.info("Setting boundary conditions")
     laplacian[boundary_indices, :] = 0  # Zero out entire rows
     laplacian[boundary_indices, boundary_indices] = 1  # Set diagonal entries to 1
+
+    # Convert to CSR before solving the linear system for efficiency
+    laplacian = laplacian.tocsr()
+
     b = np.zeros(n_vertices)
     b[boundary_indices] = boundary_values
+
     # Step 3: Solve the Laplace-Beltrami equation
     logger.info("Solve the Laplace-Beltrami equation")
     solution = np.zeros(n_vertices)
+
     if len(free_indices) > 0:
-        free_laplacian = laplacian[free_indices][:, free_indices]
+        free_laplacian = laplacian[free_indices, :][:, free_indices]
         free_b = (
-            b[free_indices]
-            - laplacian[free_indices][:, boundary_indices] @ boundary_values
+            b[free_indices] - laplacian[free_indices, :][:, boundary_indices] @ boundary_values
         )
+
         solution[boundary_indices] = boundary_values
         try:
             logger.info("about to solve")
@@ -97,12 +103,11 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
             solution[free_indices] = np.zeros(len(free_indices))
     else:
         solution[boundary_indices] = boundary_values
+
     return solution
 
 
-logger.info(
-    "Loading in surface, boundary mask, and src/sink signed distance transforms"
-)
+logger.info("Loading in surface, boundary mask, and src/sink signed distance transforms")
 
 surf = nib.load(snakemake.input.surf_gii)
 vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
@@ -112,32 +117,24 @@ src_sink_mask = nib.load(snakemake.input.src_sink_mask).agg_data()
 src_indices = np.where(src_sink_mask == 1)[0]
 sink_indices = np.where(src_sink_mask == 2)[0]
 
-# get structure metadata from src/sink mask
-structure_metadata = nib.load(snakemake.input.src_sink_mask).meta[
-    "AnatomicalStructurePrimary"
-]
-
+# Get structure metadata from src/sink mask
+structure_metadata = nib.load(snakemake.input.src_sink_mask).meta["AnatomicalStructurePrimary"]
 
 logger.info(f"# of src boundary vertices: {len(src_indices)}")
 logger.info(f"# of sink boundary vertices: {len(sink_indices)}")
 
+src_vals = [0 for _ in range(len(src_indices))]
+sink_vals = [1 for _ in range(len(sink_indices))]
 
-src_vals = [0 for i in range(len(src_indices))]
-sink_vals = [1 for i in range(len(sink_indices))]
-
-boundary_conditions = dict(
-    zip(list(src_indices) + list(sink_indices), src_vals + sink_vals)
-)
-
+boundary_conditions = dict(zip(list(src_indices) + list(sink_indices), src_vals + sink_vals))
 
 coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 
 data_array = nib.gifti.GiftiDataArray(data=coords.astype(np.float32))
 image = nib.gifti.GiftiImage()
 
-# set structure metadata
+# Set structure metadata
 image.meta["AnatomicalStructurePrimary"] = structure_metadata
-
 
 image.add_gifti_data_array(data_array)
 nib.save(image, snakemake.output.coords)
