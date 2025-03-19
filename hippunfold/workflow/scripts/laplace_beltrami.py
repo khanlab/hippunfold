@@ -14,7 +14,9 @@ def cotangent_laplacian(vertices, faces):
     row_indices = []
     col_indices = []
     values = []
-    weights = coo_matrix((n_vertices, n_vertices), dtype=np.float64).tocsr() #Initialize sparse matrix.
+    weights = coo_matrix(
+        (n_vertices, n_vertices), dtype=np.float64
+    ).tocsr()  # Initialize sparse matrix.
 
     for tri in faces:
         v0, v1, v2 = vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]
@@ -75,7 +77,7 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     free_indices = np.setdiff1d(np.arange(n_vertices), boundary_indices)
     logger.info("Setting boundary conditions")
     for i in boundary_indices:
-        start, end = laplacian.indptr[i], laplacian.indptr[i+1]
+        start, end = laplacian.indptr[i], laplacian.indptr[i + 1]
         laplacian.data[start:end] = 0  # Zero out row
         laplacian[i, i] = 1  # Set diagonal to 1
     b = np.zeros(n_vertices)
