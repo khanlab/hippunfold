@@ -35,19 +35,7 @@ def gen_parser():
         help="Optional temporary directory. If not specified, a system temp directory will be used."
     )
     parser.add_argument(
-        "--use-singularity",
-        action="store_true",
-        help="If specified, will run hippunfold using Singularity. "
-            "This requires Singularity to be installed on your system."
-    )
-    parser.add_argument(
-        "--use-conda",
-        action="store_true",
-        help="If specified, will run hippunfold using Conda environments. "
-            "This requires Conda to be installed on your system."
-    )
-    parser.add_argument(
-        "-np", "--dry-run",
+        "-n", "--dry-run",
         action="store_true",
         help="Execute a dry run without actually running the full pipeline."
     )
@@ -86,15 +74,12 @@ def main():
         "-c", "all",
         "--force-output",
         "--nolock",
-        "--modality", args.modality
+        "--modality", args.modality,
+        "--use-conda"
     ]
 
-    if args.use_singularity:
-        command.append("--use-singularity")
-    if args.use_conda:
-        command.append("--use-conda")
     if args.dry_run:
-        command.append("-np")
+        command.append("-n")
 
     # run the command 
     try:

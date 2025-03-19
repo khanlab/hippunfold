@@ -94,13 +94,13 @@ files = [
 
 [[package]]
 name = "attrs"
-version = "25.2.0"
+version = "25.3.0"
 description = "Classes Without Boilerplate"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "attrs-25.2.0-py3-none-any.whl", hash = "sha256:611344ff0a5fed735d86d7784610c84f8126b95e549bcad9ff61b4242f2d386b"},
-    {file = "attrs-25.2.0.tar.gz", hash = "sha256:18a06db706db43ac232cce80443fcd9f2500702059ecf53489e3c5a3f417acaf"},
+    {file = "attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3"},
+    {file = "attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b"},
 ]
 
 [package.extras]
@@ -2402,27 +2402,27 @@ jupyter = ["ipywidgets", "jupyter-server-proxy", "nest_asyncio", "trame (>=2.5.2
 
 [[package]]
 name = "pywin32"
-version = "309"
+version = "310"
 description = "Python for Window Extensions"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pywin32-309-cp310-cp310-win32.whl", hash = "sha256:5b78d98550ca093a6fe7ab6d71733fbc886e2af9d4876d935e7f6e1cd6577ac9"},
-    {file = "pywin32-309-cp310-cp310-win_amd64.whl", hash = "sha256:728d08046f3d65b90d4c77f71b6fbb551699e2005cc31bbffd1febd6a08aa698"},
-    {file = "pywin32-309-cp310-cp310-win_arm64.whl", hash = "sha256:c667bcc0a1e6acaca8984eb3e2b6e42696fc035015f99ff8bc6c3db4c09a466a"},
-    {file = "pywin32-309-cp311-cp311-win32.whl", hash = "sha256:d5df6faa32b868baf9ade7c9b25337fa5eced28eb1ab89082c8dae9c48e4cd51"},
-    {file = "pywin32-309-cp311-cp311-win_amd64.whl", hash = "sha256:e7ec2cef6df0926f8a89fd64959eba591a1eeaf0258082065f7bdbe2121228db"},
-    {file = "pywin32-309-cp311-cp311-win_arm64.whl", hash = "sha256:54ee296f6d11db1627216e9b4d4c3231856ed2d9f194c82f26c6cb5650163f4c"},
-    {file = "pywin32-309-cp312-cp312-win32.whl", hash = "sha256:de9acacced5fa82f557298b1fed5fef7bd49beee04190f68e1e4783fbdc19926"},
-    {file = "pywin32-309-cp312-cp312-win_amd64.whl", hash = "sha256:6ff9eebb77ffc3d59812c68db33c0a7817e1337e3537859499bd27586330fc9e"},
-    {file = "pywin32-309-cp312-cp312-win_arm64.whl", hash = "sha256:619f3e0a327b5418d833f44dc87859523635cf339f86071cc65a13c07be3110f"},
-    {file = "pywin32-309-cp313-cp313-win32.whl", hash = "sha256:008bffd4afd6de8ca46c6486085414cc898263a21a63c7f860d54c9d02b45c8d"},
-    {file = "pywin32-309-cp313-cp313-win_amd64.whl", hash = "sha256:bd0724f58492db4cbfbeb1fcd606495205aa119370c0ddc4f70e5771a3ab768d"},
-    {file = "pywin32-309-cp313-cp313-win_arm64.whl", hash = "sha256:8fd9669cfd41863b688a1bc9b1d4d2d76fd4ba2128be50a70b0ea66b8d37953b"},
-    {file = "pywin32-309-cp38-cp38-win32.whl", hash = "sha256:617b837dc5d9dfa7e156dbfa7d3906c009a2881849a80a9ae7519f3dd8c6cb86"},
-    {file = "pywin32-309-cp38-cp38-win_amd64.whl", hash = "sha256:0be3071f555480fbfd86a816a1a773880ee655bf186aa2931860dbb44e8424f8"},
-    {file = "pywin32-309-cp39-cp39-win32.whl", hash = "sha256:72ae9ae3a7a6473223589a1621f9001fe802d59ed227fd6a8503c9af67c1d5f4"},
-    {file = "pywin32-309-cp39-cp39-win_amd64.whl", hash = "sha256:88bc06d6a9feac70783de64089324568ecbc65866e2ab318eab35da3811fd7ef"},
+    {file = "pywin32-310-cp310-cp310-win32.whl", hash = "sha256:6dd97011efc8bf51d6793a82292419eba2c71cf8e7250cfac03bba284454abc1"},
+    {file = "pywin32-310-cp310-cp310-win_amd64.whl", hash = "sha256:c3e78706e4229b915a0821941a84e7ef420bf2b77e08c9dae3c76fd03fd2ae3d"},
+    {file = "pywin32-310-cp310-cp310-win_arm64.whl", hash = "sha256:33babed0cf0c92a6f94cc6cc13546ab24ee13e3e800e61ed87609ab91e4c8213"},
+    {file = "pywin32-310-cp311-cp311-win32.whl", hash = "sha256:1e765f9564e83011a63321bb9d27ec456a0ed90d3732c4b2e312b855365ed8bd"},
+    {file = "pywin32-310-cp311-cp311-win_amd64.whl", hash = "sha256:126298077a9d7c95c53823934f000599f66ec9296b09167810eb24875f32689c"},
+    {file = "pywin32-310-cp311-cp311-win_arm64.whl", hash = "sha256:19ec5fc9b1d51c4350be7bb00760ffce46e6c95eaf2f0b2f1150657b1a43c582"},
+    {file = "pywin32-310-cp312-cp312-win32.whl", hash = "sha256:8a75a5cc3893e83a108c05d82198880704c44bbaee4d06e442e471d3c9ea4f3d"},
+    {file = "pywin32-310-cp312-cp312-win_amd64.whl", hash = "sha256:bf5c397c9a9a19a6f62f3fb821fbf36cac08f03770056711f765ec1503972060"},
+    {file = "pywin32-310-cp312-cp312-win_arm64.whl", hash = "sha256:2349cc906eae872d0663d4d6290d13b90621eaf78964bb1578632ff20e152966"},
+    {file = "pywin32-310-cp313-cp313-win32.whl", hash = "sha256:5d241a659c496ada3253cd01cfaa779b048e90ce4b2b38cd44168ad555ce74ab"},
+    {file = "pywin32-310-cp313-cp313-win_amd64.whl", hash = "sha256:667827eb3a90208ddbdcc9e860c81bde63a135710e21e4cb3348968e4bd5249e"},
+    {file = "pywin32-310-cp313-cp313-win_arm64.whl", hash = "sha256:e308f831de771482b7cf692a1f308f8fca701b2d8f9dde6cc440c7da17e47b33"},
+    {file = "pywin32-310-cp38-cp38-win32.whl", hash = "sha256:0867beb8addefa2e3979d4084352e4ac6e991ca45373390775f7084cc0209b9c"},
+    {file = "pywin32-310-cp38-cp38-win_amd64.whl", hash = "sha256:30f0a9b3138fb5e07eb4973b7077e1883f558e40c578c6925acc7a94c34eaa36"},
+    {file = "pywin32-310-cp39-cp39-win32.whl", hash = "sha256:851c8d927af0d879221e616ae1f66145253537bbdd321a77e8ef701b443a9a1a"},
+    {file = "pywin32-310-cp39-cp39-win_amd64.whl", hash = "sha256:96867217335559ac619f00ad70e513c0fcf84b8a3af9fc2bba3b59b97da70475"},
 ]
 
 [[package]]
@@ -3050,13 +3050,13 @@ reports = ["pygments"]
 
 [[package]]
 name = "snakemake"
-version = "8.30.0"
+version = "9.0.1"
 description = "Workflow management system to create reproducible and scalable data analyses"
 optional = false
 python-versions = ">=3.11"
 files = [
-    {file = "snakemake-8.30.0-py3-none-any.whl", hash = "sha256:f793e977931fa5e41408d58ff956468b0040287ebc20915c78cb22dd2f8cf59e"},
-    {file = "snakemake-8.30.0.tar.gz", hash = "sha256:fd4c1c2c5521c38c507fed81f90a3756279ca5bca0cd17613ace2883d0c46622"},
+    {file = "snakemake-9.0.1-py3-none-any.whl", hash = "sha256:c903627c7c2a85c4eeab5312355ee3b629422e72e778eaa8e719e5fa74f041cb"},
+    {file = "snakemake-9.0.1.tar.gz", hash = "sha256:f1844bf9d779506d446c18d27936b26f9708077f43cf6d38540fb3da05bd0fa3"},
 ]
 
 [package.dependencies]
@@ -3081,14 +3081,16 @@ reretry = "*"
 smart-open = ">=4.0,<8.0"
 snakemake-interface-common = ">=1.17.0,<2.0"
 snakemake-interface-executor-plugins = ">=9.3.2,<10.0"
+snakemake-interface-logger-plugins = ">=1.1.0,<2.0.0"
 snakemake-interface-report-plugins = ">=1.1.0,<2.0.0"
-snakemake-interface-storage-plugins = ">=3.2.3,<4.0"
+snakemake-interface-storage-plugins = ">=3.5.0,<4.0"
 tabulate = "*"
 throttler = "*"
 wrapt = "*"
 yte = ">=1.5.5,<2.0"
 
 [package.extras]
+all = ["eido", "peppy", "pygments", "slack_sdk"]
 messaging = ["slack_sdk"]
 pep = ["eido", "peppy"]
 reports = ["pygments"]
@@ -3125,6 +3127,20 @@ snakemake-interface-common = ">=1.17.4,<2.0.0"
 throttler = ">=1.2.2,<2.0.0"
 
 [[package]]
+name = "snakemake-interface-logger-plugins"
+version = "1.2.2"
+description = "Logger plugin interface for snakemake"
+optional = false
+python-versions = "<4.0,>=3.11"
+files = [
+    {file = "snakemake_interface_logger_plugins-1.2.2-py3-none-any.whl", hash = "sha256:7c70caaa918225975abf3857c924f69c51f531845eb3451b53d3a913f6dcaece"},
+    {file = "snakemake_interface_logger_plugins-1.2.2.tar.gz", hash = "sha256:a80a03dd56bfe5c330fad17c6ad2fb051b23bc7dd457aa967ec8181977e1212f"},
+]
+
+[package.dependencies]
+snakemake-interface-common = ">=1.17.4"
+
+[[package]]
 name = "snakemake-interface-report-plugins"
 version = "1.1.0"
 description = "The interface for Snakemake report plugins."
@@ -3140,13 +3156,13 @@ snakemake-interface-common = ">=1.16.0,<2.0.0"
 
 [[package]]
 name = "snakemake-interface-storage-plugins"
-version = "3.4.0"
+version = "3.5.0"
 description = "This package provides a stable interface for interactions between Snakemake and its storage plugins."
 optional = false
 python-versions = "<4.0,>=3.11"
 files = [
-    {file = "snakemake_interface_storage_plugins-3.4.0-py3-none-any.whl", hash = "sha256:0c8898ef0153f50d95c6dafbd0a31422b06bf97d72adcbf1b2391206b3c9b4e0"},
-    {file = "snakemake_interface_storage_plugins-3.4.0.tar.gz", hash = "sha256:7e1289bda0f693640dc1257815c35168fe4996be977621bcc1671b58217c69ae"},
+    {file = "snakemake_interface_storage_plugins-3.5.0-py3-none-any.whl", hash = "sha256:90841b6333c60e5859f81eec5f63d66e8bd29108f40fe922862d31c0f761b1ca"},
+    {file = "snakemake_interface_storage_plugins-3.5.0.tar.gz", hash = "sha256:88ee1dde95f9d5abb03113c52fb8cfa78ee502cce9ec788c161b3c09076fc075"},
 ]
 
 [package.dependencies]
