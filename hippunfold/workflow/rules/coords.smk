@@ -1,7 +1,7 @@
 def get_labels_for_laplace(wildcards):
     if (
         config["skip_inject_template_labels"]
-        or config["analysis_level"] == "participant_create_template"
+        or config["analysis_level"] == "group_create_atlas"
     ):
         seg = get_input_for_shape_inject(wildcards)
     else:
@@ -275,7 +275,7 @@ rule laynii_layers_equidist:
             suffix="dseg.nii.gz",
             dir="{dir}",
             desc="laynii",
-            label="{autotop}",
+            label="{label}",
             space="corobl",
             hemi="{hemi}",
         ),
@@ -284,7 +284,7 @@ rule laynii_layers_equidist:
             root=work,
             datatype="coords",
             dir="{dir,IO}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="equidist",
             space="corobl",
@@ -314,7 +314,7 @@ rule laynii_layers_equivol:
             suffix="dseg.nii.gz",
             dir="{dir}",
             desc="laynii",
-            label="{autotop}",
+            label="{label}",
             space="corobl",
             hemi="{hemi}",
         ),
@@ -323,7 +323,7 @@ rule laynii_layers_equivol:
             root=work,
             datatype="coords",
             dir="{dir,IO}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="equivol",
             space="corobl",

@@ -14,16 +14,16 @@ derivatives: False #will search in bids/derivatives if True; can also be path(s)
 #list of analysis levels in the bids app 
 analysis_levels: &analysis_levels
  - participant
- - participant_create_template
+ - group_create_atlas
  - group
   
 
 #mapping from analysis_level to set of target rules or files
 targets_by_analysis_level:
   participant:
-    - ''  # if '', then the first rule is run
-  participant_create_template:
-    - 'all_create_template'
+    - 'all'  # if '', then the first rule is run
+  group_create_atlas:
+    - 'all_create_atlas'
   group:
     - 'all_group_tsv'
 
@@ -194,13 +194,6 @@ parse_args:
     dest: "laminar_coords_res.dentate"
 
 
-  --atlas:
-    choices:
-      - 'multihist7'
-      - 'bbhist'
-    default: 'multihist7'
-    help: 'Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)'
-
   --no_unfolded_reg:
     help: "Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. (default: %(default)s)"
     default: False
@@ -232,12 +225,13 @@ parse_args:
 
   --output_density:
     choices:
+      - 'multihist7'
       - '0p5mm'
       - '1mm'
       - '2mm'
       - 'unfoldiso'
     default:
-      - '0p5mm'
+      - 'multihist7'
     nargs: '+'
     help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
 
@@ -283,7 +277,6 @@ parse_args:
       - synthseg_v0.1
       - synthseg_v0.2
       - neonateT1w_v2
-
 
   --enable-bids-validation:
     help: |
@@ -466,58 +459,7 @@ template_files:
       - R
 
 
-
-atlas_files:
-  multihist7:
-    lut: desc-subfields_atlas-multihist7_dseg.tsv #<-- perhaps generate this from the cifti instead of having user provide it
-    surf_gii: hemi-{hemi}_space-unfold_label-{label}_{surf_type}.surf.gii
-    metric_gii: hemi-{hemi}_label-{label}_{metric}.shape.gii
-    label_gii: hemi-{hemi}_label-{label}_dseg.label.gii
-    label_wildcards:
-     - hipp
-    hemi_wildcards:
-     - L
-     - R
-    metric_wildcards:
-     - thickness
-     - gyrification
-     - curvature
-
-  bbhist:
-    lut: desc-subfields_dseg.tsv
-    surf_gii: sub-bbhist_hemi-{hemi}_space-unfold_label-{label}_{surf_type}.surf.gii
-    metric_gii: sub-bbhist_hemi-{hemi}_space-corobl_label-{label}_{metric}.shape.gii
-    label_gii: sub-bbhist_hemi-{hemi}_space-corobl_label-{label}_subfields.label.gii
-    label_wildcards:
-     - hipp
-     - dentate
-    hemi_wildcards:
-     - L
-     - R
-    metric_wildcards:
-     - thickness
-     - curvature
-
-  bigbrain:
-    label_nii: sub-bigbrain_hemi-{hemi}_label-hipp_desc-manualsubfields_dseg.nii.gz
-    lut: desc-subfields_atlas-bigbrain_dseg.tsv
-    label_list: sub-bigbrain_labellist.txt
-  magdeburg:
-    label_nii: sub-all_hemi-{hemi}_label-hipp_desc-manualsubfields_maxprob.nii.gz
-    lut: desc-subfields_atlas-magdeburg_dseg.tsv
-    label_list: magdeburg_labellist.txt
-  freesurfer:
-    label_nii: sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
-    lut: desc-subfields_atlas-freesurfer_dseg.tsv
-    label_list: freesurfer_labellist.txt
-  macaque:
-    label_nii: sub-bigmac_hemi-{hemi}_space-unfold_label-hipp_desc-macaquesubfields_dseg.nii.gz
-    lut: desc-subfields_atlas-macaque_dseg.tsv
-    label_list: macaque_labellist.txt
-  mouse:
-    label_nii: sub-ABAv3_space-unfold_label-hipp_desc-mousesubfields_dseg.nii.gz
-    lut: desc-subfields_atlas-mouse_dseg.tsv
-    label_list: mouse_labellist.txt
+gen_template_name: mytemplate
 
 
 #values to use for re-mapping tissue labels when combining with subfields.
@@ -568,11 +510,11 @@ resource_urls:
   atlas:
     bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
     multihist7: 'www.dropbox.com/scl/fi/g07u7la7v1kwfgsty6ujc/atlas-multihist7_20250108.zip?rlkey=bi7wbdsm93upgnn3bmlv4f1hx&st=5iv33isc&dl=0'
-    bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
-    magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
-    freesurfer: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
-    macaque: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6661f504d835c42bcb4cddab/?zip='
-    mouse: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666884380f8c80103a3c9569/?zip='
+    # bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
+    # magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
+    # freesurfer: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
+    # macaque: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6661f504d835c42bcb4cddab/?zip='
+    # mouse: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666884380f8c80103a3c9569/?zip='
   template:
     CITI168: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
     dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='

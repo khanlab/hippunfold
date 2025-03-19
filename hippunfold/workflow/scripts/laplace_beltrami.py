@@ -7,21 +7,8 @@ log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
 
-def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
-    """
-    Solve the Laplace-Beltrami equation on a 3D open-faced surface mesh. No islands please!
-
-    Parameters:
-        vertices (np.ndarray): Array of shape (n_vertices, 3) containing vertex coordinates.
-        faces (np.ndarray): Array of shape (n_faces, 3) containing indices of vertices forming each triangular face.
-        boundary_conditions (dict, optional): Dictionary where keys are vertex indices with fixed values.
-
-    Returns:
-        solution (np.ndarray): Array of shape (n_vertices,) with the solution values.
-    """
-    logger.info("solve_laplace_beltrami_open_mesh")
+def cotangent_laplacian(vertices, faces):
     n_vertices = vertices.shape[0]
-    logger.info(f"n_vertices: {n_vertices}")
     # Step 1: Compute cotangent weights
     logger.info("Computing cotangent weights")
     weights = lil_matrix((n_vertices, n_vertices))
@@ -49,12 +36,31 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
         weights[tri[0], tri[2]] += cot1 / 2
     logger.info("weights.tocsr()")
     weights = weights.tocsr()
-    # Step 2: Handle boundaries for open meshes
-    logger.info("Handle boundaries for open meshes")
     diagonal = weights.sum(axis=1).A1
     # Ensure no zero entries in diagonal to avoid singular matrix issues
     diagonal[diagonal < 1e-12] = 1e-12
     laplacian = diags(diagonal) - weights
+    return laplacian
+
+
+def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
+    """
+    Solve the Laplace-Beltrami equation on a 3D open-faced surface mesh. No islands please!
+
+    Parameters:
+        vertices (np.ndarray): Array of shape (n_vertices, 3) containing vertex coordinates.
+        faces (np.ndarray): Array of shape (n_faces, 3) containing indices of vertices forming each triangular face.
+        boundary_conditions (dict, optional): Dictionary where keys are vertex indices with fixed values.
+
+    Returns:
+        solution (np.ndarray): Array of shape (n_vertices,) with the solution values.
+    """
+    n_vertices = vertices.shape[0]
+    logger.info("solve_laplace_beltrami_open_mesh")
+    laplacian = cotangent_laplacian(vertices, faces)
+
+    # Step 2: Handle boundaries for open meshes
+    logger.info("Handle boundaries for open meshes")
     if boundary_conditions is None:
         boundary_conditions = {}
     boundary_indices = np.array(list(boundary_conditions.keys()))

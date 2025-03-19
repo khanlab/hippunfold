@@ -19,93 +19,6 @@ surf_to_secondary_type = {
 }
 
 
-rule cp_template_to_unfold:
-    """cp template unfold surf to subject"""
-    input:
-        gii=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_{label}",
-            "tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii",
-        ),
-    params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="FLAT",
-    output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("workbench")
-    group:
-        "subj"
-    shell:
-        "cp {input.gii} {output.gii} && "
-        "wb_command -set-structure {output.gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
-
-
-rule calc_unfold_template_coords:
-    """ Creates a coords.shape.gii from the unfolded template """
-    input:
-        midthickness_gii=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
-        ),
-    params:
-        coords_xyz="coords-XYZ.shape.gii",
-        coord_AP="coord-AP.shape.gii",
-        coord_PD="coord-PD.shape.gii",
-        coord_IO="coord-IO.shape.gii",
-        origin=lambda wildcards: config["{label}"]["origin"],
-        extent=lambda wildcards: config["{label}"]["extent"],
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-    output:
-        coords_gii=bids(
-            root=work,
-            datatype="surf",
-            den="{density}",
-            suffix="coords.shape.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("workbench")
-    shadow:
-        "minimal"  #this is required to use the temporary files defined as params
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-coordinates-to-metric {input.midthickness_gii} {params.coords_xyz} && "
-        "wb_command -file-information {params.coords_xyz} && "
-        "wb_command -metric-math '({params.origin[0]}-X)/{params.extent[0]}' {params.coord_AP} -var X {params.coords_xyz} -column 1 && "
-        "wb_command -file-information {params.coord_AP} && "
-        "wb_command -metric-math '({params.origin[1]}+Y)/{params.extent[1]}' {params.coord_PD} -var Y {params.coords_xyz} -column 2 && "
-        "wb_command -file-information {params.coord_PD} && "
-        "wb_command -metric-math '({params.origin[2]}+Z)/{params.extent[2]}' {params.coord_IO} -var Z {params.coords_xyz} -column 3 && "
-        "wb_command -file-information {params.coord_IO} && "
-        "wb_command -metric-merge {output.coords_gii}  -metric {params.coord_AP} -metric {params.coord_PD} -metric {params.coord_IO} && "
-        "wb_command -set-structure {output.coords_gii} {params.structure_type}"
-
-
 # warp from corobl to native
 rule affine_gii_to_native:
     input:
@@ -222,8 +135,7 @@ def get_inputs_cifti_label(wildcards):
             bids(
                 root=root,
                 datatype="surf",
-                den="{density}",
-                atlas="{atlas}",
+                den="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="L",
@@ -236,8 +148,7 @@ def get_inputs_cifti_label(wildcards):
             bids(
                 root=root,
                 datatype="surf",
-                den="{density}",
-                atlas="{atlas}",
+                den="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="R",
@@ -266,8 +177,7 @@ rule create_dlabel_cifti_subfields:
         cifti=bids(
             root=root,
             datatype="surf",
-            den="{density}",
-            atlas="{atlas}",
+            den="{atlas}",
             suffix="subfields.dlabel.nii",
             space="{space}",
             label="hipp",
@@ -317,12 +227,11 @@ rule create_spec_file_hipp:
             bids(
                 root=root,
                 datatype="surf",
-                den="{density}",
+                den="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
-                atlas="{atlas}",
                 **inputs.subj_wildcards,
             ),
             atlas=config["atlas"],
@@ -340,7 +249,7 @@ rule create_spec_file_hipp:
                 **inputs.subj_wildcards,
             ),
             surfname=["midthickness"],
-            space=["{space}", "unfold", "unfoldreg"],
+            space=["{space}", "unfoldreg"],
             allow_missing=True,
         ),
         cifti_metrics=lambda wildcards: inputs[config["modality"]].expand(
@@ -360,9 +269,8 @@ rule create_spec_file_hipp:
             bids(
                 root=root,
                 datatype="surf",
-                den="{density}",
+                den="{atlas}",
                 suffix="subfields.dlabel.nii",
-                atlas="{atlas}",
                 space="{space}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -421,7 +329,7 @@ rule create_spec_file_dentate:
                 **inputs.subj_wildcards,
             ),
             surfname=["midthickness"],
-            space=["{space}", "unfold"],
+            space=["{space}", "unfoldreg"],
             allow_missing=True,
         ),
         cifti=lambda wildcards: expand(

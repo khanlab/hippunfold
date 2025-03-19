@@ -81,6 +81,7 @@ def main():
     if args.dry_run:
         command.append("-n")
 
+
     # run the command 
     try:
         subprocess.run(command, check=True)
