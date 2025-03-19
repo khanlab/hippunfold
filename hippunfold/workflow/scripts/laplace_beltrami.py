@@ -74,8 +74,10 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     boundary_values = np.array(list(boundary_conditions.values()))
     free_indices = np.setdiff1d(np.arange(n_vertices), boundary_indices)
     logger.info("Setting boundary conditions")
-    laplacian[boundary_indices, :] = 0  # Zero out entire rows
-    laplacian[boundary_indices, boundary_indices] = 1  # Set diagonal entries to 1
+    for i in boundary_indices:
+        start, end = laplacian.indptr[i], laplacian.indptr[i+1]
+        laplacian.data[start:end] = 0  # Zero out row
+        laplacian[i, i] = 1  # Set diagonal to 1
     b = np.zeros(n_vertices)
     b[boundary_indices] = boundary_values
     # Step 3: Solve the Laplace-Beltrami equation
