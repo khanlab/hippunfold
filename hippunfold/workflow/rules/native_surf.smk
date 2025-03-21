@@ -377,6 +377,8 @@ rule laplace_beltrami:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    params:
+        method=lambda wildcards: "fastmarching" if wildcards.dir == "AP" else "laplace",
     output:
         coords=bids(
             root=work,
