@@ -192,7 +192,7 @@ rule create_upsampled_coords_ref:
     params:
         tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
         resample_res=lambda wildcards: config["laminar_coords_res"][wildcards.label],
-        trim_padding="3mm",
+        trim_padding="5mm",
     output:
         upsampled_ref=bids(
             root=work,
