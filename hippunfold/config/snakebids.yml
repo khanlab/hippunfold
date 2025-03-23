@@ -287,14 +287,6 @@ parse_args:
     action: "store_false"
     default: True
 
-  --workdir:
-    help: |
-      Folder for storing working files. If not specified, will be in "work/" subfolder 
-      in the output folder. You can also use environment variables when setting the 
-      workdir, e.g. --workdir '$SLURM_TMPDIR'.
-    default: work
-    type: str
-
 
   --version:
     help: 'Print the version of HippUnfold'
@@ -696,7 +688,6 @@ force_nnunet_model: False
 t1_reg_template: False
 generate_myelin_map: False
 root: results
-workdir: null
 use_template_seg: False
 template_seg_smoothing_factor: 2
 resample_dsegtissue: null

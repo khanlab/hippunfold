@@ -10,13 +10,15 @@ rule import_dseg_tissue:
         ),
         crop_cmd="-trim 5vox",  #leave 5 voxel padding
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi,L|R}",
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                space="corobl",
+                hemi="{hemi,L|R}",
+            )
         ),
     container:
         config["singularity"]["autotop"]

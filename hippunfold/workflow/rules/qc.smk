@@ -1,7 +1,7 @@
 rule qc_reg_to_template:
     input:
         flo=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="{native_modality}.nii.gz",
@@ -116,7 +116,7 @@ rule plot_subj_subfields:
 def get_bg_img_for_subfield_qc(wildcards):
     if config["modality"] == "hippb500":
         return bids(
-            root=work,
+            root=root,
             datatype="anat",
             desc="preproc",
             suffix="hippb500.nii.gz",
@@ -127,7 +127,7 @@ def get_bg_img_for_subfield_qc(wildcards):
     elif config["modality"] == "dsegtissue":
         # blank image as bg
         return bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
             space="{space}",

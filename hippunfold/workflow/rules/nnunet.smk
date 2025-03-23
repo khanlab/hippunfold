@@ -3,7 +3,7 @@ import re
 
 def get_nnunet_input(wildcards):
     T1w_nii = bids(
-        root=work,
+        root=root,
         datatype="anat",
         space="corobl",
         desc="preproc",
@@ -12,7 +12,7 @@ def get_nnunet_input(wildcards):
         **inputs.subj_wildcards,
     )
     T2w_nii = bids(
-        root=work,
+        root=root,
         datatype="anat",
         space="corobl",
         desc="preproc",
@@ -31,7 +31,7 @@ def get_nnunet_input(wildcards):
         return T1w_nii
     elif config["modality"] == "hippb500":
         return bids(
-            root=work,
+            root=root,
             datatype="dwi",
             hemi="{hemi}",
             space="corobl",
@@ -128,14 +128,16 @@ rule run_inference:
         trainer=parse_trainer_from_tar,
         tta="" if config["nnunet_enable_tta"] else "--disable_tta",
     output:
-        nnunet_seg=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi}",
+        nnunet_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="nnunet",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     log:
         bids(
@@ -193,7 +195,7 @@ rule qc_nnunet_f3d:
     input:
         img=(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 **inputs.subj_wildcards,
                 suffix="{modality}.nii.gz".format(modality=config["modality"]),
@@ -203,7 +205,7 @@ rule qc_nnunet_f3d:
             ),
         ),
         seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -216,7 +218,7 @@ rule qc_nnunet_f3d:
         ref=get_f3d_ref,
     output:
         cpp=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="cpp.nii.gz",
@@ -225,7 +227,7 @@ rule qc_nnunet_f3d:
             hemi="{hemi}",
         ),
         res=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="{modality}.nii.gz".format(modality=config["modality"]),
@@ -233,14 +235,16 @@ rule qc_nnunet_f3d:
             space="template",
             hemi="{hemi}",
         ),
-        res_mask=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="mask.nii.gz",
-            desc="f3d",
-            space="template",
-            hemi="{hemi}",
+        res_mask=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="mask.nii.gz",
+                desc="f3d",
+                space="template",
+                hemi="{hemi}",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -265,7 +269,7 @@ rule qc_nnunet_f3d:
 rule qc_nnunet_dice:
     input:
         res_mask=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="mask.nii.gz",
