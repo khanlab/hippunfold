@@ -5,43 +5,10 @@ import nibabel.gifti as gifti
 from collections import Counter
 from scipy.signal import argrelextrema
 from lib.utils import setup_logger
+from lib.surface import write_label_gii
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
-
-
-def write_src_sink_label_gifti(label_data, out_label_gifti, structure_metadata):
-
-    # Create a Label Table (LUT)
-    label_table = gifti.GiftiLabelTable()
-
-    # Define Background label (key 0)
-    background_label = gifti.GiftiLabel(
-        key=0, red=1.0, green=1.0, blue=1.0, alpha=0.0
-    )  # Transparent
-    background_label.label = "Background"
-    label_table.labels.append(background_label)
-
-    # Define src label (key 1)
-    src_label = gifti.GiftiLabel(key=1, red=1.0, green=0.0, blue=0.0, alpha=1.0)
-    src_label.label = "Source"
-    label_table.labels.append(src_label)
-
-    # Define sink label (key 2)
-    sink_label = gifti.GiftiLabel(key=2, red=0.0, green=0.0, blue=1.0, alpha=1.0)
-    sink_label.label = "Sink"
-    label_table.labels.append(sink_label)
-
-    # write the data and the label table to gifti
-    gii_img = gifti.GiftiImage(
-        darrays=[gifti.GiftiDataArray(label_data, intent="NIFTI_INTENT_LABEL")],
-        labeltable=label_table,
-    )
-
-    # set structure metadata
-    gii_img.meta["AnatomicalStructurePrimary"] = structure_metadata
-
-    nib.save(gii_img, out_label_gifti)
 
 
 nmin = snakemake.params.min_terminal_vertices
@@ -58,7 +25,7 @@ pd_src = nib.load(snakemake.input.pd_src).agg_data()
 pd_sink = nib.load(snakemake.input.pd_sink).agg_data()
 
 # get structure metadata from edges
-structure_metadata = nib.load(snakemake.input.edges).meta["AnatomicalStructurePrimary"]
+metadata = dict(nib.load(snakemake.input.edges).meta)
 
 
 logger.info("Assigning labels apsrc, apsink, pdsrc, pdsink")
@@ -119,9 +86,15 @@ pd_srcsink[idx_edges[labels == 3]] = 2
 
 
 # save to gifti:
-write_src_sink_label_gifti(
-    ap_srcsink, snakemake.output.ap, structure_metadata=structure_metadata
+label_dict = {
+    "Background": {"key": 0, "red": 1.0, "green": 1.0, "blue": 1.0, "alpha": 0.0},
+    "Source": {"key": 1, "red": 1.0, "green": 0.0, "blue": 0.0, "alpha": 1.0},
+    "Sink": {"key": 2, "red": 0.0, "green": 0.0, "blue": 1.0, "alpha": 1.0},
+}
+
+write_label_gii(
+    ap_srcsink, snakemake.output.ap, label_dict=label_dict, metadata=metadata
 )
-write_src_sink_label_gifti(
-    pd_srcsink, snakemake.output.pd, structure_metadata=structure_metadata
+write_label_gii(
+    pd_srcsink, snakemake.output.pd, label_dict=label_dict, metadata=metadata
 )
