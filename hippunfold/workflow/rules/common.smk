@@ -281,7 +281,7 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    ruleorder: laplace_beltrami > laynii_layers_equidist > laynii_layers_equivol 
+    ruleorder: laplace_beltrami > laynii_layers_equidist > laynii_layers_equivol
 
 
 def get_cifti_metric_types(label):
