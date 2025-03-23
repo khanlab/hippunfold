@@ -1,18 +1,5 @@
-bids_dir: '../test_data/bids_singleT2w'
-output_dir: 'test_output' #don't use '.'
-
-force: True
-
-#snakemake_dir: '.' #do not modify this variable -- is used to refer to files needed by the workflow when running with CLI
-
-#enable printing debug statements during parsing -- disable if generating dag visualization
-debug: False
-
-derivatives: False #will search in bids/derivatives if True; can also be path(s) to derivatives datasets
-
-
 #list of analysis levels in the bids app 
-analysis_levels: &analysis_levels
+analysis_levels: 
  - participant
  - group_create_atlas
  - group
@@ -338,18 +325,6 @@ cifti_metric_types:
     - curvature.dscalar
     - thickness.dscalar
 
-# params for detecting and removing outlier vertices
-outlier_opts:
-  outlierSmoothDist: 
-    unfoldiso: 15
-    0p5mm: 7
-    1mm: 3
-    2mm: 1
-    default: 15
-  vertexOutlierThreshold: 3
-
-
-
 #--- workflow specific configuration -- 
 
 singularity:
@@ -358,7 +333,6 @@ singularity:
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
 
-# TODO: should also perhaps include modalities avaialble, and any custom crop_native_res settings
 template_files:
   CITI168:
     T1w: T1w_head_700um.nii.gz
@@ -459,8 +433,6 @@ template_files:
       - R
 
 
-gen_template_name: mytemplate
-
 
 #values to use for re-mapping tissue labels when combining with subfields.
 # set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
@@ -482,18 +454,6 @@ tissue_atlas_mapping:
     srlm: 7
     cyst: 8
    
-
-rigid_reg_template: False
-no_reg_template: False
-
-modality: T2w
-
-inject_template: upenn
-
-template: CITI168
-
-atlas: multihist7
-
 
 
 #these will be downloaded to ~/.cache/hippunfold
@@ -529,9 +489,6 @@ resource_urls:
 
 
 
-
-crop_native_box: '256x256x256vox'
-crop_native_res: '0.2x0.2x0.2mm'
 
 hippdwi_opts:
   resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm
@@ -606,7 +563,7 @@ shape_inject:
     - 7
   label_smoothing_stdev: '0.5x0.5x0.5mm'
 
-inject_template_smoothing_factor: 1.0
+
 
 laplace_labels:
   hipp:
@@ -673,35 +630,8 @@ tight_crop_labels: #defines what labels to use for tight cropping (for upsampled
   dentate:
     - 8
 
-output_spaces:
-  - native
-
-participant_label:
-exclude_participant_label:
-hemi:
-  - L
-  - R
-output_density:
-  - 0p5mm
-
-laminar_coords_method: equivol
-skip_preproc: False
-plugins.validator.skip: False
-nnunet_enable_tta: False
-use_gpu: False
-skip_coreg: False
-keep_work: False
-skip_inject_template_labels: False
-force_nnunet_model: False
-t1_reg_template: False
-generate_myelin_map: False
-root: results
-workdir: null
-use_template_seg: False
-template_seg_smoothing_factor: 2
-resample_dsegtissue: null
 laminar_coords_res:
   hipp: 0.3x0.3x0.3mm
   dentate: 0.1x0.1x0.1mm
-resample_dseg_for_templatereg: 0.3x0.3x0.3mm
 
+resample_dseg_for_templatereg: 0.3x0.3x0.3mm
