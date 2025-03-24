@@ -54,7 +54,7 @@ if "T2w" in config["modality"]:
 elif "T1w" in config["modality"]:
     template_modality = "T1w"
 
-if config["analysis_level"] == "participant_create_template":
+if config["analysis_level"] == "group_create_atlas":
     limit_to_list.add("dsegsubfields")
 
 limit_to_list.add(config["modality"])
@@ -129,6 +129,7 @@ include: "rules/resample_final_to_crop_native.smk"
 include: "rules/qc.smk"
 include: "rules/myelin_map.smk"
 include: "rules/native_surf.smk"
+include: "rules/unfold_reg.smk"
 
 
 if config["use_template_seg"]:
@@ -156,9 +157,16 @@ rule all:
         get_final_output(),
 
 
-rule all_create_template:
+if config["analysis_level"] == "group_create_atlas":
+
+    include: "rules/atlas_gen.smk"
+
+    config["atlas"] = config["gen_template_name"]
+
+
+rule all_create_atlas:
     input:
-        get_create_template_output(),
+        get_create_atlas_output(),
 
 
 rule all_group_tsv:

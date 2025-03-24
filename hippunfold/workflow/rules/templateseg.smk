@@ -123,7 +123,7 @@ rule warp_template_dseg:
         conda_env("greedy")
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"
 
 
 rule warp_template_coords:
