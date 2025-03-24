@@ -112,8 +112,8 @@ rule gen_atlas_reg_ants:
     params:
         num_modalities=len(config["atlas_metrics"]),
         warp_prefix=lambda wildcards, output: f"{output.avgtemplate_dir}/",
-        multires="-f 6x4 -s 3x2 -q 50x20",  #only two low-res stages for now, to speed up for debugging workflow..
-    #        multires=" -f 6x4x2x1 -s 3x2x1x0 -q 100x100x70x20 ",
+        # multires="-f 6x4 -s 3x2 -q 50x20",  #only two low-res stages for now, to speed up for debugging workflow..
+        multires=" -f 6x4x2x1 -s 3x2x1x0 -q 100x100x70x20 ",
     output:
         avgtemplate_dir=directory(
             bids_atlas(
