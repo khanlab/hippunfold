@@ -13,13 +13,15 @@ rule resample_hippdwi_to_template:
         bbox_x=lambda wildcards: config["hippdwi_opts"]["bbox_x"][wildcards.hemi],
         bbox_y=config["hippdwi_opts"]["bbox_y"],
     output:
-        crop_b500=bids(
-            root=work,
-            datatype="dwi",
-            hemi="{hemi,L|R}",
-            space="corobl",
-            suffix="b500.nii.gz",
-            **inputs.subj_wildcards,
+        crop_b500=temp(
+            bids(
+                root=root,
+                datatype="dwi",
+                hemi="{hemi,L|R}",
+                space="corobl",
+                suffix="b500.nii.gz",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -40,7 +42,7 @@ rule resample_hippdwi_to_template:
 rule cp_b500_to_anat_dir:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="dwi",
             **inputs.subj_wildcards,
             suffix="b500.nii.gz",
@@ -48,14 +50,16 @@ rule cp_b500_to_anat_dir:
             hemi="{hemi}",
         ),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            desc="preproc",
-            suffix="hippb500.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="preproc",
+                suffix="hippb500.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"

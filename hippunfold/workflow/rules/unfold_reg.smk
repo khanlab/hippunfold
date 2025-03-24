@@ -16,7 +16,7 @@ rule pad_unfold_ref:
         for this)."""
     input:
         ref_nii=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="{label}",
             datatype="warps",
@@ -26,15 +26,17 @@ rule pad_unfold_ref:
     params:
         padding=f"-pad {unfoldreg_padding} {unfoldreg_padding}",
     output:
-        ref_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="refvol.nii.gz",
-            space="unfold",
-            desc="padded",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        ref_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="refvol.nii.gz",
+                space="unfold",
+                desc="padded",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -50,7 +52,7 @@ rule extract_unfold_ref_slice:
     """This gets the central-most slice of the unfold volume, for obtaining a 2D slice"""
     input:
         ref_3d_nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="refvol.nii.gz",
             space="unfold",
@@ -60,15 +62,17 @@ rule extract_unfold_ref_slice:
             **inputs.subj_wildcards,
         ),
     output:
-        ref_2d_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="refvol.nii.gz",
-            space="unfold",
-            desc="slice",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        ref_2d_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="refvol.nii.gz",
+                space="unfold",
+                desc="slice",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -120,7 +124,7 @@ rule native_metric_to_unfold_nii:
             **inputs.subj_wildcards,
         ),
         ref_nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="refvol.nii.gz",
             space="unfold",
@@ -132,14 +136,16 @@ rule native_metric_to_unfold_nii:
     params:
         interp="-nearest-vertex 0.3",
     output:
-        metric_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="{metric}.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        metric_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -157,7 +163,7 @@ rule atlas_metric_to_unfold_nii:
         This rule is for the surface template"""
     input:
         ref_nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="refvol.nii.gz",
             space="unfold",
@@ -198,15 +204,17 @@ rule atlas_metric_to_unfold_nii:
             suffix="outer.surf.gii",
         ),
     output:
-        metric_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="{metric}.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            atlas="{atlas}",
-            **inputs.subj_wildcards,
+        metric_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label}",
+                atlas="{atlas}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -224,7 +232,7 @@ def get_fixed_images_unfoldreg(wildcards):
 
     return expand(
         bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="{metric}.nii.gz",
             space="unfold",
@@ -241,7 +249,7 @@ def get_moving_images_unfoldreg(wildcards):
     unfoldreg_metrics = config["atlas_metadata"][wildcards.atlas]["metric_wildcards"]
     return expand(
         bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="{metric}.nii.gz",
             space="unfold",
@@ -284,7 +292,7 @@ rule unfoldreg_antsquick:
         ),
     output:
         warp=bids(
-            root=work,
+            root=root,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="SyN",
@@ -296,18 +304,20 @@ rule unfoldreg_antsquick:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-        invwarp=bids(
-            root=work,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="SyN",
-            from_="native",
-            to="{atlas}",
-            space="unfold",
-            type_="itk2d",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        invwarp=temp(
+            bids(
+                root=root,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="SyN",
+                from_="native",
+                to="{atlas}",
+                space="unfold",
+                type_="itk2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -353,18 +363,20 @@ rule unfoldreg_greedy:
         metric="-m NCC 4x4x4",  #4x4x4 implies a 9x9x9 window (ie 4 on either side)
         regularization="-s 1.732vox 0.707vox",  #gradient sigma, warp sigma (defaults: 1.732vox, 0.707vox)
     output:
-        warp=bids(
-            root=work,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="greedy",
-            from_="{atlas}",
-            to="native",
-            space="unfold",
-            type_="itk2d",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        warp=temp(
+            bids(
+                root=root,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="greedy",
+                from_="{atlas}",
+                to="native",
+                space="unfold",
+                type_="itk2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -401,7 +413,7 @@ rule extend_warp_2d_to_3d:
     """
     input:
         warp=bids(
-            root=work,
+            root=root,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="{desc}",
@@ -414,7 +426,7 @@ rule extend_warp_2d_to_3d:
             **inputs.subj_wildcards,
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="refvol.nii.gz",
             space="unfold",
@@ -424,18 +436,20 @@ rule extend_warp_2d_to_3d:
             **inputs.subj_wildcards,
         ),
     output:
-        warp=bids(
-            root=work,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="{desc}",
-            from_="{from}",
-            to="{to}",
-            space="{space}",
-            type_="itk",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        warp=temp(
+            bids(
+                root=root,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="{desc}",
+                from_="{from}",
+                to="{to}",
+                space="{space}",
+                type_="itk",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -450,7 +464,7 @@ rule extend_warp_2d_to_3d:
 rule convert_unfoldreg_warp_from_itk_to_world:
     input:
         warp=bids(
-            root=work,
+            root=root,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="{desc}",
@@ -463,18 +477,20 @@ rule convert_unfoldreg_warp_from_itk_to_world:
             **inputs.subj_wildcards,
         ),
     output:
-        warp=bids(
-            root=work,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="{desc}",
-            from_="{from}",
-            to="{to}",
-            space="{space}",
-            type_="surface",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        warp=temp(
+            bids(
+                root=root,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="{desc}",
+                from_="{from}",
+                to="{to}",
+                space="{space}",
+                type_="surface",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"
@@ -498,7 +514,7 @@ rule warp_unfold_native_to_unfoldreg:
             **inputs.subj_wildcards,
         ),
         warp=bids(
-            root=work,
+            root=root,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc=unfoldreg_method,
@@ -511,14 +527,16 @@ rule warp_unfold_native_to_unfoldreg:
             **inputs.subj_wildcards,
         ),
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="unfoldreg",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname}.surf.gii",
+                space="unfoldreg",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
