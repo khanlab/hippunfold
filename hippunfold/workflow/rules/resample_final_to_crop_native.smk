@@ -21,13 +21,15 @@ rule create_native_crop_ref:
         resample=config["crop_native_res"],
         pad_to=config["crop_native_box"],
     output:
-        ref=bids(
-            root=work,
-            datatype="warps",
-            suffix="cropref.nii.gz",
-            space="{native_modality}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
+        ref=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                suffix="cropref.nii.gz",
+                space="{native_modality}",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -42,7 +44,7 @@ rule create_native_crop_ref:
 rule resample_unet_native_crop:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -51,7 +53,7 @@ rule resample_unet_native_crop:
             hemi="{hemi}",
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -61,7 +63,7 @@ rule resample_unet_native_crop:
             type_="itk",
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
@@ -69,14 +71,16 @@ rule resample_unet_native_crop:
             **inputs.subj_wildcards,
         ),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="unet",
-            space="crop{native_modality}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="unet",
+                space="crop{native_modality}",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -92,7 +96,7 @@ rule resample_unet_native_crop:
 rule resample_postproc_native_crop:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -102,7 +106,7 @@ rule resample_postproc_native_crop:
             label=config["autotop_labels"][-1],
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -112,7 +116,7 @@ rule resample_postproc_native_crop:
             type_="itk",
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
@@ -120,14 +124,16 @@ rule resample_postproc_native_crop:
             **inputs.subj_wildcards,
         ),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="crop{native_modality}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="postproc",
+                space="crop{native_modality}",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -143,7 +149,7 @@ rule resample_postproc_native_crop:
 rule resample_subfields_native_crop:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
@@ -154,7 +160,7 @@ rule resample_subfields_native_crop:
             **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -164,7 +170,7 @@ rule resample_subfields_native_crop:
             type_="itk",
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
@@ -197,7 +203,7 @@ rule resample_subfields_native_crop:
 rule resample_coords_native_crop:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="coords",
             dir="{dir}",
             label="{label}",
@@ -208,7 +214,7 @@ rule resample_coords_native_crop:
             **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -218,7 +224,7 @@ rule resample_coords_native_crop:
             type_="itk",
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
@@ -258,7 +264,7 @@ rule resample_native_to_crop:
             suffix="{native_modality}.nii.gz",
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",
@@ -291,7 +297,7 @@ def get_xfm_t2_to_t1():
         xfm = []
     else:
         xfm = bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -313,7 +319,7 @@ rule resample_t2_to_crop:
             desc="preproc",
         ),
         ref=bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
             space="{native_modality}",

@@ -281,39 +281,7 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    ruleorder: laplace_beltrami > laynii_layers_equidist > laynii_layers_equivol > copy_coords_to_results
-
-    rule copy_coords_to_results:
-        input:
-            os.path.join(work, "{pre}_space-corobl_{post}{suffix}.{ext}"),
-        output:
-            os.path.join(root, "{pre,[^/].+}_space-corobl_{post}{suffix,coords}.{ext}"),
-        group:
-            "subj"
-        shell:
-            "cp {input} {output}"
-
-    rule copy_xfm_to_results:
-        input:
-            os.path.join(work, "{pre}_{fromto}-corobl_{post}{suffix}.{ext}"),
-        output:
-            os.path.join(
-                root, "{pre,[^/].+}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"
-            ),
-        group:
-            "subj"
-        shell:
-            "cp {input} {output}"
-
-    rule copy_subfields_to_results:
-        input:
-            os.path.join(work, "{pre}_desc-subfields_{post}{suffix}.{ext}"),
-        output:
-            os.path.join(root, "{pre,[^/].+}_desc-subfields_{post}{suffix,dseg}.{ext}"),
-        group:
-            "subj"
-        shell:
-            "cp {input} {output}"
+    ruleorder: laplace_beltrami > laynii_layers_equidist > laynii_layers_equivol
 
 
 def get_cifti_metric_types(label):
@@ -400,7 +368,7 @@ def get_create_atlas_output():
 def get_input_for_shape_inject(wildcards):
     if config["modality"] == "dsegtissue":
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -409,7 +377,7 @@ def get_input_for_shape_inject(wildcards):
         ).format(**wildcards)
     else:
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",

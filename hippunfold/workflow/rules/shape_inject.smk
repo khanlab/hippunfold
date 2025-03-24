@@ -5,7 +5,7 @@
 def get_input_splitseg_for_shape_inject(wildcards):
     if config["modality"] == "dsegtissue":
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dsegsplit",
@@ -14,7 +14,7 @@ def get_input_splitseg_for_shape_inject(wildcards):
         ).format(**wildcards)
     else:
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dsegsplit",
@@ -92,7 +92,7 @@ def get_inject_scaling_opt(wildcards):
 rule resample_template_dseg_tissue_for_reg:
     input:
         template_seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             space="template",
             **inputs.subj_wildcards,
@@ -106,14 +106,16 @@ rule resample_template_dseg_tissue_for_reg:
         ),
         crop_cmd="-trim 5vox",  #leave 5 voxel padding
     output:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            desc="hipptissueresampled",
-            hemi="{hemi}",
-            suffix="dseg.nii.gz",
+        template_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                desc="hipptissueresampled",
+                hemi="{hemi}",
+                suffix="dseg.nii.gz",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -128,7 +130,7 @@ rule resample_template_dseg_tissue_for_reg:
 rule template_shape_reg:
     input:
         template_seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             space="template",
             **inputs.subj_wildcards,
@@ -144,7 +146,7 @@ rule template_shape_reg:
         img_pairs=get_image_pairs,
     output:
         matrix=bids(
-            root=work,
+            root=root,
             **inputs.subj_wildcards,
             suffix="xfm.txt",
             datatype="warps",
@@ -155,16 +157,18 @@ rule template_shape_reg:
             type_="ras",
             hemi="{hemi}",
         ),
-        warp=bids(
-            root=work,
-            **inputs.subj_wildcards,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="greedy",
-            from_="template",
-            to="subject",
-            space="corobl",
-            hemi="{hemi}",
+        warp=temp(
+            bids(
+                root=root,
+                **inputs.subj_wildcards,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="greedy",
+                from_="template",
+                to="subject",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     group:
         "subj"
@@ -191,7 +195,7 @@ rule dilate_dentate_pd_src_sink:
     as they are very small. This dilates them into relative background labels"""
     input:
         template_seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             space="template",
             **inputs.subj_wildcards,
@@ -206,14 +210,16 @@ rule dilate_dentate_pd_src_sink:
         sink_bg=10,
         struc_elem_size=3,
     output:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            desc="hipptissuedilated",
-            hemi="{hemi}",
-            suffix="dseg.nii.gz",
+        template_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                desc="hipptissuedilated",
+                hemi="{hemi}",
+                suffix="dseg.nii.gz",
+            )
         ),
     group:
         "subj"
@@ -228,7 +234,7 @@ rule dilate_dentate_pd_src_sink:
 rule template_shape_inject:
     input:
         template_seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             space="template",
             **inputs.subj_wildcards,
@@ -237,7 +243,7 @@ rule template_shape_inject:
             suffix="dseg.nii.gz",
         ),
         upsampled_ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="ref.nii.gz",
@@ -247,7 +253,7 @@ rule template_shape_inject:
             hemi="{hemi}",
         ),
         matrix=bids(
-            root=work,
+            root=root,
             **inputs.subj_wildcards,
             suffix="xfm.txt",
             datatype="warps",
@@ -259,7 +265,7 @@ rule template_shape_inject:
             hemi="{hemi}",
         ),
         warp=bids(
-            root=work,
+            root=root,
             **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
@@ -272,15 +278,17 @@ rule template_shape_inject:
     params:
         interp_opt="-ri LABEL 0.1mm",  # smoothing sigma = 100micron
     output:
-        inject_seg=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="inject",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
+        inject_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="inject",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+            )
         ),
     log:
         bids(
@@ -305,7 +313,7 @@ rule inject_init_laplace_coords:
     """ TODO: this may not be needed anymore """
     input:
         upsampled_ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="ref.nii.gz",
@@ -315,7 +323,7 @@ rule inject_init_laplace_coords:
             label="{label}",
         ),
         matrix=bids(
-            root=work,
+            root=root,
             **inputs.subj_wildcards,
             suffix="xfm.txt",
             datatype="warps",
@@ -327,7 +335,7 @@ rule inject_init_laplace_coords:
             hemi="{hemi}",
         ),
         warp=bids(
-            root=work,
+            root=root,
             **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
@@ -338,7 +346,7 @@ rule inject_init_laplace_coords:
             hemi="{hemi}",
         ),
         coords=bids(
-            root=work,
+            root=root,
             datatype="coords",
             **inputs.subj_wildcards,
             dir="{dir}",
@@ -351,16 +359,18 @@ rule inject_init_laplace_coords:
     params:
         interp_opt="-ri LIN",
     output:
-        init_coords=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="{label}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="corobl",
-            hemi="{hemi}",
+        init_coords=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                **inputs.subj_wildcards,
+                dir="{dir}",
+                label="{label}",
+                suffix="coords.nii.gz",
+                desc="init",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     log:
         bids(
@@ -391,7 +401,7 @@ rule reinsert_subject_labels:
                 4) and add this to retained labels"""
     input:
         inject_seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -406,15 +416,17 @@ rule reinsert_subject_labels:
             str(label) for label in config["shape_inject"]["labels_reinsert"]
         ),
     output:
-        postproc_seg=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
+        postproc_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="postproc",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+            )
         ),
     group:
         "subj"
