@@ -331,7 +331,7 @@ rule make_metric_ref:
         "c2d {input} -resample {wildcards.downsample}% -threshold 0.1 inf 1 0 -o {output}"
 
 
-rule gen_atlas_unfold_mesh:
+rule gen_unfold_atlas_mesh:
     input:
         metric_ref=bids_atlas(
             root=work,
@@ -358,7 +358,7 @@ rule gen_atlas_unfold_mesh:
     conda:
         conda_env("pyvista")
     script:
-        "../scripts/gen_atlas_unfold_mesh.py"
+        "../scripts/gen_unfold_atlas_mesh.py"
 
 
 rule avgtemplate_metric_vol_to_surf:
