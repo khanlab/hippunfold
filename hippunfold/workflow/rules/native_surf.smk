@@ -81,16 +81,6 @@ rule gen_native_mesh:
                 **inputs.subj_wildcards,
             )
         ),
-    log:
-        surf_gii=bids(
-            root="logs",
-            suffix="{surfname,midthickness}.txt",
-            space="corobl",
-            desc="gen_isosurf",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
     group:
         "subj"
     container:
@@ -531,14 +521,12 @@ rule space_unfold_vertices:
     group:
         "subj"
     log:
-        bids(
-            root="logs",
-            suffix="log.txt",
-            datatype="space_unfold_vertices",
-            hemi="{hemi}",
-            label="{label}",
+        bids_log_wrapper(
+            "space_unfold_vertices", 
             **inputs.subj_wildcards,
-        ),
+            hemi="{hemi}", 
+            label="{label}"
+        )
     script:
         "../scripts/space_unfold_vertices.py"
 
@@ -575,14 +563,6 @@ rule unfold_surface_smoothing:
         conda_env("workbench")
     group:
         "subj"
-    log:
-        bids_log_wrapper(
-            "heavy_smooth_unfold_surf",
-            **inputs.subj_wildcards,
-            hemi="{hemi}",
-            label="{label}",
-            desc="{surfname}"
-        ),
     shell:
         "wb_command -surface-smoothing {input} {params} {output}"
 
@@ -707,19 +687,6 @@ rule register_midthickness:
                 dir="IO",
                 label="{label}",
                 suffix="xfm.nii.gz",
-                to="{inout}",
-                space="corobl",
-                hemi="{hemi}",
-                **inputs.subj_wildcards,
-            )
-        ),
-    log:
-        warp=temp(
-            bids(
-                root="logs",
-                dir="IO",
-                label="{label}",
-                suffix="xfm.txt",
                 to="{inout}",
                 space="corobl",
                 hemi="{hemi}",
@@ -885,12 +852,23 @@ rule warp_midthickness_to_inout:
         "minimal"
     group:
         "subj"
-    shell:
-        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear && "
-        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
-        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
-        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
-
+    log: 
+        bids_log_wrapper(
+            "warp_midthickness_to_inout", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}",
+            to="{surfname}"
+        )
+    shell: 
+        """
+        (
+            wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear &&
+            wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii &&
+            wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii &&
+            wb_command -surface-set-coordinates {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}
+        ) &> {log}
+        """
 
 # --- affine transforming anatomical surfaces from corobl to other (T1w, T2w) spaces
 

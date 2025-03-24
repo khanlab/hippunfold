@@ -316,13 +316,12 @@ rule unfoldreg_antsquick:
     group:
         "subj"
     log:
-        bids(
-            root="logs",
-            suffix="unfoldreg.txt",
+        bids_log_wrapper(
+            "unfoldreg_antsquick",
+            **inputs.subj_wildcards,
             atlas="{atlas}",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards,
         ),
     shadow:
         "minimal"
@@ -372,15 +371,6 @@ rule unfoldreg_greedy:
         "../envs/greedy.yaml"
     group:
         "subj"
-    log:
-        bids(
-            root="logs",
-            suffix="unfoldreg_greedy.txt",
-            atlas="{atlas}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
     shadow:
         "minimal"
     threads: 16
@@ -528,8 +518,21 @@ rule warp_unfold_native_to_unfoldreg:
         "subj"
     shadow:
         "minimal"
+    log:
+        bids_log_wrapper(
+            "warp_unfold_native_to_unfoldreg", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}",
+            to="{surfname}"
+        )
     shell:
-        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear && "
-        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
-        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
-        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
+        """
+        (
+            wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear &&
+            wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii &&
+            wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii &&
+            wb_command -surface-set-coordinates {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}
+        ) &> {log}
+        """
+

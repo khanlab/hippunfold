@@ -282,7 +282,7 @@ rule template_shape_inject:
             label="{label}",
         ),
     log:
-        bids(
+        bids_log_wrapper(
             "template_shape_inject",
             **inputs.subj_wildcards,
             hemi="{hemi}",
@@ -361,7 +361,7 @@ rule inject_init_laplace_coords:
             hemi="{hemi}",
         ),
     log:
-        bids(
+        bids_log_wrapper(
             "inject_init_laplace_coords",
             **inputs.subj_wildcards,
             dir="{dir}",

@@ -302,7 +302,7 @@ rule laynii_layers_equidist:
             "laynii_layers_equidist",
             **inputs.subj_wildcards,
             dir="{dir, IO}",
-            label="{autotop}",
+            label="{label}",
             hemi="{hemi}",
         ),
     group:
@@ -349,7 +349,7 @@ rule laynii_layers_equivol:
             "laynii_layers_equivol",
             **inputs.subj_wildcards,
             dir="{dir, IO}",
-            label="{autotop}",
+            label="{label}",
             hemi="{hemi}",
         ),
     group:
