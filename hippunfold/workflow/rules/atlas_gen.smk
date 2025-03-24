@@ -3,7 +3,7 @@ rule slice_3d_to_2d:
     """This is needed so antsMultivariateTemplateConstruction2 will believe the data is truly 2d"""
     input:
         img=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="{metric}.nii.gz",
             space="unfold",
@@ -12,14 +12,16 @@ rule slice_3d_to_2d:
             **inputs.subj_wildcards,
         ),
     output:
-        img=bids(
-            root=work,
-            datatype="anat",
-            suffix="{metric}.nii.gz",
-            space="unfold2d",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        img=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -44,7 +46,7 @@ rule templategen_subj_csv:
     input:
         metric_nii=expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
                 space="unfold2d",
@@ -58,14 +60,16 @@ rule templategen_subj_csv:
     params:
         cmd=get_cmd_templategen_subj_csv,
     output:
-        metrics_csv=bids(
-            root=work,
-            datatype="anat",
-            suffix="metrics.csv",
-            space="unfold2d",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        metrics_csv=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="metrics.csv",
+                space="unfold2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     shell:
         "{params.cmd}"
@@ -75,7 +79,7 @@ rule template_gen_combined_csv:
     input:
         metrics_csvs=lambda wildcards: inputs[config["modality"]].expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 suffix="metrics.csv",
                 space="unfold2d",
@@ -90,7 +94,7 @@ rule template_gen_combined_csv:
         cmd=lambda wildcards, input, output: f"cat {input.metrics_csvs} > {output.metrics_csv}",
     output:
         metrics_csv=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             desc="combined",
@@ -103,7 +107,7 @@ rule template_gen_combined_csv:
 rule gen_atlas_reg_ants:
     input:
         metrics_csv=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             desc="combined",
@@ -117,7 +121,7 @@ rule gen_atlas_reg_ants:
     output:
         avgtemplate_dir=directory(
             bids_atlas(
-                root=work,
+                root=root,
                 template=config["new_atlas_name"],
                 label="{label}",
                 suffix="antstemplate",
@@ -137,7 +141,7 @@ rule copy_avgtemplate_warps:
     input:
         metric_nii=expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
                 space="unfold2d",
@@ -149,7 +153,7 @@ rule copy_avgtemplate_warps:
             allow_missing=True,
         ),
         avgtemplate_dir=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             suffix="antstemplate",
@@ -165,7 +169,7 @@ rule copy_avgtemplate_warps:
         ),
     output:
         warp=bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="warp.nii.gz",
             from_="unfold",
@@ -174,15 +178,17 @@ rule copy_avgtemplate_warps:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-        invwarp=bids(
-            root=work,
-            datatype="warps",
-            suffix="invwarp.nii.gz",
-            from_="unfold",
-            to=config["new_atlas_name"],
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        invwarp=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                suffix="invwarp.nii.gz",
+                from_="unfold",
+                to=config["new_atlas_name"],
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     shell:
         "cp {params.glob_input_warp} {output.warp} && "
@@ -193,7 +199,7 @@ rule copy_avgtemplate_metric:
     """ copy avgtemplate metric out of avgtemplate folder"""
     input:
         avgtemplate_dir=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             suffix="antstemplate",
@@ -206,7 +212,7 @@ rule copy_avgtemplate_metric:
     output:
         metric=temp(
             bids_atlas(
-                root=work,
+                root=root,
                 template=config["new_atlas_name"],
                 label="{label}",
                 hemi="{hemi}",
@@ -224,7 +230,7 @@ rule reset_header_2d_metric_nii:
     input:
         ref_nii=lambda wildcards: inputs[config["modality"]].expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
                 space="unfold2d",
@@ -237,7 +243,7 @@ rule reset_header_2d_metric_nii:
             **expand_hemi(),
         )[0],
         nii=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             desc="badhdr",
             label="{label}",
@@ -246,7 +252,7 @@ rule reset_header_2d_metric_nii:
         ),
     output:
         nii=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
@@ -264,7 +270,7 @@ rule gen_atlas_surfs:
     input:
         metric_nii=expand(
             bids_atlas(
-                root=work,
+                root=root,
                 template=config["new_atlas_name"],
                 label="{label}",
                 hemi="{hemi}",
@@ -295,7 +301,7 @@ rule gen_atlas_surfs:
 rule avgtemplate_metric_vol_to_surf:
     input:
         metric_nii=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
@@ -328,7 +334,7 @@ rule avgtemplate_metric_vol_to_surf:
 rule warp_subfields_to_avg:
     input:
         img=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="subfields.nii.gz",
             space="unfold2d",
@@ -337,7 +343,7 @@ rule warp_subfields_to_avg:
             **inputs.subj_wildcards,
         ),
         warp=bids(
-            root=work,
+            root=root,
             datatype="warps",
             suffix="warp.nii.gz",
             from_="unfold",
@@ -347,14 +353,16 @@ rule warp_subfields_to_avg:
             **inputs.subj_wildcards,
         ),
     output:
-        img=bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space=config["new_atlas_name"],
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        img=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="subfields.nii.gz",
+                space=config["new_atlas_name"],
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -368,7 +376,7 @@ rule vote_subfield_labels:
     input:
         subfield_niis=lambda wildcards: inputs[config["modality"]].expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 suffix="subfields.nii.gz",
                 space=config["new_atlas_name"],
@@ -382,7 +390,7 @@ rule vote_subfield_labels:
     output:
         subfields_voted=temp(
             bids_atlas(
-                root=work,
+                root=root,
                 template=config["new_atlas_name"],
                 desc="subfields",
                 hemi="{hemi}",
@@ -404,7 +412,7 @@ rule reset_header_2d_subfields_nii:
     input:
         ref_nii=lambda wildcards: inputs[config["modality"]].expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
                 space="unfold2d",
@@ -417,7 +425,7 @@ rule reset_header_2d_subfields_nii:
             **expand_hemi(),
         )[0],
         nii=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
@@ -426,7 +434,7 @@ rule reset_header_2d_subfields_nii:
         ),
     output:
         nii=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
@@ -445,7 +453,7 @@ rule import_avg_subfields_as_label:
     """read in volumetric subfield dseg, used for group_create_atlas only"""
     input:
         vol_dseg=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
@@ -455,7 +463,7 @@ rule import_avg_subfields_as_label:
         label_list=Path(workflow.basedir) / "../resources/atlas-v2/labellist_withdg.txt",
     output:
         label_dseg=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
@@ -475,7 +483,7 @@ rule import_avg_subfields_as_label:
 rule avgtemplate_subfield_voted_vol_to_surf:
     input:
         subfields_nii=bids_atlas(
-            root=work,
+            root=root,
             template=config["new_atlas_name"],
             desc="subfieldswithlbl",
             hemi="{hemi}",
