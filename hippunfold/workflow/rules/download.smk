@@ -54,14 +54,16 @@ rule import_template_dseg:
             ),
         ),
     output:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            desc="hipptissue",
-            hemi="{hemi}",
-            suffix="dseg.nii.gz",
+        template_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                desc="hipptissue",
+                hemi="{hemi}",
+                suffix="dseg.nii.gz",
+            )
         ),
     group:
         "subj"
@@ -93,14 +95,16 @@ rule import_template_dseg_dentate:
             ].format(**wildcards),
         ),
     output:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            desc="dentatetissue",
-            hemi="{hemi}",
-            suffix="dseg.nii.gz",
+        template_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                desc="dentatetissue",
+                hemi="{hemi}",
+                suffix="dseg.nii.gz",
+            )
         ),
     group:
         "subj"
@@ -132,16 +136,18 @@ rule import_template_coords:
             ),
         ),
     output:
-        template_coords=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="{label}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="template",
-            hemi="{hemi}",
+        template_coords=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                **inputs.subj_wildcards,
+                dir="{dir}",
+                label="{label}",
+                suffix="coords.nii.gz",
+                desc="init",
+                space="template",
+                hemi="{hemi}",
+            )
         ),
     group:
         "subj"
@@ -173,14 +179,16 @@ rule import_template_anat:
             ].format(**wildcards),
         ),
     output:
-        template_anat=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **inputs.subj_wildcards,
-            hemi="{hemi}",
-            suffix="{modality}.nii.gz".format(
-                modality=get_modality_suffix(config["modality"])
+        template_anat=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                hemi="{hemi}",
+                suffix="{modality}.nii.gz".format(
+                    modality=get_modality_suffix(config["modality"])
+                ),
             ),
         ),
     group:

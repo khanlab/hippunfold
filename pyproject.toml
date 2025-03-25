@@ -41,6 +41,7 @@ poethepoet = "^0.10.0"
 snakefmt = "^0.10.0"
 [tool.poetry.scripts]
 hippunfold = "hippunfold.run:app.run"
+hippunfold-quick="hippunfold.run_quick:main"
 
 
 [build-system]

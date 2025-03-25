@@ -5,7 +5,14 @@ rule import_t1:
     input:
         in_img=partial(get_single_bids_input, component="T1w"),
     output:
-        bids(root=work, datatype="anat", **inputs.subj_wildcards, suffix="T1w.nii.gz"),
+        temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="T1w.nii.gz",
+            )
+        ),
     group:
         "subj"
     shell:
@@ -35,7 +42,7 @@ else:
     rule n4_t1:
         input:
             t1=bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 **inputs.subj_wildcards,
                 suffix="T1w.nii.gz",
@@ -71,7 +78,7 @@ rule warp_t1_to_corobl_crop:
             suffix="T1w.nii.gz",
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -87,14 +94,16 @@ rule warp_t1_to_corobl_crop:
             **wildcards, modality="T1w"
         ),
     output:
-        t1=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="T1w.nii.gz",
-            space="corobl",
-            desc="preproc",
-            hemi="{hemi,L|R}",
+        t1=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="T1w.nii.gz",
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi,L|R}",
+            )
         ),
     container:
         config["singularity"]["autotop"]

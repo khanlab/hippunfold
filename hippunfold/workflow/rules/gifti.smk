@@ -23,7 +23,7 @@ surf_to_secondary_type = {
 rule affine_gii_to_native:
     input:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -33,7 +33,7 @@ rule affine_gii_to_native:
             **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
