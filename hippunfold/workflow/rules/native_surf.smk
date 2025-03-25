@@ -1121,38 +1121,6 @@ def get_unfold_ref(wildcards):
     )
 
 
-# --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
-
-
-rule cp_surf_to_root:
-    input:
-        native_resampled=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        native_resampled=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name,midthickness}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    group:
-        "subj"
-    shell:
-        "cp {input} {output}"
-
-
 # --resampling subject native surfs, metrics to new avgatlas mesh:
 
 

@@ -1,3 +1,5 @@
+import pandas as pd
+
 
 rule slice_3d_to_2d:
     """This is needed so antsMultivariateTemplateConstruction2 will believe the data is truly 2d"""
@@ -321,20 +323,22 @@ rule make_metric_ref:
             suffix="gyrification.nii.gz",
         ),
     output:
-        metric_ref=bids_atlas(
-            root=root,
-            template=config["new_atlas_name"],
-            label="{label}",
-            hemi="{hemi}",
-            desc="{downsample}x",
-            suffix="metricref.nii.gz",
+        metric_ref=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                resample="{resample}",
+                suffix="metricref.nii.gz",
+            )
         ),
     container:
         config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     shell:
-        "c2d {input} -resample {wildcards.downsample}% -threshold 0.1 inf 1 0 -o {output}"
+        "c2d {input} -resample {wildcards.resample}% -threshold 0.1 inf 1 0 -o {output}"
 
 
 rule gen_unfold_atlas_mesh:
@@ -344,20 +348,22 @@ rule gen_unfold_atlas_mesh:
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            desc="{downsample}x",
+            resample="{resample}",
             suffix="metricref.nii.gz",
         ),
     params:
         z_level=get_unfold_z_level,
     output:
-        surf_gii=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["new_atlas_name"],
-            label="{label}",
-            den="{downsample}x",
-            space="unfold",
-            hemi="{hemi}",
-            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+        surf_gii=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                resample="{resample}",
+                space="unfold",
+                hemi="{hemi}",
+                suffix="{surfname,midthickness|inner|outer}.surf.gii",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -365,6 +371,72 @@ rule gen_unfold_atlas_mesh:
         conda_env("pyvista")
     script:
         "../scripts/gen_unfold_atlas_mesh.py"
+
+
+checkpoint resample_to_density_mapping:
+    input:
+        surf_giis=expand(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                resample="{resample}",
+                space="unfold",
+                hemi="{hemi}",
+                suffix="midthickness.surf.gii",
+            ),
+            label=config["autotop_labels"],
+            hemi=config["hemi"],
+            resample=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200],
+        ),
+    output:
+        mapping_csv=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            desc="resample2density",
+            suffix="mapping.csv",
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("pyvista")
+    script:
+        "../scripts/resample_to_density_mapping.py"
+
+
+def get_unfold_mesh_resample(wildcards):
+    with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
+        df = pd.read_csv(f)
+
+    result = df.loc[df["density"] == wildcards.density, "resample"]
+    resample = result.values[0]
+
+    return bids_atlas(
+        root=root,
+        template=config["new_atlas_name"],
+        label="{label}",
+        resample="{resample}",
+        space="unfold",
+        hemi="{hemi}",
+        suffix="{surfname}.surf.gii",
+    ).format(resample=resample, **wildcards)
+
+
+rule copy_unfold_mesh_resample_to_density:
+    input:
+        get_unfold_mesh_resample,
+    output:
+        surf_gii=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            hemi="{hemi}",
+            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+        ),
+    shell:
+        "cp {input} {output}"
 
 
 rule avgtemplate_metric_vol_to_surf:
@@ -381,7 +453,7 @@ rule avgtemplate_metric_vol_to_surf:
             template=config["new_atlas_name"],
             label="{label}",
             space="unfold",
-            den="{downsample}x",
+            den="{density}",
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
@@ -390,7 +462,7 @@ rule avgtemplate_metric_vol_to_surf:
             root=get_atlas_dir(),
             template=config["new_atlas_name"],
             label="{label}",
-            den="{downsample}x",
+            den="{density}",
             hemi="{hemi}",
             suffix="{metric}.shape.gii",
         ),
@@ -472,7 +544,7 @@ rule resample_subj_native_surf_to_avg:
             template=config["new_atlas_name"],
             label="{label}",
             space="unfold",
-            den="{downsample}x",
+            den="{density}",
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
@@ -482,7 +554,7 @@ rule resample_subj_native_surf_to_avg:
             datatype="surf",
             label="{label}",
             space="corobl",
-            den="{downsample}x",
+            den="{density}",
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
             **inputs.subj_wildcards,
@@ -659,7 +731,7 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             template=config["new_atlas_name"],
             label="{label}",
             space="unfold",
-            den="{downsample}x",
+            den="{density}",
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
@@ -668,7 +740,7 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             root=get_atlas_dir(),
             template=config["new_atlas_name"],
             label="{label}",
-            den="{downsample}x",
+            den="{density}",
             hemi="{hemi}",
             suffix="dseg.label.gii",
         ),
@@ -680,49 +752,69 @@ rule avgtemplate_subfield_voted_vol_to_surf:
         "wb_command -volume-label-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii}"
 
 
+# input function for the rule aggregate
+def get_atlas_inputs(wildcards):
+
+    files = []
+
+    with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
+        df = pd.read_csv(f)
+        # pick out all of them for now - in future could optimally assign
+        for label in config["autotop_labels"]:
+            for hemi in config["hemi"]:
+
+                density = df.query("hemi==@hemi and label==@label")["density"].to_list()
+
+                files.extend(
+                    expand(
+                        bids_atlas(
+                            root=get_atlas_dir(),
+                            template=config["new_atlas_name"],
+                            label=label,
+                            hemi=hemi,
+                            den="{density}",
+                            suffix="{metric}.shape.gii",
+                        ),
+                        metric=config["atlas_metrics"],
+                        density=density,
+                    )
+                )
+                files.extend(
+                    expand(
+                        bids_atlas(
+                            root=get_atlas_dir(),
+                            template=config["new_atlas_name"],
+                            label=label,
+                            hemi=hemi,
+                            den="{density}",
+                            space="unfold",
+                            suffix="{surfname}.surf.gii",
+                        ),
+                        surfname=["inner", "outer", "midthickness"],
+                        density=density,
+                    )
+                )
+                if label == "hipp":
+                    files.extend(
+                        expand(
+                            bids_atlas(
+                                root=get_atlas_dir(),
+                                template=config["new_atlas_name"],
+                                label="hipp",
+                                hemi=hemi,
+                                den="{density}",
+                                suffix="dseg.label.gii",
+                            ),
+                            density=density,
+                        )
+                    )
+
+    return files
+
+
 rule write_template_json:
     input:
-        metrics=expand(
-            bids_atlas(
-                root=get_atlas_dir(),
-                template=config["new_atlas_name"],
-                label="{label}",
-                hemi="{hemi}",
-                den="{downsample}x",
-                suffix="{metric}.shape.gii",
-            ),
-            hemi=config["hemi"],
-            label=config["autotop_labels"],
-            metric=config["atlas_metrics"],
-            downsample=[100, 50, 25, 10, 5],
-        ),
-        surfs=expand(
-            bids_atlas(
-                root=get_atlas_dir(),
-                template=config["new_atlas_name"],
-                label="{label}",
-                hemi="{hemi}",
-                den="{downsample}x",
-                space="unfold",
-                suffix="{surfname}.surf.gii",
-            ),
-            hemi=config["hemi"],
-            label=config["autotop_labels"],
-            surfname=["inner", "outer", "midthickness"],
-            downsample=[100, 50, 25, 10, 5],
-        ),
-        labels=expand(
-            bids_atlas(
-                root=get_atlas_dir(),
-                template=config["new_atlas_name"],
-                label="hipp",
-                den="{downsample}x",
-                hemi="{hemi}",
-                suffix="dseg.label.gii",
-            ),
-            hemi=config["hemi"],
-            downsample=[100, 50, 25, 10, 5],
-        ),
+        get_atlas_inputs,
     params:
         template_description={
             "Identifier": config["new_atlas_name"],
