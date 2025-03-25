@@ -284,7 +284,7 @@ rule reset_header_2d_warp_nii:
         nii=bids(
             root=root,
             datatype="warps",
-            suffix="warp.nii.gz",
+            suffix="{warpsuffix}.nii.gz",
             from_="unfold",
             to=config["new_atlas_name"],
             hemi="{hemi}",
@@ -295,7 +295,7 @@ rule reset_header_2d_warp_nii:
         nii=bids(
             root=root,
             datatype="warps",
-            suffix="warp.nii.gz",
+            suffix="{warpsuffix,warp|invwarp}.nii.gz",
             from_="unfold",
             to=config["new_atlas_name"],
             hemi="{hemi}",
@@ -416,7 +416,7 @@ rule warp_subj_unfold_surf_to_avg:
         warp=bids(
             root=root,
             datatype="warps",
-            suffix="warp.nii.gz",
+            suffix="invwarp.nii.gz",
             from_="unfold",
             to=config["new_atlas_name"],
             hemi="{hemi}",
@@ -443,7 +443,7 @@ rule warp_subj_unfold_surf_to_avg:
         "wb_command -metric-math '0' zwarp.shape.gii -var DUMMY xywarp.shape.gii -column 1 && "
         "wb_command -metric-merge xyzwarp.shape.gii -metric xywarp.shape.gii  -metric zwarp.shape.gii && "
         "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
-        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP xyzwarp.shape.gii && "
+        "wb_command -metric-math 'COORDS - WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP xyzwarp.shape.gii && "
         "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
 
 
