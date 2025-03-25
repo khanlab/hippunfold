@@ -627,3 +627,9 @@ laminar_coords_res:
   dentate: 0.1x0.1x0.1mm
 
 resample_dseg_for_templatereg: 0.3x0.3x0.3mm
+
+density: #temporary var
+  hipp: 
+    - 7k
+  dentate:
+    - 1k

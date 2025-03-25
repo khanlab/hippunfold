@@ -135,7 +135,8 @@ def get_inputs_cifti_label(wildcards):
             bids(
                 root=root,
                 datatype="surf",
-                den="{atlas}",
+                den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="L",
@@ -148,7 +149,8 @@ def get_inputs_cifti_label(wildcards):
             bids(
                 root=root,
                 datatype="surf",
-                den="{atlas}",
+                den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="R",
@@ -177,7 +179,8 @@ rule create_dlabel_cifti_subfields:
         cifti=bids(
             root=root,
             datatype="surf",
-            den="{atlas}",
+            den="{density}",
+            atlas="{atlas}",
             suffix="subfields.dlabel.nii",
             space="{space}",
             label="hipp",
@@ -227,7 +230,8 @@ rule create_spec_file_hipp:
             bids(
                 root=root,
                 datatype="surf",
-                den="{atlas}",
+                den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
                 space="{space}",
                 hemi="{hemi}",
@@ -269,7 +273,8 @@ rule create_spec_file_hipp:
             bids(
                 root=root,
                 datatype="surf",
-                den="{atlas}",
+                den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.dlabel.nii",
                 space="{space}",
                 label="{label}",
