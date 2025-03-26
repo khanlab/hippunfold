@@ -1179,7 +1179,8 @@ rule resample_native_surf_to_atlas_density:
             hemi="{hemi}", 
             label="{label}",
             space="{space}",
-            desec="{surf_name}"
+            den="{density}",
+            desc="{surf_name}"
         )
     shell:
         "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check &> {log}"
@@ -1231,7 +1232,7 @@ rule resample_native_metric_to_atlas_density:
             label="{label}",
             space="{space}",
             den="{density}",
-            desec="{metric}-{metrictype}"
+            desc="{metric}-{metrictype}"
         )
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
