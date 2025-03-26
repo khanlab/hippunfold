@@ -2,11 +2,13 @@ rule import_t2:
     input:
         inputs["T2w"].path,
     output:
-        bids(
-            root=work,
-            datatype="anat",
-            suffix="T2w.nii.gz",
-            **inputs["T2w"].wildcards,
+        temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="T2w.nii.gz",
+                **inputs["T2w"].wildcards,
+            )
         ),
     group:
         "subj"
@@ -17,18 +19,20 @@ rule import_t2:
 rule n4_t2:
     input:
         bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="T2w.nii.gz",
             **inputs["T2w"].wildcards,
         ),
     output:
-        bids(
-            root=work,
-            datatype="anat",
-            desc="n4",
-            suffix="T2w.nii.gz",
-            **inputs["T2w"].wildcards,
+        temp(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="n4",
+                suffix="T2w.nii.gz",
+                **inputs["T2w"].wildcards,
+            )
         ),
     threads: 8
     container:
@@ -49,7 +53,7 @@ def get_ref_n4_t2(wildcards):
         .filter(**wildcards)
         .expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 desc="n4",
                 suffix="T2w.nii.gz",
@@ -67,7 +71,7 @@ def get_floating_n4_t2(wildcards):
         .filter(**wildcards)
         .expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 suffix="T2w.nii.gz",
                 desc="n4",
@@ -84,7 +88,7 @@ rule reg_t2_to_ref:
         flo=get_floating_n4_t2,
     output:
         xfm_ras=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -93,13 +97,15 @@ rule reg_t2_to_ref:
             desc="rigid",
             type_="ras",
         ),
-        warped=bids(
-            root=work,
-            datatype="anat",
-            suffix="T2w.nii.gz",
-            desc="aligned",
-            floating="{idx}",
-            **inputs.subj_wildcards,
+        warped=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="T2w.nii.gz",
+                desc="aligned",
+                floating="{idx}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -114,7 +120,7 @@ rule reg_t2_to_ref:
 rule ras_to_itk_reg_t2:
     input:
         xfm_ras=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -124,15 +130,17 @@ rule ras_to_itk_reg_t2:
             type_="ras",
         ),
     output:
-        xfm_itk=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="T2w{idx}",
-            to="T2w0",
-            desc="rigid",
-            type_="itk",
+        xfm_itk=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T2w{idx}",
+                to="T2w0",
+                desc="rigid",
+                type_="itk",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -154,7 +162,7 @@ def get_aligned_n4_t2(wildcards):
         .filter(**wildcards)
         .expand(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
                 desc="aligned",
                 floating="{idx}",
@@ -238,15 +246,17 @@ rule reg_t2_to_t1_part1:
             desc="preproc",
             space="T1w",
         ),
-        xfm_ras=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="T2w",
-            to="T1w",
-            desc="rigid",
-            type_="ras",
+        xfm_ras=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T2w",
+                to="T1w",
+                desc="rigid",
+                type_="ras",
+            )
         ),
     log:
         bids_log_wrapper(
@@ -266,7 +276,7 @@ rule reg_t2_to_t1_part1:
 rule reg_t2_to_t1_part2:
     input:
         xfm_ras=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -276,15 +286,17 @@ rule reg_t2_to_t1_part2:
             type_="ras",
         ),
     output:
-        xfm_itk=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="T2w",
-            to="T1w",
-            desc="rigid",
-            type_="itk",
+        xfm_itk=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T2w",
+                to="T1w",
+                desc="rigid",
+                type_="itk",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -302,7 +314,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         # xfm1: t1 to corobl
         t2_to_t1 = (
             bids(
-                root=work,
+                root=root,
                 datatype="warps",
                 **inputs.subj_wildcards,
                 suffix="xfm.txt",
@@ -314,7 +326,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         )
         t1_to_cor = (
             bids(
-                root=work,
+                root=root,
                 datatype="warps",
                 **inputs.subj_wildcards,
                 suffix="xfm.txt",
@@ -330,7 +342,7 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         # xfm0: t2 to template
         t2_to_std = (
             bids(
-                root=work,
+                root=root,
                 datatype="warps",
                 **inputs.subj_wildcards,
                 suffix="xfm.txt",
@@ -370,15 +382,17 @@ rule compose_t2_xfm_corobl:
     params:
         cmd=get_cmd_compose_t2_xfm_corobl,
     output:
-        t2_to_cor=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="T2w",
-            to="corobl",
-            desc="affine",
-            type_="itk",
+        t2_to_cor=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T2w",
+                to="corobl",
+                desc="affine",
+                type_="itk",
+            )
         ),
     log:
         bids_log_wrapper(
@@ -399,7 +413,7 @@ rule compose_t2_xfm_corobl:
 def get_xfm_to_corobl():
     if config["skip_coreg"]:
         xfm = bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -411,7 +425,7 @@ def get_xfm_to_corobl():
     else:
         xfm = (
             bids(
-                root=work,
+                root=root,
                 datatype="warps",
                 **inputs.subj_wildcards,
                 suffix="xfm.txt",
@@ -440,14 +454,16 @@ rule warp_t2_to_corobl_crop:
         ref=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="T2w.nii.gz",
-            space="corobl",
-            desc="preproc",
-            hemi="{hemi,L|R}",
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="T2w.nii.gz",
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi,L|R}",
+            )
         ),
     container:
         config["singularity"]["autotop"]

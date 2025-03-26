@@ -4,14 +4,16 @@ rule import_dseg_subfields:
         vol_dseg=partial(get_single_bids_input, component="dsegsubfields"),
         label_list=Path(workflow.basedir) / "../resources/atlas-v2/labellist_withdg.txt",
     output:
-        label_dseg=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            desc="subfields",
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi,L|R}",
+        label_dseg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                desc="subfields",
+                suffix="dseg.nii.gz",
+                space="corobl",
+                hemi="{hemi,L|R}",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -26,7 +28,7 @@ rule import_dseg_subfields:
 rule subfields_to_label_gifti:
     input:
         vol=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             desc="subfields",
@@ -35,7 +37,7 @@ rule subfields_to_label_gifti:
             hemi="{hemi}",
         ),
         surf_gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
@@ -101,7 +103,7 @@ rule native_label_gii_to_unfold_nii:
             **inputs.subj_wildcards,
         ),
         ref_nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="refvol.nii.gz",
             space="unfold",
@@ -113,14 +115,16 @@ rule native_label_gii_to_unfold_nii:
     params:
         interp="-nearest-vertex 0.3",
     output:
-        label_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        label_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="subfields.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -174,16 +178,18 @@ rule label_subfields_from_vol_coords_corobl:
             **inputs.subj_wildcards,
         ),
     output:
-        nii_label=bids(
-            root=work,
-            datatype="anat",
-            desc="subfieldsnotissue",
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-            atlas="{atlas}",
-            label="{label,hipp}",
-            **inputs.subj_wildcards,
+        nii_label=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="subfieldsnotissue",
+                suffix="dseg.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                atlas="{atlas}",
+                label="{label,hipp}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -229,7 +235,7 @@ rule combine_tissue_subfield_labels_corobl:
     input:
         tissue=get_labels_for_laplace,
         subfields=bids(
-            root=work,
+            root=root,
             datatype="anat",
             desc="subfieldsnotissue",
             suffix="dseg.nii.gz",
@@ -242,16 +248,18 @@ rule combine_tissue_subfield_labels_corobl:
     params:
         remap=get_tissue_atlas_remapping,
     output:
-        combined=bids(
-            root=work,
-            datatype="anat",
-            desc="subfields",
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label,hipp}",
-            atlas="{atlas}",
-            **inputs.subj_wildcards,
+        combined=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="subfields",
+                suffix="dseg.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label,hipp}",
+                atlas="{atlas}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -267,7 +275,7 @@ rule resample_subfields_to_native:
     """Resampling to native space"""
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
@@ -278,7 +286,7 @@ rule resample_subfields_to_native:
             **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -321,7 +329,7 @@ rule resample_postproc_to_native:
     """Resample post-processed tissue seg to native"""
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -331,7 +339,7 @@ rule resample_postproc_to_native:
             label=config["autotop_labels"][-1],
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -348,14 +356,16 @@ rule resample_postproc_to_native:
             suffix="{native_modality}.nii.gz",
         ),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="{native_modality,T2w|T2w}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="postproc",
+                space="{native_modality,T2w|T2w}",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -372,7 +382,7 @@ rule resample_unet_to_native:
     """Resample unet tissue seg to native"""
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -381,7 +391,7 @@ rule resample_unet_to_native:
             hemi="{hemi}",
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -398,14 +408,16 @@ rule resample_unet_to_native:
             suffix="{native_modality}.nii.gz",
         ),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="unet",
-            space="{native_modality,T1w|T2w}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="unet",
+                space="{native_modality,T1w|T2w}",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -422,7 +434,7 @@ rule resample_subfields_to_unfold:
     """Resampling to unfold space"""
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
@@ -432,7 +444,7 @@ rule resample_subfields_to_unfold:
             **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.nii.gz",

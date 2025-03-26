@@ -15,7 +15,7 @@ ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
 rule gen_native_mesh:
     input:
         coords=lambda wildcards: bids(
-            root=work,
+            root=root,
             datatype="coords",
             dir="IO",
             label="{label}",
@@ -26,7 +26,7 @@ rule gen_native_mesh:
             **inputs.subj_wildcards,
         ),
         nan_mask=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
@@ -37,7 +37,7 @@ rule gen_native_mesh:
             **inputs.subj_wildcards,
         ),
         sink_mask=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
@@ -48,7 +48,7 @@ rule gen_native_mesh:
             **inputs.subj_wildcards,
         ),
         src_mask=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
@@ -70,15 +70,17 @@ rule gen_native_mesh:
         coords_epsilon=0.1,
     output:
         surf_gii=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                suffix="{surfname,midthickness}.surf.gii",
-                space="corobl",
-                desc="nostruct",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
+            temp(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    suffix="{surfname,midthickness}.surf.gii",
+                    space="corobl",
+                    desc="nostruct",
+                    hemi="{hemi}",
+                    label="{label}",
+                    **inputs.subj_wildcards,
+                )
             )
         ),
     group:
@@ -102,7 +104,7 @@ rule gen_native_mesh:
 rule update_native_mesh_structure:
     input:
         surf_gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="{surfname}.surf.gii",
             space="{space}",
@@ -116,14 +118,16 @@ rule update_native_mesh_structure:
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="ANATOMICAL",
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname,midthickness|inner|outer}.surf.gii",
-            space="{space,corobl|unfold}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname,midthickness|inner|outer}.surf.gii",
+                space="{space,corobl|unfold}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -152,15 +156,17 @@ rule smooth_surface:
         smoothing_strength=0.8,
         smoothing_iterations=10,
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname}.surf.gii",
-            space="corobl",
-            desc="smoothed",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname}.surf.gii",
+                space="corobl",
+                desc="smoothed",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -187,14 +193,16 @@ rule get_boundary_vertices:
             **inputs.subj_wildcards,
         ),
     output:
-        label_gii=bids(
-            root=work,
-            datatype="coords",
-            suffix="boundary.label.gii",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        label_gii=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                suffix="boundary.label.gii",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"
@@ -226,7 +234,7 @@ rule map_src_sink_sdt_to_surf:
             **inputs.subj_wildcards,
         ),
         sdt=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="sdt.nii.gz",
             space="corobl",
@@ -237,16 +245,18 @@ rule map_src_sink_sdt_to_surf:
             **inputs.subj_wildcards,
         ),
     output:
-        sdt=bids(
-            root=work,
-            datatype="coords",
-            suffix="sdt.shape.gii",
-            space="corobl",
-            hemi="{hemi}",
-            dir="{dir}",
-            desc="{srcsink}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        sdt=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                suffix="sdt.shape.gii",
+                space="corobl",
+                hemi="{hemi}",
+                dir="{dir}",
+                desc="{srcsink}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -262,7 +272,7 @@ rule postproc_boundary_vertices:
     """ ensures non-overlapping and full labelling of AP/PD edges """
     input:
         ap_src=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
@@ -273,7 +283,7 @@ rule postproc_boundary_vertices:
             **inputs.subj_wildcards,
         ),
         ap_sink=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
@@ -284,7 +294,7 @@ rule postproc_boundary_vertices:
             **inputs.subj_wildcards,
         ),
         pd_src=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
@@ -295,7 +305,7 @@ rule postproc_boundary_vertices:
             **inputs.subj_wildcards,
         ),
         pd_sink=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="sdt.shape.gii",
             space="corobl",
@@ -306,7 +316,7 @@ rule postproc_boundary_vertices:
             **inputs.subj_wildcards,
         ),
         edges=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="boundary.label.gii",
             space="corobl",
@@ -320,7 +330,7 @@ rule postproc_boundary_vertices:
         shifting_epsilon=0.1,  #could be proportional to voxel spacing
     output:
         ap=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.label.gii",
             space="corobl",
@@ -330,16 +340,18 @@ rule postproc_boundary_vertices:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-        pd=bids(
-            root=work,
-            datatype="coords",
-            suffix="mask.label.gii",
-            space="corobl",
-            hemi="{hemi}",
-            dir="PD",
-            desc="srcsink",
-            label="{label}",
-            **inputs.subj_wildcards,
+        pd=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                suffix="mask.label.gii",
+                space="corobl",
+                hemi="{hemi}",
+                dir="PD",
+                desc="srcsink",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -370,7 +382,7 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
         src_sink_mask=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.label.gii",
             space="corobl",
@@ -381,16 +393,18 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
     output:
-        coords=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir}",
-            suffix="coords.shape.gii",
-            desc="laplace",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        coords=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                dir="{dir}",
+                suffix="coords.shape.gii",
+                desc="laplace",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"
@@ -430,7 +444,7 @@ rule warp_native_mesh_to_unfold:
             **inputs.subj_wildcards,
         ),
         coords_AP=bids(
-            root=work,
+            root=root,
             datatype="coords",
             dir="AP",
             label="{label}",
@@ -441,7 +455,7 @@ rule warp_native_mesh_to_unfold:
             **inputs.subj_wildcards,
         ),
         coords_PD=bids(
-            root=work,
+            root=root,
             datatype="coords",
             dir="PD",
             label="{label}",
@@ -455,15 +469,17 @@ rule warp_native_mesh_to_unfold:
         vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
         z_level=get_unfold_z_level,
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname,midthickness}.surf.gii",
-            desc="nostruct",
-            space="unfolduneven",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname,midthickness}.surf.gii",
+                desc="nostruct",
+                space="unfolduneven",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -482,7 +498,7 @@ rule space_unfold_vertices:
         would be similar to native) """
     input:
         surf_gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="midthickness.surf.gii",
             desc="nostruct",
@@ -492,7 +508,7 @@ rule space_unfold_vertices:
             **inputs.subj_wildcards,
         ),
         native_gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
@@ -504,15 +520,17 @@ rule space_unfold_vertices:
         step_size=0.1,
         max_iterations=10000,
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="midthickness.surf.gii",
-            desc="nostruct",
-            space="unfoldspringmodel",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="midthickness.surf.gii",
+                desc="nostruct",
+                space="unfoldspringmodel",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -534,7 +552,7 @@ rule space_unfold_vertices:
 rule unfold_surface_smoothing:
     input:
         surf_gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="midthickness.surf.gii",
             desc="nostruct",
@@ -547,15 +565,17 @@ rule unfold_surface_smoothing:
         strength=1,
         iterations=5,
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="midthickness.surf.gii",
-            desc="nostruct",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="midthickness.surf.gii",
+                desc="nostruct",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -577,7 +597,7 @@ rule unfold_surface_smoothing:
 rule set_surface_z_level:
     input:
         surf_gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="midthickness.surf.gii",
             desc="nostruct",
@@ -589,15 +609,17 @@ rule set_surface_z_level:
     params:
         z_level=get_unfold_z_level,
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname,inner|outer}.surf.gii",
-            desc="nostruct",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname,inner|outer}.surf.gii",
+                desc="nostruct",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"
@@ -615,7 +637,7 @@ rule set_surface_z_level:
 rule compute_halfthick_mask:
     input:
         coords=lambda wildcards: bids(
-            root=work,
+            root=root,
             datatype="coords",
             dir="IO",
             label="{label}",
@@ -626,7 +648,7 @@ rule compute_halfthick_mask:
             **inputs.subj_wildcards,
         ),
         mask=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
@@ -641,16 +663,18 @@ rule compute_halfthick_mask:
         ),
     output:
         nii=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                dir="IO",
-                label="{label}",
-                suffix="mask.nii.gz",
-                to="{inout}",
-                space="corobl",
-                hemi="{hemi}",
-                **inputs.subj_wildcards,
+            temp(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    dir="IO",
+                    label="{label}",
+                    suffix="mask.nii.gz",
+                    to="{inout}",
+                    space="corobl",
+                    hemi="{hemi}",
+                    **inputs.subj_wildcards,
+                )
             )
         ),
     group:
@@ -666,7 +690,7 @@ rule compute_halfthick_mask:
 rule register_midthickness:
     input:
         fixed=bids(
-            root=work,
+            root=root,
             datatype="surf",
             dir="IO",
             label="{label}",
@@ -677,7 +701,7 @@ rule register_midthickness:
             **inputs.subj_wildcards,
         ),
         moving=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
@@ -688,16 +712,18 @@ rule register_midthickness:
         ),
     output:
         warp=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                dir="IO",
-                label="{label}",
-                suffix="xfm.nii.gz",
-                to="{inout}",
-                space="corobl",
-                hemi="{hemi}",
-                **inputs.subj_wildcards,
+            temp(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    dir="IO",
+                    label="{label}",
+                    suffix="xfm.nii.gz",
+                    to="{inout}",
+                    space="corobl",
+                    hemi="{hemi}",
+                    **inputs.subj_wildcards,
+                )
             )
         ),
     group:
@@ -722,7 +748,7 @@ rule register_midthickness:
 rule apply_halfsurf_warp_to_img:
     input:
         fixed=bids(
-            root=work,
+            root=root,
             datatype="surf",
             dir="IO",
             label="{label}",
@@ -733,7 +759,7 @@ rule apply_halfsurf_warp_to_img:
             **inputs.subj_wildcards,
         ),
         moving=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
@@ -743,7 +769,7 @@ rule apply_halfsurf_warp_to_img:
             **inputs.subj_wildcards,
         ),
         warp=bids(
-            root=work,
+            root=root,
             datatype="surf",
             dir="IO",
             label="{label}",
@@ -755,16 +781,18 @@ rule apply_halfsurf_warp_to_img:
         ),
     output:
         warped=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                dir="IO",
-                label="{label}",
-                suffix="warpedmask.nii.gz",
-                to_="{inout}",
-                space="corobl",
-                hemi="{hemi}",
-                **inputs.subj_wildcards,
+            temp(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    dir="IO",
+                    label="{label}",
+                    suffix="warpedmask.nii.gz",
+                    to_="{inout}",
+                    space="corobl",
+                    hemi="{hemi}",
+                    **inputs.subj_wildcards,
+                )
             )
         ),
     group:
@@ -781,7 +809,7 @@ rule apply_halfsurf_warp_to_img:
 rule convert_inout_warp_from_itk_to_world:
     input:
         warp=bids(
-            root=work,
+            root=root,
             datatype="surf",
             dir="IO",
             label="{label}",
@@ -793,16 +821,18 @@ rule convert_inout_warp_from_itk_to_world:
         ),
     output:
         warp=temp(
-            bids(
-                root=work,
-                datatype="surf",
-                dir="IO",
-                label="{label}",
-                suffix="xfmras.nii.gz",
-                to="{inout}",
-                space="corobl",
-                hemi="{hemi}",
-                **inputs.subj_wildcards,
+            temp(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    dir="IO",
+                    label="{label}",
+                    suffix="xfmras.nii.gz",
+                    to="{inout}",
+                    space="corobl",
+                    hemi="{hemi}",
+                    **inputs.subj_wildcards,
+                )
             )
         ),
     group:
@@ -827,7 +857,7 @@ rule warp_midthickness_to_inout:
             **inputs.subj_wildcards,
         ),
         warp=bids(
-            root=work,
+            root=root,
             datatype="surf",
             dir="IO",
             label="{label}",
@@ -837,19 +867,17 @@ rule warp_midthickness_to_inout:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="ANATOMICAL",
     output:
-        surf_gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surfname,inner|outer}.surf.gii",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname,inner|outer}.surf.gii",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -893,7 +921,7 @@ rule affine_gii_corobl_to_modality:
             **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -937,14 +965,16 @@ rule calculate_surface_area:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
-            root=work,
-            datatype="surf",
-            suffix="surfarea.shape.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="surfarea.shape.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -961,7 +991,7 @@ rule calculate_legacy_gyrification:
     this should be proportional by a constant, to the earlier gyrification on 32k surfaces."""
     input:
         native_surfarea=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="surfarea.shape.gii",
             space="corobl",
@@ -970,7 +1000,7 @@ rule calculate_legacy_gyrification:
             **inputs.subj_wildcards,
         ),
         unfold_surfarea=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="surfarea.shape.gii",
             space="unfold",
@@ -1002,7 +1032,7 @@ rule calculate_legacy_gyrification:
 rule calculate_curvature:
     input:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
@@ -1099,47 +1129,13 @@ def get_unfold_ref(wildcards):
     )
 
 
-# --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
-
-
-rule cp_surf_to_root:
-    input:
-        native_resampled=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        native_resampled=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name,midthickness}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    group:
-        "subj"
-    shell:
-        "cp {input} {output}"
-
-
 # --resampling subject native surfs, metrics to new avgatlas mesh:
 
 
 rule resample_native_surf_to_atlas_density:
-    """ TODO: currently density set to atlas name, should fix this later
-    """
     input:
         native=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="{surf_name}.surf.gii",
             space="{space}",
@@ -1152,20 +1148,23 @@ rule resample_native_surf_to_atlas_density:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="{surf_name}.surf.gii",
         ),
         native_unfold=get_unfold_ref,
     output:
-        native_resampled=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name,midthickness|inner|outer}.surf.gii",
-            space="{space,unfoldreg|corobl}",
-            den=config["atlas"],
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        native_resampled=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surf_name,midthickness|inner|outer}.surf.gii",
+                space="{space,unfoldreg|corobl}",
+                den="{density}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -1202,6 +1201,7 @@ rule resample_native_metric_to_atlas_density:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="midthickness.surf.gii",
         ),
@@ -1245,6 +1245,7 @@ rule resample_atlas_subfields_to_native_surf:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
+            den=config["density"]["hipp"][0],
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -1254,6 +1255,7 @@ rule resample_atlas_subfields_to_native_surf:
             hemi="{hemi}",
             label="{label}",
             space="unfold",
+            den=config["density"]["hipp"][0],
             suffix="midthickness.surf.gii",
         ),
     output:
@@ -1283,6 +1285,7 @@ rule cp_atlas_subfields_label_gii:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
+            den="{density}",
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -1294,7 +1297,8 @@ rule cp_atlas_subfields_label_gii:
             space="{space}",
             hemi="{hemi}",
             label="{label,hipp}",
-            den="{atlas}",
+            den="{density}",
+            atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
     container:
@@ -1316,7 +1320,7 @@ rule atlas_label_to_unfold_nii:
 """
     input:
         ref_nii=bids(
-            root=work,
+            root=root,
             space="unfold",
             label="{label}",
             datatype="warps",
@@ -1327,6 +1331,7 @@ rule atlas_label_to_unfold_nii:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
+            den="{density}",
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -1335,19 +1340,22 @@ rule atlas_label_to_unfold_nii:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="midthickness.surf.gii",
         ),
     output:
-        label_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            atlas="{atlas}",
-            **inputs.subj_wildcards,
+        label_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="subfields.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label}",
+                atlas="{atlas}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -1696,30 +1704,3 @@ rule merge_hipp_dentate_spec_file:
         "subj"
     shell:
         "{params.cmd}"
-
-
-rule cp_native_surf_to_root:
-    input:
-        native=bids(
-            root=work,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        native=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    group:
-        "subj"
-    shell:
-        "cp {input} {output}"

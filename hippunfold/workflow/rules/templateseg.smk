@@ -10,7 +10,7 @@ def get_smoothing_opt(wildcards):
 rule template_reg:
     input:
         fixed_img=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="{modality}.nii.gz".format(
@@ -21,7 +21,7 @@ rule template_reg:
             hemi="{hemi}",
         ),
         moving_img=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="{modality}.nii.gz".format(
                 modality=get_modality_suffix(config["modality"])
@@ -40,16 +40,18 @@ rule template_reg:
         smoothing_opts=get_smoothing_opt,
         iteration_opts="-n 100x50x10",  #default -n 100x100
     output:
-        warp=bids(
-            root=work,
-            **inputs.subj_wildcards,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="greedytemplatereg",
-            from_="template",
-            to="subject",
-            space="corobl",
-            hemi="{hemi}",
+        warp=temp(
+            bids(
+                root=root,
+                **inputs.subj_wildcards,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="greedytemplatereg",
+                from_="template",
+                to="subject",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     group:
         "subj"
@@ -73,7 +75,7 @@ rule template_reg:
 rule warp_template_dseg:
     input:
         upsampled_ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="ref.nii.gz",
@@ -83,7 +85,7 @@ rule warp_template_dseg:
             label="{label}",
         ),
         warp=bids(
-            root=work,
+            root=root,
             **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
@@ -94,7 +96,7 @@ rule warp_template_dseg:
             hemi="{hemi}",
         ),
         template_dseg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="dseg.nii.gz",
             desc="hipptissue",
@@ -105,15 +107,17 @@ rule warp_template_dseg:
     params:
         interp_opt="-ri LABEL 0.2vox",
     output:
-        inject_seg=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
+        inject_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="postproc",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+            )
         ),
     group:
         "subj"
@@ -130,7 +134,7 @@ rule warp_template_coords:
     input:
         template_dir=Path(download_dir) / "template" / config["template"],
         ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix=f"{config['modality']}.nii.gz",
@@ -139,7 +143,7 @@ rule warp_template_coords:
             hemi="{hemi}",
         ),
         warp=bids(
-            root=work,
+            root=root,
             **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
@@ -150,7 +154,7 @@ rule warp_template_coords:
             hemi="{hemi}",
         ),
         template_coords=bids(
-            root=work,
+            root=root,
             datatype="coords",
             **inputs.subj_wildcards,
             dir="{dir}",
@@ -163,16 +167,18 @@ rule warp_template_coords:
     params:
         interp_opt="-ri NN",
     output:
-        init_coords=bids(
-            root=work,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="{label}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="corobl",
-            hemi="{hemi}",
+        init_coords=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                **inputs.subj_wildcards,
+                dir="{dir}",
+                label="{label}",
+                suffix="coords.nii.gz",
+                desc="init",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     group:
         "subj"
@@ -188,7 +194,7 @@ rule warp_template_coords:
 rule warp_template_anat:
     input:
         ref=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix=f"{config['modality']}.nii.gz",
@@ -197,7 +203,7 @@ rule warp_template_anat:
             hemi="{hemi}",
         ),
         warp=bids(
-            root=work,
+            root=root,
             **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
@@ -208,7 +214,7 @@ rule warp_template_anat:
             hemi="{hemi}",
         ),
         template_anat=bids(
-            root=work,
+            root=root,
             datatype="anat",
             suffix="{modality}.nii.gz".format(
                 modality=get_modality_suffix(config["modality"])
@@ -223,14 +229,16 @@ rule warp_template_anat:
             **wildcards
         ),
     output:
-        warped=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix=f"{config['modality']}.nii.gz",
-            desc="warpedtemplate",
-            space="corobl",
-            hemi="{hemi}",
+        warped=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix=f"{config['modality']}.nii.gz",
+                desc="warpedtemplate",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     group:
         "subj"

@@ -29,23 +29,27 @@ rule reg_to_template:
     params:
         cmd=reg_to_template_cmd,
     output:
-        warped_subj=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="{modality,T1w|T2w}.nii.gz",
-            space=config["template"],
-            desc="affine",
+        warped_subj=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="{modality,T1w|T2w}.nii.gz",
+                space=config["template"],
+                desc="affine",
+            )
         ),
-        xfm_ras=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="{modality,T1w|T2w}",
-            to=config["template"],
-            desc="affine",
-            type_="ras",
+        xfm_ras=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="{modality,T1w|T2w}",
+                to=config["template"],
+                desc="affine",
+                type_="ras",
+            )
         ),
     log:
         bids_log_wrapper(
@@ -67,7 +71,7 @@ rule reg_to_template:
 rule convert_template_xfm_ras2itk:
     input:
         bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -77,15 +81,17 @@ rule convert_template_xfm_ras2itk:
             type_="ras",
         ),
     output:
-        bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="{reg_suffix}",
-            to=config["template"],
-            desc="affine",
-            type_="itk",
+        temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="{reg_suffix}",
+                to=config["template"],
+                desc="affine",
+                type_="itk",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -101,7 +107,7 @@ rule convert_template_xfm_ras2itk:
 rule compose_template_xfm_corobl:
     input:
         sub_to_std=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -117,15 +123,17 @@ rule compose_template_xfm_corobl:
             **wildcards
         ),
     output:
-        sub_to_cor=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="T1w",
-            to="corobl",
-            desc="affine",
-            type_="itk",
+        sub_to_cor=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T1w",
+                to="corobl",
+                desc="affine",
+                type_="itk",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -140,7 +148,7 @@ rule compose_template_xfm_corobl:
 rule invert_template_xfm_itk2ras:
     input:
         xfm_ras=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -150,15 +158,17 @@ rule invert_template_xfm_itk2ras:
             type_="itk",
         ),
     output:
-        xfm_ras=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="T1w",
-            to="corobl",
-            desc="affineInverse",
-            type_="ras",
+        xfm_ras=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T1w",
+                to="corobl",
+                desc="affineInverse",
+                type_="ras",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -173,7 +183,7 @@ rule invert_template_xfm_itk2ras:
 rule template_xfm_itk2ras:
     input:
         xfm_ras=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -183,15 +193,17 @@ rule template_xfm_itk2ras:
             type_="itk",
         ),
     output:
-        xfm_ras=bids(
-            root=work,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="{native_modality,T1w|T2w}",
-            to="corobl",
-            desc="affine",
-            type_="ras",
+        xfm_ras=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="{native_modality,T1w|T2w}",
+                to="corobl",
+                desc="affine",
+                type_="ras",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -217,13 +229,15 @@ rule create_unfold_ref:
         ),
         orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
     output:
-        nii=bids(
-            root=work,
-            space="unfold",
-            label="{label}",
-            datatype="warps",
-            suffix="refvol.nii.gz",
-            **inputs.subj_wildcards,
+        nii=temp(
+            bids(
+                root=root,
+                space="unfold",
+                label="{label}",
+                datatype="warps",
+                suffix="refvol.nii.gz",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"

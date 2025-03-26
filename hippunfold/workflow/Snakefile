@@ -88,7 +88,6 @@ wildcard_constraints:
     template="[a-zA-Z0-9]+",
 
 
-work = os.path.expandvars(config["workdir"])
 root = os.path.expandvars(config["root"])
 
 
@@ -161,7 +160,7 @@ if config["analysis_level"] == "group_create_atlas":
 
     include: "rules/atlas_gen.smk"
 
-    config["atlas"] = config["gen_template_name"]
+    config["atlas"] = config["new_atlas_name"]
 
 
 rule all_create_atlas:
