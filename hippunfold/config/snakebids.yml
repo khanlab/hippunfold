@@ -210,17 +210,6 @@ parse_args:
       - 'native'
     help: 'Sets output spaces for results (default: %(default)s)'
 
-  --output_density:
-    choices:
-      - 'multihist7'
-      - '0p5mm'
-      - '1mm'
-      - '2mm'
-      - 'unfoldiso'
-    default:
-      - 'multihist7'
-    nargs: '+'
-    help: 'Sets the output vertex density for results. Options correspond to approximate vertex spacings of 0.5mm, 1.0mm, and 2.0mm, respectively, with the unfoldiso (32k hipp) vertices legacy option having unequal vertex spacing. (default: %(default)s)'
 
   --hemi:
     choices:
@@ -627,3 +616,10 @@ laminar_coords_res:
   dentate: 0.1x0.1x0.1mm
 
 resample_dseg_for_templatereg: 0.3x0.3x0.3mm
+unfoldreg_padding: 64x64x0vox
+
+density: #temporary var
+  hipp: 
+    - 7k
+  dentate:
+    - 1k

@@ -866,10 +866,6 @@ rule warp_midthickness_to_inout:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="ANATOMICAL",
     output:
         surf_gii=temp(
             bids(
@@ -1121,44 +1117,10 @@ def get_unfold_ref(wildcards):
     )
 
 
-# --- resampling using the unfoldreg surface to (legacy) standard densities (0p5mm, 1mm, 2mm, unfoldiso)
-
-
-rule cp_surf_to_root:
-    input:
-        native_resampled=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        native_resampled=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name,midthickness}.surf.gii",
-            space="{space}",
-            den="{density}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    group:
-        "subj"
-    shell:
-        "cp {input} {output}"
-
-
 # --resampling subject native surfs, metrics to new avgatlas mesh:
 
 
 rule resample_native_surf_to_atlas_density:
-    """ TODO: currently density set to atlas name, should fix this later
-    """
     input:
         native=bids(
             root=root,
@@ -1174,6 +1136,7 @@ rule resample_native_surf_to_atlas_density:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="{surf_name}.surf.gii",
         ),
@@ -1185,7 +1148,7 @@ rule resample_native_surf_to_atlas_density:
                 datatype="surf",
                 suffix="{surf_name,midthickness|inner|outer}.surf.gii",
                 space="{space,unfoldreg|corobl}",
-                den=config["atlas"],
+                den="{density}",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -1217,6 +1180,7 @@ rule resample_native_metric_to_atlas_density:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="midthickness.surf.gii",
         ),
@@ -1250,6 +1214,7 @@ rule resample_atlas_subfields_to_native_surf:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
+            den=config["density"]["hipp"][0],
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -1259,6 +1224,7 @@ rule resample_atlas_subfields_to_native_surf:
             hemi="{hemi}",
             label="{label}",
             space="unfold",
+            den=config["density"]["hipp"][0],
             suffix="midthickness.surf.gii",
         ),
     output:
@@ -1288,6 +1254,7 @@ rule cp_atlas_subfields_label_gii:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
+            den="{density}",
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -1299,7 +1266,8 @@ rule cp_atlas_subfields_label_gii:
             space="{space}",
             hemi="{hemi}",
             label="{label,hipp}",
-            den="{atlas}",
+            den="{density}",
+            atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
     container:
@@ -1332,6 +1300,7 @@ rule atlas_label_to_unfold_nii:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
+            den="{density}",
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -1340,6 +1309,7 @@ rule atlas_label_to_unfold_nii:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="midthickness.surf.gii",
         ),
@@ -1703,30 +1673,3 @@ rule merge_hipp_dentate_spec_file:
         "subj"
     shell:
         "{params.cmd}"
-
-
-rule cp_native_surf_to_root:
-    input:
-        native=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        native=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name}.surf.gii",
-            space="{space}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    group:
-        "subj"
-    shell:
-        "cp {input} {output}"
