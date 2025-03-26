@@ -3,12 +3,11 @@ import numpy as np
 from scipy.spatial import Delaunay
 
 # Load metric files
-metric_files = [nib.load(metric).get_fdata() for metric in snakemake.input.metric_nii]
-all_metrics = np.stack(metric_files, axis=2)
+metric_ref = nib.load(snakemake.input.metric_ref).get_fdata()
 
 # Create a meshgrid spanning the metric space
-x = np.linspace(0, all_metrics.shape[0] - 1, all_metrics.shape[0])
-y = np.linspace(0, all_metrics.shape[1] - 1, all_metrics.shape[1])
+x = np.linspace(0, metric_ref.shape[0] - 1, metric_ref.shape[0])
+y = np.linspace(0, metric_ref.shape[1] - 1, metric_ref.shape[1])
 
 
 coords_y, coords_x = np.meshgrid(y, x)
@@ -21,12 +20,12 @@ tri = Delaunay(all_points)
 points = np.column_stack((all_points, np.full(all_points.shape[0], 0)))
 
 # Identify valid vertices (non-zero and finite values across all metrics)
-valid_mask = ~np.all((all_metrics < 1e-6) | (all_metrics > 1e6), axis=2).ravel()
+valid_mask = (metric_ref > 0).ravel()
 filtered_points = points[valid_mask]
 
 
 # apply transformation from vox to phys
-affine = nib.load(snakemake.input.metric_nii[0]).affine
+affine = nib.load(snakemake.input.metric_ref).affine
 coords = np.hstack((filtered_points, np.ones((filtered_points.shape[0], 1))))
 transformed = affine @ coords.T
 filtered_points = transformed.T[:, :3]

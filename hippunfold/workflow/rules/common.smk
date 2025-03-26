@@ -102,21 +102,24 @@ def get_modality_suffix(modality):
 
 def get_final_spec():
     specs = []
-    specs.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                den="{density}",
-                space="{space}",
-                suffix="surfaces.spec",
-                **inputs.subj_wildcards,
-            ),
-            density=config["output_density"],
-            space=ref_spaces,
-            allow_missing=True,
+
+    for label in config["autotop_labels"]:
+        specs.extend(
+            inputs[config["modality"]].expand(
+                bids(
+                    root=root,
+                    datatype="surf",
+                    space="{space}",
+                    label=label,
+                    den="{density}",
+                    suffix="surfaces.spec",
+                    **inputs.subj_wildcards,
+                ),
+                space=ref_spaces,
+                density=config["density"][label],
+                allow_missing=True,
+            )
         )
-    )
     specs.extend(
         inputs[config["modality"]].expand(
             bids(
@@ -214,26 +217,26 @@ def get_final_qc():
             allow_missing=True,
         )
     )
-    qc.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="qc",
-                suffix="midthickness.surf.png",
-                den="{density}",
-                desc="subfields",
-                space="{space}",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            hemi=config["hemi"],
-            label=config["autotop_labels"],
-            density=config["output_density"],
-            space=ref_spaces,
-            allow_missing=True,
+    for label in config["autotop_labels"]:
+        qc.extend(
+            inputs[config["modality"]].expand(
+                bids(
+                    root=root,
+                    datatype="qc",
+                    suffix="midthickness.surf.png",
+                    den="{density}",
+                    desc="subfields",
+                    space="{space}",
+                    hemi="{hemi}",
+                    label=label,
+                    **inputs.subj_wildcards,
+                ),
+                hemi=config["hemi"],
+                density=config["density"][label],
+                space=ref_spaces,
+                allow_missing=True,
+            )
         )
-    )
     if len(config["hemi"]) == 2:
         qc.extend(
             inputs[config["modality"]].expand(
@@ -386,3 +389,29 @@ def get_input_for_shape_inject(wildcards):
             hemi="{hemi}",
         ).format(**wildcards)
     return seg
+
+
+def get_cmd_warp_surface_2d_warp(wildcards, input, output):
+    """Using this workaround for warping meshes with 2D warps, since surface-apply-warpfield was
+    giving bounding box issues"""
+
+    cmds = []
+    cmds.append(
+        f"wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} xywarp.shape.gii -trilinear"
+    )
+    cmds.append(
+        f"wb_command -metric-math '0' zwarp.shape.gii -var DUMMY xywarp.shape.gii -column 1"
+    )
+    cmds.append(
+        f"wb_command -metric-merge xyzwarp.shape.gii -metric xywarp.shape.gii  -metric zwarp.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -metric-math 'COORDS - WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP xyzwarp.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
+    )
+    return " && ".join(cmds)

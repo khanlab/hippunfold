@@ -1,13 +1,3 @@
-# --- unfolded registration
-
-
-# for unfold_reg, need to get data into 2d image - Jordan's previous code used metric-to-volume-mapping with unfoldiso inner and outer surfaces
-# we can use same approach, just calculating the metrics on native, and using the unfold inner/outer as ribbon
-unfoldreg_method = "SyN"  # choices: ["greedy","SyN"]
-
-unfoldreg_padding = "64x64x0vox"
-
-
 rule pad_unfold_ref:
     """pads the unfolded ref in XY (to improve registration by ensuring zero-displacement at boundaries)
         and to deal with input vertices that are just slightly outside the original bounding box. 
@@ -24,7 +14,9 @@ rule pad_unfold_ref:
             **inputs.subj_wildcards,
         ),
     params:
-        padding=f"-pad {unfoldreg_padding} {unfoldreg_padding}",
+        padding="-pad {unfoldreg_padding} {unfoldreg_padding}".format(
+            unfoldreg_padding=config["unfoldreg_padding"]
+        ),
     output:
         ref_nii=temp(
             bids(
@@ -177,6 +169,7 @@ rule atlas_metric_to_unfold_nii:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             suffix="{metric}.shape.gii",
         ),
         midthickness_surf=bids_atlas(
@@ -184,6 +177,7 @@ rule atlas_metric_to_unfold_nii:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="midthickness.surf.gii",
         ),
@@ -192,6 +186,7 @@ rule atlas_metric_to_unfold_nii:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="inner.surf.gii",
         ),
@@ -200,6 +195,7 @@ rule atlas_metric_to_unfold_nii:
             template=config["atlas"],
             hemi="{hemi}",
             label="{label}",
+            den="{density}",
             space="unfold",
             suffix="outer.surf.gii",
         ),
@@ -212,6 +208,7 @@ rule atlas_metric_to_unfold_nii:
                 space="unfold",
                 hemi="{hemi}",
                 label="{label}",
+                den="{density}",
                 atlas="{atlas}",
                 **inputs.subj_wildcards,
             )
@@ -227,6 +224,78 @@ rule atlas_metric_to_unfold_nii:
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
 
 
+rule slice_3d_to_2d_subject:
+    """This is needed so ants will believe the data is truly 2d"""
+    input:
+        img=bids(
+            root=root,
+            datatype="anat",
+            suffix="{metric}.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        img=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("neurovis")
+    group:
+        "subj"
+    script:
+        "../scripts/slice_3d_to_2d.py"
+
+
+rule slice_3d_to_2d_atlas:
+    """This is needed so ants will believe the data is truly 2d"""
+    input:
+        img=bids(
+            root=root,
+            datatype="anat",
+            suffix="{metric}.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            atlas="{atlas}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        img=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold2d",
+                hemi="{hemi}",
+                label="{label}",
+                den="{density}",
+                atlas="{atlas}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("neurovis")
+    group:
+        "subj"
+    script:
+        "../scripts/slice_3d_to_2d.py"
+
+
 def get_fixed_images_unfoldreg(wildcards):
     unfoldreg_metrics = config["atlas_metadata"][wildcards.atlas]["metric_wildcards"]
 
@@ -235,7 +304,7 @@ def get_fixed_images_unfoldreg(wildcards):
             root=root,
             datatype="anat",
             suffix="{metric}.nii.gz",
-            space="unfold",
+            space="unfold2d",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -252,9 +321,10 @@ def get_moving_images_unfoldreg(wildcards):
             root=root,
             datatype="anat",
             suffix="{metric}.nii.gz",
-            space="unfold",
+            space="unfold2d",
             hemi="{hemi}",
             label="{label}",
+            den=config["density"][wildcards.label][0],
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
@@ -345,74 +415,11 @@ rule unfoldreg_antsquick:
         "{params.cmd_copy_warps}"
 
 
-rule unfoldreg_greedy:
-    """performs 2D registration in unfolded space using greedy.
-    Greedy produces the forward map (can optionally produce inverse maps)
-    so is not symmetric, but can usually produce more precise warps
-    if symmetry isn't desired"""
+rule reset_header_2d_warp_unfoldreg:
+    """ adjusts header to match the original data
+     (since this seems to get garbled in z by ants)"""
     input:
-        fixed_images=get_fixed_images_unfoldreg,
-        moving_images=get_moving_images_unfoldreg,
-    params:
-        in_images=lambda wildcards, input: " ".join(
-            [
-                f"-i {fix} {mov}"
-                for fix, mov in zip(input.fixed_images, input.moving_images)
-            ]
-        ),
-        metric="-m NCC 4x4x4",  #4x4x4 implies a 9x9x9 window (ie 4 on either side)
-        regularization="-s 1.732vox 0.707vox",  #gradient sigma, warp sigma (defaults: 1.732vox, 0.707vox)
-    output:
-        warp=temp(
-            bids(
-                root=root,
-                suffix="xfm.nii.gz",
-                datatype="warps",
-                desc="greedy",
-                from_="{atlas}",
-                to="native",
-                space="unfold",
-                type_="itk2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        "../envs/greedy.yaml"
-    group:
-        "subj"
-    log:
-        bids(
-            root="logs",
-            suffix="unfoldreg_greedy.txt",
-            atlas="{atlas}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    shadow:
-        "minimal"
-    threads: 16
-    resources:
-        mem_mb=16000,
-        time=10,
-    shell:
-        "greedy -d 2 {params.metric} {params.regularization} {params.in_images} -o {output.warp}"
-
-
-rule extend_warp_2d_to_3d:
-    """ we have a 2d warp, in space of innersurf 2d slice, 254x126. we want to 
-        1) make it a 3d warp (create a z-displacement, as zeros)
-        2) extend the 2d warp across z slices, (so each z slice is transformed identically)
-        3) fill in the central part of the array, when going from 254x126 to 256x128
-
-        Note that this rule is hardcoded for 256x128xN ref and 254x126 2d warp; 
-    """
-    input:
-        warp=bids(
+        nii=bids(
             root=root,
             suffix="xfm.nii.gz",
             datatype="warps",
@@ -425,7 +432,7 @@ rule extend_warp_2d_to_3d:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-        ref=bids(
+        ref_nii=bids(
             root=root,
             datatype="anat",
             suffix="refvol.nii.gz",
@@ -436,7 +443,7 @@ rule extend_warp_2d_to_3d:
             **inputs.subj_wildcards,
         ),
     output:
-        warp=temp(
+        nii=temp(
             bids(
                 root=root,
                 suffix="xfm.nii.gz",
@@ -454,52 +461,9 @@ rule extend_warp_2d_to_3d:
     container:
         config["singularity"]["autotop"]
     conda:
-        "../envs/neurovis.yaml"
-    group:
-        "subj"
+        conda_env("neurovis")
     script:
-        "../scripts/convert_warp_2d_to_3d.py"
-
-
-rule convert_unfoldreg_warp_from_itk_to_world:
-    input:
-        warp=bids(
-            root=root,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="{desc}",
-            from_="{to}",
-            to="{from}",
-            space="{space}",
-            type_="itk",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        warp=temp(
-            bids(
-                root=root,
-                suffix="xfm.nii.gz",
-                datatype="warps",
-                desc="{desc}",
-                from_="{from}",
-                to="{to}",
-                space="{space}",
-                type_="surface",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        "../envs/workbench.yaml"
-    shell:
-        "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
+        "../scripts/set_metric_nii_header.py"
 
 
 rule warp_unfold_native_to_unfoldreg:
@@ -517,15 +481,17 @@ rule warp_unfold_native_to_unfoldreg:
             root=root,
             suffix="xfm.nii.gz",
             datatype="warps",
-            desc=unfoldreg_method,
-            from_="native",
-            to=config["atlas"],
+            desc="SyN",
+            from_=config["atlas"],
+            to="native",
             space="unfold",
-            type_="surface",
+            type_="itk",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    params:
+        cmd=get_cmd_warp_surface_2d_warp,
     output:
         surf_gii=temp(
             bids(
@@ -547,7 +513,4 @@ rule warp_unfold_native_to_unfoldreg:
     shadow:
         "minimal"
     shell:
-        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear && "
-        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
-        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
-        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
+        "{params.cmd}"

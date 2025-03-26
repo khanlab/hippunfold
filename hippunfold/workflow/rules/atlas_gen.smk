@@ -1,34 +1,4 @@
-
-rule slice_3d_to_2d:
-    """This is needed so antsMultivariateTemplateConstruction2 will believe the data is truly 2d"""
-    input:
-        img=bids(
-            root=root,
-            datatype="anat",
-            suffix="{metric}.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        img=temp(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfold2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("neurovis")
-    script:
-        "../scripts/slice_3d_to_2d.py"
+import pandas as pd
 
 
 def get_cmd_templategen_subj_csv(wildcards, input, output):
@@ -116,8 +86,6 @@ rule gen_atlas_reg_ants:
     params:
         num_modalities=len(config["atlas_metrics"]),
         warp_prefix=lambda wildcards, output: f"{output.avgtemplate_dir}/",
-        # multires="-f 6x4 -s 3x2 -q 50x20",  #only two low-res stages for now, to speed up for debugging workflow..
-        multires=" -f 6x4x2x1 -s 3x2x1x0 -q 100x100x70x20 ",
     output:
         avgtemplate_dir=directory(
             bids_atlas(
@@ -133,7 +101,6 @@ rule gen_atlas_reg_ants:
         conda_env("ants")
     shell:
         "antsMultivariateTemplateConstruction2.sh "
-        " {params.multires} "
         " -d 2 -o {params.warp_prefix} -n 0 -l 0 -k {params.num_modalities} {input.metrics_csv} "
 
 
@@ -266,36 +233,178 @@ rule reset_header_2d_metric_nii:
         "../scripts/set_metric_nii_header.py"
 
 
-rule gen_atlas_surfs:
+rule reset_header_2d_warp_atlasgen:
+    """ adjusts header to match the original data
+     (since this seems to get garbled in z by ants)"""
     input:
-        metric_nii=expand(
+        ref_nii=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            label=wildcards.label,
+            metric=config["atlas_metrics"][0],
+            **expand_hemi(),
+        )[0],
+        nii=bids(
+            root=root,
+            datatype="warps",
+            suffix="{warpsuffix}.nii.gz",
+            from_="unfold",
+            to=config["new_atlas_name"],
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        nii=bids(
+            root=root,
+            datatype="warps",
+            suffix="{warpsuffix,warp|invwarp}.nii.gz",
+            from_="unfold",
+            to=config["new_atlas_name"],
+            hemi="{hemi}",
+            label="{label}",
+            desc="3D",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("neurovis")
+    script:
+        "../scripts/set_metric_nii_header.py"
+
+
+rule make_metric_ref:
+    input:
+        metric_nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            suffix="gyrification.nii.gz",
+        ),
+    output:
+        metric_ref=temp(
             bids_atlas(
                 root=root,
                 template=config["new_atlas_name"],
                 label="{label}",
                 hemi="{hemi}",
-                suffix="{metric}.nii.gz",
-            ),
-            metric=config["atlas_metrics"],
-            allow_missing=True,
+                resample="{resample}",
+                suffix="metricref.nii.gz",
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("c3d")
+    shell:
+        "c2d {input} -resample {wildcards.resample}% -threshold 0.1 inf 1 0 -o {output}"
+
+
+rule gen_unfold_atlas_mesh:
+    input:
+        metric_ref=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            resample="{resample}",
+            suffix="metricref.nii.gz",
         ),
     params:
         z_level=get_unfold_z_level,
     output:
-        surf_gii=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["new_atlas_name"],
-            label="{label}",
-            space="unfold",
-            hemi="{hemi}",
-            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+        surf_gii=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                resample="{resample}",
+                space="unfold",
+                hemi="{hemi}",
+                suffix="{surfname,midthickness|inner|outer}.surf.gii",
+            )
         ),
     container:
         config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
     script:
-        "../scripts/surf_gen.py"
+        "../scripts/gen_unfold_atlas_mesh.py"
+
+
+checkpoint resample_to_density_mapping:
+    input:
+        surf_giis=expand(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                resample="{resample}",
+                space="unfold",
+                hemi="{hemi}",
+                suffix="midthickness.surf.gii",
+            ),
+            label=config["autotop_labels"],
+            hemi=config["hemi"],
+            resample=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200],
+        ),
+    output:
+        mapping_csv=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            desc="resample2density",
+            suffix="mapping.csv",
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("pyvista")
+    script:
+        "../scripts/resample_to_density_mapping.py"
+
+
+def get_unfold_mesh_resample(wildcards):
+    with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
+        df = pd.read_csv(f)
+
+    result = df.loc[df["density"] == wildcards.density, "resample"]
+    resample = result.values[0]
+
+    return bids_atlas(
+        root=root,
+        template=config["new_atlas_name"],
+        label="{label}",
+        resample="{resample}",
+        space="unfold",
+        hemi="{hemi}",
+        suffix="{surfname}.surf.gii",
+    ).format(resample=resample, **wildcards)
+
+
+rule copy_unfold_mesh_resample_to_density:
+    input:
+        get_unfold_mesh_resample,
+    output:
+        surf_gii=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            hemi="{hemi}",
+            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+        ),
+    shell:
+        "cp {input} {output}"
 
 
 rule avgtemplate_metric_vol_to_surf:
@@ -312,6 +421,7 @@ rule avgtemplate_metric_vol_to_surf:
             template=config["new_atlas_name"],
             label="{label}",
             space="unfold",
+            den="{density}",
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
@@ -320,6 +430,7 @@ rule avgtemplate_metric_vol_to_surf:
             root=get_atlas_dir(),
             template=config["new_atlas_name"],
             label="{label}",
+            den="{density}",
             hemi="{hemi}",
             suffix="{metric}.shape.gii",
         ),
@@ -329,6 +440,98 @@ rule avgtemplate_metric_vol_to_surf:
         conda_env("workbench")
     shell:
         "wb_command -volume-to-surface-mapping {input.metric_nii} {input.midthickness} {output.metric_gii} -trilinear"
+
+
+rule warp_subj_unfold_surf_to_avg:
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        warp=bids(
+            root=root,
+            datatype="warps",
+            suffix="invwarp.nii.gz",
+            from_="unfold",
+            to=config["new_atlas_name"],
+            hemi="{hemi}",
+            label="{label}",
+            desc="3D",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        cmd=get_cmd_warp_surface_2d_warp,
+    output:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfoldavg",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    shadow:
+        "minimal"
+    shell:
+        "{params.cmd}"
+
+
+rule resample_subj_native_surf_to_avg:
+    input:
+        subj_native=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        subj_unfold=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfoldavg",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        atlas_unfold=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            space="unfold",
+            den="{density}",
+            hemi="{hemi}",
+            suffix="midthickness.surf.gii",
+        ),
+    output:
+        native_resampled=bids(
+            root=root,
+            datatype="surf",
+            label="{label}",
+            space="corobl",
+            den="{density}",
+            hemi="{hemi}",
+            suffix="midthickness.surf.gii",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    shell:
+        "wb_command -surface-resample {input.subj_native} {input.subj_unfold} {input.atlas_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
 
 
 rule warp_subfields_to_avg:
@@ -495,6 +698,7 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             template=config["new_atlas_name"],
             label="{label}",
             space="unfold",
+            den="{density}",
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
@@ -503,6 +707,7 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             root=get_atlas_dir(),
             template=config["new_atlas_name"],
             label="{label}",
+            den="{density}",
             hemi="{hemi}",
             suffix="dseg.label.gii",
         ),
@@ -514,43 +719,69 @@ rule avgtemplate_subfield_voted_vol_to_surf:
         "wb_command -volume-label-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii}"
 
 
+# input function for the rule aggregate
+def get_atlas_inputs(wildcards):
+
+    files = []
+
+    with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
+        df = pd.read_csv(f)
+        # pick out all of them for now - in future could optimally assign
+        for label in config["autotop_labels"]:
+            for hemi in config["hemi"]:
+
+                density = df.query("hemi==@hemi and label==@label")["density"].to_list()
+
+                files.extend(
+                    expand(
+                        bids_atlas(
+                            root=get_atlas_dir(),
+                            template=config["new_atlas_name"],
+                            label=label,
+                            hemi=hemi,
+                            den="{density}",
+                            suffix="{metric}.shape.gii",
+                        ),
+                        metric=config["atlas_metrics"],
+                        density=density,
+                    )
+                )
+                files.extend(
+                    expand(
+                        bids_atlas(
+                            root=get_atlas_dir(),
+                            template=config["new_atlas_name"],
+                            label=label,
+                            hemi=hemi,
+                            den="{density}",
+                            space="unfold",
+                            suffix="{surfname}.surf.gii",
+                        ),
+                        surfname=["inner", "outer", "midthickness"],
+                        density=density,
+                    )
+                )
+                if label == "hipp":
+                    files.extend(
+                        expand(
+                            bids_atlas(
+                                root=get_atlas_dir(),
+                                template=config["new_atlas_name"],
+                                label="hipp",
+                                hemi=hemi,
+                                den="{density}",
+                                suffix="dseg.label.gii",
+                            ),
+                            density=density,
+                        )
+                    )
+
+    return files
+
+
 rule write_template_json:
     input:
-        metrics=expand(
-            bids_atlas(
-                root=get_atlas_dir(),
-                template=config["new_atlas_name"],
-                label="{label}",
-                hemi="{hemi}",
-                suffix="{metric}.shape.gii",
-            ),
-            hemi=config["hemi"],
-            label=config["autotop_labels"],
-            metric=config["atlas_metrics"],
-        ),
-        surfs=expand(
-            bids_atlas(
-                root=get_atlas_dir(),
-                template=config["new_atlas_name"],
-                label="{label}",
-                hemi="{hemi}",
-                space="unfold",
-                suffix="{surfname}.surf.gii",
-            ),
-            hemi=config["hemi"],
-            label=config["autotop_labels"],
-            surfname=["inner", "outer", "midthickness"],
-        ),
-        labels=expand(
-            bids_atlas(
-                root=get_atlas_dir(),
-                template=config["new_atlas_name"],
-                label="hipp",
-                hemi="{hemi}",
-                suffix="dseg.label.gii",
-            ),
-            hemi=config["hemi"],
-        ),
+        get_atlas_inputs,
     params:
         template_description={
             "Identifier": config["new_atlas_name"],
