@@ -511,13 +511,5 @@ rule warp_unfold_native_to_unfoldreg:
         "subj"
     shadow:
         "minimal"
-    log:
-        bids_log_wrapper(
-            "warp_unfold_native_to_unfoldreg", 
-            **inputs.subj_wildcards,
-            hemi="{hemi}", 
-            label="{label}",
-            to="{surfname}"
-        )
     shell:
         "{params.cmd}"

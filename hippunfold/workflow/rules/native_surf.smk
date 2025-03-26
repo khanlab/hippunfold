@@ -583,15 +583,8 @@ rule unfold_surface_smoothing:
         conda_env("workbench")
     group:
         "subj"
-    log:
-        bids_log_wrapper(
-            "unfold_surface_smoothing", 
-            **inputs.subj_wildcards,
-            hemi="{hemi}", 
-            label="{label}"
-        )
     shell:
-        "wb_command -surface-smoothing {input} {params} {output} &> {log}"
+        "wb_command -surface-smoothing {input} {params} {output}"
 
 
 rule set_surface_z_level:
