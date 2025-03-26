@@ -389,3 +389,29 @@ def get_input_for_shape_inject(wildcards):
             hemi="{hemi}",
         ).format(**wildcards)
     return seg
+
+
+def get_cmd_warp_surface_2d_warp(wildcards, input, output):
+    """Using this workaround for warping meshes with 2D warps, since surface-apply-warpfield was
+    giving bounding box issues"""
+
+    cmds = []
+    cmds.append(
+        f"wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} xywarp.shape.gii -trilinear"
+    )
+    cmds.append(
+        f"wb_command -metric-math '0' zwarp.shape.gii -var DUMMY xywarp.shape.gii -column 1"
+    )
+    cmds.append(
+        f"wb_command -metric-merge xyzwarp.shape.gii -metric xywarp.shape.gii  -metric zwarp.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -metric-math 'COORDS - WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP xyzwarp.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
+    )
+    return " && ".join(cmds)

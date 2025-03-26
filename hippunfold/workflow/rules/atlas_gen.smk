@@ -1,38 +1,6 @@
 import pandas as pd
 
 
-rule slice_3d_to_2d:
-    """This is needed so antsMultivariateTemplateConstruction2 will believe the data is truly 2d"""
-    input:
-        img=bids(
-            root=root,
-            datatype="anat",
-            suffix="{metric}.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    output:
-        img=temp(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfold2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("neurovis")
-    script:
-        "../scripts/slice_3d_to_2d.py"
-
-
 def get_cmd_templategen_subj_csv(wildcards, input, output):
 
     cmds = []
@@ -265,7 +233,7 @@ rule reset_header_2d_metric_nii:
         "../scripts/set_metric_nii_header.py"
 
 
-rule reset_header_2d_warp_nii:
+rule reset_header_2d_warp_atlasgen:
     """ adjusts header to match the original data
      (since this seems to get garbled in z by ants)"""
     input:
@@ -496,6 +464,8 @@ rule warp_subj_unfold_surf_to_avg:
             desc="3D",
             **inputs.subj_wildcards,
         ),
+    params:
+        cmd=get_cmd_warp_surface_2d_warp,
     output:
         surf_gii=bids(
             root=root,
@@ -510,13 +480,10 @@ rule warp_subj_unfold_surf_to_avg:
         config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
+    shadow:
+        "minimal"
     shell:
-        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} xywarp.shape.gii -trilinear && "
-        "wb_command -metric-math '0' zwarp.shape.gii -var DUMMY xywarp.shape.gii -column 1 && "
-        "wb_command -metric-merge xyzwarp.shape.gii -metric xywarp.shape.gii  -metric zwarp.shape.gii && "
-        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
-        "wb_command -metric-math 'COORDS - WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP xyzwarp.shape.gii && "
-        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
+        "{params.cmd}"
 
 
 rule resample_subj_native_surf_to_avg:

@@ -866,10 +866,6 @@ rule warp_midthickness_to_inout:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="ANATOMICAL",
     output:
         surf_gii=temp(
             bids(
@@ -1125,8 +1121,6 @@ def get_unfold_ref(wildcards):
 
 
 rule resample_native_surf_to_atlas_density:
-    """ TODO: currently density set to atlas name, should fix this later
-    """
     input:
         native=bids(
             root=root,
