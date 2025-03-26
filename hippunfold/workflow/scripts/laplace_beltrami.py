@@ -1,7 +1,8 @@
 import numpy as np
 import nibabel as nib
-from scipy.sparse import diags, linalg, lil_matrix
+import scipy.sparse as sp
 from lib.utils import setup_logger
+from scipy.sparse import coo_matrix, diags
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
@@ -10,21 +11,29 @@ logger = setup_logger(log_file)
 def cotangent_laplacian(vertices, faces):
     n_vertices = vertices.shape[0]
     # Step 1: Compute cotangent weights
-    logger.info("Computing cotangent weights")
-    weights = lil_matrix((n_vertices, n_vertices))
+    row_indices = []
+    col_indices = []
+    values = []
+    weights = coo_matrix(
+        (n_vertices, n_vertices), dtype=np.float64
+    ).tocsr()  # Initialize sparse matrix.
+
     for tri in faces:
         v0, v1, v2 = vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]
         e0 = v1 - v2
         e1 = v2 - v0
         e2 = v0 - v1
+
         # Compute cross products and norms
         cross0 = np.cross(e1, -e2)
         cross1 = np.cross(e2, -e0)
         cross2 = np.cross(e0, -e1)
+
         norm0 = np.linalg.norm(cross0)
         norm1 = np.linalg.norm(cross1)
         norm2 = np.linalg.norm(cross2)
-        # Avoid division by zero
+
+        # Compute cotangent weights safely
         cot0 = np.dot(e1, -e2) / norm0 if norm0 > 1e-12 else 0.0
         cot1 = np.dot(e2, -e0) / norm1 if norm1 > 1e-12 else 0.0
         cot2 = np.dot(e0, -e1) / norm2 if norm2 > 1e-12 else 0.0
@@ -67,8 +76,10 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     boundary_values = np.array(list(boundary_conditions.values()))
     free_indices = np.setdiff1d(np.arange(n_vertices), boundary_indices)
     logger.info("Setting boundary conditions")
-    laplacian[boundary_indices, :] = 0  # Zero out entire rows
-    laplacian[boundary_indices, boundary_indices] = 1  # Set diagonal entries to 1
+    for i in boundary_indices:
+        start, end = laplacian.indptr[i], laplacian.indptr[i + 1]
+        laplacian.data[start:end] = 0  # Zero out row
+        laplacian[i, i] = 1  # Set diagonal to 1
     b = np.zeros(n_vertices)
     b[boundary_indices] = boundary_values
     # Step 3: Solve the Laplace-Beltrami equation
@@ -83,9 +94,9 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
         solution[boundary_indices] = boundary_values
         try:
             logger.info("about to solve")
-            solution[free_indices] = linalg.spsolve(free_laplacian, free_b)
+            solution[free_indices] = sp.linalg.spsolve(free_laplacian, free_b)
             logger.info("done solve")
-        except linalg.MatrixRankWarning:
+        except sp.linalg.MatrixRankWarning:
             logger.info("Warning: Laplacian matrix is singular or ill-conditioned.")
             solution[free_indices] = np.zeros(len(free_indices))
     else:
