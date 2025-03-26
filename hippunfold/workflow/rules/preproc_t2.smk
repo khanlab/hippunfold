@@ -259,15 +259,10 @@ rule reg_t2_to_t1_part1:
             )
         ),
     log:
-        bids(
-            root="logs",
+        bids_log_wrapper(
+            "reg_t2_to_t1_part1",
             **inputs.subj_wildcards,
-            suffix="reg.txt",
-            from_="T2w",
-            to="T1w",
-            desc="rigid",
-            type_="ras",
-        ),
+        )
     container:
         config["singularity"]["autotop"]
     conda:
@@ -400,14 +395,9 @@ rule compose_t2_xfm_corobl:
             )
         ),
     log:
-        bids(
-            root="logs",
+        bids_log_wrapper(
+            "compose_t2_xfm_corobol",
             **inputs.subj_wildcards,
-            suffix="composecorobl.txt",
-            from_="T2w",
-            to="corobl",
-            desc="affine",
-            type_="itk",
         ),
     container:
         config["singularity"]["autotop"]

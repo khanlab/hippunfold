@@ -2,9 +2,12 @@ import numpy as np
 import nibabel as nib
 from scipy.sparse import diags, linalg, lil_matrix
 from lib.utils import setup_logger
+import sys
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
+sys.stdout = open(log_file, "a")
+sys.stderr = open(log_file, "a")
 
 
 def cotangent_laplacian(vertices, faces):

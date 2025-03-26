@@ -59,11 +59,17 @@ rule template_reg:
         config["singularity"]["autotop"]
     conda:
         conda_env("greedy")
+    log: 
+        bids_log_wrapper(
+            "template_reg",
+            **inputs.subj_wildcards,
+            hemi="{hemi}"
+        ),
     threads: 8
     shell:
         "greedy -threads {threads} {params.general_opts} "
         " {params.smoothing_opts} {params.iteration_opts} "
-        " -i {input.fixed_img} {input.moving_img} -it {params.xfm_corobl} -o {output.warp}"
+        " -i {input.fixed_img} {input.moving_img} -it {params.xfm_corobl} -o {output.warp} &> {log}"
 
 
 rule warp_template_dseg:
