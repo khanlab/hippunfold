@@ -166,6 +166,22 @@ class AtlasConfig(PluginBase):
                 "Surface metrics to use when creating new atlas (default: %(default)s)"
             ),
         )
+        self.try_add_argument(
+            group,
+            "--density",
+            "--density",
+            action="store",
+            type=str,
+            dest="density",
+            default=[
+                "hipp=272,1k,2k,4k,7k,10k,14k,18k,22k,27k,62k",
+                "dentate=34,129,301,536,842,1k,2k,3k,8k,13k",
+            ],
+            nargs="+",
+            help=(
+                "Density for surface meshes. Use --atlas-list-density to get a listing of available densities (default: %(default)s)"
+            ),
+        )
 
     @bidsapp.hookimpl
     def update_cli_namespace(self, namespace: dict[str, Any], config: dict[str, Any]):
@@ -177,10 +193,32 @@ class AtlasConfig(PluginBase):
             namespace["analysis_level"] == "group_create_atlas"
             and new_atlas_name == None
         ):
-            raise TypeError(
+            raise argparse.ArgumentTypeError(
                 "--new_atlas_name must be specified when using group_create_atlas"
             )
 
         config["atlas"] = atlas
         config["new_atlas_name"] = new_atlas_name
         config["atlas_metadata"] = self.atlas_config
+
+        # parsing for density
+        density_args = self.pop(namespace, "density")
+
+        density = {}
+        for d_arg in density_args:
+            if "=" not in d_arg:
+                raise argparse.ArgumentTypeError(
+                    f"Invalid format: '{item}'. Expected format label=density1,density2,..."
+                )
+
+            label, values = d_arg.split("=", 1)
+            if label not in ["hipp", "dentate"]:
+                raise argparse.ArgumentTypeError(
+                    f"Invalid label: '{label}'. Valid labels are hipp or dentate"
+                )
+
+            density[label] = values.split(",")
+
+            # TODO: check if they are in the atlas
+
+        config["density"] = density
