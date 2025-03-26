@@ -288,6 +288,14 @@ rule gen_atlas_surfs:
         config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
+    log: 
+        bids_log_wrapper(
+            "gen_atlas_surfs", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}",
+            to="{surfname}"
+        )
     script:
         "../scripts/surf_gen.py"
 

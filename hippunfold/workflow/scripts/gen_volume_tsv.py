@@ -31,6 +31,6 @@ for in_img, hemi in zip(snakemake.input.segs, hemis):
         new_entry[name] = np.sum(img == index) * voxel_mm3
 
     # now create a dataframe from it
-    df = df.append(new_entry, ignore_index=True)
+    df = df._append(new_entry, ignore_index=True)
 
 df.to_csv(snakemake.output.tsv, sep="\t", index=False)

@@ -93,7 +93,7 @@ rule gen_native_mesh:
             **inputs.subj_wildcards,
             hemi="{hemi}",
             label="{label}",
-            desc="{surfname,midthickness}"
+            desc="{surfname}"
         ),
     script:
         "../scripts/gen_isosurface.py"
@@ -563,8 +563,15 @@ rule unfold_surface_smoothing:
         conda_env("workbench")
     group:
         "subj"
+    log:
+        bids_log_wrapper(
+            "unfold_surface_smoothing", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}"
+        )
     shell:
-        "wb_command -surface-smoothing {input} {params} {output}"
+        "wb_command -surface-smoothing {input} {params} {output} &> {log}"
 
 
 rule set_surface_z_level:
@@ -1166,8 +1173,17 @@ rule resample_native_surf_to_atlas_density:
         conda_env("workbench")
     group:
         "subj"
+    log: 
+        bids_log_wrapper(
+            "resample_native_surf_to_atlas_density", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}",
+            space="{space}",
+            desec="{surf_name}"
+        )
     shell:
-        "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
+        "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check &> {log}"
 
 
 rule resample_native_metric_to_atlas_density:
@@ -1207,8 +1223,18 @@ rule resample_native_metric_to_atlas_density:
         conda_env("workbench")
     group:
         "subj"
+    log: 
+        bids_log_wrapper(
+            "resample_native_metric_to_atlas_density", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}",
+            space="{space}",
+            den="{density}",
+            desec="{metric}-{metrictype}"
+        )
     shell:
-        "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
+        "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
 
 # --- resampling from avgatlas to native vertices

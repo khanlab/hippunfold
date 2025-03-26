@@ -14,7 +14,8 @@ def bids_log_wrapper(rule_name, **kwargs):
 
     log_params = {
         "root": "logs",
-        "suffix": f"{rule_name}.txt",
+        "datatype": rule_name,
+        "suffix": f"log.txt",
     }
     log_params.update(kwargs)
 
