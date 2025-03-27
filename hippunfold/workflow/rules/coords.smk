@@ -6,7 +6,7 @@ def get_labels_for_laplace(wildcards):
         seg = get_input_for_shape_inject(wildcards)
     else:
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -56,15 +56,17 @@ rule get_label_mask:
     params:
         labels=get_gm_labels,
     output:
-        mask=bids(
-            root=work,
-            datatype="coords",
-            suffix="mask.nii.gz",
-            space="corobl",
-            desc="GM",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        mask=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                suffix="mask.nii.gz",
+                space="corobl",
+                desc="GM",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -82,7 +84,7 @@ def get_inputs_laplace(wildcards):
     if not config["skip_inject_template_labels"]:
         files["init_coords"] = (
             bids(
-                root=work,
+                root=root,
                 datatype="coords",
                 **inputs.subj_wildcards,
                 dir="{dir}",
@@ -102,16 +104,18 @@ rule get_src_sink_mask:
     params:
         labels=get_src_sink_labels,
     output:
-        mask=bids(
-            root=work,
-            datatype="coords",
-            suffix="mask.nii.gz",
-            space="corobl",
-            dir="{dir}",
-            desc="{srcsink,src|sink}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        mask=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                suffix="mask.nii.gz",
+                space="corobl",
+                dir="{dir}",
+                desc="{srcsink,src|sink}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -127,7 +131,7 @@ rule get_src_sink_sdt:
     """calculate signed distance transform (negative inside, positive outside)"""
     input:
         mask=bids(
-            root=work,
+            root=root,
             datatype="coords",
             suffix="mask.nii.gz",
             space="corobl",
@@ -138,16 +142,18 @@ rule get_src_sink_sdt:
             **inputs.subj_wildcards,
         ),
     output:
-        sdt=bids(
-            root=work,
-            datatype="coords",
-            suffix="sdt.nii.gz",
-            space="corobl",
-            dir="{dir}",
-            desc="{srcsink}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        sdt=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                suffix="sdt.nii.gz",
+                space="corobl",
+                dir="{dir}",
+                desc="{srcsink}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -165,16 +171,18 @@ rule get_nan_mask:
     params:
         labels=get_nan_labels,
     output:
-        mask=bids(
-            root=work,
-            datatype="coords",
-            suffix="mask.nii.gz",
-            space="corobl",
-            dir="{dir}",
-            desc="nan",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        mask=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                suffix="mask.nii.gz",
+                space="corobl",
+                dir="{dir}",
+                desc="nan",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -192,17 +200,19 @@ rule create_upsampled_coords_ref:
     params:
         tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
         resample_res=lambda wildcards: config["laminar_coords_res"][wildcards.label],
-        trim_padding="3mm",
+        trim_padding="5mm",
     output:
-        upsampled_ref=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="ref.nii.gz",
-            desc="resampled",
-            space="corobl",
-            label="{label}",
-            hemi="{hemi}",
+        upsampled_ref=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="ref.nii.gz",
+                desc="resampled",
+                space="corobl",
+                label="{label}",
+                hemi="{hemi}",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -245,16 +255,18 @@ rule prep_dseg_for_laynii:
             ]
         ),
     output:
-        dseg_rim=bids(
-            root=work,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="dseg.nii.gz",
-            dir="{dir,IO}",
-            desc="laynii",
-            label="{label}",
-            space="corobl",
-            hemi="{hemi}",
+        dseg_rim=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                dir="{dir,IO}",
+                desc="laynii",
+                label="{label}",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -269,7 +281,7 @@ rule prep_dseg_for_laynii:
 rule laynii_layers_equidist:
     input:
         dseg_rim=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -280,16 +292,18 @@ rule laynii_layers_equidist:
             hemi="{hemi}",
         ),
     output:
-        equidist=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir,IO}",
-            label="{label}",
-            suffix="coords.nii.gz",
-            desc="equidist",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
+        equidist=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                dir="{dir,IO}",
+                label="{label}",
+                suffix="coords.nii.gz",
+                desc="equidist",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     shadow:
         "minimal"
@@ -308,7 +322,7 @@ rule laynii_layers_equidist:
 rule laynii_layers_equivol:
     input:
         dseg_rim=bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -319,16 +333,18 @@ rule laynii_layers_equivol:
             hemi="{hemi}",
         ),
     output:
-        equivol=bids(
-            root=work,
-            datatype="coords",
-            dir="{dir,IO}",
-            label="{label}",
-            suffix="coords.nii.gz",
-            desc="equivol",
-            space="corobl",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
+        equivol=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                dir="{dir,IO}",
+                label="{label}",
+                suffix="coords.nii.gz",
+                desc="equivol",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     shadow:
         "minimal"
