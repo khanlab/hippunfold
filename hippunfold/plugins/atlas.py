@@ -174,8 +174,8 @@ class AtlasConfig(PluginBase):
             type=str,
             dest="density",
             default=[
-                "hipp=272,1k,2k,4k,7k,10k,14k,18k,22k,27k,62k",
-                "dentate=34,129,301,536,842,1k,2k,3k,8k,13k",
+                "hipp=21k",
+                "dentate=3k",
             ],
             nargs="+",
             help=(
