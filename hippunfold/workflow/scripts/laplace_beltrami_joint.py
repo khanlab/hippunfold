@@ -116,10 +116,10 @@ sink_indices1 = np.where(src_sink_mask == 2)[0]
 
 ## stack
 vertices = np.vstack(vertices1, vertices2)
-faces = np.vstack(faces1, faces2+len(vertices1))
+faces = np.vstack(faces1, faces2 + len(vertices1))
 
-src_indices = np.vstack(src_indices1, src_indices2+len(vertices1))
-sink_indices = np.vstack(sink_indices1, sink_indices2+len(vertices1))
+src_indices = np.vstack(src_indices1, src_indices2 + len(vertices1))
+sink_indices = np.vstack(sink_indices1, sink_indices2 + len(vertices1))
 
 ## bridgeheads
 bridge_hipp = nib.load(snakemake.input.bridgehead_hipp).agg_data()
@@ -130,11 +130,11 @@ bridge_dentate_indices = np.where(bridge_dentate == 1)[0] + len(vertices1)
 ## stitch
 tree_dentate = cKDTree(vertices[bridge_dentate_indices])
 for e in bridge_hipp_indices:
-    nearestvert = tree_dentate.query(vertices[e,:])
+    nearestvert = tree_dentate.query(vertices[e, :])
     faces = faces.vstack(faces, [e, nearestvert, e])
 tree_hipp = cKDTree(vertices[bridge_dentate_indices])
 for e in bridge_dentate_indices:
-    nearestvert = tree_hipp.query(vertices[e,:])
+    nearestvert = tree_hipp.query(vertices[e, :])
     faces = faces.vstack(faces, [e, nearestvert, e])
 
 
@@ -154,8 +154,8 @@ coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 
 
 ## unstitch
-coords_hipp = coords[:len(vertices)]
-coords_dentate = coords[len(vertices)+1:]
+coords_hipp = coords[: len(vertices)]
+coords_dentate = coords[len(vertices) + 1 :]
 
 ## save
 
