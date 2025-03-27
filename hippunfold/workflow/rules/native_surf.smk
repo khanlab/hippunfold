@@ -426,6 +426,123 @@ rule laplace_beltrami:
         "../scripts/laplace_beltrami.py"
 
 
+ruleorder: laplace_beltrami_joint > laplace_beltrami
+
+
+rule laplace_beltrami_joint:
+    input:
+        surf_gii_hipp=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards,
+        ),
+        surf_gii_dentate=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="dentate",
+            **inputs.subj_wildcards,
+        ),
+        src_sink_mask_hipp=bids(
+            root=root,
+            datatype="coords",
+            suffix="mask.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="AP",
+            desc="srcsink",
+            label="hipp",
+            **inputs.subj_wildcards,
+        ),
+        src_sink_mask_dentate=bids(
+            root=root,
+            datatype="coords",
+            suffix="mask.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="AP",
+            desc="srcsink",
+            label="dentate",
+            **inputs.subj_wildcards,
+        ),
+        bridgehead_hipp=bids(
+            root=root,
+            datatype="coords",
+            suffix="mask.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="PD",
+            desc="srcsink",
+            label="hipp",
+            **inputs.subj_wildcards,
+        ),
+        bridgehead_dentate=bids(
+            root=root,
+            datatype="coords",
+            suffix="mask.label.gii",
+            space="corobl",
+            hemi="{hemi}",
+            dir="PD",
+            desc="srcsink",
+            label="dentate",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        coords_hipp=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                dir="AP",
+                suffix="coords.shape.gii",
+                desc="laplace",
+                space="corobl",
+                hemi="{hemi}",
+                label="hipp",
+                **inputs.subj_wildcards,
+            )
+        ),
+        coords_dentate=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                dir="AP",
+                suffix="coords.shape.gii",
+                desc="laplace",
+                space="corobl",
+                hemi="{hemi}",
+                label="dentate",
+                **inputs.subj_wildcards,
+            )
+        ),
+    log:
+        bids(
+            root="logs",
+            datatype="laplace_beltrami",
+            suffix="log.txt",
+            hemi="{hemi}",
+            dir="AP",
+            label="hipp-dentate-joint",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    threads: 1
+    resources:
+        mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
+    conda:
+        conda_env("pyvista")
+    script:
+        "../scripts/laplace_beltrami_joint.py"
+
+
 def get_unfold_z_level(wildcards):
     extent = float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
     return surf_thresholds[wildcards.surfname] * extent
