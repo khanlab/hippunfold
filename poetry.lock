@@ -3081,14 +3081,16 @@ reretry = "*"
 smart-open = ">=4.0,<8.0"
 snakemake-interface-common = ">=1.17.0,<2.0"
 snakemake-interface-executor-plugins = ">=9.3.2,<10.0"
+snakemake-interface-logger-plugins = ">=1.1.0,<2.0.0"
 snakemake-interface-report-plugins = ">=1.1.0,<2.0.0"
-snakemake-interface-storage-plugins = ">=3.2.3,<4.0"
+snakemake-interface-storage-plugins = ">=3.5.0,<4.0"
 tabulate = "*"
 throttler = "*"
 wrapt = "*"
 yte = ">=1.5.5,<2.0"
 
 [package.extras]
+all = ["eido", "peppy", "pygments", "slack_sdk"]
 messaging = ["slack_sdk"]
 pep = ["eido", "peppy"]
 reports = ["pygments"]
@@ -3123,6 +3125,20 @@ files = [
 argparse-dataclass = ">=2.0.0,<3.0.0"
 snakemake-interface-common = ">=1.17.4,<2.0.0"
 throttler = ">=1.2.2,<2.0.0"
+
+[[package]]
+name = "snakemake-interface-logger-plugins"
+version = "1.2.2"
+description = "Logger plugin interface for snakemake"
+optional = false
+python-versions = "<4.0,>=3.11"
+files = [
+    {file = "snakemake_interface_logger_plugins-1.2.2-py3-none-any.whl", hash = "sha256:7c70caaa918225975abf3857c924f69c51f531845eb3451b53d3a913f6dcaece"},
+    {file = "snakemake_interface_logger_plugins-1.2.2.tar.gz", hash = "sha256:a80a03dd56bfe5c330fad17c6ad2fb051b23bc7dd457aa967ec8181977e1212f"},
+]
+
+[package.dependencies]
+snakemake-interface-common = ">=1.17.4"
 
 [[package]]
 name = "snakemake-interface-report-plugins"
