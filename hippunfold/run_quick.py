@@ -12,10 +12,6 @@ def check_conda_installation():
         )
         print(f"Conda is installed (version: {conda_version.stdout.strip()})")
         return True
-    except subprocess.CalledProcessError:
-        error_message = "There was an issue running the Conda command."
-        print(error_message)
-        return False
     except FileNotFoundError:
         error_message = "Conda is not installed on your system or not found in PATH."
         print(error_message)
