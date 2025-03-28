@@ -18,16 +18,10 @@ snakemake = [
 ]
 snakebids = "0.14.0"
 appdirs = "^1.4.4"
-Jinja2 = "^3.0.3"
-Pygments = "^2.10.0"
-pulp = { version="<2.8.0", python = "<3.11" }
 pandas = [
     { version = "<=2.0.3", python = "<3.9" },
     { version = ">=2.1.1", python = ">=3.12" },
 ]
-nibabel = "^5.3.2"
-pyvista = "^0.44.2"
-pygeodesic = "^0.1.11"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
@@ -39,6 +33,7 @@ isort = "^5.10.1"
 poethepoet = "^0.10.0"
 snakefmt = "^0.10.0"
 pygraphviz = "1.7"
+Jinja2 = "^3.0.3"
 
 [tool.poetry.scripts]
 hippunfold = "hippunfold.run:app.run"
