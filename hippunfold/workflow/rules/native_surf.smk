@@ -492,8 +492,8 @@ rule warp_native_mesh_to_unfold:
 
 # rule space_unfold_vertices:
 #     """ this irons out the surface to result in more even
-#         vertex spacing. the resulting shape will be more 
-#         individual (e.g. the surface area in unfolded space 
+#         vertex spacing. the resulting shape will be more
+#         individual (e.g. the surface area in unfolded space
 #         would be similar to native) """
 #     input:
 #         surf_gii=bids(
@@ -1143,14 +1143,14 @@ rule resample_native_surf_to_atlas_density:
         native_unfold=get_unfold_ref,
     output:
         native_resampled=bids(
-                root=root,
-                datatype="surf",
-                suffix="{surf_name,midthickness|inner|outer}.surf.gii",
-                space="{space,unfoldreg|corobl}",
-                den="{density}",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
+            root=root,
+            datatype="surf",
+            suffix="{surf_name,midthickness|inner|outer}.surf.gii",
+            space="{space,unfoldreg|corobl}",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
