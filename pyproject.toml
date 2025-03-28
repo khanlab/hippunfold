@@ -19,7 +19,6 @@ snakemake = [
 snakebids = "0.14.0"
 appdirs = "^1.4.4"
 Jinja2 = "^3.0.3"
-pygraphviz = "1.7"
 Pygments = "^2.10.0"
 pulp = { version="<2.8.0", python = "<3.11" }
 pandas = [
@@ -39,6 +38,8 @@ pylint = "^2.11.1"
 isort = "^5.10.1"
 poethepoet = "^0.10.0"
 snakefmt = "^0.10.0"
+pygraphviz = "1.7"
+
 [tool.poetry.scripts]
 hippunfold = "hippunfold.run:app.run"
 hippunfold-quick="hippunfold.run_quick:main"
