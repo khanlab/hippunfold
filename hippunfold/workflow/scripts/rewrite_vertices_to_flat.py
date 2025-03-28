@@ -1,17 +1,25 @@
-import nibabel as nib
+from lib.surface import (
+    read_surface_from_gifti,
+    read_metric_from_gii,
+    write_surface_to_gifti,
+)
 
-gii = nib.load(snakemake.input.surf_gii)
-vertices = gii.get_arrays_from_intent("NIFTI_INTENT_POINTSET")[0].data
 
-ap = nib.load(snakemake.input.coords_AP).darrays[0].data
-pd = nib.load(snakemake.input.coords_PD).darrays[0].data
+surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
+ap = read_metric_from_gii(snakemake.input.coords_AP)
+pd = read_metric_from_gii(snakemake.input.coords_AP)
 
-vertices[:, 0] = ap * -float(snakemake.params.vertspace["extent"][0]) - float(
+
+surface.points[:, 0] = ap * -float(snakemake.params.vertspace["extent"][0]) - float(
     snakemake.params.vertspace["origin"][0]
 )
-vertices[:, 1] = pd * float(snakemake.params.vertspace["extent"][1]) - float(
+
+surface.points[:, 1] = pd * -float(snakemake.params.vertspace["extent"][1]) - float(
     snakemake.params.vertspace["origin"][1]
 )
-vertices[:, 2] = snakemake.params.z_level
 
-nib.save(gii, snakemake.output.surf_gii)
+surface.points[:, 2] = snakemake.params.z_level
+
+# TODO: write metadata too
+
+write_surface_to_gifti(surface, snakemake.output.surf_gii)

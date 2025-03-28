@@ -5,66 +5,11 @@ import nibabel.gifti as gifti
 from nibabel.gifti.gifti import intent_codes
 from collections import defaultdict
 from lib.utils import setup_logger
+from lib.surface import read_surface_from_gifti, find_boundary_vertices, write_label_gii
 
 # Setup logger
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
-
-
-def find_boundary_vertices(mesh):
-    """
-    Find boundary vertices of a 3D mesh.
-
-    Args:
-        mesh
-    Returns:
-        list: List of vertex indices that are boundary vertices, sorted in ascending order.
-    """
-    vertices = mesh.points
-    faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
-
-    edge_count = defaultdict(int)
-    # Step 1: Count edge occurrences
-    for face in faces:
-        # Extract edges from the face, ensure consistent ordering (min, max)
-        edges = [
-            tuple(sorted((face[0], face[1]))),
-            tuple(sorted((face[1], face[2]))),
-            tuple(sorted((face[2], face[0]))),
-        ]
-        for edge in edges:
-            edge_count[edge] += 1
-    # Step 2: Identify boundary edges
-    boundary_edges = [edge for edge, count in edge_count.items() if count == 1]
-    # Step 3: Collect boundary vertices
-    boundary_vertices = set()
-    for edge in boundary_edges:
-        boundary_vertices.update(edge)
-    # Convert the set to a sorted list (array)
-    return np.array(sorted(boundary_vertices), dtype=np.int32)
-
-
-def read_surface_from_gifti(surf_gii):
-    """Load a surface mesh from a GIFTI file."""
-    surf = nib.load(surf_gii)
-    vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
-    faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
-    faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])  # PyVista format
-
-    # Find the first darray that represents vertices (NIFTI_INTENT_POINTSET)
-    vertices_darray = next(
-        (
-            darray
-            for darray in surf.darrays
-            if darray.intent == intent_codes["NIFTI_INTENT_POINTSET"]
-        ),
-        None,
-    )
-
-    # Extract metadata as a dictionary (return empty dict if no metadata)
-    metadata = dict(vertices_darray.meta) if vertices_darray else {}
-
-    return pv.PolyData(vertices, faces_pv), metadata
 
 
 logger.info("Loading surface from GIFTI...")
@@ -110,33 +55,15 @@ boundary_scalars[largest_component_indices] = 1
 
 logger.info("Saving GIFTI label file...")
 
-# Create a GIFTI label data array
-gii_data = gifti.GiftiDataArray(boundary_scalars, intent="NIFTI_INTENT_LABEL")
+label_dict = {
+    "Background": {"key": 0, "red": 1.0, "green": 1.0, "blue": 1.0, "alpha": 0.0},
+    "Boundary": {"key": 1, "red": 1.0, "green": 0.0, "blue": 0.0, "alpha": 1.0},
+}
 
-# Create a Label Table (LUT)
-label_table = gifti.GiftiLabelTable()
-
-# Define Background label (key 0)
-background_label = gifti.GiftiLabel(
-    key=0, red=1.0, green=1.0, blue=1.0, alpha=0.0
-)  # Transparent
-background_label.label = "Background"
-label_table.labels.append(background_label)
-
-# Define Boundary label (key 1)
-boundary_label = gifti.GiftiLabel(
-    key=1, red=1.0, green=0.0, blue=0.0, alpha=1.0
-)  # Red color
-boundary_label.label = "Boundary"
-label_table.labels.append(boundary_label)
-
-# Assign label table to GIFTI image
-gii_img = gifti.GiftiImage(darrays=[gii_data], labeltable=label_table)
-
-# set structure metadata
-gii_img.meta["AnatomicalStructurePrimary"] = metadata["AnatomicalStructurePrimary"]
-
-
-# Save the label file
-gii_img.to_filename(snakemake.output.label_gii)
+write_label_gii(
+    boundary_scalars,
+    snakemake.output.label_gii,
+    label_dict=label_dict,
+    metadata=metadata,
+)
 logger.info(f"GIFTI label file saved as '{snakemake.output.label_gii}'.")

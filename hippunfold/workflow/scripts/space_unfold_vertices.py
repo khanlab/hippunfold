@@ -1,53 +1,15 @@
 import numpy as np
-import pyvista as pv
-import nibabel as nib
 from lib.utils import setup_logger
-from scipy.spatial import KDTree
+from lib.surface import read_surface_from_gifti
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
 
-def read_surface_from_gifti(surf_gii):
-    """Load a surface mesh from a GIFTI file."""
-    surf = nib.load(surf_gii)
-    vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
-    faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
-    faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])  # PyVista format
-    return pv.PolyData(vertices, faces_pv)
-
-
-def write_surface_to_gifti(mesh, out_surf_gii):
-    """Writes a PyVista mesh to a GIFTI surface file."""
-    points = mesh.points
-    faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
-
-    points_darray = nib.gifti.GiftiDataArray(
-        data=points, intent="NIFTI_INTENT_POINTSET", datatype="NIFTI_TYPE_FLOAT32"
-    )
-
-    tri_darray = nib.gifti.GiftiDataArray(
-        data=faces, intent="NIFTI_INTENT_TRIANGLE", datatype="NIFTI_TYPE_INT32"
-    )
-
-    gifti = nib.GiftiImage()
-    gifti.add_gifti_data_array(points_darray)
-    gifti.add_gifti_data_array(tri_darray)
-    gifti.to_filename(out_surf_gii)
-
-
 # Run the processing pipeline
-mesh = read_surface_from_gifti(snakemake.input.surf_gii)
-mesh_native = read_surface_from_gifti(snakemake.input.native_gii)
+mesh, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
+mesh_native, metadata_native = read_surface_from_gifti(snakemake.input.native_gii)
 
-# check for bad vertices
-# orig_points = mesh.points
-# mesh = mesh.clean()
-# if not mesh.points.shape == mesh_native.points.shape:
-#     logger.info("unfolded surface contained degenerate vertices. removing them for now, but the native surf will also need to be modified accordingly!")
-#     tree = KDTree(orig_points)
-#     _, retained_indices = tree.query(mesh.points, k=1)  # Find closest match indices
-#     mesh_native = mesh_native.extract_points(retained_indices)
 
 """
 Perform spring-based smoothing on a 2D projected mesh, aiming for uniform edge lengths.
