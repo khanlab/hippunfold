@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 import json
 import os
 
+# Global variable to store the commit hash
+ATLAS_REPO_COMMIT = "7c292113c669a629773a644f82485ffde1842f52"
+
 
 def get_download_dir():
     if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
@@ -40,9 +43,11 @@ def sync_atlas_repo():
             # If the directory exists and is a git repo, update it
             repo = Repo(atlas_dir)
             repo.remotes.origin.pull()
+            repo.git.checkout(ATLAS_REPO_COMMIT)
         else:
             # If the directory does not exist, clone the repo
             Repo.clone_from(repo_url, atlas_dir)
+            repo.git.checkout(ATLAS_REPO_COMMIT)
     except GitCommandError as e:
         logger.info(f"Error syncing atlas repository: {e}")
 
