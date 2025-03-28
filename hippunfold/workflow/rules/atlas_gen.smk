@@ -288,7 +288,7 @@ rule make_metric_ref:
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            suffix="gyrification.nii.gz",
+            suffix="{metric}.nii.gz".format(metric=config["atlas_metrics"][0]),
         ),
     output:
         metric_ref=temp(
@@ -306,7 +306,7 @@ rule make_metric_ref:
     conda:
         conda_env("c3d")
     shell:
-        "c2d {input} -resample {wildcards.resample}% -threshold 0.1 inf 1 0 -o {output}"
+        "c2d {input} -resample {wildcards.resample}% -scale 0 -shift 1 -binarize -o {output}"
 
 
 rule gen_unfold_atlas_mesh:
