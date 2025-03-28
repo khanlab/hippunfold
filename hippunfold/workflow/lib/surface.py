@@ -25,6 +25,24 @@ def read_surface_from_gifti(surf_gii):
 
     return pv.PolyData(vertices, faces_pv), metadata
 
+def compute_edge_lengths(surface):
+
+    # Extract edges
+    edges = surface.extract_all_edges()
+
+    # Extract individual edge segments
+    edge_lengths = []
+    lines = edges.lines.reshape(-1, 3)  # Each row: [2, point1, point2]
+
+    for line in lines:
+        _, p1, p2 = line  # First entry is always "2" (pairs of points)
+        length = np.linalg.norm(edges.points[p1] - edges.points[p2])
+        edge_lengths.append(length)
+
+    edge_lengths = np.array(edge_lengths)
+
+    return edge_lengths
+
 
 def write_surface_to_gifti(mesh, out_surf_gii, metadata=None):
     """
