@@ -46,7 +46,7 @@ def sync_atlas_repo():
             repo.git.checkout(ATLAS_REPO_COMMIT)
         else:
             # If the directory does not exist, clone the repo
-            Repo.clone_from(repo_url, atlas_dir)
+            repo = Repo.clone_from(repo_url, atlas_dir)
             repo.git.checkout(ATLAS_REPO_COMMIT)
     except GitCommandError as e:
         logger.info(f"Error syncing atlas repository: {e}")
