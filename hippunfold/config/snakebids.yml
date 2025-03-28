@@ -620,6 +620,6 @@ unfoldreg_padding: 64x64x0vox
 
 density: #temporary var
   hipp: 
-    - 7k
+    - 8k
   dentate:
     - 1k
