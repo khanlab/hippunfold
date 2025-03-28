@@ -808,3 +808,5 @@ rule write_template_json:
             )
             / "template_description.json"
         ),
+    script:
+        "../scripts/write_template_json.py"
