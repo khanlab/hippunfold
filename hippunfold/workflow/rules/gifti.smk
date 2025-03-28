@@ -56,7 +56,7 @@ rule affine_gii_to_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        conda_env("workbench")
     group:
         "subj"
     shell:
