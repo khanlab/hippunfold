@@ -1535,29 +1535,14 @@ test = ["pytest", "pytest-xdist", "setuptools"]
 
 [[package]]
 name = "pulp"
-version = "3.0.2"
+version = "2.7.0"
 description = "PuLP is an LP modeler written in python. PuLP can generate MPS or LP files and call GLPK, COIN CLP/CBC, CPLEX, and GUROBI to solve linear problems."
 optional = false
-python-versions = ">=3.7"
+python-versions = "*"
 files = [
-    {file = "PuLP-3.0.2-py3-none-any.whl", hash = "sha256:327ba7a0d33cb7d4330005eed2b58f0d19391ca96d15f6546fe3621eb86ce341"},
-    {file = "pulp-3.0.2.tar.gz", hash = "sha256:7e57cd4eb145bdca80214acb07315f03583dd1c00cc8f24f91bf037649f93eb6"},
+    {file = "PuLP-2.7.0-py3-none-any.whl", hash = "sha256:b6de42c929e80325bf44cc7a2997f02535440800c376b9eb8cb7b4670ed53769"},
+    {file = "PuLP-2.7.0.tar.gz", hash = "sha256:e73ee6b32d639c9b8cf4b4aded334ba158be5f8313544e056f796ace0a10ae63"},
 ]
-
-[[package]]
-name = "pulp"
-version = "3.1.1"
-description = "PuLP is an LP modeler written in python. PuLP can generate MPS or LP files and call GLPK, COIN CLP/CBC, CPLEX, and GUROBI to solve linear problems."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "pulp-3.1.1-py3-none-any.whl", hash = "sha256:ad9d46afaf78a708270a2fa9b38e56536584c048dfbd7a6dbc719abee1051261"},
-    {file = "pulp-3.1.1.tar.gz", hash = "sha256:300a330e917c9ca9ac7fda6f5849bbf30d489c368117f197a3e3fd0bc1966d95"},
-]
-
-[package.extras]
-open-py = ["cylp", "highspy", "pyscipopt"]
-public-py = ["coptpy", "gurobipy", "xpress"]
 
 [[package]]
 name = "pvandyken-deprecated"
@@ -3469,4 +3454,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "5ff7d4a3fb7cff435e35dbc23d084245d12acfc16eaa99ca199d540a060bc959"
+content-hash = "6e9f870d26fba81ed17767bd09a933109f9d43dbe7375f852aa6620bd2d0801b"
