@@ -99,47 +99,52 @@ logger.info(
 )
 
 surf1 = nib.load(snakemake.input.surf_gii_hipp)
-vertices1 = surf.agg_data("NIFTI_INTENT_POINTSET")
-faces1 = surf.agg_data("NIFTI_INTENT_TRIANGLE")
+vertices1 = surf1.agg_data("NIFTI_INTENT_POINTSET")
+faces1 = surf1.agg_data("NIFTI_INTENT_TRIANGLE")
 
 surf2 = nib.load(snakemake.input.surf_gii_dentate)
-vertices2 = surf.agg_data("NIFTI_INTENT_POINTSET")
-faces2 = surf.agg_data("NIFTI_INTENT_TRIANGLE")
+vertices2 = surf2.agg_data("NIFTI_INTENT_POINTSET")
+faces2 = surf2.agg_data("NIFTI_INTENT_TRIANGLE")
 
 src_sink_mask1 = nib.load(snakemake.input.src_sink_mask_hipp).agg_data()
-src_indices1 = np.where(src_sink_mask == 1)[0]
-sink_indices1 = np.where(src_sink_mask == 2)[0]
+src_indices1 = np.where(src_sink_mask1 == 1)[0]
+sink_indices1 = np.where(src_sink_mask1 == 2)[0]
 
-src_sink_mask1 = nib.load(snakemake.input.src_sink_mask_dentate).agg_data()
-src_indices1 = np.where(src_sink_mask == 1)[0]
-sink_indices1 = np.where(src_sink_mask == 2)[0]
+src_sink_mask2 = nib.load(snakemake.input.src_sink_mask_dentate).agg_data()
+src_indices2 = np.where(src_sink_mask2 == 1)[0]
+sink_indices2 = np.where(src_sink_mask2 == 2)[0]
 
 ## stack
-vertices = np.vstack(vertices1, vertices2)
-faces = np.vstack(faces1, faces2 + len(vertices1))
+vertices = np.vstack((vertices1, vertices2))
+faces = np.vstack((faces1, faces2 + len(vertices1)))
+logger.info(f"Combined vertices shape {vertices.shape}")
+logger.info(f"Combined faces shape {faces.shape}")
 
-src_indices = np.vstack(src_indices1, src_indices2 + len(vertices1))
-sink_indices = np.vstack(sink_indices1, sink_indices2 + len(vertices1))
+src_indices = np.hstack((src_indices1, src_indices2 + len(vertices1)))
+sink_indices = np.hstack((sink_indices1, sink_indices2 + len(vertices1)))
+logger.info(f"# of src boundary vertices: {len(src_indices)}")
+logger.info(f"# of sink boundary vertices: {len(sink_indices)}")
+
 
 ## bridgeheads
 bridge_hipp = nib.load(snakemake.input.bridgehead_hipp).agg_data()
 bridge_hipp_indices = np.where(bridge_hipp == 2)[0]
+logger.info(f"Hipp bridgeheads {bridge_hipp_indices.shape}")
 bridge_dentate = nib.load(snakemake.input.bridgehead_dentate).agg_data()
 bridge_dentate_indices = np.where(bridge_dentate == 1)[0] + len(vertices1)
+logger.info(f"Dentate bridgeheads {bridge_dentate_indices.shape}")
 
 ## stitch
-tree_dentate = cKDTree(vertices[bridge_dentate_indices])
+tree_dentate = cKDTree(vertices[bridge_dentate_indices, :])
 for e in bridge_hipp_indices:
-    nearestvert = tree_dentate.query(vertices[e, :])
-    faces = faces.vstack(faces, [e, nearestvert, e])
-tree_hipp = cKDTree(vertices[bridge_dentate_indices])
+    nearestvert = tree_dentate.query(vertices[e, :])[1]
+    faces = np.vstack((faces, [e, nearestvert, e]))
+tree_hipp = cKDTree(vertices[bridge_hipp_indices, :])
 for e in bridge_dentate_indices:
-    nearestvert = tree_hipp.query(vertices[e, :])
-    faces = faces.vstack(faces, [e, nearestvert, e])
+    nearestvert = tree_hipp.query(vertices[e, :])[1]
+    faces = np.vstack((faces, [e, nearestvert, e]))
 
-
-logger.info(f"# of src boundary vertices: {len(src_indices)}")
-logger.info(f"# of sink boundary vertices: {len(sink_indices)}")
+logger.info(f"Stitched faces shape {faces.shape}")
 
 
 src_vals = [0 for i in range(len(src_indices))]
@@ -154,8 +159,8 @@ coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 
 
 ## unstitch
-coords_hipp = coords[: len(vertices)]
-coords_dentate = coords[len(vertices) + 1 :]
+coords_hipp = coords[: len(vertices1)]
+coords_dentate = coords[len(vertices1) :]
 
 ## save
 
