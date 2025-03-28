@@ -26,9 +26,6 @@ pandas = [
     { version = "<=2.0.3", python = "<3.9" },
     { version = ">=2.1.1", python = ">=3.12" },
 ]
-nibabel = "^5.3.2"
-pyvista = "^0.44.2"
-pygeodesic = "^0.1.11"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
