@@ -490,102 +490,101 @@ rule warp_native_mesh_to_unfold:
         "../scripts/rewrite_vertices_to_flat.py"
 
 
-# rule space_unfold_vertices:
-#     """ this irons out the surface to result in more even
-#         vertex spacing. the resulting shape will be more
-#         individual (e.g. the surface area in unfolded space
-#         would be similar to native) """
-#     input:
-#         surf_gii=bids(
-#             root=root,
-#             datatype="surf",
-#             suffix="midthickness.surf.gii",
-#             desc="nostruct",
-#             space="unfolduneven",
-#             hemi="{hemi}",
-#             label="{label}",
-#             **inputs.subj_wildcards,
-#         ),
-#         native_gii=bids(
-#             root=root,
-#             datatype="surf",
-#             suffix="midthickness.surf.gii",
-#             space="corobl",
-#             hemi="{hemi}",
-#             label="{label}",
-#             **inputs.subj_wildcards,
-#         ),
-#     params:
-#         step_size=0.1,
-#         max_iterations=10000,
-#     output:
-#         surf_gii=temp(
-#             bids(
-#                 root=root,
-#                 datatype="surf",
-#                 suffix="midthickness.surf.gii",
-#                 desc="nostruct",
-#                 space="unfoldspringmodel",
-#                 hemi="{hemi}",
-#                 label="{label}",
-#                 **inputs.subj_wildcards,
-#             )
-#         ),
-#     container:
-#         config["singularity"]["autotop"]
-#     conda:
-#         conda_env("pyvista")
-#     group:
-#         "subj"
-#     log:
-#         bids(
-#             root="logs",
-#             suffix="log.txt",
-#             datatype="space_unfold_vertices",
-#             hemi="{hemi}",
-#             label="{label}",
-#             **inputs.subj_wildcards,
-#         ),
-#     script:
-#         "../scripts/space_unfold_vertices.py"
+rule space_unfold_vertices:
+    """ this irons out the surface to result in more even
+        vertex spacing. the resulting shape will be more
+        individual (e.g. the surface area in unfolded space
+        would be similar to native) """
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        native_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        step_size=0.1,
+        max_iterations=10000,
+    output:
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="midthickness.surf.gii",
+                desc="nostruct",
+                space="unfoldspringmodel",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("pyvista")
+    group:
+        "subj"
+    log:
+        bids(
+            root="logs",
+            suffix="log.txt",
+            datatype="space_unfold_vertices",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    script:
+        "../scripts/space_unfold_vertices.py"
 
 
-# rule unfold_surface_smoothing:
-#     input:
-#         surf_gii=bids(
-#             root=root,
-#             datatype="surf",
-#             suffix="midthickness.surf.gii",
-#             desc="nostruct",
-#             space="unfoldspringmodel",
-#             hemi="{hemi}",
-#             label="{label}",
-#             **inputs.subj_wildcards,
-#         ),
-#     params:
-#         strength=1,
-#         iterations=5,
-#     output:
-#         surf_gii=temp(
-#             bids(
-#                 root=root,
-#                 datatype="surf",
-#                 suffix="midthickness.surf.gii",
-#                 desc="nostruct",
-#                 space="unfold",
-#                 hemi="{hemi}",
-#                 label="{label}",
-#                 **inputs.subj_wildcards,
-#             )
-#         ),
-#     container:
-#         config["singularity"]["autotop"]
-#     conda:
-#         conda_env("workbench")
-#     group:
-#         "subj"
-#     shell:
-#         "wb_command -surface-smoothing {input} {params} {output}"
+rule unfold_surface_smoothing:
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            desc="nostruct",
+            space="unfoldspringmodel",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        strength=1,
+        iterations=5,
+    output:
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="midthickness.surf.gii",
+                space="unfoldspringmodelsmooth",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-smoothing {input} {params} {output}"
 
 
 rule set_surface_z_level:
@@ -991,7 +990,7 @@ rule calculate_legacy_gyrification:
             root=root,
             datatype="surf",
             suffix="surfarea.shape.gii",
-            space="unfold",
+            space="unfoldspringmodelsmooth",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
