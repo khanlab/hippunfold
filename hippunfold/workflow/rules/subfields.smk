@@ -113,7 +113,7 @@ rule native_label_gii_to_unfold_nii:
             **inputs.subj_wildcards,
         ),
     params:
-        interp="-nearest-vertex 0.3",
+        interp="-nearest-vertex 10",
     output:
         label_nii=temp(
             bids(
@@ -134,7 +134,7 @@ rule native_label_gii_to_unfold_nii:
         "subj"
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
-        " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
+        " {params.interp}"
 
 
 rule label_subfields_from_vol_coords_corobl:

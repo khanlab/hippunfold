@@ -126,7 +126,7 @@ rule native_metric_to_unfold_nii:
             **inputs.subj_wildcards,
         ),
     params:
-        interp="-nearest-vertex 0.3",
+        interp="-nearest-vertex 10",
     output:
         metric_nii=temp(
             bids(
@@ -147,7 +147,7 @@ rule native_metric_to_unfold_nii:
         "subj"
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
-        " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
+        " {params.interp}"
 
 
 rule atlas_metric_to_unfold_nii:
