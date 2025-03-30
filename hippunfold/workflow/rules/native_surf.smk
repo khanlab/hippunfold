@@ -973,15 +973,57 @@ rule calculate_surface_area:
         "wb_command -surface-vertex-areas {input} {output}"
 
 
-rule calculate_legacy_gyrification:
-    """new gyrification is ratio of nativearea to unfoldarea (e.g. surface scaling or distortion factor.
-    this should be proportional by a constant, to the earlier gyrification on 32k surfaces."""
+rule metric_smoothing:
+    input:
+        surface=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        metric=bids(
+            root=root,
+            datatype="surf",
+            suffix="{metric}.shape.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        fwhm=lambda wildcards: str(wildcards.fwhm).replace("p", "."),
+    output:
+        metric=bids(
+            root=root,
+            datatype="surf",
+            suffix="{metric}.shape.gii",
+            space="{space}",
+            desc="fwhm{fwhm}mm",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -metric-smoothing {input.surface} {input.metric} {params.fwhm} {output.metric} -fwhm"
+
+
+rule calculate_gyrification:
     input:
         native_surfarea=bids(
             root=root,
             datatype="surf",
             suffix="surfarea.shape.gii",
             space="corobl",
+            desc="fwhm1mm",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -991,6 +1033,7 @@ rule calculate_legacy_gyrification:
             datatype="surf",
             suffix="surfarea.shape.gii",
             space="unfoldspringmodelsmooth",
+            desc="fwhm1mm",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
