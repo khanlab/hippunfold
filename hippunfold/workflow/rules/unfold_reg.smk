@@ -1,55 +1,11 @@
-rule pad_unfold_ref:
-    """pads the unfolded ref in XY (to improve registration by ensuring zero-displacement at boundaries)
-        and to deal with input vertices that are just slightly outside the original bounding box. 
-       The ribbon-constrained method will be used to resample surface metrics into this reference, then
-        to get a 2D slice we will take the central slice (the next rule creates the single-slice reference
-        for this)."""
-    input:
-        ref_nii=bids(
-            root=root,
-            space="unfold",
-            label="{label}",
-            datatype="warps",
-            suffix="refvol.nii.gz",
-            **inputs.subj_wildcards,
-        ),
-    params:
-        padding="-pad {unfoldreg_padding} {unfoldreg_padding}".format(
-            unfoldreg_padding=config["unfoldreg_padding"]
-        ),
-    output:
-        ref_nii=temp(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="refvol.nii.gz",
-                space="unfold",
-                desc="padded",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        "../envs/c3d.yaml"
-    group:
-        "subj"
-    shell:
-        "c3d {input.ref_nii} -scale 0 -shift 1 {params.padding} 0 -o {output.ref_nii}"
-
-
 rule extract_unfold_ref_slice:
     """This gets the central-most slice of the unfold volume, for obtaining a 2D slice"""
     input:
         ref_3d_nii=bids(
             root=root,
-            datatype="anat",
+            datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
-            desc="padded",
-            hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
@@ -61,7 +17,6 @@ rule extract_unfold_ref_slice:
                 suffix="refvol.nii.gz",
                 space="unfold",
                 desc="slice",
-                hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
             )
@@ -121,7 +76,6 @@ rule native_metric_to_unfold_nii:
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
-            hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
@@ -132,7 +86,7 @@ rule native_metric_to_unfold_nii:
             bids(
                 root=root,
                 datatype="anat",
-                suffix="{metric}.nii.gz",
+                suffix="{metric,[0-9a-zA-Z]+}.nii.gz",
                 space="unfold",
                 hemi="{hemi}",
                 label="{label}",
@@ -160,7 +114,6 @@ rule atlas_metric_to_unfold_nii:
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
-            hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
@@ -434,11 +387,9 @@ rule reset_header_2d_warp_unfoldreg:
         ),
         ref_nii=bids(
             root=root,
-            datatype="anat",
+            datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
-            desc="padded",
-            hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
