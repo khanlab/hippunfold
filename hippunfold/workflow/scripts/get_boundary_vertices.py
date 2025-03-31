@@ -5,11 +5,13 @@ import nibabel.gifti as gifti
 from nibabel.gifti.gifti import intent_codes
 from collections import defaultdict
 from lib.utils import setup_logger
+import sys
 
 # Setup logger
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
-
+sys.stdout = open(log_file, "a")
+sys.stderr = open(log_file, "a")
 
 def find_boundary_vertices(mesh):
     """

@@ -349,13 +349,12 @@ rule unfoldreg_antsquick:
     group:
         "subj"
     log:
-        bids(
-            root="logs",
-            suffix="unfoldreg.txt",
+        bids_log_wrapper(
+            "unfoldreg_antsquick",
+            **inputs.subj_wildcards,
             atlas="{atlas}",
             hemi="{hemi}",
             label="{label}",
-            **inputs.subj_wildcards,
         ),
     shadow:
         "minimal"

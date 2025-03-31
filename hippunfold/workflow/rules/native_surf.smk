@@ -83,22 +83,20 @@ rule gen_native_mesh:
                 )
             )
         ),
-    log:
-        surf_gii=bids(
-            root="logs",
-            suffix="{surfname,midthickness}.txt",
-            space="corobl",
-            desc="gen_isosurf",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
     group:
         "subj"
     container:
         config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
+    log:
+        bids_log_wrapper(
+            "gen_native_mesh",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            desc="{surfname}"
+        ),
     script:
         "../scripts/gen_isosurface.py"
 
@@ -212,6 +210,13 @@ rule get_boundary_vertices:
         config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
+    log: 
+        bids_log_wrapper(
+            "get_boundary_verticies",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}"
+        ),
     script:
         "../scripts/get_boundary_vertices.py"
 
@@ -351,13 +356,11 @@ rule postproc_boundary_vertices:
     container:
         config["singularity"]["autotop"]
     log:
-        bids(
-            root="logs",
-            datatype="postproc_boundary_vertices",
-            suffix="log.txt",
-            hemi="{hemi}",
-            label="{label}",
+        bids_log_wrapper(
+            "postproc_boundary_verticies",
             **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}"
         ),
     conda:
         conda_env("pyvista")
@@ -403,16 +406,6 @@ rule laplace_beltrami:
                 **inputs.subj_wildcards,
             )
         ),
-    log:
-        bids(
-            root="logs",
-            datatype="laplace_beltrami",
-            suffix="log.txt",
-            hemi="{hemi}",
-            dir="{dir}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
     group:
         "subj"
     container:
@@ -422,6 +415,14 @@ rule laplace_beltrami:
         mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
     conda:
         conda_env("pyvista")
+    log:
+        bids_log_wrapper(
+            "laplace_beltrami",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            dir="{dir}"
+        ),
     script:
         "../scripts/laplace_beltrami.py"
 
@@ -538,14 +539,12 @@ rule space_unfold_vertices:
     group:
         "subj"
     log:
-        bids(
-            root="logs",
-            suffix="log.txt",
-            datatype="space_unfold_vertices",
-            hemi="{hemi}",
-            label="{label}",
+        bids_log_wrapper(
+            "space_unfold_vertices", 
             **inputs.subj_wildcards,
-        ),
+            hemi="{hemi}", 
+            label="{label}"
+        )
     script:
         "../scripts/space_unfold_vertices.py"
 
@@ -719,19 +718,6 @@ rule register_midthickness:
                 )
             )
         ),
-    log:
-        warp=temp(
-            bids(
-                root="logs",
-                dir="IO",
-                label="{label}",
-                suffix="xfm.txt",
-                to="{inout}",
-                space="corobl",
-                hemi="{hemi}",
-                **inputs.subj_wildcards,
-            )
-        ),
     group:
         "subj"
     container:
@@ -739,8 +725,16 @@ rule register_midthickness:
     threads: 16
     conda:
         conda_env("greedy")
+    log:
+        bids_log_wrapper(
+            "register_midthickness", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}", 
+            to="{inout}"
+        )
     shell:
-        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp}"
+        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp} &> {log}"
 
 
 rule apply_halfsurf_warp_to_img:
@@ -885,12 +879,23 @@ rule warp_midthickness_to_inout:
         "minimal"
     group:
         "subj"
-    shell:
-        "wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear && "
-        "wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii && "
-        "wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii && "
-        "wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
-
+    log: 
+        bids_log_wrapper(
+            "warp_midthickness_to_inout", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}",
+            to="{surfname}"
+        )
+    shell: 
+        """
+        (
+            wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear &&
+            wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii &&
+            wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii &&
+            wb_command -surface-set-coordinates {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}
+        ) &> {log}
+        """
 
 # --- affine transforming anatomical surfaces from corobl to other (T1w, T2w) spaces
 
@@ -1200,8 +1205,18 @@ rule resample_native_surf_to_atlas_density:
         conda_env("workbench")
     group:
         "subj"
+    log: 
+        bids_log_wrapper(
+            "resample_native_surf_to_atlas_density", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}",
+            space="{space}",
+            den="{density}",
+            desc="{surf_name}"
+        )
     shell:
-        "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
+        "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check &> {log}"
 
 
 rule resample_native_metric_to_atlas_density:
@@ -1242,8 +1257,18 @@ rule resample_native_metric_to_atlas_density:
         conda_env("workbench")
     group:
         "subj"
+    log: 
+        bids_log_wrapper(
+            "resample_native_metric_to_atlas_density", 
+            **inputs.subj_wildcards,
+            hemi="{hemi}", 
+            label="{label}",
+            space="{space}",
+            den="{density}",
+            desc="{metric}-{metrictype}"
+        )
     shell:
-        "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check"
+        "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
 
 # --- resampling from avgatlas to native vertices

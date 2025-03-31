@@ -140,11 +140,9 @@ rule run_inference:
             )
         ),
     log:
-        bids(
-            root="logs",
+        bids_log_wrapper(
+            "run_inference",
             **inputs.subj_wildcards,
-            suffix="nnunet.txt",
-            space="corobl",
             hemi="{hemi}",
         ),
     shadow:
@@ -251,14 +249,11 @@ rule qc_nnunet_f3d:
     conda:
         conda_env("niftyreg")
     log:
-        bids(
-            root="logs",
+        bids_log_wrapper(
+            "qc_nnunet_f3d",
             **inputs.subj_wildcards,
-            suffix="qcreg.txt",
-            desc="f3d",
-            space="corobl",
             hemi="{hemi}",
-        ),
+        )
     group:
         "subj"
     shell:

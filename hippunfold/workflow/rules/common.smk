@@ -2,6 +2,24 @@ from appdirs import AppDirs
 from snakebids.paths import bids_factory, specs
 from functools import partial
 
+def bids_log_wrapper(rule_name, **kwargs):
+    """
+    Args:
+        rule_name (str): The name of the rule for the log.
+        **kwargs: Optional parameters (e.g., subj_wildcards, hemi, label, etc.).
+
+    Returns:
+        str: Path to the log file.
+    """
+
+    log_params = {
+        "root": "logs",
+        "datatype": rule_name,
+        "suffix": f"log.txt",
+    }
+    log_params.update(kwargs)
+
+    return bids(**log_params)
 
 def conda_env(env_name):
     """
