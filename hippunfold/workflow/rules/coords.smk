@@ -311,8 +311,8 @@ rule laynii_layers_equidist:
         config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
-    log: 
-        bids_log_wrapper(
+    log:
+        bids_log(
             "laynii_layers_equidist",
             **inputs.subj_wildcards,
             dir="{dir, IO}",
@@ -360,8 +360,8 @@ rule laynii_layers_equivol:
         config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
-    log: 
-        bids_log_wrapper(
+    log:
+        bids_log(
             "laynii_layers_equivol",
             **inputs.subj_wildcards,
             dir="{dir, IO}",

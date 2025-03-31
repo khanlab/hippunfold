@@ -349,7 +349,7 @@ rule unfoldreg_antsquick:
     group:
         "subj"
     log:
-        bids_log_wrapper(
+        bids_log(
             "unfoldreg_antsquick",
             **inputs.subj_wildcards,
             atlas="{atlas}",

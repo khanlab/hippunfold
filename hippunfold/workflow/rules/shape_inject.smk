@@ -178,11 +178,7 @@ rule template_shape_reg:
         conda_env("greedy")
     threads: 8
     log:
-        bids_log_wrapper(
-            "template_shape_reg",
-            **inputs.subj_wildcards,
-            hemi="{hemi}"
-        ),
+        bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     shell:
         #affine (with moments), then greedy
         "greedy -threads {threads} {params.general_opts} {params.affine_opts} {params.img_pairs} -o {output.matrix}  &> {log} && "
@@ -290,7 +286,7 @@ rule template_shape_inject:
             )
         ),
     log:
-        bids_log_wrapper(
+        bids_log(
             "template_shape_inject",
             **inputs.subj_wildcards,
             hemi="{hemi}",
@@ -371,7 +367,7 @@ rule inject_init_laplace_coords:
             )
         ),
     log:
-        bids_log_wrapper(
+        bids_log(
             "inject_init_laplace_coords",
             **inputs.subj_wildcards,
             dir="{dir}",
