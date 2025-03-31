@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from argparse import ArgumentParser
-import sys
+
 
 def check_conda_installation():
     try:
@@ -16,6 +18,7 @@ def check_conda_installation():
         error_message = "Conda is not installed on your system or not found in PATH."
         print(error_message)
         return False
+
 
 def gen_parser():
     parser = ArgumentParser(description="Run hippunfold for a single subject.")
@@ -40,12 +43,14 @@ def gen_parser():
         help="Optional temporary directory. If not specified, a system temp directory will be used.",
     )
     parser.add_argument(
-        "-n", "--dry-run",
+        "-n",
+        "--dry-run",
         action="store_true",
         help="Execute a dry run without actually running the full pipeline.",
     )
 
     return parser
+
 
 def main():
     if check_conda_installation():
@@ -54,7 +59,7 @@ def main():
     else:
         print("Please install Conda to continue using hippunfold-quick.")
         sys.exit(1)
-    
+
     args = gen_parser().parse_args()
 
     # set temp dir if specified, else use python tempfile
@@ -87,15 +92,15 @@ def main():
         "all",
         "--force-output",
         "--nolock",
-        "--modality", args.modality,
+        "--modality",
+        args.modality,
         "--use-conda",
         "--quiet",
-        "all"
+        "all",
     ]
 
     if args.dry_run:
         command.append("-n")
-
 
     # run the command
     try:

@@ -13,6 +13,7 @@ logger = setup_logger(log_file)
 sys.stdout = open(log_file, "a")
 sys.stderr = open(log_file, "a")
 
+
 def find_boundary_vertices(mesh):
     """
     Find boundary vertices of a 3D mesh.
