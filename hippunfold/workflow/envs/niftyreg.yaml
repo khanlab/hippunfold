@@ -4,4 +4,4 @@ channels:
   - defaults
 dependencies:
   - python=3.9
-  - niftyreg
+  - niftyreg=1.5.69.6

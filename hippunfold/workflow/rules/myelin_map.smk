@@ -38,7 +38,7 @@ rule divide_t1_by_t2:
     conda:
         conda_env("c3d")
     shell:
-        "c3d {input.t1} {input.t2} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
+        "c3d {input.t2} {input.t1} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
 
 
 # sample on hipp & dg midthickness surfaces
