@@ -5,48 +5,9 @@ import numpy as np
 import pandas as pd
 import pyvista as pv
 from nibabel.gifti.gifti import intent_codes
-
-
-def read_surface_from_gifti(surf_gii):
-    """Load a surface mesh from a GIFTI file."""
-    surf = nib.load(surf_gii)
-    vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
-    faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
-    faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces])  # PyVista format
-
-    # Find the first darray that represents vertices (NIFTI_INTENT_POINTSET)
-    vertices_darray = next(
-        (
-            darray
-            for darray in surf.darrays
-            if darray.intent == intent_codes["NIFTI_INTENT_POINTSET"]
-        ),
-        None,
-    )
-
-    # Extract metadata as a dictionary (return empty dict if no metadata)
-    metadata = dict(vertices_darray.meta) if vertices_darray else {}
-
-    return pv.PolyData(vertices, faces_pv), metadata
-
-
-def compute_edge_lengths(surface):
-
-    # Extract edges
-    edges = surface.extract_all_edges()
-
-    # Extract individual edge segments
-    edge_lengths = []
-    lines = edges.lines.reshape(-1, 3)  # Each row: [2, point1, point2]
-
-    for line in lines:
-        _, p1, p2 = line  # First entry is always "2" (pairs of points)
-        length = np.linalg.norm(edges.points[p1] - edges.points[p2])
-        edge_lengths.append(length)
-
-    edge_lengths = np.array(edge_lengths)
-
-    return edge_lengths
+from lib.surface import (
+    compute_edge_lengths
+)
 
 
 density_list = []
