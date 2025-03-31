@@ -3,7 +3,19 @@ import shutil
 import subprocess
 import tempfile
 from argparse import ArgumentParser
+import sys
 
+def check_conda_installation():
+    try:
+        conda_version = subprocess.run(
+            ["conda", "--version"], capture_output=True, text=True, check=True
+        )
+        print(f"Conda is installed (version: {conda_version.stdout.strip()})")
+        return True
+    except FileNotFoundError:
+        error_message = "Conda is not installed on your system or not found in PATH."
+        print(error_message)
+        return False
 
 def gen_parser():
     parser = ArgumentParser(description="Run hippunfold for a single subject.")
@@ -28,28 +40,21 @@ def gen_parser():
         help="Optional temporary directory. If not specified, a system temp directory will be used.",
     )
     parser.add_argument(
-        "--use-singularity",
-        action="store_true",
-        help="If specified, will run hippunfold using Singularity. "
-        "This requires Singularity to be installed on your system.",
-    )
-    parser.add_argument(
-        "--use-conda",
-        action="store_true",
-        help="If specified, will run hippunfold using Conda environments. "
-        "This requires Conda to be installed on your system.",
-    )
-    parser.add_argument(
-        "-np",
-        "--dry-run",
+        "-n", "--dry-run",
         action="store_true",
         help="Execute a dry run without actually running the full pipeline.",
     )
 
     return parser
 
-
 def main():
+    if check_conda_installation():
+        print("Conda is ready to use.")
+        print("running......")
+    else:
+        print("Please install Conda to continue using hippunfold-quick.")
+        sys.exit(1)
+    
     args = gen_parser().parse_args()
 
     # set temp dir if specified, else use python tempfile
@@ -82,16 +87,15 @@ def main():
         "all",
         "--force-output",
         "--nolock",
-        "--modality",
-        args.modality,
+        "--modality", args.modality,
+        "--use-conda",
+        "--quiet",
+        "all"
     ]
 
-    if args.use_singularity:
-        command.append("--use-singularity")
-    if args.use_conda:
-        command.append("--use-conda")
     if args.dry_run:
-        command.append("-np")
+        command.append("-n")
+
 
     # run the command
     try:
