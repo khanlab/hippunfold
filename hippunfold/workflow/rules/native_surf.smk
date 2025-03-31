@@ -474,7 +474,7 @@ rule warp_native_mesh_to_unfold:
                 datatype="surf",
                 suffix="{surfname,midthickness}.surf.gii",
                 desc="nostruct",
-                space="unfolduneven",
+                space="unfold",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -492,8 +492,8 @@ rule warp_native_mesh_to_unfold:
 
 rule space_unfold_vertices:
     """ this irons out the surface to result in more even
-        vertex spacing. the resulting shape will be more 
-        individual (e.g. the surface area in unfolded space 
+        vertex spacing. the resulting shape will be more
+        individual (e.g. the surface area in unfolded space
         would be similar to native) """
     input:
         surf_gii=bids(
@@ -501,7 +501,7 @@ rule space_unfold_vertices:
             datatype="surf",
             suffix="midthickness.surf.gii",
             desc="nostruct",
-            space="unfolduneven",
+            space="unfold",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -571,8 +571,7 @@ rule unfold_surface_smoothing:
                 root=root,
                 datatype="surf",
                 suffix="midthickness.surf.gii",
-                desc="nostruct",
-                space="unfold",
+                space="unfoldspringmodelsmooth",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -974,15 +973,57 @@ rule calculate_surface_area:
         "wb_command -surface-vertex-areas {input} {output}"
 
 
-rule calculate_legacy_gyrification:
-    """new gyrification is ratio of nativearea to unfoldarea (e.g. surface scaling or distortion factor.
-    this should be proportional by a constant, to the earlier gyrification on 32k surfaces."""
+rule metric_smoothing:
+    input:
+        surface=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        metric=bids(
+            root=root,
+            datatype="surf",
+            suffix="{metric}.shape.gii",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        fwhm=lambda wildcards: str(wildcards.fwhm).replace("p", "."),
+    output:
+        metric=bids(
+            root=root,
+            datatype="surf",
+            suffix="{metric}.shape.gii",
+            space="{space}",
+            desc="fwhm{fwhm}mm",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -metric-smoothing {input.surface} {input.metric} {params.fwhm} {output.metric} -fwhm"
+
+
+rule calculate_gyrification:
     input:
         native_surfarea=bids(
             root=root,
             datatype="surf",
             suffix="surfarea.shape.gii",
             space="corobl",
+            desc="fwhm1mm",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -991,7 +1032,8 @@ rule calculate_legacy_gyrification:
             root=root,
             datatype="surf",
             suffix="surfarea.shape.gii",
-            space="unfold",
+            space="unfoldspringmodelsmooth",
+            desc="fwhm1mm",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -1142,17 +1184,15 @@ rule resample_native_surf_to_atlas_density:
         ),
         native_unfold=get_unfold_ref,
     output:
-        native_resampled=temp(
-            bids(
-                root=root,
-                datatype="surf",
-                suffix="{surf_name,midthickness|inner|outer}.surf.gii",
-                space="{space,unfoldreg|corobl}",
-                den="{density}",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
+        native_resampled=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surf_name,midthickness|inner|outer}.surf.gii",
+            space="{space,unfoldreg|corobl}",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]
@@ -1214,7 +1254,7 @@ rule resample_atlas_subfields_to_native_surf:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
-            den=config["density"]["hipp"][0],
+            den=config["output_density"][0],
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -1224,7 +1264,7 @@ rule resample_atlas_subfields_to_native_surf:
             hemi="{hemi}",
             label="{label}",
             space="unfold",
-            den=config["density"]["hipp"][0],
+            den=config["output_density"][0],
             suffix="midthickness.surf.gii",
         ),
     output:
