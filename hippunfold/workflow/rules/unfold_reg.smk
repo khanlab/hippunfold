@@ -277,7 +277,7 @@ def get_moving_images_unfoldreg(wildcards):
             space="unfold2d",
             hemi="{hemi}",
             label="{label}",
-            den=config["density"][wildcards.label][0],
+            den=config["output_density"][0],
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),

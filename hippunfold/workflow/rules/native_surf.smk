@@ -1254,7 +1254,7 @@ rule resample_atlas_subfields_to_native_surf:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
-            den=config["density"]["hipp"][0],
+            den=config["output_density"][0],
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -1264,7 +1264,7 @@ rule resample_atlas_subfields_to_native_surf:
             hemi="{hemi}",
             label="{label}",
             space="unfold",
-            den=config["density"]["hipp"][0],
+            den=config["output_density"][0],
             suffix="midthickness.surf.gii",
         ),
     output:

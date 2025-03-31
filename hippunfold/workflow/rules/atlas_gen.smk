@@ -343,19 +343,33 @@ rule gen_unfold_atlas_mesh:
 
 checkpoint resample_to_density_mapping:
     input:
-        surf_giis=expand(
-            bids_atlas(
+        hipp_surf_giis=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
                 root=root,
-                template=config["new_atlas_name"],
-                label="{label}",
+                datatype="surf",
+                label="hipp",
+                space="corobl",
                 resample="{resample}",
-                space="unfold",
                 hemi="{hemi}",
                 suffix="midthickness.surf.gii",
+                **inputs.subj_wildcards,
             ),
-            label=config["autotop_labels"],
-            hemi=config["hemi"],
-            resample=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 150, 200],
+            **expand_hemi(),
+            resample=[20, 40, 60],
+        ),
+        dentate_surf_giis=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="surf",
+                label="dentate",
+                space="corobl",
+                resample="{resample}",
+                hemi="{hemi}",
+                suffix="midthickness.surf.gii",
+                **inputs.subj_wildcards,
+            ),
+            **expand_hemi(),
+            resample=[40, 80, 120],
         ),
     output:
         mapping_csv=bids_atlas(
@@ -507,11 +521,11 @@ rule resample_subj_native_surf_to_avg:
             **inputs.subj_wildcards,
         ),
         atlas_unfold=bids_atlas(
-            root=get_atlas_dir(),
+            root=root,
             template=config["new_atlas_name"],
             label="{label}",
             space="unfold",
-            den="{density}",
+            resample="{resample}",
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
@@ -521,7 +535,7 @@ rule resample_subj_native_surf_to_avg:
             datatype="surf",
             label="{label}",
             space="corobl",
-            den="{density}",
+            resample="{resample}",
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
             **inputs.subj_wildcards,
@@ -726,7 +740,9 @@ def get_atlas_inputs(wildcards):
 
     with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
         df = pd.read_csv(f)
+
         # pick out all of them for now - in future could optimally assign
+
         for label in config["autotop_labels"]:
             for hemi in config["hemi"]:
 

@@ -18,7 +18,7 @@ import json
 import os
 
 # Global variable to store the commit hash
-ATLAS_REPO_COMMIT = "7c292113c669a629773a644f82485ffde1842f52"
+ATLAS_REPO_COMMIT = "c1a53ecade939ead9de8f9169c6a4ddff0c73c3d"
 
 
 def get_download_dir():
@@ -173,18 +173,16 @@ class AtlasConfig(PluginBase):
         )
         self.try_add_argument(
             group,
-            "--density",
-            "--density",
+            "--output-density",
+            "--output_density",
             action="store",
             type=str,
-            dest="density",
-            default=[
-                "hipp=21k",
-                "dentate=3k",
-            ],
+            dest="output_density",
+            default=["12k"],
+            choices=["1k", "5k", "12k"],
             nargs="+",
             help=(
-                "Density for surface meshes. Use --atlas-list-density to get a listing of available densities (default: %(default)s)"
+                "Sets the output vertex density for results, using the same vertex density for hipp and dentate (default: %(default)s)"
             ),
         )
 
@@ -193,6 +191,7 @@ class AtlasConfig(PluginBase):
         """Add atlas to config."""
         atlas = self.pop(namespace, "atlas")
         new_atlas_name = self.pop(namespace, "new_atlas_name")
+        output_density = self.pop(namespace, "output_density")
 
         if (
             namespace["analysis_level"] == "group_create_atlas"
@@ -205,25 +204,4 @@ class AtlasConfig(PluginBase):
         config["atlas"] = atlas
         config["new_atlas_name"] = new_atlas_name
         config["atlas_metadata"] = self.atlas_config
-
-        # parsing for density
-        density_args = self.pop(namespace, "density")
-
-        density = {}
-        for d_arg in density_args:
-            if "=" not in d_arg:
-                raise argparse.ArgumentTypeError(
-                    f"Invalid format: '{item}'. Expected format label=density1,density2,..."
-                )
-
-            label, values = d_arg.split("=", 1)
-            if label not in ["hipp", "dentate"]:
-                raise argparse.ArgumentTypeError(
-                    f"Invalid label: '{label}'. Valid labels are hipp or dentate"
-                )
-
-            density[label] = values.split(",")
-
-            # TODO: check if they are in the atlas
-
-        config["density"] = density
+        config["output_density"] = output_density
