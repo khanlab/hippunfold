@@ -32,7 +32,7 @@ rule prep_segs_for_greedy:
         labels=" ".join(str(label) for label in config["shape_inject"]["labels_reg"]),
         smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
     output:
-        directory("{prefix}_dsegsplit"),
+        temp(directory("{prefix}_dsegsplit")),
     group:
         "subj"
     container:
@@ -145,17 +145,19 @@ rule template_shape_reg:
         greedy_opts=get_inject_scaling_opt,
         img_pairs=get_image_pairs,
     output:
-        matrix=bids(
-            root=root,
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            datatype="warps",
-            desc="moments",
-            from_="template",
-            to="subject",
-            space="corobl",
-            type_="ras",
-            hemi="{hemi}",
+        matrix=temp(
+            bids(
+                root=root,
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                datatype="warps",
+                desc="moments",
+                from_="template",
+                to="subject",
+                space="corobl",
+                type_="ras",
+                hemi="{hemi}",
+            )
         ),
         warp=temp(
             bids(
