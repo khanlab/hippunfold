@@ -136,7 +136,7 @@ def get_final_spec():
             ),
             space=ref_spaces,
             label=config["autotop_labels"],
-            density=config["output_density"],
+            density=config["output_density"] + ["native"],
             allow_missing=True,
         )
     )
@@ -146,11 +146,14 @@ def get_final_spec():
                 root=root,
                 datatype="surf",
                 space="{space}",
+                den="{density}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
-            space="corobl",
             allow_missing=True,
+            space=ref_spaces,
+            label=config["autotop_labels"],
+            density=config["output_density"] + ["native"],
         )
     )
 
@@ -332,13 +335,12 @@ def get_create_atlas_output():
                     root=root,
                     datatype="surf",
                     suffix="{metric}.gii",
-                    space="{space}",
+                    den="native",
                     hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
                 ),
                 metric=get_gifti_metric_types(label),
-                space="corobl",
                 **expand_hemi(),
             )
         )
@@ -349,6 +351,7 @@ def get_create_atlas_output():
                     datatype="surf",
                     suffix="{surftype}.surf.gii",
                     space="{space}",
+                    den="native",
                     hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
@@ -365,12 +368,11 @@ def get_create_atlas_output():
                     root=root,
                     datatype="surf",
                     suffix="subfields.label.gii",
-                    space="corobl",
+                    den="native",
                     hemi="{hemi}",
                     label="hipp",
                     **inputs.subj_wildcards,
                 ),
-                space="corobl",
                 **expand_hemi(),
             )
         )
