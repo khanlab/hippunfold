@@ -314,18 +314,20 @@ rule unfoldreg_antsquick:
             ]
         ),
     output:
-        warp=bids(
-            root=root,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="SyN",
-            from_="{atlas}",
-            to="native",
-            space="unfold",
-            type_="itk2d",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        warp=temp(
+            bids(
+                root=root,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="SyN",
+                from_="{atlas}",
+                to="native",
+                space="unfold",
+                type_="itk2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
         invwarp=temp(
             bids(

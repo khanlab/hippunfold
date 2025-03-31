@@ -196,7 +196,7 @@ rule get_boundary_vertices:
         label_gii=temp(
             bids(
                 root=root,
-                datatype="coords",
+                datatype="surf",
                 suffix="boundary.label.gii",
                 space="corobl",
                 hemi="{hemi}",
@@ -248,7 +248,7 @@ rule map_src_sink_sdt_to_surf:
         sdt=temp(
             bids(
                 root=root,
-                datatype="coords",
+                datatype="surf",
                 suffix="sdt.shape.gii",
                 space="corobl",
                 hemi="{hemi}",
@@ -273,7 +273,7 @@ rule postproc_boundary_vertices:
     input:
         ap_src=bids(
             root=root,
-            datatype="coords",
+            datatype="surf",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -284,7 +284,7 @@ rule postproc_boundary_vertices:
         ),
         ap_sink=bids(
             root=root,
-            datatype="coords",
+            datatype="surf",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -295,7 +295,7 @@ rule postproc_boundary_vertices:
         ),
         pd_src=bids(
             root=root,
-            datatype="coords",
+            datatype="surf",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -306,7 +306,7 @@ rule postproc_boundary_vertices:
         ),
         pd_sink=bids(
             root=root,
-            datatype="coords",
+            datatype="surf",
             suffix="sdt.shape.gii",
             space="corobl",
             hemi="{hemi}",
@@ -317,7 +317,7 @@ rule postproc_boundary_vertices:
         ),
         edges=bids(
             root=root,
-            datatype="coords",
+            datatype="surf",
             suffix="boundary.label.gii",
             space="corobl",
             hemi="{hemi}",
@@ -329,21 +329,23 @@ rule postproc_boundary_vertices:
         max_iterations=100,
         shifting_epsilon=0.1,  #could be proportional to voxel spacing
     output:
-        ap=bids(
-            root=root,
-            datatype="coords",
-            suffix="mask.label.gii",
-            space="corobl",
-            hemi="{hemi}",
-            dir="AP",
-            desc="srcsink",
-            label="{label}",
-            **inputs.subj_wildcards,
+        ap=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="mask.label.gii",
+                space="corobl",
+                hemi="{hemi}",
+                dir="AP",
+                desc="srcsink",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
         pd=temp(
             bids(
                 root=root,
-                datatype="coords",
+                datatype="surf",
                 suffix="mask.label.gii",
                 space="corobl",
                 hemi="{hemi}",
@@ -383,7 +385,7 @@ rule laplace_beltrami:
         ),
         src_sink_mask=bids(
             root=root,
-            datatype="coords",
+            datatype="surf",
             suffix="mask.label.gii",
             space="corobl",
             hemi="{hemi}",
@@ -393,18 +395,16 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
     output:
-        coords=temp(
-            bids(
-                root=root,
-                datatype="coords",
-                dir="{dir}",
-                suffix="coords.shape.gii",
-                desc="laplace",
-                space="corobl",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
+        coords=bids(
+            root=root,
+            datatype="surf",
+            dir="{dir}",
+            suffix="coords.shape.gii",
+            desc="laplace",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     group:
         "subj"
@@ -445,7 +445,7 @@ rule warp_native_mesh_to_unfold:
         ),
         coords_AP=bids(
             root=root,
-            datatype="coords",
+            datatype="surf",
             dir="AP",
             label="{label}",
             suffix="coords.shape.gii",
@@ -456,7 +456,7 @@ rule warp_native_mesh_to_unfold:
         ),
         coords_PD=bids(
             root=root,
-            datatype="coords",
+            datatype="surf",
             dir="PD",
             label="{label}",
             suffix="coords.shape.gii",
@@ -655,18 +655,16 @@ rule compute_halfthick_mask:
         ),
     output:
         nii=temp(
-            temp(
-                bids(
-                    root=root,
-                    datatype="surf",
-                    dir="IO",
-                    label="{label}",
-                    suffix="mask.nii.gz",
-                    to="{inout}",
-                    space="corobl",
-                    hemi="{hemi}",
-                    **inputs.subj_wildcards,
-                )
+            bids(
+                root=root,
+                datatype="coords",
+                dir="IO",
+                label="{label}",
+                suffix="mask.nii.gz",
+                to="{inout}",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
             )
         ),
     group:
@@ -683,7 +681,7 @@ rule register_midthickness:
     input:
         fixed=bids(
             root=root,
-            datatype="surf",
+            datatype="coords",
             dir="IO",
             label="{label}",
             suffix="mask.nii.gz",
@@ -704,18 +702,16 @@ rule register_midthickness:
         ),
     output:
         warp=temp(
-            temp(
-                bids(
-                    root=root,
-                    datatype="surf",
-                    dir="IO",
-                    label="{label}",
-                    suffix="xfm.nii.gz",
-                    to="{inout}",
-                    space="corobl",
-                    hemi="{hemi}",
-                    **inputs.subj_wildcards,
-                )
+            bids(
+                root=root,
+                datatype="warps",
+                dir="IO",
+                label="{label}",
+                suffix="xfm.nii.gz",
+                to="{inout}",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
             )
         ),
     group:
@@ -741,7 +737,7 @@ rule apply_halfsurf_warp_to_img:
     input:
         fixed=bids(
             root=root,
-            datatype="surf",
+            datatype="coords",
             dir="IO",
             label="{label}",
             suffix="mask.nii.gz",
@@ -762,7 +758,7 @@ rule apply_halfsurf_warp_to_img:
         ),
         warp=bids(
             root=root,
-            datatype="surf",
+            datatype="warps",
             dir="IO",
             label="{label}",
             suffix="xfm.nii.gz",
@@ -776,7 +772,7 @@ rule apply_halfsurf_warp_to_img:
             temp(
                 bids(
                     root=root,
-                    datatype="surf",
+                    datatype="coords",
                     dir="IO",
                     label="{label}",
                     suffix="warpedmask.nii.gz",
@@ -802,7 +798,7 @@ rule convert_inout_warp_from_itk_to_world:
     input:
         warp=bids(
             root=root,
-            datatype="surf",
+            datatype="warps",
             dir="IO",
             label="{label}",
             suffix="xfm.nii.gz",
@@ -816,7 +812,7 @@ rule convert_inout_warp_from_itk_to_world:
             temp(
                 bids(
                     root=root,
-                    datatype="surf",
+                    datatype="warps",
                     dir="IO",
                     label="{label}",
                     suffix="xfmras.nii.gz",
@@ -850,7 +846,7 @@ rule warp_midthickness_to_inout:
         ),
         warp=bids(
             root=root,
-            datatype="surf",
+            datatype="warps",
             dir="IO",
             label="{label}",
             suffix="xfmras.nii.gz",

@@ -215,23 +215,27 @@ rule qc_nnunet_f3d:
     params:
         ref=get_f3d_ref,
     output:
-        cpp=bids(
-            root=root,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="cpp.nii.gz",
-            desc="f3d",
-            space="corobl",
-            hemi="{hemi}",
+        cpp=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="cpp.nii.gz",
+                desc="f3d",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
-        res=bids(
-            root=root,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="{modality}.nii.gz".format(modality=config["modality"]),
-            desc="f3d",
-            space="template",
-            hemi="{hemi}",
+        res=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="{modality}.nii.gz".format(modality=config["modality"]),
+                desc="f3d",
+                space="template",
+                hemi="{hemi}",
+            )
         ),
         res_mask=temp(
             bids(
