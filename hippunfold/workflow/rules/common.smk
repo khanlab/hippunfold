@@ -3,7 +3,6 @@ from functools import partial
 from hippunfold.workflow.lib import utils as utils
 
 
-
 def bids_log(rule_name, **kwargs):
     """
     Args:
