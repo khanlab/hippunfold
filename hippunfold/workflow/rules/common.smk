@@ -3,7 +3,8 @@ from functools import partial
 from hippunfold.workflow.lib import utils as utils
 
 
-def bids_log_wrapper(rule_name, **kwargs):
+
+def bids_log(rule_name, **kwargs):
     """
     Args:
         rule_name (str): The name of the rule for the log.

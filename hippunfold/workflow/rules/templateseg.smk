@@ -60,7 +60,7 @@ rule template_reg:
     conda:
         conda_env("greedy")
     log:
-        bids_log_wrapper("template_reg", **inputs.subj_wildcards, hemi="{hemi}"),
+        bids_log("template_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     threads: 8
     shell:
         "greedy -threads {threads} {params.general_opts} "

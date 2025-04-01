@@ -198,7 +198,7 @@ rule label_subfields_from_vol_coords_corobl:
     group:
         "subj"
     log:
-        bids_log_wrapper(
+        bids_log(
             "label_subfields_from_vol_coords_corobl",
             **inputs.subj_wildcards,
             hemi="{hemi}",

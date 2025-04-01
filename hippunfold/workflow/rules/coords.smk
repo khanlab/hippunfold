@@ -312,7 +312,7 @@ rule laynii_layers_equidist:
     conda:
         conda_env("laynii")
     log:
-        bids_log_wrapper(
+        bids_log(
             "laynii_layers_equidist",
             **inputs.subj_wildcards,
             dir="{dir, IO}",
@@ -361,7 +361,7 @@ rule laynii_layers_equivol:
     conda:
         conda_env("laynii")
     log:
-        bids_log_wrapper(
+        bids_log(
             "laynii_layers_equivol",
             **inputs.subj_wildcards,
             dir="{dir, IO}",

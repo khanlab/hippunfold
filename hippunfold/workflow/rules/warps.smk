@@ -52,7 +52,7 @@ rule reg_to_template:
             )
         ),
     log:
-        bids_log_wrapper(
+        bids_log(
             "reg_to_template",
             **inputs.subj_wildcards,
             from_="{modality,T1w|T2w}",
