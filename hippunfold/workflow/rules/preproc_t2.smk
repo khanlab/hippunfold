@@ -262,7 +262,7 @@ rule reg_t2_to_t1_part1:
         bids_log_wrapper(
             "reg_t2_to_t1_part1",
             **inputs.subj_wildcards,
-        )
+        ),
     container:
         config["singularity"]["autotop"]
     conda:

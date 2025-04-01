@@ -1,6 +1,7 @@
-from appdirs import AppDirs
 from snakebids.paths import bids_factory, specs
 from functools import partial
+from hippunfold.workflow.lib import utils as utils
+
 
 def bids_log_wrapper(rule_name, **kwargs):
     """
@@ -20,6 +21,7 @@ def bids_log_wrapper(rule_name, **kwargs):
     log_params.update(kwargs)
 
     return bids(**log_params)
+
 
 def conda_env(env_name):
     """
@@ -51,18 +53,8 @@ def conda_env(env_name):
     return None
 
 
-def get_download_dir():
-    if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
-        download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
-    else:
-        # create local download dir if it doesn't exist
-        dirs = AppDirs("hippunfold", "khanlab")
-        download_dir = dirs.user_cache_dir
-    return download_dir
-
-
 def get_atlas_dir():
-    return Path(get_download_dir()) / "hippunfold-atlases"
+    return Path(utils.get_download_dir()) / "hippunfold-atlases"
 
 
 def expand_hemi():

@@ -311,7 +311,7 @@ rule laynii_layers_equidist:
         config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
-    log: 
+    log:
         bids_log_wrapper(
             "laynii_layers_equidist",
             **inputs.subj_wildcards,
@@ -360,7 +360,7 @@ rule laynii_layers_equivol:
         config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
-    log: 
+    log:
         bids_log_wrapper(
             "laynii_layers_equivol",
             **inputs.subj_wildcards,

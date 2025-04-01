@@ -197,14 +197,14 @@ rule label_subfields_from_vol_coords_corobl:
         conda_env("workbench")
     group:
         "subj"
-    log: 
+    log:
         bids_log_wrapper(
-            "label_subfields_from_vol_coords_corobl", 
+            "label_subfields_from_vol_coords_corobl",
             **inputs.subj_wildcards,
-            hemi="{hemi}", 
+            hemi="{hemi}",
             label="{label}",
             atlas="{atlas}",
-        )
+        ),
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.nii_label} &>> {log}"
         " -ribbon-constrained {input.inner_surf} {input.outer_surf} &>> {log}"

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import os
+from pathlib import Path
 
 from snakebids import bidsapp, plugins
+
+from hippunfold.workflow.lib import utils as utils
 
 try:
     from hippunfold.plugins import atlas as atlas_plugin  # Works when run as a package
@@ -25,14 +27,8 @@ app = bidsapp.app(
     ]
 )
 
-# Function to get the download directory
-def get_download_dir():
-    # You can customize this function as needed
-    # For example, it might return a directory based on some environment variable
-    return Path("/localscratch/.cache/hippunfold")
-
 # Set the conda prefix directory
-conda_prefix = str(get_download_dir()) +  "/" + "conda"
+conda_prefix = str(utils.get_download_dir()) + "/" + "conda"
 
 # Set the environment variable SNAKEMAKE_CONDA_PREFIX
 os.environ["SNAKEMAKE_CONDA_PREFIX"] = str(conda_prefix)

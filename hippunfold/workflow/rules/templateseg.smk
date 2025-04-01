@@ -59,12 +59,8 @@ rule template_reg:
         config["singularity"]["autotop"]
     conda:
         conda_env("greedy")
-    log: 
-        bids_log_wrapper(
-            "template_reg",
-            **inputs.subj_wildcards,
-            hemi="{hemi}"
-        ),
+    log:
+        bids_log_wrapper("template_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     threads: 8
     shell:
         "greedy -threads {threads} {params.general_opts} "

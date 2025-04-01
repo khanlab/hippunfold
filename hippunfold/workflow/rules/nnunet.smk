@@ -253,7 +253,7 @@ rule qc_nnunet_f3d:
             "qc_nnunet_f3d",
             **inputs.subj_wildcards,
             hemi="{hemi}",
-        )
+        ),
     group:
         "subj"
     shell:

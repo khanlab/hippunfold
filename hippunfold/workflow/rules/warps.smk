@@ -56,7 +56,7 @@ rule reg_to_template:
             "reg_to_template",
             **inputs.subj_wildcards,
             from_="{modality,T1w|T2w}",
-            to=config["template"]
+            to=config["template"],
         ),
     container:
         config["singularity"]["autotop"]
