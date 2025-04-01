@@ -1,5 +1,7 @@
 import logging
 import sys
+import os
+from appdirs import AppDirs
 
 
 def setup_logger(log_file=None):
@@ -15,3 +17,13 @@ def setup_logger(log_file=None):
 
     logger.addHandler(handler)
     return logger
+
+
+def get_download_dir():
+    if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
+        download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
+    else:
+        # create local download dir if it doesn't exist
+        dirs = AppDirs("hippunfold", "khanlab")
+        download_dir = dirs.user_cache_dir
+    return download_dir
