@@ -1,0 +1,110 @@
+---
+# Adapted from @pvandyken's composite action
+name: Build and cache Python project
+description: Install project dependencies and optionally install project
+inputs:
+  python-version:
+    description: Python version to setup
+    required: true
+  cache-id:
+    description: |
+      Reference id to define cache. This id should be unique to the commit or PR
+      (e.g. the PR id or git hash)
+    required: false
+    default: ${{ github.event.pull_request.id || github.event.after }}
+  cache-key:
+    description: |
+      Unique key to identify cache. This id should be unique to the job step
+      (e.g. 'test', 'docs')
+    required: false
+  manager:
+    description: Dependency manager used (e.g. uv)
+    required: false
+    default: "uv"
+  install-library:
+    description: |
+      indicate if project library should be installed. 'true' installs from
+      cloned repo, false skips install
+    required: false
+    default: "false"
+  install-deps-with:
+    description: |
+      install specified groups with dependency installation. Ignored if
+      install-deps-only is provided
+    required: false
+    default: dev
+  install-deps-only:
+    description: install only the specified dependency groups
+    required: false
+  sparse-checkout:
+    description: enables sparse-checkout on actions/checkout
+    required: false
+  sparse-checkout-cone-mode:
+    description: |
+      Specifies whether to use cone-mode when doing a sparse checkout.
+    required: false
+outputs:
+  python-version:
+    description: "Resolved python version as reported by setup-python"
+    value: ${{ steps.setup-python.outputs.python-version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Clone repo
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha || github.base_ref }}
+        sparse-checkout: ${{ inputs.sparse-checkout }}
+        sparse-checkout-cone-mode: ${{ inputs.sparse-checkout-cone-mode }}
+
+    # Setup & configure dependency manager
+    - name: Cache manager installation
+      uses: actions/cache@v4
+      id: cached-manager
+      with:
+        path: ~/.local
+        key: ${{ runner.os }}-${{ inputs.manager }}-${{ inputs.cache-id }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      if: inputs.manager == 'uv' && steps.cached-manager.outputs.cache-hit != 'true'
+
+    # Setup & configure Python
+    - name: Create cache-key file
+      shell: bash
+      run: echo "${{ inputs.cache-key }}" >> .git/x-gh-cache-key
+
+    - name: Setup python
+      uses: actions/setup-python@v5
+      id: setup-python
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: "${{ inputs.manager }}"
+        cache-dependency-path: |
+          **/uv.lock
+          .git/x-gh-cache-key
+
+    # Install dependencies with manager, if necessary
+    - name: Install dependencies (with)
+      if: >
+        inputs.manager == 'uv' &&
+        steps.setup-python.outputs.cache-hit != 'true' &&
+        ! inputs.install-deps-only
+      shell: bash
+      run: >
+        uv pip install . --extra ${{ inputs.install-deps-with }} --all-extras
+
+    - name: Install dependencies (only)
+      if: >
+        inputs.manager == 'uv' &&
+        steps.setup-python.outputs.cache-hit != 'true' &&
+        inputs.install-deps-only
+      shell: bash
+      run: >
+        uv pip install . --no-deps --extra ${{ inputs.install-deps-only }}
+
+    - name: Install library
+      if: inputs.manager == 'uv' && inputs.install-library == 'true'
+      shell: bash
+      run: uv pip install . --all-extras
