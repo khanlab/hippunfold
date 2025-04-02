@@ -2,7 +2,6 @@ import pyvista as pv
 import nibabel as nib
 import numpy as np
 from copy import deepcopy
-import pygeodesic.geodesic as geodesic
 from scipy.ndimage import binary_dilation
 from lib.utils import setup_logger
 
