@@ -440,3 +440,130 @@ rule merge_hipp_dentate_spec_file:
         "subj"
     shell:
         "{params.cmd}"
+
+# -- calculate surface metrics on std resampled densities
+
+
+rule calculate_gyrification_resampled:
+    input:
+        native_surfarea=bids(
+            root=root,
+            datatype="surf",
+            suffix="surfareacorobl.shape.gii",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        unfold_surfarea=bids(
+            root=root,
+            datatype="surf",
+            suffix="surfareaunfoldatlas.shape.gii",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="gyrification.shape.gii",
+            den="{density,[0-9k]+}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    log:
+        bids_log(
+            "calculate_gyrification_resampled",
+            **inputs.subj_wildcards,
+            den="{density,[0-9k]+}",
+            hemi="{hemi}",
+            label="{label}",
+        ),
+    shell:
+        'wb_command -metric-math "nativearea/unfoldarea" {output.gii}'
+        " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea} &> {log}"
+
+
+rule calculate_curvature_resampled:
+    input:
+        gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="curvature.shape.gii",
+            den="{density,[0-9k]+}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-curvature {input} -mean {output}"
+
+
+rule calculate_thickness_resampled:
+    input:
+        inner=bids(
+            root=root,
+            datatype="surf",
+            suffix="inner.surf.gii",
+            space="corobl",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        outer=bids(
+            root=root,
+            datatype="surf",
+            suffix="outer.surf.gii",
+            space="corobl",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="thickness.shape.gii",
+            den="{density,[0-9k]+}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
+
+

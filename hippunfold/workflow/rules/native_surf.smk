@@ -915,6 +915,31 @@ rule warp_midthickness_to_inout:
 
 # --- calculating metrics on native anatomical surfaces
 
+rule copy_atlas_unfold:
+    input:
+        ref_unfold=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            suffix="{surf_name}.surf.gii",
+        ),
+    output:
+        gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surf_name}.surf.gii",
+            space="unfoldatlas",
+            den="{density}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    shell:
+        'cp {input} {output}'
+
 
 rule calculate_surface_area:
     input:
@@ -923,7 +948,7 @@ rule calculate_surface_area:
             datatype="surf",
             suffix="midthickness.surf.gii",
             space="{space}",
-            den="native",
+            den="{density}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -934,7 +959,7 @@ rule calculate_surface_area:
                 root=root,
                 datatype="surf",
                 suffix="surfarea{space}.shape.gii",
-                den="native",
+                den="{density}",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -994,7 +1019,7 @@ rule metric_smoothing:
         "wb_command -metric-smoothing {input.surface} {input.metric} {params.fwhm} {output.metric} -fwhm"
 
 
-rule calculate_gyrification:
+rule calculate_gyrification_native:
     input:
         native_surfarea=bids(
             root=root,
@@ -1032,12 +1057,19 @@ rule calculate_gyrification:
         conda_env("workbench")
     group:
         "subj"
+    log:
+        bids_log(
+            "calculate_gyrification_native",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+        ),
     shell:
         'wb_command -metric-math "nativearea/unfoldarea" {output.gii}'
-        " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea}"
+        " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea} &> {log}"
 
 
-rule calculate_curvature:
+rule calculate_curvature_native:
     input:
         gii=bids(
             root=root,
@@ -1070,7 +1102,7 @@ rule calculate_curvature:
         "wb_command -surface-curvature {input} -mean {output}"
 
 
-rule calculate_thickness:
+rule calculate_thickness_native:
     input:
         inner=bids(
             root=root,
@@ -1196,7 +1228,7 @@ rule resample_native_surf_to_atlas_density:
     shell:
         "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check &> {log}"
 
-
+"""
 rule resample_native_metric_to_atlas_density:
     input:
         native_metric=bids(
@@ -1245,7 +1277,7 @@ rule resample_native_metric_to_atlas_density:
         ),
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
-
+"""
 
 # --- resampling from avgatlas to native vertices
 rule resample_atlas_subfields_to_native_surf:
