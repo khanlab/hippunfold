@@ -136,13 +136,13 @@ logger.info(f"Dentate bridgeheads {bridge_dentate_indices.shape}")
 
 ## stitch
 tree_dentate = cKDTree(vertices[bridge_dentate_indices, :])
-for e in bridge_hipp_indices:
-    nearestvert = tree_dentate.query(vertices[e, :])[1]
-    faces = np.vstack((faces, [e, nearestvert, e]))
+for e, edge in enumerate(bridge_hipp_indices[:-1]):
+    nearestvert = tree_dentate.query(vertices[edge, :])[1]
+    faces = np.vstack((faces, [edge, nearestvert, bridge_hipp_indices[e+1]]))
 tree_hipp = cKDTree(vertices[bridge_hipp_indices, :])
-for e in bridge_dentate_indices:
-    nearestvert = tree_hipp.query(vertices[e, :])[1]
-    faces = np.vstack((faces, [e, nearestvert, e]))
+for e,edge in enumerate(bridge_dentate_indices[:-1]):
+    nearestvert = tree_hipp.query(vertices[edge, :])[1]
+    faces = np.vstack((faces, [edge, nearestvert, bridge_dentate_indices[e+1]]))
 
 logger.info(f"Stitched faces shape {faces.shape}")
 
