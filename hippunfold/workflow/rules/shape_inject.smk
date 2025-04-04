@@ -32,7 +32,7 @@ rule prep_segs_for_greedy:
         labels=" ".join(str(label) for label in config["shape_inject"]["labels_reg"]),
         smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
     output:
-        directory("{prefix}_dsegsplit"),
+        temp(directory("{prefix}_dsegsplit")),
     group:
         "subj"
     container:
@@ -145,17 +145,19 @@ rule template_shape_reg:
         greedy_opts=get_inject_scaling_opt,
         img_pairs=get_image_pairs,
     output:
-        matrix=bids(
-            root=root,
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            datatype="warps",
-            desc="moments",
-            from_="template",
-            to="subject",
-            space="corobl",
-            type_="ras",
-            hemi="{hemi}",
+        matrix=temp(
+            bids(
+                root=root,
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                datatype="warps",
+                desc="moments",
+                from_="template",
+                to="subject",
+                space="corobl",
+                type_="ras",
+                hemi="{hemi}",
+            )
         ),
         warp=temp(
             bids(
@@ -178,12 +180,7 @@ rule template_shape_reg:
         conda_env("greedy")
     threads: 8
     log:
-        bids(
-            root="logs",
-            **inputs.subj_wildcards,
-            hemi="{hemi}",
-            suffix="templateshapereg.txt",
-        ),
+        bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     shell:
         #affine (with moments), then greedy
         "greedy -threads {threads} {params.general_opts} {params.affine_opts} {params.img_pairs} -o {output.matrix}  &> {log} && "
@@ -291,10 +288,9 @@ rule template_shape_inject:
             )
         ),
     log:
-        bids(
-            root="logs",
+        bids_log(
+            "template_shape_inject",
             **inputs.subj_wildcards,
-            suffix="templateshapeinject.txt",
             hemi="{hemi}",
             label="{label}",
         ),
@@ -373,13 +369,11 @@ rule inject_init_laplace_coords:
             )
         ),
     log:
-        bids(
-            root="logs",
+        bids_log(
+            "inject_init_laplace_coords",
             **inputs.subj_wildcards,
             dir="{dir}",
             label="{label}",
-            suffix="injectcoords.txt",
-            desc="init",
             hemi="{hemi}",
         ),
     group:

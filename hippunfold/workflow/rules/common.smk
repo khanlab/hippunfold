@@ -3,6 +3,26 @@ from snakebids.paths import bids_factory, specs
 from functools import partial
 
 
+def bids_log(rule_name, **kwargs):
+    """
+    Args:
+        rule_name (str): The name of the rule for the log.
+        **kwargs: Optional parameters (e.g., subj_wildcards, hemi, label, etc.).
+
+    Returns:
+        str: Path to the log file.
+    """
+
+    log_params = {
+        "root": "logs",
+        "datatype": rule_name,
+        "suffix": f"log.txt",
+    }
+    log_params.update(kwargs)
+
+    return bids(**log_params)
+
+
 def conda_env(env_name):
     """
     Returns the path to the Conda environment file if --use-conda is set, otherwise returns None.
@@ -103,34 +123,37 @@ def get_modality_suffix(modality):
 def get_final_spec():
     specs = []
 
-    for label in config["autotop_labels"]:
-        specs.extend(
-            inputs[config["modality"]].expand(
-                bids(
-                    root=root,
-                    datatype="surf",
-                    space="{space}",
-                    label=label,
-                    den="{density}",
-                    suffix="surfaces.spec",
-                    **inputs.subj_wildcards,
-                ),
-                space=ref_spaces,
-                density=config["density"][label],
-                allow_missing=True,
-            )
-        )
     specs.extend(
         inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
                 space="{space}",
+                label="{label}",
+                den="{density}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
-            space="corobl",
+            space=ref_spaces,
+            label=config["autotop_labels"],
+            density=config["output_density"] + ["native"],
             allow_missing=True,
+        )
+    )
+    specs.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="surf",
+                space="{space}",
+                den="{density}",
+                suffix="surfaces.spec",
+                **inputs.subj_wildcards,
+            ),
+            allow_missing=True,
+            space=ref_spaces,
+            label=config["autotop_labels"],
+            density=config["output_density"] + ["native"],
         )
     )
 
@@ -217,26 +240,26 @@ def get_final_qc():
             allow_missing=True,
         )
     )
-    for label in config["autotop_labels"]:
-        qc.extend(
-            inputs[config["modality"]].expand(
-                bids(
-                    root=root,
-                    datatype="qc",
-                    suffix="midthickness.surf.png",
-                    den="{density}",
-                    desc="subfields",
-                    space="{space}",
-                    hemi="{hemi}",
-                    label=label,
-                    **inputs.subj_wildcards,
-                ),
-                hemi=config["hemi"],
-                density=config["density"][label],
-                space=ref_spaces,
-                allow_missing=True,
-            )
+    qc.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="qc",
+                suffix="midthickness.surf.png",
+                den="{density}",
+                desc="subfields",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            hemi=config["hemi"],
+            density=config["output_density"],
+            label=config["autotop_labels"],
+            space=ref_spaces,
+            allow_missing=True,
         )
+    )
     if len(config["hemi"]) == 2:
         qc.extend(
             inputs[config["modality"]].expand(
@@ -312,13 +335,12 @@ def get_create_atlas_output():
                     root=root,
                     datatype="surf",
                     suffix="{metric}.gii",
-                    space="{space}",
+                    den="native",
                     hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
                 ),
                 metric=get_gifti_metric_types(label),
-                space="corobl",
                 **expand_hemi(),
             )
         )
@@ -329,6 +351,7 @@ def get_create_atlas_output():
                     datatype="surf",
                     suffix="{surftype}.surf.gii",
                     space="{space}",
+                    den="native",
                     hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
@@ -345,12 +368,11 @@ def get_create_atlas_output():
                     root=root,
                     datatype="surf",
                     suffix="subfields.label.gii",
-                    space="corobl",
+                    den="native",
                     hemi="{hemi}",
                     label="hipp",
                     **inputs.subj_wildcards,
                 ),
-                space="corobl",
                 **expand_hemi(),
             )
         )

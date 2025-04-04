@@ -616,7 +616,7 @@ laminar_coords_res:
   dentate: 0.1x0.1x0.1mm
 
 resample_dseg_for_templatereg: 0.3x0.3x0.3mm
-unfoldreg_padding: 64x64x0vox
+unfoldreg_padding: 0x0x0vox
 
 density: #temporary var
   hipp: 

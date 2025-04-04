@@ -52,14 +52,11 @@ rule reg_to_template:
             )
         ),
     log:
-        bids(
-            root="logs",
+        bids_log(
+            "reg_to_template",
             **inputs.subj_wildcards,
-            suffix="reg.txt",
             from_="{modality,T1w|T2w}",
             to=config["template"],
-            desc="affine",
-            type_="ras",
         ),
     container:
         config["singularity"]["autotop"]
@@ -68,7 +65,7 @@ rule reg_to_template:
     group:
         "subj"
     shell:
-        "{params.cmd}"
+        "{params.cmd} > {log}"
 
 
 rule convert_template_xfm_ras2itk:
