@@ -23,7 +23,7 @@ surf_to_secondary_type = {
 rule affine_gii_to_native:
     input:
         gii=bids(
-            root=work,
+            root=root,
             datatype="surf",
             den="{density}",
             suffix="{surfname}.surf.gii",
@@ -33,7 +33,7 @@ rule affine_gii_to_native:
             **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
@@ -56,7 +56,7 @@ rule affine_gii_to_native:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        conda_env("workbench")
     group:
         "subj"
     shell:
@@ -81,7 +81,6 @@ def get_inputs_cifti_metric(wildcards):
                 datatype="surf",
                 den="{density}",
                 suffix="{metric}.shape.gii",
-                space="{space}",
                 hemi="L",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -94,7 +93,6 @@ def get_inputs_cifti_metric(wildcards):
                 datatype="surf",
                 den="{density}",
                 suffix="{metric}.shape.gii",
-                space="{space}",
                 hemi="R",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -112,9 +110,8 @@ rule create_dscalar_metric_cifti:
         cifti=bids(
             root=root,
             datatype="surf",
-            den="{density}",
+            den="{density,[0-9k]+}",
             suffix="{metric}.dscalar.nii",
-            space="{space}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
@@ -135,9 +132,9 @@ def get_inputs_cifti_label(wildcards):
             bids(
                 root=root,
                 datatype="surf",
-                den="{atlas}",
+                den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
-                space="{space}",
                 hemi="L",
                 label="hipp",
                 **inputs.subj_wildcards,
@@ -148,9 +145,9 @@ def get_inputs_cifti_label(wildcards):
             bids(
                 root=root,
                 datatype="surf",
-                den="{atlas}",
+                den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
-                space="{space}",
                 hemi="R",
                 label="hipp",
                 **inputs.subj_wildcards,
@@ -177,9 +174,9 @@ rule create_dlabel_cifti_subfields:
         cifti=bids(
             root=root,
             datatype="surf",
-            den="{atlas}",
+            den="{density,[0-9k]+}",
+            atlas="{atlas}",
             suffix="subfields.dlabel.nii",
-            space="{space}",
             label="hipp",
             **inputs.subj_wildcards,
         ),
@@ -215,7 +212,6 @@ rule create_spec_file_hipp:
                 datatype="surf",
                 den="{density}",
                 suffix="{metric}.gii",
-                space="{space}",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -227,9 +223,9 @@ rule create_spec_file_hipp:
             bids(
                 root=root,
                 datatype="surf",
-                den="{atlas}",
+                den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.label.gii",
-                space="{space}",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -258,7 +254,6 @@ rule create_spec_file_hipp:
                 datatype="surf",
                 den="{density}",
                 suffix="{cifti}.nii",
-                space="{space}",
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
@@ -269,9 +264,9 @@ rule create_spec_file_hipp:
             bids(
                 root=root,
                 datatype="surf",
-                den="{atlas}",
+                den="{density}",
+                atlas="{atlas}",
                 suffix="subfields.dlabel.nii",
-                space="{space}",
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
@@ -284,7 +279,7 @@ rule create_spec_file_hipp:
         spec_file=bids(
             root=root,
             datatype="surf",
-            den="{density}",
+            den="{density,[0-9k]+}",
             suffix="surfaces.spec",
             hemi="{hemi,L|R}",
             space="{space}",
@@ -309,7 +304,6 @@ rule create_spec_file_dentate:
                 datatype="surf",
                 den="{density}",
                 suffix="{metric}.gii",
-                space="{space}",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -338,7 +332,6 @@ rule create_spec_file_dentate:
                 datatype="surf",
                 den="{density}",
                 suffix="{cifti}.nii",
-                space="{space}",
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
@@ -351,7 +344,7 @@ rule create_spec_file_dentate:
         spec_file=bids(
             root=root,
             datatype="surf",
-            den="{density}",
+            den="{density,[0-9k]+}",
             suffix="surfaces.spec",
             hemi="{hemi,L|R}",
             space="{space}",
@@ -375,7 +368,7 @@ def get_cmd_merge_spec(wildcards, input, output):
         return f"wb_command -spec-file-merge {input.spec_files} {output}"
 
 
-rule merge_lr_spec_file_native:
+rule merge_lr_spec_file:
     input:
         spec_files=expand(
             bids(
@@ -413,7 +406,7 @@ rule merge_lr_spec_file_native:
         "{params.cmd}"
 
 
-rule merge_hipp_dentate_spec_file_native:
+rule merge_hipp_dentate_spec_file:
     input:
         spec_files=expand(
             bids(

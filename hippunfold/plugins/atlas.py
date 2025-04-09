@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 import json
 import os
 
+# Global variable to store the commit hash
+ATLAS_REPO_COMMIT = "c1a53ecade939ead9de8f9169c6a4ddff0c73c3d"
+
 
 def get_download_dir():
     if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
@@ -40,9 +43,11 @@ def sync_atlas_repo():
             # If the directory exists and is a git repo, update it
             repo = Repo(atlas_dir)
             repo.remotes.origin.pull()
+            repo.git.checkout(ATLAS_REPO_COMMIT)
         else:
             # If the directory does not exist, clone the repo
-            Repo.clone_from(repo_url, atlas_dir)
+            repo = Repo.clone_from(repo_url, atlas_dir)
+            repo.git.checkout(ATLAS_REPO_COMMIT)
     except GitCommandError as e:
         logger.info(f"Error syncing atlas repository: {e}")
 
@@ -166,21 +171,37 @@ class AtlasConfig(PluginBase):
                 "Surface metrics to use when creating new atlas (default: %(default)s)"
             ),
         )
+        self.try_add_argument(
+            group,
+            "--output-density",
+            "--output_density",
+            action="store",
+            type=str,
+            dest="output_density",
+            default=["12k"],
+            choices=["1k", "5k", "12k"],
+            nargs="+",
+            help=(
+                "Sets the output vertex density for results, using the same vertex density for hipp and dentate (default: %(default)s)"
+            ),
+        )
 
     @bidsapp.hookimpl
     def update_cli_namespace(self, namespace: dict[str, Any], config: dict[str, Any]):
         """Add atlas to config."""
         atlas = self.pop(namespace, "atlas")
         new_atlas_name = self.pop(namespace, "new_atlas_name")
+        output_density = self.pop(namespace, "output_density")
 
         if (
             namespace["analysis_level"] == "group_create_atlas"
             and new_atlas_name == None
         ):
-            raise TypeError(
+            raise argparse.ArgumentTypeError(
                 "--new_atlas_name must be specified when using group_create_atlas"
             )
 
         config["atlas"] = atlas
         config["new_atlas_name"] = new_atlas_name
         config["atlas_metadata"] = self.atlas_config
+        config["output_density"] = output_density

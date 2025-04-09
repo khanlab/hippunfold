@@ -3,6 +3,26 @@ from snakebids.paths import bids_factory, specs
 from functools import partial
 
 
+def bids_log(rule_name, **kwargs):
+    """
+    Args:
+        rule_name (str): The name of the rule for the log.
+        **kwargs: Optional parameters (e.g., subj_wildcards, hemi, label, etc.).
+
+    Returns:
+        str: Path to the log file.
+    """
+
+    log_params = {
+        "root": "logs",
+        "datatype": rule_name,
+        "suffix": f"log.txt",
+    }
+    log_params.update(kwargs)
+
+    return bids(**log_params)
+
+
 def conda_env(env_name):
     """
     Returns the path to the Conda environment file if --use-conda is set, otherwise returns None.
@@ -102,18 +122,21 @@ def get_modality_suffix(modality):
 
 def get_final_spec():
     specs = []
+
     specs.extend(
         inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
-                den="{density}",
                 space="{space}",
+                label="{label}",
+                den="{density}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
-            density=config["output_density"],
             space=ref_spaces,
+            label=config["autotop_labels"],
+            density=config["output_density"] + ["native"],
             allow_missing=True,
         )
     )
@@ -123,11 +146,14 @@ def get_final_spec():
                 root=root,
                 datatype="surf",
                 space="{space}",
+                den="{density}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
-            space="corobl",
             allow_missing=True,
+            space=ref_spaces,
+            label=config["autotop_labels"],
+            density=config["output_density"] + ["native"],
         )
     )
 
@@ -228,8 +254,8 @@ def get_final_qc():
                 **inputs.subj_wildcards,
             ),
             hemi=config["hemi"],
-            label=config["autotop_labels"],
             density=config["output_density"],
+            label=config["autotop_labels"],
             space=ref_spaces,
             allow_missing=True,
         )
@@ -281,39 +307,7 @@ def get_final_output():
 
 if "corobl" in ref_spaces:
 
-    ruleorder: laplace_beltrami > laynii_layers_equidist > laynii_layers_equivol > copy_coords_to_results
-
-    rule copy_coords_to_results:
-        input:
-            os.path.join(work, "{pre}_space-corobl_{post}{suffix}.{ext}"),
-        output:
-            os.path.join(root, "{pre,[^/].+}_space-corobl_{post}{suffix,coords}.{ext}"),
-        group:
-            "subj"
-        shell:
-            "cp {input} {output}"
-
-    rule copy_xfm_to_results:
-        input:
-            os.path.join(work, "{pre}_{fromto}-corobl_{post}{suffix}.{ext}"),
-        output:
-            os.path.join(
-                root, "{pre,[^/].+}_{fromto,from|to}-corobl_{post}{suffix,xfm}.{ext}"
-            ),
-        group:
-            "subj"
-        shell:
-            "cp {input} {output}"
-
-    rule copy_subfields_to_results:
-        input:
-            os.path.join(work, "{pre}_desc-subfields_{post}{suffix}.{ext}"),
-        output:
-            os.path.join(root, "{pre,[^/].+}_desc-subfields_{post}{suffix,dseg}.{ext}"),
-        group:
-            "subj"
-        shell:
-            "cp {input} {output}"
+    ruleorder: laplace_beltrami > laynii_layers_equidist > laynii_layers_equivol
 
 
 def get_cifti_metric_types(label):
@@ -341,13 +335,12 @@ def get_create_atlas_output():
                     root=root,
                     datatype="surf",
                     suffix="{metric}.gii",
-                    space="{space}",
+                    den="native",
                     hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
                 ),
                 metric=get_gifti_metric_types(label),
-                space="corobl",
                 **expand_hemi(),
             )
         )
@@ -358,6 +351,7 @@ def get_create_atlas_output():
                     datatype="surf",
                     suffix="{surftype}.surf.gii",
                     space="{space}",
+                    den="native",
                     hemi="{hemi}",
                     label=label,
                     **inputs.subj_wildcards,
@@ -374,12 +368,11 @@ def get_create_atlas_output():
                     root=root,
                     datatype="surf",
                     suffix="subfields.label.gii",
-                    space="corobl",
+                    den="native",
                     hemi="{hemi}",
                     label="hipp",
                     **inputs.subj_wildcards,
                 ),
-                space="corobl",
                 **expand_hemi(),
             )
         )
@@ -400,7 +393,7 @@ def get_create_atlas_output():
 def get_input_for_shape_inject(wildcards):
     if config["modality"] == "dsegtissue":
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -409,7 +402,7 @@ def get_input_for_shape_inject(wildcards):
         ).format(**wildcards)
     else:
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
@@ -418,3 +411,29 @@ def get_input_for_shape_inject(wildcards):
             hemi="{hemi}",
         ).format(**wildcards)
     return seg
+
+
+def get_cmd_warp_surface_2d_warp(wildcards, input, output):
+    """Using this workaround for warping meshes with 2D warps, since surface-apply-warpfield was
+    giving bounding box issues"""
+
+    cmds = []
+    cmds.append(
+        f"wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} xywarp.shape.gii -trilinear"
+    )
+    cmds.append(
+        f"wb_command -metric-math '0' zwarp.shape.gii -var DUMMY xywarp.shape.gii -column 1"
+    )
+    cmds.append(
+        f"wb_command -metric-merge xyzwarp.shape.gii -metric xywarp.shape.gii  -metric zwarp.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -metric-math 'COORDS - WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP xyzwarp.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -surface-set-coordinates  {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}"
+    )
+    return " && ".join(cmds)

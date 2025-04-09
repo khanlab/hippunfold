@@ -2,7 +2,7 @@
 rule divide_t1_by_t2:
     input:
         t1=bids(
-            root=work,
+            root=root,
             datatype="anat",
             hemi="{hemi}",
             space="corobl",
@@ -11,7 +11,7 @@ rule divide_t1_by_t2:
             **inputs.subj_wildcards,
         ),
         t2=bids(
-            root=work,
+            root=root,
             datatype="anat",
             hemi="{hemi}",
             space="corobl",
@@ -20,14 +20,16 @@ rule divide_t1_by_t2:
             **inputs.subj_wildcards,
         ),
     output:
-        t1overt2=bids(
-            root=work,
-            datatype="anat",
-            hemi="{hemi}",
-            space="corobl",
-            desc="preproc",
-            suffix="T1wDividedByT2w.nii.gz",
-            **inputs.subj_wildcards,
+        t1overt2=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                hemi="{hemi}",
+                space="corobl",
+                desc="preproc",
+                suffix="T1wDividedByT2w.nii.gz",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"
@@ -36,7 +38,7 @@ rule divide_t1_by_t2:
     conda:
         conda_env("c3d")
     shell:
-        "c3d {input.t1} {input.t2} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
+        "c3d {input.t2} {input.t1} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
 
 
 # sample on hipp & dg midthickness surfaces
@@ -44,7 +46,7 @@ rule sample_myelin_map_surf:
     """ samples myelin map on surf using corobl space """
     input:
         vol=bids(
-            root=work,
+            root=root,
             datatype="anat",
             space="corobl",
             hemi="{hemi}",
@@ -53,28 +55,31 @@ rule sample_myelin_map_surf:
             **inputs.subj_wildcards,
         ),
         mid=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
         inner=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="inner.surf.gii",
             space="corobl",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
         outer=bids(
-            root=work,
+            root=root,
             datatype="surf",
             suffix="outer.surf.gii",
             space="corobl",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -84,7 +89,7 @@ rule sample_myelin_map_surf:
             root=root,
             datatype="surf",
             suffix="myelin.shape.gii",
-            space="corobl",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
