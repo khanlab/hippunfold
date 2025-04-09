@@ -2,8 +2,9 @@ import numpy as np
 import nibabel as nib
 import scipy.sparse as sp
 from lib.utils import setup_logger
+import heapq
 import sys
-from scipy.sparse import coo_matrix, diags
+from scipy.sparse import diags, linalg, lil_matrix
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
@@ -12,14 +13,21 @@ sys.stderr = open(log_file, "a")
 
 
 def cotangent_laplacian(vertices, faces):
+    """
+    Computes the cotangent Laplacian for a triangular mesh.
+
+    Parameters:
+        vertices (np.ndarray): (n_vertices, 3) array of vertex positions.
+        faces (np.ndarray): (n_faces, 3) array of mesh faces.
+
+    Returns:
+        scipy.sparse.csr_matrix: The Laplacian matrix (normalized if specified).
+    """
     n_vertices = vertices.shape[0]
+
     # Step 1: Compute cotangent weights
-    row_indices = []
-    col_indices = []
-    values = []
-    weights = coo_matrix(
-        (n_vertices, n_vertices), dtype=np.float64
-    ).tocsr()  # Initialize sparse matrix.
+    logger.info("Computing cotangent weights")
+    weights = lil_matrix((n_vertices, n_vertices))
 
     for tri in faces:
         v0, v1, v2 = vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]
@@ -40,19 +48,82 @@ def cotangent_laplacian(vertices, faces):
         cot0 = np.dot(e1, -e2) / norm0 if norm0 > 1e-12 else 0.0
         cot1 = np.dot(e2, -e0) / norm1 if norm1 > 1e-12 else 0.0
         cot2 = np.dot(e0, -e1) / norm2 if norm2 > 1e-12 else 0.0
+
         weights[tri[0], tri[1]] += cot2 / 2
         weights[tri[1], tri[0]] += cot2 / 2
         weights[tri[1], tri[2]] += cot0 / 2
         weights[tri[2], tri[1]] += cot0 / 2
         weights[tri[2], tri[0]] += cot1 / 2
         weights[tri[0], tri[2]] += cot1 / 2
-    logger.info("weights.tocsr()")
+
+    logger.info("Converting to CSR format")
     weights = weights.tocsr()
     diagonal = weights.sum(axis=1).A1
+
     # Ensure no zero entries in diagonal to avoid singular matrix issues
     diagonal[diagonal < 1e-12] = 1e-12
     laplacian = diags(diagonal) - weights
+
     return laplacian
+
+
+def fast_marching_mesh(vertices, faces, source_indices, normalize=True):
+    """
+    Computes geodesic distances using an optimized Fast Marching Method (FMM) on a triangular mesh.
+
+    Parameters:
+        vertices (np.ndarray): (n_vertices, 3) array of vertex positions.
+        faces (np.ndarray): (n_faces, 3) array of mesh faces.
+        source_indices (list or np.ndarray): List of source vertex indices (geodesic distance = 0).
+
+    Returns:
+        np.ndarray: Geodesic distances at each vertex.
+    """
+    n_vertices = len(vertices)
+
+    # Step 1: Initialize distance field
+    phi = np.full(n_vertices, np.inf)
+    phi[source_indices] = 0  # Source vertices are at 0 distance
+
+    # Step 2: Construct adjacency list for fast neighbor lookup
+    adjacency = {i: set() for i in range(n_vertices)}
+    for face in faces:
+        for i in range(3):
+            adjacency[face[i]].add(face[(i + 1) % 3])
+            adjacency[face[i]].add(face[(i + 2) % 3])
+
+    # Step 3: Priority queue for fast marching
+    heap = [(0.0, idx) for idx in source_indices]
+    heapq.heapify(heap)
+
+    # Step 4: Fast Marching Loop
+    visited = set(source_indices)
+
+    while heap:
+        dist, v_idx = heapq.heappop(heap)
+
+        for neighbor in adjacency[v_idx]:
+            if neighbor in visited:
+                continue  # Skip if already processed
+
+            # Compute geodesic update
+            new_dist = np.linalg.norm(vertices[v_idx] - vertices[neighbor]) + dist
+
+            if new_dist < phi[neighbor]:  # Only update if we found a shorter path
+                phi[neighbor] = new_dist
+                heapq.heappush(heap, (new_dist, neighbor))
+                visited.add(neighbor)
+
+    # Step 5: Normalize distances to [0,1]
+    if normalize:
+        phi_min, phi_max = np.min(phi), np.max(phi)
+        phi = (
+            (phi - phi_min) / (phi_max - phi_min)
+            if phi_max - phi_min > 1e-12
+            else np.zeros_like(phi)
+        )
+
+    return phi
 
 
 def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
@@ -128,7 +199,6 @@ structure_metadata = nib.load(snakemake.input.src_sink_mask).meta[
 logger.info(f"# of src boundary vertices: {len(src_indices)}")
 logger.info(f"# of sink boundary vertices: {len(sink_indices)}")
 
-
 src_vals = [0 for i in range(len(src_indices))]
 sink_vals = [1 for i in range(len(sink_indices))]
 
@@ -137,7 +207,27 @@ boundary_conditions = dict(
 )
 
 
-coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
+if snakemake.params.method == "fastmarching":
+
+    logger.info("calculating forward phi")
+    forward_phi = fast_marching_mesh(vertices, faces, src_indices, normalize=False)
+    logger.info(f"min: {forward_phi.min()}, max: {forward_phi.max()}")
+    logger.info("calculating backward phi")
+    backward_phi = fast_marching_mesh(vertices, faces, sink_indices, normalize=False)
+    logger.info(f"min: {backward_phi.min()}, max: {backward_phi.max()}")
+
+    # Constrained (or relative) geodesics
+    logger.info("combining relative forward and backward marching")
+    coords = forward_phi / (forward_phi + backward_phi)
+    coords += (
+        np.random.rand(coords.shape[0]) * 1e-6
+    )  # add a small random noise to avoid singularities
+    logger.info(f"min: {coords.min()}, max: {coords.max()}")
+
+elif snakemake.params.method == "laplace":
+
+    coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
+
 
 data_array = nib.gifti.GiftiDataArray(data=coords.astype(np.float32))
 image = nib.gifti.GiftiImage()
