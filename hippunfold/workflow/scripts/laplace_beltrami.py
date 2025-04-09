@@ -4,7 +4,7 @@ import scipy.sparse as sp
 from lib.utils import setup_logger
 import heapq
 import sys
-from scipy.sparse import coo_matrix, diags
+from scipy.sparse import diags, linalg, lil_matrix
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
@@ -210,20 +210,16 @@ boundary_conditions = dict(
 if snakemake.params.method == "fastmarching":
 
     logger.info("calculating forward phi")
-    forward_phi = fast_marching_mesh(vertices, faces, src_indices)
+    forward_phi = fast_marching_mesh(vertices, faces, src_indices, normalize=False)
     logger.info(f"min: {forward_phi.min()}, max: {forward_phi.max()}")
     logger.info("calculating backward phi")
-    backward_phi = fast_marching_mesh(vertices, faces, sink_indices)
+    backward_phi = fast_marching_mesh(vertices, faces, sink_indices, normalize=False)
     logger.info(f"min: {backward_phi.min()}, max: {backward_phi.max()}")
 
-    # Average both distance maps
-    logger.info("averaging forward and backward marching")
-    coords = 0.5 * (
-        forward_phi + (1 - backward_phi)
-    )  # 1-backward_phi to invert its direction
+    # Constrained (or relative) geodesics
+    logger.info("combining relative forward and backward marching")
+    coords = forward_phi / (forward_phi + backward_phi)
     logger.info(f"min: {coords.min()}, max: {coords.max()}")
-
-    coords = forward_phi
 
 elif snakemake.params.method == "laplace":
 
