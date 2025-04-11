@@ -224,7 +224,7 @@ if snakemake.params.method == "fastmarching":
     coords += noise
     # Reflect at boundaries
     coords = np.where(coords < 0, -coords, coords)
-    coords = np.where(coords > 1, 2 - coords, coords)  
+    coords = np.where(coords > 1, 2 - coords, coords)
     logger.info(f"min: {coords.min()}, max: {coords.max()}")
 
 elif snakemake.params.method == "laplace":
