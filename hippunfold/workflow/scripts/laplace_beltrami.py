@@ -219,9 +219,12 @@ if snakemake.params.method == "fastmarching":
     # Constrained (or relative) geodesics
     logger.info("combining relative forward and backward marching")
     coords = forward_phi / (forward_phi + backward_phi)
-    coords += (
-        np.random.rand(coords.shape[0]) * 1e-6
-    )  # add a small random noise to avoid singularities
+    # add a small random noise to avoid singularities
+    noise = np.random.randn(coords.shape[0]) * 1e-6
+    coords += noise
+    # Reflect at boundaries
+    coords = np.where(coords < 0, -coords, coords)
+    coords = np.where(coords > 1, 2 - coords, coords)  
     logger.info(f"min: {coords.min()}, max: {coords.max()}")
 
 elif snakemake.params.method == "laplace":
