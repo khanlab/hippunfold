@@ -57,15 +57,17 @@ rule metric_smoothing:
     params:
         fwhm=lambda wildcards: str(wildcards.fwhm).replace("p", "."),
     output:
-        metric=bids(
-            root=root,
-            datatype="metric",
-            suffix="{metric}.shape.gii",
-            den="{density}",
-            desc="fwhm{fwhm}mm",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        metric=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="{metric}.shape.gii",
+                den="{density}",
+                desc="fwhm{fwhm}mm",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -100,14 +102,16 @@ rule calculate_gyrification:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
-            root=root,
-            datatype="metric",
-            suffix="gyrification.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="gyrification.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -134,14 +138,16 @@ rule calculate_curvature:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
-            root=root,
-            datatype="metric",
-            suffix="curvature.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="curvature.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -176,14 +182,16 @@ rule calculate_thickness:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
-            root=root,
-            datatype="metric",
-            suffix="thickness.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="thickness.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]

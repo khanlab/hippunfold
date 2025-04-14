@@ -216,16 +216,18 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
     output:
-        coords=bids(
-            root=root,
-            datatype="metric",
-            dir="{dir}",
-            suffix="coords.shape.gii",
-            desc="laplace",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        coords=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                dir="{dir}",
+                suffix="coords.shape.gii",
+                desc="laplace",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"

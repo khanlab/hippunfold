@@ -47,14 +47,16 @@ rule subfields_to_label_gifti:
             **inputs.subj_wildcards,
         ),
     output:
-        label_gii=bids(
-            root=root,
-            datatype="metric",
-            suffix="subfields.label.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label,hipp}",
-            **inputs.subj_wildcards,
+        label_gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="subfields.label.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label,hipp}",
+                **inputs.subj_wildcards,
+            )
         ),
     conda:
         conda_env("workbench")

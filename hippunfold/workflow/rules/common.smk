@@ -140,23 +140,6 @@ def get_final_spec():
             allow_missing=True,
         )
     )
-    specs.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surfnative",
-                space="{space}",
-                label="{label}",
-                den="{density}",
-                suffix="surfaces.spec",
-                **inputs.subj_wildcards,
-            ),
-            space=ref_spaces,
-            label=config["autotop_labels"],
-            density=["native"],
-            allow_missing=True,
-        )
-    )
 
     specs.extend(
         inputs[config["modality"]].expand(
@@ -172,22 +155,6 @@ def get_final_spec():
             space=ref_spaces,
             label=config["autotop_labels"],
             density=config["output_density"],
-        )
-    )
-    specs.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surfnative",
-                space="{space}",
-                den="{density}",
-                suffix="surfaces.spec",
-                **inputs.subj_wildcards,
-            ),
-            allow_missing=True,
-            space=ref_spaces,
-            label=config["autotop_labels"],
-            density=["native"],
         )
     )
 

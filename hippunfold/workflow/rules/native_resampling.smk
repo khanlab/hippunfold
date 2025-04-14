@@ -28,6 +28,34 @@ def get_unfold_ref(wildcards):
     )
 
 
+rule cp_atlas_unfold:
+    input:
+        ref_unfold=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            suffix="{surf_name}.surf.gii",
+        ),
+    output:
+        unfold=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surf_name,midthickness}.surf.gii",
+            space="unfold",
+            den="{density,[0-9k]+}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "subj"
+    shell:
+        "cp {input} {output}"
+
+
 rule resample_native_surf_to_atlas_density:
     input:
         native=bids(
@@ -51,15 +79,17 @@ rule resample_native_surf_to_atlas_density:
         ),
         native_unfold=get_unfold_ref,
     output:
-        native_resampled=bids(
-            root=root,
-            datatype="surf",
-            suffix="{surf_name,midthickness|inner|outer}.surf.gii",
-            space="{space,unfoldreg|corobl}",
-            den="{density,[0-9k]+}",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        native_resampled=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surf_name,midthickness|inner|outer}.surf.gii",
+                space="{space,corobl}",
+                den="{density,[0-9k]+}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -153,15 +183,17 @@ rule resample_atlas_subfields_to_native_surf:
             suffix="midthickness.surf.gii",
         ),
     output:
-        label_gii=bids(
-            root=root,
-            datatype="metric",
-            suffix="subfields.label.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label,hipp}",
-            atlas="{atlas}",
-            **inputs.subj_wildcards,
+        label_gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="subfields.label.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label,hipp}",
+                atlas="{atlas}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
