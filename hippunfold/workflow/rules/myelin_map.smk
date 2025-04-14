@@ -56,7 +56,7 @@ rule sample_myelin_map_surf:
         ),
         mid=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -66,7 +66,7 @@ rule sample_myelin_map_surf:
         ),
         inner=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="inner.surf.gii",
             space="corobl",
             den="native",
@@ -76,7 +76,7 @@ rule sample_myelin_map_surf:
         ),
         outer=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="outer.surf.gii",
             space="corobl",
             den="native",
