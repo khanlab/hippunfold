@@ -338,7 +338,22 @@ rule create_spec_file_dentate:
                 **inputs.subj_wildcards,
             ),
             surfname=["midthickness", "inner", "outer"],
-            space=["{space}", "unfold"],
+            space=["{space}"],
+            allow_missing=True,
+        ),
+        unfold_surfs=expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            surfname=["midthickness"],
+            space=["unfold"],
             allow_missing=True,
         ),
         cifti=lambda wildcards: expand(
