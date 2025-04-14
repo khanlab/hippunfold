@@ -623,3 +623,8 @@ density: #temporary var
     - 7k
   dentate:
     - 1k
+
+surf_thresholds:
+  inner: 0
+  outer: 1
+  midthickness: 0.5

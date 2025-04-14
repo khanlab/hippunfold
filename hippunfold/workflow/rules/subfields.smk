@@ -38,7 +38,7 @@ rule subfields_to_label_gifti:
         ),
         surf_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -49,7 +49,7 @@ rule subfields_to_label_gifti:
     output:
         label_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="subfields.label.gii",
             den="native",
             hemi="{hemi}",
@@ -69,7 +69,7 @@ rule native_label_gii_to_unfold_nii:
     input:
         label_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="subfields.label.gii",
             den="native",
             hemi="{hemi}",
@@ -78,7 +78,7 @@ rule native_label_gii_to_unfold_nii:
         ),
         inner_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="inner.surf.gii",
             space="unfold",
             den="native",
@@ -88,7 +88,7 @@ rule native_label_gii_to_unfold_nii:
         ),
         midthickness_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="midthickness.surf.gii",
             space="unfold",
             den="native",
@@ -98,7 +98,7 @@ rule native_label_gii_to_unfold_nii:
         ),
         outer_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="outer.surf.gii",
             space="unfold",
             den="native",
@@ -146,7 +146,7 @@ rule label_subfields_from_vol_coords_corobl:
         ref_nii=get_labels_for_laplace,
         midthickness_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -156,7 +156,7 @@ rule label_subfields_from_vol_coords_corobl:
         ),
         inner_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="inner.surf.gii",
             space="corobl",
             den="native",
@@ -166,7 +166,7 @@ rule label_subfields_from_vol_coords_corobl:
         ),
         outer_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="outer.surf.gii",
             space="corobl",
             den="native",
@@ -176,7 +176,7 @@ rule label_subfields_from_vol_coords_corobl:
         ),
         label_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="subfields.label.gii",
             den="native",
             hemi="{hemi}",

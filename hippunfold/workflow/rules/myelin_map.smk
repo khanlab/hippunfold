@@ -87,7 +87,7 @@ rule sample_myelin_map_surf:
     output:
         metric=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="myelin.shape.gii",
             den="native",
             hemi="{hemi}",

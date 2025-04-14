@@ -24,7 +24,7 @@ rule affine_gii_to_native:
     input:
         gii=bids(
             root=root,
-            datatype="surf",
+            datatype="{surfdir}",
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="corobl",
@@ -45,7 +45,7 @@ rule affine_gii_to_native:
     output:
         gii=bids(
             root=root,
-            datatype="surf",
+            datatype="{surfdir}",
             den="{density}",
             suffix="{surfname}.surf.gii",
             space="{native_modality,T1w|T2w}",
@@ -78,7 +78,7 @@ def get_inputs_cifti_metric(wildcards):
         files["left_metric"] = (
             bids(
                 root=root,
-                datatype="surf",
+                datatype="metric",
                 den="{density}",
                 suffix="{metric}.shape.gii",
                 hemi="L",
@@ -90,7 +90,7 @@ def get_inputs_cifti_metric(wildcards):
         files["right_metric"] = (
             bids(
                 root=root,
-                datatype="surf",
+                datatype="metric",
                 den="{density}",
                 suffix="{metric}.shape.gii",
                 hemi="R",
@@ -109,7 +109,7 @@ rule create_dscalar_metric_cifti:
     output:
         cifti=bids(
             root=root,
-            datatype="surf",
+            datatype="cifti",
             den="{density,[0-9k]+}",
             suffix="{metric}.dscalar.nii",
             label="{label}",
@@ -131,7 +131,7 @@ def get_inputs_cifti_label(wildcards):
         files["left_label"] = (
             bids(
                 root=root,
-                datatype="surf",
+                datatype="metric",
                 den="{density}",
                 atlas="{atlas}",
                 suffix="subfields.label.gii",
@@ -144,7 +144,7 @@ def get_inputs_cifti_label(wildcards):
         files["right_label"] = (
             bids(
                 root=root,
-                datatype="surf",
+                datatype="metric",
                 den="{density}",
                 atlas="{atlas}",
                 suffix="subfields.label.gii",
@@ -173,7 +173,7 @@ rule create_dlabel_cifti_subfields:
     output:
         cifti=bids(
             root=root,
-            datatype="surf",
+            datatype="cifti",
             den="{density,[0-9k]+}",
             atlas="{atlas}",
             suffix="subfields.dlabel.nii",
@@ -209,7 +209,7 @@ rule create_spec_file_hipp:
         metrics=lambda wildcards: expand(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="metric",
                 den="{density}",
                 suffix="{metric}.gii",
                 hemi="{hemi}",
@@ -222,7 +222,7 @@ rule create_spec_file_hipp:
         subfields=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="metric",
                 den="{density}",
                 atlas="{atlas}",
                 suffix="subfields.label.gii",
@@ -251,7 +251,7 @@ rule create_spec_file_hipp:
         cifti_metrics=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="cifti",
                 den="{density}",
                 suffix="{cifti}.nii",
                 label="{label}",
@@ -263,7 +263,7 @@ rule create_spec_file_hipp:
         cifti_labels=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="cifti",
                 den="{density}",
                 atlas="{atlas}",
                 suffix="subfields.dlabel.nii",
@@ -301,7 +301,7 @@ rule create_spec_file_dentate:
         metrics=lambda wildcards: expand(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="metric",
                 den="{density}",
                 suffix="{metric}.gii",
                 hemi="{hemi}",
@@ -329,7 +329,7 @@ rule create_spec_file_dentate:
         cifti=lambda wildcards: expand(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="cifti",
                 den="{density}",
                 suffix="{cifti}.nii",
                 label="{label}",
@@ -373,7 +373,7 @@ rule merge_lr_spec_file:
         spec_files=expand(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="{surfdir}",
                 den="{density}",
                 suffix="surfaces.spec",
                 hemi="{hemi}",
@@ -389,7 +389,7 @@ rule merge_lr_spec_file:
     output:
         spec_file=bids(
             root=root,
-            datatype="surf",
+            datatype="{surfdir}",
             den="{density}",
             space="{space}",
             suffix="surfaces.spec",
@@ -411,7 +411,7 @@ rule merge_hipp_dentate_spec_file:
         spec_files=expand(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="{surfdir}",
                 den="{density}",
                 suffix="surfaces.spec",
                 space="{space}",
@@ -426,7 +426,7 @@ rule merge_hipp_dentate_spec_file:
     output:
         spec_file=bids(
             root=root,
-            datatype="surf",
+            datatype="{surfdir}",
             den="{density}",
             space="{space}",
             suffix="surfaces.spec",

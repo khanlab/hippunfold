@@ -36,7 +36,7 @@ rule native_metric_to_unfold_nii:
     input:
         metric_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="{metric}.shape.gii",
             den="native",
             hemi="{hemi}",
@@ -45,7 +45,7 @@ rule native_metric_to_unfold_nii:
         ),
         inner_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="inner.surf.gii",
             space="unfold",
             den="native",
@@ -55,7 +55,7 @@ rule native_metric_to_unfold_nii:
         ),
         midthickness_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="midthickness.surf.gii",
             space="unfold",
             den="native",
@@ -65,7 +65,7 @@ rule native_metric_to_unfold_nii:
         ),
         outer_surf=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="outer.surf.gii",
             space="unfold",
             den="native",
@@ -425,7 +425,7 @@ rule warp_unfold_native_to_unfoldreg:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="surfnative",
             suffix="{surfname}.surf.gii",
             space="unfold",
             den="native",
@@ -452,7 +452,7 @@ rule warp_unfold_native_to_unfoldreg:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surf",
+                datatype="surfnative",
                 suffix="{surfname}.surf.gii",
                 space="unfoldreg",
                 den="native",

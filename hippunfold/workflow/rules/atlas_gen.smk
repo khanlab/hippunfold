@@ -548,6 +548,7 @@ rule resample_subj_native_surf_to_avg:
         config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
+    threads: 12
     shell:
         "wb_command -surface-resample {input.subj_native} {input.subj_unfold} {input.atlas_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
 
