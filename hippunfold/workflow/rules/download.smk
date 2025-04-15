@@ -1,6 +1,7 @@
 # populate the HIPPUNFOLD_CACHE_DIR folder as needed
+from hippunfold.workflow.lib import utils as utils
 
-download_dir = get_download_dir()
+download_dir = utils.get_download_dir()
 
 
 rule download_extract_template:

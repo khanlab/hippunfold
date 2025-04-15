@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+import os
 from pathlib import Path
 
 from snakebids import bidsapp, plugins
+
+from hippunfold.workflow.lib import utils as utils
 
 try:
     from hippunfold.plugins import atlas as atlas_plugin  # Works when run as a package
@@ -23,6 +26,11 @@ app = bidsapp.app(
         atlas_plugin.AtlasConfig(argument_group="ATLASES"),
     ]
 )
+
+
+# Set the environment variable SNAKEMAKE_CONDA_PREFIX if not already set
+if not "SNAKEMAKE_CONDA_PREFIX" in os.environ:
+    os.environ["SNAKEMAKE_CONDA_PREFIX"] = str(Path(utils.get_download_dir()) / "conda")
 
 
 def get_parser():
