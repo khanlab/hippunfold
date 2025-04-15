@@ -92,7 +92,7 @@ runs:
     # Install dependencies with manager, if necessary
     - name: Install dependencies (with)
       if: >
-        inputs.manager == 'uv' && steps.restore-uv-cache.outputs.cache-hit != 'true' && ! inputs.install-deps-only
+        inputs.manager == 'uv' && ! inputs.install-deps-only
       shell: bash
       run: >
         uv pip install -r pyproject.toml --extra ${{ inputs.install-deps-with }}
