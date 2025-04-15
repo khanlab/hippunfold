@@ -19,6 +19,10 @@ import os
 
 # Global variable to store the commit hash
 ATLAS_REPO_COMMIT = "c1a53ecade939ead9de8f9169c6a4ddff0c73c3d"
+ATLAS_DENSITY_CHOICES = ["native", "1k", "5k", "12k"]
+ATLAS_DENSITY_DEFAULT = (
+    "12k"  # also density that is used for unfoldreg, cannot set this to native
+)
 
 
 def get_download_dir():
@@ -178,8 +182,8 @@ class AtlasConfig(PluginBase):
             action="store",
             type=str,
             dest="output_density",
-            default=["12k"],
-            choices=["1k", "5k", "12k"],
+            default=[ATLAS_DENSITY_DEFAULT],
+            choices=ATLAS_DENSITY_CHOICES,
             nargs="+",
             help=(
                 "Sets the output vertex density for results, using the same vertex density for hipp and dentate (default: %(default)s)"
@@ -205,3 +209,7 @@ class AtlasConfig(PluginBase):
         config["new_atlas_name"] = new_atlas_name
         config["atlas_metadata"] = self.atlas_config
         config["output_density"] = output_density
+        config["unfoldreg_density"] = ATLAS_DENSITY_DEFAULT
+        config["unused_density"] = list(
+            set(ATLAS_DENSITY_CHOICES) - set(output_density)
+        )

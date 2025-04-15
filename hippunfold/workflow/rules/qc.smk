@@ -4,7 +4,7 @@ rule qc_reg_to_template:
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
-            suffix="{native_modality}.nii.gz",
+            suffix="{modality}.nii.gz",
             space=config["template"],
             desc="affine",
         ),
@@ -12,9 +12,9 @@ rule qc_reg_to_template:
     params:
         ref=lambda wildcards, input: str(
             Path(input.template_dir)
-            / config["template_files"][config["template"]][
-                wildcards.native_modality
-            ].format(**wildcards)
+            / config["template_files"][config["template"]][wildcards.modality].format(
+                **wildcards
+            )
         ),
     output:
         png=report(
@@ -23,7 +23,7 @@ rule qc_reg_to_template:
                 datatype="qc",
                 **inputs.subj_wildcards,
                 suffix="regqc.png",
-                from_="{native_modality}",
+                from_="{modality}",
                 to=config["template"],
             ),
             caption="../report/t1w_template_regqc.rst",

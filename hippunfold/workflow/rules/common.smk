@@ -120,27 +120,114 @@ def get_modality_suffix(modality):
         return modality
 
 
-def get_final_spec():
-    specs = []
+def get_inputs_spec_file(label):
 
-    specs.extend(
-        inputs[config["modality"]].expand(
+    files = []
+    files.extend(
+        expand(
             bids(
                 root=root,
-                datatype="surf",
-                space="{space}",
+                datatype="metric",
+                den="{density}",
+                suffix="{metric}.gii",
+                hemi="{hemi}",
                 label="{label}",
-                den="{density}",
-                suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
-            space=ref_spaces,
-            label=config["autotop_labels"],
-            density=config["output_density"] + ["native"],
+            metric=get_gifti_metric_types(label),
             allow_missing=True,
         )
     )
-    specs.extend(
+    files.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            surfname=["midthickness", "inner", "outer"],
+            space=["{space}"],
+            allow_missing=True,
+        )
+    )
+    files.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            surfname=["midthickness"],
+            space=["unfold"],
+            allow_missing=True,
+        )
+    )
+    files.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="cifti",
+                den="{density}",
+                suffix="{cifti}.nii",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            cifti=get_cifti_metric_types(label),
+            allow_missing=True,
+        )
+    )
+    if label == "hipp":
+        files.extend(
+            expand(
+                bids(
+                    root=root,
+                    datatype="cifti",
+                    den="{density}",
+                    atlas="{atlas}",
+                    suffix="subfields.dlabel.nii",
+                    label="{label}",
+                    **inputs.subj_wildcards,
+                ),
+                atlas=config["atlas"],
+                allow_missing=True,
+            )
+        )
+        files.extend(
+            expand(
+                bids(
+                    root=root,
+                    datatype="metric",
+                    den="{density}",
+                    atlas="{atlas}",
+                    suffix="subfields.label.gii",
+                    hemi="{hemi}",
+                    label="{label}",
+                    **inputs.subj_wildcards,
+                ),
+                atlas=config["atlas"],
+                allow_missing=True,
+            )
+        )
+
+    return files
+
+
+def get_final_spec():
+    """include input files for spec too, so they don't get removed with temp()"""
+
+    files = []
+
+    files.extend(
         inputs[config["modality"]].expand(
             bids(
                 root=root,
@@ -150,14 +237,36 @@ def get_final_spec():
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
-            allow_missing=True,
             space=ref_spaces,
-            label=config["autotop_labels"],
-            density=config["output_density"] + ["native"],
+            density=config["output_density"],
+            allow_missing=True,
+        )
+    )
+    # add spec inputs too
+    for label in config["autotop_labels"]:
+        for spec_input in get_inputs_spec_file(label):
+            files.extend(
+                inputs[config["modality"]].expand(
+                    spec_input,
+                    space=ref_spaces,
+                    label=label,
+                    density=config["output_density"],
+                    **expand_hemi(),
+                )
+            )
+
+    files.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="removeunused.touch",
+                **inputs.subj_wildcards,
+            )
         )
     )
 
-    return specs
+    return files
 
 
 def get_final_subfields():
@@ -214,11 +323,11 @@ def get_final_qc():
                     root=root,
                     datatype="qc",
                     suffix="regqc.png",
-                    from_="{native_modality}",
+                    from_="{modality}",
                     to=config["template"],
                     **inputs.subj_wildcards,
                 ),
-                native_modality=template_modality,
+                modality=template_modality,
                 allow_missing=True,
             )
         )
@@ -333,7 +442,7 @@ def get_create_atlas_output():
             inputs[config["modality"]].expand(
                 bids(
                     root=root,
-                    datatype="surf",
+                    datatype="metric",
                     suffix="{metric}.gii",
                     den="native",
                     hemi="{hemi}",
@@ -366,7 +475,7 @@ def get_create_atlas_output():
             inputs[config["modality"]].expand(
                 bids(
                     root=root,
-                    datatype="surf",
+                    datatype="metric",
                     suffix="subfields.label.gii",
                     den="native",
                     hemi="{hemi}",

@@ -36,7 +36,7 @@ rule native_metric_to_unfold_nii:
     input:
         metric_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="{metric}.shape.gii",
             den="native",
             hemi="{hemi}",
@@ -237,7 +237,7 @@ rule slice_3d_to_2d_atlas:
                 space="unfold2d",
                 hemi="{hemi}",
                 label="{label}",
-                den="{density}",
+                den="{density,[0-9k]+}",
                 atlas="{atlas}",
                 **inputs.subj_wildcards,
             )
@@ -280,7 +280,7 @@ def get_moving_images_unfoldreg(wildcards):
             space="unfold2d",
             hemi="{hemi}",
             label="{label}",
-            den=config["output_density"][0],
+            den=config["unfoldreg_density"],
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),

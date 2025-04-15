@@ -47,14 +47,16 @@ rule subfields_to_label_gifti:
             **inputs.subj_wildcards,
         ),
     output:
-        label_gii=bids(
-            root=root,
-            datatype="surf",
-            suffix="subfields.label.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label,hipp}",
-            **inputs.subj_wildcards,
+        label_gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="subfields.label.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label,hipp}",
+                **inputs.subj_wildcards,
+            )
         ),
     conda:
         conda_env("workbench")
@@ -69,7 +71,7 @@ rule native_label_gii_to_unfold_nii:
     input:
         label_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="subfields.label.gii",
             den="native",
             hemi="{hemi}",
@@ -176,7 +178,7 @@ rule label_subfields_from_vol_coords_corobl:
         ),
         label_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="subfields.label.gii",
             den="native",
             hemi="{hemi}",
@@ -278,8 +280,8 @@ rule combine_tissue_subfield_labels_corobl:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 
 
-rule resample_subfields_to_native:
-    """Resampling to native space"""
+rule resample_subfields_to_orig:
+    """Resampling to original modality space"""
     input:
         nii=bids(
             root=root,
@@ -297,7 +299,7 @@ rule resample_subfields_to_native:
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
             type_="itk",
@@ -307,7 +309,7 @@ rule resample_subfields_to_native:
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz",
+            suffix="{modality}.nii.gz",
         ),
     output:
         nii=bids(
@@ -315,7 +317,7 @@ rule resample_subfields_to_native:
             datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="{native_modality,T1w|T2w}",
+            space="{modality,T1w|T2w}",
             hemi="{hemi}",
             atlas="{atlas}",
             label="{label,hipp}",
@@ -332,8 +334,8 @@ rule resample_subfields_to_native:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_postproc_to_native:
-    """Resample post-processed tissue seg to native"""
+rule resample_postproc_to_orig:
+    """Resample post-processed tissue seg to original modality"""
     input:
         nii=bids(
             root=root,
@@ -350,7 +352,7 @@ rule resample_postproc_to_native:
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
             type_="itk",
@@ -360,7 +362,7 @@ rule resample_postproc_to_native:
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz",
+            suffix="{modality}.nii.gz",
         ),
     output:
         nii=temp(
@@ -369,7 +371,7 @@ rule resample_postproc_to_native:
                 datatype="anat",
                 suffix="dseg.nii.gz",
                 desc="postproc",
-                space="{native_modality,T2w|T2w}",
+                space="{modality,T2w|T2w}",
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
             )
@@ -385,8 +387,8 @@ rule resample_postproc_to_native:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_unet_to_native:
-    """Resample unet tissue seg to native"""
+rule resample_unet_to_orig:
+    """Resample unet tissue seg to original modality"""
     input:
         nii=bids(
             root=root,
@@ -402,7 +404,7 @@ rule resample_unet_to_native:
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
             type_="itk",
@@ -412,7 +414,7 @@ rule resample_unet_to_native:
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz",
+            suffix="{modality}.nii.gz",
         ),
     output:
         nii=temp(
@@ -421,7 +423,7 @@ rule resample_unet_to_native:
                 datatype="anat",
                 suffix="dseg.nii.gz",
                 desc="unet",
-                space="{native_modality,T1w|T2w}",
+                space="{modality,T1w|T2w}",
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
             )

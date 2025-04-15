@@ -1,5 +1,5 @@
-rule create_native_crop_ref:
-    """Create ref space for hires crop in native space
+rule create_crop_ref:
+    """Create ref space for hires crop in original modality space
     TODO:  expose the resampling factor and size as cmd line args"""
     input:
         seg=inputs[config["modality"]].expand(
@@ -8,7 +8,7 @@ rule create_native_crop_ref:
                 datatype="anat",
                 suffix="dseg.nii.gz",
                 desc="subfields",
-                space="{native_modality}",
+                space="{modality}",
                 hemi="{hemi}",
                 atlas="{atlas}",
                 label="hipp",
@@ -18,15 +18,15 @@ rule create_native_crop_ref:
             allow_missing=True,
         ),
     params:
-        resample=config["crop_native_res"],
-        pad_to=config["crop_native_box"],
+        resample=config["crop_res"],
+        pad_to=config["crop_box"],
     output:
         ref=temp(
             bids(
                 root=root,
                 datatype="warps",
                 suffix="cropref.nii.gz",
-                space="{native_modality}",
+                space="{modality}",
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
             )
@@ -41,7 +41,7 @@ rule create_native_crop_ref:
         "c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample-mm {params.resample} -pad-to {params.pad_to} 0 -scale 0 -type uchar {output}"
 
 
-rule resample_unet_native_crop:
+rule resample_unet_crop:
     input:
         nii=bids(
             root=root,
@@ -57,7 +57,7 @@ rule resample_unet_native_crop:
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
             type_="itk",
@@ -66,7 +66,7 @@ rule resample_unet_native_crop:
             root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
-            space="{native_modality}",
+            space="{modality}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
@@ -77,7 +77,7 @@ rule resample_unet_native_crop:
                 datatype="anat",
                 suffix="dseg.nii.gz",
                 desc="unet",
-                space="crop{native_modality}",
+                space="crop{modality}",
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
             )
@@ -93,7 +93,7 @@ rule resample_unet_native_crop:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_postproc_native_crop:
+rule resample_postproc_crop:
     input:
         nii=bids(
             root=root,
@@ -110,7 +110,7 @@ rule resample_postproc_native_crop:
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
             type_="itk",
@@ -119,7 +119,7 @@ rule resample_postproc_native_crop:
             root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
-            space="{native_modality}",
+            space="{modality}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
@@ -130,7 +130,7 @@ rule resample_postproc_native_crop:
                 datatype="anat",
                 suffix="dseg.nii.gz",
                 desc="postproc",
-                space="crop{native_modality}",
+                space="crop{modality}",
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
             )
@@ -146,7 +146,7 @@ rule resample_postproc_native_crop:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_subfields_native_crop:
+rule resample_subfields_crop:
     input:
         nii=bids(
             root=root,
@@ -164,7 +164,7 @@ rule resample_subfields_native_crop:
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
             type_="itk",
@@ -173,7 +173,7 @@ rule resample_subfields_native_crop:
             root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
-            space="{native_modality}",
+            space="{modality}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
@@ -183,7 +183,7 @@ rule resample_subfields_native_crop:
             datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="crop{native_modality}",
+            space="crop{modality}",
             hemi="{hemi}",
             atlas="{atlas}",
             label="{label,hipp}",
@@ -200,7 +200,7 @@ rule resample_subfields_native_crop:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_coords_native_crop:
+rule resample_coords_crop:
     input:
         nii=bids(
             root=root,
@@ -218,7 +218,7 @@ rule resample_coords_native_crop:
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
             type_="itk",
@@ -227,7 +227,7 @@ rule resample_coords_native_crop:
             root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
-            space="{native_modality}",
+            space="{modality}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
@@ -238,7 +238,7 @@ rule resample_coords_native_crop:
             dir="{dir}",
             suffix="coords.nii.gz",
             desc="{desc}",
-            space="crop{native_modality}",
+            space="crop{modality}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -254,20 +254,20 @@ rule resample_coords_native_crop:
         "antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_native_to_crop:
+rule resample_to_crop:
     input:
         nii=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz",
+            suffix="{modality}.nii.gz",
         ),
         ref=bids(
             root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
-            space="{native_modality}",
+            space="{modality}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
@@ -276,8 +276,8 @@ rule resample_native_to_crop:
             root=root,
             datatype="anat",
             desc="preproc",
-            suffix="{native_modality}.nii.gz",
-            space="crop{native_modality}",
+            suffix="{modality}.nii.gz",
+            space="crop{modality}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
@@ -302,7 +302,7 @@ def get_xfm_t2_to_t1():
             **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="T2w",
-            to="{native_modality}",
+            to="{modality}",
             desc="rigid",
             type_="itk",
         )
@@ -322,7 +322,7 @@ rule resample_t2_to_crop:
             root=root,
             datatype="warps",
             suffix="cropref.nii.gz",
-            space="{native_modality}",
+            space="{modality}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
@@ -337,7 +337,7 @@ rule resample_t2_to_crop:
             datatype="anat",
             desc="preproc",
             suffix="T2w.nii.gz",
-            space="crop{native_modality}",
+            space="crop{modality}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
