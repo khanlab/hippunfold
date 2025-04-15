@@ -28,7 +28,7 @@ app = bidsapp.app(
 )
 
 # Set the conda prefix directory
-conda_prefix = str(utils.get_download_dir()) + "/" + "conda"
+conda_prefix = Path(utils.get_download_dir() / "conda"
 
 # Set the environment variable SNAKEMAKE_CONDA_PREFIX
 os.environ["SNAKEMAKE_CONDA_PREFIX"] = str(conda_prefix)
