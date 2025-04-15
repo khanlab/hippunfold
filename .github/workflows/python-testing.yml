@@ -24,8 +24,14 @@ jobs:
         with:
           python-version: "3.9"
 
-      - name: Quality check (isort, Black, and snakefmt)
-        run: uv run poe quality_check
+      - name: isort
+        run: uv run isort hippunfold/*.py -c
+
+      - name: Black
+        run: uv run black hippunfold --check
+
+      - name: snakefmt
+        run: uv run snakefmt hippunfold --check
 
   test:
     runs-on: ubuntu-latest
