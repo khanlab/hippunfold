@@ -12,11 +12,6 @@ inputs:
       (e.g. the PR id or git hash)
     required: false
     default: ${{ github.event.pull_request.id || github.event.after }}
-  cache-key:
-    description: |
-      Unique key to identify cache. This id should be unique to the job step
-      (e.g. 'test', 'docs')
-    required: false
   manager:
     description: Dependency manager used (e.g. uv)
     required: false
@@ -66,45 +61,44 @@ runs:
         path: ~/.local
         key: ${{ runner.os }}-${{ inputs.manager }}-${{ inputs.cache-id }}
 
+    - name: Restore uv cache
+      uses: actions/cache@v4
+      id: restore-uv-cache
+      with:
+        path: /home/runner/work/_temp/setup-uv-cache
+        key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+        restore-keys: |
+          uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+          uv-${{ runner.os }}
+
     - name: Install uv
       uses: astral-sh/setup-uv@v5
       if: inputs.manager == 'uv' && steps.cached-manager.outputs.cache-hit != 'true'
+      with:
+        version: '0.6.14'
+        enable-cache: false
 
     # Setup & configure Python
-    - name: Create cache-key file
-      shell: bash
-      run: echo "${{ inputs.cache-key }}" >> .git/x-gh-cache-key
-
     - name: Setup python
       uses: actions/setup-python@v5
       id: setup-python
       with:
         python-version: ${{ inputs.python-version }}
-        cache: "${{ inputs.manager }}"
-        cache-dependency-path: |
-          **/uv.lock
-          .git/x-gh-cache-key
+
+    - name: Create virtual environment
+      if: inputs.manager == 'uv' && steps.cached-manager.outputs.cache-hit != 'true'
+      shell: bash
+      run: uv venv
 
     # Install dependencies with manager, if necessary
     - name: Install dependencies (with)
       if: >
-        inputs.manager == 'uv' &&
-        steps.setup-python.outputs.cache-hit != 'true' &&
-        ! inputs.install-deps-only
+        inputs.manager == 'uv' && ! inputs.install-deps-only
       shell: bash
       run: >
-        uv pip install . --extra ${{ inputs.install-deps-with }} --all-extras
-
-    - name: Install dependencies (only)
-      if: >
-        inputs.manager == 'uv' &&
-        steps.setup-python.outputs.cache-hit != 'true' &&
-        inputs.install-deps-only
-      shell: bash
-      run: >
-        uv pip install . --no-deps --extra ${{ inputs.install-deps-only }}
+        uv pip install -r pyproject.toml --extra ${{ inputs.install-deps-with }}
 
     - name: Install library
       if: inputs.manager == 'uv' && inputs.install-library == 'true'
       shell: bash
-      run: uv pip install . --all-extras
+      run: uv pip install -e .
