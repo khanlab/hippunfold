@@ -76,7 +76,6 @@ runs:
       if: inputs.manager == 'uv' && steps.cached-manager.outputs.cache-hit != 'true'
       with:
         version: '0.6.14'
-        enable-cache: false
 
     # Setup & configure Python
     - name: Setup python
