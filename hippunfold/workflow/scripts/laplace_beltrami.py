@@ -140,9 +140,13 @@ boundary_conditions = dict(
 coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
 
 # make fully uniform distribution
-domain = np.setdiff1d(np.arange(len(coords)), np.concatenate([src_indices, sink_indices])) # ignore src/sink indices
+domain = np.setdiff1d(
+    np.arange(len(coords)), np.concatenate([src_indices, sink_indices])
+)  # ignore src/sink indices
 sorted_indices = np.argsort(coords[domain])
-uniform_values = np.linspace(0, 1, len(domain)+2)[1:-1] # ignore first and last values
+uniform_values = np.linspace(0, 1, len(domain) + 2)[
+    1:-1
+]  # ignore first and last values
 coords[domain[sorted_indices]] = uniform_values
 
 # save the coordinates to a gifti file
