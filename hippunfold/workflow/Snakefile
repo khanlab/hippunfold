@@ -23,9 +23,7 @@ if config["modality"] == "T1w" or "T1w" in config["output_spaces"]:
     ref_spaces.append("T1w")
     crop_ref_spaces.append("cropT1w")
     limit_to_list.add("T1w")
-if (
-    config["modality"] == "T2w" and "native" in config["output_spaces"]
-) or "T2w" in config["output_spaces"]:
+if config["modality"] == "T2w" or "T2w" in config["output_spaces"]:
     ref_spaces.append("T2w")
     crop_ref_spaces.append("cropT2w")
     limit_to_list.add("T2w")
@@ -122,17 +120,15 @@ if config["modality"] == "hippb500":
 
 include: "rules/coords.smk"
 include: "rules/warps.smk"
-include: "rules/gifti.smk"
+include: "rules/cifti.smk"
 include: "rules/subfields.smk"
-include: "rules/resample_final_to_crop_native.smk"
+include: "rules/resample_final_to_crop.smk"
 include: "rules/qc.smk"
 include: "rules/myelin_map.smk"
-# include: "rules/native_cifti.smk"
 include: "rules/native_isosurf.smk"
 include: "rules/inner_outer_surf.smk"
 include: "rules/native_metrics.smk"
 include: "rules/native_resampling.smk"
-# include: "rules/native_spec.smk"
 include: "rules/native_unfold.smk"
 include: "rules/unfold_reg.smk"
 

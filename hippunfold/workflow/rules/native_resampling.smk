@@ -290,3 +290,46 @@ rule atlas_label_to_unfold_nii:
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " -nearest-vertex 1000"
+
+
+rule affine_gii_corobl_to_orig:
+    input:
+        gii=bids(
+            root=root,
+            datatype="{surfdir}",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        xfm=bids(
+            root=root,
+            datatype="warps",
+            **inputs.subj_wildcards,
+            suffix="xfm.txt",
+            from_="{modality}",
+            to="corobl",
+            desc="affine",
+            type_="ras",
+        ),
+    output:
+        gii=bids(
+            root=root,
+            datatype="{surfdir}",
+            den="{density}",
+            suffix="{surfname}.surf.gii",
+            space="{modality,T1w|T2w}",
+            hemi="{hemi}",
+            label="{label,hipp|dentate}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"

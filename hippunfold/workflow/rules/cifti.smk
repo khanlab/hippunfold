@@ -19,50 +19,6 @@ surf_to_secondary_type = {
 }
 
 
-# warp from corobl to native
-rule affine_gii_to_native:
-    input:
-        gii=bids(
-            root=root,
-            datatype="{surfdir}",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="corobl",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-        xfm=bids(
-            root=root,
-            datatype="warps",
-            **inputs.subj_wildcards,
-            suffix="xfm.txt",
-            from_="{native_modality}",
-            to="corobl",
-            desc="affine",
-            type_="ras",
-        ),
-    output:
-        gii=bids(
-            root=root,
-            datatype="{surfdir}",
-            den="{density}",
-            suffix="{surfname}.surf.gii",
-            space="{native_modality,T1w|T2w}",
-            hemi="{hemi}",
-            label="{label,hipp|dentate}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("workbench")
-    group:
-        "subj"
-    shell:
-        "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"
-
-
 def get_cmd_cifti_metric(wildcards, input, output):
     cmd = f"wb_command  -cifti-create-dense-scalar {output}"
     if "L" in config["hemi"]:

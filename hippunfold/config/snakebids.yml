@@ -158,12 +158,12 @@ parse_args:
     default: false
     action: store_true
 
-  --crop_native_res:
-    help: 'Sets the bounding box resolution for the crop native (e.g. cropT1w space). Under the hood, hippUnfold operates at higher resolution than the native image, so this tries to preserve some of that detail. (default: %(default)s)'
+  --crop_res:
+    help: 'Sets the bounding box resolution for the crop original modality (e.g. cropT1w space). Under the hood, hippUnfold operates at higher resolution than the original image, so this tries to preserve some of that detail. (default: %(default)s)'
     default: '0.2x0.2x0.2mm'
 
-  --crop_native_box:
-    help: 'Sets the bounding box size for the crop native (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
+  --crop_box:
+    help: 'Sets the bounding box size for the crop original modality (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
     default: '256x256x256vox'
 
   --resample_dsegtissue:
@@ -203,11 +203,10 @@ parse_args:
 
   --output_spaces:
     choices: 
-      - 'native'
       - 'T1w'
+      - 'corobl'
     nargs: '+'
-    default:
-      - 'native'
+    default: []
     help: 'Sets output spaces for results (default: %(default)s)'
 
 

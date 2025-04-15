@@ -215,11 +215,11 @@ def get_final_qc():
                     root=root,
                     datatype="qc",
                     suffix="regqc.png",
-                    from_="{native_modality}",
+                    from_="{modality}",
                     to=config["template"],
                     **inputs.subj_wildcards,
                 ),
-                native_modality=template_modality,
+                modality=template_modality,
                 allow_missing=True,
             )
         )
