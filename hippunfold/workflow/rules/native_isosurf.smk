@@ -107,17 +107,15 @@ rule update_native_mesh_structure:
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type="ANATOMICAL",
     output:
-        surf_gii=temp(
-            bids(
-                root=root,
-                datatype="surf",
-                suffix="{surfname,midthickness|inner|outer}.surf.gii",
-                space="{space,corobl|unfold}",
-                den="native",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+            space="{space,corobl|unfold}",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     container:
         config["singularity"]["autotop"]

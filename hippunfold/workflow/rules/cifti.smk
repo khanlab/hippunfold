@@ -160,182 +160,23 @@ def get_cmd_spec_file(wildcards, input, output):
     return " && ".join(cmds)
 
 
-rule create_spec_file_hipp:
+rule create_spec_file:
     input:
-        metrics=lambda wildcards: expand(
-            bids(
-                root=root,
-                datatype="metric",
-                den="{density}",
-                suffix="{metric}.gii",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            metric=get_gifti_metric_types(wildcards.label),
-            allow_missing=True,
-        ),
-        subfields=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="metric",
-                den="{density}",
-                atlas="{atlas}",
-                suffix="subfields.label.gii",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            atlas=config["atlas"],
-            allow_missing=True,
-        ),
-        surfs=expand(
-            bids(
-                root=root,
-                datatype="surf",
-                den="{density}",
-                suffix="{surfname}.surf.gii",
-                space="{space}",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            surfname=["midthickness", "inner", "outer"],
-            space=["{space}"],
-            allow_missing=True,
-        ),
-        unfold_surfs=expand(
-            bids(
-                root=root,
-                datatype="surf",
-                den="{density}",
-                suffix="{surfname}.surf.gii",
-                space="{space}",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            surfname=["midthickness"],
-            space=["unfold"],
-            allow_missing=True,
-        ),
-        cifti_metrics=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="cifti",
-                den="{density}",
-                suffix="{cifti}.nii",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            cifti=get_cifti_metric_types(wildcards.label),
-            allow_missing=True,
-        ),
-        cifti_labels=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="cifti",
-                den="{density}",
-                atlas="{atlas}",
-                suffix="subfields.dlabel.nii",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            atlas=config["atlas"],
-            allow_missing=True,
-        ),
+        lambda wildcards: get_inputs_spec_file(wildcards.label),
     params:
         cmds=get_cmd_spec_file,
     output:
-        spec_file=bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            suffix="surfaces.spec",
-            hemi="{hemi,L|R}",
-            space="{space}",
-            label="{label,hipp}",
-            **inputs.subj_wildcards,
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("workbench")
-    group:
-        "subj"
-    shell:
-        "{params.cmds}"
-
-
-rule create_spec_file_dentate:
-    input:
-        metrics=lambda wildcards: expand(
-            bids(
-                root=root,
-                datatype="metric",
-                den="{density}",
-                suffix="{metric}.gii",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            metric=get_gifti_metric_types(wildcards.label),
-            allow_missing=True,
-        ),
-        surfs=expand(
+        spec_file=temp(
             bids(
                 root=root,
                 datatype="surf",
                 den="{density}",
-                suffix="{surfname}.surf.gii",
+                suffix="surfaces.spec",
+                hemi="{hemi,L|R}",
                 space="{space}",
-                hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
-            ),
-            surfname=["midthickness", "inner", "outer"],
-            space=["{space}"],
-            allow_missing=True,
-        ),
-        unfold_surfs=expand(
-            bids(
-                root=root,
-                datatype="surf",
-                den="{density}",
-                suffix="{surfname}.surf.gii",
-                space="{space}",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            surfname=["midthickness"],
-            space=["unfold"],
-            allow_missing=True,
-        ),
-        cifti=lambda wildcards: expand(
-            bids(
-                root=root,
-                datatype="cifti",
-                den="{density}",
-                suffix="{cifti}.nii",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            cifti=get_cifti_metric_types(wildcards.label),
-            allow_missing=True,
-        ),
-    params:
-        cmds=get_cmd_spec_file,
-    output:
-        spec_file=bids(
-            root=root,
-            datatype="surf",
-            den="{density}",
-            suffix="surfaces.spec",
-            hemi="{hemi,L|R}",
-            space="{space}",
-            label="{label,dentate}",
-            **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -373,14 +214,16 @@ rule merge_lr_spec_file:
     params:
         cmd=get_cmd_merge_spec,
     output:
-        spec_file=bids(
-            root=root,
-            datatype="{surfdir}",
-            den="{density}",
-            space="{space}",
-            suffix="surfaces.spec",
-            label="{label}",
-            **inputs.subj_wildcards,
+        spec_file=temp(
+            bids(
+                root=root,
+                datatype="{surfdir}",
+                den="{density}",
+                space="{space}",
+                suffix="surfaces.spec",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
     container:
         config["singularity"]["autotop"]
@@ -426,3 +269,51 @@ rule merge_hipp_dentate_spec_file:
         "subj"
     shell:
         "{params.cmd}"
+
+
+def get_inputs_to_remove(wildcards):
+    files = []
+    for label in config["autotop_labels"]:
+        for spec_input in get_inputs_spec_file(label):
+            files.extend(
+                inputs[config["modality"]].expand(
+                    spec_input,
+                    space=ref_spaces,
+                    label=label,
+                    density=config["unused_density"],
+                    **wildcards,
+                    **expand_hemi(),
+                )
+            )
+    return files
+
+
+rule remove_extra_spec_inputs:
+    """ after all specs are created, remove files with unused density """
+    input:
+        expand(
+            bids(
+                root=root,
+                datatype="{surfdir}",
+                den="{density}",
+                space="{space}",
+                suffix="surfaces.spec",
+                **inputs.subj_wildcards,
+            ),
+            density=config["output_density"],
+            space=ref_spaces,
+            allow_missing=True,
+        ),
+    params:
+        to_remove=get_inputs_to_remove,
+    output:
+        temp(
+            bids(
+                root=root,
+                datatype="{surfdir}",
+                suffix="removeunused.touch",
+                **inputs.subj_wildcards,
+            )
+        ),
+    shell:
+        "rm -f {params.to_remove} && touch {output}"

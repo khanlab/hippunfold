@@ -210,3 +210,6 @@ class AtlasConfig(PluginBase):
         config["atlas_metadata"] = self.atlas_config
         config["output_density"] = output_density
         config["unfoldreg_density"] = ATLAS_DENSITY_DEFAULT
+        config["unused_density"] = list(
+            set(ATLAS_DENSITY_CHOICES) - set(output_density)
+        )
