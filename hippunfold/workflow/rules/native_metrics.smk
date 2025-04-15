@@ -3,7 +3,7 @@ rule calculate_surface_area:
     input:
         gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="{space}",
             den="native",
@@ -37,7 +37,7 @@ rule metric_smoothing:
     input:
         surface=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="{density}",
@@ -128,7 +128,7 @@ rule calculate_curvature:
     input:
         gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -163,7 +163,7 @@ rule calculate_thickness:
     input:
         inner=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="inner.surf.gii",
             space="corobl",
             den="native",
@@ -173,7 +173,7 @@ rule calculate_thickness:
         ),
         outer=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="outer.surf.gii",
             space="corobl",
             den="native",

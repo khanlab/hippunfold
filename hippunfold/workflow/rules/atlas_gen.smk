@@ -460,7 +460,7 @@ rule warp_subj_unfold_surf_to_avg:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="unfold",
             den="native",
@@ -506,7 +506,7 @@ rule resample_subj_native_surf_to_avg:
     input:
         subj_native=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",

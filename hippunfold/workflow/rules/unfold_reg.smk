@@ -45,7 +45,7 @@ rule native_metric_to_unfold_nii:
         ),
         inner_surf=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="inner.surf.gii",
             space="unfold",
             den="native",
@@ -55,7 +55,7 @@ rule native_metric_to_unfold_nii:
         ),
         midthickness_surf=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="unfold",
             den="native",
@@ -65,7 +65,7 @@ rule native_metric_to_unfold_nii:
         ),
         outer_surf=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="outer.surf.gii",
             space="unfold",
             den="native",
@@ -237,7 +237,7 @@ rule slice_3d_to_2d_atlas:
                 space="unfold2d",
                 hemi="{hemi}",
                 label="{label}",
-                den="{density}",
+                den="{density,[0-9k]+}",
                 atlas="{atlas}",
                 **inputs.subj_wildcards,
             )
@@ -280,7 +280,7 @@ def get_moving_images_unfoldreg(wildcards):
             space="unfold2d",
             hemi="{hemi}",
             label="{label}",
-            den=config["output_density"][0],
+            den=config["unfoldreg_density"],
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
@@ -425,7 +425,7 @@ rule warp_unfold_native_to_unfoldreg:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="{surfname}.surf.gii",
             space="unfold",
             den="native",
@@ -452,7 +452,7 @@ rule warp_unfold_native_to_unfoldreg:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surfnative",
+                datatype="surf",
                 suffix="{surfname}.surf.gii",
                 space="unfoldreg",
                 den="native",

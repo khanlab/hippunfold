@@ -211,7 +211,7 @@ rule warp_midthickness_to_inout:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             den="native",
             space="corobl",
@@ -234,7 +234,7 @@ rule warp_midthickness_to_inout:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surfnative",
+                datatype="surf",
                 suffix="{surfname,inner|outer}.surf.gii",
                 den="native",
                 space="corobl",

@@ -349,7 +349,7 @@ def get_create_atlas_output():
             inputs[config["modality"]].expand(
                 bids(
                     root=root,
-                    datatype="surfnative",
+                    datatype="surf",
                     suffix="{surftype}.surf.gii",
                     space="{space}",
                     den="native",

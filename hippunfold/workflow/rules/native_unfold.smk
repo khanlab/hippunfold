@@ -3,7 +3,7 @@ rule get_boundary_vertices:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -45,7 +45,7 @@ rule map_src_sink_sdt_to_surf:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -196,7 +196,7 @@ rule laplace_beltrami:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -259,7 +259,7 @@ rule warp_native_mesh_to_unfold:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -296,7 +296,7 @@ rule warp_native_mesh_to_unfold:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surfnative",
+                datatype="surf",
                 suffix="{surfname,midthickness}.surf.gii",
                 desc="nostruct",
                 space="unfold",
@@ -324,7 +324,7 @@ rule space_unfold_vertices:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             desc="nostruct",
             space="unfold",
@@ -335,7 +335,7 @@ rule space_unfold_vertices:
         ),
         native_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             space="corobl",
             den="native",
@@ -350,7 +350,7 @@ rule space_unfold_vertices:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surfnative",
+                datatype="surf",
                 suffix="midthickness.surf.gii",
                 desc="nostruct",
                 den="native",
@@ -381,7 +381,7 @@ rule unfold_surface_smoothing:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             desc="nostruct",
             space="unfoldspringmodel",
@@ -397,7 +397,7 @@ rule unfold_surface_smoothing:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surfnative",
+                datatype="surf",
                 suffix="midthickness.surf.gii",
                 space="unfoldspringmodelsmooth",
                 den="native",
@@ -420,7 +420,7 @@ rule set_surface_z_level:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="midthickness.surf.gii",
             desc="nostruct",
             space="unfold",
@@ -435,7 +435,7 @@ rule set_surface_z_level:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surfnative",
+                datatype="surf",
                 suffix="{surfname,inner|outer}.surf.gii",
                 desc="nostruct",
                 space="unfold",

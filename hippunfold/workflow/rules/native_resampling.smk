@@ -18,7 +18,7 @@ def get_unfold_ref(wildcards):
 
     return bids(
         root=root,
-        datatype="surfnative",
+        datatype="surf",
         suffix="midthickness.surf.gii",
         space=get_unfold_ref_name(wildcards),
         den="native",
@@ -60,7 +60,7 @@ rule resample_native_surf_to_atlas_density:
     input:
         native=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="{surf_name}.surf.gii",
             space="{space}",
             den="native",
@@ -169,7 +169,7 @@ rule resample_atlas_subfields_to_native_surf:
             root=get_atlas_dir(),
             template=config["atlas"],
             hemi="{hemi}",
-            den=config["output_density"][0],
+            den=config["unfoldreg_density"],
             label="{label}",
             suffix="dseg.label.gii",
         ),
@@ -179,7 +179,7 @@ rule resample_atlas_subfields_to_native_surf:
             hemi="{hemi}",
             label="{label}",
             space="unfold",
-            den=config["output_density"][0],
+            den=config["unfoldreg_density"],
             suffix="midthickness.surf.gii",
         ),
     output:
@@ -222,7 +222,7 @@ rule cp_atlas_subfields_label_gii:
             suffix="subfields.label.gii",
             hemi="{hemi}",
             label="{label,hipp}",
-            den="{density}",
+            den="{density,[0-9k]+}",
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),

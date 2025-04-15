@@ -66,7 +66,7 @@ rule create_dscalar_metric_cifti:
         cifti=bids(
             root=root,
             datatype="cifti",
-            den="{density,[0-9k]+}",
+            den="{density}",
             suffix="{metric}.dscalar.nii",
             label="{label}",
             **inputs.subj_wildcards,
@@ -130,7 +130,7 @@ rule create_dlabel_cifti_subfields:
         cifti=bids(
             root=root,
             datatype="cifti",
-            den="{density,[0-9k]+}",
+            den="{density}",
             atlas="{atlas}",
             suffix="subfields.dlabel.nii",
             label="hipp",
@@ -250,7 +250,7 @@ rule create_spec_file_hipp:
         spec_file=bids(
             root=root,
             datatype="surf",
-            den="{density,[0-9k]+}",
+            den="{density}",
             suffix="surfaces.spec",
             hemi="{hemi,L|R}",
             space="{space}",
@@ -330,7 +330,7 @@ rule create_spec_file_dentate:
         spec_file=bids(
             root=root,
             datatype="surf",
-            den="{density,[0-9k]+}",
+            den="{density}",
             suffix="surfaces.spec",
             hemi="{hemi,L|R}",
             space="{space}",

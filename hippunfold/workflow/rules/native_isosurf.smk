@@ -60,7 +60,7 @@ rule gen_native_mesh:
             temp(
                 bids(
                     root=root,
-                    datatype="surfnative",
+                    datatype="surf",
                     suffix="{surfname,midthickness}.surf.gii",
                     den="native",
                     space="corobl",
@@ -93,7 +93,7 @@ rule update_native_mesh_structure:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="{surfname}.surf.gii",
             space="{space}",
             den="native",
@@ -110,7 +110,7 @@ rule update_native_mesh_structure:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surfnative",
+                datatype="surf",
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
                 space="{space,corobl|unfold}",
                 den="native",
@@ -135,7 +135,7 @@ rule smooth_surface:
     input:
         surf_gii=bids(
             root=root,
-            datatype="surfnative",
+            datatype="surf",
             suffix="{surfname}.surf.gii",
             space="corobl",
             den="native",
@@ -150,7 +150,7 @@ rule smooth_surface:
         surf_gii=temp(
             bids(
                 root=root,
-                datatype="surfnative",
+                datatype="surf",
                 suffix="{surfname}.surf.gii",
                 space="corobl",
                 den="native",
