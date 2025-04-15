@@ -1,5 +1,5 @@
 # populate the HIPPUNFOLD_CACHE_DIR folder as needed
-from hippunfold.workflow.lib import utils as utils
+from lib import utils as utils
 
 download_dir = utils.get_download_dir()
 

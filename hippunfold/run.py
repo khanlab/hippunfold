@@ -4,12 +4,12 @@ from pathlib import Path
 
 from snakebids import bidsapp, plugins
 
-from hippunfold.workflow.lib import utils as utils
-
 try:
     from hippunfold.plugins import atlas as atlas_plugin  # Works when run as a package
+    from hippunfold.workflow.lib import utils as utils
 except ImportError:
     from plugins import atlas as atlas_plugin  # Works when run directly
+    from workflow.lib import utils as utils
 
 
 if "__file__" not in globals():
