@@ -65,7 +65,11 @@ def expand_hemi():
     else:
         # hemi is not an input wildcard,
         # so we additionally expand using the config hemi
-        return {"hemi": config["hemi"]}
+        return {"hemi": config["autotop_labels"]}
+
+
+def expand_label():
+    return {"label": config["autotop_labels"]}
 
 
 def get_single_bids_input(wildcards, component):
