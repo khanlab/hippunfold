@@ -1,3 +1,6 @@
+ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
+
+
 rule extract_unfold_ref_slice:
     """This gets the central-most slice of the unfold volume, for obtaining a 2D slice"""
     input:
