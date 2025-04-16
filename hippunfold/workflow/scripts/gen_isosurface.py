@@ -147,7 +147,7 @@ logger.info(surface)
 
 # reduce # of vertices with decimation
 logger.info(f"Decimating surface with {snakemake.params.decimate_opts}")
-surface = surface.decimate_pro(**snakemake.params.decimate_opts)
+surface = surface.decimate(**snakemake.params.decimate_opts)
 logger.info(surface)
 
 

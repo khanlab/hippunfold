@@ -49,8 +49,6 @@ rule gen_native_mesh:
         threshold=lambda wildcards: config["surf_thresholds"][wildcards.surfname],
         decimate_opts={
             "reduction": 0.5,
-            "feature_angle": 25,
-            "preserve_topology": True,
         },
         hole_fill_radius=1.0,
         morph_openclose_dist=2,  # mm
