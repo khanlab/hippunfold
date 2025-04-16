@@ -343,11 +343,11 @@ rule gen_unfold_atlas_mesh:
 
 checkpoint resample_to_density_mapping:
     input:
-        hipp_surf_giis=lambda wildcards: inputs[config["modality"]].expand(
+        surf_giis=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
-                label="hipp",
+                label="{label}",
                 space="corobl",
                 resample="{resample}",
                 hemi="{hemi}",
@@ -355,21 +355,8 @@ checkpoint resample_to_density_mapping:
                 **inputs.subj_wildcards,
             ),
             **expand_hemi(),
-            resample=[20, 40, 60],
-        ),
-        dentate_surf_giis=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                label="dentate",
-                space="corobl",
-                resample="{resample}",
-                hemi="{hemi}",
-                suffix="midthickness.surf.gii",
-                **inputs.subj_wildcards,
-            ),
-            **expand_hemi(),
-            resample=[20, 40, 60],
+            **expand_label(),
+            resample=config["resample_factors"],
         ),
     output:
         mapping_csv=bids_atlas(
