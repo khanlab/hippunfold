@@ -1,5 +1,3 @@
-
-
 def get_unfold_ref_name(wildcards):
     if (
         wildcards.label in config["atlas_metadata"][config["atlas"]]["label_wildcards"]
