@@ -84,20 +84,15 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Create virtual environment
-      if: inputs.manager == 'uv' && steps.cached-manager.outputs.cache-hit != 'true'
-      shell: bash
-      run: uv venv
-
     # Install dependencies with manager, if necessary
     - name: Install dependencies (with)
       if: >
         inputs.manager == 'uv' && ! inputs.install-deps-only
       shell: bash
       run: >
-        uv pip install -r pyproject.toml --all-extras
+        uv sync --all-extras
 
     - name: Install library
       if: inputs.manager == 'uv' && inputs.install-library == 'true'
       shell: bash
-      run: uv pip install -e .
+      run: uv sync
