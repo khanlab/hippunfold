@@ -424,67 +424,14 @@ def get_gifti_metric_types(label):
 
 
 def get_create_atlas_output():
-
-    files = []
-    ## -> these are the subject data that feed into the average atlas - might be useful to keep with the avgatlas...
-    for label in config["autotop_labels"]:
-        files.extend(
-            inputs[config["modality"]].expand(
-                bids(
-                    root=root,
-                    datatype="metric",
-                    suffix="{metric}.gii",
-                    den="native",
-                    hemi="{hemi}",
-                    label=label,
-                    **inputs.subj_wildcards,
-                ),
-                metric=get_gifti_metric_types(label),
-                **expand_hemi(),
+    files = str(
+        Path(
+            bids(
+                root=get_atlas_dir(),
+                tpl=config["new_atlas_name"],
             )
         )
-        files.extend(
-            inputs[config["modality"]].expand(
-                bids(
-                    root=root,
-                    datatype="surf",
-                    suffix="{surftype}.surf.gii",
-                    space="{space}",
-                    den="native",
-                    hemi="{hemi}",
-                    label=label,
-                    **inputs.subj_wildcards,
-                ),
-                metric=get_gifti_metric_types(label),
-                space=["corobl", "unfold"],
-                surftype=["inner", "outer", "midthickness"],
-                **expand_hemi(),
-            )
-        )
-        files.extend(
-            inputs[config["modality"]].expand(
-                bids(
-                    root=root,
-                    datatype="metric",
-                    suffix="subfields.label.gii",
-                    den="native",
-                    hemi="{hemi}",
-                    label="hipp",
-                    **inputs.subj_wildcards,
-                ),
-                **expand_hemi(),
-            )
-        )
-    files.append(
-        str(
-            Path(
-                bids(
-                    root=get_atlas_dir(),
-                    tpl=config["new_atlas_name"],
-                )
-            )
-            / "template_description.json"
-        )
+        / "template_description.json"
     )
     return files
 
