@@ -377,7 +377,9 @@ def get_unfold_mesh_resample(wildcards):
     with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
         df = pd.read_csv(f)
 
-    ind_resample = config["density_choices"].index(wildcards.density) -1 # density has 1 more values then resample since the first should be native
+    ind_resample = (
+        config["density_choices"].index(wildcards.density) - 1
+    )  # density has 1 more values then resample since the first should be native
     resample = config["resample_factors"][ind_resample]
 
     return bids_atlas(
@@ -772,7 +774,7 @@ def get_atlas_inputs(wildcards):
                             den="{density}",
                             suffix="dseg.label.gii",
                         ),
-                    density=config["density_choices"],
+                        density=config["density_choices"],
                     )
                 )
 
