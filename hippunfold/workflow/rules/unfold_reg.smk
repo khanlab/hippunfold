@@ -80,7 +80,6 @@ rule native_metric_to_unfold_nii:
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
-            hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
