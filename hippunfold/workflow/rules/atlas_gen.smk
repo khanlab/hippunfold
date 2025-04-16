@@ -369,7 +369,7 @@ checkpoint resample_to_density_mapping:
                 **inputs.subj_wildcards,
             ),
             **expand_hemi(),
-            resample=[40, 80, 120],
+            resample=[20, 40, 60],
         ),
     output:
         mapping_csv=bids_atlas(
