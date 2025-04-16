@@ -20,8 +20,8 @@ from hippunfold.workflow.lib import utils as utils
 
 # Global variable to store the commit hash
 ATLAS_REPO_COMMIT = "c1a53ecade939ead9de8f9169c6a4ddff0c73c3d"
-ATLAS_DENSITY_CHOICES = ["native", "1k", "5k", "12k"]
-RESAMPLING_FACTORS = [60, 40, 10]  # percent, relative to native
+ATLAS_DENSITY_CHOICES = ["native", "1k", "5k", "12k"] # note these are SUGGESTED NAMES and should be compared to actual surface properties
+RESAMPLING_FACTORS = [60, 40, 10]  # percent, relative to native (should be a list with the same length as ATLAS_DENSITY_CHOICES -1 )
 ATLAS_DENSITY_DEFAULT = (
     "12k"  # also density that is used for unfoldreg, cannot set this to native
 )
@@ -217,6 +217,7 @@ class AtlasConfig(PluginBase):
         config["output_density"] = output_density
         config["unfoldreg_density"] = ATLAS_DENSITY_DEFAULT
         config["resample_factors"] = RESAMPLING_FACTORS
+        config["density_choices"] = ATLAS_DENSITY_CHOICES
         config["unused_density"] = list(
             set(ATLAS_DENSITY_CHOICES) - set(output_density)
         )
