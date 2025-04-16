@@ -95,7 +95,7 @@ runs:
         inputs.manager == 'uv' && ! inputs.install-deps-only
       shell: bash
       run: >
-        uv pip install -r pyproject.toml --extra ${{ inputs.install-deps-with }}
+        uv pip install -r pyproject.toml --all-extras
 
     - name: Install library
       if: inputs.manager == 'uv' && inputs.install-library == 'true'
