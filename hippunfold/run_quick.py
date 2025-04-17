@@ -55,7 +55,6 @@ def gen_parser():
 def main():
     if check_conda_installation():
         print("Conda is ready to use.")
-        print("running......")
     else:
         print("Please install Conda to continue using hippunfold-quick.")
         sys.exit(1)
@@ -104,8 +103,10 @@ def main():
 
     # run the command
     try:
+        print("running......")
         subprocess.run(command, check=True)
-        print("hippunfold completed successfully.")
+        if not args.dry_run:
+            print("hippunfold completed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
     finally:
