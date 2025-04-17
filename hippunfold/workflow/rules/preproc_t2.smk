@@ -259,10 +259,10 @@ rule reg_t2_to_t1_part1:
             )
         ),
     log:
-        bids_log_wrapper(
+        bids_log(
             "reg_t2_to_t1_part1",
             **inputs.subj_wildcards,
-        )
+        ),
     container:
         config["singularity"]["autotop"]
     conda:
@@ -395,7 +395,7 @@ rule compose_t2_xfm_corobl:
             )
         ),
     log:
-        bids_log_wrapper(
+        bids_log(
             "compose_t2_xfm_corobol",
             **inputs.subj_wildcards,
         ),

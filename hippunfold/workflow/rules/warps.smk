@@ -52,11 +52,11 @@ rule reg_to_template:
             )
         ),
     log:
-        bids_log_wrapper(
+        bids_log(
             "reg_to_template",
             **inputs.subj_wildcards,
             from_="{modality,T1w|T2w}",
-            to=config["template"]
+            to=config["template"],
         ),
     container:
         config["singularity"]["autotop"]
@@ -187,7 +187,7 @@ rule template_xfm_itk2ras:
             datatype="warps",
             **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
             type_="itk",
@@ -199,7 +199,7 @@ rule template_xfm_itk2ras:
                 datatype="warps",
                 **inputs.subj_wildcards,
                 suffix="xfm.txt",
-                from_="{native_modality,T1w|T2w}",
+                from_="{modality,T1w|T2w}",
                 to="corobl",
                 desc="affine",
                 type_="ras",

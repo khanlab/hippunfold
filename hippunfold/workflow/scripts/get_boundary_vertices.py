@@ -6,13 +6,11 @@ from nibabel.gifti.gifti import intent_codes
 from collections import defaultdict
 from lib.utils import setup_logger
 from lib.surface import read_surface_from_gifti, find_boundary_vertices, write_label_gii
-import sys
 
 # Setup logger
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
-sys.stdout = open(log_file, "a")
-sys.stderr = open(log_file, "a")
+
 
 logger.info("Loading surface from GIFTI...")
 surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)

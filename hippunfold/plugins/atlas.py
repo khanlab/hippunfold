@@ -17,18 +17,19 @@ logger = logging.getLogger(__name__)
 import json
 import os
 
+
+try:
+    from hippunfold.workflow.lib import utils as utils
+except ImportError:
+    from workflow.lib import utils as utils
+
+
 # Global variable to store the commit hash
 ATLAS_REPO_COMMIT = "c1a53ecade939ead9de8f9169c6a4ddff0c73c3d"
-
-
-def get_download_dir():
-    if "HIPPUNFOLD_CACHE_DIR" in os.environ.keys():
-        download_dir = os.environ["HIPPUNFOLD_CACHE_DIR"]
-    else:
-        # create local download dir if it doesn't exist
-        dirs = AppDirs("hippunfold", "khanlab")
-        download_dir = dirs.user_cache_dir
-    return download_dir
+ATLAS_DENSITY_CHOICES = ["native", "1k", "5k", "12k"]
+ATLAS_DENSITY_DEFAULT = (
+    "12k"  # also density that is used for unfoldreg, cannot set this to native
+)
 
 
 def sync_atlas_repo():
@@ -36,7 +37,7 @@ def sync_atlas_repo():
     Ensures the atlas folder is synced from the public GitHub repository using GitPython.
     """
     repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
-    atlas_dir = Path(get_download_dir()) / "hippunfold-atlases"
+    atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
 
     try:
         if atlas_dir.exists() and (atlas_dir / ".git").exists():
@@ -98,7 +99,7 @@ def get_atlas_configs():
     sync_atlas_repo()
 
     # Define search locations
-    cache_dir = get_download_dir()
+    cache_dir = utils.get_download_dir()
 
     atlas_dirs = []
     atlas_dirs.append(Path(cache_dir) / "hippunfold-atlases")
@@ -178,8 +179,8 @@ class AtlasConfig(PluginBase):
             action="store",
             type=str,
             dest="output_density",
-            default=["12k"],
-            choices=["1k", "5k", "12k"],
+            default=[ATLAS_DENSITY_DEFAULT],
+            choices=ATLAS_DENSITY_CHOICES,
             nargs="+",
             help=(
                 "Sets the output vertex density for results, using the same vertex density for hipp and dentate (default: %(default)s)"
@@ -205,3 +206,7 @@ class AtlasConfig(PluginBase):
         config["new_atlas_name"] = new_atlas_name
         config["atlas_metadata"] = self.atlas_config
         config["output_density"] = output_density
+        config["unfoldreg_density"] = ATLAS_DENSITY_DEFAULT
+        config["unused_density"] = list(
+            set(ATLAS_DENSITY_CHOICES) - set(output_density)
+        )

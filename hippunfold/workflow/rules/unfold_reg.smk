@@ -36,9 +36,9 @@ rule native_metric_to_unfold_nii:
     input:
         metric_gii=bids(
             root=root,
-            datatype="surf",
+            datatype="metric",
             suffix="{metric}.shape.gii",
-            space="corobl",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -48,6 +48,7 @@ rule native_metric_to_unfold_nii:
             datatype="surf",
             suffix="inner.surf.gii",
             space="unfold",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -57,6 +58,7 @@ rule native_metric_to_unfold_nii:
             datatype="surf",
             suffix="midthickness.surf.gii",
             space="unfold",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -66,6 +68,7 @@ rule native_metric_to_unfold_nii:
             datatype="surf",
             suffix="outer.surf.gii",
             space="unfold",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -234,7 +237,7 @@ rule slice_3d_to_2d_atlas:
                 space="unfold2d",
                 hemi="{hemi}",
                 label="{label}",
-                den="{density}",
+                den="{density,[0-9k]+}",
                 atlas="{atlas}",
                 **inputs.subj_wildcards,
             )
@@ -277,7 +280,7 @@ def get_moving_images_unfoldreg(wildcards):
             space="unfold2d",
             hemi="{hemi}",
             label="{label}",
-            den=config["output_density"][0],
+            den=config["unfoldreg_density"],
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
@@ -314,18 +317,20 @@ rule unfoldreg_antsquick:
             ]
         ),
     output:
-        warp=bids(
-            root=root,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="SyN",
-            from_="{atlas}",
-            to="native",
-            space="unfold",
-            type_="itk2d",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        warp=temp(
+            bids(
+                root=root,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="SyN",
+                from_="{atlas}",
+                to="native",
+                space="unfold",
+                type_="itk2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
         invwarp=temp(
             bids(
@@ -349,7 +354,7 @@ rule unfoldreg_antsquick:
     group:
         "subj"
     log:
-        bids_log_wrapper(
+        bids_log(
             "unfoldreg_antsquick",
             **inputs.subj_wildcards,
             atlas="{atlas}",
@@ -423,6 +428,7 @@ rule warp_unfold_native_to_unfoldreg:
             datatype="surf",
             suffix="{surfname}.surf.gii",
             space="unfold",
+            den="native",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -449,6 +455,7 @@ rule warp_unfold_native_to_unfoldreg:
                 datatype="surf",
                 suffix="{surfname}.surf.gii",
                 space="unfoldreg",
+                den="native",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
