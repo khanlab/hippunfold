@@ -16,7 +16,13 @@ logger = logging.getLogger(__name__)
 
 import json
 import os
-from hippunfold.workflow.lib import utils as utils
+
+
+try:
+    from hippunfold.workflow.lib import utils as utils
+except ImportError:
+    from workflow.lib import utils as utils
+
 
 # Global variable to store the commit hash
 ATLAS_REPO_COMMIT = "c1a53ecade939ead9de8f9169c6a4ddff0c73c3d"
