@@ -47,12 +47,8 @@ rule gen_native_mesh:
         ),
     params:
         threshold=lambda wildcards: config["surf_thresholds"][wildcards.surfname],
-        decimate_opts={
-            "target_reduction": 0.5,
-        },
+        decimate_opts=0.75,
         hole_fill_radius=1.0,
-        morph_openclose_dist=2,  # mm
-        coords_epsilon=0.1,
     output:
         surf_gii=temp(
             temp(
