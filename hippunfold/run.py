@@ -15,8 +15,8 @@ except ImportError:
 
 
 def check_for_existing_process(output_dir):
-    snakebids_path = output_dir / ".snakebids"
-    if snakebids_path.exists():
+    snakebids_path = os.path.join(output_dir, "config", "snakebids.yml")
+    if os.path.exists(snakebids_path):
         warnings.warn(
             "Another .snakebids file has been detected in your output directory.\n"
             "Please make sure only one snakebids process is writing to this output folder at a time."
