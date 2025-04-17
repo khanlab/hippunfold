@@ -65,7 +65,7 @@ def expand_hemi():
     else:
         # hemi is not an input wildcard,
         # so we additionally expand using the config hemi
-        return {"hemi": config["autotop_labels"]}
+        return {"hemi": config["hemi"]}
 
 
 def expand_label():

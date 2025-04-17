@@ -107,6 +107,7 @@ rule native_metric_to_unfold_nii:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " {params.interp}"
 
+
 rule atlas_metric_to_unfold_nii:
     """converts metric .gii files to .nii for use in ANTs. 
         This rule is for the surface template"""
