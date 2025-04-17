@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import os
-from pathlib import Path
 import sys
-import warnings 
+import warnings
+from pathlib import Path
 
 from snakebids import bidsapp, plugins
 
@@ -15,12 +15,14 @@ except ImportError:
 
 
 def check_for_existing_process(output_dir):
-    snakebids_path = output_dir/".snakebids"
+    snakebids_path = output_dir / ".snakebids"
     if snakebids_path.exists():
         warnings.warn(
             "Another .snakebids file has been detected in your output directory.\n"
             "Please make sure only one snakebids process is writing to this output folder at a time."
         )
+
+
 output_dir = Path(sys.argv[2]).resolve()
 check_for_existing_process(output_dir)
 
