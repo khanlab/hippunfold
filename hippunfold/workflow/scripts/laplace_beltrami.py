@@ -112,8 +112,8 @@ logger.info(
 
 
 surf, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
-vertices = mesh.points
-faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
+vertices = surf.points
+faces = surf.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
 
 src_sink_mask = nib.load(snakemake.input.src_sink_mask).agg_data()
 src_indices = np.where(src_sink_mask == 1)[0]

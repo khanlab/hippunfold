@@ -1,9 +1,5 @@
 import pyvista as pv
 import numpy as np
-import nibabel as nib
-import nibabel.gifti as gifti
-from nibabel.gifti.gifti import intent_codes
-from collections import defaultdict
 from lib.utils import setup_logger
 from lib.surface import read_surface_from_gifti, find_boundary_vertices, write_label_gii
 

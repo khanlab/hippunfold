@@ -1,10 +1,7 @@
 import re
-
-import nibabel as nib
 import numpy as np
 import pandas as pd
 import pyvista as pv
-from nibabel.gifti.gifti import intent_codes
 from lib.surface import compute_edge_lengths, read_surface_from_gifti
 
 

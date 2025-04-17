@@ -1,6 +1,8 @@
 import pyvista as pv
 import nibabel as nib
 import numpy as np
+from nibabel.gifti.gifti import intent_codes
+from collections import defaultdict
 
 
 def read_surface_from_gifti(surf_gii):
@@ -91,19 +93,19 @@ def write_metric_gii(scalars, out_metric_gii, metadata=None):
 def write_label_gii(label_scalars, out_label_gii, label_dict={}, metadata=None):
 
     # Create a GIFTI label data array
-    gii_data = gifti.GiftiDataArray(label_scalars, intent="NIFTI_INTENT_LABEL")
+    gii_data = nib.gifti.GiftiDataArray(label_scalars, intent="NIFTI_INTENT_LABEL")
 
     # Create a Label Table (LUT)
-    label_table = gifti.GiftiLabelTable()
+    label_table = nib.gifti.GiftiLabelTable()
 
-    for label_name, label_dict in label_table.items():
+    for label_name, label_kwargs in label_dict.items():
 
-        lbl = gifti.GiftiLabel(**label_dict)
+        lbl = nib.gifti.GiftiLabel(**label_kwargs)
         lbl.label = label_name
         label_table.labels.append(lbl)
 
     # Assign label table to GIFTI image
-    gii_img = gifti.GiftiImage(darrays=[gii_data], labeltable=label_table)
+    gii_img = nib.gifti.GiftiImage(darrays=[gii_data], labeltable=label_table)
 
     # set structure metadata
     if metadata is not None:
