@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
+import os
 import shutil
 import subprocess
 import sys
 import tempfile
-import os
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -26,16 +26,22 @@ def gen_parser():
 
     # command line arguments for hippunfold-quick
     parser.add_argument(
-        "-i","--input", required=True, help="File path to your input NIfTI image. Must have .nii.gz extension."
-    )
-    parser.add_argument(
-        "-o","--output", required=True, help="Path to your desired output folder."
-    )
-    parser.add_argument("-s","--subject", required=True, help="Subject ID (e.g., 001).")
-    parser.add_argument(
-        "-m", "--modality",
+        "-i",
+        "--input",
         required=True,
-        choices=["T1w", "T2w"],  #currently hardcoded to put things in anat
+        help="File path to your input NIfTI image. Must have .nii.gz extension.",
+    )
+    parser.add_argument(
+        "-o", "--output", required=True, help="Path to your desired output folder."
+    )
+    parser.add_argument(
+        "-s", "--subject", required=True, help="Subject ID (e.g., 001)."
+    )
+    parser.add_argument(
+        "-m",
+        "--modality",
+        required=True,
+        choices=["T1w", "T2w"],  # currently hardcoded to put things in anat
         help="Image modality.",
     )
     parser.add_argument(
@@ -58,12 +64,14 @@ def main():
     script_path = Path(__file__).resolve().parent / "run.py"
 
     if not check_conda_installation():
-        print("Please activate conda and install snakebids to continue using hippunfold-quick.")
+        print(
+            "Please activate conda and install snakebids to continue using hippunfold-quick."
+        )
         sys.exit(1)
 
     if "SNAKEMAKE_PROFILE" in os.environ:
         del os.environ["SNAKEMAKE_PROFILE"]
-    
+
     args = gen_parser().parse_args()
 
     # set temp dir if specified, else use python tempfile
@@ -76,7 +84,7 @@ def main():
 
         # create subject folder
         subject_folder = Path(temp_dir) / "anat" / f"sub-{args.subject}"
-        subject_folder.mkdir(parents=True,exist_ok=True)
+        subject_folder.mkdir(parents=True, exist_ok=True)
 
         # create new file name
         input_filename = f"sub-{args.subject}_{args.modality}.nii.gz"
@@ -100,7 +108,7 @@ def main():
             "--modality",
             args.modality,
             "--use-conda",
-            #"--quiet",
+            "--quiet",
         ]
 
         if args.dry_run:
@@ -112,6 +120,7 @@ def main():
             print("hippunfold completed successfully.")
         except subprocess.CalledProcessError as e:
             print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     main()
