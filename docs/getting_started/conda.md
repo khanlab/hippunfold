@@ -20,21 +20,13 @@ Follow the instructions at the official Miniconda site:
 ### 2. Create and activate a new Conda environment
 
 ```bash
-conda create -n hippunfold-env python=3.10
+conda create --name hippunfold-env -c conda-forge -c bioconda hippunfold
 conda activate hippunfold-env
 ```
 
 ---
 
-### 3. Install HippUnfold from Bioconda
-
-```bash
-conda install -c conda-forge -c bioconda hippunfold
-```
-
----
-
-### 4. Test the installation
+### 3. Test the installation
 
 Run the following command to verify the installation:
 
@@ -75,7 +67,7 @@ ds002168/
 Now let’s run HippUnfold using the T1w modality:
 
 ```bash
-hippunfold ds002168 ds002168_hippunfold participant --modality T1w --cores all
+hippunfold ds002168 ds002168_hippunfold participant --modality T1w --cores all --use-conda
 ```
 
 This should run the full pipeline and place results in a new `ds002168_hippunfold/` folder.
@@ -86,24 +78,7 @@ This should run the full pipeline and place results in a new `ds002168_hippunfol
 
 These steps are intended for people who want to contribute to the development of HippUnfold or explore its internals.
 
-### 1. Create and activate a new Conda environment
-
-```bash
-conda create -n hippunfold-dev python=3.10
-conda activate hippunfold-dev
-```
-
----
-
-### 2. Install Snakebids and development dependencies
-
-```bash
-conda install -c conda-forge -c bioconda snakebids
-```
-
----
-
-### 3. Clone the HippUnfold GitHub repository
+### 1. Clone the HippUnfold GitHub repository
 
 ```bash
 git clone https://github.com/khanlab/hippunfold.git
@@ -112,12 +87,21 @@ cd hippunfold
 
 ---
 
-### 4. Run the development version of HippUnfold
+### 2. Create and activate a new Conda environment
+
+```bash
+conda env create -f hippunfold/hippunfold-dev.yml
+conda activate hippunfold-dev
+```
+
+---
+
+### 3. Run the development version of HippUnfold
 
 You can run HippUnfold directly from the source directory using:
 
 ```bash
-python hippunfold/run.py -h
+./hippunfold/run.py -h
 ```
 
 This should print out the available command-line arguments for the tool.  
