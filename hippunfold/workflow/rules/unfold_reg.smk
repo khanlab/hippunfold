@@ -107,6 +107,78 @@ rule native_metric_to_unfold_nii:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " {params.interp}"
 
+rule atlas_metric_to_unfold_nii:
+    """converts metric .gii files to .nii for use in ANTs. 
+        This rule is for the surface template"""
+    input:
+        ref_nii=bids(
+            root=root,
+            datatype="anat",
+            suffix="refvol.nii.gz",
+            space="unfold",
+            desc="slice",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        metric_gii=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            suffix="{metric}.shape.gii",
+        ),
+        midthickness_surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            suffix="midthickness.surf.gii",
+        ),
+        inner_surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            suffix="inner.surf.gii",
+        ),
+        outer_surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            suffix="outer.surf.gii",
+        ),
+    output:
+        metric_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label}",
+                den="{density}",
+                atlas="{atlas}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
+        " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
+
 
 rule slice_3d_to_2d_subject:
     """This is needed so ants will believe the data is truly 2d"""
