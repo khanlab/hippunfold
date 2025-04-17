@@ -309,7 +309,7 @@ rule warp_native_mesh_to_unfold:
     container:
         config["singularity"]["autotop"]
     conda:
-        conda_env("pyunfold")
+        conda_env("pyvista")
     group:
         "subj"
     script:

@@ -7,7 +7,7 @@ from lib.surface import (
 
 surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
 ap = read_metric_from_gii(snakemake.input.coords_AP)
-pd = read_metric_from_gii(snakemake.input.coords_AP)
+pd = read_metric_from_gii(snakemake.input.coords_PD)
 
 
 surface.points[:, 0] = ap * -float(snakemake.params.vertspace["extent"][0]) - float(
