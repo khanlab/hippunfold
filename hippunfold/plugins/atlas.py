@@ -32,7 +32,7 @@ RESAMPLING_FACTORS = [
 ATLAS_DENSITY_CHOICES = [
     "native",
 ]
-# naming convention based on fsLR32k, etc. 
+# naming convention based on fsLR32k, etc.
 # NOTE: this is based on the hipp surface not the dentate surface.
 for R in RESAMPLING_FACTORS:
     ATLAS_DENSITY_CHOICES.append(str(int((256 * 128 * (R / 100) ** 2) / 1000)) + "k")
