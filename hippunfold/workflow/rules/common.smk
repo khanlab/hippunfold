@@ -1,6 +1,6 @@
 from snakebids.paths import bids_factory, specs
 from functools import partial
-from hippunfold.workflow.lib import utils as utils
+from lib import utils as utils
 
 
 def bids_log(rule_name, **kwargs):
