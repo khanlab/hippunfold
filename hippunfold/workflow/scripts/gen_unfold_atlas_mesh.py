@@ -1,6 +1,8 @@
 import nibabel as nib
 import numpy as np
 from scipy.spatial import Delaunay
+from lib.surface import write_points_faces_to_gifti
+
 
 # Load metric files
 metric_ref = nib.load(snakemake.input.metric_ref).get_fdata()
@@ -39,18 +41,5 @@ new_indices[valid_mask] = np.arange(filtered_points.shape[0])
 valid_faces_mask = np.all(valid_mask[tri.simplices], axis=1)
 filtered_faces = new_indices[tri.simplices[valid_faces_mask]]
 
-# Save as a Gifti file
-points_darray = nib.gifti.GiftiDataArray(
-    data=filtered_points.astype(np.float32),
-    intent="NIFTI_INTENT_POINTSET",
-    datatype="NIFTI_TYPE_FLOAT32",
-)
-tri_darray = nib.gifti.GiftiDataArray(
-    data=filtered_faces.astype(np.int32),
-    intent="NIFTI_INTENT_TRIANGLE",
-    datatype="NIFTI_TYPE_INT32",
-)
-gifti = nib.GiftiImage()
-gifti.add_gifti_data_array(points_darray)
-gifti.add_gifti_data_array(tri_darray)
-gifti.to_filename(snakemake.output.surf_gii)
+
+write_points_faces_to_gifti(filtered_points, filtered_faces, snakemake.output.surf_gii)
