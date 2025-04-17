@@ -1,6 +1,6 @@
 import numpy as np
 from lib.utils import setup_logger
-from lib.surface import read_surface_from_gifti
+from lib.surface import read_surface_from_gifti, write_surface_to_gifti
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)

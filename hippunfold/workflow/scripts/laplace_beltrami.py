@@ -2,13 +2,12 @@ import numpy as np
 import nibabel as nib
 import scipy.sparse as sp
 from lib.utils import setup_logger
-import sys
 from scipy.sparse import coo_matrix, diags
+from lib.surface import read_surface_from_gifti, write_metric_gii
+
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
-sys.stdout = open(log_file, "a")
-sys.stderr = open(log_file, "a")
 
 
 def cotangent_laplacian(vertices, faces):
@@ -111,18 +110,14 @@ logger.info(
     "Loading in surface, boundary mask, and src/sink signed distance transforms"
 )
 
-surf = nib.load(snakemake.input.surf_gii)
-vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
-faces = surf.agg_data("NIFTI_INTENT_TRIANGLE")
+
+surf, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
+vertices = mesh.points
+faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
 
 src_sink_mask = nib.load(snakemake.input.src_sink_mask).agg_data()
 src_indices = np.where(src_sink_mask == 1)[0]
 sink_indices = np.where(src_sink_mask == 2)[0]
-
-# get structure metadata from src/sink mask
-structure_metadata = nib.load(snakemake.input.src_sink_mask).meta[
-    "AnatomicalStructurePrimary"
-]
 
 
 logger.info(f"# of src boundary vertices: {len(src_indices)}")
@@ -149,13 +144,5 @@ uniform_values = np.linspace(0, 1, len(domain) + 2)[
 ]  # ignore first and last values
 coords[domain[sorted_indices]] = uniform_values
 
-# save the coordinates to a gifti file
-data_array = nib.gifti.GiftiDataArray(data=coords.astype(np.float32))
-image = nib.gifti.GiftiImage()
 
-# set structure metadata
-image.meta["AnatomicalStructurePrimary"] = structure_metadata
-
-
-image.add_gifti_data_array(data_array)
-nib.save(image, snakemake.output.coords)
+write_metric_gii(coords, snakemake.output.coords, metadata=metadata)

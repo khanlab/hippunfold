@@ -25,6 +25,7 @@ def read_surface_from_gifti(surf_gii):
 
     return pv.PolyData(vertices, faces_pv), metadata
 
+
 def compute_edge_lengths(surface):
 
     # Extract edges
@@ -44,12 +45,7 @@ def compute_edge_lengths(surface):
     return edge_lengths
 
 
-def write_surface_to_gifti(mesh, out_surf_gii, metadata=None):
-    """
-    Writes a PyVista mesh to a GIFTI surface file.
-    """
-    points = mesh.points
-    faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
+def write_points_faces_to_gifti(points, faces, out_surf_gii, metadata=None):
 
     points_darray = nib.gifti.GiftiDataArray(
         data=points, intent="NIFTI_INTENT_POINTSET", datatype="NIFTI_TYPE_FLOAT32"
@@ -65,8 +61,31 @@ def write_surface_to_gifti(mesh, out_surf_gii, metadata=None):
     gifti.to_filename(out_surf_gii)
 
 
+def write_surface_to_gifti(mesh, out_surf_gii, metadata=None):
+    """
+    Writes a PyVista mesh to a GIFTI surface file.
+    """
+    points = mesh.points
+    faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
+
+    write_points_faces_to_gifti(points, faces, out_surf_gii, metadata)
+
+
 def read_metric_from_gii(metric_gifti):
     return nib.load(metric_gifti).darrays[0].data
+
+
+def write_metric_gii(scalars, out_metric_gii, metadata=None):
+
+    # save the coordinates to a gifti file
+    data_array = nib.gifti.GiftiDataArray(data=scalars.astype(np.float32))
+    image = nib.gifti.GiftiImage()
+
+    # set structure metadata
+    image.meta["AnatomicalStructurePrimary"] = metadata["AnatomicalStructurePrimary"]
+
+    image.add_gifti_data_array(data_array)
+    nib.save(image, out_metric_gii)
 
 
 def write_label_gii(label_scalars, out_label_gii, label_dict={}, metadata=None):
