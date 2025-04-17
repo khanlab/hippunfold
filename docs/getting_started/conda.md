@@ -13,7 +13,7 @@ These steps are intended for **end users** who simply want to run HippUnfold for
 ### 1. Install Miniconda (if not already installed)
 
 Follow the instructions at the official Miniconda site:  
-🔗 [https://www.anaconda.com/docs/getting-started/miniconda/install](https://www.anaconda.com/docs/getting-started/miniconda/install)
+[https://www.anaconda.com/docs/getting-started/miniconda/install](https://www.anaconda.com/docs/getting-started/miniconda/install)
 
 ---
 
