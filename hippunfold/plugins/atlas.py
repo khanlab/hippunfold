@@ -25,7 +25,7 @@ except ImportError:
 
 
 # Global variable to store the commit hash
-ATLAS_REPO_COMMIT = "c1a53ecade939ead9de8f9169c6a4ddff0c73c3d"
+ATLAS_REPO_COMMIT = "679f5d1525a82dbbd4327c265a15b5729a32f263"
 
 RESAMPLING_FACTORS = [
     25,
