@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 from argparse import ArgumentParser
+from pathlib import Path
 
 
 def check_conda_installation():
@@ -25,16 +26,22 @@ def gen_parser():
 
     # command line arguments for hippunfold-quick
     parser.add_argument(
-        "--input", required=True, help="File path to your input NIfTI image."
+        "-i",
+        "--input",
+        required=True,
+        help="File path to your input NIfTI image. Must have .nii.gz extension.",
     )
     parser.add_argument(
-        "--output", required=True, help="Path to your desired output folder."
+        "-o", "--output", required=True, help="Path to your desired output folder."
     )
-    parser.add_argument("--subject", required=True, help="Subject ID (e.g., 001).")
     parser.add_argument(
+        "-s", "--subject", required=True, help="Subject ID (e.g., 001)."
+    )
+    parser.add_argument(
+        "-m",
         "--modality",
         required=True,
-        choices=["T1w", "T2w", "hippb500", "dsegtissue"],
+        choices=["T1w", "T2w"],  # currently hardcoded to put things in anat
         help="Image modality.",
     )
     parser.add_argument(
@@ -53,65 +60,66 @@ def gen_parser():
 
 
 def main():
-    if check_conda_installation():
-        print("Conda is ready to use.")
-        print("running......")
-    else:
-        print("Please install Conda to continue using hippunfold-quick.")
+
+    script_path = Path(__file__).resolve().parent / "run.py"
+
+    if not check_conda_installation():
+        print(
+            "Please activate conda and install snakebids to continue using hippunfold-quick."
+        )
         sys.exit(1)
+
+    if "SNAKEMAKE_PROFILE" in os.environ:
+        del os.environ["SNAKEMAKE_PROFILE"]
 
     args = gen_parser().parse_args()
 
     # set temp dir if specified, else use python tempfile
     if args.temp_dir:
-        temp_dir = args.temp_dir
-        os.makedirs(temp_dir, exist_ok=True)
+        prefix = args.temp_dir
     else:
-        temp_dir = tempfile.mkdtemp()
+        prefix = None
 
-    # create subject folder
-    subject_folder = os.path.join(temp_dir, f"anat/sub-{args.subject}")
-    os.makedirs(subject_folder, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=prefix) as temp_dir:
 
-    # create new file name
-    input_filename = f"sub-{args.subject}_{args.modality}.nii.gz"
+        # create subject folder
+        subject_folder = Path(temp_dir) / "anat" / f"sub-{args.subject}"
+        subject_folder.mkdir(parents=True, exist_ok=True)
 
-    # add file name to the created subject folder
-    temp_input_file = os.path.join(subject_folder, input_filename)
+        # create new file name
+        input_filename = f"sub-{args.subject}_{args.modality}.nii.gz"
 
-    # copy the input file
-    shutil.copy(args.input, temp_input_file)
+        # add file name to the created subject folder
+        temp_input_file = subject_folder / input_filename
 
-    # run hippunfold
-    command = [
-        "hippunfold",
-        temp_dir,
-        args.output,
-        "participant",
-        "-c",
-        "all",
-        "--force-output",
-        "--nolock",
-        "--modality",
-        args.modality,
-        "--use-conda",
-        "--quiet",
-        "all",
-    ]
+        # copy the input file
+        shutil.copy(args.input, temp_input_file)
 
-    if args.dry_run:
-        command.append("-n")
+        # run hippunfold
+        command = [
+            script_path,
+            temp_dir,
+            args.output,
+            "participant",
+            "-c",
+            "all",
+            "--force-output",
+            "--nolock",
+            "--modality",
+            args.modality,
+            "--use-conda",
+            "--quiet",
+        ]
 
-    # run the command
-    try:
-        subprocess.run(command, check=True)
-        print("hippunfold completed successfully.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
-    finally:
-        # delete the temp dir if not user specified
-        if not args.temp_dir:
-            shutil.rmtree(temp_dir)
+        if args.dry_run:
+            command.append("-n")
+
+        # run the command
+        try:
+            subprocess.run(command, check=True)
+            print("hippunfold completed successfully.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
 
 
 if __name__ == "__main__":

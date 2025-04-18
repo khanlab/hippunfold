@@ -1,6 +1,5 @@
-import nibabel as nib
+from lib.surface import read_surface_from_gifti, write_surface_to_gifti
 
-surf = nib.load(snakemake.input.surf_gii)
-vertices = surf.agg_data("NIFTI_INTENT_POINTSET")
-vertices[:, 2] = snakemake.params.z_level
-nib.save(surf, snakemake.output.surf_gii)
+surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
+surface.points[:, 2] = snakemake.params.z_level
+write_surface_to_gifti(surface, snakemake.output.surf_gii)
