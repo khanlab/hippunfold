@@ -6,6 +6,7 @@ subfield segmentation)
 ## Requirements
 
 -   Docker (Intel Mac/Windows/Linux) or Singularity (Linux)
+- OR install via Conda (Linux/macOS only, no containers needed)
 -   For those wishing to contribute or modify the code, `pip install` or `poetry install` are also available (Linux), but will still require singularity to handle some dependencies. See [Contributing to HippUnfold](https://hippunfold.readthedocs.io/en/latest/contributing/contributing.html).
 -   GPU not required
 -   Note: Apple M1 is currently **not supported**. We don't have a Docker arm64 container yet, and hippunfold is unusably slow with the emulated amd64 container. 
@@ -23,7 +24,8 @@ There are several different ways of running HippUnfold. In order of increasing c
 1. CBRAIN Web-based Platform
 2. Singularity Container on Linux
 3. Docker Container on Windows/Mac (Intel)/Linux
-4. Python Environment with Singularity Dependencies
+4. Conda Environment (Linux/macOS)
+5. Python Environment with Singularity Dependencies
 
 ### CBRAIN Web-based Platform
 
@@ -67,6 +69,19 @@ The same docker container can also be used with Singularity (now Apptainer). Ins
 - Cannot use Snakemake cluster execution profiles
 - Cannot edit code
 
+### Conda on Linux/macOS
+
+As of version **2.0.0**, HippUnfold is available via [Conda](https://docs.conda.io/), offering a container-free way to run the tool on Linux and macOS systems.
+
+#### Pros:
+- No need for Docker/Singularity
+- Easy to install via `conda`
+- Compatible with Snakemake execution profiles
+- Good option for users who prefer Python virtual environments
+
+#### Cons:
+- Not compatible with Windows
+- Requires installation of Conda or Miniconda
 
 ### Python Environment with Singularity Dependencies
 
