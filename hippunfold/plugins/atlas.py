@@ -58,14 +58,15 @@ def sync_atlas_repo():
 
     try:
         if atlas_dir.exists() and (atlas_dir / ".git").exists():
-            # If the directory exists and is a git repo, update it
+            print(f"Checking out repo {atlas_dir}")
             repo = Repo(atlas_dir)
-            repo.remotes.origin.pull()
-            repo.git.checkout(ATLAS_REPO_COMMIT)
+            repo.git.fetch()  # Make sure latest commits are available
         else:
-            # If the directory does not exist, clone the repo
             repo = Repo.clone_from(repo_url, atlas_dir)
-            repo.git.checkout(ATLAS_REPO_COMMIT)
+
+        # Explicitly checkout desired commit
+        repo.git.checkout(ATLAS_REPO_COMMIT)
+
     except GitCommandError as e:
         logger.info(f"Error syncing atlas repository: {e}")
 
