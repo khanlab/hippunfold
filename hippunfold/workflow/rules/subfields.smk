@@ -69,16 +69,14 @@ rule subfields_to_label_gifti:
 rule native_label_gii_to_unfold_nii:
     """converts subfields label .gii files to .nii for applying with 2D ANTS transform (when creating a template)"""
     input:
-        label_gii=temp(
-            bids(
-                root=root,
-                datatype="metric",
-                suffix="subfields.label.gii",
-                den="native",
-                hemi="{hemi}",
-                label="{label,hipp}",
-                **inputs.subj_wildcards,
-            )
+        label_gii=bids(
+            root=root,
+            datatype="metric",
+            suffix="subfields.label.gii",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
         inner_surf=bids(
             root=root,
@@ -129,7 +127,7 @@ rule native_label_gii_to_unfold_nii:
                 suffix="subfields.nii.gz",
                 space="unfold",
                 hemi="{hemi}",
-                label="{label}",
+                label="{label,hipp}",
                 **inputs.subj_wildcards,
             )
         ),
