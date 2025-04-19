@@ -120,7 +120,7 @@ specify what subjects and images to use with subject `wildcards`. This is done b
 TSE are both T2-weighted acquisitions, and can be captured by using the `--path-T2w` flag to specify exactly which of these file(s)
 to use as inputs. For example, the following command:
 
-    hippunfold - PATH_TO_OUTPUT_DIR participant \
+    hippunfold PATH_TO_nonBIDS_DIR PATH_TO_OUTPUT_DIR participant \
     --modality T2w \
     --t1-reg-template \
     --path_T1w PATH_TO_nonBIDS_DIR/s_{subject}_T1w.nii.gz \
