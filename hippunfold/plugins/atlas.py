@@ -58,7 +58,6 @@ def sync_atlas_repo():
 
     try:
         if atlas_dir.exists() and (atlas_dir / ".git").exists():
-            print(f"Checking out repo {atlas_dir}")
             repo = Repo(atlas_dir)
             repo.git.fetch()  # Make sure latest commits are available
         else:
