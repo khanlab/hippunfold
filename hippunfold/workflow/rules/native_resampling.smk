@@ -1,7 +1,3 @@
-
-ruleorder: atlas_label_to_unfold_nii > atlas_metric_to_unfold_nii
-
-
 def get_unfold_ref_name(wildcards):
     if (
         wildcards.label in config["atlas_metadata"][config["atlas"]]["label_wildcards"]

@@ -343,11 +343,11 @@ rule gen_unfold_atlas_mesh:
 
 checkpoint resample_to_density_mapping:
     input:
-        hipp_surf_giis=lambda wildcards: inputs[config["modality"]].expand(
+        surf_giis=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
-                label="hipp",
+                label="{label}",
                 space="corobl",
                 resample="{resample}",
                 hemi="{hemi}",
@@ -355,21 +355,8 @@ checkpoint resample_to_density_mapping:
                 **inputs.subj_wildcards,
             ),
             **expand_hemi(),
-            resample=[20, 40, 60],
-        ),
-        dentate_surf_giis=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                label="dentate",
-                space="corobl",
-                resample="{resample}",
-                hemi="{hemi}",
-                suffix="midthickness.surf.gii",
-                **inputs.subj_wildcards,
-            ),
-            **expand_hemi(),
-            resample=[40, 80, 120],
+            **expand_label(),
+            resample=config["resample_factors"],
         ),
     output:
         mapping_csv=bids_atlas(
@@ -390,8 +377,10 @@ def get_unfold_mesh_resample(wildcards):
     with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
         df = pd.read_csv(f)
 
-    result = df.loc[df["density"] == wildcards.density, "resample"]
-    resample = result.values[0]
+    ind_resample = (
+        config["density_choices"].index(wildcards.density) - 1
+    )  # density has 1 more values then resample since the first should be native
+    resample = config["resample_factors"][ind_resample]
 
     return bids_atlas(
         root=root,
@@ -742,59 +731,52 @@ def get_atlas_inputs(wildcards):
 
     files = []
 
-    with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
-        df = pd.read_csv(f)
+    for label in config["autotop_labels"]:
+        for hemi in config["hemi"]:
 
-        # pick out all of them for now - in future could optimally assign
-
-        for label in config["autotop_labels"]:
-            for hemi in config["hemi"]:
-
-                density = df.query("hemi==@hemi and label==@label")["density"].to_list()
-
+            files.extend(
+                expand(
+                    bids_atlas(
+                        root=get_atlas_dir(),
+                        template=config["new_atlas_name"],
+                        label=label,
+                        hemi=hemi,
+                        den="{density}",
+                        suffix="{metric}.shape.gii",
+                    ),
+                    metric=config["atlas_metrics"],
+                    density=config["density_choices"],
+                )
+            )
+            files.extend(
+                expand(
+                    bids_atlas(
+                        root=get_atlas_dir(),
+                        template=config["new_atlas_name"],
+                        label=label,
+                        hemi=hemi,
+                        den="{density}",
+                        space="unfold",
+                        suffix="{surfname}.surf.gii",
+                    ),
+                    surfname=["inner", "outer", "midthickness"],
+                    density=config["density_choices"],
+                )
+            )
+            if label == "hipp":
                 files.extend(
                     expand(
                         bids_atlas(
                             root=get_atlas_dir(),
                             template=config["new_atlas_name"],
-                            label=label,
+                            label="hipp",
                             hemi=hemi,
                             den="{density}",
-                            suffix="{metric}.shape.gii",
+                            suffix="dseg.label.gii",
                         ),
-                        metric=config["atlas_metrics"],
-                        density=density,
+                        density=config["density_choices"],
                     )
                 )
-                files.extend(
-                    expand(
-                        bids_atlas(
-                            root=get_atlas_dir(),
-                            template=config["new_atlas_name"],
-                            label=label,
-                            hemi=hemi,
-                            den="{density}",
-                            space="unfold",
-                            suffix="{surfname}.surf.gii",
-                        ),
-                        surfname=["inner", "outer", "midthickness"],
-                        density=density,
-                    )
-                )
-                if label == "hipp":
-                    files.extend(
-                        expand(
-                            bids_atlas(
-                                root=get_atlas_dir(),
-                                template=config["new_atlas_name"],
-                                label="hipp",
-                                hemi=hemi,
-                                den="{density}",
-                                suffix="dseg.label.gii",
-                            ),
-                            density=density,
-                        )
-                    )
 
     return files
 

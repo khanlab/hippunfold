@@ -10,7 +10,7 @@ density_list = []
 
 rows = []
 
-for surf_gii in snakemake.input.hipp_surf_giis + snakemake.input.dentate_surf_giis:
+for surf_gii in snakemake.input.surf_giis:
     # get the resample value from the filename
     resample = re.search(r"_resample-(\d+)_", surf_gii).group(1)
     hemi = re.search(r"_hemi-([LR])_", surf_gii).group(1)
