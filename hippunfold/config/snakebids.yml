@@ -57,6 +57,7 @@ pybids_inputs:
       suffix: 'dseg'
       extension: '.nii.gz'
       datatype: 'anat'
+      desc: 'tissue'
     wildcards:
       - subject
       - session
@@ -70,6 +71,7 @@ pybids_inputs:
       suffix: 'dseg'
       extension: '.nii.gz'
       datatype: 'anat'
+      desc: 'subfields'
     wildcards:
       - subject
       - session
