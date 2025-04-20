@@ -14,7 +14,7 @@ surface.points[:, 0] = ap * -float(snakemake.params.vertspace["extent"][0]) - fl
     snakemake.params.vertspace["origin"][0]
 )
 
-surface.points[:, 1] = pd * -float(snakemake.params.vertspace["extent"][1]) - float(
+surface.points[:, 1] = pd * float(snakemake.params.vertspace["extent"][1]) - float(
     snakemake.params.vertspace["origin"][1]
 )
 
