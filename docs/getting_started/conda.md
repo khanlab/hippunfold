@@ -10,10 +10,10 @@ HippUnfold can be installed and run using Conda on **Linux and macOS** systems.
 
 These steps are intended for **end users** who simply want to run HippUnfold for hippocampal segmentation and unfolding.
 
-### 1. Install Miniconda (if not already installed)
+### 1. Install Conda (if not already installed)
 
-Follow the instructions at the official Miniconda site:  
-[https://www.anaconda.com/docs/getting-started/miniconda/install](https://www.anaconda.com/docs/getting-started/miniconda/install)
+Follow the instructions at the official Conda documentation:
+[https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 
 ---
 
@@ -64,7 +64,9 @@ ds002168/
 2 directories, 6 files
 ```
 
-Now let’s run HippUnfold using the T1w modality:
+### Option 1: Run the full HippUnfold BIDS pipeline
+
+Running HippUnfold using the T1w modality:
 
 ```bash
 hippunfold ds002168 ds002168_hippunfold participant --modality T1w --cores all --use-conda
@@ -72,7 +74,35 @@ hippunfold ds002168 ds002168_hippunfold participant --modality T1w --cores all -
 
 This should run the full pipeline and place results in a new `ds002168_hippunfold/` folder.
 
+### Option 2: Run HippUnfold for a single subject and modality directly
+
+Alternatively, you can use the quick runner script to process just one image:
+
+```bash
+run_quick.py --input ds002168/sub-1425/anat/sub-1425_T1w.nii.gz --output ds002168_hippunfold_quick --modality T1w --subject 1425
+```
+
+This will run HippUnfold on the T1w image only and save outputs to the `ds002168_hippunfold_quick/` directory.
+
 ---
+
+## Cache Directory
+
+When running, HippUnfold automatically downloads and caches necessary resources such as atlases and templates to speed up subsequent runs.
+
+By default, these are stored in the following directory:
+
+```bash
+~/.cache/hippunfold/
+```
+
+You can override this default cache location by setting the `HIPPUNFOLD_CACHE_DIR` environment variable:
+
+```bash
+export HIPPUNFOLD_CACHE_DIR=/path/to/custom/cache
+```
+
+This is useful when working on shared systems, when home directory storage is limited, or if you wish to isolate data per project or user.
 
 ## For Developers & Contributors
 
