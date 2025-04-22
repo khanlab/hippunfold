@@ -619,12 +619,6 @@ laminar_coords_res:
 resample_dseg_for_templatereg: 0.3x0.3x0.3mm
 unfoldreg_padding: 0x0x0vox
 
-density: #temporary var
-  hipp: 
-    - 7k
-  dentate:
-    - 1k
-
 surf_thresholds:
   inner: 0
   outer: 1
