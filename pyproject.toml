@@ -31,12 +31,9 @@ dev = [
 hippunfold = "hippunfold.run:app.run"
 hippunfold-quick = "hippunfold.run_quick:main"
 
-[tool.setuptools.packages.find]
-where = ["."]
-
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.poe.tasks]
 quality_check = { shell = "isort hippunfold/*.py -c && black hippunfold --check && snakefmt hippunfold --check" }
