@@ -6,29 +6,29 @@ from pathlib import Path
 from typing import Any
 
 import attrs
+from appdirs import AppDirs
 from git import GitCommandError, Repo
 from snakebids import bidsapp
 from snakebids.bidsapp.args import ArgumentGroups
 from snakebids.plugins.base import PluginBase
-from appdirs import AppDirs
 
 logger = logging.getLogger(__name__)
 
 import json
 import os
 
-
 try:
     from hippunfold.workflow.lib import utils as utils
 except ImportError:
     from workflow.lib import utils as utils
 
-# =========================================================================
+# ====================================================================================
 # This section is edited by hand:
-# -------------------------------------------------------------------------
-# Global variable to store the commit hash
-ATLAS_REPO_COMMIT = "679f5d1525a82dbbd4327c265a15b5729a32f263"
+# ------------------------------------------------------------------------------------
+# Global variable to store the commit hash or branch name
+ATLAS_REPO_COMMIT = "atlas-cli"
 
+# Default settings for atlas creation
 DEFAULT_RESAMPLE_FACTORS = [
     12.5,
     25,
@@ -36,8 +36,9 @@ DEFAULT_RESAMPLE_FACTORS = [
     75,
 ]  # percent, relative to native
 
+# Default associated help (indicating approx vertex spacing for each factor)
 DEFAULT_RESAMPLE_FACTORS_SPACING_HELP = ", ".join(["~2mm", "~1mm", "~0.5mm", "0.3mm"])
-# =========================================================================
+# ====================================================================================
 
 
 # helper functions for resample factors and density
