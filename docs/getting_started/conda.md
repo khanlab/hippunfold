@@ -79,7 +79,7 @@ This should run the full pipeline and place results in a new `ds002168_hippunfol
 Alternatively, you can use the quick runner script to process just one image:
 
 ```bash
-run_quick.py --input ds002168/sub-1425/anat/sub-1425_T1w.nii.gz --output ds002168_hippunfold_quick --modality T1w --subject 1425
+hippunfold-quick --input ds002168/sub-1425/anat/sub-1425_T1w.nii.gz --output ds002168_hippunfold_quick --modality T1w --subject 1425
 ```
 
 This will run HippUnfold on the T1w image only and save outputs to the `ds002168_hippunfold_quick/` directory.
