@@ -341,45 +341,9 @@ rule gen_unfold_atlas_mesh:
         "../scripts/gen_unfold_atlas_mesh.py"
 
 
-checkpoint resample_to_density_mapping:
-    input:
-        surf_giis=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                label="{label}",
-                space="corobl",
-                resample="{resample}",
-                hemi="{hemi}",
-                suffix="midthickness.surf.gii",
-                **inputs.subj_wildcards,
-            ),
-            **expand_hemi(),
-            **expand_label(),
-            resample=config["resample_factors"],
-        ),
-    output:
-        mapping_csv=bids_atlas(
-            root=root,
-            template=config["new_atlas_name"],
-            desc="resample2density",
-            suffix="mapping.csv",
-        ),
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("pyvista")
-    script:
-        "../scripts/resample_to_density_mapping.py"
-
-
 def get_unfold_mesh_resample(wildcards):
-    with checkpoints.resample_to_density_mapping.get(**wildcards).output[0].open() as f:
-        df = pd.read_csv(f)
 
-    ind_resample = (
-        config["density_choices"].index(wildcards.density) - 1
-    )  # density has 1 more values then resample since the first should be native
+    ind_resample = config["density_choices"].index(wildcards.density)
     resample = config["resample_factors"][ind_resample]
 
     return bids_atlas(
