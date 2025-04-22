@@ -15,4 +15,4 @@ set -euxo pipefail
 ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w 
 ./hippunfold/run.py test_data/bids_T1w test_out participant -np --modality T1w --use-template-seg 
 ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --generate-myelin-map
-./hippunfold/run.py test_data/bids_dsegtissue test_out group_create_atlas -np --modality dsegtissue --new-atlas-name mytestatlas
+./hippunfold/run.py test_data/bids_dsegtissue test_out group_create_atlas -np --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas 
