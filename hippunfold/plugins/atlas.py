@@ -24,12 +24,29 @@ except ImportError:
     from workflow.lib import utils as utils
 
 
+def resample_factors_to_densities(resample_factors):
+
+    return [
+        str(int((256 * 128 * (r / 100) ** 2) / 1000)) + "k" for r in resample_factors
+    ]
+
+
 # Global variable to store the commit hash
-ATLAS_REPO_COMMIT = "c1a53ecade939ead9de8f9169c6a4ddff0c73c3d"
-ATLAS_DENSITY_CHOICES = ["native", "1k", "5k", "12k"]
-ATLAS_DENSITY_DEFAULT = (
-    "12k"  # also density that is used for unfoldreg, cannot set this to native
-)
+ATLAS_REPO_COMMIT = "679f5d1525a82dbbd4327c265a15b5729a32f263"
+
+RESAMPLE_FACTORS = [
+    25,
+    50,
+    75,
+]  # percent, relative to native
+# in multihist7, this corresponds to ~1mm, ~0.5mm, ~0.33m vertex distances
+
+# naming for native similar to fsnative
+ATLAS_DENSITY_CHOICES = ["native"] + resample_factors_to_densities(RESAMPLE_FACTORS)
+
+# naming convention based on fsLR32k, etc.
+# NOTE: this is based on the hipp surface not the dentate surface.
+# See output file tpl-ATLAS_desc-resample2density_mapping.csv for estimates of vertex spacing in mm
 
 
 def sync_atlas_repo():
@@ -41,14 +58,14 @@ def sync_atlas_repo():
 
     try:
         if atlas_dir.exists() and (atlas_dir / ".git").exists():
-            # If the directory exists and is a git repo, update it
             repo = Repo(atlas_dir)
-            repo.remotes.origin.pull()
-            repo.git.checkout(ATLAS_REPO_COMMIT)
+            repo.git.fetch()  # Make sure latest commits are available
         else:
-            # If the directory does not exist, clone the repo
             repo = Repo.clone_from(repo_url, atlas_dir)
-            repo.git.checkout(ATLAS_REPO_COMMIT)
+
+        # Explicitly checkout desired commit
+        repo.git.checkout(ATLAS_REPO_COMMIT)
+
     except GitCommandError as e:
         logger.info(f"Error syncing atlas repository: {e}")
 
@@ -103,7 +120,6 @@ def get_atlas_configs():
 
     atlas_dirs = []
     atlas_dirs.append(Path(cache_dir) / "hippunfold-atlases")
-    #    atlas_dirs.append(Path(cache_dir) / "atlas_user")
 
     return load_atlas_configs(atlas_dirs)
 
@@ -179,11 +195,24 @@ class AtlasConfig(PluginBase):
             action="store",
             type=str,
             dest="output_density",
-            default=[ATLAS_DENSITY_DEFAULT],
+            default=ATLAS_DENSITY_CHOICES[-1],
             choices=ATLAS_DENSITY_CHOICES,
             nargs="+",
             help=(
                 "Sets the output vertex density for results, using the same vertex density for hipp and dentate (default: %(default)s)"
+            ),
+        )
+        self.try_add_argument(
+            group,
+            "--resample-factors",
+            "--resample_factors",
+            action="store",
+            type=int,
+            dest="resample_factors",
+            default=RESAMPLE_FACTORS,
+            nargs="+",
+            help=(
+                "Sets the downsampling factors of the surface mesh relative to native. Only used in group_create_atlas (default: %(default)s)"
             ),
         )
 
@@ -193,6 +222,7 @@ class AtlasConfig(PluginBase):
         atlas = self.pop(namespace, "atlas")
         new_atlas_name = self.pop(namespace, "new_atlas_name")
         output_density = self.pop(namespace, "output_density")
+        resample_factors = self.pop(namespace, "resample_factors")
 
         if (
             namespace["analysis_level"] == "group_create_atlas"
@@ -206,7 +236,9 @@ class AtlasConfig(PluginBase):
         config["new_atlas_name"] = new_atlas_name
         config["atlas_metadata"] = self.atlas_config
         config["output_density"] = output_density
-        config["unfoldreg_density"] = ATLAS_DENSITY_DEFAULT
+        config["unfoldreg_density"] = ATLAS_DENSITY_CHOICES[-1]
+        config["resample_factors"] = resample_factors
+        config["density_choices"] = resample_factors_to_densities(resample_factors)
         config["unused_density"] = list(
             set(ATLAS_DENSITY_CHOICES) - set(output_density)
         )
