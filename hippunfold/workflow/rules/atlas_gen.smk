@@ -754,6 +754,7 @@ rule write_template_json:
             "metric_wildcards": config["atlas_metrics"],
             "label_wildcards": config["autotop_labels"],
             "hemi_wildcards": config["hemi"],
+            "density_wildcards": config["density_choices"],
             "Authors": [""],
             "Acknowledgements": "",
             "BIDSVersion": "",
