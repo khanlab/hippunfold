@@ -114,7 +114,6 @@ rule native_label_gii_to_unfold_nii:
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
-            hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
@@ -128,7 +127,7 @@ rule native_label_gii_to_unfold_nii:
                 suffix="subfields.nii.gz",
                 space="unfold",
                 hemi="{hemi}",
-                label="{label}",
+                label="{label,hipp}",
                 **inputs.subj_wildcards,
             )
         ),
