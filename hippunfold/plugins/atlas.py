@@ -269,7 +269,7 @@ class AtlasConfig(PluginBase):
             action="store",
             type=str,
             dest="output_density",
-            default=get_all_densities(self.atlas_config)[-1],
+            default=[get_all_densities(self.atlas_config)[-1]],
             choices=get_all_densities(self.atlas_config),
             nargs="+",
             help="Sets the output vertex density for participant-level results. Note: the density refers to the number of vertices in the hipp surface; the dentate has 1/4 the number of vertices.\n"
