@@ -6,49 +6,119 @@ from pathlib import Path
 from typing import Any
 
 import attrs
+from appdirs import AppDirs
 from git import GitCommandError, Repo
 from snakebids import bidsapp
 from snakebids.bidsapp.args import ArgumentGroups
 from snakebids.plugins.base import PluginBase
-from appdirs import AppDirs
 
 logger = logging.getLogger(__name__)
 
 import json
 import os
 
-
 try:
     from hippunfold.workflow.lib import utils as utils
 except ImportError:
     from workflow.lib import utils as utils
 
+# ====================================================================================
+# This section is edited by hand:
+# ------------------------------------------------------------------------------------
+# Global variable to store the commit hash or branch name
+ATLAS_REPO_COMMIT = "atlas-cli"
 
-def resample_factors_to_densities(resample_factors):
-
-    return [
-        str(int((256 * 128 * (r / 100) ** 2) / 1000)) + "k" for r in resample_factors
-    ]
-
-
-# Global variable to store the commit hash
-ATLAS_REPO_COMMIT = "679f5d1525a82dbbd4327c265a15b5729a32f263"
-
-RESAMPLE_FACTORS = [
+# Default settings for atlas creation
+DEFAULT_RESAMPLE_FACTORS = [
+    12.5,
     25,
     50,
     75,
 ]  # percent, relative to native
-# in multihist7, this corresponds to ~1mm, ~0.5mm, ~0.33m vertex distances
 
-# naming for native similar to fsnative
-ATLAS_DENSITY_CHOICES = ["native"] + resample_factors_to_densities(RESAMPLE_FACTORS)
-
-# naming convention based on fsLR32k, etc.
-# NOTE: this is based on the hipp surface not the dentate surface.
-# See output file tpl-ATLAS_desc-resample2density_mapping.csv for estimates of vertex spacing in mm
+# Default associated help (indicating approx vertex spacing for each factor)
+DEFAULT_RESAMPLE_FACTORS_SPACING_HELP = ", ".join(["~2mm", "~1mm", "~0.5mm", "0.3mm"])
+# ====================================================================================
 
 
+# helper functions for resample factors and density
+
+
+def resample_to_density(r):
+    nverts = 256 * 128 * (r / 100) ** 2
+    if nverts > 800:
+        return str(round(nverts / 1000)) + "k"
+    else:
+        return str(int(nverts))
+
+
+def resample_factors_to_densities(resample_factors):
+
+    return [resample_to_density(r) for r in resample_factors]
+
+
+def sort_densities(densities):
+    def parse_density(d):
+        if isinstance(d, str) and d.endswith("k"):
+            return int(float(d[:-1]) * 1000)
+        return int(d)
+
+    return sorted(densities, key=parse_density)
+
+
+def get_all_densities(atlas_config):
+    """Return a sorted list of all unique output densities across all atlases."""
+    densities = set()
+    for config in atlas_config.values():
+        densities.update(config.get("density_wildcards", []))
+    return ["native"] + sort_densities(densities)
+
+
+def get_unfoldreg_density(atlas_config, atlas):
+    """Get the density to use for unfoldreg, which is the highest density available for the chosen atlas."""
+    return sort_densities(atlas_config[atlas]["density_wildcards"])[-1]
+
+
+def get_unused_densities(atlas_config, atlas, output_density):
+    """Gets the list of densities not used, so we can delete intermediate files."""
+    return list(set(atlas_config[atlas]["density_wildcards"]) - set(output_density))
+
+
+def format_density_help(atlas_config):
+    lines = ["Available output densities per atlas:\n"]
+    for atlas, config in atlas_config.items():
+        if "density_wildcards" in config:
+            densities = ", ".join(config["density_wildcards"])
+            lines.append(f"  {atlas}=[{densities}]")
+    return "\n".join(lines)
+
+
+def validate_output_density(atlas, output_densities, atlas_config):
+    """
+    Validate that each output_density is allowed for the selected atlas.
+
+    Parameters:
+        atlas (str): The name of the selected atlas.
+        output_densities (str or list): One or more densities to validate.
+        atlas_config (dict): Dictionary of atlas options, with allowed densities under ['density_wildcards'].
+
+    Raises:
+        ValueError: If any of the provided densities are invalid.
+    """
+    if isinstance(output_densities, str):
+        output_densities = [output_densities]
+
+    allowed = set(atlas_config[atlas]["density_wildcards"]) | {"native"}
+
+    invalid = [d for d in output_densities if d not in allowed]
+    if invalid:
+        raise ValueError(
+            f"Invalid output_density value(s) for atlas '{atlas}': {invalid}. "
+            f"Allowed values: {sorted(allowed)}"
+        )
+
+
+# helper functions for hippunfold-atlases
 def sync_atlas_repo():
     """
     Ensures the atlas folder is synced from the public GitHub repository using GitPython.
@@ -124,6 +194,9 @@ def get_atlas_configs():
     return load_atlas_configs(atlas_dirs)
 
 
+# snakebids plugin definition
+
+
 @attrs.define
 class AtlasConfig(PluginBase):
     """Dynamically add CLI parameters for the atlas.
@@ -188,6 +261,7 @@ class AtlasConfig(PluginBase):
                 "Surface metrics to use when creating new atlas (default: %(default)s)"
             ),
         )
+
         self.try_add_argument(
             group,
             "--output-density",
@@ -195,24 +269,24 @@ class AtlasConfig(PluginBase):
             action="store",
             type=str,
             dest="output_density",
-            default=ATLAS_DENSITY_CHOICES[-1],
-            choices=ATLAS_DENSITY_CHOICES,
+            default=get_all_densities(self.atlas_config)[-1],
+            choices=get_all_densities(self.atlas_config),
             nargs="+",
-            help=(
-                "Sets the output vertex density for results, using the same vertex density for hipp and dentate (default: %(default)s)"
-            ),
+            help="Sets the output vertex density for participant-level results. Note: the density refers to the number of vertices in the hipp surface; the dentate has 1/4 the number of vertices.\n"
+            + format_density_help(self.atlas_config)
+            + " (default: %(default)s)",
         )
         self.try_add_argument(
             group,
             "--resample-factors",
             "--resample_factors",
             action="store",
-            type=int,
+            type=float,
             dest="resample_factors",
-            default=RESAMPLE_FACTORS,
+            default=DEFAULT_RESAMPLE_FACTORS,
             nargs="+",
             help=(
-                "Sets the downsampling factors of the surface mesh relative to native. Only used in group_create_atlas (default: %(default)s)"
+                f"Sets the downsampling factors of the surface mesh relative to native, as a percent of the original unfoldiso (256x128 for hipp) surface.  Only used in group_create_atlas (default: %(default)s), which corresponds to {DEFAULT_RESAMPLE_FACTORS_SPACING_HELP}"
             ),
         )
 
@@ -232,13 +306,15 @@ class AtlasConfig(PluginBase):
                 "--new_atlas_name must be specified when using group_create_atlas"
             )
 
+        validate_output_density(atlas, output_density, self.atlas_config)
+
         config["atlas"] = atlas
         config["new_atlas_name"] = new_atlas_name
         config["atlas_metadata"] = self.atlas_config
         config["output_density"] = output_density
-        config["unfoldreg_density"] = ATLAS_DENSITY_CHOICES[-1]
+        config["unfoldreg_density"] = get_unfoldreg_density(self.atlas_config, atlas)
         config["resample_factors"] = resample_factors
         config["density_choices"] = resample_factors_to_densities(resample_factors)
-        config["unused_density"] = list(
-            set(ATLAS_DENSITY_CHOICES) - set(output_density)
+        config["unused_density"] = get_unused_densities(
+            self.atlas_config, atlas, output_density
         )
