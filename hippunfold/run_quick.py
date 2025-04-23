@@ -22,6 +22,7 @@ IMAGE_MODALITY = {
     },
 }
 
+
 def check_conda_installation():
     try:
         conda_version = subprocess.run(
@@ -55,7 +56,9 @@ def gen_parser():
         "-m",
         "--modality",
         required=True,
-        choices=list(IMAGE_MODALITY.keys()), # currently hardcoded to put things in anat
+        choices=list(
+            IMAGE_MODALITY.keys()
+        ),  # currently hardcoded to put things in anat
         help="Image modality - choose between: " + ", ".join(IMAGE_MODALITY.keys()),
     )
     parser.add_argument(
@@ -105,7 +108,9 @@ def main():
         if args.modality == "dsegtissue":
             input_filename = f"sub-{args.subject}_desc-tissue_{IMAGE_MODALITY[args.modality]['suffix']}.nii.gz"
         else:
-            input_filename = f"sub-{args.subject}_{IMAGE_MODALITY[args.modality]['suffix']}.nii.gz"
+            input_filename = (
+                f"sub-{args.subject}_{IMAGE_MODALITY[args.modality]['suffix']}.nii.gz"
+            )
 
         # add file name to the created subject folder
         temp_input_file = subject_folder / input_filename
@@ -132,12 +137,12 @@ def main():
         if args.dry_run:
             command.append("-n")
 
-        if IMAGE_MODALITY[args.modality]['use_derivatives']:
+        if IMAGE_MODALITY[args.modality]["use_derivatives"]:
             # need to have desc file in bids dir to use --derivatives
             desc_file = Path(temp_dir) / "dataset_description.json"
             desc_file.write_text(
-                '{"Name": "Generated Derivatives", ' \
-                '"BIDSVersion": "1.0.2", ' \
+                '{"Name": "Generated Derivatives", '
+                '"BIDSVersion": "1.0.2", '
                 '"GeneratedBy": [{"Name": "hippunfold-quick"}]}'
             )
             command.append("--derivatives")
