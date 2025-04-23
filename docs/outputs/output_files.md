@@ -1,16 +1,16 @@
 # Output Files
 
-The `PATH_TO_OUTPUT_DIR` folder contains a `logs` and `work` folder for troubleshooting, but for most purposes all the outputs of interest will be in a subfolder called `hippunfold` with the following structure:
+The `PATH_TO_OUTPUT_DIR` folder contains a `logs` and `config` folder for troubleshooting, but for most purposes all the outputs of interest will be in subje t folders with the following structure:
 
-    hippunfold/
-    └── sub-{subject}
-        ├── anat
-        ├── coords
-        ├── qc
-        ├── surf
-        └── warps
+    sub-1425/
+    ├── anat
+    ├── surf
+    ├── metric
+    ├── cifti
+    └── qc
 
-Briefly, `anat` contains preprocessed volumetric input images and output segmentations in nifti format, `surf` contains surface data in gifti format, `coords` contain Laplace fields spanning the hippocampus, `warps` contains transformations between unfolded and native or 'unfolded' space, and `qc` contains snapshots and useful diagnostic information for quality control.
+
+Briefly, `anat` contains preprocessed volumetric input images and output segmentations in nifti format, `surf` contains surface meshes in gifti format along with aggregate spec files, `metric` contains scalar metrics and labels in gifti format, `cifti` contains metrics aggregated over hemispheres, and `qc` contains snapshots and useful diagnostic information for quality control.
 
 ## anat
 
@@ -22,11 +22,12 @@ In this example, a `T1w` image was used as a standard reference image, but a `T2
      └── anat
          ├── sub-001_desc-preproc_T1w.nii.gz
          ├── sub-001_space-T1w_desc-preproc_T2w.nii.gz
-         ├── sub-001_hemi-R_space-T1w_desc-subfields_atlas-bigbrain_dseg.nii.gz
+         ├── sub-001_hemi-R_space-T1w_desc-subfields_atlas-multihist7_dseg.nii.gz
          ├── sub-001_hemi-R_space-cropT1w_desc-preproc_T2w.nii.gz
-         └── sub-001_hemi-R_space-cropT1w_desc-subfields_atlas-bigbrain_dseg.nii.gz
+         ├── sub-001_hemi-R_space-cropT1w_desc-subfields_atlas-multihist7_dseg.nii.gz
+         └── sub-001_space-cropT1w_desc-subfields_atlas-multihist7_volumes.tsv
 
-As per BIDS guidelines, `desc-preproc` refers to preprocessed input images, `space-T1w` refers to the volume to which the image is registered, `hemi` refers to the left or right hemisphere (only shown for the right in this example), and `dseg` (discrete-segmentation) images with `desc-subfields` contains subfield labels (coded as integers as described in the included `volumes.tsv` file). The subfield atlas used will also be included, by default as `atlas-bigbrain`. Note that HippUnfold does most intermediate processing in an unshown (available in the `work/` folder) `space-corobl` which is cropped, upsampled, and rotated. Downsampling to the original `T1w` space can thus degrade the results and so they are also provided in a higher resolution `space-cropT1w` space which is ideal for conducting volumetry or morphometry measures with high precision and detail. 
+As per BIDS guidelines, `desc-preproc` refers to preprocessed input images, `space-T1w` refers to the volume to which the image is registered, `hemi` refers to the left or right hemisphere (only shown for the right in this example), and `dseg` (discrete-segmentation) images with `desc-subfields` contains subfield labels (coded as integers as described in the included `volumes.tsv` file). The subfield atlas used will also be included, by default as `atlas-bigbrain`. Note that HippUnfold does most intermediate processing in an unshown `space-corobl` which is cropped, upsampled, and rotated (available with `--output-space corobl`. Downsampling to the original `T1w` space can thus degrade the results and so they are also provided in a higher resolution `space-cropT1w` space which is ideal for conducting volumetry or morphometry measures with high precision and detail. 
 
 For example, the following image shows a whole-brain `T1w` image, a
 `space-cropT1w` overlay of the upsampled T2w image (centre square), and a similarly upsampled output
@@ -37,6 +38,7 @@ subfield segmentation (colour).
 
 ## surf
 
+**TODO** I reached here so far.. 
 ### surface meshes
 
 Surface meshes (geometry files) are in `.surf.gii` format, and are
