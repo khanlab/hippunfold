@@ -1,5 +1,11 @@
 # Command-line interface
 
+
+## TODO: HippUnfold-Quick Command-line interface
+
+insert argparse for hippunfold-quick here
+
+
 ## HippUnfold Command-line interface
 
  The following can also be seen by entering ``hippunfold -h`` into your terminal. 
@@ -14,6 +20,7 @@ func: get_parser
 prog: hippunfold
 ---
 ```
+
 
 ## Snakemake command-line interface
 
