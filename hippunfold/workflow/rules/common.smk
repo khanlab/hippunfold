@@ -114,7 +114,7 @@ def get_modality_suffix(modality):
         return modality
 
 
-def get_inputs_spec_file(label):
+def get_inputs_spec_file(label, density):
 
     files = []
     files.extend(
@@ -129,6 +129,7 @@ def get_inputs_spec_file(label):
                 **inputs.subj_wildcards,
             ),
             metric=get_gifti_metric_types(label),
+            density=density,
             allow_missing=True,
         )
     )
@@ -146,6 +147,7 @@ def get_inputs_spec_file(label):
                 **inputs.subj_wildcards,
             ),
             dir=["AP", "PD"],
+            density=density,
             allow_missing=True,
         )
     )
@@ -164,6 +166,7 @@ def get_inputs_spec_file(label):
             ),
             surfname=["midthickness", "inner", "outer"],
             space=ref_spaces,
+            density=density,
             allow_missing=True,
         )
     )
@@ -180,6 +183,7 @@ def get_inputs_spec_file(label):
                 **inputs.subj_wildcards,
             ),
             surfname=["midthickness"],
+            density=density,
             space=["unfold"],
             allow_missing=True,
         )
@@ -195,6 +199,7 @@ def get_inputs_spec_file(label):
                 **inputs.subj_wildcards,
             ),
             cifti=get_cifti_metric_types(label),
+            density=density,
             allow_missing=True,
         )
     )
@@ -211,6 +216,7 @@ def get_inputs_spec_file(label):
                     **inputs.subj_wildcards,
                 ),
                 atlas=config["atlas"],
+                density=density,
                 allow_missing=True,
             )
         )
@@ -227,6 +233,7 @@ def get_inputs_spec_file(label):
                     **inputs.subj_wildcards,
                 ),
                 atlas=config["atlas"],
+                density=density,
                 allow_missing=True,
             )
         )
@@ -254,13 +261,11 @@ def get_final_spec():
     )
     # add spec inputs too
     for label in config["autotop_labels"]:
-        for spec_input in get_inputs_spec_file(label):
+        for spec_input in get_inputs_spec_file(label, density=config["output_density"]):
             files.extend(
                 inputs[config["modality"]].expand(
                     spec_input,
-                    space=ref_spaces,
                     label=label,
-                    density=config["output_density"],
                     **expand_hemi(),
                 )
             )
