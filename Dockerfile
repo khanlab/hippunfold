@@ -39,4 +39,4 @@ RUN bash -c "source ~/.bashrc && \
 
 # Run the pipeline
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "snakebids-env", "./hippunfold/run.py"]
-CMD ["--use-conda"]
+CMD ["--use-conda", "--conda-prefix /src/conda-envs"]
