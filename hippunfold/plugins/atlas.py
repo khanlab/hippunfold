@@ -28,6 +28,8 @@ except ImportError:
 # Global variable to store the commit hash or branch name
 ATLAS_REPO_COMMIT = "atlas-cli"
 
+DEFAULT_OUTPUT_DENSITY = ["8k"]
+
 # Default settings for atlas creation
 DEFAULT_RESAMPLE_FACTORS = [
     12.5,
@@ -81,7 +83,9 @@ def get_unfoldreg_density(atlas_config, atlas):
 
 def get_unused_densities(atlas_config, atlas, output_density):
     """Gets the list of densities not used, so we can delete intermediate files."""
-    return list(set(atlas_config[atlas]["density_wildcards"]) - set(output_density))
+    return list(
+        set(["native"] + atlas_config[atlas]["density_wildcards"]) - set(output_density)
+    )
 
 
 def format_density_help(atlas_config):
@@ -269,7 +273,7 @@ class AtlasConfig(PluginBase):
             action="store",
             type=str,
             dest="output_density",
-            default=[get_all_densities(self.atlas_config)[-1]],
+            default=DEFAULT_OUTPUT_DENSITY,
             choices=get_all_densities(self.atlas_config),
             nargs="+",
             help="Sets the output vertex density for participant-level results. Note: the density refers to the number of vertices in the hipp surface; the dentate has 1/4 the number of vertices.\n"

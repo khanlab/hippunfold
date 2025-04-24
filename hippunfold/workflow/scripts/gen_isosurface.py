@@ -56,14 +56,12 @@ coords[sink_mask == 1] = 1.1
 src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
 coords[src_sink_nan_mask == 1] = np.nan
 
-
 grid.cell_data["values"] = coords.flatten(order="F")
 grid = grid.cells_to_points("values")
-tfm_grid = grid.transform(affine, inplace=False)
 
 # Generate isosurface
 logger.info("Generating isosurface")
-surface = tfm_grid.contour(
+surface = grid.contour(
     [snakemake.params.threshold], method="contour", compute_scalars=True
 )
 logger.info(surface)
@@ -93,6 +91,9 @@ logger.info(surface)
 
 logger.info(f"final surface clean to remove overlapping vertices, etc.")
 surface = surface.clean()
+
+# apply affine to go from matrix to image space
+surface = surface.transform(affine, inplace=False)
 
 # Save the final mesh
 write_surface_to_gifti(surface, snakemake.output.surf_gii)
