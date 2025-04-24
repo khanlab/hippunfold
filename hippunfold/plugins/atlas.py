@@ -83,7 +83,9 @@ def get_unfoldreg_density(atlas_config, atlas):
 
 def get_unused_densities(atlas_config, atlas, output_density):
     """Gets the list of densities not used, so we can delete intermediate files."""
-    return list(set(atlas_config[atlas]["density_wildcards"]) - set(output_density))
+    return list(
+        set(["native"] + atlas_config[atlas]["density_wildcards"]) - set(output_density)
+    )
 
 
 def format_density_help(atlas_config):

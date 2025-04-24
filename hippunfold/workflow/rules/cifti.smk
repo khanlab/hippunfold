@@ -162,7 +162,7 @@ def get_cmd_spec_file(wildcards, input, output):
 
 rule create_spec_file:
     input:
-        lambda wildcards: get_inputs_spec_file(wildcards.label),
+        lambda wildcards: get_inputs_spec_file(wildcards.label, wildcards.density),
     params:
         cmds=get_cmd_spec_file,
     output:
@@ -173,7 +173,6 @@ rule create_spec_file:
                 den="{density}",
                 suffix="surfaces.spec",
                 hemi="{hemi,L|R}",
-                space="{space}",
                 label="{label}",
                 **inputs.subj_wildcards,
             )
@@ -204,7 +203,6 @@ rule merge_lr_spec_file:
                 den="{density}",
                 suffix="surfaces.spec",
                 hemi="{hemi}",
-                space="{space}",
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
@@ -219,7 +217,6 @@ rule merge_lr_spec_file:
                 root=root,
                 datatype="{surfdir}",
                 den="{density}",
-                space="{space}",
                 suffix="surfaces.spec",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -243,7 +240,6 @@ rule merge_hipp_dentate_spec_file:
                 datatype="{surfdir}",
                 den="{density}",
                 suffix="surfaces.spec",
-                space="{space}",
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
@@ -257,7 +253,6 @@ rule merge_hipp_dentate_spec_file:
             root=root,
             datatype="{surfdir}",
             den="{density}",
-            space="{space}",
             suffix="surfaces.spec",
             **inputs.subj_wildcards,
         ),
@@ -274,17 +269,37 @@ rule merge_hipp_dentate_spec_file:
 def get_inputs_to_remove(wildcards):
     files = []
     for label in config["autotop_labels"]:
-        for spec_input in get_inputs_spec_file(label):
+        for spec_input in get_inputs_spec_file(label, density=config["unused_density"]):
             files.extend(
                 inputs[config["modality"]].expand(
                     spec_input,
-                    space=ref_spaces,
                     label=label,
-                    density=config["unused_density"],
                     **wildcards,
                     **expand_hemi(),
                 )
             )
+    files.extend(
+        expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="{density}",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            surfname=["midthickness", "inner", "outer"],
+            space=["corobl", "unfold"],
+            label=config["autotop_labels"],
+            density=config["unused_density"],
+            **wildcards,
+            **expand_hemi(),
+            allow_missing=True,
+        )
+    )
+    print(files)
     return files
 
 
@@ -296,7 +311,6 @@ rule remove_extra_spec_inputs:
                 root=root,
                 datatype="{surfdir}",
                 den="{density}",
-                space="{space}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
