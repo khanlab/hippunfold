@@ -299,7 +299,6 @@ def get_inputs_to_remove(wildcards):
             allow_missing=True,
         )
     )
-    print(files)
     return files
 
 
