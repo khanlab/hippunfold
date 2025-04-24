@@ -157,6 +157,61 @@ rule resample_native_metric_to_atlas_density:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
 
+rule resample_native_coords_to_atlas_density:
+    input:
+        native_metric=bids(
+            root=root,
+            datatype="metric",
+            dir="{dir}",
+            suffix="coords.shape.gii",
+            desc="{desc}",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        ref_unfold=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["atlas"],
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            suffix="midthickness.surf.gii",
+        ),
+        native_unfold=get_unfold_ref,
+    output:
+        metric_resampled=bids(
+            root=root,
+            datatype="metric",
+            dir="{dir}",
+            suffix="coords.shape.gii",
+            desc="{desc}",
+            den="{density,[0-9k]+}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("workbench")
+    group:
+        "subj"
+    log:
+        bids_log(
+            "resample_native_coords_to_atlas_density",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            den="{density,[0-9k]+}",
+            dir="{dir}",
+            desc="{desc}",
+        ),
+    shell:
+        "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
+
+
 # --- resampling from avgatlas to native vertices
 rule resample_atlas_subfields_to_native_surf:
     input:

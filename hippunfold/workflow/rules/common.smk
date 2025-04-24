@@ -136,6 +136,24 @@ def get_inputs_spec_file(label):
         expand(
             bids(
                 root=root,
+                datatype="metric",
+                den="{density}",
+                desc="laplace",
+                suffix="coords.shape.gii",
+                hemi="{hemi}",
+                dir="{dir}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            dir=["AP", "PD"],
+            allow_missing=True,
+        )
+    )
+
+    files.extend(
+        expand(
+            bids(
+                root=root,
                 datatype="surf",
                 den="{density}",
                 suffix="{surfname}.surf.gii",
@@ -145,7 +163,7 @@ def get_inputs_spec_file(label):
                 **inputs.subj_wildcards,
             ),
             surfname=["midthickness", "inner", "outer"],
-            space=["{space}"],
+            space=ref_spaces,
             allow_missing=True,
         )
     )
@@ -226,12 +244,10 @@ def get_final_spec():
             bids(
                 root=root,
                 datatype="surf",
-                space="{space}",
                 den="{density}",
                 suffix="surfaces.spec",
                 **inputs.subj_wildcards,
             ),
-            space=ref_spaces,
             density=config["output_density"],
             allow_missing=True,
         )
