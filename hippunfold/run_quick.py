@@ -72,6 +72,12 @@ def gen_parser():
         action="store_true",
         help="Execute a dry run without actually running the full pipeline.",
     )
+    parser.add_argument(
+        "--hemi", 
+        required=False, 
+        choices= ["L","R"],
+        help="Brain hemisphere, tequired for dsegtissue modality. Choose between 'L' or 'R'."
+    )
 
     return parser
 
@@ -91,6 +97,11 @@ def main():
 
     args = gen_parser().parse_args()
 
+    # if the user selects dsegtissue but doesn't specify hemi, throw an error 
+    if args.modality == "dsegtissue" and not args.hemi:
+        print("Error: The 'hemi' argument is required when using the 'dsegtissue' modality.")
+        sys.exit(1)
+
     # set temp dir if specified, else use python tempfile
     if args.temp_dir:
         prefix = args.temp_dir
@@ -106,7 +117,7 @@ def main():
         # create new file name
         # if dsegtissue, desc-tissue needs to be added for bids format
         if args.modality == "dsegtissue":
-            input_filename = f"sub-{args.subject}_desc-tissue_{IMAGE_MODALITY[args.modality]['suffix']}.nii.gz"
+            input_filename = f"sub-{args.subject}_hemi-{args.hemi}_desc-tissue_{IMAGE_MODALITY[args.modality]['suffix']}.nii.gz"
         else:
             input_filename = (
                 f"sub-{args.subject}_{IMAGE_MODALITY[args.modality]['suffix']}.nii.gz"
@@ -147,6 +158,8 @@ def main():
             )
             command.append("--derivatives")
             command.append(Path(temp_dir))
+            command.append("hemi")
+            command.append(args.hemi)
 
         # run the command
         try:
