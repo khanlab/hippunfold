@@ -1,9 +1,16 @@
 # Command-line interface
 
 
-## TODO: HippUnfold-Quick Command-line interface
+## HippUnfold-Quick Command-line interface
 
-insert argparse for hippunfold-quick here
+```{argparse}
+---
+filename: ../hippunfold/run_quick.py
+func: gen_parser
+prog: hippunfold_quick
+---
+```
+
 
 
 ## HippUnfold Command-line interface
@@ -32,7 +39,7 @@ The complete list of [Snakemake](https://snakemake.readthedocs.io/en/stable/) ar
 
 ```{argparse}
 ---
-module: snakemake
+module: snakemake.cli
 func: get_argument_parser
 prog: snakemake
 ---
