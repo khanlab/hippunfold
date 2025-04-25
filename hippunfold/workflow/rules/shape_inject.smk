@@ -1,3 +1,36 @@
+# Template-based segmentation supports templates that have only a single hemisphere
+# by mapping it to the flipped version of the other hemisphere.
+# If a template has both L and R files, then we set hemi_constrained_wildcard to L|R.
+# If a hemisphere is missing data, then we set it to flip that, e.g. if L missing, then use Lflip|R
+
+hemi_constraints = []
+if config["template"] in config["template_based_segmentation"]:
+    for hemi in config["hemi"]:
+        if hemi in config["template_based_segmentation"][config["template"]]["hemi"]:
+            hemi_constraints.append(hemi)
+        else:
+            hemi_constraints.append(f"{hemi}flip")
+
+hemi_constrained_wildcard = "{{hemi,{constraints}}}".format(
+    constraints="|".join(hemi_constraints)
+)
+
+
+def flipped(wildcards):
+    """function to map hemi in wildcards from Lflip to R, or Rflip to L,
+    for use in rules where e.g. the output wildcard is Lflip, but for the input, R is desired, such as
+    when mapping a R hemi dseg to the Lflip hemisphere of a subject."""
+
+    if wildcards.hemi == "L" or wildcards.hemi == "R":
+        return wildcards
+    elif wildcards.hemi == "Lflip":
+        wildcards.hemi = "R"
+        return wildcards
+    elif wildcards.hemi == "Rflip":
+        wildcards.hemi = "L"
+        return wildcard
+
+
 def get_input_for_shape_inject(wildcards):
     if config["modality"] == "cropseg":
         seg = bids(
@@ -6,7 +39,7 @@ def get_input_for_shape_inject(wildcards):
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ).format(**wildcards)
     elif get_modality_key(config["modality"]) == "seg":
         modality_suffix = get_modality_suffix(config["modality"])
@@ -18,7 +51,7 @@ def get_input_for_shape_inject(wildcards):
                 suffix="dseg.nii.gz",
                 space="corobl",
                 hemi="{hemi}",
-                from_="{modality_suffix}"
+                from_="{modality_suffix}",
             ).format(**wildcards, modality_suffix=modality_suffix),
         )
     else:
@@ -29,7 +62,7 @@ def get_input_for_shape_inject(wildcards):
             suffix="dseg.nii.gz",
             desc="nnunet",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ).format(**wildcards)
     return seg
 
@@ -42,7 +75,7 @@ def get_input_splitseg_for_shape_inject(wildcards):
             **config["subj_wildcards"],
             suffix="dsegsplit",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ).format(**wildcards)
 
     elif get_modality_key(config["modality"]) == "seg":
@@ -54,7 +87,7 @@ def get_input_splitseg_for_shape_inject(wildcards):
             suffix="dsegsplit",
             space="corobl",
             hemi="{hemi}",
-            from_="{modality_suffix}"
+            from_="{modality_suffix}",
         ).format(**wildcards, modality_suffix=modality_suffix)
     else:
         seg = bids(
@@ -64,7 +97,7 @@ def get_input_splitseg_for_shape_inject(wildcards):
             suffix="dsegsplit",
             desc="nnunet",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ).format(**wildcards)
     return seg
 
@@ -92,7 +125,7 @@ rule import_template_shape:
     params:
         template_seg=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["inject_template"]]["dseg"].format(
-            **wildcards
+            **flipped(wildcards)
         ),
     output:
         template_seg=bids(
@@ -101,6 +134,7 @@ rule import_template_shape:
             space="template",
             **config["subj_wildcards"],
             desc="hipptissue",
+            hemi=hemi_constrained_wildcard,
             suffix="dseg.nii.gz"
         ),
     group:
@@ -164,6 +198,7 @@ rule template_shape_reg:
             space="template",
             **config["subj_wildcards"],
             desc="hipptissue",
+            hemi="{hemi}",
             suffix="dsegsplit"
         ),
         subject_seg=get_input_splitseg_for_shape_inject,
@@ -183,7 +218,7 @@ rule template_shape_reg:
             to="subject",
             space="corobl",
             type_="ras",
-            hemi="{hemi,Lflip|R}"
+            hemi=hemi_constrained_wildcard,
         ),
         warp=bids(
             root=work,
@@ -194,7 +229,7 @@ rule template_shape_reg:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi,Lflip|R}"
+            hemi=hemi_constrained_wildcard,
         ),
     group:
         "subj"
@@ -205,7 +240,7 @@ rule template_shape_reg:
         bids(
             root="logs",
             **config["subj_wildcards"],
-            hemi="{hemi,Lflip|R}",
+            hemi=hemi_constrained_wildcard,
             suffix="templateshapereg.txt"
         ),
     shell:
@@ -222,6 +257,7 @@ rule template_shape_inject:
             space="template",
             **config["subj_wildcards"],
             desc="hipptissue",
+            hemi="{hemi}",
             suffix="dseg.nii.gz"
         ),
         subject_seg=get_input_for_shape_inject,
@@ -235,7 +271,7 @@ rule template_shape_inject:
             to="subject",
             space="corobl",
             type_="ras",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         warp=bids(
             root=work,
@@ -246,7 +282,7 @@ rule template_shape_inject:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     params:
         interp_opt="-ri LABEL 0.2vox",
@@ -258,14 +294,14 @@ rule template_shape_inject:
             suffix="dseg.nii.gz",
             desc="inject",
             space="corobl",
-            hemi="{hemi,Lflip|R}"
+            hemi=hemi_constrained_wildcard,
         ),
     log:
         bids(
             root="logs",
             **config["subj_wildcards"],
             suffix="templateshapeinject.txt",
-            hemi="{hemi,Lflip|R}"
+            hemi=hemi_constrained_wildcard,
         ),
     group:
         "subj"
@@ -289,7 +325,7 @@ rule inject_init_laplace_coords:
             to="subject",
             space="corobl",
             type_="ras",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         warp=bids(
             root=work,
@@ -300,7 +336,7 @@ rule inject_init_laplace_coords:
             from_="template",
             to="subject",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         template_dir=Path(download_dir) / "template" / config["inject_template"],
     params:
@@ -319,7 +355,7 @@ rule inject_init_laplace_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi,R|Lflip}"
+            hemi=hemi_constrained_wildcard,
         ),
     log:
         bids(
@@ -329,7 +365,7 @@ rule inject_init_laplace_coords:
             label="{autotop}",
             suffix="injectcoords.txt",
             desc="init",
-            hemi="{hemi,R|Lflip}"
+            hemi=hemi_constrained_wildcard,
         ),
     group:
         "subj"
@@ -365,7 +401,7 @@ rule unflip_init_coords:
             suffix="coords.nii.gz",
             desc="init",
             space="corobl",
-            hemi="{hemi,L}"
+            hemi="{hemi,L|R}"
         ),
     container:
         config["singularity"]["autotop"]
@@ -385,7 +421,7 @@ rule reinsert_subject_labels:
             suffix="dseg.nii.gz",
             desc="inject",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         subject_seg=get_input_for_shape_inject,
     params:
@@ -400,7 +436,7 @@ rule reinsert_subject_labels:
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi,Lflip|R}"
+            hemi=hemi_constrained_wildcard,
         ),
     group:
         "subj"
@@ -429,7 +465,7 @@ rule unflip_postproc:
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi,L}",
+            hemi="{hemi,L|R}",
             **config["subj_wildcards"]
         ),
     container:

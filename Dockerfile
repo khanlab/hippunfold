@@ -1,4 +1,4 @@
-FROM khanlab/autotop_deps:v0.4.4-fix
+FROM khanlab/hippunfold_deps:v0.5.1
 
 MAINTAINER alik@robarts.ca
 
@@ -6,6 +6,7 @@ COPY . /src/
 
 # avoid pre-downloading the models to make for lighter container
 # ENV HIPPUNFOLD_CACHE_DIR=/opt/hippunfold_cache
+ENV PYTHONNOUSERSITE=1
 
 #install hippunfold and imagemagick (for reports)
 RUN pip install --no-cache-dir /src && \

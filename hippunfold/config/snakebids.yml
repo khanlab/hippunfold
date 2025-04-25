@@ -128,7 +128,7 @@ parse_args:
   --version:
     help: 'Print the version of HippUnfold'
     action: version
-    version: "1.4.2-pre.43"
+    version: "1.5.2-pre.2"
 
 
   --modality:
@@ -151,6 +151,7 @@ parse_args:
       - 'MBMv3'
       - 'CIVM'
       - 'ABAv3'
+      - 'bigbrain'
     default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, CIVM is for in vivo macaque data, and ABAv3 is for mouse data. When using a non-human template, consider using a corresponding atlas. (default: %(default)s)'
 
@@ -159,10 +160,12 @@ parse_args:
   --inject_template:
     choices:
       - 'upenn'
+      - 'dHCP'
       - 'MBMv2'
       - 'MBMv3'
       - 'CIVM'
       - 'ABAv3'
+      - 'bigbrain'
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
@@ -328,10 +331,14 @@ parse_args:
       - neonateT1w_v2
       - AD_T1w
 
+
+
+
+# --- surface specific configuration -- 
+
 autotop_labels:
   - 'hipp'
   - 'dentate'
-
 
 surf_types:
   hipp:
@@ -366,7 +373,7 @@ cifti_metric_types:
 #--- workflow specific configuration -- 
 
 singularity:
-  autotop: 'docker://khanlab/hippunfold_deps:v0.5.0'
+  autotop: 'docker://khanlab/hippunfold_deps:v0.5.1'
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
@@ -378,21 +385,32 @@ template_based_segmentation:
     hemi:
       - R
       - L
-  CIVM:
+  dHCP:
     hemi:
       - R
       - L
+
   MBMv2:
     hemi:
       - R
   MBMv3:
     hemi:
       - R
+  CIVM:
+    hemi:
+      - R
+      - L
+  upenn:
+    hemi:
+      - R
   ABAv3:
     hemi:
       - R
       - L
-
+  bigbrain:
+    hemi:
+      - R
+      - L
 
 template_files:
   CITI168:
@@ -411,22 +429,24 @@ template_files:
     crop_ref: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
+    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
+    coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   MBMv2:
     T1w: Template_sym_MTR_80um.nii.gz
     T2w: Template_sym_T2_80um.nii.gz
     xfm_corobl: tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv2_hemi-{hemi}_space-corobl_{modality}.nii.gz
-    Mask_crop: tpl-MBMv2_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    crop_ref: tpl-MBMv2_hemi-R_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-MBMv2_hemi-R_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   MBMv3:
     T1w: tpl-MBMv3_T1w.nii.gz
     T2w: tpl-MBMv3_T2w.nii.gz
     xfm_corobl: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-MBMv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+    crop_ref: tpl-MBMv3_hemi-R_space-corobl_T1w.nii.gz
+    Mask_crop: tpl-MBMv3_hemi-R_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-MBMv3_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
   CIVM:
     T1w: tpl-CIVM_T1w.nii.gz
     xfm_corobl: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
@@ -445,6 +465,13 @@ template_files:
     Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
+  bigbrain:
+    T1w: tpl-bbhist_100um_T1w.nii.gz
+    xfm_corobl: tpl-bbhist_from-native_to-corobl_type-itk_affine.txt
+    crop_ref: tpl-bbhist_hemi-{hemi}_space-corobl_desc-tissuemanual_40um_dseg.nii.gz
+    Mask_crop: tpl-bbhist_hemi-{hemi}_space-corobl_desc-tissuemanual_40um_dseg.nii.gz
+    dseg: tpl-bbhist_hemi-{hemi}_space-corobl_desc-tissuemanual_40um_dseg.nii.gz
+    coords: tpl-bbhist_dir-{dir}_hemi-{hemi}_space-corobl_label-{autotop}_desc-laplace_coords.nii.gz
 
 atlas_files:
   multihist7:
@@ -464,7 +491,7 @@ atlas_files:
     label_list: magdeburg_labellist.txt
   freesurfer:
     label_nii: sub-all_hemi-{hemi}_space-unfold_label-hipp_desc-freesurfersubfields_dseg.nii.gz
-    lut: desc-subfields_atlas-mfreesurfer_dseg.tsv
+    lut: desc-subfields_atlas-freesurfer_dseg.tsv
     label_list: freesurfer_labellist.txt
   macaque:
     label_nii: sub-bigmac_hemi-{hemi}_space-unfold_label-hipp_desc-macaquesubfields_dseg.nii.gz
@@ -503,7 +530,10 @@ tissue_atlas_mapping:
     dg: 6
     srlm: 7
     cyst: 8
-
+  macaque: 
+    dg: 6
+    srlm: 7
+    cyst: 8
 
 rigid_reg_template: False
 no_reg_template: False
@@ -546,6 +576,7 @@ resource_urls:
     upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
     CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
     ABAv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip='
+    bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666b1bc765e1de5972893e59/?zip='
 #to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 
@@ -600,10 +631,6 @@ unfold_vol_ref:
       - '2.5'
     orient: RPI
 
-unfold_crop_epsilon_fractions:
-    - 0
-    - 0
-    - 0.0625 #1/16
 
 # space for uniform unfolded grid:
 #  currently only used for interpolating hipp subfields on surface
