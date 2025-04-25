@@ -53,19 +53,10 @@ def get_model_tar():
 
     return (Path(download_dir) / "model" / Path(local_tar).name).absolute()
 
-def get_url():
-    if config["force_nnunet_model"]:
-        if config["force_nnunet_model"] == 'AD_T1w':
-            url='osf.io/ug3dz/download'  
-        else:
-            url=config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]] 
-    else:
-        url=config["resource_urls"]["nnunet_model"][config["modality"]] 
-    return(url)
 
 rule download_nnunet_model:
     params:
-        url=get_url()
+        url=config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
         if config["force_nnunet_model"]
         else config["resource_urls"]["nnunet_model"][config["modality"]],
         model_dir=Path(download_dir) / "model",
