@@ -160,7 +160,7 @@ def main():
             )
             command.append("--derivatives")
             command.append(Path(temp_dir))
-            command.append("hemi")
+            command.append("--hemi")
             command.append(args.hemi)
 
         # run the command
