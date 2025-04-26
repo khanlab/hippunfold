@@ -12,7 +12,7 @@ on:
 
 jobs:
   push_to_registries:
-    uses: khanlab/actions/.github/workflows/workflow-release_task-deployDocker.yml@v0.3.2
+    uses: khanlab/actions/.github/workflows/workflow-release_task-deployDocker.yml@no-latest
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
