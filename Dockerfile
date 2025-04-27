@@ -26,7 +26,7 @@ RUN bash -c "source ~/.bashrc && \
     ./hippunfold/run.py test_data/bids_singleT2w test_out participant  --modality T2w --hemi L --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_multiT2w test_out participant  --modality T2w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_T1w test_out participant  --modality T1w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
-    ./hippunfold/run.py test_data/bids_hippb500 test_out participant  --modality hippb500 --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-env && \
+    ./hippunfold/run.py test_data/bids_hippb500 test_out participant  --modality hippb500 --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs && \
     ./hippunfold/run.py test_data/bids_T1w_longitudinal test_out participant  --modality T1w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_singleT2w_longitudinal test_out participant  --modality T2w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_dsegtissue test_out participant  --modality dsegtissue --derivatives test_data/bids_dsegtissue --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
@@ -37,7 +37,8 @@ RUN bash -c "source ~/.bashrc && \
     ./hippunfold/run.py test_data/bids_singleT2w test_out participant  --modality T2w --generate-myelin-map --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_dsegtissue test_out group_create_atlas  --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba"
 
+ENV SNAKEMAKE_PROFILE=/src/profiles/docker-conda
+
 # Run the pipeline
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
