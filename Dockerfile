@@ -8,6 +8,9 @@ COPY . /src/
 # Disable user site packages
 ENV PYTHONNOUSERSITE=1
 
+# Use bash for the following RUNs
+SHELL ["/bin/bash", "-c"]
+
 # ---- ONE SINGLE RUN ----
 RUN set -e && \
     conda install -n base -c conda-forge mamba -y && \
