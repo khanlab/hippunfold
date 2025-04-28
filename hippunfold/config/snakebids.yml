@@ -449,6 +449,7 @@ resource_urls:
     T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
+    ADNI_T1w_v1: 'zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
   atlas:
     bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
     multihist7: 'www.dropbox.com/scl/fi/g07u7la7v1kwfgsty6ujc/atlas-multihist7_20250108.zip?rlkey=bi7wbdsm93upgnn3bmlv4f1hx&st=5iv33isc&dl=0'
