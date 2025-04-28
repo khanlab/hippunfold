@@ -5,6 +5,9 @@ name: Build and Upload Conda Package
 on:
   push:
     branches:
+      - setup-conda-ci
+  pull_request:
+    branches:
       - dev-v2.0.0
   workflow_dispatch:
 
