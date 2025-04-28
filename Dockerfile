@@ -30,7 +30,7 @@ RUN set -e && \
     ./hippunfold/run.py test_data/bids_dsegtissue test_out group_create_atlas  --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     conda clean --all -y && \
     rm -rf /opt/conda/pkgs /root/.cache && \
-    cp /src/entrypoint_quick.sh /usr/local/lib/hippunfold-quick 
+    cp /src/entrypoint_quick.sh /usr/local/bin/hippunfold-quick 
 
 ENV SNAKEMAKE_PROFILE=/src/hippunfold/workflow/profiles/docker-conda
 
