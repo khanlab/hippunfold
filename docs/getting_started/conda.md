@@ -154,4 +154,3 @@ If you encounter issues while setting up HippUnfold via Conda:
 ---
 
 Happy unfolding!
-For more information, visit the [official documentation]( hippunfold.readthedocs.io ).

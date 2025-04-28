@@ -21,6 +21,22 @@ import sphinx_rtd_theme
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent ))
 
 
+# -- Set current_tag variable (for use in install instructions) --------------
+import os
+
+# Get the RTD version name
+current_tag = os.environ.get("READTHEDOCS_VERSION", "latest")
+
+# If you want to clean it up (optional)
+if current_tag in ("latest", "stable"):
+    current_tag = "master"  # or whatever your default branch/tag should be
+
+# Now inject into MyST
+myst_substitutions = {
+    "current_tag": current_tag,
+}
+
+
 # -- Project information -----------------------------------------------------
 
 
