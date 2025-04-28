@@ -23,7 +23,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
-          auto-activate-base: false
+          auto-activate-base: true
 
       - name: Install dependencies
         run: |
@@ -52,18 +52,22 @@ jobs:
           # 3) Replace the literal 'sha256:' line under source:
           sed -i "s|^\(\s*sha256:\s*\).*|\1$SHA256_SUM|" ./recipe/meta.yaml
 
-          # 4) Verify
-          echo "Updated meta.yaml:"
-          cat ./recipe/meta.yaml
-
-
-
-      - name: Build Conda package
+      - name: Build & capture path
+        id: build
         run: |
-          cd ./recipe
+          cd recipe
+          OUT=$(conda build . -c conda-forge -c bioconda --output)
+          echo "PACKAGE_PATH=$OUT" >> $GITHUB_ENV
           conda build . -c conda-forge -c bioconda
 
       - name: Upload package to Khanlab channel
+        shell: bash -l {0}
         run: |
-          anaconda login --username ${{ secrets.ANACONDA_USERNAME }} --password ${{ secrets.ANACONDA_PASSWORD }}
-          # anaconda upload /path/to/conda-package.tar.bz2 --yes
+          conda activate base
+          anaconda login \
+            --username ${{ secrets.ANACONDA_USERNAME }} \
+            --password ${{ secrets.ANACONDA_PASSWORD }}
+          anaconda upload "$PACKAGE_PATH" \
+            --label main \
+            --force \
+            --yes
