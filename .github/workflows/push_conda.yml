@@ -18,9 +18,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: dev-v2.0.0 # checkout the latest dev-v2.0.0
 
       - name: Set up Conda
         uses: conda-incubator/setup-miniconda@v2
@@ -32,10 +29,12 @@ jobs:
         run: |
           conda install -y conda-build anaconda-client
 
-      - name: Get latest commit SHA
+      - name: Get latest commit SHA from dev-v2.0.0
         id: get_sha
         run: |
-          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "Fetching latest commit on dev-v2.0.0 branch..."
+          COMMIT_SHA=$(git ls-remote origin refs/heads/dev-v2.0.0 | cut -f1)
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
 
       - name: Update meta.yaml with latest SHA and SHA256
         run: |
