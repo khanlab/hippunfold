@@ -42,7 +42,7 @@ jobs:
           sed -i "s|^{% set ref = .* %}|{% set ref = \"$COMMIT_SHA\" %}|" ./recipe/meta.yaml
 
           # Download the tarball corresponding to that commit
-          curl -L -o source.tar.gz https://github.com/<your-org-or-username>/hippunfold/archive/${COMMIT_SHA}.tar.gz
+          curl -L -o source.tar.gz https://github.com/khanlab/hippunfold/archive/${COMMIT_SHA}.tar.gz
 
           # Calculate sha256
           SHA256_SUM=$(sha256sum source.tar.gz | awk '{print $1}')
