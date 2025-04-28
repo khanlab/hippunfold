@@ -39,23 +39,23 @@ jobs:
       - name: Update meta.yaml with latest SHA and SHA256
         run: |
           echo "Updating meta.yaml with commit: $COMMIT_SHA"
-          # Update 'ref' in meta.yaml
+
+          # 1) Update the Jinja-set 'ref' (this is fine)
           sed -i "s|^{% set ref = \".*\" %}|{% set ref = \"$COMMIT_SHA\" %}|" ./recipe/meta.yaml
 
-          # Download the tarball corresponding to that commit
-          curl -L -o source.tar.gz https://github.com/khanlab/hippunfold/archive/${COMMIT_SHA}.tar.gz
-
-          # Calculate sha256
+          # 2) Download the tarball and compute the checksum
+          curl -L -o source.tar.gz \
+            https://github.com/khanlab/hippunfold/archive/${COMMIT_SHA}.tar.gz
           SHA256_SUM=$(sha256sum source.tar.gz | awk '{print $1}')
-
           echo "New sha256: $SHA256_SUM"
 
-          # Update 'sha256' in meta.yaml
-          sed -i "s|^{% set sha256 = \".*\" %}|{% set sha256 = \"$SHA256_SUM\" %}|" ./recipe/meta.yaml
+          # 3) Replace the literal 'sha256:' line under source:
+          sed -i "s|^\(\s*sha256:\s*\).*|\1$SHA256_SUM|" ./recipe/meta.yaml
 
-          # Verify the update
+          # 4) Verify
           echo "Updated meta.yaml:"
           cat ./recipe/meta.yaml
+
 
 
       - name: Build Conda package
