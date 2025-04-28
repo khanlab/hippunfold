@@ -70,4 +70,3 @@ jobs:
           anaconda upload "$PACKAGE_PATH" \
             --label main \
             --force \
-            --yes
