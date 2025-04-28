@@ -39,7 +39,8 @@ jobs:
       - name: Update meta.yaml with latest SHA and SHA256
         run: |
           echo "Updating meta.yaml with commit: $COMMIT_SHA"
-          sed -i "s|^{% set ref = .* %}|{% set ref = \"$COMMIT_SHA\" %}|" ./recipe/meta.yaml
+          # Update 'ref' in meta.yaml
+          sed -i "s|^{% set ref = \".*\" %}|{% set ref = \"$COMMIT_SHA\" %}|" ./recipe/meta.yaml
 
           # Download the tarball corresponding to that commit
           curl -L -o source.tar.gz https://github.com/khanlab/hippunfold/archive/${COMMIT_SHA}.tar.gz
@@ -49,11 +50,13 @@ jobs:
 
           echo "New sha256: $SHA256_SUM"
 
-          # Update sha256 in meta.yaml
-          sed -i "s|^{% set sha256 = .* %}|{% set sha256 = \"$SHA256_SUM\" %}|" ./recipe/meta.yaml
+          # Update 'sha256' in meta.yaml
+          sed -i "s|^{% set sha256 = \".*\" %}|{% set sha256 = \"$SHA256_SUM\" %}|" ./recipe/meta.yaml
 
+          # Verify the update
           echo "Updated meta.yaml:"
           cat ./recipe/meta.yaml
+
 
       - name: Build Conda package
         run: |
