@@ -37,14 +37,14 @@ jobs:
       - name: Update meta.yaml with latest SHA
         run: |
           echo "Updating meta.yaml with commit: $COMMIT_SHA"
-          sed -i "s|^{% set ref = .* %}|{% set ref = \"$COMMIT_SHA\" %}|" hippunfold/recipe/meta.yaml
+          sed -i "s|^{% set ref = .* %}|{% set ref = \"$COMMIT_SHA\" %}|" ./recipe/meta.yaml
 
           echo "New meta.yaml:"
-          cat hippunfold/recipe/meta.yaml
+          cat ./recipe/meta.yaml
 
       - name: Build Conda package
         run: |
-          cd hippunfold/recipe
+          cd ./recipe
           conda build . -c conda-forge -c bioconda
 
       - name: Upload package to Khanlab channel
