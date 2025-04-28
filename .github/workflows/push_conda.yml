@@ -1,0 +1,55 @@
+# .github/workflows/build-conda.yml
+
+name: Build and Upload Conda Package
+
+on:
+  push:
+    branches:
+      - dev-v2.0.0
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          auto-activate-base: false
+
+      - name: Configure Conda
+        run: |
+          conda config --set always_yes yes --set changeps1 no
+          conda install conda-build anaconda-client
+
+      - name: Get latest commit SHA
+        id: get_sha
+        run: |
+          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Update meta.yaml with latest SHA
+        run: |
+          echo "Updating meta.yaml with commit: $COMMIT_SHA"
+          sed -i "s|^{% set ref = .* %}|{% set ref = \"$COMMIT_SHA\" %}|" hippunfold/recipe/meta.yaml
+
+          echo "New meta.yaml:"
+          cat hippunfold/recipe/meta.yaml
+
+      - name: Build Conda package
+        run: |
+          cd hippunfold/recipe
+          conda build . -c conda-forge -c bioconda
+
+      - name: Upload to Khanlab channel
+        if: success()
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        run: |
+          BUILT_PACKAGE=$(conda build hippunfold/recipe --output)
+          echo "Uploading built package: $BUILT_PACKAGE"
+          anaconda upload --user khanlab "$BUILT_PACKAGE"
