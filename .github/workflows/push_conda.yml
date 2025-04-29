@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Mambaforge
+      - name: Setup Miniforge and mamba
         uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-variant: Miniforge3
@@ -31,7 +31,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          mamba install -y conda-build anaconda-client
+          mamba install -y conda-build anaconda-client boa
 
       - name: Get latest commit SHA from dev-v2.0.0
         id: get_sha
@@ -62,7 +62,7 @@ jobs:
           cd recipe
           OUT=$(conda build . -c conda-forge -c bioconda --output)
           echo "PACKAGE_PATH=$OUT" >> $GITHUB_ENV
-          conda build . -c conda-forge -c bioconda
+          conda mambabuild . -c conda-forge -c bioconda
 
       - name: Upload package to Khanlab channel
         shell: bash -l {0}
