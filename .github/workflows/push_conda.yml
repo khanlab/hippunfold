@@ -19,15 +19,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Conda
+      - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2
         with:
-          miniconda-version: "latest"
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          use-mamba: true
           auto-activate-base: true
 
       - name: Install dependencies
         run: |
-          conda install -y anaconda-client
+          mamba install -y conda-build anaconda-client
 
       - name: Get latest commit SHA from dev-v2.0.0
         id: get_sha
