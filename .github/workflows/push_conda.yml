@@ -68,9 +68,9 @@ jobs:
         id: build
         run: |
           cd recipe
-          OUT=$(boa mambabuild . -c conda-forge -c bioconda --output)
+          OUT=$(conda mambabuild . -c conda-forge -c bioconda --output)
           echo "PACKAGE_PATH=$OUT" >> $GITHUB_ENV
-          boa mambabuild . -c conda-forge -c bioconda
+          conda mambabuild . -c conda-forge -c bioconda
 
       - name: Upload package to Khanlab channel
         shell: bash -l {0}
