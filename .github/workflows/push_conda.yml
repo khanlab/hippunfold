@@ -19,6 +19,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug CONDA_PREFIX and build folder
+        run: |
+          echo "CONDA_PREFIX: $CONDA_PREFIX"
+          echo "Contents of $CONDA_PREFIX/conda-bld:"
+          ls -ld "$CONDA_PREFIX/conda-bld" || echo "Directory not found"
+
+      - name: Cache conda build cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CONDA_PREFIX }}/conda-bld
+          key: ${{ runner.os }}-conda-bld-${{ hashFiles('recipe/meta.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-bld-
+
       - name: Setup Miniforge and mamba
         uses: conda-incubator/setup-miniconda@v3
         with:
