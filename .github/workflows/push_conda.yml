@@ -27,7 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda install -y conda-build anaconda-client
+          conda install -y anaconda-client
 
       - name: Get latest commit SHA from dev-v2.0.0
         id: get_sha
@@ -36,7 +36,7 @@ jobs:
           COMMIT_SHA=$(git ls-remote origin refs/heads/dev-v2.0.0 | cut -f1)
           echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
 
-      - name: Update meta.yaml with latest SHA and SHA256
+      - name: Update meta.yaml with latest ref and sha256
         run: |
           echo "Updating meta.yaml with commit: $COMMIT_SHA"
 
