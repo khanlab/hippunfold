@@ -68,7 +68,7 @@ jobs:
         id: build
         run: |
           cd recipe
-          OUT=$(conda mambabuild . -c conda-forge -c bioconda --output)
+          OUT=$(conda mambabuild . -c conda-forge -c bioconda --output 2>/dev/null)
           echo "PACKAGE_PATH=$OUT" >> $GITHUB_ENV
           conda mambabuild . -c conda-forge -c bioconda
 
