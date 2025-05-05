@@ -10,10 +10,9 @@
 :maxdepth: 2
 
 getting_started/installation
-getting_started/docker
-getting_started/singularity
-getting_started/vagrant
 getting_started/conda
+getting_started/apptainer
+getting_started/docker
 ```
 
 

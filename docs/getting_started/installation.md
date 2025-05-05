@@ -7,7 +7,7 @@ subfield segmentation)
 
 HippUnfold can be run either with Conda, or with containers
 -   Conda (Linux/Mac only, no containers needed)
--   **--OR--**  Docker (Intel Mac/Windows/Linux) or Singularity (Linux)
+-   **--OR--**  Docker (Intel Mac/Windows/Linux) or Apptainer (formerly known as Singularity) (Linux)
 -   For those wishing to contribute or modify the code, see [Contributing to HippUnfold](https://hippunfold.readthedocs.io/en/latest/contributing/contributing.html).
 -   GPU not required
 
@@ -22,16 +22,16 @@ HippUnfold can be run either with Conda, or with containers
 There are several different ways of running HippUnfold:
 
 1. Conda Environment (Linux/macOS)
-2. CBRAIN Web-based Platform
-3. Singularity Container on Linux
-4. Docker Container on Windows/Mac (Intel)/Linux
+2. Apptainer/Singularity Container on Linux
+3. Docker Container on Windows/Mac (Intel)/Linux
+4. CBRAIN Web-based Platform
 
-### Conda on Linux/macOS
+### Conda
 
 As of version **2.0.0**, HippUnfold is available via [Conda](https://docs.conda.io/), offering a container-free way to run the tool on Linux and macOS systems.
 
 #### Pros:
-- No need for Docker/Singularity
+- No need for any containers
 - Easy to install via `conda`
 - Compatible with Snakemake execution profiles
 - Good option for users who prefer Python virtual environments
@@ -40,23 +40,20 @@ As of version **2.0.0**, HippUnfold is available via [Conda](https://docs.conda.
 - Not compatible with Windows
 - Requires installation of Conda or Miniconda
 
-### CBRAIN Web-based Platform
+### Apptainer
 
-HippUnfold is available on the [CBRAIN platform](https://github.com/aces/cbrain/wiki), a 
-web-based platform for batch high-performance computing that is free for researchers.
+The same docker container can also be used with Singularity (now Apptainer). Instructions can be found below.
 
 #### Pros:
-- No software installation required
-- Fully point and click interface (no CLI)
-- Can perform batch-processing
+- All dependencies+models (* See Note 1) in a single container 
+- Container stored as a single file (.sif)
 
 #### Cons:
-- Must upload data for processing
-- Limited command-line options exposed
+- Compatible on shared systems with Singularity installed
+- Cannot use Snakemake cluster execution profiles
 - Cannot edit code
 
-
-### Docker on Windows/Mac (Intel)/Linux
+### Docker
 
 The HippUnfold BIDS App is available on a DockerHub as versioned releases and development branches.
 
@@ -69,17 +66,20 @@ The HippUnfold BIDS App is available on a DockerHub as versioned releases and de
 - Cannot use Snakemake cluster execution profiles
 - Cannot edit code
 
-### Singularity Container
 
-The same docker container can also be used with Singularity (now Apptainer). Instructions can be found below.
+### CBRAIN
+
+HippUnfold is available on the [CBRAIN platform](https://github.com/aces/cbrain/wiki), a 
+web-based platform for batch high-performance computing that is free for researchers.
 
 #### Pros:
-- All dependencies+models (* See Note 1) in a single container 
-- Container stored as a single file (.sif)
+- No software installation required
+- Fully point and click interface (no CLI)
+- Can perform batch-processing
 
 #### Cons:
-- Compatible on shared systems with Singularity installed
-- Cannot use Snakemake cluster execution profiles
+- Must upload data for processing
+- Limited command-line options exposed
 - Cannot edit code
 
 
