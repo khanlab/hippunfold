@@ -20,7 +20,7 @@ Follow the instructions at the official Conda documentation:
 ### 2. Create and activate a new Conda environment
 
 ```bash
-conda create --name hippunfold-env -c conda-forge -c bioconda hippunfold
+conda create --name hippunfold-env {{ conda_channel }} -c conda-forge -c bioconda hippunfold
 conda activate hippunfold-env
 ```
 
