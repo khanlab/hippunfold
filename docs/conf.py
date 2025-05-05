@@ -31,11 +31,30 @@ current_tag = os.environ.get("READTHEDOCS_VERSION", "latest")
 if current_tag in ("latest", "stable"):
     current_tag = "master"  # or whatever your default branch/tag should be
 
-# Now inject into MyST
+if current_tag == 'dev-v2.0.0':
+    conda_channel = '-c khanlab'
+else:
+    conda_channel = ''
+
 myst_substitutions = {
     "current_tag": current_tag,
+    "conda_channel": conda_channel
 }
 
+def _replace_placeholders(app, docname, source):
+    """
+    Runs on Sphinx's 'source-read' event, before parsing.
+    Replaces any {{ … }} placeholders with the Python variables.
+    """
+    text = source[0]
+    # do your replacements
+    text = text.replace("{{ current_tag }}", current_tag)
+    text = text.replace("{{ conda_channel }}", conda_channel)
+    source[0] = text
+
+def setup(app):
+    # connect our replacer to the 'source-read' event
+    app.connect("source-read", _replace_placeholders)
 
 # -- Project information -----------------------------------------------------
 
@@ -66,7 +85,7 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-myst_enable_extensions = ['html_image','dollarmath','amsmath']
+myst_enable_extensions = ['html_image','dollarmath','amsmath','substitution']
 myst_heading_anchors = 3
 
 master_doc = 'index'
