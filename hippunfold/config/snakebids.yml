@@ -329,6 +329,7 @@ parse_args:
       - synthseg_v0.1
       - synthseg_v0.2
       - neonateT1w_v2
+      - ADNI_T1w_v1
 
 
 
@@ -559,6 +560,7 @@ resource_urls:
     T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
+    ADNI_T1w_v1: 'zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
   atlas:
     multihist7: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
