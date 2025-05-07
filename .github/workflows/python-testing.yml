@@ -33,25 +33,24 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: ["quality"]
-    strategy:
-      matrix:
-        python-version: ["3.9","3.10","3.11","3.12"]
 
     steps:
-      - name: Install non-python dependencies
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Miniforge and mamba
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-variant: Miniforge3
+          miniforge-version: latest
+          mamba-version: "*"
+          use-mamba: true
+          conda-solver: libmamba
+          auto-activate-base: true
+
+      - name: Create environment with snakebids
         run: |
-          sudo apt-get install -y graphviz-dev
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Setup Python environments
-        uses: khanlab/actions/.github/actions/action-setup_task-installPyProject@v0.3.2
-        with:
-          python-version: ${{ matrix.python-version }}
-          install-library: true
+          mamba create -n snakebids-env snakebids -c bioconda -c conda-forge -y
 
       - name: Setup env for hippunfold
         run: |
@@ -59,63 +58,63 @@ jobs:
 
       - name: Test single T2w bids
         run: |
-          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w
+          ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w
 
       - name: Test running on existing folder
         run: |
           mkdir test_newout
-          poetry run hippunfold test_data/bids_singleT2w test_newout participant -np --modality T2w
+          ./hippunfold/run.py test_data/bids_singleT2w test_newout participant -np --modality T2w
 
       - name: Test single T2w bids, right hemi
         run: |
-          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
+          ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
 
       - name: Test single T2w bids, left hemi
         run: |
-          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
+          ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
 
       - name: Test multiple T2w bids
         run: |
-          poetry run hippunfold test_data/bids_multiT2w test_out participant -np --modality T2w
+          ./hippunfold/run.py test_data/bids_multiT2w test_out participant -np --modality T2w
 
       - name: Test T1w bids
         run: |
-          poetry run hippunfold test_data/bids_T1w test_out participant -np --modality T1w
+          ./hippunfold/run.py test_data/bids_T1w test_out participant -np --modality T1w
 
       - name: Test hipp b500 bids
         run: |
-          poetry run hippunfold test_data/bids_hippb500 test_out participant -np --modality hippb500
+          ./hippunfold/run.py test_data/bids_hippb500 test_out participant -np --modality hippb500
 
       - name: Test T1w multi-session/longitudinal bids
         run: |
-          poetry run hippunfold test_data/bids_T1w_longitudinal test_out participant -np --modality T1w
+          ./hippunfold/run.py test_data/bids_T1w_longitudinal test_out participant -np --modality T1w
 
       - name: Test single T2w multi-session/longitudinal bids
         run: |
-          poetry run hippunfold test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w
+          ./hippunfold/run.py test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w
 
       - name: Test manualseg bids, with path override
         run: |
-          poetry run hippunfold test_data/bids_dsegtissue test_out participant -np --modality dsegtissue --derivatives test_data/bids_dsegtissue 
+          ./hippunfold/run.py test_data/bids_dsegtissue test_out participant -np --modality dsegtissue --derivatives test_data/bids_dsegtissue 
 
       - name: Test manualseg bids, one hemisphere hemi
         run: |
-          poetry run hippunfold test_data/bids_dsegtissue_1hemi test_out participant -np --modality dsegtissue --derivatives test_data/bids_dsegtissue --hemi L
+          ./hippunfold/run.py test_data/bids_dsegtissue_1hemi test_out participant -np --modality dsegtissue --derivatives test_data/bids_dsegtissue --hemi L
 
       - name: Test T2w with T1w template registration
         run: |
-          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
+          ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
 
       - name: Test T2w with T1w output space
         run: |
-          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
+          ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
 
       - name: Test modality T2w with myelin map
         run: |
-          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --generate-myelin-map
+          ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --generate-myelin-map
 
       - name: Test modality T1w with myelin map
         run: |
-          poetry run hippunfold test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
+          ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
 
 
