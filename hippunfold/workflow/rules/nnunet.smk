@@ -68,7 +68,7 @@ rule download_nnunet_model:
     container:
         config["singularity"]["autotop"]
     shell:
-        "mkdir -p {params.model_dir} && wget https://{params.url} -O {output}"
+        "mkdir -p {params.model_dir} && curl -L https://{params.url} -O {output}"
 
 
 def parse_task_from_tar(wildcards, input):

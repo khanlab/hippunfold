@@ -14,7 +14,7 @@ rule download_extract_template:
     shadow:
         "minimal"
     shell:
-        "wget 'https://{params.url}' -O temp.zip && "
+        "curl -L 'https://{params.url}' -O temp.zip && "
         " unzip -d {output.unzip_dir} temp.zip"
 
 
