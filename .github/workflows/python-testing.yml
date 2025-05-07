@@ -48,9 +48,9 @@ jobs:
           conda-solver: libmamba
           auto-activate-base: true
 
-      - name: Create environment with snakebids
+      - name: Install snakebids
         run: |
-          mamba create -n snakebids-env snakebids -c bioconda -c conda-forge -y
+          mamba install snakebids -c bioconda -c conda-forge -y
 
       - name: Setup env for hippunfold
         run: |
