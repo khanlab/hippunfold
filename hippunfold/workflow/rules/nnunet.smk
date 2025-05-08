@@ -67,6 +67,8 @@ rule download_nnunet_model:
         model_tar=get_model_tar(),
     container:
         config["singularity"]["autotop"]
+    conda:
+        conda_env("curl")
     shell:
         "mkdir -p {params.model_dir} && curl -L https://{params.url} -O {output}"
 

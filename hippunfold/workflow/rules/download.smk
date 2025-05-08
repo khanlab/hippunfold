@@ -13,6 +13,8 @@ rule download_extract_template:
         config["singularity"]["autotop"]
     shadow:
         "minimal"
+    conda:
+        conda_env("curl")
     shell:
         "curl -L 'https://{params.url}' -O temp.zip && "
         " unzip -d {output.unzip_dir} temp.zip"
