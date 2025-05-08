@@ -44,7 +44,7 @@ You can try HippUnfold on a sample dataset to make sure everything works as expe
 First, download and extract a single-subject BIDS dataset for this test:
 
 ```bash
-wget https://www.dropbox.com/s/mdbmpmmq6fi8sk0/hippunfold_test_data.tar 
+curl -L https://www.dropbox.com/s/mdbmpmmq6fi8sk0/hippunfold_test_data.tar -o hippunfold_test_data.tar
 tar -xvf hippunfold_test_data.tar
 ```
 
