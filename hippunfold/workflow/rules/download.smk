@@ -16,7 +16,7 @@ rule download_extract_template:
     conda:
         conda_env("curl")
     shell:
-        "curl -L 'https://{params.url}' -O temp.zip && "
+        "curl -L 'https://{params.url}' -o temp.zip && "
         " unzip -d {output.unzip_dir} temp.zip"
 
 

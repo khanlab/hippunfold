@@ -70,7 +70,7 @@ rule download_nnunet_model:
     conda:
         conda_env("curl")
     shell:
-        "mkdir -p {params.model_dir} && curl -L https://{params.url} -O {output}"
+        "mkdir -p {params.model_dir} && curl -L https://{params.url} -o {output}"
 
 
 def parse_task_from_tar(wildcards, input):
