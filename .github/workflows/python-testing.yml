@@ -19,7 +19,7 @@ jobs:
       - name: Setup Python environment
         uses: khanlab/actions/.github/actions/action-setup_task-installPyProject@v0.3.2
         with:
-          python-version: "3.9"
+          python-version: "3.11"
 
       - name: isort
         run: poetry run isort hippunfold/*.py -c
