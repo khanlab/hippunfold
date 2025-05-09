@@ -78,6 +78,47 @@ rule import_template_dseg:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
 
+rule import_template_layers:
+    input:
+        template_dir=Path(download_dir) / "template" / config["inject_template"],
+    params:
+        template_seg=lambda wildcards: Path(download_dir)
+        / "template"
+        / config["inject_template"]
+        / config["template_files"][config["inject_template"]]["layers"].format(
+            **wildcards
+        ),
+        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
+            wildcards,
+            Path(download_dir)
+            / "template"
+            / config["inject_template"]
+            / config["template_files"][config["inject_template"]]["layers"].format(
+                **wildcards
+            ),
+        ),
+    output:
+        template_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                desc="layers",
+                hemi="{hemi}",
+                suffix="dseg.nii.gz",
+            )
+        ),
+    group:
+        "subj"
+    container:
+        config["singularity"]["autotop"]
+    conda:
+        conda_env("c3d")
+    shell:
+        "{params.copy_or_flip_cmd} {output.template_seg}"
+
+
 rule import_template_dseg_dentate:
     input:
         template_dir=Path(download_dir) / "template" / config["inject_template"],
