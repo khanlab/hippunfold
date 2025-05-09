@@ -37,7 +37,7 @@ RUN bash -c "source ~/.bashrc && \
     ./hippunfold/run.py test_data/bids_singleT2w test_out participant  --modality T2w --generate-myelin-map --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_dsegtissue test_out group_create_atlas  --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba"
 
-ENV SNAKEMAKE_PROFILE=/src/profiles/docker-conda
+ENV SNAKEMAKE_PROFILE=/src/hippunfold/profiles/docker-conda
 
 # Run the pipeline
 COPY entrypoint.sh /entrypoint.sh
