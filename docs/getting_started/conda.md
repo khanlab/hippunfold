@@ -69,7 +69,7 @@ ds002168/
 Running HippUnfold using the T1w modality:
 
 ```bash
-hippunfold ds002168 ds002168_hippunfold participant --modality T1w --cores all --use-conda
+hippunfold ds002168 ds002168_hippunfold participant --modality T1w --cores all
 ```
 
 This should run the full pipeline and place results in a new `ds002168_hippunfold/` folder.
