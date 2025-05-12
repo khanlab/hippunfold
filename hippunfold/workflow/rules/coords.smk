@@ -68,8 +68,6 @@ rule get_label_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     group:
         "subj"
     conda:
@@ -117,8 +115,6 @@ rule get_src_sink_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -155,8 +151,6 @@ rule get_src_sink_sdt:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -184,8 +178,6 @@ rule get_nan_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -214,14 +206,10 @@ rule create_upsampled_coords_ref:
                 hemi="{hemi}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     shell:
         "c3d {input} -retain-labels {params.tight_crop_labels} -trim {params.trim_padding} -resample-mm {params.resample_res} -o {output}"
 
@@ -268,8 +256,6 @@ rule prep_dseg_for_laynii:
                 hemi="{hemi}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -307,8 +293,6 @@ rule laynii_layers_equidist:
         ),
     shadow:
         "minimal"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
     log:
@@ -356,8 +340,6 @@ rule laynii_layers_equivol:
         ),
     shadow:
         "minimal"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("laynii")
     log:

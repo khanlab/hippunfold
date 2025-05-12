@@ -20,8 +20,6 @@ rule import_dseg_tissue:
                 hemi="{hemi,L|R}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:

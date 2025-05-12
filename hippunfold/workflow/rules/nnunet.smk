@@ -1,52 +1,8 @@
 import re
 
 
-def get_nnunet_input(wildcards):
-    T1w_nii = bids(
-        root=root,
-        datatype="anat",
-        space="corobl",
-        desc="preproc",
-        hemi="{hemi}",
-        suffix="T1w.nii.gz",
-        **inputs.subj_wildcards,
-    )
-    T2w_nii = bids(
-        root=root,
-        datatype="anat",
-        space="corobl",
-        desc="preproc",
-        hemi="{hemi}",
-        suffix="T2w.nii.gz",
-        **inputs.subj_wildcards,
-    )
-    if (config["modality"] == "T1w" or config["modality"] == "T2w") and config[
-        "force_nnunet_model"
-    ] == "T1T2w":
-        return (T1w_nii, T2w_nii)
-
-    elif config["modality"] == "T2w":
-        return T2w_nii
-    elif config["modality"] == "T1w":
-        return T1w_nii
-    elif config["modality"] == "hippb500":
-        return bids(
-            root=root,
-            datatype="dwi",
-            hemi="{hemi}",
-            space="corobl",
-            suffix="b500.nii.gz",
-            **inputs.subj_wildcards,
-        )
-    else:
-        raise ValueError("modality not supported for nnunet!")
-
-
 def get_model_tar():
-    if config["force_nnunet_model"]:
-        model_name = config["force_nnunet_model"]
-    else:
-        model_name = config["modality"]
+    model_name = config["nnunet_model"]
 
     local_tar = config["resource_urls"]["nnunet_model"].get(model_name, None)
     if local_tar == None:
@@ -58,15 +14,11 @@ def get_model_tar():
 rule download_nnunet_model:
     params:
         url=(
-            config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
-            if config["force_nnunet_model"]
-            else config["resource_urls"]["nnunet_model"][config["modality"]]
+            config["resource_urls"]["nnunet_model"][config["nnunet_model"]]
         ),
         model_dir=Path(download_dir) / "model",
     output:
         model_tar=get_model_tar(),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("curl")
     shell:
@@ -117,7 +69,14 @@ rule run_inference:
     """ This rule uses either GPU or CPU .
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
     input:
-        in_img=get_nnunet_input,
+        in_img=bids(
+            root=root,
+            datatype="anat",
+            space="corobl",
+            hemi="{hemi,L|R}",
+            suffix="preproc.nii.gz",
+            **inputs.subj_wildcards,
+        ),
         model_tar=get_model_tar(),
     params:
         cmd_copy_inputs=get_cmd_copy_inputs,
@@ -156,10 +115,8 @@ rule run_inference:
         time=30 if config["use_gpu"] else 60,
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("nnunet")
+    # conda:
+    #     conda_env("nnunet")
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -171,9 +128,10 @@ rule run_inference:
         "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
         "{params.cmd_copy_inputs} && "
         "tar -xf {input.model_tar} -C {params.model_dir} && "
-        "export RESULTS_FOLDER={params.model_dir} && "
+        "export nnUNet_results={params.model_dir} && "
         "export nnUNet_n_proc_DA={threads} && "
-        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
+        # "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
+        "nnUNetv2_predict -i {params.in_folder} -o {params.out_folder} -d 001 -c 3d_fullres {params.tta} &> {log} && "
         "cp {params.temp_lbl} {output.nnunet_seg}"
 
 
@@ -250,8 +208,6 @@ rule qc_nnunet_f3d:
                 hemi="{hemi}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("niftyreg")
     log:
@@ -302,8 +258,6 @@ rule qc_nnunet_dice:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("pyunfold")
     script:

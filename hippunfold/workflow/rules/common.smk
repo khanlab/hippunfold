@@ -402,21 +402,20 @@ def get_final_qc():
             )
         )
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
-        if not config["use_template_seg"]:
-            qc.extend(
-                inputs[config["modality"]].expand(
-                    bids(
-                        root=root,
-                        datatype="qc",
-                        desc="unetf3d",
-                        suffix="dice.tsv",
-                        hemi="{hemi}",
-                        **inputs.subj_wildcards,
-                    ),
-                    hemi=config["hemi"],
-                    allow_missing=True,
-                )
+        qc.extend(
+            inputs[config["modality"]].expand(
+                bids(
+                    root=root,
+                    datatype="qc",
+                    desc="unetf3d",
+                    suffix="dice.tsv",
+                    hemi="{hemi}",
+                    **inputs.subj_wildcards,
+                ),
+                hemi=config["hemi"],
+                allow_missing=True,
             )
+        )
     return qc
 
 
@@ -436,15 +435,11 @@ if "corobl" in ref_spaces:
 
 def get_cifti_metric_types(label):
     types_list = config["cifti_metric_types"][label]
-    if config["generate_myelin_map"]:
-        types_list.append("myelin.dscalar")
     return types_list
 
 
 def get_gifti_metric_types(label):
     types_list = config["gifti_metric_types"][label]
-    if config["generate_myelin_map"]:
-        types_list.append("myelin.shape")
     return types_list
 
 

@@ -1,4 +1,37 @@
 
+# unfold ref nifti
+rule create_unfold_ref:
+    params:
+        dims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["dims"]
+        ),
+        voxdims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["voxdims"]
+        ),
+        origin=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["origin"]
+        ),
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
+    output:
+        nii=temp(
+            bids(
+                root=root,
+                space="unfold",
+                label="{label}",
+                datatype="warps",
+                suffix="refvol.nii.gz",
+                **inputs.subj_wildcards,
+            )
+        ),
+    group:
+        "subj"
+    conda:
+        conda_env("c3d")
+    shell:
+        "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}"
+
+
+
 rule extract_unfold_ref_slice:
     """This gets the central-most slice of the unfold volume, for obtaining a 2D slice"""
     input:
@@ -22,8 +55,6 @@ rule extract_unfold_ref_slice:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/c3d.yaml"
     group:
@@ -97,8 +128,6 @@ rule native_metric_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
     group:
@@ -170,8 +199,6 @@ rule atlas_metric_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
     group:
@@ -205,8 +232,6 @@ rule slice_3d_to_2d_subject:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     group:
@@ -243,8 +268,6 @@ rule slice_3d_to_2d_atlas:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     group:
@@ -348,8 +371,6 @@ rule unfoldreg_antsquick:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/ants.yaml"
     group:
@@ -414,8 +435,6 @@ rule reset_header_2d_warp_unfoldreg:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:
@@ -462,8 +481,6 @@ rule warp_unfold_native_to_unfoldreg:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
     group:

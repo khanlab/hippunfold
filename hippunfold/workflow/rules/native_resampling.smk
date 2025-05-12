@@ -1,12 +1,3 @@
-def get_unfold_ref_name(wildcards):
-    if (
-        wildcards.label in config["atlas_metadata"][config["atlas"]]["label_wildcards"]
-        and config["no_unfolded_reg"] == False
-    ):
-        return "unfoldreg"
-    else:
-        return "unfold"
-
 
 def get_unfold_ref(wildcards):
     """function to return either unfoldreg or unfold ref mesh, depending on whether
@@ -16,7 +7,7 @@ def get_unfold_ref(wildcards):
         root=root,
         datatype="surf",
         suffix="midthickness.surf.gii",
-        space=get_unfold_ref_name(wildcards),
+        space="unfoldreg",
         den="native",
         hemi="{hemi}",
         label="{label}",
@@ -87,8 +78,6 @@ rule resample_native_surf_to_atlas_density:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -138,8 +127,6 @@ rule resample_native_metric_to_atlas_density:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -192,8 +179,6 @@ rule resample_native_coords_to_atlas_density:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -246,8 +231,6 @@ rule resample_atlas_subfields_to_native_surf:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -277,8 +260,6 @@ rule cp_atlas_subfields_label_gii:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -332,8 +313,6 @@ rule atlas_label_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -376,8 +355,6 @@ rule affine_gii_corobl_to_orig:
             label="{label,hipp|dentate}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:

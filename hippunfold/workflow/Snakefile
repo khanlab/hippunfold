@@ -19,38 +19,14 @@ template_modality = False
 
 
 # set the lists used for output spaces
-if config["modality"] == "T1w" or "T1w" in config["output_spaces"]:
-    ref_spaces.append("T1w")
-    crop_ref_spaces.append("cropT1w")
-    limit_to_list.add("T1w")
-if config["modality"] == "T2w" or "T2w" in config["output_spaces"]:
-    ref_spaces.append("T2w")
-    crop_ref_spaces.append("cropT2w")
-    limit_to_list.add("T2w")
+ref_spaces.append(config["modality"])
+crop_ref_spaces.append("crop"+config["modality"])
 if (
-    config["modality"] == "hippb500"
-    or config["modality"] == "dsegtissue"
+    config["modality"] == "dsegtissue"
     or "corobl" in config["output_spaces"]
 ):
     ref_spaces.append("corobl")
-    crop_ref_spaces.append("corobl")
 
-# add required inputs for myelin mapping
-if config["generate_myelin_map"]:
-    limit_to_list.add("T1w")
-    limit_to_list.add("T2w")
-
-
-# set the modality to use for template registration
-if "T2w" in config["modality"]:
-    if config["t1_reg_template"]:
-        limit_to_list.add("T1w")
-        template_modality = "T1w"
-    else:
-        template_modality = "T2w"
-
-elif "T1w" in config["modality"]:
-    template_modality = "T1w"
 
 if config["analysis_level"] == "group_create_atlas":
     limit_to_list.add("dsegsubfields")
@@ -91,12 +67,7 @@ root = os.path.expandvars(config["root"])
 
 include: "rules/common.smk"
 include: "rules/download.smk"
-
-
-if "T1w" in limit_to_list:
-
-    include: "rules/preproc_t1.smk"
-
+include: "rules/preproc_inputs.smk"
 
 # include rules only as they are needed..
 if config["modality"] == "dsegtissue":
@@ -107,50 +78,18 @@ else:
 
     include: "rules/nnunet.smk"
 
-
-if "T2w" in limit_to_list or config["generate_myelin_map"]:
-
-    include: "rules/preproc_t2.smk"
-
-
-if config["modality"] == "hippb500":
-
-    include: "rules/preproc_hippb500.smk"
-
-
 include: "rules/coords.smk"
-include: "rules/warps.smk"
 include: "rules/cifti.smk"
 include: "rules/subfields.smk"
 include: "rules/resample_final_to_crop.smk"
 include: "rules/qc.smk"
-include: "rules/myelin_map.smk"
 include: "rules/native_isosurf.smk"
 include: "rules/inner_outer_surf.smk"
 include: "rules/native_metrics.smk"
 include: "rules/native_resampling.smk"
 include: "rules/native_unfold.smk"
 include: "rules/unfold_reg.smk"
-
-
-if config["use_template_seg"]:
-    if (
-        "dseg" in config["template_files"][config["template"]]
-        and "coords" in config["template_files"][config["template"]]
-    ):
-
-        include: "rules/templateseg.smk"
-
-    else:
-        print(
-            "use_template_seg is not possible, template dseg or coords do not exist for the chosen template"
-        )
-
-        include: "rules/shape_inject.smk"
-
-else:
-
-    include: "rules/shape_inject.smk"
+include: "rules/shape_inject.smk"
 
 
 rule all:

@@ -94,9 +94,7 @@ rule gen_atlas_reg_ants:
                 label="{label}",
                 suffix="antstemplate",
             )
-        ),
-    container:
-        config["singularity"]["autotop"]  # note antsMultivariateTemplateConstruction2 is not in the container right now!
+        ),  # note antsMultivariateTemplateConstruction2 is not in the container right now!
     conda:
         conda_env("ants")
     shell:
@@ -225,8 +223,6 @@ rule reset_header_2d_metric_nii:
             hemi="{hemi}",
             suffix="{metric,[a-zA-Z0-9]+}.nii.gz",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:
@@ -273,8 +269,6 @@ rule reset_header_2d_warp_atlasgen:
             desc="3D",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:
@@ -301,8 +295,6 @@ rule make_metric_ref:
                 suffix="metricref.nii.gz",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     shell:
@@ -333,8 +325,6 @@ rule gen_unfold_atlas_mesh:
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
     script:
@@ -401,8 +391,6 @@ rule avgtemplate_metric_vol_to_surf:
             hemi="{hemi}",
             suffix="{metric}.shape.gii",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     shell:
@@ -445,8 +433,6 @@ rule warp_subj_unfold_surf_to_avg:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     shadow:
@@ -497,8 +483,6 @@ rule resample_subj_native_surf_to_avg:
             suffix="midthickness.surf.gii",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     shell:
@@ -538,8 +522,6 @@ rule warp_subfields_to_avg:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("ants")
     shell:
@@ -572,8 +554,6 @@ rule vote_subfield_labels:
                 label="{label}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:
@@ -615,8 +595,6 @@ rule reset_header_2d_subfields_nii:
             desc="subfieldsfixhdr",
             suffix="dseg.nii.gz",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("neurovis")
     script:
@@ -644,8 +622,6 @@ rule import_avg_subfields_as_label:
             desc="subfieldswithlbl",
             suffix="dseg.nii.gz",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -682,8 +658,6 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             hemi="{hemi}",
             suffix="dseg.label.gii",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     shell:

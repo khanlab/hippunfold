@@ -21,26 +21,6 @@ targets_by_analysis_level:
 
 
 pybids_inputs:
-  T2w:
-    filters:
-      suffix: 'T2w'
-      extension: '.nii.gz'
-      datatype: 'anat'
-    wildcards:
-      - subject
-      - session
-      - acquisition
-      - run
-
-  hippb500:
-    filters:
-      suffix: 'b500'
-      extension: '.nii.gz'
-      datatype: 'dwi'
-    wildcards:
-      - subject
-      - session
-
   T1w:
     filters:
       suffix: 'T1w'
@@ -51,7 +31,26 @@ pybids_inputs:
       - session
       - acquisition
       - run
-
+  T2w:
+    filters:
+      suffix: 'T2w'
+      extension: '.nii.gz'
+      datatype: 'anat'
+    wildcards:
+      - subject
+      - session
+      - acquisition
+      - run
+  flair:
+    filters:
+      suffix: 'FLAIR'
+      extension: '.nii.gz'
+      datatype: 'anat'
+    wildcards:
+      - subject
+      - session
+      - acquisition
+      - run
   dsegtissue:
     filters:
       suffix: 'dseg'
@@ -85,28 +84,27 @@ pybids_inputs:
 parse_args:
 
   --modality:
-    help: 'Type of image to run hippunfold on. For dsegtissue and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with separate hemi-L|R in the name(s). (default: %(default)s)'
-    required: True
+    help: 'Type of image to run hippunfold on. superres will attempt super-resolution sampling as T1w + 1/T2w + 1/flair. For dsegtissue and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with separate hemi-L|R in the name(s). (default: %(default)s)'
+    required: False
     choices:
       - T1w
       - T2w
-      - hippb500
+      - flair
+      - superres
       - dsegtissue
+    default: 'T1w'
 
-
-  --template:
+  --nnunet_model:
+    help: 'Set the nnU-net model to use for segmentation. (default: %(default)s)'
+    required: False
     choices:
-      - 'CITI168'
-      - 'dHCP'
-      - 'MBMv2'
-      - 'MBMv3'
-      - 'CIVM'
-      - 'ABAv3'
-      - 'bigbrain'
-    default: 'CITI168'
-    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, CIVM is for in vivo macaque data, and ABAv3 is for mouse data. When using a non-human template, consider using a corresponding atlas. (default: %(default)s)'
+      - synthlayer
+    default: 'synthlayer'
 
-
+  --skip_inject_template_labels:
+    help: 'Set this flag to skip post-processing template injection into CNN segmentation. Note this will disable generation of DG surfaces. (default: %(default)s)'
+    default: False
+    action: 'store_true'
 
   --inject_template:
     choices:
@@ -114,51 +112,9 @@ parse_args:
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
-  --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv2 (ex vivo marmoset), MBMv3 (in vivo marmoset), or CIVM (ex vivo macaque) template. (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  --template_seg_smoothing_factor: 
-    help: 'Scales the default smoothing sigma for gradient and warp in greedy registration for template-based segmentation. Using a value higher than 1 will use result in a smoother warp. (default: %(default)s)'
-    default: 2.0
-
-  --skip_preproc:
-    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  --skip_coreg:
-    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  --skip_inject_template_labels:
-    help: 'Set this flag to skip post-processing template injection into CNN segmentation. Note this will disable generation of DG surfaces. (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  
   --inject_template_smoothing_factor: 
     help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
     default: 1.0
-
-
-  --rigid_reg_template:
-    help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  --no_reg_template:
-    help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
-    default: False
-    action: 'store_true'
-
-  
-  --t1_reg_template:
-    help: 'Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
-    default: false
-    action: store_true
 
   --crop_res:
     help: 'Sets the bounding box resolution for the crop original modality (e.g. cropT1w space). Under the hood, hippUnfold operates at higher resolution than the original image, so this tries to preserve some of that detail. (default: %(default)s)'
@@ -167,32 +123,7 @@ parse_args:
   --crop_box:
     help: 'Sets the bounding box size for the crop original modality (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
     default: '256x256x256vox'
-
-  --resample_dsegtissue:
-    help: 'Resample the manual segmentation (for --modality dsegtissue), keeping the bounding box the same, but changing the number of voxels in the image. This can be specified as voxels ("300x300x300"), or a percentage ("20%%") or percentage in each direction ("20x20x40%%"). Note: the segmentation will always be subsequently cropped around the segmentation, with a padding of 5 voxels.  (default: %(default)s)'
-    default: null
-
-  --laminar_coords_res_hipp:
-    help: 'Set the resolution that the laminar (IO) coords will be computed with for hippocampus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
-    default: '0.3x0.3x0.3mm'
-    dest: "laminar_coords_res.hipp"
-
-  --laminar_coords_res_dentate:
-    help: 'Set the resolution that the laminar (IO) coords will be computed with for the dentate gyrus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
-    default: '0.1x0.1x0.1mm'
-    dest: "laminar_coords_res.dentate"
-
-
-  --no_unfolded_reg:
-    help: "Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. (default: %(default)s)"
-    default: False
-    action: store_true
-
-  --generate_myelin_map:
-    help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
-    default: False
-    action: store_true
-
+    
   --use_gpu:
     help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
     default: False
@@ -210,7 +141,6 @@ parse_args:
     nargs: '+'
     default: []
     help: 'Sets output spaces for results (default: %(default)s)'
-
 
   --hemi:
     choices:
@@ -240,21 +170,6 @@ parse_args:
     nargs: '+'
     help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
 
-  --force_nnunet_model:
-    help: 'Force nnunet model to use (expert option). (default: %(default)s)'
-    default: False
-    choices:
-      - T1w
-      - T2w
-      - T1T2w
-      - b1000
-      - trimodal
-      - hippb500
-      - neonateT1w
-      - synthseg_v0.1
-      - synthseg_v0.2
-      - neonateT1w_v2
-
   --enable-bids-validation:
     help: |
       Enable validation of BIDS dataset. BIDS validation would be performed
@@ -263,7 +178,6 @@ parse_args:
     dest: "plugins.validator.skip"
     action: "store_false"
     default: True
-
 
   --version:
     help: 'Print the version of HippUnfold'
@@ -309,175 +223,38 @@ cifti_metric_types:
 
 #--- workflow specific configuration -- 
 
-singularity:
-  autotop: 'docker://khanlab/hippunfold_deps:workbench-2.0.1'
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
 
+template: 'CITI168'
+
 template_files:
   CITI168:
-    T1w: T1w_head_700um.nii.gz
-    T2w: T2w_head_700um.nii.gz
+    T1w: T1w_space-corobl.nii.gz
     xfm_corobl: CoronalOblique_rigid.txt
-    crop_ref: T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    Mask_crop: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
-    dseg:  sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz 
-    coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{label}_desc-laplace_coords.nii.gz 
-    hemi_wildcards:
-      - L
-      - R
-  dHCP:
-    T1w: tpl-dHCP_cohort-1_res-1_T1w.nii.gz
-    T2w: tpl-dHCP_cohort-1_res-1_T2w.nii.gz
-    xfm_corobl: tpl-dHCP_cohort-1_to-corobl_affine.txt
-    crop_ref: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
-    crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
-    Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
-    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuedsegtissue_dseg.nii.gz
-    coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - L
-      - R
-
-  MBMv2:
-    T1w: Template_sym_MTR_80um.nii.gz
-    T2w: Template_sym_T2_80um.nii.gz
-    xfm_corobl: tpl-MBMv2_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv2_hemi-R_space-corobl_{modality}.nii.gz
-    Mask_crop: tpl-MBMv2_hemi-R_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv2_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-MBMv2_dir-{dir}_hemi-R_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - R
-
-  MBMv3:
-    T1w: tpl-MBMv3_T1w.nii.gz
-    T2w: tpl-MBMv3_T2w.nii.gz
-    xfm_corobl: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv3_hemi-R_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-MBMv3_hemi-R_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv3_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - R
-
-
-  CIVM:
-    T1w: tpl-CIVM_T1w.nii.gz
-    xfm_corobl: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-CIVM_hemi-{hemi}_space-corobl_{modality}.nii.gz
-    Mask_crop: tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-CIVM_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - L
-      - R
-
-
+    Mask_crop: Mask_200umCoronalOblique_hemi-{hemi}.nii.gz
   upenn:
-    T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
-    dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
-    dseg_dentate: tpl-upenn_desc-hippdentate_dseg.nii.gz # hack: separate files for DG
-    coords: tpl-upenn_dir-{dir}_label-{label}_coords.nii.gz
-    hemi_wildcards:
-      - R
-
-  bbhist:
-    T1w: sub-bbhist_hemi-{hemi}_100um.nii.gz
-    dseg: sub-bbhist_hemi-{hemi}_100um_dseg.nii.gz # aka dsegtissue
-    hemi_wildcards:
-      - L
-      - R
-
-  ABAv3:
-    T1w: tpl-ABAv3_T1w.nii.gz
-    xfm_corobl: tpl-ABAv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-ABAv3_hemi-{hemi}_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - L
-      - R
-
-  bigbrain:
-    T1w: tpl-bigbrain_1mm_merker.nii.gz
-    T2w: tpl-bigbrain_1mm_merker.nii.gz
-    xfm_corobl: tpl-bigbrain_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-bigbrain_hemi-{hemi}_space-corobl_100um_merker.nii.gz
-    Mask_crop: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
-    dseg: tpl-bigbrain_hemi-{hemi}_space-corobl_desc-tissuemanual_100um_dseg.nii.gz
-    coords: tpl-bigbrain_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - L
-      - R
-
-
-
-#values to use for re-mapping tissue labels when combining with subfields.
-# set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
-tissue_atlas_mapping:
-  tissue:
-    dg: 8
-    srlm: 2
-    cyst: 7
-  magdeburg:
-    dg: 3
-    srlm: 9
-    cyst: 10
-  freesurfer:
-    dg: 209
-    srlm: 227
-    cyst: 228
-  default: #this is used for any other atlases
-    dg: 6
-    srlm: 7
-    cyst: 8
+      T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
+      dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
+      layers: tpl-upenn_desc-layers_dseg.nii.gz
+      dseg_dentate: tpl-upenn_desc-hippdentate_dseg.nii.gz # hack: separate files for DG
+      coords: tpl-upenn_dir-{dir}_label-{label}_coords.nii.gz
+      hemi_wildcards:
+        - R
    
 
-
 #these will be downloaded to ~/.cache/hippunfold
+
 resource_urls:
   nnunet_model:
-    T1w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
-    T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar'
-    hippb500: 'zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
-    neonateT1w: 'zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
-    neonateT1w_v2: 'zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
-    T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
-    synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
-    synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
+    synthlayer: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task100_synthlayer.nnUNetTrainerV2.model_best.tar'
   atlas:
-    bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
     multihist7: 'www.dropbox.com/scl/fi/g07u7la7v1kwfgsty6ujc/atlas-multihist7_20250108.zip?rlkey=bi7wbdsm93upgnn3bmlv4f1hx&st=5iv33isc&dl=0'
-    # bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
-    # magdeburg: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8013d27b122f94c938/?zip='
-    # freesurfer: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8513d27b123094c96a/?zip='
-    # macaque: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6661f504d835c42bcb4cddab/?zip='
-    # mouse: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666884380f8c80103a3c9569/?zip='
   template:
     CITI168: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
-    dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
-    MBMv2: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0887852d133ca597dd/?zip='
-    MBMv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
     upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
-    CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
-    ABAv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip='
-    bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666b1bc765e1de5972893e59/?zip='
-    bbhist: 'placeholder.url'
-#to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
-
-
-
-hippdwi_opts:
-  resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm
-  bbox_x:
-    L: '383 510'
-    R: '224 351'
-  bbox_y: '198 453'
 
 unfold_vol_ref:
   hipp:
@@ -540,9 +317,8 @@ shape_inject:
     - 4
     - 5
     - 6
-    - 8
   labels_reinsert:
-    - 7
+    - 8
   label_smoothing_stdev: '0.5x0.5x0.5mm'
 
 

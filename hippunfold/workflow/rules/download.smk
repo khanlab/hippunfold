@@ -9,8 +9,6 @@ rule download_extract_template:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
         unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
-    container:
-        config["singularity"]["autotop"]
     shadow:
         "minimal"
     conda:
@@ -70,8 +68,45 @@ rule import_template_dseg:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        conda_env("c3d")
+    shell:
+        "{params.copy_or_flip_cmd} {output.template_seg}"
+
+
+rule import_template_layers:
+    input:
+        template_dir=Path(download_dir) / "template" / config["inject_template"],
+    params:
+        template_seg=lambda wildcards: Path(download_dir)
+        / "template"
+        / config["inject_template"]
+        / config["template_files"][config["inject_template"]]["layers"].format(
+            **wildcards
+        ),
+        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
+            wildcards,
+            Path(download_dir)
+            / "template"
+            / config["inject_template"]
+            / config["template_files"][config["inject_template"]]["layers"].format(
+                **wildcards
+            ),
+        ),
+    output:
+        template_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                desc="hipplayers",
+                hemi="{hemi}",
+                suffix="dseg.nii.gz",
+            )
+        ),
+    group:
+        "subj"
     conda:
         conda_env("c3d")
     shell:
@@ -111,94 +146,8 @@ rule import_template_dseg_dentate:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
-
-rule import_template_coords:
-    input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
-    params:
-        template_coords=lambda wildcards: Path(download_dir)
-        / "template"
-        / config["inject_template"]
-        / config["template_files"][config["inject_template"]]["coords"].format(
-            **wildcards
-        ),
-        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
-            wildcards,
-            Path(download_dir)
-            / "template"
-            / config["inject_template"]
-            / config["template_files"][config["inject_template"]]["coords"].format(
-                **wildcards
-            ),
-        ),
-    output:
-        template_coords=temp(
-            bids(
-                root=root,
-                datatype="coords",
-                **inputs.subj_wildcards,
-                dir="{dir}",
-                label="{label}",
-                suffix="coords.nii.gz",
-                desc="init",
-                space="template",
-                hemi="{hemi}",
-            )
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("c3d")
-    shell:
-        "{params.copy_or_flip_cmd} {output.template_coords}"
-
-
-rule import_template_anat:
-    input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
-    params:
-        template_anat=lambda wildcards: Path(download_dir)
-        / "template"
-        / config["inject_template"]
-        / config["template_files"][config["inject_template"]][
-            get_modality_suffix(config["modality"])
-        ].format(**wildcards),
-        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
-            wildcards,
-            Path(download_dir)
-            / "template"
-            / config["inject_template"]
-            / config["template_files"][config["inject_template"]][
-                get_modality_suffix(config["modality"])
-            ].format(**wildcards),
-        ),
-    output:
-        template_anat=temp(
-            bids(
-                root=root,
-                datatype="anat",
-                space="template",
-                **inputs.subj_wildcards,
-                hemi="{hemi}",
-                suffix="{modality}.nii.gz".format(
-                    modality=get_modality_suffix(config["modality"])
-                ),
-            ),
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    conda:
-        conda_env("c3d")
-    shell:
-        "{params.copy_or_flip_cmd} {output.template_anat}"
