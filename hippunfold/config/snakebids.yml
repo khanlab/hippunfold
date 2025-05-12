@@ -123,7 +123,7 @@ parse_args:
   --crop_box:
     help: 'Sets the bounding box size for the crop original modality (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
     default: '256x256x256vox'
-    
+
   --use_gpu:
     help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
     default: False
@@ -244,8 +244,17 @@ template_files:
         - R
    
 
-#these will be downloaded to ~/.cache/hippunfold
+tissue_atlas_mapping:
+  tissue:
+    dg: 5,6
+    srlm: 7
+    cyst: 8
+  default: 
+    dg: 6
+    srlm: 7
+    cyst: 8
 
+#these will be downloaded to ~/.cache/hippunfold
 resource_urls:
   nnunet_model:
     synthlayer: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task100_synthlayer.nnUNetTrainerV2.model_best.tar'

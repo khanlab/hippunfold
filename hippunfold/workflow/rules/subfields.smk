@@ -290,14 +290,12 @@ rule resample_subfields_to_orig:
             suffix="xfm.txt",
             from_="{modality}",
             to="corobl",
-            desc="affine",
             type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
-            desc="preproc",
             suffix="{modality}.nii.gz",
         ),
     output:
@@ -341,14 +339,12 @@ rule resample_postproc_to_orig:
             suffix="xfm.txt",
             from_="{modality}",
             to="corobl",
-            desc="affine",
             type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
-            desc="preproc",
             suffix="{modality}.nii.gz",
         ),
     output:
@@ -391,14 +387,12 @@ rule resample_unet_to_orig:
             suffix="xfm.txt",
             from_="{modality}",
             to="corobl",
-            desc="affine",
             type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
-            desc="preproc",
             suffix="{modality}.nii.gz",
         ),
     output:

@@ -107,13 +107,6 @@ def get_avg_or_cp_scans_cmd(wildcards, input, output):
     return cmd
 
 
-def get_modality_suffix(modality):
-    if modality[:4] == "hipp":
-        return modality[4:]
-    else:
-        return modality
-
-
 def get_inputs_spec_file(label, density):
 
     files = []
@@ -312,10 +305,7 @@ def get_final_anat():
                 bids(
                     root=root,
                     datatype="anat",
-                    desc="preproc",
-                    suffix="{modality_suffix}.nii.gz".format(
-                        modality_suffix=get_modality_suffix(config["modality"])
-                    ),
+                    suffix=config["modality"] + ".nii.gz",
                     space="{space}",
                     hemi="{hemi}",
                     **inputs.subj_wildcards,

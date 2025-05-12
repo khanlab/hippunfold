@@ -160,7 +160,6 @@ rule resample_subfields_crop:
             suffix="xfm.txt",
             from_="{modality}",
             to="corobl",
-            desc="affine",
             type_="itk",
         ),
         ref=bids(
@@ -250,7 +249,6 @@ rule resample_to_crop:
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
-            desc="preproc",
             suffix="{modality}.nii.gz",
         ),
         ref=bids(
@@ -265,7 +263,6 @@ rule resample_to_crop:
         nii=bids(
             root=root,
             datatype="anat",
-            desc="preproc",
             suffix="{modality}.nii.gz",
             space="crop{modality}",
             hemi="{hemi}",
@@ -293,43 +290,3 @@ def get_xfm_t2_to_t1():
     )
     return xfm
 
-
-rule resample_t2_to_crop:
-    input:
-        nii=bids(
-            root=root,
-            datatype="anat",
-            **inputs.subj_wildcards,
-            suffix="T2w.nii.gz",
-            desc="preproc",
-        ),
-        ref=bids(
-            root=root,
-            datatype="warps",
-            suffix="cropref.nii.gz",
-            space="{modality}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
-        ),
-        xfm=get_xfm_t2_to_t1(),
-    params:
-        xfm_opt=lambda wildcards, input: (
-            "" if len(input.xfm) == 0 else f"-t {input.xfm}"
-        ),
-    output:
-        nii=bids(
-            root=root,
-            datatype="anat",
-            desc="preproc",
-            suffix="T2w.nii.gz",
-            space="crop{modality}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
-        ),
-    conda:
-        conda_env("ants")
-    group:
-        "subj"
-    shell:
-        "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
-        "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} {params.xfm_opt}"

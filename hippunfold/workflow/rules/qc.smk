@@ -108,17 +108,7 @@ rule plot_subj_subfields:
 
 
 def get_bg_img_for_subfield_qc(wildcards):
-    if config["modality"] == "hippb500":
-        return bids(
-            root=root,
-            datatype="anat",
-            desc="preproc",
-            suffix="hippb500.nii.gz",
-            space="{space}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
-        )
-    elif config["modality"] == "dsegtissue":
+    if config["modality"] == "dsegtissue":
         # blank image as bg
         return bids(
             root=root,
@@ -128,26 +118,11 @@ def get_bg_img_for_subfield_qc(wildcards):
             hemi="{hemi}",
             **inputs.subj_wildcards,
         )
-
-    elif config["modality"][:3] == "seg":
-        bg_modality = config["modality"][3:]
-        return bids(
-            root=root,
-            datatype="anat",
-            desc="preproc",
-            suffix=f"{bg_modality}.nii.gz",
-            space="{space}",
-            hemi="{hemi}",
-            **inputs.subj_wildcards,
-        )
-
     else:
-        bg_modality = config["modality"]
         return bids(
             root=root,
             datatype="anat",
-            desc="preproc",
-            suffix=f"{bg_modality}.nii.gz",
+            suffix=config["modality"] + ".nii.gz",
             space="{space}",
             hemi="{hemi}",
             **inputs.subj_wildcards,
