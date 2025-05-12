@@ -299,22 +299,21 @@ def get_final_subfields():
 
 def get_final_anat():
     anat = []
-    if "T1w" in ref_spaces or "T2w" in ref_spaces:
-        anat.extend(
-            inputs[config["modality"]].expand(
-                bids(
-                    root=root,
-                    datatype="anat",
-                    suffix=config["modality"] + ".nii.gz",
-                    space="{space}",
-                    hemi="{hemi}",
-                    **inputs.subj_wildcards,
-                ),
-                space=crop_ref_spaces,
-                hemi=config["hemi"],
-                allow_missing=True,
-            )
+    anat.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix=config["modality"] + ".nii.gz",
+                space="{space}",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            ),
+            space=crop_ref_spaces,
+            hemi=config["hemi"],
+            allow_missing=True,
         )
+    )
     return anat
 
 
@@ -374,38 +373,36 @@ def get_final_qc():
             allow_missing=True,
         )
     )
-    if len(config["hemi"]) == 2:
-        qc.extend(
-            inputs[config["modality"]].expand(
-                bids(
-                    root=root,
-                    datatype="qc",
-                    desc="subfields",
-                    space="{space}",
-                    atlas="{atlas}",
-                    suffix="volumes.png",
-                    **inputs.subj_wildcards,
-                ),
-                space=crop_ref_spaces,
-                atlas=config["atlas"],
-                allow_missing=True,
-            )
+    qc.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="qc",
+                desc="subfields",
+                space="{space}",
+                atlas="{atlas}",
+                suffix="volumes.png",
+                **inputs.subj_wildcards,
+            ),
+            space=crop_ref_spaces,
+            atlas=config["atlas"],
+            allow_missing=True,
         )
-    if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
-        qc.extend(
-            inputs[config["modality"]].expand(
-                bids(
-                    root=root,
-                    datatype="qc",
-                    desc="unetf3d",
-                    suffix="dice.tsv",
-                    hemi="{hemi}",
-                    **inputs.subj_wildcards,
-                ),
-                hemi=config["hemi"],
-                allow_missing=True,
-            )
+    )
+    qc.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="qc",
+                desc="unetf3d",
+                suffix="dice.tsv",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            ),
+            hemi=config["hemi"],
+            allow_missing=True,
         )
+    )
     return qc
 
 
