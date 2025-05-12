@@ -149,7 +149,7 @@ rule run_inference:
         ),
     shadow:
         "minimal"
-    threads: 5
+    threads: 16
     resources:
         gpus=1 if config["use_gpu"] else 0,
         mem_mb=16000,
@@ -158,8 +158,8 @@ rule run_inference:
         "subj"
     container:
         config["singularity"]["autotop"]
-    # conda:
-    #     conda_env("nnunetv2")
+    conda:
+        conda_env("nnunet")
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -173,8 +173,7 @@ rule run_inference:
         "tar -xf {input.model_tar} -C {params.model_dir} && "
         "export RESULTS_FOLDER={params.model_dir} && "
         "export nnUNet_n_proc_DA={threads} && "
-        # "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
-        "nnUNetv2_predict -i {params.in_folder} -o {params.out_folder} -d 001 -c 3d_fullres &> {log} && "
+        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
         "cp {params.temp_lbl} {output.nnunet_seg}"
 
 

@@ -254,7 +254,6 @@ parse_args:
       - synthseg_v0.1
       - synthseg_v0.2
       - neonateT1w_v2
-      - synthlayer
 
   --enable-bids-validation:
     help: |
@@ -321,8 +320,8 @@ template_files:
     T1w: T1w_head_700um.nii.gz
     T2w: T2w_head_700um.nii.gz
     xfm_corobl: CoronalOblique_rigid.txt
-    crop_ref: T2w_200umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: T1w_200umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_ref: T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
+    crop_refT1w: T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
     dseg:  sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz 
     coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{label}_desc-laplace_coords.nii.gz 
@@ -380,7 +379,6 @@ template_files:
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
-    layers: tpl-upenn_desc-hlayers_dseg.nii.gz
     dseg_dentate: tpl-upenn_desc-hippdentate_dseg.nii.gz # hack: separate files for DG
     coords: tpl-upenn_dir-{dir}_label-{label}_coords.nii.gz
     hemi_wildcards:
@@ -451,7 +449,6 @@ resource_urls:
     T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
-    synthlayer: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task100_synthlayer.nnUNetTrainerV2.model_best.tar'
   atlas:
     bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
     multihist7: 'www.dropbox.com/scl/fi/g07u7la7v1kwfgsty6ujc/atlas-multihist7_20250108.zip?rlkey=bi7wbdsm93upgnn3bmlv4f1hx&st=5iv33isc&dl=0'
@@ -543,6 +540,7 @@ shape_inject:
     - 4
     - 5
     - 6
+    - 8
   labels_reinsert:
     - 7
   label_smoothing_stdev: '0.5x0.5x0.5mm'

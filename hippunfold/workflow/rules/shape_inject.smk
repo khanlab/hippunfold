@@ -96,7 +96,7 @@ rule resample_template_dseg_tissue_for_reg:
             datatype="anat",
             space="template",
             **inputs.subj_wildcards,
-            desc="layers",
+            desc="hipptissue",
             hemi="{hemi}",
             suffix="dseg.nii.gz",
         ),
