@@ -66,30 +66,24 @@ root = os.path.expandvars(config["root"])
 
 
 include: "rules/common.smk"
-include: "rules/download.smk"
-include: "rules/preproc_inputs.smk"
 
 # include rules only as they are needed..
 if config["modality"] == "dsegtissue":
-
     include: "rules/preproc_dsegtissue.smk"
-
 else:
-
+    include: "rules/preproc_inputs.smk"
     include: "rules/nnunet.smk"
-
 include: "rules/coords.smk"
+include: "rules/native_isosurf.smk"
+include: "rules/inner_outer_surf.smk"
+include: "rules/native_metrics.smk"
+include: "rules/native_unfold.smk"
+include: "rules/unfold_reg.smk"
+include: "rules/native_resampling.smk"
 include: "rules/cifti.smk"
 include: "rules/subfields.smk"
 include: "rules/resample_final_to_crop.smk"
 include: "rules/qc.smk"
-include: "rules/native_isosurf.smk"
-include: "rules/inner_outer_surf.smk"
-include: "rules/native_metrics.smk"
-include: "rules/native_resampling.smk"
-include: "rules/native_unfold.smk"
-include: "rules/unfold_reg.smk"
-include: "rules/shape_inject.smk"
 
 
 rule all:

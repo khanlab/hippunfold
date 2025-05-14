@@ -1,5 +1,3 @@
-import re
-
 
 def get_model_tar():
     model_name = config["nnunet_model"]
@@ -86,7 +84,7 @@ rule run_inference:
     group:
         "subj"
     # conda:
-    #     conda_env("nnunet")
+    #     conda_env("nnunetv2")
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -100,7 +98,7 @@ rule run_inference:
         "tar -xf {input.model_tar} -C {params.model_dir} && "
         "export nnUNet_results={params.model_dir} && "
         "export nnUNet_n_proc_DA={threads} && "
-        "nnUNetv2_predict -i {params.in_folder} -o {params.out_folder} -d 001 -c 3d_fullres {params.tta} &> {log} && "
+        "nnUNetv2_predict -i {params.in_folder} -o {params.out_folder} -d 001 -c 3d_fullres {params.tta} -f 1 4 &> {log} && "
         "cp {params.temp_lbl} {output.nnunet_seg}"
 
 

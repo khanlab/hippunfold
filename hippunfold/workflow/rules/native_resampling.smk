@@ -400,7 +400,7 @@ rule affine_gii_corobl_to_orig:
             root=root,
             datatype="warps",
             **inputs.subj_wildcards,
-            suffix="xfm.txt",
+            suffix="xfm.mat",
             from_="{modality}",
             to="corobl",
             type_="ras",

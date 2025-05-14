@@ -138,7 +138,7 @@ rule native_label_gii_to_unfold_nii:
 
 rule label_subfields_from_vol_coords_corobl:
     input:
-        ref_nii=get_labels_for_laplace,
+        ref_nii=get_input_for_shape_inject,
         midthickness_surf=bids(
             root=root,
             datatype="surf",
@@ -233,7 +233,7 @@ rule combine_tissue_subfield_labels_corobl:
     then, we just need to add those in, using max(old,new) to override old with new in case of conflict
     """
     input:
-        tissue=get_labels_for_laplace,
+        tissue=get_input_for_shape_inject,
         subfields=bids(
             root=root,
             datatype="anat",
@@ -287,7 +287,7 @@ rule resample_subfields_to_orig:
             root=root,
             datatype="warps",
             **inputs.subj_wildcards,
-            suffix="xfm.txt",
+            suffix="xfm.mat",
             from_="{modality}",
             to="corobl",
             type_="itk",
@@ -336,7 +336,7 @@ rule resample_postproc_to_orig:
             root=root,
             datatype="warps",
             **inputs.subj_wildcards,
-            suffix="xfm.txt",
+            suffix="xfm.mat",
             from_="{modality}",
             to="corobl",
             type_="itk",
@@ -384,7 +384,7 @@ rule resample_unet_to_orig:
             root=root,
             datatype="warps",
             **inputs.subj_wildcards,
-            suffix="xfm.txt",
+            suffix="xfm.mat",
             from_="{modality}",
             to="corobl",
             type_="itk",

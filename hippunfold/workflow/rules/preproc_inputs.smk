@@ -1,3 +1,15 @@
+# populate the HIPPUNFOLD_CACHE_DIR folder as needed
+from lib import utils as utils
+
+download_dir = utils.get_download_dir()
+
+def get_inputs(): # TODO: swap this in
+    if config["modality"] == "multires":
+        return inputs["T1w"] + inputs["T2w"] + inputs["FLAIR"]
+    else:
+        return inputs[config["modality"]]   
+
+
 rule import_any_modality:
     input:
         inputs[config["modality"]].path,
@@ -30,7 +42,7 @@ rule lamareg_to_template:
         affine=bids(
             root=root,
             datatype="warps",
-            suffix="xfm.txt",
+            suffix="xfm.mat",
             from_=config["modality"],
             to="corobl",
             type_="itk",
@@ -39,7 +51,7 @@ rule lamareg_to_template:
         invaffine=bids(
             root=root,
             datatype="warps",
-            suffix="xfm.txt",
+            suffix="xfm.mat",
             from_="corobl",
             to=config["modality"],
             type_="itk",
@@ -63,10 +75,17 @@ rule lamareg_to_template:
             type_="itk",
             **inputs[config["modality"]].wildcards,
         ),
+    shadow:
+        "minimal"
     group:
         "subj" 
+    log:
+        bids_log(
+            "lamareg_to_template",
+            **inputs.wildcards,
+        ),
     shell:
-        "lamar generate-warpfield --fixed {params.ref} --moving {input.img} --affine-file {output.affine} --rev-affine-file {output.invaffine} --warpfield {output.warp} --ref-warp-file {output.invwarp}"
+        "lamar generate-warpfield --ants-threads 4 --synthseg-thread 4 --fixed {params.ref} --moving {input.img} --affine {output.affine} --inverse-affine {output.invaffine} --warpfield {output.warp} --inverse-warpfield {output.invwarp} --inverse-output-parc tmp0.nii.gz --moving-parc tmp1.nii.gz --fixed-parc tmp2.nii.gz --registered-parc tmp3.nii.gz --output-parc tmp4.nii.gz &> {log}" # these SHOULD be removed in lamareg soon
 
 
 rule apply_transforms:
@@ -81,7 +100,7 @@ rule apply_transforms:
         affine=bids(
             root=root,
             datatype="warps",
-            suffix="xfm.txt",
+            suffix="xfm.mat",
             from_=config["modality"],
             to="corobl",
             type_="itk",
@@ -110,8 +129,14 @@ rule apply_transforms:
         ),
     group:
         "subj"
+    log:
+        bids_log(
+            "apply_transforms",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+        ),
     shell:
-        "lamar apply-warp --affine-file {input.affine} --moving {input.img} --reference {params.ref} --output-file {output.img}"
+        "lamar apply-warp --affine {input.affine} --warp {input.warp} --moving {input.img} --reference {params.ref} --output {output.img} &> {log}"
 
 
 # TODO: refine registrations using the raw images and the above initializations
@@ -123,7 +148,7 @@ rule template_xfm_itk2ras:
             root=root,
             datatype="warps",
             **inputs.subj_wildcards,
-            suffix="xfm.txt",
+            suffix="xfm.mat",
             from_="{modality}",
             to="corobl",
             type_="itk",
@@ -134,8 +159,8 @@ rule template_xfm_itk2ras:
                 root=root,
                 datatype="warps",
                 **inputs.subj_wildcards,
-                suffix="xfm.txt",
-                from_="{modality,T1w|T2w}",
+                suffix="xfm.mat",
+                from_="{modality}",
                 to="corobl",
                 type_="ras",
             )
@@ -150,7 +175,7 @@ rule template_xfm_itk2ras:
 
 rule superres_inputs:
     input:
-        img=bids(
+        bids(
             root=root,
             datatype="anat",
             space="corobl",
@@ -159,7 +184,7 @@ rule superres_inputs:
             **inputs[config["modality"]].wildcards,
         ),
     output:
-        img=bids(
+        bids(
             root=root,
             datatype="anat",
             space="corobl",
@@ -172,4 +197,10 @@ rule superres_inputs:
     group:
         "subj"
     shell:
-        "c3d {input.img} -add -o {output.img}"
+        """
+        if [ $(echo {input} | wc -w) -eq 1 ]; then
+            cp {input} {output}
+        else
+            c3d {input} -add -o {output}
+        fi
+        """
