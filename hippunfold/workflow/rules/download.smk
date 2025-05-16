@@ -13,23 +13,8 @@ rule download_extract_template:
         config["singularity"]["autotop"]
     shadow:
         "minimal"
-    conda:
-        conda_env("curl")
-    run:
-        import os
-        import urllib.request
-        import zipfile
-
-        outdir = str(output.unzip_dir)
-        os.makedirs(outdir, exist_ok=True)
-
-        zip_path = os.path.join(outdir, "temp.zip")
-        urllib.request.urlretrieve("https://" + params.url, zip_path)
-
-        with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(outdir)
-
-        os.remove(zip_path)
+    script:
+        "../scripts/download.py"
 
 
 ## unpack template
