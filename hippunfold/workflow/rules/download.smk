@@ -25,13 +25,13 @@ rule download_extract_template:
 
         # 1) download the zip
         zip_path = os.path.join(outdir, "temp.zip")
-        urllib.request.urlretrieve('https://' + params.url, zip_path)
+        urllib.request.urlretrieve("https://" + params.url, zip_path)
 
         # 2) extract all files using Python's zipfile
-        with zipfile.ZipFile(zip_path, 'r') as zf:
+        with zipfile.ZipFile(zip_path, "r") as zf:
             zf.extractall(outdir)
 
-        # 3) clean up
+            # 3) clean up
         os.remove(zip_path)
 
 
