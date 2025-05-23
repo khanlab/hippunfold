@@ -271,11 +271,11 @@ def get_inputs_to_remove(wildcards):
     for label in config["autotop_labels"]:
         for spec_input in get_inputs_spec_file(label, density=config["unused_density"]):
             files.extend(
-                inputs[config["modality"]].expand(
+                expand(
                     spec_input,
                     label=label,
+                    hemi=config["hemi"],
                     **wildcards,
-                    **expand_hemi(),
                 )
             )
     files.extend(
@@ -294,8 +294,8 @@ def get_inputs_to_remove(wildcards):
             space=["corobl", "unfold"],
             label=config["autotop_labels"],
             density=config["unused_density"],
+            hemi=config["hemi"],
             **wildcards,
-            **expand_hemi(),
             allow_missing=True,
         )
     )
