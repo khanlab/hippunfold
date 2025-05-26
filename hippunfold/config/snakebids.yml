@@ -79,6 +79,30 @@ pybids_inputs:
       - acquisition
       - run
 
+  electrodes:
+    filters:
+      suffix: 'electrodes'
+      extension: '.tsv'
+      datatype: 'ieeg'
+  #    desc: 'SEEGA'
+    wildcards:
+      - subject
+      - session
+
+  electrodes_ref:
+    filters:
+      suffix: 'T1w'
+      extension: '.nii.gz'
+      datatype: 'anat'
+    wildcards:
+      - subject
+      - session
+      - acquisition
+      - run
+
+
+       
+
 
 #configuration for the command-line parameters to make available
 # passed on the argparse add_argument()
@@ -254,6 +278,12 @@ parse_args:
       - synthseg_v0.1
       - synthseg_v0.2
       - neonateT1w_v2
+
+  --use_electrodes:
+    help: |
+      Import and map ieeg electrode contact locations to unfolded hippocampus
+    default: False
+    action: 'store_true'
 
   --enable-bids-validation:
     help: |
