@@ -413,7 +413,6 @@ rule reinsert_subject_labels:
         labels_overwrite=" ".join(
             str(label) for label in config["shape_inject"]["labels_overwrite"]
         ),
-
     output:
         postproc_seg=temp(
             bids(
