@@ -391,8 +391,9 @@ rule reinsert_subject_labels:
     """ c3d command to:
                 1) get the labels to retain
                 2) reslice to injected seg
-                3) set injected seg to zero where retained labels are
-                4) and add this to retained labels"""
+                3) limit to labels_overwrite (e.g. SRLM)
+                4) set injected seg to zero where retained labels are
+                5) and add this to retained labels"""
     input:
         inject_seg=bids(
             root=root,
@@ -409,6 +410,10 @@ rule reinsert_subject_labels:
         labels=" ".join(
             str(label) for label in config["shape_inject"]["labels_reinsert"]
         ),
+        labels_overwrite=" ".join(
+            str(label) for label in config["shape_inject"]["labels_overwrite"]
+        ),
+
     output:
         postproc_seg=temp(
             bids(
@@ -431,5 +436,7 @@ rule reinsert_subject_labels:
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
         " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "
+        " -push SEG -retain-labels {params.labels_overwrite}  -binarize "
+        " -push LBL_RESLICE -multiply -popas LBL_RESLICE "
         "-push LBL_RESLICE -threshold 0 0 1 0 -push SEG -multiply "
         "-push LBL_RESLICE -add -o {output.postproc_seg}"
