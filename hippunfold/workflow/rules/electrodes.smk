@@ -82,10 +82,7 @@ rule reg_modality_to_electroderef:
     shell:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log}"
 
-
-
-
-rule annotate_electrodes:
+rule annotate_electrodes_table:
     input:
         tsv=bids(
             root=root,
@@ -117,7 +114,7 @@ rule annotate_electrodes:
             surfname=["midthickness", "inner", "outer"],
             hemi=["L", "R"],
             label=["hipp", "dentate"],
-            space=[config["modality"]],  # or other space(s) used in your pipeline
+            space=[config["modality"]],
             allow_missing=True,
         ),
         label_left=bids(
@@ -149,7 +146,7 @@ rule annotate_electrodes:
             **inputs.subj_wildcards,
         ),
     log:
-        bids_log("annotate_electrodes", **inputs.subj_wildcards),
+        bids_log("annotate_electrodes_table", **inputs.subj_wildcards),
     conda:
         conda_env("pyvista"),
     container:
@@ -157,5 +154,72 @@ rule annotate_electrodes:
     group:
         "subj",
     script:
-        "../scripts/annotate_electrodes.py"
+        "../scripts/annotate_electrodes_table.py"
+
+
+rule index_electrode_vertex_hits:
+    input:
+        annotated=bids(
+            root=root,
+            datatype="ieeg",
+            desc="annotated",
+            suffix="electrodes.tsv",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        hits=bids(
+            root=root,
+            datatype="ieeg",
+            suffix="electrodehits.json",
+            **inputs.subj_wildcards,
+        ),
+    conda:
+        conda_env("pyunfold"),
+    script:
+        "../scripts/index_electrode_vertex_hits.py"
+
+rule write_surface_label_gii:
+    input:
+        hits=bids(
+            root=root,
+            datatype="ieeg",
+            suffix="electrodehits.json",
+            **inputs.subj_wildcards,
+        ),
+        surfs=expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="native",
+                suffix="{surfname}.surf.gii",
+                space=config["modality"],
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            surfname=["midthickness", "inner", "outer"],
+            hemi=["L", "R"],
+            label=["hipp", "dentate"],
+            allow_missing=True
+        ),
+    output:
+        labelgii=expand(
+            bids(
+                root=root,
+                datatype="ieeg",
+                den="native",
+                suffix="electrodes.label.gii",
+                space=config["modality"],
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            hemi=["L", "R"],
+            label=["hipp", "dentate"],
+            allow_missing=True
+        ),
+    conda:
+        conda_env("pyvista"),
+    script:
+        "../scripts/write_electrodes_label_gii.py"
 
