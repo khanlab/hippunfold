@@ -83,3 +83,79 @@ rule reg_modality_to_electroderef:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log}"
 
 
+
+
+rule annotate_electrodes:
+    input:
+        tsv=bids(
+            root=root,
+            datatype="ieeg",
+            suffix="electrodes.tsv",
+            **inputs.subj_wildcards,
+        ),
+        xfm=bids(
+            root=root,
+            datatype="warps",
+            suffix="xfm.txt",
+            from_=config["modality"],
+            to="electroderef",
+            desc="rigid",
+            type_="ras",
+            **inputs.subj_wildcards,
+        ),
+        surfs=expand(
+            bids(
+                root=root,
+                datatype="surf",
+                den="native",
+                suffix="{surfname}.surf.gii",
+                space="{space}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            surfname=["midthickness", "inner", "outer"],
+            hemi=["L", "R"],
+            label=["hipp", "dentate"],
+            space=[config["modality"]],  # or other space(s) used in your pipeline
+            allow_missing=True,
+        ),
+        label_left=bids(
+            root=root,
+            datatype="metric",
+            den="native",
+            atlas=config["atlas"],
+            suffix="subfields.label.gii",
+            hemi="L",
+            label="hipp",
+            **inputs.subj_wildcards,
+        ),
+        label_right=bids(
+            root=root,
+            datatype="metric",
+            den="native",
+            atlas=config["atlas"],
+            suffix="subfields.label.gii",
+            hemi="R",
+            label="hipp",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        annotated=bids(
+            root=root,
+            datatype="ieeg",
+            desc="annotated",
+            suffix="electrodes.tsv",
+            **inputs.subj_wildcards,
+        ),
+    log:
+        bids_log("annotate_electrodes", **inputs.subj_wildcards),
+    conda:
+        conda_env("pyvista"),
+    container:
+        config["singularity"]["autotop"],
+    group:
+        "subj",
+    script:
+        "../scripts/annotate_electrodes.py"
+
