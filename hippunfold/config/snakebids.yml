@@ -543,6 +543,8 @@ shape_inject:
     - 8
   labels_reinsert:
     - 7
+  labels_overwrite:
+    - 2  
   label_smoothing_stdev: '0.5x0.5x0.5mm'
 
 
