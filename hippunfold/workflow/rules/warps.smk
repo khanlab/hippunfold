@@ -58,8 +58,6 @@ rule reg_to_template:
             from_="{modality,T1w|T2w}",
             to=config["template"],
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("niftyreg")
     group:
@@ -93,8 +91,6 @@ rule convert_template_xfm_ras2itk:
                 type_="itk",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -135,8 +131,6 @@ rule compose_template_xfm_corobl:
                 type_="itk",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -170,8 +164,6 @@ rule invert_template_xfm_itk2ras:
                 type_="ras",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -205,8 +197,6 @@ rule template_xfm_itk2ras:
                 type_="ras",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     group:
@@ -241,8 +231,6 @@ rule create_unfold_ref:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     shell:

@@ -23,8 +23,6 @@ rule calculate_surface_area:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -69,8 +67,6 @@ rule metric_smoothing:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -111,8 +107,6 @@ rule calculate_gyrification:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -145,8 +139,6 @@ rule calculate_curvature:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -187,8 +179,6 @@ rule calculate_thickness:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:

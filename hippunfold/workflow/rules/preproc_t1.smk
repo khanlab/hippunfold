@@ -105,8 +105,6 @@ rule warp_t1_to_corobl_crop:
                 hemi="{hemi,L|R}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("ants")
     group:
