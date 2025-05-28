@@ -51,6 +51,8 @@ labels_by_side = {
 all_points = []
 all_labels = []
 all_sources = []
+all_local_indices = []  # track original vertex index
+all_surface_keys = []   # track surface (filename) of each point
 
 for surf_path in surface_paths:
     mesh, _ = read_surface_from_gifti(surf_path)
@@ -72,23 +74,36 @@ for surf_path in surface_paths:
     all_points.append(verts)
     all_labels.extend(labels)
     all_sources.extend([source] * verts.shape[0])
+    all_local_indices.extend(list(range(verts.shape[0])))
+    all_surface_keys.extend([source] * verts.shape[0])
 
 # --- Build KDTree and query nearest vertex ---
 all_points = np.vstack(all_points)
 tree = cKDTree(all_points)
-dists, indices = tree.query(coords)
+dists, global_indices = tree.query(coords)
 
-closest_labels = [
-    all_labels[i] if d <= max_dist_mm else "n/a" for i, d in zip(indices, dists)
-]
-closest_sources = [
-    all_sources[i] if d <= max_dist_mm else "n/a" for i, d in zip(indices, dists)
-]
+# --- Recover per-surface local indices and metadata ---
+matched_labels = []
+matched_sources = []
+matched_local_indices = []
 
-# --- Write updated TSV ---
-df["closest_label"] = closest_labels
+for d, gi in zip(dists, global_indices):
+    if d <= max_dist_mm:
+        matched_labels.append(all_labels[gi])
+        matched_sources.append(all_sources[gi])
+        matched_local_indices.append(all_local_indices[gi])
+    else:
+        matched_labels.append("n/a")
+        matched_sources.append("n/a")
+        matched_local_indices.append(-1)
+
+# --- Add annotations to dataframe ---
+df["closest_label"] = matched_labels
 df["distance_mm"] = dists
-df["surface_source"] = closest_sources
-df["vertex_index"] = [i if d <= max_dist_mm else -1 for i, d in zip(indices, dists)]
+df["surface_source"] = matched_sources
+df["vertex_index"] = matched_local_indices
+
+# --- Write output TSV ---
 df.to_csv(output_path, sep="\t", index=False)
+
 
