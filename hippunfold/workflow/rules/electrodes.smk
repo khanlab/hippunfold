@@ -104,14 +104,15 @@ rule annotate_electrodes_table:
             bids(
                 root=root,
                 datatype="surf",
-                den="native",
+                den="{density}",
                 suffix="{surfname}.surf.gii",
                 space="{space}",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
-            surfname=["midthickness", "inner", "outer"],
+            # surfname=["midthickness", "inner", "outer"],
+            surfname=["midthickness"],
             hemi=["L", "R"],
             label=["hipp", "dentate"],
             space=[config["modality"]],
@@ -120,7 +121,7 @@ rule annotate_electrodes_table:
         label_left=bids(
             root=root,
             datatype="metric",
-            den="native",
+            den="{density}",
             atlas=config["atlas"],
             suffix="subfields.label.gii",
             hemi="L",
@@ -130,7 +131,7 @@ rule annotate_electrodes_table:
         label_right=bids(
             root=root,
             datatype="metric",
-            den="native",
+            den="{density}",
             atlas=config["atlas"],
             suffix="subfields.label.gii",
             hemi="R",
@@ -141,6 +142,7 @@ rule annotate_electrodes_table:
         annotated=bids(
             root=root,
             datatype="ieeg",
+            den="{density}",
             desc="annotated",
             suffix="electrodes.tsv",
             **inputs.subj_wildcards,
@@ -162,6 +164,7 @@ rule index_electrode_vertex_hits:
         annotated=bids(
             root=root,
             datatype="ieeg",
+            den="{density}",
             desc="annotated",
             suffix="electrodes.tsv",
             **inputs.subj_wildcards,
@@ -170,6 +173,7 @@ rule index_electrode_vertex_hits:
         hits=bids(
             root=root,
             datatype="ieeg",
+            den="{density}",
             suffix="electrodehits.json",
             **inputs.subj_wildcards,
         ),
@@ -183,6 +187,7 @@ rule write_surface_label_gii:
         hits=bids(
             root=root,
             datatype="ieeg",
+            den="{density}",
             suffix="electrodehits.json",
             **inputs.subj_wildcards,
         ),
@@ -190,14 +195,13 @@ rule write_surface_label_gii:
             bids(
                 root=root,
                 datatype="surf",
-                den="native",
-                suffix="{surfname}.surf.gii",
+                den="{density}",
+                suffix="midthickness.surf.gii",
                 space=config["modality"],
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
-            surfname=["midthickness", "inner", "outer"],
             hemi=["L", "R"],
             label=["hipp", "dentate"],
             allow_missing=True
@@ -207,7 +211,7 @@ rule write_surface_label_gii:
             bids(
                 root=root,
                 datatype="ieeg",
-                den="native",
+                den="{density}",
                 suffix="electrodes.label.gii",
                 space=config["modality"],
                 hemi="{hemi}",
