@@ -94,7 +94,8 @@ rule gen_atlas_reg_ants:
                 label="{label}",
                 suffix="antstemplate",
             )
-        ),  # note antsMultivariateTemplateConstruction2 is not in the container right now!
+        ),
+        # note antsMultivariateTemplateConstruction2 is not in the container right now!
     conda:
         conda_env("ants")
     shell:
