@@ -613,6 +613,7 @@ tight_crop_labels: #defines what labels to use for tight cropping (for upsampled
     - 1
   dentate:
     - 8
+    - 6
 
 laminar_coords_res:
   hipp: 0.3x0.3x0.3mm
