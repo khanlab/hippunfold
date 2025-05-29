@@ -26,7 +26,7 @@ for surf_path, out_path in zip(surface_paths, label_gii_paths):
 
     if basename in vertex_hits:
         for integer_id, (vert_str, label) in enumerate(vertex_hits[basename].items(), start=1):
-            label_table[label] = {
+            label_table[f'sub-{snakemake.wildcards.subject}_{label}'] = {
                 "key": integer_id,
                 "red": 1.0,
                 "green": 0.0,

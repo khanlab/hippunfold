@@ -114,7 +114,7 @@ rule annotate_electrodes_table:
             # surfname=["midthickness", "inner", "outer"],
             surfname=["midthickness"],
             hemi=["L", "R"],
-            label=["hipp", "dentate"],
+            label=config['autotop_labels'],
             space=[config["modality"]],
             allow_missing=True,
         ),
@@ -148,7 +148,9 @@ rule annotate_electrodes_table:
             **inputs.subj_wildcards,
         ),
     log:
-        bids_log("annotate_electrodes_table", **inputs.subj_wildcards),
+        bids_log("annotate_electrodes_table",
+                den="{density}",
+                **inputs.subj_wildcards),
     conda:
         conda_env("pyvista"),
     container:
@@ -203,7 +205,7 @@ rule write_surface_label_gii:
                 **inputs.subj_wildcards,
             ),
             hemi=["L", "R"],
-            label=["hipp", "dentate"],
+            label=config['autotop_labels'],
             allow_missing=True
         ),
     output:
@@ -213,17 +215,48 @@ rule write_surface_label_gii:
                 datatype="ieeg",
                 den="{density}",
                 suffix="electrodes.label.gii",
-                space=config["modality"],
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
             hemi=["L", "R"],
-            label=["hipp", "dentate"],
+            label=config['autotop_labels'],
             allow_missing=True
         ),
     conda:
         conda_env("pyvista"),
     script:
         "../scripts/write_electrodes_label_gii.py"
+
+
+rule electrode_label_gii_to_roi:
+    input:
+        bids(
+            root=root,
+            datatype="ieeg",
+            den="{density}",
+            suffix="electrodes.label.gii",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        bids(
+            root=root,
+            datatype="ieeg",
+            den="{density}",
+            suffix="electrodes.shape.gii",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    conda:
+         conda_env("workbench")
+    group:
+        "subj"
+    shell:
+        'wb_command -gifti-all-labels-to-rois {input} 1 {output}'
+
+
+#should aggregate over  subjects using  metric-merge
 
