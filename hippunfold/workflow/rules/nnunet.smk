@@ -65,8 +65,6 @@ rule download_nnunet_model:
         model_dir=Path(download_dir) / "model",
     output:
         model_tar=get_model_tar(),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("curl")
     shell:
@@ -156,8 +154,6 @@ rule run_inference:
         time=30 if config["use_gpu"] else 60,
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("nnunet")
     shell:
@@ -250,8 +246,6 @@ rule qc_nnunet_f3d:
                 hemi="{hemi}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("niftyreg")
     log:
@@ -302,8 +296,6 @@ rule qc_nnunet_dice:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("pyunfold")
     script:

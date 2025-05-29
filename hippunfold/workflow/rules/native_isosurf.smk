@@ -67,8 +67,6 @@ rule gen_native_mesh:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("pyvista")
     log:
@@ -111,8 +109,6 @@ rule update_native_mesh_structure:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:
@@ -152,8 +148,6 @@ rule smooth_surface:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     group:

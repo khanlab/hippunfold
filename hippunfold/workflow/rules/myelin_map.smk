@@ -33,8 +33,6 @@ rule divide_t1_by_t2:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     shell:
@@ -96,8 +94,6 @@ rule sample_myelin_map_surf:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     shell:

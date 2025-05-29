@@ -43,8 +43,6 @@ rule compute_halfthick_mask:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("c3d")
     shell:
@@ -90,8 +88,6 @@ rule register_midthickness:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     threads: 16
     conda:
         conda_env("greedy")
@@ -159,8 +155,6 @@ rule apply_halfsurf_warp_to_img:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("greedy")
     shell:
@@ -199,8 +193,6 @@ rule convert_inout_warp_from_itk_to_world:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     shell:
@@ -243,8 +235,6 @@ rule warp_midthickness_to_inout:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         conda_env("workbench")
     shadow:
