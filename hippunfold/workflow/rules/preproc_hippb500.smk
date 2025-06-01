@@ -24,7 +24,7 @@ rule resample_hippdwi_to_template:
             )
         ),
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:

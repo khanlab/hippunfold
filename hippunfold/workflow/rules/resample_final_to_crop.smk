@@ -32,7 +32,7 @@ rule create_crop_ref:
             )
         ),
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -81,7 +81,7 @@ rule resample_unet_crop:
             )
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -132,7 +132,7 @@ rule resample_postproc_crop:
             )
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -184,7 +184,7 @@ rule resample_subfields_crop:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -236,7 +236,7 @@ rule resample_coords_crop:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -272,7 +272,7 @@ rule resample_to_crop:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -330,7 +330,7 @@ rule resample_t2_to_crop:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

@@ -200,7 +200,7 @@ rule slice_3d_to_2d_subject:
             )
         ),
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     group:
         "subj"
     script:
@@ -236,7 +236,7 @@ rule slice_3d_to_2d_atlas:
             )
         ),
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     group:
         "subj"
     script:
@@ -403,7 +403,7 @@ rule reset_header_2d_warp_unfoldreg:
             )
         ),
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
 

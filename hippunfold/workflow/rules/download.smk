@@ -66,7 +66,7 @@ rule import_template_dseg:
     group:
         "subj"
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -105,7 +105,7 @@ rule import_template_dseg_dentate:
     group:
         "subj"
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -146,7 +146,7 @@ rule import_template_coords:
     group:
         "subj"
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_coords}"
 
@@ -186,6 +186,6 @@ rule import_template_anat:
     group:
         "subj"
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_anat}"

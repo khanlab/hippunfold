@@ -56,10 +56,8 @@ else:
                 suffix="T1w.nii.gz",
             ),
         threads: 8
-        container:
-            config["singularity"]["autotop"]
         conda:
-            conda_env("ants")
+            "../envs/ants.yaml"
         group:
             "subj"
         shell:
@@ -106,7 +104,7 @@ rule warp_t1_to_corobl_crop:
             )
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

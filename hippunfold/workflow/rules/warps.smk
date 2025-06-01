@@ -59,7 +59,7 @@ rule reg_to_template:
             to=config["template"],
         ),
     conda:
-        conda_env("niftyreg")
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
@@ -92,7 +92,7 @@ rule convert_template_xfm_ras2itk:
             )
         ),
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -132,7 +132,7 @@ rule compose_template_xfm_corobl:
             )
         ),
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -165,7 +165,7 @@ rule invert_template_xfm_itk2ras:
             )
         ),
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -198,7 +198,7 @@ rule template_xfm_itk2ras:
             )
         ),
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -232,6 +232,6 @@ rule create_unfold_ref:
     group:
         "subj"
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}"

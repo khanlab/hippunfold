@@ -24,7 +24,7 @@ rule calculate_surface_area:
             )
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -68,7 +68,7 @@ rule metric_smoothing:
             )
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -108,7 +108,7 @@ rule calculate_gyrification:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -140,7 +140,7 @@ rule calculate_curvature:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -180,7 +180,7 @@ rule calculate_thickness:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:

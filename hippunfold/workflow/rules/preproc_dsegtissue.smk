@@ -21,7 +21,7 @@ rule import_dseg_tissue:
             )
         ),
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:

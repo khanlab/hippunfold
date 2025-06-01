@@ -68,7 +68,7 @@ rule gen_native_mesh:
     group:
         "subj"
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     log:
         bids_log(
             "gen_native_mesh",
@@ -110,7 +110,7 @@ rule update_native_mesh_structure:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -149,7 +149,7 @@ rule smooth_surface:
             )
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:

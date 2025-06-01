@@ -66,7 +66,7 @@ rule download_nnunet_model:
     output:
         model_tar=get_model_tar(),
     conda:
-        conda_env("curl")
+        "../envs/curl.yaml"
     shell:
         "mkdir -p {params.model_dir} && curl -L https://{params.url} -o {output}"
 
@@ -155,7 +155,7 @@ rule run_inference:
     group:
         "subj"
     conda:
-        conda_env("nnunet")
+        "../envs/nnunet.yaml"
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -247,7 +247,7 @@ rule qc_nnunet_f3d:
             )
         ),
     conda:
-        conda_env("niftyreg")
+        "../envs/niftyreg.yaml"
     log:
         bids_log(
             "qc_nnunet_f3d",
@@ -297,6 +297,6 @@ rule qc_nnunet_dice:
     group:
         "subj"
     conda:
-        conda_env("pyunfold")
+        "../envs/pyunfold.yaml"
     script:
         "../scripts/dice.py"

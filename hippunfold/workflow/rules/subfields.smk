@@ -16,7 +16,7 @@ rule import_dseg_subfields:
             )
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -57,7 +57,7 @@ rule subfields_to_label_gifti:
             )
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shell:
         "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
 
@@ -194,7 +194,7 @@ rule label_subfields_from_vol_coords_corobl:
             )
         ),
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     log:
@@ -262,7 +262,7 @@ rule combine_tissue_subfield_labels_corobl:
             )
         ),
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -313,7 +313,7 @@ rule resample_subfields_to_orig:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -364,7 +364,7 @@ rule resample_postproc_to_orig:
             )
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -414,7 +414,7 @@ rule resample_unet_to_orig:
             )
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -457,7 +457,7 @@ rule resample_subfields_to_unfold:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
