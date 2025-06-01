@@ -254,6 +254,7 @@ parse_args:
       - synthseg_v0.1
       - synthseg_v0.2
       - neonateT1w_v2
+      - ADNI_T1w_v1
 
   --enable-bids-validation:
     help: |
