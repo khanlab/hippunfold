@@ -14,10 +14,12 @@ label_right_path = snakemake.input.label_right
 output_path = snakemake.output.annotated
 max_dist_mm = 5.0
 
+
 # --- Helper functions ---
 def apply_transform(pts, affine):
     pts_h = np.c_[pts, np.ones(len(pts))]
     return (affine @ pts_h.T).T[:, :3]
+
 
 def load_label_scalars_and_names(label_gii_path):
     gii = nib.load(label_gii_path)
@@ -27,6 +29,7 @@ def load_label_scalars_and_names(label_gii_path):
     label_names = [label_map.get(idx, "n/a") for idx in scalars]
     return label_names
 
+
 def determine_side(path):
     name = os.path.basename(path).lower()
     if "hemi-l" in name or "left" in name or "lh" in name:
@@ -34,6 +37,7 @@ def determine_side(path):
     elif "hemi-r" in name or "right" in name or "rh" in name:
         return "right"
     return None
+
 
 # --- Load and transform electrode coordinates ---
 df = pd.read_csv(electrode_tsv, sep="\t")
@@ -52,7 +56,7 @@ all_points = []
 all_labels = []
 all_sources = []
 all_local_indices = []  # track original vertex index
-all_surface_keys = []   # track surface (filename) of each point
+all_surface_keys = []  # track surface (filename) of each point
 
 for surf_path in surface_paths:
     mesh, _ = read_surface_from_gifti(surf_path)
@@ -69,7 +73,9 @@ for surf_path in surface_paths:
         raise ValueError(f"Cannot determine label side for surface: {source}")
 
     if len(labels) != verts.shape[0]:
-        raise ValueError(f"Label count mismatch for {source}: {len(labels)} vs {verts.shape[0]}")
+        raise ValueError(
+            f"Label count mismatch for {source}: {len(labels)} vs {verts.shape[0]}"
+        )
 
     all_points.append(verts)
     all_labels.extend(labels)
@@ -105,5 +111,3 @@ df["vertex_index"] = matched_local_indices
 
 # --- Write output TSV ---
 df.to_csv(output_path, sep="\t", index=False)
-
-

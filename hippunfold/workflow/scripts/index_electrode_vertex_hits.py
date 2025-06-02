@@ -34,4 +34,3 @@ for i, row in df.iterrows():
 # --- Write to JSON ---
 with open(output_json, "w") as f:
     json.dump(surface_hits, f, indent=2)
-

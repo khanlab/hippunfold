@@ -3,17 +3,17 @@ rule import_electrodes_tsv:
         in_tsv=partial(get_single_bids_input, component="electrodes"),
     output:
         bids(
-                root=root,
-                datatype="ieeg",
-                **inputs.subj_wildcards,
-                suffix="electrodes.tsv",
-            )
+            root=root,
+            datatype="ieeg",
+            **inputs.subj_wildcards,
+            suffix="electrodes.tsv",
+        ),
     group:
         "subj"
     shell:
         "cp {input} {output}"
 
- 
+
 rule import_electrodes_ref:
     input:
         in_img=partial(get_single_bids_input, component="electrodes_ref"),
@@ -31,6 +31,7 @@ rule import_electrodes_ref:
     shell:
         "cp {input} {output}"
 
+
 rule reg_modality_to_electroderef:
     input:
         flo=bids(
@@ -41,20 +42,22 @@ rule reg_modality_to_electroderef:
             desc="preproc",
         ),
         ref=bids(
-                root=root,
-                datatype="anat",
-                **inputs.subj_wildcards,
-                suffix="electroderef.nii.gz")
-        
-    output:
-        warped=temp(bids(
             root=root,
             datatype="anat",
-            suffix="{modality}.nii.gz",
-            desc="preproc",
-            space="electroderef",
             **inputs.subj_wildcards,
-        )),
+            suffix="electroderef.nii.gz",
+        ),
+    output:
+        warped=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{modality}.nii.gz",
+                desc="preproc",
+                space="electroderef",
+                **inputs.subj_wildcards,
+            )
+        ),
         xfm_ras=temp(
             bids(
                 root=root,
@@ -70,7 +73,7 @@ rule reg_modality_to_electroderef:
     log:
         bids_log(
             "reg_modality_to_electroderef",
-            modality='{modality}',
+            modality="{modality}",
             **inputs.subj_wildcards,
         ),
     container:
@@ -81,6 +84,7 @@ rule reg_modality_to_electroderef:
         "subj"
     shell:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log}"
+
 
 rule annotate_electrodes_table:
     input:
@@ -111,10 +115,9 @@ rule annotate_electrodes_table:
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
-            # surfname=["midthickness", "inner", "outer"],
             surfname=["midthickness"],
             hemi=["L", "R"],
-            label=config['autotop_labels'],
+            label=config["autotop_labels"],
             space=[config["modality"]],
             allow_missing=True,
         ),
@@ -148,15 +151,13 @@ rule annotate_electrodes_table:
             **inputs.subj_wildcards,
         ),
     log:
-        bids_log("annotate_electrodes_table",
-                den="{density}",
-                **inputs.subj_wildcards),
+        bids_log("annotate_electrodes_table", den="{density}", **inputs.subj_wildcards),
     conda:
-        conda_env("pyvista"),
+        conda_env("pyvista")
     container:
-        config["singularity"]["autotop"],
+        config["singularity"]["autotop"]
     group:
-        "subj",
+        "subj"
     script:
         "../scripts/annotate_electrodes_table.py"
 
@@ -180,9 +181,10 @@ rule index_electrode_vertex_hits:
             **inputs.subj_wildcards,
         ),
     conda:
-        conda_env("pyunfold"),
+        conda_env("pyunfold")
     script:
         "../scripts/index_electrode_vertex_hits.py"
+
 
 rule write_surface_label_gii:
     input:
@@ -205,8 +207,8 @@ rule write_surface_label_gii:
                 **inputs.subj_wildcards,
             ),
             hemi=["L", "R"],
-            label=config['autotop_labels'],
-            allow_missing=True
+            label=config["autotop_labels"],
+            allow_missing=True,
         ),
     output:
         labelgii=expand(
@@ -220,11 +222,11 @@ rule write_surface_label_gii:
                 **inputs.subj_wildcards,
             ),
             hemi=["L", "R"],
-            label=config['autotop_labels'],
-            allow_missing=True
+            label=config["autotop_labels"],
+            allow_missing=True,
         ),
     conda:
-        conda_env("pyvista"),
+        conda_env("pyvista")
     script:
         "../scripts/write_electrodes_label_gii.py"
 
@@ -251,12 +253,45 @@ rule electrode_label_gii_to_roi:
             **inputs.subj_wildcards,
         ),
     conda:
-         conda_env("workbench")
+        conda_env("workbench")
     group:
         "subj"
     shell:
-        'wb_command -gifti-all-labels-to-rois {input} 1 {output}'
+        "wb_command -gifti-all-labels-to-rois {input} 1 {output}"
 
 
-#should aggregate over  subjects using  metric-merge
-
+rule aggregate_electrode_labels:
+    input:
+        metrics=inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="ieeg",
+                den="{density}",
+                suffix="electrodes.shape.gii",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            density=config["output_density"],
+            allow_missing=True,
+        ),
+    output:
+        bids(
+            root=root,
+            prefix="group",
+            datatype="ieeg",
+            den="{density}",
+            suffix="electrodes.shape.gii",
+            hemi="{hemi}",
+            label="{label}",
+        ),
+    params:
+        metrics=lambda wildcards, input: " ".join(
+            [f"-metric {metric}" for metric in input.metrics]
+        ),
+    group:
+        "aggregate"
+    conda:
+        conda_env("workbench")
+    shell:
+        "wb_command -metric-merge {output} {params.metrics}"

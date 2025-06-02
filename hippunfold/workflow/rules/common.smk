@@ -420,12 +420,32 @@ def get_final_qc():
     return qc
 
 
+def get_final_electrodes():
+    return expand(
+        bids(
+            root=root,
+            prefix="group",
+            datatype="ieeg",
+            den="{density}",
+            suffix="electrodes.shape.gii",
+            hemi="{hemi}",
+            label="{label}",
+        ),
+        hemi=config["hemi"],
+        density=list(set(config["output_density"]) - set(["native"])),
+        label=config["autotop_labels"],
+    )
+
+
 def get_final_output():
     subj_output = []
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
+    if config.get("use_electrodes", False):
+        subj_output.extend(get_final_electrodes())
+
     return subj_output
 
 

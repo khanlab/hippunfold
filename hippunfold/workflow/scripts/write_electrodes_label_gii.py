@@ -21,12 +21,20 @@ for surf_path, out_path in zip(surface_paths, label_gii_paths):
 
     # Always start with background label
     label_table = {
-        "Background": {"key": 0, "red": 1.0, "green": 1.0, "blue": 1.0, "alpha": 0.0}
+        f"sub-{snakemake.wildcards.subject}_Background": {
+            "key": 0,
+            "red": 1.0,
+            "green": 1.0,
+            "blue": 1.0,
+            "alpha": 0.0,
+        }
     }
 
     if basename in vertex_hits:
-        for integer_id, (vert_str, label) in enumerate(vertex_hits[basename].items(), start=1):
-            label_table[f'sub-{snakemake.wildcards.subject}_{label}'] = {
+        for integer_id, (vert_str, label) in enumerate(
+            vertex_hits[basename].items(), start=1
+        ):
+            label_table[f"sub-{snakemake.wildcards.subject}_{label}"] = {
                 "key": integer_id,
                 "red": 1.0,
                 "green": 0.0,
@@ -35,7 +43,8 @@ for surf_path, out_path in zip(surface_paths, label_gii_paths):
             }
             label_scalars[int(vert_str)] = integer_id
     else:
-        print(f"Note: {basename} has no vertex hits — writing background-only label GIFTI.")
+        print(
+            f"Note: {basename} has no vertex hits — writing background-only label GIFTI."
+        )
 
     write_label_gii(label_scalars, out_path, label_dict=label_table, metadata=metadata)
-
