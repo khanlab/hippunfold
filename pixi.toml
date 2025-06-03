@@ -6,9 +6,16 @@ platforms = ["linux-64"]
 version = "1.5.2-pre.2"
 
 [tasks]
+hippunfold = "python ./hippunfold/run.py"
+hippunfold-quick="python ./hippunfold/run_quick.py"
+
+
 
 [dependencies]
 appdirs = ">=1.4.4,<2"
 snakemake = ">=9.3.0"
 snakebids = ">=0.14.0"
 conda = ">=25.5.0,<26"
+
+
+
