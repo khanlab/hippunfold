@@ -102,7 +102,7 @@ rule calculate_gyrification:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
+        gii=temp(bids(
             root=root,
             datatype="metric",
             suffix="gyrification.shape.gii",
@@ -110,7 +110,7 @@ rule calculate_gyrification:
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
-        ),
+        )),
     container:
         config["singularity"]["autotop"]
     conda:
@@ -136,7 +136,7 @@ rule calculate_curvature:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
+        gii=temp(bids(
             root=root,
             datatype="metric",
             suffix="curvature.shape.gii",
@@ -144,7 +144,7 @@ rule calculate_curvature:
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
-        ),
+        )),
     container:
         config["singularity"]["autotop"]
     conda:
@@ -178,7 +178,7 @@ rule calculate_thickness:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
+        gii=temp(bids(
             root=root,
             datatype="metric",
             suffix="thickness.shape.gii",
@@ -186,7 +186,7 @@ rule calculate_thickness:
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
-        ),
+        )),
     container:
         config["singularity"]["autotop"]
     conda:

@@ -216,7 +216,7 @@ rule laplace_beltrami:
             **inputs.subj_wildcards,
         ),
     output:
-        coords=bids(
+        coords=temp(bids(
             root=root,
             datatype="metric",
             dir="{dir}",
@@ -226,7 +226,7 @@ rule laplace_beltrami:
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
-        ),
+        )),
     group:
         "subj"
     container:
