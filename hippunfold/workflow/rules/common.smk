@@ -240,17 +240,6 @@ def get_final_spec():
                 )
             )
 
-    files.extend(
-        inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="surf",
-                suffix="removeunused.touch",
-                **inputs.subj_wildcards,
-            )
-        )
-    )
-
     return files
 
 
