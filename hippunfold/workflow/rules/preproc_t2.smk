@@ -35,10 +35,8 @@ rule n4_t2:
             )
         ),
     threads: 8
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -107,10 +105,8 @@ rule reg_t2_to_ref:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("niftyreg")
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
@@ -142,10 +138,8 @@ rule ras_to_itk_reg_t2:
                 type_="itk",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -211,10 +205,8 @@ else:
                 suffix="T2w.nii.gz",
                 desc="preproc",
             ),
-        container:
-            config["singularity"]["autotop"]
         conda:
-            conda_env("c3d")
+            "../envs/c3d.yaml"
         group:
             "subj"
         shell:
@@ -263,10 +255,8 @@ rule reg_t2_to_t1_part1:
             "reg_t2_to_t1_part1",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("niftyreg")
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
@@ -298,10 +288,8 @@ rule reg_t2_to_t1_part2:
                 type_="itk",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -399,10 +387,8 @@ rule compose_t2_xfm_corobl:
             "compose_t2_xfm_corobol",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -465,10 +451,8 @@ rule warp_t2_to_corobl_crop:
                 hemi="{hemi,L|R}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

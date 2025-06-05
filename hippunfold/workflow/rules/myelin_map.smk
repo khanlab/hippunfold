@@ -33,10 +33,8 @@ rule divide_t1_by_t2:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "c3d {input.t2} {input.t1} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
 
@@ -96,9 +94,7 @@ rule sample_myelin_map_surf:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shell:
         "wb_command -volume-to-surface-mapping {input.vol} {input.mid} {output.metric} -ribbon-constrained {input.outer} {input.inner}"

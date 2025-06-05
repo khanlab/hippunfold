@@ -9,8 +9,6 @@ rule download_extract_template:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
         unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
-    container:
-        config["singularity"]["autotop"]
     shadow:
         "minimal"
     script:
@@ -67,10 +65,8 @@ rule import_template_dseg:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -108,10 +104,8 @@ rule import_template_dseg_dentate:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -151,10 +145,8 @@ rule import_template_coords:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_coords}"
 
@@ -193,9 +185,7 @@ rule import_template_anat:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "{params.copy_or_flip_cmd} {output.template_anat}"

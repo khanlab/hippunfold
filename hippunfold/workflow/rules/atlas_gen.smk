@@ -95,10 +95,9 @@ rule gen_atlas_reg_ants:
                 suffix="antstemplate",
             )
         ),
-    container:
-        config["singularity"]["autotop"]  # note antsMultivariateTemplateConstruction2 is not in the container right now!
+        # note antsMultivariateTemplateConstruction2 is not in the container right now!
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     shell:
         "antsMultivariateTemplateConstruction2.sh "
         " -d 2 -o {params.warp_prefix} -n 0 -l 0 -k {params.num_modalities} {input.metrics_csv} "
@@ -225,10 +224,8 @@ rule reset_header_2d_metric_nii:
             hemi="{hemi}",
             suffix="{metric,[a-zA-Z0-9]+}.nii.gz",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -273,10 +270,8 @@ rule reset_header_2d_warp_atlasgen:
             desc="3D",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -301,10 +296,8 @@ rule make_metric_ref:
                 suffix="metricref.nii.gz",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "c2d {input} -resample {wildcards.resample}% -scale 0 -shift 1 -binarize -o {output}"
 
@@ -333,10 +326,8 @@ rule gen_unfold_atlas_mesh:
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     script:
         "../scripts/gen_unfold_atlas_mesh.py"
 
@@ -401,10 +392,8 @@ rule avgtemplate_metric_vol_to_surf:
             hemi="{hemi}",
             suffix="{metric}.shape.gii",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shell:
         "wb_command -volume-to-surface-mapping {input.metric_nii} {input.midthickness} {output.metric_gii} -trilinear"
 
@@ -445,10 +434,8 @@ rule warp_subj_unfold_surf_to_avg:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shadow:
         "minimal"
     shell:
@@ -497,10 +484,8 @@ rule resample_subj_native_surf_to_avg:
             suffix="midthickness.surf.gii",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shell:
         "wb_command -surface-resample {input.subj_native} {input.subj_unfold} {input.atlas_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
 
@@ -538,10 +523,8 @@ rule warp_subfields_to_avg:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     shell:
         "antsApplyTransforms -d 2 -i {input.img} -o {output.img} -t {input.warp} -r {input.img} -n NearestNeighbor -v"
 
@@ -572,10 +555,8 @@ rule vote_subfield_labels:
                 label="{label}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     script:
         "../scripts/majority_voting.py"
 
@@ -615,10 +596,8 @@ rule reset_header_2d_subfields_nii:
             desc="subfieldsfixhdr",
             suffix="dseg.nii.gz",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -644,10 +623,8 @@ rule import_avg_subfields_as_label:
             desc="subfieldswithlbl",
             suffix="dseg.nii.gz",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -682,10 +659,8 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             hemi="{hemi}",
             suffix="dseg.label.gii",
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shell:
         "wb_command -volume-label-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii}"
 
