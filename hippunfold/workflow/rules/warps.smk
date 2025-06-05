@@ -58,10 +58,8 @@ rule reg_to_template:
             from_="{modality,T1w|T2w}",
             to=config["template"],
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("niftyreg")
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
@@ -93,10 +91,8 @@ rule convert_template_xfm_ras2itk:
                 type_="itk",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -135,10 +131,8 @@ rule compose_template_xfm_corobl:
                 type_="itk",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -170,10 +164,8 @@ rule invert_template_xfm_itk2ras:
                 type_="ras",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -205,10 +197,8 @@ rule template_xfm_itk2ras:
                 type_="ras",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -241,9 +231,7 @@ rule create_unfold_ref:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} -o {output.nii}"

@@ -23,10 +23,8 @@ rule resample_hippdwi_to_template:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -63,7 +61,5 @@ rule cp_b500_to_anat_dir:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"

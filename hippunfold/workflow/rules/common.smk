@@ -23,36 +23,6 @@ def bids_log(rule_name, **kwargs):
     return bids(**log_params)
 
 
-def conda_env(env_name):
-    """
-    Returns the path to the Conda environment file if --use-conda is set, otherwise returns None.
-
-    Args:
-        env_name (str): The name of the environment.
-
-    Returns:
-        str or None: Path to the Conda YAML file or None.
-    """
-    import snakemake
-    from packaging.version import parse
-
-    # Get Snakemake version
-    snakemake_version = parse(snakemake.__version__)
-
-    if snakemake_version >= parse("8.0.0"):
-        # Snakemake >= 8.0
-        from snakemake.settings.types import DeploymentMethod
-
-        if DeploymentMethod.CONDA in workflow.deployment_settings.deployment_method:
-            return f"../envs/{env_name}.yaml"
-    else:
-        # Snakemake < 8.0
-        if workflow.use_conda:
-            return f"../envs/{env_name}.yaml"
-
-    return None
-
-
 def get_atlas_dir():
     return Path(utils.get_download_dir()) / "hippunfold-atlases"
 

@@ -25,10 +25,8 @@ rule get_boundary_vertices:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     log:
         bids_log(
             "get_boundary_verticies",
@@ -78,10 +76,8 @@ rule map_src_sink_sdt_to_surf:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -175,8 +171,6 @@ rule postproc_boundary_vertices:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     log:
         bids_log(
             "postproc_boundary_verticies",
@@ -185,7 +179,7 @@ rule postproc_boundary_vertices:
             label="{label}",
         ),
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     group:
         "subj"
     script:
@@ -229,13 +223,11 @@ rule laplace_beltrami:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     threads: 1
     resources:
         mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     log:
         bids_log(
             "laplace_beltrami",
@@ -304,10 +296,8 @@ rule warp_native_mesh_to_unfold:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     group:
         "subj"
     script:
@@ -358,10 +348,8 @@ rule space_unfold_vertices:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     group:
         "subj"
     log:
@@ -404,10 +392,8 @@ rule unfold_surface_smoothing:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -445,9 +431,7 @@ rule set_surface_z_level:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("pyvista")
+        "../envs/pyvista.yaml"
     script:
         "../scripts/set_surface_z_level.py"
