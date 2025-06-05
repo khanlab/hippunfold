@@ -264,6 +264,3 @@ rule merge_hipp_dentate_spec_file:
         "subj"
     shell:
         "{params.cmd}"
-
-
-

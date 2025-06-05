@@ -102,15 +102,17 @@ rule calculate_gyrification:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=temp(bids(
-            root=root,
-            datatype="metric",
-            suffix="gyrification.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        )),
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="gyrification.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
     container:
         config["singularity"]["autotop"]
     conda:
@@ -136,15 +138,17 @@ rule calculate_curvature:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=temp(bids(
-            root=root,
-            datatype="metric",
-            suffix="curvature.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        )),
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="curvature.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
     container:
         config["singularity"]["autotop"]
     conda:
@@ -178,15 +182,17 @@ rule calculate_thickness:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=temp(bids(
-            root=root,
-            datatype="metric",
-            suffix="thickness.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        )),
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="thickness.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
     container:
         config["singularity"]["autotop"]
     conda:
