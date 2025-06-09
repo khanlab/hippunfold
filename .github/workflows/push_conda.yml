@@ -1,0 +1,81 @@
+# .github/workflows/build-conda.yml
+
+name: Build and Upload Conda Package
+
+on:
+  push:
+    branches:
+      - dev-v2.0.0
+  workflow_dispatch:
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache conda build cache
+        uses: actions/cache@v3
+        with:
+          path: /home/runner/miniconda3/conda-bld
+          key: ${{ runner.os }}-conda-bld-${{ hashFiles('recipe/meta.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-conda-bld-
+
+      - name: Setup Miniforge and mamba
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-variant: Miniforge3
+          miniforge-version: latest
+          mamba-version: "*"
+          use-mamba: true
+          conda-solver: libmamba
+          auto-activate-base: true
+
+      - name: Install dependencies
+        run: |
+          mamba install -y -c conda-forge conda-build anaconda-client boa
+
+      - name: Get latest commit SHA from dev-v2.0.0
+        id: get_sha
+        run: |
+          echo "Fetching latest commit on dev-v2.0.0 branch..."
+          COMMIT_SHA=$(git ls-remote origin refs/heads/dev-v2.0.0 | cut -f1)
+          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
+
+      - name: Update meta.yaml with latest ref and sha256
+        run: |
+          echo "Updating meta.yaml with commit: $COMMIT_SHA"
+
+          # 1) Update the Jinja-set 'ref' (this is fine)
+          sed -i "s|^{% set ref = \".*\" %}|{% set ref = \"$COMMIT_SHA\" %}|" ./recipe/meta.yaml
+
+          # 2) Download the tarball and compute the checksum
+          curl -L -o source.tar.gz \
+            https://github.com/khanlab/hippunfold/archive/${COMMIT_SHA}.tar.gz
+          SHA256_SUM=$(sha256sum source.tar.gz | awk '{print $1}')
+          echo "New sha256: $SHA256_SUM"
+
+          # 3) Replace the literal 'sha256:' line under source:
+          sed -i "s|^\(\s*sha256:\s*\).*|\1$SHA256_SUM|" ./recipe/meta.yaml
+
+      - name: Build & capture path
+        id: build
+        run: |
+          cd recipe
+          OUT=$(conda build . -c conda-forge -c bioconda --output 2>/dev/null)
+          echo "PACKAGE_PATH=$OUT" >> $GITHUB_ENV
+          conda mambabuild . -c conda-forge -c bioconda
+
+      - name: Upload package to Khanlab channel
+        shell: bash -l {0}
+        run: |
+          conda activate base
+          anaconda login \
+            --username ${{ secrets.ANACONDA_USERNAME }} \
+            --password ${{ secrets.ANACONDA_PASSWORD }}
+          anaconda upload "$PACKAGE_PATH" \
+            --label main \
+            --force \
