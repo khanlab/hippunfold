@@ -3,22 +3,22 @@ import re
 
 def get_nnunet_input(wildcards):
     T1w_nii = bids(
-        root=work,
+        root=root,
         datatype="anat",
-        **config["subj_wildcards"],
-        suffix="T1w.nii.gz",
         space="corobl",
         desc="preproc",
         hemi="{hemi}",
+        suffix="T1w.nii.gz",
+        **inputs.subj_wildcards,
     )
     T2w_nii = bids(
-        root=work,
+        root=root,
         datatype="anat",
-        **config["subj_wildcards"],
-        suffix="T2w.nii.gz",
         space="corobl",
         desc="preproc",
         hemi="{hemi}",
+        suffix="T2w.nii.gz",
+        **inputs.subj_wildcards,
     )
     if (config["modality"] == "T1w" or config["modality"] == "T2w") and config[
         "force_nnunet_model"
@@ -31,12 +31,12 @@ def get_nnunet_input(wildcards):
         return T1w_nii
     elif config["modality"] == "hippb500":
         return bids(
-            root=work,
+            root=root,
             datatype="dwi",
             hemi="{hemi}",
             space="corobl",
             suffix="b500.nii.gz",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
         )
     else:
         raise ValueError("modality not supported for nnunet!")
@@ -57,20 +57,22 @@ def get_model_tar():
 
 rule download_nnunet_model:
     params:
-        url=config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
-        if config["force_nnunet_model"]
-        else config["resource_urls"]["nnunet_model"][config["modality"]],
+        url=(
+            config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
+            if config["force_nnunet_model"]
+            else config["resource_urls"]["nnunet_model"][config["modality"]]
+        ),
         model_dir=Path(download_dir) / "model",
     output:
         model_tar=get_model_tar(),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/curl.yaml"
     shell:
-        "mkdir -p {params.model_dir} && wget https://{params.url} -O {output}"
+        "mkdir -p {params.model_dir} && curl -L https://{params.url} -o {output}"
 
 
 def parse_task_from_tar(wildcards, input):
-    match = re.search("Task[0-9]{3}_[\w]+", input.model_tar)
+    match = re.search(r"Task[0-9]{3}_[\w]+", input.model_tar)
     if match:
         task = match.group(0)
     else:
@@ -79,7 +81,7 @@ def parse_task_from_tar(wildcards, input):
 
 
 def parse_chkpnt_from_tar(wildcards, input):
-    match = re.search("^.*\.(\w+)\.tar", input.model_tar)
+    match = re.search(r"^.*\.(\w+)\.tar", input.model_tar)
     if match:
         chkpnt = match.group(1)
     else:
@@ -88,7 +90,7 @@ def parse_chkpnt_from_tar(wildcards, input):
 
 
 def parse_trainer_from_tar(wildcards, input):
-    match = re.search("^.*\.(\w+)\..*.tar", input.model_tar)
+    match = re.search(r"^.*\.(\w+)\..*.tar", input.model_tar)
     if match:
         trainer = match.group(1)
     else:
@@ -126,22 +128,22 @@ rule run_inference:
         trainer=parse_trainer_from_tar,
         tta="" if config["nnunet_enable_tta"] else "--disable_tta",
     output:
-        nnunet_seg=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi,Lflip|R}"
+        nnunet_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="nnunet",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            suffix="nnunet.txt",
-            space="corobl",
-            hemi="{hemi,Lflip|R}"
+        bids_log(
+            "run_inference",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
         ),
     shadow:
         "minimal"
@@ -152,8 +154,8 @@ rule run_inference:
         time=30 if config["use_gpu"] else 60,
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/nnunet.yaml"
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -169,48 +171,6 @@ rule run_inference:
         "export nnUNet_n_proc_DA={threads} && "
         "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
         "cp {params.temp_lbl} {output.nnunet_seg}"
-
-
-rule unflip_nnunet_nii:
-    """Unflip the Lflip nnunet seg"""
-    input:
-        nnunet_seg=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi}flip"
-        ),
-        unflip_ref=(
-            bids(
-                root=work,
-                datatype="anat",
-                **config["subj_wildcards"],
-                suffix="{modality}.nii.gz".format(modality=config["modality"]),
-                space="corobl",
-                desc="preproc",
-                hemi="{hemi}",
-            ),
-        ),
-    output:
-        nnunet_seg=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi,L}"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input.nnunet_seg} -flip x -popas FLIPPED "
-        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nnunet_seg} "
 
 
 def get_f3d_ref(wildcards, input):
@@ -231,9 +191,9 @@ rule qc_nnunet_f3d:
     input:
         img=(
             bids(
-                root=work,
+                root=root,
                 datatype="anat",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="{modality}.nii.gz".format(modality=config["modality"]),
                 space="corobl",
                 desc="preproc",
@@ -241,55 +201,58 @@ rule qc_nnunet_f3d:
             ),
         ),
         seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="nnunet",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         ref=get_f3d_ref,
     output:
-        cpp=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            suffix="cpp.nii.gz",
-            desc="f3d",
-            space="corobl",
-            hemi="{hemi}"
+        cpp=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="cpp.nii.gz",
+                desc="f3d",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
-        res=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="{modality}.nii.gz".format(modality=config["modality"]),
-            desc="f3d",
-            space="template",
-            hemi="{hemi}"
+        res=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="{modality}.nii.gz".format(modality=config["modality"]),
+                desc="f3d",
+                space="template",
+                hemi="{hemi}",
+            )
         ),
-        res_mask=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="mask.nii.gz",
-            desc="f3d",
-            space="template",
-            hemi="{hemi}"
+        res_mask=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="mask.nii.gz",
+                desc="f3d",
+                space="template",
+                hemi="{hemi}",
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/niftyreg.yaml"
     log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            suffix="qcreg.txt",
-            desc="f3d",
-            space="corobl",
-            hemi="{hemi}"
+        bids_log(
+            "qc_nnunet_f3d",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
         ),
     group:
         "subj"
@@ -301,13 +264,13 @@ rule qc_nnunet_f3d:
 rule qc_nnunet_dice:
     input:
         res_mask=bids(
-            root=work,
+            root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="mask.nii.gz",
             desc="f3d",
             space="template",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
@@ -326,14 +289,14 @@ rule qc_nnunet_dice:
                 suffix="dice.tsv",
                 desc="unetf3d",
                 hemi="{hemi}",
-                **config["subj_wildcards"]
+                **inputs.subj_wildcards,
             ),
             caption="../report/nnunet_qc.rst",
             category="Segmentation QC",
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/pyunfold.yaml"
     script:
         "../scripts/dice.py"

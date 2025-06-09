@@ -1,0 +1,10 @@
+name: neurovis
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - nilearn>=0.8.1,<0.9.0
+  - matplotlib=3.4.2
+  - pandas>=1.2.0,<1.3.0
+  - seaborn>=0.11.2,<0.12.0

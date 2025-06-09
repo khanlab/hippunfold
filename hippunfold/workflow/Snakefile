@@ -1,11 +1,14 @@
 # ---- snakebids boilerplate
 
 import snakebids
-from snakebids import bids
+from snakebids import bids, set_bids_spec
+from tempfile import mkdtemp
 
 
 configfile: "config/snakebids.yml"
 
+
+set_bids_spec("v0_0_0")
 
 # consider moving this logic to another smk file to clean-up
 
@@ -16,24 +19,17 @@ template_modality = False
 
 
 # set the lists used for output spaces
-if (
-    config["modality"] == "T1w"
-    or config["modality"] == "segT1w"
-    or "T1w" in config["output_spaces"]
-):
+if config["modality"] == "T1w" or "T1w" in config["output_spaces"]:
     ref_spaces.append("T1w")
     crop_ref_spaces.append("cropT1w")
     limit_to_list.add("T1w")
-if (
-    (config["modality"] == "T2w" or config["modality"] == "segT2w")
-    and "native" in config["output_spaces"]
-) or "T2w" in config["output_spaces"]:
+if config["modality"] == "T2w" or "T2w" in config["output_spaces"]:
     ref_spaces.append("T2w")
     crop_ref_spaces.append("cropT2w")
     limit_to_list.add("T2w")
 if (
     config["modality"] == "hippb500"
-    or config["modality"] == "cropseg"
+    or config["modality"] == "dsegtissue"
     or "corobl" in config["output_spaces"]
 ):
     ref_spaces.append("corobl")
@@ -56,35 +52,19 @@ if "T2w" in config["modality"]:
 elif "T1w" in config["modality"]:
     template_modality = "T1w"
 
+if config["analysis_level"] == "group_create_atlas":
+    limit_to_list.add("dsegsubfields")
 
-# only generate hipp surface if skipping template injection
-#   i.e. drop dentate
-if config["skip_inject_template_labels"]:  # TODO do we need this?
-    config["autotop_labels"] = ["hipp"]
+limit_to_list.add(config["modality"])
 
 
-# add seg (if chosen) and the modality to the inputs
-if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg
-    limit_to_list.add("seg")
-    limit_to_list.add(config["modality"][3:])
-else:
-    limit_to_list.add(config["modality"])
-
-# if atlas doesn't contain alignment features
-if not config["atlas"] == ["multihist7"]:
-    config["no_unfolded_reg"] = True
-
-# writes inputs_config.yml and updates config dict
-config.update(
-    snakebids.generate_inputs(
-        bids_dir=config["bids_dir"],
-        pybids_inputs=config["pybids_inputs"],
-        derivatives=config["derivatives"],
-        participant_label=config["participant_label"],
-        exclude_participant_label=config["exclude_participant_label"],
-        limit_to=list(limit_to_list),
-        use_bids_inputs=False,
-    )
+inputs = snakebids.generate_inputs(
+    bids_dir=config["bids_dir"],
+    pybids_inputs=config["pybids_inputs"],
+    derivatives=config["derivatives"],
+    participant_label=config["participant_label"],
+    exclude_participant_label=config["exclude_participant_label"],
+    limit_to=list(limit_to_list),
 )
 
 
@@ -102,27 +82,26 @@ wildcard_constraints:
     modality="[a-zA-Z0-9]+",
     density="[a-zA-Z0-9]+",
     atlas="[a-zA-Z0-9]+",
-    autotop="[a-zA-Z0-9]+",
+    label="[a-zA-Z0-9]+",
     template="[a-zA-Z0-9]+",
 
 
-root = os.path.join(config["root"], "hippunfold")
-work = os.path.join(config["root"], "work")
+root = os.path.expandvars(config["root"])
 
 
 include: "rules/common.smk"
 include: "rules/download.smk"
-include: "rules/preproc_t1.smk"
+
+
+if "T1w" in limit_to_list:
+
+    include: "rules/preproc_t1.smk"
 
 
 # include rules only as they are needed..
-if config["modality"] == "segT1w" or config["modality"] == "segT2w":
+if config["modality"] == "dsegtissue":
 
-    include: "rules/preproc_seg.smk"
-
-elif config["modality"] == "cropseg":
-
-    include: "rules/preproc_cropseg.smk"
+    include: "rules/preproc_dsegtissue.smk"
 
 else:
 
@@ -139,25 +118,19 @@ if config["modality"] == "hippb500":
     include: "rules/preproc_hippb500.smk"
 
 
-include: "rules/autotop.smk"
-
-
+include: "rules/coords.smk"
 include: "rules/warps.smk"
-
-
-include: "rules/gifti.smk"
-
-
+include: "rules/cifti.smk"
 include: "rules/subfields.smk"
-
-
-include: "rules/resample_final_to_crop_native.smk"
-
-
+include: "rules/resample_final_to_crop.smk"
 include: "rules/qc.smk"
-
-
 include: "rules/myelin_map.smk"
+include: "rules/native_isosurf.smk"
+include: "rules/inner_outer_surf.smk"
+include: "rules/native_metrics.smk"
+include: "rules/native_resampling.smk"
+include: "rules/native_unfold.smk"
+include: "rules/unfold_reg.smk"
 
 
 if config["use_template_seg"]:
@@ -183,6 +156,18 @@ else:
 rule all:
     input:
         get_final_output(),
+
+
+if config["analysis_level"] == "group_create_atlas":
+
+    include: "rules/atlas_gen.smk"
+
+    config["atlas"] = config["new_atlas_name"]
+
+
+rule all_create_atlas:
+    input:
+        get_create_atlas_output(),
 
 
 rule all_group_tsv:

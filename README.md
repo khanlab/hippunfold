@@ -18,28 +18,20 @@ This is especially useful for:
 - Morphometry (eg. thickness, surface area, curvature, and gyrification measures)
 - Quantitative mapping (eg. map your qT1 MRI data to a midthickness surface; extract laminar profiles perpendicular to this surface)
 
-## NEW: Version 1.3.x release 
+## What's new in version 2.0? 
 
-Major changes include the addition of unfolded space registration to a reference atlas harmonized across seven ground-truth histology samples. This method allows shifting in unfolded space, providing even better intersubject alignment. 
+- 
 
-*Note: this replaces the default workflow, however you can revert to the legacy workflow, disabling unfolded space registration, by setting `--atlas bigbrain` or `--no-unfolded-reg`*
+## Workflow 
 
-Read more in our [ manuscript](https://doi.org/10.7554/eLife.88404.3)
-
-Also the ability to specify a new **experimental** UNet model that is contrast-agnostic using [synthseg](https://github.com/BBillot/SynthSeg) and trained using more detailed segmentations. This generally produces more detailed results but has not been extensively tested yet. 
-
-Note: Docker containers for version 1.3.x and above do not come pre-shipped with nnU-net models (and are accordingly more lightweight!) - models are downloaded automatically when running, but please see the FAQ for more information!
-
-## Workflow
-
-The overall workflow can be summarized in the following steps:
-
-![Pipeline Overview](https://raw.githubusercontent.com//khanlab/hippunfold/master/docs/images/hippunfold_overview_unfoldreg.png)
+TODO: include updated workflow figure/diagram
 
 For more information, see
 **Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
 
 ## Additional tools
+
+TODO: update and add to this
 
 For plotting, mapping fMRI, DWI or other data, and manipulating surfaces, see [here](https://github.com/jordandekraker/hippunfold_toolbox)
 

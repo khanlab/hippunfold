@@ -1,17 +1,18 @@
 #!/bin/bash
 set -euxo pipefail
-HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models
-hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w
-hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R
-hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L
-hippunfold test_data/bids_multiT2w test_out participant -np --modality T2w
-hippunfold test_data/bids_T1w test_out participant -np --modality T1w
-hippunfold test_data/bids_hippb500 test_out participant -np --modality hippb500
-hippunfold test_data/bids_T1w_longitudinal test_out participant -np --modality T1w
-hippunfold test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w
-hippunfold test_data/bids_segT2w test_out participant -np --modality segT2w
-hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg/sub-{subject}_hemi-{hemi}_dseg.nii.gz
-hippunfold . test_out participant -np --modality cropseg --path_cropseg test_data/data_cropseg_1hemi/sub-{subject}_hemi-{hemi}_dseg.nii.gz --hemi L
-hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template
-hippunfold test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w
-hippunfold test_data/bids_T1w test_out participant -np --modality T1w --use-template-seg
+#HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/fake_models
+./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w 
+./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --hemi R 
+./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --hemi L 
+./hippunfold/run.py test_data/bids_multiT2w test_out participant -np --modality T2w 
+./hippunfold/run.py test_data/bids_T1w test_out participant -np --modality T1w 
+./hippunfold/run.py test_data/bids_hippb500 test_out participant -np --modality hippb500 
+./hippunfold/run.py test_data/bids_T1w_longitudinal test_out participant -np --modality T1w 
+./hippunfold/run.py test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w 
+./hippunfold/run.py test_data/bids_dsegtissue test_out participant -np --modality dsegtissue --derivatives test_data/bids_dsegtissue 
+./hippunfold/run.py test_data/bids_dsegtissue_1hemi test_out participant -np --modality dsegtissue --derivatives test_data/bids_dsegtissue_1hemi --hemi L
+./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --t1_reg_template 
+./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --output_space T1w 
+./hippunfold/run.py test_data/bids_T1w test_out participant -np --modality T1w --use-template-seg 
+./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w --generate-myelin-map
+./hippunfold/run.py test_data/bids_dsegtissue test_out group_create_atlas -np --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas 

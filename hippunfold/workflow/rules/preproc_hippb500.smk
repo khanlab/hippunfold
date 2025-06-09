@@ -7,22 +7,24 @@ rule resample_hippdwi_to_template:
     bounding boxes, and keep all Z slices (since is Z 
     is smaller than in template). """
     input:
-        b500=config["input_path"]["hippb500"],
+        b500=inputs["hippb500"].path,
     params:
         resample_dim=config["hippdwi_opts"]["resample_dim"],
         bbox_x=lambda wildcards: config["hippdwi_opts"]["bbox_x"][wildcards.hemi],
         bbox_y=config["hippdwi_opts"]["bbox_y"],
     output:
-        crop_b500=bids(
-            root=work,
-            datatype="dwi",
-            hemi="{hemi,L|R}",
-            space="corobl",
-            suffix="b500.nii.gz",
-            **config["subj_wildcards"]
+        crop_b500=temp(
+            bids(
+                root=root,
+                datatype="dwi",
+                hemi="{hemi,L|R}",
+                space="corobl",
+                suffix="b500.nii.gz",
+                **inputs.subj_wildcards,
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -35,56 +37,29 @@ rule resample_hippdwi_to_template:
         " -trim 0vox -o {output}"
 
 
-rule lr_flip_b500:
-    input:
-        nii=bids(
-            root=work,
-            datatype="dwi",
-            **config["subj_wildcards"],
-            suffix="b500.nii.gz",
-            space="corobl",
-            hemi="{hemi}"
-        ),
-    output:
-        nii=bids(
-            root=work,
-            datatype="dwi",
-            **config["subj_wildcards"],
-            suffix="b500.nii.gz",
-            space="corobl",
-            hemi="{hemi,L}flip"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -flip x -o  {output}"
-
-
 rule cp_b500_to_anat_dir:
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="dwi",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="b500.nii.gz",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            desc="preproc",
-            suffix="hippb500.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-            **config["subj_wildcards"]
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="preproc",
+                suffix="hippb500.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     shell:
         "cp {input} {output}"

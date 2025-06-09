@@ -1,5 +1,18 @@
 # Command-line interface
 
+
+## HippUnfold-Quick Command-line interface
+
+```{argparse}
+---
+filename: ../hippunfold/run_quick.py
+func: gen_parser
+prog: hippunfold_quick
+---
+```
+
+
+
 ## HippUnfold Command-line interface
 
  The following can also be seen by entering ``hippunfold -h`` into your terminal. 
@@ -15,6 +28,7 @@ prog: hippunfold
 ---
 ```
 
+
 ## Snakemake command-line interface
 
 In addition to the above command-line arguments, Snakemake arguments are also be passed at the `hippunfold` command-line. 
@@ -25,7 +39,7 @@ The complete list of [Snakemake](https://snakemake.readthedocs.io/en/stable/) ar
 
 ```{argparse}
 ---
-module: snakemake
+module: snakemake.cli
 func: get_argument_parser
 prog: snakemake
 ---

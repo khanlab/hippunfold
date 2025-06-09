@@ -1,12 +1,14 @@
 rule import_t2:
     input:
-        config["input_path"]["T2w"],
+        inputs["T2w"].path,
     output:
-        bids(
-            root=work,
-            datatype="anat",
-            **config["input_wildcards"]["T2w"],
-            suffix="T2w.nii.gz"
+        temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="T2w.nii.gz",
+                **inputs["T2w"].wildcards,
+            )
         ),
     group:
         "subj"
@@ -17,22 +19,24 @@ rule import_t2:
 rule n4_t2:
     input:
         bids(
-            root=work,
+            root=root,
             datatype="anat",
-            **config["input_wildcards"]["T2w"],
-            suffix="T2w.nii.gz"
+            suffix="T2w.nii.gz",
+            **inputs["T2w"].wildcards,
         ),
     output:
-        bids(
-            root=work,
-            datatype="anat",
-            **config["input_wildcards"]["T2w"],
-            suffix="T2w.nii.gz",
-            desc="n4"
+        temp(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="n4",
+                suffix="T2w.nii.gz",
+                **inputs["T2w"].wildcards,
+            )
         ),
     threads: 8
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -42,31 +46,36 @@ rule n4_t2:
 
 def get_ref_n4_t2(wildcards):
     # get the first image
-    t2_imgs = expand(
-        bids(
-            root=work,
-            datatype="anat",
-            **config["input_wildcards"]["T2w"],
-            suffix="T2w.nii.gz",
-            desc="n4"
-        ),
-        zip,
-        **snakebids.filter_list(config["input_zip_lists"]["T2w"], wildcards)
+    t2_imgs = (
+        inputs["T2w"]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="n4",
+                suffix="T2w.nii.gz",
+                **inputs["T2w"].wildcards,
+            )
+        )
     )
+
     return t2_imgs[0]
 
 
 def get_floating_n4_t2(wildcards):
-    t2_imgs = expand(
-        bids(
-            root=work,
-            datatype="anat",
-            **config["input_wildcards"]["T2w"],
-            suffix="T2w.nii.gz",
-            desc="n4"
-        ),
-        zip,
-        **snakebids.filter_list(config["input_zip_lists"]["T2w"], wildcards)
+    t2_imgs = (
+        inputs["T2w"]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="T2w.nii.gz",
+                desc="n4",
+                **inputs["T2w"].wildcards,
+            ),
+        )
     )
     return t2_imgs[int(wildcards.idx)]
 
@@ -77,80 +86,102 @@ rule reg_t2_to_ref:
         flo=get_floating_n4_t2,
     output:
         xfm_ras=bids(
-            root=work,
+            root=root,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="T2w{idx}",
             to="T2w0",
             desc="rigid",
-            type_="ras"
+            type_="ras",
         ),
-        xfm_itk=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            from_="T2w{idx}",
-            to="T2w0",
-            desc="rigid",
-            type_="itk"
+        warped=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="T2w.nii.gz",
+                desc="aligned",
+                floating="{idx}",
+                **inputs.subj_wildcards,
+            )
         ),
-        warped=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="T2w.nii.gz",
-            desc="aligned",
-            floating="{idx}"
-        ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
-        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac && "
-        "c3d_affine_tool  {output.xfm_ras} -oitk {output.xfm_itk}"
+        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac"
+
+
+rule ras_to_itk_reg_t2:
+    input:
+        xfm_ras=bids(
+            root=root,
+            datatype="warps",
+            **inputs.subj_wildcards,
+            suffix="xfm.txt",
+            from_="T2w{idx}",
+            to="T2w0",
+            desc="rigid",
+            type_="ras",
+        ),
+    output:
+        xfm_itk=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T2w{idx}",
+                to="T2w0",
+                desc="rigid",
+                type_="itk",
+            )
+        ),
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d_affine_tool  {input.xfm_ras} -oitk {output.xfm_itk}"
 
 
 def get_aligned_n4_t2(wildcards):
     # first get the number of floating t2s
-    filtered = snakebids.filter_list(config["input_zip_lists"]["T2w"], wildcards)
-    num_scans = len(filtered["subject"])
+    num_scans = len(inputs["T2w"].filter(**wildcards).expand())
 
     # then, return the path, expanding over range(1,num_scans) -i.e excludes 0 (ref image)
-    t2_imgs = expand(
-        bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="T2w.nii.gz",
-            desc="aligned",
-            floating="{idx}"
-        ),
-        **wildcards,
-        idx=range(1, num_scans)
+    t2_imgs = (
+        inputs["T2w"]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="aligned",
+                floating="{idx}",
+                suffix="T2w.nii.gz",
+                **inputs.subj_wildcards,
+            ),
+            idx=range(1, num_scans),
+        )
     )
     return t2_imgs
 
 
 if config["skip_preproc"]:
 
-    # grabs the first t2w only
+    # for preproc T2, we expect the user to use bids filters/wildcards to ensure only 1 T1w is matched per subject
     rule import_preproc_t2:
         input:
-            lambda wildcards: expand(
-                config["input_path"]["T2w"],
-                zip,
-                **snakebids.filter_list(config["input_zip_lists"]["T2w"], wildcards)
-            )[0],
+            lambda wildcards: inputs["T2w"].filter(**wildcards).expand()[0],
         output:
             bids(
                 root=root,
                 datatype="anat",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="T2w.nii.gz",
-                desc="preproc"
+                desc="preproc",
             ),
         group:
             "subj"
@@ -170,80 +201,99 @@ else:
             bids(
                 root=root,
                 datatype="anat",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="T2w.nii.gz",
-                desc="preproc"
+                desc="preproc",
             ),
-        container:
-            config["singularity"]["autotop"]
+        conda:
+            "../envs/c3d.yaml"
         group:
             "subj"
         shell:
             "{params.cmd}"
 
 
-rule reg_t2_to_t1:
+rule reg_t2_to_t1_part1:
     input:
         flo=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="T2w.nii.gz",
-            desc="preproc"
+            desc="preproc",
         ),
         ref=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
-            suffix="T1w.nii.gz"
+            suffix="T1w.nii.gz",
         ),
     output:
         warped=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="T2w.nii.gz",
             desc="preproc",
-            space="T1w"
+            space="T1w",
         ),
-        xfm_ras=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            from_="T2w",
-            to="T1w",
-            desc="rigid",
-            type_="ras"
-        ),
-        xfm_itk=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            from_="T2w",
-            to="T1w",
-            desc="rigid",
-            type_="itk"
+        xfm_ras=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T2w",
+                to="T1w",
+                desc="rigid",
+                type_="ras",
+            )
         ),
     log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            suffix="reg.txt",
-            from_="T2w",
-            to="T1w",
-            desc="rigid",
-            type_="ras"
+        bids_log(
+            "reg_t2_to_t1_part1",
+            **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/niftyreg.yaml"
     group:
         "subj"
     shell:
-        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log} && "
-        "c3d_affine_tool  {output.xfm_ras} -oitk {output.xfm_itk}"
+        "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log}"
+
+
+rule reg_t2_to_t1_part2:
+    input:
+        xfm_ras=bids(
+            root=root,
+            datatype="warps",
+            **inputs.subj_wildcards,
+            suffix="xfm.txt",
+            from_="T2w",
+            to="T1w",
+            desc="rigid",
+            type_="ras",
+        ),
+    output:
+        xfm_itk=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T2w",
+                to="T1w",
+                desc="rigid",
+                type_="itk",
+            )
+        ),
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d_affine_tool {input.xfm_ras} -oitk {output.xfm_itk}"
 
 
 def get_inputs_compose_t2_xfm_corobl(wildcards):
@@ -252,9 +302,9 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         # xfm1: t1 to corobl
         t2_to_t1 = (
             bids(
-                root=work,
+                root=root,
                 datatype="warps",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="xfm.txt",
                 from_="T2w",
                 to="T1w",
@@ -264,9 +314,9 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         )
         t1_to_cor = (
             bids(
-                root=work,
+                root=root,
                 datatype="warps",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="xfm.txt",
                 from_="T1w",
                 to="corobl",
@@ -280,9 +330,9 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         # xfm0: t2 to template
         t2_to_std = (
             bids(
-                root=work,
+                root=root,
                 datatype="warps",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="xfm.txt",
                 from_="T2w",
                 to=config["template"],
@@ -320,28 +370,25 @@ rule compose_t2_xfm_corobl:
     params:
         cmd=get_cmd_compose_t2_xfm_corobl,
     output:
-        t2_to_cor=bids(
-            root=work,
-            datatype="warps",
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            from_="T2w",
-            to="corobl",
-            desc="affine",
-            type_="itk"
+        t2_to_cor=temp(
+            bids(
+                root=root,
+                datatype="warps",
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                from_="T2w",
+                to="corobl",
+                desc="affine",
+                type_="itk",
+            )
         ),
     log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            suffix="composecorobl.txt",
-            from_="T2w",
-            to="corobl",
-            desc="affine",
-            type_="itk"
+        bids_log(
+            "compose_t2_xfm_corobol",
+            **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -352,26 +399,26 @@ rule compose_t2_xfm_corobl:
 def get_xfm_to_corobl():
     if config["skip_coreg"]:
         xfm = bids(
-            root=work,
+            root=root,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             from_="T1w",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         )
     else:
         xfm = (
             bids(
-                root=work,
+                root=root,
                 datatype="warps",
-                **config["subj_wildcards"],
+                **inputs.subj_wildcards,
                 suffix="xfm.txt",
                 from_="T2w",
                 to="corobl",
                 desc="affine",
-                type_="itk"
+                type_="itk",
             ),
         )
     return xfm
@@ -383,9 +430,9 @@ rule warp_t2_to_corobl_crop:
         nii=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="T2w.nii.gz",
-            desc="preproc"
+            desc="preproc",
         ),
         xfm=get_xfm_to_corobl(),
         template_dir=Path(download_dir) / "template" / config["template"],
@@ -393,48 +440,21 @@ rule warp_t2_to_corobl_crop:
         ref=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="T2w.nii.gz",
-            space="corobl",
-            desc="preproc",
-            hemi="{hemi,L|R}"
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="T2w.nii.gz",
+                space="corobl",
+                desc="preproc",
+                hemi="{hemi,L|R}",
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {params.ref}  -t {input.xfm}"
-
-
-rule lr_flip_t2:
-    input:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="T2w.nii.gz",
-            space="corobl",
-            desc="{desc}",
-            hemi="{hemi}"
-        ),
-    output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="T2w.nii.gz",
-            space="corobl",
-            desc="{desc}",
-            hemi="{hemi,L}flip"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input} -flip x -o  {output}"

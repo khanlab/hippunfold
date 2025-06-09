@@ -1,0 +1,2 @@
+use-conda: True
+conda-prefix: /src/conda-envs

@@ -1,125 +1,213 @@
-
-rule resample_unfoldreg_subfields:
+rule import_dseg_subfields:
+    """read in volumetric subfield dseg, used for group_create_atlas only"""
     input:
-        label_nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **config["subj_wildcards"]
-        ),
-        warp=bids(
-            root=work,
-            **config["subj_wildcards"],
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="SyN",
-            from_="{atlas}",
-            to="subject",
-            space="unfold",
-            type_="itk",
-            hemi="{hemi}"
-        ),
+        vol_dseg=partial(get_single_bids_input, component="dsegsubfields"),
+        label_list=Path(workflow.basedir) / "../resources/atlas-v2/labellist_withdg.txt",
     output:
-        label_nii=bids(
-            root=root,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **config["subj_wildcards"]
+        label_dseg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                desc="subfields",
+                suffix="dseg.nii.gz",
+                space="corobl",
+                hemi="{hemi,L|R}",
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
-    shadow:
-        "minimal"
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
-        "c3d {input.label_nii} -slice z 0:15 -oo tmp0%d.nii.gz && "
-        "for fn in $(ls tmp*.nii.gz); do antsApplyTransforms -d 2 -i $fn -r $fn -o $fn -n MultiLabel -t {input.warp}; done && "
-        "c3d tmp*.nii.gz -tile z -o recombined.nii.gz && "
-        "c3d {input.label_nii} recombined.nii.gz -copy-transform -o {output}"
+        "wb_command -volume-label-import {input.vol_dseg} {input.label_list} {output.label_dseg}"
 
 
-def skip_unfoldreg_option_subfields(wildcards):
-    if config["no_unfolded_reg"]:
-        label_nii = bids(
-            root=work,
-            datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **config["subj_wildcards"]
-        )
-    else:
-        label_nii = bids(
+rule subfields_to_label_gifti:
+    input:
+        vol=bids(
             root=root,
             datatype="anat",
-            suffix="subfields.nii.gz",
-            space="unfold",
-            hemi="{hemi}",
-            label="hipp",
-            atlas="{atlas}",
-            **config["subj_wildcards"]
-        )
-    return label_nii
-
-
-rule label_subfields_from_vol_coords_corobl:
-    """ Label subfields using the volumetric coords and atlas subfield labels"""
-    input:
-        label_nii=skip_unfoldreg_option_subfields,
-        nii_ap=bids(
-            root=work,
-            datatype="coords",
-            dir="AP",
-            label="hipp",
-            suffix="coords.nii.gz",
-            desc="laplace",
-            space="corobl",
-            hemi="{hemi}",
-            **config["subj_wildcards"]
-        ),
-        nii_pd=bids(
-            root=work,
-            datatype="coords",
-            dir="PD",
-            label="hipp",
-            suffix="coords.nii.gz",
-            desc="laplace",
-            space="corobl",
-            hemi="{hemi}",
-            **config["subj_wildcards"]
-        ),
-        nii_io=get_laminar_coords,
-        labelmap=get_labels_for_laplace,
-    params:
-        gm_labels=lambda wildcards: config["laplace_labels"]["AP"]["gm"],
-    output:
-        nii_label=bids(
-            root=work,
-            datatype="anat",
-            desc="subfieldsnotissue",
+            **inputs.subj_wildcards,
+            desc="subfields",
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
-            atlas="{atlas}",
-            **config["subj_wildcards"]
         ),
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            den="native",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        label_gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="subfields.label.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label,hipp}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    shell:
+        "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
+
+
+rule native_label_gii_to_unfold_nii:
+    """converts subfields label .gii files to .nii for applying with 2D ANTS transform (when creating a template)"""
+    input:
+        label_gii=bids(
+            root=root,
+            datatype="metric",
+            suffix="subfields.label.gii",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        inner_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="inner.surf.gii",
+            space="unfold",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        midthickness_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfold",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        outer_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="outer.surf.gii",
+            space="unfold",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        ref_nii=bids(
+            root=root,
+            datatype="anat",
+            suffix="refvol.nii.gz",
+            space="unfold",
+            desc="slice",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        interp="-nearest-vertex 10",
+    output:
+        label_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="subfields.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label,hipp}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    conda:
+        "../envs/workbench.yaml"
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
-    script:
-        "../scripts/label_subfields_from_vol_coords.py"
+    shell:
+        "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
+        " {params.interp}"
+
+
+rule label_subfields_from_vol_coords_corobl:
+    input:
+        ref_nii=get_labels_for_laplace,
+        midthickness_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        inner_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="inner.surf.gii",
+            space="corobl",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        outer_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="outer.surf.gii",
+            space="corobl",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        label_gii=bids(
+            root=root,
+            datatype="metric",
+            suffix="subfields.label.gii",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            atlas="{atlas}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        nii_label=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="subfieldsnotissue",
+                suffix="dseg.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                atlas="{atlas}",
+                label="{label,hipp}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    log:
+        bids_log(
+            "label_subfields_from_vol_coords_corobl",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            atlas="{atlas}",
+        ),
+    shell:
+        "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.nii_label} &>> {log}"
+        " -ribbon-constrained {input.inner_surf} {input.outer_surf} &>> {log}"
 
 
 def get_tissue_atlas_remapping(wildcards):
@@ -129,7 +217,7 @@ def get_tissue_atlas_remapping(wildcards):
 
     for label in mapping["tissue"].keys():
         in_label = mapping["tissue"][label]
-        out_label = mapping[wildcards.atlas][label]
+        out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
 
         remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
 
@@ -147,65 +235,70 @@ rule combine_tissue_subfield_labels_corobl:
     input:
         tissue=get_labels_for_laplace,
         subfields=bids(
-            root=work,
+            root=root,
             datatype="anat",
             desc="subfieldsnotissue",
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
     params:
         remap=get_tissue_atlas_remapping,
     output:
-        combined=bids(
-            root=work,
-            datatype="anat",
-            desc="subfields",
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-            atlas="{atlas}",
-            **config["subj_wildcards"]
+        combined=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                desc="subfields",
+                suffix="dseg.nii.gz",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label,hipp}",
+                atlas="{atlas}",
+                **inputs.subj_wildcards,
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 
 
-rule resample_subfields_to_native:
-    """Resampling to native space"""
+rule resample_subfields_to_orig:
+    """Resampling to original modality space"""
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            label="{label}",
+            **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz"
+            suffix="{modality}.nii.gz",
         ),
     output:
         nii=bids(
@@ -213,13 +306,14 @@ rule resample_subfields_to_native:
             datatype="anat",
             suffix="dseg.nii.gz",
             desc="subfields",
-            space="{native_modality,T1w|T2w}",
+            space="{modality,T1w|T2w}",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            label="{label,hipp}",
+            **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -227,47 +321,50 @@ rule resample_subfields_to_native:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_postproc_to_native:
-    """Resample post-processed tissue seg to native"""
+rule resample_postproc_to_orig:
+    """Resample post-processed tissue seg to original modality"""
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="postproc",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
+            label=config["autotop_labels"][-1],
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz"
+            suffix="{modality}.nii.gz",
         ),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="{native_modality,T2w|T2w}",
-            hemi="{hemi}",
-            **config["subj_wildcards"]
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="postproc",
+                space="{modality,T2w|T2w}",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -275,47 +372,49 @@ rule resample_postproc_to_native:
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
 
 
-rule resample_unet_to_native:
-    """Resample unet tissue seg to native"""
+rule resample_unet_to_orig:
+    """Resample unet tissue seg to original modality"""
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="nnunet",
             space="corobl",
-            hemi="{hemi}"
+            hemi="{hemi}",
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
-            from_="{native_modality}",
+            from_="{modality}",
             to="corobl",
             desc="affine",
-            type_="itk"
+            type_="itk",
         ),
         ref=bids(
             root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             desc="preproc",
-            suffix="{native_modality}.nii.gz"
+            suffix="{modality}.nii.gz",
         ),
     output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="unet",
-            space="{native_modality,T1w|T2w}",
-            hemi="{hemi}",
-            **config["subj_wildcards"]
+        nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="unet",
+                space="{modality,T1w|T2w}",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -327,24 +426,24 @@ rule resample_subfields_to_unfold:
     """Resampling to unfold space"""
     input:
         nii=bids(
-            root=work,
+            root=root,
             datatype="anat",
             desc="subfields",
             suffix="dseg.nii.gz",
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards,
         ),
         xfm=bids(
-            root=work,
+            root=root,
             datatype="warps",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             hemi="{hemi}",
             from_="corobl",
             to="unfold",
-            mode="image"
+            mode="image",
         ),
     output:
         nii=bids(
@@ -355,10 +454,10 @@ rule resample_subfields_to_unfold:
             space="unfold",
             hemi="{hemi}",
             atlas="{atlas}",
-            **config["subj_wildcards"]
+            **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

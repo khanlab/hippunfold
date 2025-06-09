@@ -1,99 +1,22 @@
 # Template-based segmentation supports templates that have only a single hemisphere
-# by mapping it to the flipped version of the other hemisphere.
-# If a template has both L and R files, then we set hemi_constrained_wildcard to L|R.
-# If a hemisphere is missing data, then we set it to flip that, e.g. if L missing, then use Lflip|R
-
-hemi_constraints = []
-if config["template"] in config["template_based_segmentation"]:
-    for hemi in config["hemi"]:
-        if hemi in config["template_based_segmentation"][config["template"]]["hemi"]:
-            hemi_constraints.append(hemi)
-        else:
-            hemi_constraints.append(f"{hemi}flip")
-
-hemi_constrained_wildcard = "{{hemi,{constraints}}}".format(
-    constraints="|".join(hemi_constraints)
-)
-
-
-def flipped(wildcards):
-    """function to map hemi in wildcards from Lflip to R, or Rflip to L,
-    for use in rules where e.g. the output wildcard is Lflip, but for the input, R is desired, such as
-    when mapping a R hemi dseg to the Lflip hemisphere of a subject."""
-
-    if wildcards.hemi == "L" or wildcards.hemi == "R":
-        return wildcards
-    elif wildcards.hemi == "Lflip":
-        wildcards.hemi = "R"
-        return wildcards
-    elif wildcards.hemi == "Rflip":
-        wildcards.hemi = "L"
-        return wildcard
-
-
-def get_input_for_shape_inject(wildcards):
-    if config["modality"] == "cropseg":
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            space="corobl",
-            hemi="{hemi}",
-        ).format(**wildcards)
-    elif get_modality_key(config["modality"]) == "seg":
-        modality_suffix = get_modality_suffix(config["modality"])
-        seg = (
-            bids(
-                root=work,
-                datatype="anat",
-                **config["subj_wildcards"],
-                suffix="dseg.nii.gz",
-                space="corobl",
-                hemi="{hemi}",
-                from_="{modality_suffix}",
-            ).format(**wildcards, modality_suffix=modality_suffix),
-        )
-    else:
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi}",
-        ).format(**wildcards)
-    return seg
+# by flipping it
 
 
 def get_input_splitseg_for_shape_inject(wildcards):
-    if config["modality"] == "cropseg":
+    if config["modality"] == "dsegtissue":
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dsegsplit",
             space="corobl",
             hemi="{hemi}",
         ).format(**wildcards)
-
-    elif get_modality_key(config["modality"]) == "seg":
-        modality_suffix = get_modality_suffix(config["modality"])
-        seg = bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dsegsplit",
-            space="corobl",
-            hemi="{hemi}",
-            from_="{modality_suffix}",
-        ).format(**wildcards, modality_suffix=modality_suffix)
     else:
         seg = bids(
-            root=work,
+            root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dsegsplit",
             desc="nnunet",
             space="corobl",
@@ -109,40 +32,14 @@ rule prep_segs_for_greedy:
         labels=" ".join(str(label) for label in config["shape_inject"]["labels_reg"]),
         smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
     output:
-        directory("{prefix}_dsegsplit"),
+        temp(directory("{prefix}_dsegsplit")),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
-
-
-rule import_template_shape:
-    input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
-    params:
-        template_seg=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["inject_template"]]["dseg"].format(
-            **flipped(wildcards)
-        ),
-    output:
-        template_seg=bids(
-            root=work,
-            datatype="anat",
-            space="template",
-            **config["subj_wildcards"],
-            desc="hipptissue",
-            hemi=hemi_constrained_wildcard,
-            suffix="dseg.nii.gz"
-        ),
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
-    shell:
-        "cp {params.template_seg} {output.template_seg}"
 
 
 def get_image_pairs(wildcards, input):
@@ -190,80 +87,163 @@ def get_inject_scaling_opt(wildcards):
     return f"-s {gradient_sigma}vox {warp_sigma}vox"
 
 
+rule resample_template_dseg_tissue_for_reg:
+    input:
+        template_seg=bids(
+            root=root,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissue",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    params:
+        resample_cmd="-resample-mm {res}".format(
+            res=config["resample_dseg_for_templatereg"]
+        ),
+        crop_cmd="-trim 5vox",  #leave 5 voxel padding
+    output:
+        template_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                desc="hipptissueresampled",
+                hemi="{hemi}",
+                suffix="dseg.nii.gz",
+            )
+        ),
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
+
+
 rule template_shape_reg:
     input:
         template_seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             space="template",
-            **config["subj_wildcards"],
-            desc="hipptissue",
+            **inputs.subj_wildcards,
+            desc="hipptissueresampled",
             hemi="{hemi}",
-            suffix="dsegsplit"
+            suffix="dsegsplit",
         ),
         subject_seg=get_input_splitseg_for_shape_inject,
     params:
         general_opts="-d 3 -m SSD",
-        affine_opts="-moments 2",
+        affine_opts="-moments 2 -det 1",
         greedy_opts=get_inject_scaling_opt,
         img_pairs=get_image_pairs,
     output:
-        matrix=bids(
-            root=work,
-            **config["subj_wildcards"],
-            suffix="xfm.txt",
-            datatype="warps",
-            desc="moments",
-            from_="template",
-            to="subject",
-            space="corobl",
-            type_="ras",
-            hemi=hemi_constrained_wildcard,
+        matrix=temp(
+            bids(
+                root=root,
+                **inputs.subj_wildcards,
+                suffix="xfm.txt",
+                datatype="warps",
+                desc="moments",
+                from_="template",
+                to="subject",
+                space="corobl",
+                type_="ras",
+                hemi="{hemi}",
+            )
         ),
-        warp=bids(
-            root=work,
-            **config["subj_wildcards"],
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="greedy",
-            from_="template",
-            to="subject",
-            space="corobl",
-            hemi=hemi_constrained_wildcard,
+        warp=temp(
+            bids(
+                root=root,
+                **inputs.subj_wildcards,
+                suffix="xfm.nii.gz",
+                datatype="warps",
+                desc="greedy",
+                from_="template",
+                to="subject",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/greedy.yaml"
     threads: 8
     log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            hemi=hemi_constrained_wildcard,
-            suffix="templateshapereg.txt"
-        ),
+        bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     shell:
         #affine (with moments), then greedy
         "greedy -threads {threads} {params.general_opts} {params.affine_opts} {params.img_pairs} -o {output.matrix}  &> {log} && "
         "greedy -threads {threads} {params.general_opts} {params.greedy_opts} {params.img_pairs} -it {output.matrix} -o {output.warp} &>> {log}"
 
 
+rule dilate_dentate_pd_src_sink:
+    """ The PD src/sink labels can disappear after label propagation
+    as they are very small. This dilates them into relative background labels"""
+    input:
+        template_seg=bids(
+            root=root,
+            datatype="anat",
+            space="template",
+            **inputs.subj_wildcards,
+            desc="hipptissue",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+        ),
+    params:
+        src_label=config["laplace_labels"]["dentate"]["PD"]["src"][0],
+        sink_label=config["laplace_labels"]["dentate"]["PD"]["sink"][0],
+        src_bg=2,
+        sink_bg=10,
+        struc_elem_size=3,
+    output:
+        template_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                desc="hipptissuedilated",
+                hemi="{hemi}",
+                suffix="dseg.nii.gz",
+            )
+        ),
+    group:
+        "subj"
+    conda:
+        "../envs/neurovis.yaml"
+    script:
+        "../scripts/dilate_dentate_pd_src_sink.py"
+
+
 rule template_shape_inject:
     input:
         template_seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
             space="template",
-            **config["subj_wildcards"],
-            desc="hipptissue",
+            **inputs.subj_wildcards,
+            desc="{label}tissue",
             hemi="{hemi}",
-            suffix="dseg.nii.gz"
+            suffix="dseg.nii.gz",
         ),
-        subject_seg=get_input_for_shape_inject,
+        upsampled_ref=bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            label="{label}",
+            space="corobl",
+            hemi="{hemi}",
+        ),
         matrix=bids(
-            root=work,
-            **config["subj_wildcards"],
+            root=root,
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             datatype="warps",
             desc="moments",
@@ -274,8 +254,8 @@ rule template_shape_inject:
             hemi="{hemi}",
         ),
         warp=bids(
-            root=work,
-            **config["subj_wildcards"],
+            root=root,
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="greedy",
@@ -285,39 +265,52 @@ rule template_shape_inject:
             hemi="{hemi}",
         ),
     params:
-        interp_opt="-ri LABEL 0.2vox",
+        interp_opt="-ri LABEL 0.1mm",  # smoothing sigma = 100micron
     output:
-        inject_seg=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="inject",
-            space="corobl",
-            hemi=hemi_constrained_wildcard,
+        inject_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="inject",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+            )
         ),
     log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            suffix="templateshapeinject.txt",
-            hemi=hemi_constrained_wildcard,
+        bids_log(
+            "template_shape_inject",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/greedy.yaml"
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule inject_init_laplace_coords:
+    """ TODO: this may not be needed anymore """
     input:
-        subject_seg=get_input_for_shape_inject,
+        upsampled_ref=bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="ref.nii.gz",
+            desc="resampled",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+        ),
         matrix=bids(
-            root=work,
-            **config["subj_wildcards"],
+            root=root,
+            **inputs.subj_wildcards,
             suffix="xfm.txt",
             datatype="warps",
             desc="moments",
@@ -328,8 +321,8 @@ rule inject_init_laplace_coords:
             hemi="{hemi}",
         ),
         warp=bids(
-            root=work,
-            **config["subj_wildcards"],
+            root=root,
+            **inputs.subj_wildcards,
             suffix="xfm.nii.gz",
             datatype="warps",
             desc="greedy",
@@ -338,140 +331,97 @@ rule inject_init_laplace_coords:
             space="corobl",
             hemi="{hemi}",
         ),
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
-    params:
-        coords=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["inject_template"]]["coords"].format(
-            **wildcards
-        ),
-        interp_opt="-ri NN",
-    output:
-        init_coords=bids(
-            root=work,
+        coords=bids(
+            root=root,
             datatype="coords",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
+            label="{label}",
             suffix="coords.nii.gz",
             desc="init",
-            space="corobl",
-            hemi=hemi_constrained_wildcard,
+            space="template",
+            hemi="{hemi}",
+        ),
+    params:
+        interp_opt="-ri LIN",
+    output:
+        init_coords=temp(
+            bids(
+                root=root,
+                datatype="coords",
+                **inputs.subj_wildcards,
+                dir="{dir}",
+                label="{label}",
+                suffix="coords.nii.gz",
+                desc="init",
+                space="corobl",
+                hemi="{hemi}",
+            )
         ),
     log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
+        bids_log(
+            "inject_init_laplace_coords",
+            **inputs.subj_wildcards,
             dir="{dir}",
-            label="{autotop}",
-            suffix="injectcoords.txt",
-            desc="init",
-            hemi=hemi_constrained_wildcard,
+            label="{label}",
+            hemi="{hemi}",
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/greedy.yaml"
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.subject_seg} -rm {params.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
-
-
-rule unflip_init_coords:
-    """Unflip the Lflip init coords"""
-    input:
-        nnunet_seg=bids(
-            root=work,
-            datatype="coords",
-            **config["subj_wildcards"],
-            dir="{dir}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="corobl",
-            hemi="{hemi}flip"
-        ),
-        unflip_ref=get_input_for_shape_inject,
-    output:
-        nnunet_seg=bids(
-            root=work,
-            datatype="coords",
-            **config["subj_wildcards"],
-            dir="{dir}",
-            label="{autotop}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="corobl",
-            hemi="{hemi,L|R}"
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input.nnunet_seg} -flip x -popas FLIPPED "
-        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nnunet_seg} "
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.coords} {output.init_coords}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule reinsert_subject_labels:
+    """ c3d command to:
+                1) get the labels to retain
+                2) reslice to injected seg
+                3) limit to labels_overwrite (e.g. SRLM)
+                4) set injected seg to zero where retained labels are
+                5) and add this to retained labels"""
     input:
         inject_seg=bids(
-            root=work,
+            root=root,
             datatype="anat",
-            **config["subj_wildcards"],
+            **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
             desc="inject",
             space="corobl",
             hemi="{hemi}",
+            label="{label}",
         ),
         subject_seg=get_input_for_shape_inject,
     params:
         labels=" ".join(
             str(label) for label in config["shape_inject"]["labels_reinsert"]
         ),
+        labels_overwrite=" ".join(
+            str(label) for label in config["shape_inject"]["labels_overwrite"]
+        ),
     output:
-        postproc_seg=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="corobl",
-            hemi=hemi_constrained_wildcard,
+        postproc_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="postproc",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+            )
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
+    conda:
+        "../envs/c3d.yaml"
     shell:
-        "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL -push LBL -threshold 0 0 1 0 {input.inject_seg} -multiply -push LBL -add -o {output.postproc_seg}"
-
-
-rule unflip_postproc:
-    input:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="corobl",
-            hemi="{hemi}flip",
-            **config["subj_wildcards"]
-        ),
-        unflip_ref=get_input_for_shape_inject,
-    output:
-        nii=bids(
-            root=work,
-            datatype="anat",
-            suffix="dseg.nii.gz",
-            desc="postproc",
-            space="corobl",
-            hemi="{hemi,L|R}",
-            **config["subj_wildcards"]
-        ),
-    container:
-        config["singularity"]["autotop"]
-    group:
-        "subj"
-    shell:
-        "c3d {input.nii} -flip x -popas FLIPPED "
-        " {input.unflip_ref} -push FLIPPED -copy-transform -o {output.nii} "
+        "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
+        " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "
+        " -push SEG -retain-labels {params.labels_overwrite}  -binarize "
+        " -push LBL_RESLICE -multiply -popas LBL_RESLICE "
+        "-push LBL_RESLICE -threshold 0 0 1 0 -push SEG -multiply "
+        "-push LBL_RESLICE -add -o {output.postproc_seg}"
