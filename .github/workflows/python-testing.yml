@@ -127,7 +127,7 @@ jobs:
 
       - name: Test atlasgen with unfoldreg
         run: |
-          ./hippunfold/run.py test_data/bids_atlasgen_native test_out group_create_atlas --modality dsegtissue --new-atlas-name testatlas --new-atlas-subfields-from unfoldreg -np
+          ./hippunfold/run.py test_data/bids_atlasgen_native test_out group_create_atlas --modality dsegtissue --new-atlas-name testatlas --new-atlas-subfields-from unfoldreg --derivatives test_data/bids_atlasgen_native -np
 
       - name: Test atlasgen with unfoldreg, including myelin
         run: |
