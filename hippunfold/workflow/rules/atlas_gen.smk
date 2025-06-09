@@ -613,7 +613,8 @@ rule import_avg_subfields_as_label:
             desc="subfieldsfixhdr",
             suffix="dseg.nii.gz",
         ),
-        label_list=Path(workflow.basedir) / "../resources/atlas-v2/labellist_withdg.txt",
+        label_list=Path(workflow.basedir)
+        / "../resources/label_lut/labellist_withdg.txt",
     output:
         label_dseg=bids_atlas(
             root=root,
