@@ -121,4 +121,16 @@ jobs:
         run: |
           ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
 
+      - name: Test atlasgen with native
+        run: |
+          ./hippunfold/run.py test_data/bids_atlasgen_native test_atlasgen group_create_atlas --modality dsegtissue --new-atlas-name testatlas --new-atlas-subfields-from native --derivatives test_data/bids_atlasgen_native -np
+
+      - name: Test atlasgen with unfoldreg
+        run: |
+          ./hippunfold/run.py test_data/bids_atlasgen_native test_out group_create_atlas --modality dsegtissue --new-atlas-name testatlas --new-atlas-subfields-from unfoldreg -np
+
+      - name: Test atlasgen with unfoldreg, including myelin
+        run: |
+          ./hippunfold/run.py test_data/bids_singleT2w test_out group_create_atlas --modality T2w --generate-myelin-map --new-atlas-name testatlas --new-atlas-subfields-from unfoldreg --new-atlas-metrics myelin curvature gyrification thickness  -np
+           
 

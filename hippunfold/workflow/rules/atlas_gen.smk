@@ -24,7 +24,7 @@ rule templategen_subj_csv:
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
-            metric=config["atlas_metrics"],
+            metric=config["new_atlas_metrics"],
             allow_missing=True,
         ),
     params:
@@ -84,7 +84,7 @@ rule gen_atlas_reg_ants:
             suffix="metrics.csv",
         ),
     params:
-        num_modalities=len(config["atlas_metrics"]),
+        num_modalities=len(config["new_atlas_metrics"]),
         warp_prefix=lambda wildcards, output: f"{output.avgtemplate_dir}/",
     output:
         avgtemplate_dir=directory(
@@ -95,7 +95,6 @@ rule gen_atlas_reg_ants:
                 suffix="antstemplate",
             )
         ),
-        # note antsMultivariateTemplateConstruction2 is not in the container right now!
     conda:
         "../envs/ants.yaml"
     shell:
@@ -115,7 +114,7 @@ rule copy_avgtemplate_warps:
                 label="{label}",
                 **inputs.subj_wildcards,
             ),
-            metric=config["atlas_metrics"],
+            metric=config["new_atlas_metrics"],
             allow_missing=True,
         ),
         avgtemplate_dir=bids_atlas(
@@ -173,7 +172,7 @@ rule copy_avgtemplate_metric:
     params:
         in_metric=lambda wildcards, input: "{avgtemplate_dir}/template{i}.nii.gz".format(
             avgtemplate_dir=input.avgtemplate_dir,
-            i=config["atlas_metrics"].index(wildcards.metric),
+            i=config["new_atlas_metrics"].index(wildcards.metric),
         ),
     output:
         metric=temp(
@@ -245,7 +244,7 @@ rule reset_header_2d_warp_atlasgen:
                 **inputs.subj_wildcards,
             ),
             label=wildcards.label,
-            metric=config["atlas_metrics"][0],
+            metric=config["new_atlas_metrics"][0],
             **expand_hemi(),
         )[0],
         nii=bids(
@@ -283,7 +282,7 @@ rule make_metric_ref:
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            suffix="{metric}.nii.gz".format(metric=config["atlas_metrics"][0]),
+            suffix="{metric}.nii.gz".format(metric=config["new_atlas_metrics"][0]),
         ),
     output:
         metric_ref=temp(
@@ -491,11 +490,14 @@ rule resample_subj_native_surf_to_avg:
 
 
 rule warp_subfields_to_avg:
+    """ this rule either takes subfields defined from native (manual segs), or from the base unfolded atlas"""
     input:
         img=bids(
             root=root,
             datatype="anat",
-            suffix="subfields.nii.gz",
+            suffix="subfieldsfrom{subfields_from}.nii.gz".format(
+                subfields_from=config["new_atlas_subfields_from"]
+            ),
             space="unfold2d",
             hemi="{hemi}",
             label="{label}",
@@ -576,7 +578,7 @@ rule reset_header_2d_subfields_nii:
                 **inputs.subj_wildcards,
             ),
             label=wildcards.label,
-            metric=config["atlas_metrics"],
+            metric=config["new_atlas_metrics"],
             **expand_hemi(),
         )[0],
         nii=bids_atlas(
@@ -684,7 +686,7 @@ def get_atlas_inputs(wildcards):
                         den="{density}",
                         suffix="{metric}.shape.gii",
                     ),
-                    metric=config["atlas_metrics"],
+                    metric=config["new_atlas_metrics"],
                     density=config["density_choices"],
                 )
             )
@@ -727,7 +729,7 @@ rule write_template_json:
     params:
         template_description={
             "Identifier": config["new_atlas_name"],
-            "metric_wildcards": config["atlas_metrics"],
+            "metric_wildcards": config["new_atlas_metrics"],
             "label_wildcards": config["autotop_labels"],
             "hemi_wildcards": config["hemi"],
             "density_wildcards": config["density_choices"],
