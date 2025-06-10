@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import socket
 from pathlib import Path
 from typing import Any
 
@@ -123,25 +124,43 @@ def validate_output_density(atlas, output_densities, atlas_config):
 
 
 # helper functions for hippunfold-atlases
+
+
+def is_internet_available(host="github.com", port=443, timeout=2):
+    try:
+        socket.create_connection((host, port), timeout)
+        return True
+    except OSError:
+        return False
+
+
 def sync_atlas_repo():
     """
     Ensures the atlas folder is synced from the public GitHub repository using GitPython.
     """
     repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
     atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
+    internet = is_internet_available()
 
     try:
         if atlas_dir.exists() and (atlas_dir / ".git").exists():
-            repo = Repo(atlas_dir)
-            repo.git.fetch()  # Make sure latest commits are available
+            if internet:
+                repo = Repo(atlas_dir)
+                repo.git.fetch()
+                repo.git.checkout(ATLAS_REPO_COMMIT)
+            else:
+                logger.warning(
+                    "WARNING: No internet connectivity, not updating the existing atlas repository"
+                )
         else:
+            if not internet:
+                raise ConnectionError(
+                    "No internet connectivity, error cloning atlas repository"
+                )
             repo = Repo.clone_from(repo_url, atlas_dir)
-
-        # Explicitly checkout desired commit
-        repo.git.checkout(ATLAS_REPO_COMMIT)
-
+            repo.git.checkout(ATLAS_REPO_COMMIT)
     except GitCommandError as e:
-        logger.info(f"Error syncing atlas repository: {e}")
+        logger.error(f"Git error while syncing atlas repository: {e}")
 
 
 def load_atlas_configs(atlas_dirs):
