@@ -347,9 +347,13 @@ def get_unfold_mesh_resample(wildcards):
     ).format(resample=resample, **wildcards)
 
 
-rule copy_unfold_mesh_resample_to_density:
+rule update_unfold_mesh_metadata:
     input:
         get_unfold_mesh_resample,
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type="FLAT",
     output:
         surf_gii=bids_atlas(
             root=get_atlas_dir(),
@@ -360,8 +364,11 @@ rule copy_unfold_mesh_resample_to_density:
             hemi="{hemi}",
             suffix="{surfname,midthickness|inner|outer}.surf.gii",
         ),
+    conda:
+        "../envs/workbench.yaml"
     shell:
-        "cp {input} {output}"
+        "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        " -surface-secondary-type {params.secondary_type}"
 
 
 rule avgtemplate_metric_vol_to_surf:
@@ -382,6 +389,8 @@ rule avgtemplate_metric_vol_to_surf:
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
     output:
         metric_gii=bids_atlas(
             root=get_atlas_dir(),
@@ -394,7 +403,8 @@ rule avgtemplate_metric_vol_to_surf:
     conda:
         "../envs/workbench.yaml"
     shell:
-        "wb_command -volume-to-surface-mapping {input.metric_nii} {input.midthickness} {output.metric_gii} -trilinear"
+        "wb_command -volume-to-surface-mapping {input.metric_nii} {input.midthickness} {output.metric_gii} -trilinear && "
+        "wb_command -set-structure {output.metric_gii} {params.structure_type}"
 
 
 rule warp_subj_unfold_surf_to_avg:
@@ -653,6 +663,8 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             hemi="{hemi}",
             suffix="midthickness.surf.gii",
         ),
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
     output:
         metric_gii=bids_atlas(
             root=get_atlas_dir(),
@@ -665,7 +677,8 @@ rule avgtemplate_subfield_voted_vol_to_surf:
     conda:
         "../envs/workbench.yaml"
     shell:
-        "wb_command -volume-label-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii}"
+        "wb_command -volume-label-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii} && "
+        "wb_command -set-structure {output.metric_gii} {params.structure_type}"
 
 
 # input function for the rule aggregate
