@@ -142,12 +142,22 @@ def sync_atlas_repo():
     atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
     internet = is_internet_available()
 
+    branch = ATLAS_REPO_COMMIT
     try:
         if atlas_dir.exists() and (atlas_dir / ".git").exists():
             if internet:
                 repo = Repo(atlas_dir)
-                repo.git.fetch()
-                repo.git.checkout(ATLAS_REPO_COMMIT)
+                origin = repo.remotes.origin
+                origin.fetch()
+                
+                # Make sure the branch exists locally and tracks remote
+                if branch not in repo.heads:
+                    repo.git.checkout('-b', branch, f'origin/{branch}')
+                else:
+                    repo.git.checkout(branch)
+
+                # Pull latest updates (fast-forward only)
+                repo.git.pull('--ff-only')                
             else:
                 logger.warning(
                     "WARNING: No internet connectivity, not updating the existing atlas repository"
@@ -158,7 +168,7 @@ def sync_atlas_repo():
                     "No internet connectivity, error cloning atlas repository"
                 )
             repo = Repo.clone_from(repo_url, atlas_dir)
-            repo.git.checkout(ATLAS_REPO_COMMIT)
+            repo.git.checkout(branch)
     except GitCommandError as e:
         logger.error(f"Git error while syncing atlas repository: {e}")
 
