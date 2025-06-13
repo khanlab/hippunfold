@@ -20,7 +20,7 @@ RUN set -e && \
     ./hippunfold/run.py test_data/bids_singleT2w test_out participant  --modality T2w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_multiT2w test_out participant  --modality T2w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_T1w test_out participant  --modality T1w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
-    ./hippunfold/run.py test_data/bids_hippb500 test_out participant  --modality hippb500 --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs && \
+    ./hippunfold/run.py test_data/bids_hippb500 test_out participant  --modality hippb500 --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_singleT2w_longitudinal test_out participant  --modality T2w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_dsegtissue test_out participant  --modality dsegtissue --derivatives test_data/bids_dsegtissue --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_singleT2w test_out participant  --modality T2w --t1_reg_template --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
