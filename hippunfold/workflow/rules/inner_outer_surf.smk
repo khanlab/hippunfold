@@ -229,6 +229,7 @@ rule warp_midthickness_to_inout:
                 datatype="surf",
                 suffix="{surfname,inner|outer}.surf.gii",
                 den="native",
+                desc="nostruct",
                 space="corobl",
                 hemi="{hemi}",
                 label="{label}",
