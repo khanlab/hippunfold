@@ -14,7 +14,7 @@ rule extract_unfold_ref_slice:
         ref_2d_nii=temp(
             bids(
                 root=root,
-                datatype="anat",
+                datatype="warps",
                 suffix="refvol.nii.gz",
                 space="unfold",
                 desc="slice",
@@ -74,7 +74,7 @@ rule native_metric_to_unfold_nii:
         ),
         ref_nii=bids(
             root=root,
-            datatype="anat",
+            datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -110,7 +110,7 @@ rule atlas_metric_to_unfold_nii:
     input:
         ref_nii=bids(
             root=root,
-            datatype="anat",
+            datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -382,7 +382,8 @@ rule reset_header_2d_warp_unfoldreg:
             root=root,
             datatype="warps",
             suffix="refvol.nii.gz",
-            space="unfold",
+            space="unfold", 
+            desc="slice",
             label="{label}",
             **inputs.subj_wildcards,
         ),

@@ -106,7 +106,7 @@ rule native_label_gii_to_unfold_nii:
         ),
         ref_nii=bids(
             root=root,
-            datatype="anat",
+            datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
