@@ -149,15 +149,15 @@ def sync_atlas_repo():
                 repo = Repo(atlas_dir)
                 origin = repo.remotes.origin
                 origin.fetch()
-                
+
                 # Make sure the branch exists locally and tracks remote
                 if branch not in repo.heads:
-                    repo.git.checkout('-b', branch, f'origin/{branch}')
+                    repo.git.checkout("-b", branch, f"origin/{branch}")
                 else:
                     repo.git.checkout(branch)
 
                 # Pull latest updates (fast-forward only)
-                repo.git.pull('--ff-only')                
+                repo.git.pull("--ff-only")
             else:
                 logger.warning(
                     "WARNING: No internet connectivity, not updating the existing atlas repository"
