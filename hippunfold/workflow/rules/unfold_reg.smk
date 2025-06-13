@@ -382,7 +382,7 @@ rule reset_header_2d_warp_unfoldreg:
             root=root,
             datatype="warps",
             suffix="refvol.nii.gz",
-            space="unfold", 
+            space="unfold",
             desc="slice",
             label="{label}",
             **inputs.subj_wildcards,
