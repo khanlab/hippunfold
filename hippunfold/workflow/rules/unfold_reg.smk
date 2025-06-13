@@ -404,6 +404,8 @@ rule reset_header_2d_warp_unfoldreg:
         ),
     conda:
         "../envs/neurovis.yaml"
+    group:
+        "subj"
     script:
         "../scripts/set_metric_nii_header.py"
 
