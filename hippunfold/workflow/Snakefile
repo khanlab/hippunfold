@@ -55,6 +55,15 @@ elif "T1w" in config["modality"]:
 if config["analysis_level"] == "group_create_atlas":
     limit_to_list.add("dsegsubfields")
 
+
+if config.get("use_electrodes", False):
+    if config["modality"] == "T1w" or config["modality"] == "T2w":
+        limit_to_list.add("electrodes")
+        limit_to_list.add("electrodes_ref")
+    else:
+        print("Warning: use_electrodes is only available for modality T1w or T2w.")
+
+
 limit_to_list.add(config["modality"])
 
 
@@ -116,6 +125,11 @@ if "T2w" in limit_to_list or config["generate_myelin_map"]:
 if config["modality"] == "hippb500":
 
     include: "rules/preproc_hippb500.smk"
+
+
+if "electrodes" in limit_to_list:
+
+    include: "rules/electrodes.smk"
 
 
 include: "rules/coords.smk"
