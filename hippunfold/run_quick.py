@@ -7,6 +7,21 @@ import tempfile
 from argparse import ArgumentParser
 from pathlib import Path
 
+IMAGE_MODALITY = {
+    "T1w": {
+        "suffix": "T1w",
+        "use_derivatives": False,
+    },
+    "T2w": {
+        "suffix": "T2w",
+        "use_derivatives": False,
+    },
+    "dsegtissue": {
+        "suffix": "dseg",
+        "use_derivatives": True,
+    },
+}
+
 
 def check_conda_installation():
     try:
@@ -41,8 +56,10 @@ def gen_parser():
         "-m",
         "--modality",
         required=True,
-        choices=["T1w", "T2w"],  # currently hardcoded to put things in anat
-        help="Image modality.",
+        choices=list(
+            IMAGE_MODALITY.keys()
+        ),  # currently hardcoded to put things in anat
+        help="Image modality - choose between: " + ", ".join(IMAGE_MODALITY.keys()),
     )
     parser.add_argument(
         "--temp-dir",
@@ -54,6 +71,12 @@ def gen_parser():
         "--dry-run",
         action="store_true",
         help="Execute a dry run without actually running the full pipeline.",
+    )
+    parser.add_argument(
+        "--hemi",
+        required=False,
+        choices=["L", "R"],
+        help="Brain hemisphere, tequired for dsegtissue modality. Choose between 'L' or 'R'.",
     )
 
     return parser
@@ -74,6 +97,13 @@ def main():
 
     args = gen_parser().parse_args()
 
+    # if the user selects dsegtissue but doesn't specify hemi, throw an error
+    if args.modality == "dsegtissue" and not args.hemi:
+        print(
+            "Error: The 'hemi' argument is required when using the 'dsegtissue' modality."
+        )
+        sys.exit(1)
+
     # set temp dir if specified, else use python tempfile
     if args.temp_dir:
         prefix = args.temp_dir
@@ -87,7 +117,13 @@ def main():
         subject_folder.mkdir(parents=True, exist_ok=True)
 
         # create new file name
-        input_filename = f"sub-{args.subject}_{args.modality}.nii.gz"
+        # if dsegtissue, desc-tissue needs to be added for bids format
+        if args.modality == "dsegtissue":
+            input_filename = f"sub-{args.subject}_hemi-{args.hemi}_desc-tissue_{IMAGE_MODALITY[args.modality]['suffix']}.nii.gz"
+        else:
+            input_filename = (
+                f"sub-{args.subject}_{IMAGE_MODALITY[args.modality]['suffix']}.nii.gz"
+            )
 
         # add file name to the created subject folder
         temp_input_file = subject_folder / input_filename
@@ -113,6 +149,19 @@ def main():
 
         if args.dry_run:
             command.append("-n")
+
+        if IMAGE_MODALITY[args.modality]["use_derivatives"]:
+            # need to have desc file in bids dir to use --derivatives
+            desc_file = Path(temp_dir) / "dataset_description.json"
+            desc_file.write_text(
+                '{"Name": "Generated Derivatives", '
+                '"BIDSVersion": "1.0.2", '
+                '"GeneratedBy": [{"Name": "hippunfold-quick"}]}'
+            )
+            command.append("--derivatives")
+            command.append(Path(temp_dir))
+            command.append("--hemi")
+            command.append(args.hemi)
 
         # run the command
         try:

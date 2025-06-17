@@ -2,7 +2,8 @@ rule import_dseg_subfields:
     """read in volumetric subfield dseg, used for group_create_atlas only"""
     input:
         vol_dseg=partial(get_single_bids_input, component="dsegsubfields"),
-        label_list=Path(workflow.basedir) / "../resources/atlas-v2/labellist_withdg.txt",
+        label_list=Path(workflow.basedir)
+        / "../resources/label_lut/labellist_withdg.txt",
     output:
         label_dseg=temp(
             bids(
@@ -15,10 +16,8 @@ rule import_dseg_subfields:
                 hemi="{hemi,L|R}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -59,9 +58,7 @@ rule subfields_to_label_gifti:
             )
         ),
     conda:
-        conda_env("workbench")
-    container:
-        config["singularity"]["autotop"]
+        "../envs/workbench.yaml"
     shell:
         "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
 
@@ -110,7 +107,7 @@ rule native_label_gii_to_unfold_nii:
         ),
         ref_nii=bids(
             root=root,
-            datatype="anat",
+            datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -131,8 +128,6 @@ rule native_label_gii_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
     group:
@@ -199,10 +194,8 @@ rule label_subfields_from_vol_coords_corobl:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     log:
@@ -269,10 +262,8 @@ rule combine_tissue_subfield_labels_corobl:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -322,10 +313,8 @@ rule resample_subfields_to_orig:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -375,10 +364,8 @@ rule resample_postproc_to_orig:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -427,10 +414,8 @@ rule resample_unet_to_orig:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -472,10 +457,8 @@ rule resample_subfields_to_unfold:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("ants")
+        "../envs/ants.yaml"
     group:
         "subj"
     shell:

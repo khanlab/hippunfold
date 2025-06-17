@@ -43,10 +43,8 @@ rule compute_halfthick_mask:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -90,11 +88,9 @@ rule register_midthickness:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     threads: 16
     conda:
-        conda_env("greedy")
+        "../envs/greedy.yaml"
     log:
         bids_log(
             "register_midthickness",
@@ -159,10 +155,8 @@ rule apply_halfsurf_warp_to_img:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("greedy")
+        "../envs/greedy.yaml"
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
@@ -199,10 +193,8 @@ rule convert_inout_warp_from_itk_to_world:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -237,16 +229,15 @@ rule warp_midthickness_to_inout:
                 datatype="surf",
                 suffix="{surfname,inner|outer}.surf.gii",
                 den="native",
+                desc="nostruct",
                 space="corobl",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     shadow:
         "minimal"
     group:

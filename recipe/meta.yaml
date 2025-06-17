@@ -1,0 +1,58 @@
+{% set name = "hippunfold" %}
+{% set version = "2.0.0" %}
+{% set ref = "d3fc75e36b323fbdd926e25bf8156637504a0c30" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/khanlab/hippunfold/archive/{{ ref }}.tar.gz
+  sha256: c915eec1da79f18895932c56a9c982ef148391aa21afa030df8f75d9d18ceaab
+
+build:
+  entry_points: 
+    - hippunfold = hippunfold.run:app.run
+    - hippunfold-quick = hippunfold.run_quick:main
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  number: 0
+  run_exports:
+    - {{ pin_subpackage("hippunfold", max_pin="x") }} 
+
+requirements:
+  host:
+    - python
+    - poetry-core
+    - pip
+  run:
+    - python >=3.9,<4.0
+    - snakebids >=0.14.0
+    - appdirs >=1.4.4,<2.0.0
+    - pulp <2.8.0  # [py<311]
+    - pyvista >=0.44.2,<0.45.0
+
+
+test:
+  imports:
+    - hippunfold
+  commands:
+    - hippunfold --help
+    - hippunfold-quick --help
+
+
+about:
+  home: https://github.com/khanlab/hippunfold
+  summary: |
+    This tool aims to automatically model the topological folding 
+    structure of the human hippocampus, and computationally unfold it. 
+  description: |
+    This tool aims to automatically model the topological folding structure 
+    of the human hippocampus, and computationally unfold it. 
+  license: MIT
+  license_file: LICENSE
+
+
+extra:
+  recipe-maintainers:
+    - Dhananjhay

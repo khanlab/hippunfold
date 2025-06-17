@@ -23,10 +23,8 @@ rule calculate_surface_area:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -69,10 +67,8 @@ rule metric_smoothing:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -102,19 +98,19 @@ rule calculate_gyrification:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
-            root=root,
-            datatype="metric",
-            suffix="gyrification.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="gyrification.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -136,19 +132,19 @@ rule calculate_curvature:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
-            root=root,
-            datatype="metric",
-            suffix="curvature.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="curvature.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -178,19 +174,19 @@ rule calculate_thickness:
             **inputs.subj_wildcards,
         ),
     output:
-        gii=bids(
-            root=root,
-            datatype="metric",
-            suffix="thickness.shape.gii",
-            den="native",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="thickness.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("workbench")
+        "../envs/workbench.yaml"
     group:
         "subj"
     shell:

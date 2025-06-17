@@ -14,7 +14,7 @@ rule extract_unfold_ref_slice:
         ref_2d_nii=temp(
             bids(
                 root=root,
-                datatype="anat",
+                datatype="warps",
                 suffix="refvol.nii.gz",
                 space="unfold",
                 desc="slice",
@@ -22,8 +22,6 @@ rule extract_unfold_ref_slice:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/c3d.yaml"
     group:
@@ -76,7 +74,7 @@ rule native_metric_to_unfold_nii:
         ),
         ref_nii=bids(
             root=root,
-            datatype="anat",
+            datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -97,8 +95,6 @@ rule native_metric_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
     group:
@@ -114,7 +110,7 @@ rule atlas_metric_to_unfold_nii:
     input:
         ref_nii=bids(
             root=root,
-            datatype="anat",
+            datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -170,8 +166,6 @@ rule atlas_metric_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
     group:
@@ -205,10 +199,8 @@ rule slice_3d_to_2d_subject:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     group:
         "subj"
     script:
@@ -243,10 +235,8 @@ rule slice_3d_to_2d_atlas:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
     group:
         "subj"
     script:
@@ -348,8 +338,6 @@ rule unfoldreg_antsquick:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/ants.yaml"
     group:
@@ -395,6 +383,7 @@ rule reset_header_2d_warp_unfoldreg:
             datatype="warps",
             suffix="refvol.nii.gz",
             space="unfold",
+            desc="slice",
             label="{label}",
             **inputs.subj_wildcards,
         ),
@@ -414,10 +403,10 @@ rule reset_header_2d_warp_unfoldreg:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("neurovis")
+        "../envs/neurovis.yaml"
+    group:
+        "subj"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -462,8 +451,6 @@ rule warp_unfold_native_to_unfoldreg:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
         "../envs/workbench.yaml"
     group:

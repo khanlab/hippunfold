@@ -65,10 +65,8 @@ rule download_nnunet_model:
         model_dir=Path(download_dir) / "model",
     output:
         model_tar=get_model_tar(),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("curl")
+        "../envs/curl.yaml"
     shell:
         "mkdir -p {params.model_dir} && curl -L https://{params.url} -o {output}"
 
@@ -156,10 +154,8 @@ rule run_inference:
         time=30 if config["use_gpu"] else 60,
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("nnunet")
+        "../envs/nnunet.yaml"
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -250,10 +246,8 @@ rule qc_nnunet_f3d:
                 hemi="{hemi}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("niftyreg")
+        "../envs/niftyreg.yaml"
     log:
         bids_log(
             "qc_nnunet_f3d",
@@ -302,9 +296,7 @@ rule qc_nnunet_dice:
         ),
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("pyunfold")
+        "../envs/pyunfold.yaml"
     script:
         "../scripts/dice.py"

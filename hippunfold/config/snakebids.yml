@@ -117,7 +117,6 @@ parse_args:
       - hippb500
       - dsegtissue
 
-
   --template:
     choices:
       - 'CITI168'
@@ -129,8 +128,6 @@ parse_args:
       - 'bigbrain'
     default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv2 is for ex vivo marmoset data, MBMv3 is for in vivo marmoset data, CIVM is for in vivo macaque data, and ABAv3 is for mouse data. When using a non-human template, consider using a corresponding atlas. (default: %(default)s)'
-
-
 
   --inject_template:
     choices:
@@ -167,7 +164,6 @@ parse_args:
     help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
     default: 1.0
 
-
   --rigid_reg_template:
     help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
     default: False
@@ -177,7 +173,6 @@ parse_args:
     help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
     default: False
     action: 'store_true'
-
   
   --t1_reg_template:
     help: 'Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
@@ -206,7 +201,6 @@ parse_args:
     default: '0.1x0.1x0.1mm'
     dest: "laminar_coords_res.dentate"
 
-
   --no_unfolded_reg:
     help: "Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. (default: %(default)s)"
     default: False
@@ -234,7 +228,6 @@ parse_args:
     nargs: '+'
     default: []
     help: 'Sets output spaces for results (default: %(default)s)'
-
 
   --hemi:
     choices:
@@ -278,6 +271,7 @@ parse_args:
       - synthseg_v0.1
       - synthseg_v0.2
       - neonateT1w_v2
+      - ADNI_T1w_v1
 
   --use_electrodes:
     help: |
@@ -294,11 +288,10 @@ parse_args:
     action: "store_false"
     default: True
 
-
   --version:
     help: 'Print the version of HippUnfold'
     action: version
-    version: "1.5.2-pre.2"
+    version: "2.0.0"
 
 
 # --- surface specific configuration -- 
@@ -338,9 +331,6 @@ cifti_metric_types:
     - thickness.dscalar
 
 #--- workflow specific configuration -- 
-
-singularity:
-  autotop: 'docker://khanlab/hippunfold_deps:workbench-2.0.1'
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
@@ -405,7 +395,6 @@ template_files:
       - L
       - R
 
-
   upenn:
     T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
     dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
@@ -445,7 +434,6 @@ template_files:
       - R
 
 
-
 #values to use for re-mapping tissue labels when combining with subfields.
 # set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
 tissue_atlas_mapping:
@@ -467,7 +455,6 @@ tissue_atlas_mapping:
     cyst: 8
    
 
-
 #these will be downloaded to ~/.cache/hippunfold
 resource_urls:
   nnunet_model:
@@ -479,6 +466,7 @@ resource_urls:
     T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
+    ADNI_T1w_v1: 'zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
   atlas:
     bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
     multihist7: 'www.dropbox.com/scl/fi/g07u7la7v1kwfgsty6ujc/atlas-multihist7_20250108.zip?rlkey=bi7wbdsm93upgnn3bmlv4f1hx&st=5iv33isc&dl=0'
@@ -498,8 +486,6 @@ resource_urls:
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666b1bc765e1de5972893e59/?zip='
     bbhist: 'placeholder.url'
 #to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
-
-
 
 
 hippdwi_opts:
@@ -549,19 +535,6 @@ unfold_vol_ref:
     orient: RPI
 
 
-# space for uniform unfolded grid:
-#  currently only used for interpolating hipp subfields on surface
-unfold_mesh_ref:
-  dims:
-   - 254
-   - 126
-  start:
-   - 0.234375
-   - 0.234375
-  end:
-   - 39.765625
-   - 19.765625
-
 shape_inject:
   labels_reg: 
     - 1
@@ -576,7 +549,6 @@ shape_inject:
   labels_overwrite:
     - 2  
   label_smoothing_stdev: '0.5x0.5x0.5mm'
-
 
 
 laplace_labels:

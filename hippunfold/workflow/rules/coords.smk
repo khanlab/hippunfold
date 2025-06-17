@@ -68,12 +68,10 @@ rule get_label_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     group:
         "subj"
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -117,10 +115,8 @@ rule get_src_sink_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -155,10 +151,8 @@ rule get_src_sink_sdt:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -184,10 +178,8 @@ rule get_nan_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -214,14 +206,10 @@ rule create_upsampled_coords_ref:
                 hemi="{hemi}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
-    container:
-        config["singularity"]["autotop"]
     shell:
         "c3d {input} -retain-labels {params.tight_crop_labels} -trim {params.trim_padding} -resample-mm {params.resample_res} -o {output}"
 
@@ -268,10 +256,8 @@ rule prep_dseg_for_laynii:
                 hemi="{hemi}",
             )
         ),
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("c3d")
+        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -307,10 +293,8 @@ rule laynii_layers_equidist:
         ),
     shadow:
         "minimal"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("laynii")
+        "../envs/laynii.yaml"
     log:
         bids_log(
             "laynii_layers_equidist",
@@ -356,10 +340,8 @@ rule laynii_layers_equivol:
         ),
     shadow:
         "minimal"
-    container:
-        config["singularity"]["autotop"]
     conda:
-        conda_env("laynii")
+        "../envs/laynii.yaml"
     log:
         bids_log(
             "laynii_layers_equivol",
