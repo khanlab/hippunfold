@@ -14,8 +14,8 @@ env:
   OS_AUTH_URL:                       "https://arbutus.cloud.computecanada.ca:5000/v3"
   OS_USERNAME:                       "djay"
   OS_USER_DOMAIN_NAME:               "CCDB"
-  OS_APPLICATION_CREDENTIAL_ID:      ${{ secretes.OS_APPLICATION_CREDENTIAL_ID }}
-  OS_APPLICATION_CREDENTIAL_SECRET: "${{ secretes.OS_APPLICATION_CREDENTIAL_SECRET }}"
+  OS_APPLICATION_CREDENTIAL_ID:      ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+  OS_APPLICATION_CREDENTIAL_SECRET: "${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}"
 
 
 jobs:
