@@ -1,13 +1,15 @@
 name: Hippunfold PR Wet-Run (Ephemeral Runner)
 
 on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
   pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
   contents: read
-  actions: write   # needed to create/delete runners via API
+  actions: write   # needed to manage runners
 
 env:
   OS_AUTH_TYPE:                      "v3applicationcredential"
@@ -20,43 +22,50 @@ env:
 
 jobs:
   launch-runner:
+    if: github.event_name == 'pull_request_target'
     runs-on: ubuntu-latest
-
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
-      GITHUB_REPO_NAME: ${{ github.repository_owner }}/{{ github.repository.split('/')[1] }}
-
+      FULL_REPO: ${{ github.repository }}
     outputs:
       vm_id: ${{ steps.launch.outputs.vm_id }}
-      runner_token: ${{ steps.token.outputs.token }}
 
     steps:
-    - name: Install Openstack CLI & tools
+    - name: Install OpenStack CLI & tools
       run: |
         sudo apt-get update
         sudo apt-get install -y python3-openstackclient jq gettext-base
 
-    - name: Checkout
+    - name: Checkout workflow files
       uses: actions/checkout@v4
+
+    - name: Get runner PAT
+      id: pat
+      run: |
+        echo "::set-output name=pat::${{ secrets.RUNNER_PAT }}"
 
     - name: Get registration token
       id: token
       run: |
-        token=$(curl -sX POST \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          https://api.github.com/repos/${{ github.repository }}/actions/runners/registration-token \
+        token=$(curl -sS -X POST \
+          -H "Authorization: token ${{ steps.pat.outputs.pat }}" \
+          https://api.github.com/repos/${{ env.FULL_REPO }}/actions/runners/registration-token \
           | jq -r .token)
+        if [ -z "$token" ] || [ "$token" == "null" ]; then
+          echo "Failed to get runner registration token" >&2
+          exit 1
+        fi
         echo "::set-output name=token::$token"
 
     - name: Generate cloud-init
       run: |
-        export PR_NUMBER=${PR_NUMBER}
+        export PR_NUMBER=${{ env.PR_NUMBER }}
         export GITHUB_RUNNER_TOKEN=${{ steps.token.outputs.token }}
-        export GITHUB_REPO_OWNER=${{ github.repository_owner }}
-        export GITHUB_REPO_NAME=${GITHUB_REPO_NAME}
-        envsubst < cloud-init.yml > cloud-init.generated.yml
+        export GITHUB_REPO_OWNER=${{ env.FULL_REPO%%/* }}
+        export GITHUB_REPO_NAME=${{ env.FULL_REPO##*/ }}
+        envsubst < cloud-init-runner.yml > cloud-init.generated.yml
 
-    - name: Launch VM
+    - name: Launch VM and register runner
       id: launch
       run: |
         openstack server create \
@@ -70,12 +79,12 @@ jobs:
 
     - name: Wait for runner registration
       run: |
-        echo "Waiting for runner to appear..."
+        echo "Waiting for runner runner-${{ env.PR_NUMBER }} to register..."
         for i in {1..30}; do
-          runners=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/actions/runners \
-            | jq -r '.runners[].name')
-          if echo "$runners" | grep -q "runner-${PR_NUMBER}"; then
+          runners=$(curl -sS -H "Authorization: token ${{ steps.pat.outputs.pat }}" \
+            https://api.github.com/repos/${{ env.FULL_REPO }}/actions/runners \
+            | jq -r '.runners // [] | .[].name')
+          if echo "$runners" | grep -q "runner-${{ env.PR_NUMBER }}"; then
             echo "Runner registered."
             exit 0
           fi
@@ -85,40 +94,29 @@ jobs:
         exit 1
 
   run-wet-run:
+    if: github.event_name == 'pull_request'
     needs: launch-runner
     runs-on: [self-hosted, ephemeral, wet-run]
-    timeout-minutes: 60  # max 1 hour
+    timeout-minutes: 60
 
     steps:
-    - name: Checkout
+    - name: Checkout repo
       uses: actions/checkout@v4
 
-    - name: Fetch PR & run wet run
+    - name: Fetch PR & run Hippunfold wet run
       run: |
         PR=${{ github.event.pull_request.number }}
         git fetch origin pull/${PR}/head:pr-${PR}
         git checkout pr-${PR}
-        ./hippunfold/run.py ../data/lowresMRI derivatives/ participant --participant-label 01 --modality T1w --cores all
+        ./hippunfold/run.py ../data/lowresMRI derivatives/ participant \
+          --participant-label 01 --modality T1w --cores all
 
   cleanup:
     needs: [launch-runner, run-wet-run]
-    runs-on: ubuntu-latest
     if: always()
-    steps:
-    - name: Deregister runner
-      run: |
-        # get removal token
-        token=$(curl -sX POST \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          https://api.github.com/repos/${{ github.repository }}/actions/runners/remove-token \
-          | jq -r .token)
-        # instruct runner to remove itself
-        ssh-keyscan -H ${{ needs.launch-runner.outputs.vm_id }}  # if needed for network
-        openstack console log show ${{ needs.launch-runner.outputs.vm_id }} | grep -q 'Runner listener launched' && \
-          openstack console log show ${{ needs.launch-runner.outputs.vm_id }} | grep -q 'Runner removed'
-        # you could signal via API instead, but simplest is to delete the VM:
-        openstack server delete ${{ needs.launch-runner.outputs.vm_id }} || true
+    runs-on: ubuntu-latest
 
+    steps:
     - name: Delete VM
       run: |
         openstack server delete ${{ needs.launch-runner.outputs.vm_id }} || true
