@@ -1,0 +1,39 @@
+# cloud-config
+hostname: hippunfold-pr-${PR_NUMBER}
+
+write_files:
+  - path: /home/ubuntu/setup-runner.sh
+    permissions: '0755'
+    owner: ubuntu:ubuntu
+    content: |
+      #!/bin/bash
+      set -eux
+      GH_OWNER="${GITHUB_REPO_OWNER}"
+      GH_REPO="${GITHUB_REPO_NAME}"
+      GH_TOKEN="${GITHUB_RUNNER_TOKEN}"
+      LABELS="ephemeral,wet-run"
+      RUNNER_DIR=/home/ubuntu/actions-runner
+
+      # Install dependencies
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get install -y curl wget git libicu-dev libssl-dev jq
+
+      # Download and extract the runner
+      mkdir -p "$RUNNER_DIR" && cd "$RUNNER_DIR"
+      curl -fsSL -o runner.tar.gz \
+        https://github.com/actions/runner/releases/latest/download/actions-runner-linux-x64.tar.gz
+      tar xzf runner.tar.gz
+
+      # Configure runner (unattended)
+      ./config.sh --unattended \
+        --url https://github.com/${GH_OWNER}/${GH_REPO} \
+        --token "${GH_TOKEN}" \
+        --labels ${LABELS} \
+        --name runner-${PR_NUMBER}
+
+      # Install and start as a service
+      ./svc.sh install
+      ./svc.sh start
+
+runcmd:
+  - su - ubuntu -c "/home/ubuntu/setup-runner.sh"
