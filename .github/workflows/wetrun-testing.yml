@@ -26,7 +26,7 @@ jobs:
 
     env:
       PR_NUMBER: ${{ github.event.pull_request.number }}
-      GITHUB_REPO_NAME: ${{ github.repository.split('/')[1] }}
+      GITHUB_REPO_NAME: ${{ github.event.repository.name }}
 
     outputs:
       vm_id: ${{ steps.launch.outputs.vm_id }}
