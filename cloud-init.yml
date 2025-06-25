@@ -36,4 +36,5 @@ write_files:
       ./svc.sh start
 
 runcmd:
-  - su - ubuntu -c "/home/ubuntu/setup-runner.sh"
+  - [ "/bin/bash", "-lc", "bash /home/ubuntu/setup-runner.sh > /var/log/setup-runner.log 2>&1" ]
+
