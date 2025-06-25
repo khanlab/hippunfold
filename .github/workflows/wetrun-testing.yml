@@ -74,7 +74,7 @@ jobs:
           --user-data cloud-init.generated.yml \
           hippunfold-pr-${PR_NUMBER}
         VM_ID=$(openstack server list --name hippunfold-pr-${PR_NUMBER} -f value -c ID)
-        echo "::set-output name=vm_id::$VM_ID"
+        echo "vm_id=$VM_ID" >> $GITHUB_OUTPUT
 
     - name: Wait for runner registration
       run: |
