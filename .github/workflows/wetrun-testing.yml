@@ -39,6 +39,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Validate PAT
+      run: |
+        status=$(curl -s -o /dev/null -w "%{http_code}" \
+          -H "Authorization: Bearer ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
+          https://api.github.com/user)
+        echo "PAT test HTTP status: $status"
+        if [ "$status" -ne 200 ]; then
+          echo "❌ PAT is invalid or missing scopes (got HTTP $status)" >&2
+          exit 1
+        fi
+
+
     - name: Get repo-scoped registration token
       id: token
       run: |
