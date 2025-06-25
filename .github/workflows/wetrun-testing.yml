@@ -73,8 +73,11 @@ jobs:
         export PR_NUMBER=${PR_NUMBER}
         export GITHUB_RUNNER_TOKEN=${{ steps.token.outputs.token }}
         export GITHUB_REPO_OWNER=${{ github.repository_owner }}
-        export GITHUB_REPO_NAME=${GITHUB_REPO_NAME}
-        envsubst < cloud-init.yml > cloud-init.generated.yml
+        export GITHUB_REPO_NAME=${{ github.repository }}
+
+        # Only substitute the four env vars, keep all other ${…} intact
+        envsubst '$PR_NUMBER $GITHUB_RUNNER_TOKEN $GITHUB_REPO_OWNER $GITHUB_REPO_NAME' \
+          < cloud-init.yml > cloud-init.generated.yml
 
     - name: Show generated cloud-init
       run: |
