@@ -76,6 +76,10 @@ jobs:
         export GITHUB_REPO_NAME=${GITHUB_REPO_NAME}
         envsubst < cloud-init.yml > cloud-init.generated.yml
 
+    - name: Show generated cloud-init
+      run: |
+        cat cloud-init.generated.yml
+
     - name: Launch VM
       id: launch
       run: |

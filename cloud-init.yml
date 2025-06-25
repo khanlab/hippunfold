@@ -1,4 +1,4 @@
-# cloud-config
+#cloud-config
 hostname: hippunfold-pr-${PR_NUMBER}
 
 write_files:
