@@ -1,11 +1,11 @@
 name: Hippunfold PR Wet-Run (Ephemeral Runner)
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
     branches:
       - main
-      - setup-wetrun-testing
+      - dev-v2.0.0
   workflow_dispatch:
 
 permissions:
