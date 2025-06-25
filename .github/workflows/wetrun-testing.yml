@@ -92,7 +92,9 @@ jobs:
       run: |
         echo "Waiting for runner to appear..."
         for i in {1..30}; do
-          runners=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          runners=$(curl -s \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.RUNNER_PAT }}" \
             https://api.github.com/repos/${{ github.repository }}/actions/runners \
             | jq -r '.runners[].name')
           if echo "$runners" | grep -q "runner-${PR_NUMBER}"; then
