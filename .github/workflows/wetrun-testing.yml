@@ -1,13 +1,13 @@
 name: Hippunfold PR Wet-Run (Ephemeral Runner)
 
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
   contents: read
-  actions: write   # needed to create/delete runners via API
+  actions: write
 
 env:
   OS_AUTH_TYPE:                      "v3applicationcredential"
