@@ -2,7 +2,7 @@ rule create_crop_ref:
     """Create ref space for hires crop in original modality space
     TODO:  expose the resampling factor and size as cmd line args"""
     input:
-        seg=inputs[config["modality"]].expand(
+        seg=lambda wildcards: inputs[config["modality"]].filter(**wildcards).expand(
             bids(
                 root=root,
                 datatype="anat",
@@ -16,7 +16,7 @@ rule create_crop_ref:
             ),
             atlas=config["atlas"],
             allow_missing=True,
-        ),
+        )[0].format(**wildcards)
     params:
         resample=config["crop_res"],
         pad_to=config["crop_box"],
