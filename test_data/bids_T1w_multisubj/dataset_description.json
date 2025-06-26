@@ -1,0 +1,13 @@
+{
+  "Acknowledgements": "Snakebids Development Team",
+  "Authors": ["Peter Van Dyken", "Ali Khan", "Tristan Kuehn", "Jason Kai"],
+  "DatasetType": "raw",
+  "BIDSVersion": "1.4.1",
+  "HowToAcknowledge": "https://zenodo.org/record/8274278",
+  "License": "PDLL",
+  "Name": "Snakebids Test T1w Dataset (empty files)",
+  "ReferencesAndLinks": [
+    "https://github.com/khanlab/snakebids",
+    "List of papers or websites"
+  ]
+}
