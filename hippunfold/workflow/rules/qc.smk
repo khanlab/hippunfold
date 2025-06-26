@@ -40,7 +40,9 @@ rule qc_reg_to_template:
 rule get_subfield_vols_subj:
     """Export segmentation volume for a subject to TSV"""
     input:
-        segs=inputs[config["modality"]].expand(
+        segs=lambda wildcards: inputs[config["modality"]]
+        .filter(**wildcards)
+        .expand(
             bids(
                 root=root,
                 **inputs.subj_wildcards,

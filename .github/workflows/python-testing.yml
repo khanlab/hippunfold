@@ -85,6 +85,10 @@ jobs:
         run: |
           ./hippunfold/run.py test_data/bids_T1w test_out participant -np --modality T1w
 
+      - name: Test T1w bids multiple subjects
+        run: |
+          ./hippunfold/run.py test_data/bids_T1w_multisubj test_out participant -np --modality T1w
+
       - name: Test hipp b500 bids
         run: |
           ./hippunfold/run.py test_data/bids_hippb500 test_out participant -np --modality hippb500
