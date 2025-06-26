@@ -2,8 +2,7 @@ name: Hippunfold PR Wet-Run (Ephemeral Runner)
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-  workflow_dispatch:
+    types: [labeled]
 
 permissions:
   contents: read
@@ -20,6 +19,12 @@ env:
 
 jobs:
   launch-runner:
+    if: >
+      (github.event_name == 'pull_request' &&
+         github.event.action == 'labeled' &&
+         github.event.label.name == 'ready-for-wet-run')
+      ||
+      (github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
 
     env:
