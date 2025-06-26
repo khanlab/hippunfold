@@ -1,0 +1,45 @@
+#cloud-config
+hostname: hippunfold-pr-${PR_NUMBER}
+
+write_files:
+  - path: /run/start.sh
+    owner: root:root
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -eux
+      export HOME=/home/runner
+      export RUNNER_DIR=$HOME/actions-runner
+      export RUNNER_VERSION="2.325.0"
+      GH_OWNER="${GITHUB_REPO_OWNER}"
+      GH_REPO="${GITHUB_REPO_NAME}"
+      GH_TOKEN="${GITHUB_RUNNER_TOKEN}"
+      LABELS="ephemeral,wet-run"
+
+      mkdir -p "$RUNNER_DIR"
+      cd "$RUNNER_DIR"
+
+      # download & extract
+      curl -fsSL -o runner.tar.gz \
+        "https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz"
+      tar xzf runner.tar.gz
+      rm -f runner.tar.gz
+
+
+      # Configure runner
+      ./config.sh --unattended \
+        --url "https://github.com/${GH_OWNER}/${GH_REPO}" \
+        --token "${GH_TOKEN}" \
+        --labels "${LABELS}" \
+        --name "runner-pr-${PR_NUMBER}"
+
+runcmd:
+  - apt-get update
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y curl git wget unzip libicu-dev libssl-dev jq
+  - useradd -m runner || true
+  - cp /run/start.sh /home/runner/start.sh
+  - chown -R runner:runner /home/runner
+  - chmod 755 /home/runner/start.sh
+  - su - runner -c "/home/runner/start.sh"
+  - cd /home/runner/actions-runner && ./svc.sh install
+  - cd /home/runner/actions-runner && ./svc.sh start
