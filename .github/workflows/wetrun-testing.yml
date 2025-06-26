@@ -139,6 +139,13 @@ jobs:
       run: |
         mamba install snakebids -c bioconda -c conda-forge -y
 
+    - name: Download lowresMRI dataset
+      run: |
+        mkdir -p /mnt/data
+        cd /mnt/data
+        wget -q -O lowresMRI.zip "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
+        unzip -q lowresMRI.zip -d lowresMRI
+
     - name: Setup env for hippunfold
       run: |
         echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/hippunfold_cache_dir" >> $GITHUB_ENV
@@ -148,7 +155,7 @@ jobs:
         PR=${{ github.event.pull_request.number }}
         git fetch origin pull/${PR}/head:pr-${PR}
         git checkout pr-${PR}
-        ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w
+        ./hippunfold/run.py /mnt/data/lowresMRI test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
 
   cleanup:
     needs: [launch-runner, run-wet-run]
@@ -179,9 +186,6 @@ jobs:
 
           echo "Resolved IP for VM $VM_ID: $ip"
 
-          # scan SSH key if needed (e.g., to populate known_hosts)
-          ssh-keyscan -H "$ip" || echo "SSH keyscan failed or not necessary"
-
           # check console log for runner removal
           openstack console log show "$VM_ID" | grep -q 'Runner listener launched' && \
             openstack console log show "$VM_ID" | grep -q 'Runner removed'
@@ -192,3 +196,27 @@ jobs:
       - name: Delete VM fallback
         run: |
           openstack server delete ${{ needs.launch-runner.outputs.vm_id }} || true
+
+      - name: Remove runner registration from GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.RUNNER_PAT }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.inputs.pr_number }}
+        run: |
+          runner_id=$(curl -sS \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/$REPO/actions/runners \
+            | jq -r --arg NAME "runner-pr-$PR_NUMBER" \
+                '.runners[] | select(.name==$NAME) | .id')
+
+          if [ -n "$runner_id" ]; then
+            echo "Deleting runner ID $runner_id from $REPO …"
+            curl -X DELETE \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/$REPO/actions/runners/$runner_id
+          else
+            echo "No runner 'runner-pr-$PR_NUMBER' found in $REPO"
+          fi
+
