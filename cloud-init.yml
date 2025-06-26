@@ -10,6 +10,7 @@ write_files:
       set -eux
       export HOME=/home/runner
       export RUNNER_DIR=$HOME/actions-runner
+      export RUNNER_VERSION="2.325.0"
       GH_OWNER="${GITHUB_REPO_OWNER}"
       GH_REPO="${GITHUB_REPO_NAME}"
       GH_TOKEN="${GITHUB_RUNNER_TOKEN}"
