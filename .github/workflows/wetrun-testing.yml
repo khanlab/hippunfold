@@ -122,32 +122,65 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Fetch PR & run wet run
+    - name: Setup Miniforge and mamba
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniforge-variant: Miniforge3
+        miniforge-version: latest
+        mamba-version: "*"
+        use-mamba: true
+        conda-solver: libmamba
+        auto-activate-base: true
+
+    - name: Install snakebids
+      run: |
+        mamba install snakebids -c bioconda -c conda-forge -y
+
+    - name: Setup env for hippunfold
+      run: |
+        echo "HIPPUNFOLD_CACHE_DIR=`pwd`/test_data/hippunfold_cache_dir" >> $GITHUB_ENV
+
+    - name: run wet run
       run: |
         PR=${{ github.event.pull_request.number }}
         git fetch origin pull/${PR}/head:pr-${PR}
         git checkout pr-${PR}
-        ./hippunfold/run.py ../data/lowresMRI derivatives/ participant --participant-label 01 --modality T1w --cores all
+        ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T2w
 
   cleanup:
     needs: [launch-runner, run-wet-run]
     runs-on: ubuntu-latest
     if: always()
     steps:
-    - name: Deregister runner
-      run: |
-        # get removal token
-        token=$(curl -sX POST \
-          -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          https://api.github.com/repos/${{ github.repository }}/actions/runners/remove-token \
-          | jq -r .token)
-        # instruct runner to remove itself
-        ssh-keyscan -H ${{ needs.launch-runner.outputs.vm_id }}  # if needed for network
-        openstack console log show ${{ needs.launch-runner.outputs.vm_id }} | grep -q 'Runner listener launched' && \
-          openstack console log show ${{ needs.launch-runner.outputs.vm_id }} | grep -q 'Runner removed'
-        # you could signal via API instead, but simplest is to delete the VM:
-        openstack server delete ${{ needs.launch-runner.outputs.vm_id }} || true
+      - name: Deregister runner
+        env:
+          VM_ID: ${{ needs.launch-runner.outputs.vm_id }}
+          GITHUB_TOKEN: ${{ secrets.RUNNER_PAT }}
+          REPO: ${{ github.repository }}
+        run: |
+          # get removal token
+          token=$(curl -sX POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${REPO}/actions/runners/remove-token \
+            | jq -r .token)
 
-    - name: Delete VM
-      run: |
-        openstack server delete ${{ needs.launch-runner.outputs.vm_id }} || true
+          # fetch IP address of the VM
+          ip=$(openstack server show "$VM_ID" -f value -c addresses | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1)
+
+          echo "Resolved IP for VM $VM_ID: $ip"
+
+          # scan SSH key if needed (e.g., to populate known_hosts)
+          ssh-keyscan -H "$ip" || echo "SSH keyscan failed or not necessary"
+
+          # check console log for runner removal
+          openstack console log show "$VM_ID" | grep -q 'Runner listener launched' && \
+            openstack console log show "$VM_ID" | grep -q 'Runner removed'
+
+          # delete VM
+          openstack server delete "$VM_ID" || true
+
+      - name: Delete VM fallback
+        run: |
+          openstack server delete ${{ needs.launch-runner.outputs.vm_id }} || true
