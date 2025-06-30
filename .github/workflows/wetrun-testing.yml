@@ -131,14 +131,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Activate baked conda env
-      run: |
-        # 1. Make sure we can find Miniforge
-        export PATH=/home/ubuntu/miniforge/bin:$PATH
-
-        # 2. Activate the snakebids-env you pre-baked into the image
-        source /home/ubuntu/miniforge/bin/activate snakebids-env
-
     # - name: Setup Miniforge and mamba
     #   uses: conda-incubator/setup-miniconda@v3
     #   with:
@@ -164,8 +156,11 @@ jobs:
       run: |
         echo "HIPPUNFOLD_CACHE_DIR=/mnt/test_data/hippunfold_cache_dir" >> $GITHUB_ENV
 
-    - name: run wet run
+    - name: activate snakebids-env and run wet run
       run: |
+        export PATH=/home/ubuntu/miniforge/bin:$PATH
+        source /home/ubuntu/miniforge/bin/activate snakebids-env
+
         PR=${{ github.event.pull_request.number }}
         git fetch origin pull/${PR}/head:pr-${PR}
         git checkout pr-${PR}
