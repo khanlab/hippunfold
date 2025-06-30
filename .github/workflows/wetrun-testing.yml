@@ -133,10 +133,10 @@ jobs:
     - name: Activate baked conda env
       run: |
         # 1. Make sure we can find Miniforge
-        export PATH=/home/runner/miniforge/bin:$PATH
+        export PATH=/home/ubuntu/miniforge/bin:$PATH
 
         # 2. Activate the snakebids-env you pre-baked into the image
-        source /home/runner/miniforge/bin/activate snakebids-env
+        source /home/ubuntu/miniforge/bin/activate snakebids-env
 
     # - name: Setup Miniforge and mamba
     #   uses: conda-incubator/setup-miniconda@v3
