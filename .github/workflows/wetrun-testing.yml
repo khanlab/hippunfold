@@ -84,15 +84,15 @@ jobs:
         envsubst '$PR_NUMBER $GITHUB_RUNNER_TOKEN $GITHUB_REPO_OWNER $GITHUB_REPO_NAME' \
           < cloud-init.yml > cloud-init.generated.yml
 
-    - name: Show generated cloud-init
-      run: |
-        cat cloud-init.generated.yml
+    # - name: Show generated cloud-init
+    #   run: |
+    #     cat cloud-init.generated.yml
 
     - name: Launch VM
       id: launch
       run: |
         openstack server create \
-          --image "Ubuntu-22.04.4-Jammy-x64-2024-06" \
+          --image "hippunfold-wet-run-base-image-latest" \
           --flavor c16-60gb-576 \
           --network def-akhanf-dev-network \
           --user-data cloud-init.generated.yml \
@@ -130,26 +130,34 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setup Miniforge and mamba
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        miniforge-variant: Miniforge3
-        miniforge-version: latest
-        mamba-version: "*"
-        use-mamba: true
-        conda-solver: libmamba
-        auto-activate-base: true
-
-    - name: Install snakebids
+    - name: Activate baked conda env
       run: |
-        mamba install snakebids -c bioconda -c conda-forge -y
+        # 1. Make sure we can find Miniforge
+        export PATH=/home/runner/miniforge/bin:$PATH
 
-    - name: Download lowresMRI dataset
-      run: |
-        mkdir -p /mnt/data
-        cd /mnt/data
-        wget -q -O lowresMRI.zip "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
-        unzip -q lowresMRI.zip -d lowresMRI
+        # 2. Activate the snakebids-env you pre-baked into the image
+        source /home/runner/miniforge/bin/activate snakebids-env
+
+    # - name: Setup Miniforge and mamba
+    #   uses: conda-incubator/setup-miniconda@v3
+    #   with:
+    #     miniforge-variant: Miniforge3
+    #     miniforge-version: latest
+    #     mamba-version: "*"
+    #     use-mamba: true
+    #     conda-solver: libmamba
+    #     auto-activate-base: true
+
+    # - name: Install snakebids
+    #   run: |
+    #     mamba install snakebids -c bioconda -c conda-forge -y
+
+    # - name: Download lowresMRI dataset
+    #   run: |
+    #     mkdir -p /mnt/data
+    #     cd /mnt/data
+    #     wget -q -O lowresMRI.zip "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
+    #     unzip -q lowresMRI.zip -d lowresMRI
 
     - name: Setup env for hippunfold
       run: |
