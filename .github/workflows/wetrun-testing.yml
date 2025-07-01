@@ -93,7 +93,7 @@ jobs:
       id: launch
       run: |
         openstack server create \
-          --image "hippunfold-wet-run-base-image-latest" \
+          --image "hippunfold-wet-run-base-latest" \
           --flavor c16-60gb-576 \
           --network def-akhanf-dev-network \
           --user-data cloud-init.generated.yml \
