@@ -38,7 +38,7 @@ runcmd:
   # - DEBIAN_FRONTEND=noninteractive apt-get install -y curl git wget unzip libicu-dev libssl-dev jq
   - useradd -m runner || true
   - mkdir -p /data
-  - mount /dev/vdb /data
+  - mount /dev/vdc /data
   - chown -R runner:runner /data
   - cp /run/start.sh /home/runner/start.sh
   - chown -R runner:runner /home/runner
