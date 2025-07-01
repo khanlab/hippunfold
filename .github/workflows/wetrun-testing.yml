@@ -109,11 +109,6 @@ jobs:
         VM_ID=$(openstack server list --name hippunfold-pr-${PR_NUMBER} -f value -c ID)
         echo "vm_id=$VM_ID" >> $GITHUB_OUTPUT
 
-    - name: Attach volume to VM
-      run: |
-        openstack server add volume hippunfold-pr-${{ github.event.pull_request.number }} \
-          ${{ steps.create_volume.outputs.volume_name }}
-
     - name: Wait for runner registration
       run: |
         echo "Waiting for runner to appear..."
@@ -131,6 +126,11 @@ jobs:
         done
         echo "Runner did not register in time." >&2
         exit 1
+
+    - name: Attach volume to VM
+      run: |
+        openstack server add volume hippunfold-pr-${{ github.event.pull_request.number }} \
+          ${{ steps.create_volume.outputs.volume_name }}
 
   run-wet-run:
     needs: launch-runner
@@ -241,4 +241,9 @@ jobs:
           else
             echo "No runner 'runner-pr-$PR_NUMBER' found in $REPO"
           fi
+
+      - name: Delete volume
+        if: always()
+        run: |
+          openstack volume delete ${{ steps.create_volume.outputs.volume_name }}
 
