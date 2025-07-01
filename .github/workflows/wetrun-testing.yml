@@ -89,6 +89,14 @@ jobs:
     #   run: |
     #     cat cloud-init.generated.yml
 
+    - name: Create volume from snapshot
+      id: create_volume
+      run: |
+        SNAPSHOT_ID=$(openstack volume snapshot list -f value -c ID --name hippunfold-data-snapshot-latest)
+        VOLUME_NAME="hippunfold-data-vol-${{ github.event.pull_request.number }}"
+        openstack volume create --snapshot $SNAPSHOT_ID --size 50 --type standard $VOLUME_NAME
+        echo "volume_name=$VOLUME_NAME" >> $GITHUB_OUTPUT
+
     - name: Launch VM
       id: launch
       run: |
@@ -100,6 +108,11 @@ jobs:
           hippunfold-pr-${PR_NUMBER}
         VM_ID=$(openstack server list --name hippunfold-pr-${PR_NUMBER} -f value -c ID)
         echo "vm_id=$VM_ID" >> $GITHUB_OUTPUT
+
+    - name: Attach volume to VM
+      run: |
+        openstack server add volume hippunfold-pr-${{ github.event.pull_request.number }} \
+          ${{ steps.create_volume.outputs.volume_name }}
 
     - name: Wait for runner registration
       run: |
