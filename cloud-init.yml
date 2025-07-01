@@ -37,9 +37,9 @@ runcmd:
   # - apt-get update
   # - DEBIAN_FRONTEND=noninteractive apt-get install -y curl git wget unzip libicu-dev libssl-dev jq
   - useradd -m runner || true
-  - mkdir -p /conda-envs
-  - mount /dev/vdb /conda-envs
-  - chown -R runner:runner /conda-envs
+  - mkdir -p /data
+  - mount /dev/vdb /data
+  - chown -R runner:runner /data
   - cp /run/start.sh /home/runner/start.sh
   - chown -R runner:runner /home/runner
   - chmod 755 /home/runner/start.sh
