@@ -133,10 +133,10 @@ jobs:
 
     - name: Verify dataset exists before run
       run: |
-        echo "Checking /mnt/data:"
-        ls -lh /mnt/data || echo "/mnt/data does not exist"
-        echo "Checking /mnt/data/lowresMRI:"
-        ls -lh /mnt/data/lowresMRI || echo "lowresMRI not found"
+        echo "Checking /opt/data:"
+        ls -lh /opt/data || echo "/opt/data does not exist"
+        echo "Checking /opt/data/lowresMRI:"
+        ls -lh /opt/data/lowresMRI || echo "lowresMRI not found"
 
     # - name: Setup Miniforge and mamba
     #   uses: conda-incubator/setup-miniconda@v3
@@ -171,7 +171,7 @@ jobs:
         PR=${{ github.event.pull_request.number }}
         git fetch origin pull/${PR}/head:pr-${PR}
         git checkout pr-${PR}
-        ./hippunfold/run.py /mnt/data/lowresMRI test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
+        ./hippunfold/run.py /opt/data/lowresMRI test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
 
   cleanup:
     needs: [launch-runner, run-wet-run]
