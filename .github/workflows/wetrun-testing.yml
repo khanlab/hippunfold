@@ -131,6 +131,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Verify dataset exists before run
+      run: |
+        echo "Checking /mnt/data:"
+        ls -lh /mnt/data || echo "/mnt/data does not exist"
+        echo "Checking /mnt/data/lowresMRI:"
+        ls -lh /mnt/data/lowresMRI || echo "lowresMRI not found"
+
     # - name: Setup Miniforge and mamba
     #   uses: conda-incubator/setup-miniconda@v3
     #   with:
