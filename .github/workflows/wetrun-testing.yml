@@ -94,7 +94,7 @@ jobs:
       run: |
         SNAPSHOT_ID=$(openstack volume snapshot list -f value -c ID --name hippunfold-data-snapshot-latest)
         VOLUME_NAME="hippunfold-data-vol-${{ github.event.pull_request.number }}"
-        openstack volume create --snapshot $SNAPSHOT_ID --size 50 --type standard $VOLUME_NAME
+        openstack volume create --snapshot $SNAPSHOT_ID --size 50 $VOLUME_NAME
         echo "volume_name=$VOLUME_NAME" >> $GITHUB_OUTPUT
 
     - name: Launch VM
