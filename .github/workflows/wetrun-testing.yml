@@ -92,7 +92,7 @@ jobs:
       id: launch
       run: |
         openstack server create \
-          --image "hippunfold-wetrun-base-image" \
+          --image "Ubuntu-22.04.4-Jammy-x64-2024-06" \
           --flavor c16-60gb-576 \
           --network def-akhanf-dev-network \
           --user-data cloud-init.generated.yml \
@@ -130,19 +130,19 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    # - name: Setup Miniforge and mamba
-    #   uses: conda-incubator/setup-miniconda@v3
-    #   with:
-    #     miniforge-variant: Miniforge3
-    #     miniforge-version: latest
-    #     mamba-version: "*"
-    #     use-mamba: true
-    #     conda-solver: libmamba
-    #     auto-activate-base: true
+    - name: Setup Miniforge and mamba
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniforge-variant: Miniforge3
+        miniforge-version: latest
+        mamba-version: "*"
+        use-mamba: true
+        conda-solver: libmamba
+        auto-activate-base: true
 
-    # - name: Install snakebids
-    #   run: |
-    #     mamba install snakebids -c bioconda -c conda-forge -y
+    - name: Install snakebids
+      run: |
+        mamba install snakebids -c bioconda -c conda-forge -y
 
     - name: Download lowresMRI dataset
       run: |
