@@ -157,9 +157,6 @@ jobs:
 
     - name: activate snakebids-env and run wet run
       run: |
-        export PATH=/home/ubuntu/miniforge/bin:$PATH
-        source /home/ubuntu/miniforge/bin/activate snakebids-env
-
         PR=${{ github.event.pull_request.number }}
         git fetch origin pull/${PR}/head:pr-${PR}
         git checkout pr-${PR}
