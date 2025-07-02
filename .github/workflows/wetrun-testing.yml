@@ -160,7 +160,7 @@ jobs:
         PR=${{ github.event.pull_request.number }}
         git fetch origin pull/${PR}/head:pr-${PR}
         git checkout pr-${PR}
-        ./hippunfold/run.py /mnt/data/lowresMRI /mnt/test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /hippunfold_data/conda-envs
+        ./hippunfold/run.py /mnt/data/lowresMRI /mnt/test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
 
   cleanup:
     needs: [launch-runner, run-wet-run]
