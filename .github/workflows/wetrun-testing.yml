@@ -103,7 +103,7 @@ jobs:
     - name: Wait for runner registration
       run: |
         echo "Waiting for runner to appear..."
-        for i in {1..30}; do
+        for i in {1..60}; do
           runners=$(curl -s \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.RUNNER_PAT }}" \
