@@ -36,10 +36,7 @@ write_files:
 runcmd:
   # - apt-get update
   # - DEBIAN_FRONTEND=noninteractive apt-get install -y curl git wget unzip libicu-dev libssl-dev jq
-  - useradd -m runner || true
-  - mkdir -p /data
-  - mount /dev/vdc /data
-  - chown -R runner:runner /data
+  # - useradd -m runner || true
   - cp /run/start.sh /home/runner/start.sh
   - chown -R runner:runner /home/runner
   - chmod 755 /home/runner/start.sh

@@ -56,7 +56,6 @@ jobs:
           exit 1
         fi
 
-
     - name: Get repo-scoped registration token
       id: token
       run: |
@@ -89,19 +88,11 @@ jobs:
     #   run: |
     #     cat cloud-init.generated.yml
 
-    - name: Create volume from snapshot
-      id: create_volume
-      run: |
-        SNAPSHOT_ID=$(openstack volume snapshot list -f value -c ID --name hippunfold-data-snapshot-latest)
-        VOLUME_NAME="hippunfold-data-vol-${{ github.event.pull_request.number }}"
-        openstack volume create --snapshot $SNAPSHOT_ID --size 50 $VOLUME_NAME
-        echo "volume_name=$VOLUME_NAME" >> $GITHUB_OUTPUT
-
     - name: Launch VM
       id: launch
       run: |
         openstack server create \
-          --image "hippunfold-wet-run-base-latest" \
+          --image "hippunfold-wetrun-base-image" \
           --flavor c16-60gb-576 \
           --network def-akhanf-dev-network \
           --user-data cloud-init.generated.yml \
@@ -126,11 +117,6 @@ jobs:
         done
         echo "Runner did not register in time." >&2
         exit 1
-
-    - name: Attach volume to VM
-      run: |
-        openstack server add volume hippunfold-pr-${{ github.event.pull_request.number }} \
-          ${{ steps.create_volume.outputs.volume_name }}
 
   run-wet-run:
     needs: launch-runner
@@ -158,12 +144,12 @@ jobs:
     #   run: |
     #     mamba install snakebids -c bioconda -c conda-forge -y
 
-    # - name: Download lowresMRI dataset
-    #   run: |
-    #     mkdir -p /mnt/data
-    #     cd /mnt/data
-    #     wget -q -O lowresMRI.zip "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
-    #     unzip -q lowresMRI.zip -d lowresMRI
+    - name: Download lowresMRI dataset
+      run: |
+        mkdir -p /mnt/data
+        cd /mnt/data
+        wget -q -O lowresMRI.zip "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
+        unzip -q lowresMRI.zip -d lowresMRI
 
     - name: Setup env for hippunfold
       run: |
@@ -177,7 +163,7 @@ jobs:
         PR=${{ github.event.pull_request.number }}
         git fetch origin pull/${PR}/head:pr-${PR}
         git checkout pr-${PR}
-        ./hippunfold/run.py /data/wet-run-data/lowresMRI test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /data/conda-envs
+        ./hippunfold/run.py /mnt/data/lowresMRI /mnt/test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /hippunfold_data/conda-envs
 
   cleanup:
     needs: [launch-runner, run-wet-run]
@@ -241,9 +227,3 @@ jobs:
           else
             echo "No runner 'runner-pr-$PR_NUMBER' found in $REPO"
           fi
-
-      - name: Delete volume
-        if: always()
-        run: |
-          openstack volume delete ${{ steps.create_volume.outputs.volume_name }}
-
