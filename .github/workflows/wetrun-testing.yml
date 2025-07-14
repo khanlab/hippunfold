@@ -1,0 +1,226 @@
+name: Hippunfold PR Wet-Run (Ephemeral Runner)
+
+on:
+  pull_request:
+    # types: [labeled]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  actions: write
+
+env:
+  OS_AUTH_TYPE:                      "v3applicationcredential"
+  OS_AUTH_URL:                       "https://arbutus.cloud.computecanada.ca:5000/v3"
+  OS_USERNAME:                       "djay"
+  OS_USER_DOMAIN_NAME:               "CCDB"
+  OS_APPLICATION_CREDENTIAL_ID:      ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+  OS_APPLICATION_CREDENTIAL_SECRET: "${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}"
+
+
+jobs:
+  launch-runner:
+    # if: >
+    #   (github.event_name == 'pull_request' &&
+    #      github.event.action == 'labeled' &&
+    #      github.event.label.name == 'ready-for-wet-run')
+    #   ||
+    #   (github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      GITHUB_REPO_NAME: ${{ github.event.repository.name }}
+
+    outputs:
+      vm_id: ${{ steps.launch.outputs.vm_id }}
+      runner_token: ${{ steps.token.outputs.token }}
+
+    steps:
+    - name: Install Openstack CLI & tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-openstackclient jq gettext-base
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Validate PAT
+      run: |
+        status=$(curl -s -o /dev/null -w "%{http_code}" \
+          -H "Authorization: Bearer ${{ secrets.RUNNER_PAT }}" \
+          https://api.github.com/user)
+        echo "PAT test HTTP status: $status"
+        if [ "$status" -ne 200 ]; then
+          echo "❌ PAT is invalid or missing scopes (got HTTP $status)" >&2
+          exit 1
+        fi
+
+    - name: Get repo-scoped registration token
+      id: token
+      run: |
+        response=$(curl -sX POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.RUNNER_PAT }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/actions/runners/registration-token)
+
+        echo "Full API response:"
+        echo "$response"
+
+        token=$(echo "$response" | jq -r .token)
+
+        echo "Parsed token: $token"
+        echo "token=$token" >> $GITHUB_OUTPUT
+
+    - name: Generate cloud-init
+      run: |
+        export PR_NUMBER=${PR_NUMBER}
+        export GITHUB_RUNNER_TOKEN=${{ steps.token.outputs.token }}
+        export GITHUB_REPO_OWNER=${{ github.repository_owner }}
+        export GITHUB_REPO_NAME=${GITHUB_REPO_NAME}
+
+        # Only substitute the four env vars, keep all other ${…} intact
+        envsubst '$PR_NUMBER $GITHUB_RUNNER_TOKEN $GITHUB_REPO_OWNER $GITHUB_REPO_NAME' \
+          < cloud-init.yml > cloud-init.generated.yml
+
+    # - name: Show generated cloud-init
+    #   run: |
+    #     cat cloud-init.generated.yml
+
+    - name: Launch VM
+      id: launch
+      run: |
+        openstack server create \
+          --image "Ubuntu-22.04.4-Jammy-x64-2024-06" \
+          --flavor c16-60gb-576 \
+          --network def-akhanf-dev-network \
+          --user-data cloud-init.generated.yml \
+          hippunfold-pr-${PR_NUMBER}
+        VM_ID=$(openstack server list --name hippunfold-pr-${PR_NUMBER} -f value -c ID)
+        echo "vm_id=$VM_ID" >> $GITHUB_OUTPUT
+
+    - name: Wait for runner registration
+      run: |
+        echo "Waiting for runner to appear..."
+        for i in {1..60}; do
+          runners=$(curl -s \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.RUNNER_PAT }}" \
+            https://api.github.com/repos/${{ github.repository }}/actions/runners \
+            | jq -r '.runners[].name')
+          if echo "$runners" | grep -q "runner-pr-${PR_NUMBER}"; then
+            echo "Runner registered."
+            exit 0
+          fi
+          sleep 10
+        done
+        echo "Runner did not register in time." >&2
+        exit 1
+
+  run-wet-run:
+    needs: launch-runner
+    runs-on: [self-hosted, ephemeral, wet-run]
+    defaults:
+      run:
+        shell: bash -l {0}
+    timeout-minutes: 60  # max 1 hour
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Miniforge and mamba
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniforge-variant: Miniforge3
+        miniforge-version: latest
+        mamba-version: "*"
+        use-mamba: true
+        conda-solver: libmamba
+        auto-activate-base: true
+
+    - name: Install snakebids
+      run: |
+        mamba install snakebids -c bioconda -c conda-forge -y
+
+    - name: Download lowresMRI dataset
+      run: |
+        mkdir -p /mnt/data
+        cd /mnt/data
+        wget -q -O lowresMRI.zip "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
+        unzip -q lowresMRI.zip -d lowresMRI
+
+    - name: Setup env for hippunfold
+      run: |
+        echo "HIPPUNFOLD_CACHE_DIR=/mnt/test_data/hippunfold_cache_dir" >> $GITHUB_ENV
+
+    - name: activate snakebids-env and run wet run
+      run: |
+        PR=${{ github.event.pull_request.number }}
+        git fetch origin pull/${PR}/head:pr-${PR}
+        git checkout pr-${PR}
+        ./hippunfold/run.py /mnt/data/lowresMRI /mnt/test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
+
+  cleanup:
+    needs: [launch-runner, run-wet-run]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Install Openstack CLI & tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-openstackclient jq gettext-base
+
+      - name: Deregister runner
+        env:
+          VM_ID: ${{ needs.launch-runner.outputs.vm_id }}
+          GITHUB_TOKEN: ${{ secrets.RUNNER_PAT }}
+          REPO: ${{ github.repository }}
+        run: |
+          # get removal token
+          token=$(curl -sX POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${REPO}/actions/runners/remove-token \
+            | jq -r .token)
+
+          # fetch IP address of the VM
+          ip=$(openstack server show "$VM_ID" -f value -c addresses | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1)
+
+          echo "Resolved IP for VM $VM_ID: $ip"
+
+          # check console log for runner removal
+          openstack console log show "$VM_ID" | grep -q 'Runner listener launched' && \
+            openstack console log show "$VM_ID" | grep -q 'Runner removed'
+
+          # delete VM
+          openstack server delete "$VM_ID" || true
+
+      - name: Delete VM fallback
+        run: |
+          openstack server delete ${{ needs.launch-runner.outputs.vm_id }} || true
+
+      - name: Remove runner registration from GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.RUNNER_PAT }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          runner_id=$(curl -sS \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/$REPO/actions/runners \
+            | jq -r --arg NAME "runner-pr-$PR_NUMBER" \
+                '.runners[] | select(.name==$NAME) | .id')
+
+          if [ -n "$runner_id" ]; then
+            echo "Deleting runner ID $runner_id from $REPO …"
+            curl -X DELETE \
+              -H "Authorization: token $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/$REPO/actions/runners/$runner_id
+          else
+            echo "No runner 'runner-pr-$PR_NUMBER' found in $REPO"
+          fi
