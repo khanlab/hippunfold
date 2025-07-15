@@ -58,7 +58,7 @@ rule template_gen_combined_csv:
                 **inputs.subj_wildcards,
             ),
             label=wildcards.label,
-            **expand_hemi(),
+            **expand_hemi_atlas_gen(wildcards),
         ),
     params:
         cmd=lambda wildcards, input, output: f"cat {input.metrics_csvs} > {output.metrics_csv}",
@@ -69,6 +69,7 @@ rule template_gen_combined_csv:
             label="{label}",
             desc="combined",
             suffix="metrics.csv",
+            **hemi_wildcard_atlas_gen(),
         ),
     shell:
         "{params.cmd}"
@@ -82,6 +83,7 @@ rule gen_atlas_reg_ants:
             label="{label}",
             desc="combined",
             suffix="metrics.csv",
+            **hemi_wildcard_atlas_gen(),
         ),
     params:
         num_modalities=len(config["new_atlas_metrics"]),
@@ -93,6 +95,7 @@ rule gen_atlas_reg_ants:
                 template=config["new_atlas_name"],
                 label="{label}",
                 suffix="antstemplate",
+                **hemi_wildcard_atlas_gen(),
             )
         ),
     conda:
@@ -122,6 +125,7 @@ rule copy_avgtemplate_warps:
             template=config["new_atlas_name"],
             label="{label}",
             suffix="antstemplate",
+            **hemi_wildcard_atlas_gen(),
         ),
     params:
         glob_input_warp=lambda wildcards, input: "{avgtemplate_dir}/input*-{filename}-1Warp.nii.gz".format(
@@ -168,6 +172,7 @@ rule copy_avgtemplate_metric:
             template=config["new_atlas_name"],
             label="{label}",
             suffix="antstemplate",
+            **hemi_wildcard_atlas_gen(),
         ),
     params:
         in_metric=lambda wildcards, input: "{avgtemplate_dir}/template{i}.nii.gz".format(
@@ -205,7 +210,7 @@ rule reset_header_2d_metric_nii:
             ),
             label=wildcards.label,
             metric=wildcards.metric,
-            **expand_hemi(),
+            hemi=wildcards.hemi,
         )[0],
         nii=bids_atlas(
             root=root,
@@ -245,7 +250,7 @@ rule reset_header_2d_warp_atlasgen:
             ),
             label=wildcards.label,
             metric=config["new_atlas_metrics"][0],
-            **expand_hemi(),
+            hemi=wildcards.hemi,
         )[0],
         nii=bids(
             root=root,
@@ -412,7 +417,7 @@ rule warp_subj_unfold_surf_to_avg:
         surf_gii=bids(
             root=root,
             datatype="surf",
-            suffix="midthickness.surf.gii",
+            suffix="{surfname}.surf.gii",
             space="unfold",
             den="native",
             hemi="{hemi}",
@@ -436,7 +441,7 @@ rule warp_subj_unfold_surf_to_avg:
         surf_gii=bids(
             root=root,
             datatype="surf",
-            suffix="midthickness.surf.gii",
+            suffix="{surfname}.surf.gii",
             space="unfoldavg",
             den="native",
             hemi="{hemi}",
@@ -456,7 +461,7 @@ rule resample_subj_native_surf_to_avg:
         subj_native=bids(
             root=root,
             datatype="surf",
-            suffix="midthickness.surf.gii",
+            suffix="{surfname}.surf.gii",
             space="corobl",
             den="native",
             hemi="{hemi}",
@@ -466,7 +471,7 @@ rule resample_subj_native_surf_to_avg:
         subj_unfold=bids(
             root=root,
             datatype="surf",
-            suffix="midthickness.surf.gii",
+            suffix="{surfname}.surf.gii",
             space="unfoldavg",
             den="native",
             hemi="{hemi}",
@@ -480,7 +485,7 @@ rule resample_subj_native_surf_to_avg:
             space="unfold",
             resample="{resample}",
             hemi="{hemi}",
-            suffix="midthickness.surf.gii",
+            suffix="{surfname}.surf.gii",
         ),
     output:
         native_resampled=bids(
@@ -490,7 +495,7 @@ rule resample_subj_native_surf_to_avg:
             space="corobl",
             resample="{resample}",
             hemi="{hemi}",
-            suffix="midthickness.surf.gii",
+            suffix="{surfname}.surf.gii",
             **inputs.subj_wildcards,
         ),
     conda:
@@ -554,7 +559,7 @@ rule vote_subfield_labels:
                 **inputs.subj_wildcards,
             ),
             label=wildcards.label,
-            **expand_hemi(),
+            **expand_hemi_atlas_gen(wildcards),
         ),
     output:
         subfields_voted=temp(
@@ -589,7 +594,7 @@ rule reset_header_2d_subfields_nii:
             ),
             label=wildcards.label,
             metric=config["new_atlas_metrics"],
-            **expand_hemi(),
+            hemi=wildcards.hemi,
         )[0],
         nii=bids_atlas(
             root=root,
@@ -711,9 +716,11 @@ def get_atlas_inputs(wildcards):
                         label=label,
                         hemi=hemi,
                         den="{density}",
-                        space="unfold",
+                        space="{space}",
                         suffix="{surfname}.surf.gii",
                     ),
+                    # space=["unfold", "native"],
+                    space=["unfold"],
                     surfname=["inner", "outer", "midthickness"],
                     density=config["density_choices"],
                 )
@@ -734,6 +741,52 @@ def get_atlas_inputs(wildcards):
                 )
 
     return files
+
+
+def density_to_resample(density_wildcard):
+    ind_resample = config["density_choices"].index(density_wildcard)
+    resample = config["resample_factors"][ind_resample]
+
+    return resample
+
+
+rule average_native_surfs:
+    input:
+        surfs=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="surf",
+                label="{label}",
+                space="corobl",
+                resample="{resample}".format(
+                    resample=density_to_resample(wildcards.density)
+                ),
+                hemi="{hemi}",
+                suffix="{surfname}.surf.gii",
+                **inputs.subj_wildcards,
+            ),
+            surfname=wildcards.surfname,
+            label=wildcards.label,
+            hemi=wildcards.hemi,
+        ),
+    params:
+        surf_args=lambda wildcards, input: " ".join(
+            [f"-surf {surf}" for surf in input.surfs]
+        ),
+    output:
+        surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            den="{density}",
+            space="native",
+            suffix="{surfname}.surf.gii",
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    shell:
+        "wb_command -surface-average {output} {params.surf_args}"
 
 
 rule write_template_json:

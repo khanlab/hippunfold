@@ -288,7 +288,7 @@ class AtlasConfig(PluginBase):
             choices=["unfoldreg", "native"],
             dest="new_atlas_subfields_from",
             help=(
-                "Method for defining subfields for the new atlas, either 'unfoldreg' to use unfoldreg with existing --atlas, or 'native' to use native space subfield segmentations."
+                "Method for defining subfields for the new atlas, either 'unfoldreg' to use unfoldreg with existing --atlas, or 'native' to use native space subfield segmentations. Note: if 'native' subfields are selected, data from both hemispheres will be concatenated."
             ),
         )
         self.try_add_argument(
