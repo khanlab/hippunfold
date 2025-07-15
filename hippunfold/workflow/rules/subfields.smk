@@ -57,6 +57,8 @@ rule subfields_to_label_gifti:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "subj"
     conda:
         "../envs/workbench.yaml"
     shell:
