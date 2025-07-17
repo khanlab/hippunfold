@@ -31,7 +31,6 @@ rule calculate_surface_area:
         "wb_command -surface-vertex-areas {input} {output}"
 
 
-
 rule metric_smoothing:
     input:
         surface=bids(
@@ -105,7 +104,6 @@ rule calculate_gyrification:
                 datatype="metric",
                 suffix="gyrification.shape.gii",
                 den="native",
-                desc="noclamp",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -140,7 +138,6 @@ rule calculate_curvature:
                 datatype="metric",
                 suffix="curvature.shape.gii",
                 den="native",
-                desc="noclamp",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -183,7 +180,6 @@ rule calculate_thickness:
                 datatype="metric",
                 suffix="thickness.shape.gii",
                 den="native",
-                desc="noclamp",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -195,41 +191,3 @@ rule calculate_thickness:
         "subj"
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
-
-
-
-rule metric_clamping:
-    """clamps the values to at most -5 to +5, so registration is better behaved"""
-    input:
-        metric=bids(
-            root=root,
-            datatype="metric",
-            suffix="{metric}.shape.gii",
-            den="native",
-            desc="noclamp",
-            hemi="{hemi}",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
-    params:
-        cmd=lambda wildcards, input, output: f"wb_command -metric-math 'clamp(X,-5,+5)' {output.metric} -var X {input.metric} -fixnan 0"
-    output:
-        metric=temp(
-            bids(
-                root=root,
-                datatype="metric",
-                suffix="{metric}.shape.gii",
-                den="native",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            )
-        ),
-    conda:
-        "../envs/workbench.yaml"
-    group:
-        "subj"
-    shell:
-        "{params.cmd}"
-
-
