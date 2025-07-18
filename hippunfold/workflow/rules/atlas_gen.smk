@@ -719,8 +719,7 @@ def get_atlas_inputs(wildcards):
                         space="{space}",
                         suffix="{surfname}.surf.gii",
                     ),
-                    # space=["unfold", "native"],
-                    space=["unfold"],
+                    space=["unfold", "native"],
                     surfname=["inner", "outer", "midthickness"],
                     density=config["density_choices"],
                 )
