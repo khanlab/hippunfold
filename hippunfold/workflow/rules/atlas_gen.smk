@@ -77,6 +77,20 @@ rule template_gen_combined_csv:
 
 rule gen_atlas_reg_ants:
     input:
+        metrics_niis=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold2d",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            metric=config["new_atlas_metrics"],
+            label=wildcards.label,
+            **expand_hemi_atlas_gen(wildcards),
+        ),
         metrics_csv=bids_atlas(
             root=root,
             template=config["new_atlas_name"],
