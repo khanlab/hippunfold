@@ -1,7 +1,6 @@
 import pyvista as pv
 import nibabel as nib
 import numpy as np
-from scipy.ndimage import binary_dilation
 from lib.utils import setup_logger
 from lib.surface import (
     write_surface_to_gifti,
@@ -13,26 +12,33 @@ log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
 
-def get_adjacent_voxels(mask_a, mask_b):
-    """
-    Create a mask for voxels where label A is adjacent to label B.
-    Parameters:
-    - mask_a (np.ndarray): A 3D binary mask for label A.
-    - mask_b (np.ndarray): A 3D binary mask for label B.
-
-    Returns:
-    - np.ndarray: A 3D mask where adjacent voxels for label A and label B are marked as True.
-    """
-    # Dilate each mask to identify neighboring regions
-    dilated_a = binary_dilation(mask_a)
-    dilated_b = binary_dilation(mask_b)
-
-    # Find adjacency: voxels of A touching B and B touching A
-    adjacency_mask = (dilated_a.astype("bool") & mask_b.astype("bool")) | (
-        dilated_b.astype("bool") & mask_a.astype("bool")
-    )
-
-    return adjacency_mask
+def get_second_largest_component(surface):
+    # Extract all connected components
+    components = surface.connectivity(split_bodies=True)
+    
+    # Get the component ID array
+    component_ids = components['RegionId']
+    
+    # Count the number of faces in each component
+    region_sizes = {}
+    for region_id in range(component_ids.max() + 1):
+        region_mask = component_ids == region_id
+        region_size = region_mask.sum()
+        region_sizes[region_id] = region_size
+    
+    # Sort regions by size in descending order
+    sorted_regions = sorted(region_sizes.items(), key=lambda x: x[1], reverse=True)
+    
+    if len(sorted_regions) < 2:
+        raise ValueError("Surface does not contain at least two connected components.")
+    
+    # Extract the second largest region ID
+    second_largest_region_id = sorted_regions[1][0]
+    
+    # Threshold to extract just this region
+    second_largest_component = components.threshold(value=second_largest_region_id, scalars='RegionId', preference='cell')
+    
+    return second_largest_component
 
 
 # Load data
@@ -51,11 +57,6 @@ coords[nan_mask == 1] = np.nan
 coords[src_mask == 1] = -0.1
 coords[sink_mask == 1] = 1.1
 
-# we also need to use a nan mask for the voxels where src and sink meet directly
-# (since this is another false boundary)..
-src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
-coords[src_sink_nan_mask == 1] = np.nan
-
 grid.cell_data["values"] = coords.flatten(order="F")
 grid = grid.cells_to_points("values")
 
@@ -71,8 +72,13 @@ logger.info("Removing nan-valued vertices")
 surface = remove_nan_vertices(surface)
 logger.info(surface)
 
+# keep second largest connected component
+logger.info("Keeping second largest CC (first should be outer surface)")
+surface = get_second_largest_component(surface)
+logger.info(surface)
+
 logger.info("Cleaning surface")
-surface = surface.clean(point_merging=False)
+surface = surface.clean()
 logger.info(surface)
 
 logger.info("Extracting largest connected component")
