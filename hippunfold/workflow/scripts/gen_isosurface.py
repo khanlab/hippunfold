@@ -3,6 +3,7 @@ import nibabel as nib
 import numpy as np
 from scipy.ndimage import binary_dilation
 from lib.utils import setup_logger
+from pymeshfix._meshfix import PyTMesh
 from lib.surface import (
     write_surface_to_gifti,
     apply_affine_transform,
@@ -81,6 +82,17 @@ logger.info(surface)
 
 logger.info(f"Filling holes up to radius {snakemake.params.hole_fill_radius}")
 surface = surface.fill_holes(snakemake.params.hole_fill_radius)
+logger.info(surface)
+
+logger.info(f"filling more holes with mfix")
+MeshFix = PyTMesh()
+MeshFix.load_array(surface.points, surface.faces.reshape(-1, 4)[:, 1:])
+MeshFix.fill_small_boundaries(nbe=100, refine=True)
+vert, faces = MeshFix.return_arrays()
+triangles = np.empty((faces.shape[0], 4), dtype=faces.dtype)
+triangles[:, -3:] = faces
+triangles[:, 0] = 3
+surface = pv.PolyData(vert, triangles)
 logger.info(surface)
 
 # reduce # of vertices with decimation
