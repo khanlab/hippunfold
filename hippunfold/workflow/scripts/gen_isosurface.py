@@ -1,45 +1,17 @@
 import pyvista as pv
 import nibabel as nib
 import numpy as np
+from scipy.spatial import cKDTree
 from lib.utils import setup_logger
 from lib.surface import (
     write_surface_to_gifti,
     apply_affine_transform,
     remove_nan_vertices,
 )
+from copy import deepcopy
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
-
-
-def get_second_largest_component(surface):
-    # Extract all connected components
-    components = surface.connectivity(split_bodies=True)
-    
-    # Get the component ID array
-    component_ids = components['RegionId']
-    
-    # Count the number of faces in each component
-    region_sizes = {}
-    for region_id in range(component_ids.max() + 1):
-        region_mask = component_ids == region_id
-        region_size = region_mask.sum()
-        region_sizes[region_id] = region_size
-    
-    # Sort regions by size in descending order
-    sorted_regions = sorted(region_sizes.items(), key=lambda x: x[1], reverse=True)
-    
-    if len(sorted_regions) < 2:
-        raise ValueError("Surface does not contain at least two connected components.")
-    
-    # Extract the second largest region ID
-    second_largest_region_id = sorted_regions[1][0]
-    
-    # Threshold to extract just this region
-    second_largest_component = components.threshold(value=second_largest_region_id, scalars='RegionId', preference='cell')
-    
-    return second_largest_component
-
 
 # Load data
 coords_img = nib.load(snakemake.input.coords)
@@ -72,13 +44,29 @@ logger.info("Removing nan-valued vertices")
 surface = remove_nan_vertices(surface)
 logger.info(surface)
 
-# keep second largest connected component
-logger.info("Keeping second largest CC (first should be outer surface)")
-surface = get_second_largest_component(surface)
-logger.info(surface)
-
 logger.info("Cleaning surface")
 surface = surface.clean()
+logger.info(surface)
+
+logger.info("removing vertices not near coords")
+# tag vertices not in coords
+V = np.floor(surface.points).astype(int)
+coord_at_V = coords[V[:, 0], V[:, 1], V[:, 2]]
+valid_mask = np.logical_and(coord_at_V > 0, coord_at_V < 1)
+logger.info(f"found {np.sum(valid_mask)} valid vertices")
+# largest connected component on invalid vertices
+badVmesh = deepcopy(surface)
+badVmesh.points[valid_mask] = np.nan
+badVmesh = remove_nan_vertices(badVmesh)
+badVmesh = badVmesh.extract_largest()
+logger.info(f"NaNing {badVmesh.n_points} connected invalid vertices")
+# Use KDTree to map badVmesh.points back to surface.points
+tree = cKDTree(surface.points)
+_, inds = tree.query(badVmesh.points, k=1)
+surface.points[inds] = np.nan
+# remove the nan-valued vertices
+logger.info("Removing nan-valued vertices")
+surface = remove_nan_vertices(surface)
 logger.info(surface)
 
 logger.info("Extracting largest connected component")
