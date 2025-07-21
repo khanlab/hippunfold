@@ -49,6 +49,8 @@ rule gen_native_mesh:
         threshold=lambda wildcards: config["surf_thresholds"][wildcards.surfname],
         decimate_opts=0.75,
         hole_fill_radius=1.0,
+        use_pymeshfix=lambda wildcards: True if wildcards.label == 'hipp' else False,
+        #use_pymeshfix=False,
     output:
         surf_gii=temp(
             temp(
