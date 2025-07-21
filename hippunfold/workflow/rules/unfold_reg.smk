@@ -187,6 +187,9 @@ rule slice_3d_to_2d_subject:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    params:
+        clip_min=-5.0,
+        clip_max=+5.0,
     output:
         img=temp(
             bids(
@@ -221,6 +224,9 @@ rule slice_3d_to_2d_atlas:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
+    params:
+        clip_min=-5.0,
+        clip_max=+5.0,
     output:
         img=temp(
             bids(
