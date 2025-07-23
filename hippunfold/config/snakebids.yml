@@ -170,12 +170,10 @@ parse_args:
   --laminar_coords_res_hipp:
     help: 'Set the resolution that the laminar (IO) coords will be computed with for hippocampus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
     default: '0.3x0.3x0.3mm'
-    dest: "laminar_coords_res.hipp"
 
   --laminar_coords_res_dentate:
     help: 'Set the resolution that the laminar (IO) coords will be computed with for the dentate gyrus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
     default: '0.1x0.1x0.1mm'
-    dest: "laminar_coords_res.dentate"
 
   --no_unfolded_reg:
     help: "Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. (default: %(default)s)"
@@ -586,10 +584,6 @@ tight_crop_labels: #defines what labels to use for tight cropping (for upsampled
   dentate:
     - 8
     - 6
-
-laminar_coords_res:
-  hipp: 0.3x0.3x0.3mm
-  dentate: 0.1x0.1x0.1mm
 
 resample_dseg_for_templatereg: 0.3x0.3x0.3mm
 unfoldreg_padding: 0x0x0vox
