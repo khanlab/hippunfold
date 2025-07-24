@@ -540,6 +540,7 @@ laplace_labels:
     IO:
       gm:
         - 1
+        - 8
       src:
         - 2
         - 4

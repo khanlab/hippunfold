@@ -1,39 +1,17 @@
 import pyvista as pv
 import nibabel as nib
 import numpy as np
-from scipy.ndimage import binary_dilation
+from scipy.spatial import cKDTree
 from lib.utils import setup_logger
 from lib.surface import (
     write_surface_to_gifti,
     apply_affine_transform,
     remove_nan_vertices,
 )
+from copy import deepcopy
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
-
-
-def get_adjacent_voxels(mask_a, mask_b):
-    """
-    Create a mask for voxels where label A is adjacent to label B.
-    Parameters:
-    - mask_a (np.ndarray): A 3D binary mask for label A.
-    - mask_b (np.ndarray): A 3D binary mask for label B.
-
-    Returns:
-    - np.ndarray: A 3D mask where adjacent voxels for label A and label B are marked as True.
-    """
-    # Dilate each mask to identify neighboring regions
-    dilated_a = binary_dilation(mask_a)
-    dilated_b = binary_dilation(mask_b)
-
-    # Find adjacency: voxels of A touching B and B touching A
-    adjacency_mask = (dilated_a.astype("bool") & mask_b.astype("bool")) | (
-        dilated_b.astype("bool") & mask_a.astype("bool")
-    )
-
-    return adjacency_mask
-
 
 # Load data
 coords_img = nib.load(snakemake.input.coords)
@@ -51,11 +29,6 @@ coords[nan_mask == 1] = np.nan
 coords[src_mask == 1] = -0.1
 coords[sink_mask == 1] = 1.1
 
-# we also need to use a nan mask for the voxels where src and sink meet directly
-# (since this is another false boundary)..
-src_sink_nan_mask = get_adjacent_voxels(sink_mask, src_mask)
-coords[src_sink_nan_mask == 1] = np.nan
-
 grid.cell_data["values"] = coords.flatten(order="F")
 grid = grid.cells_to_points("values")
 
@@ -72,7 +45,28 @@ surface = remove_nan_vertices(surface)
 logger.info(surface)
 
 logger.info("Cleaning surface")
-surface = surface.clean(point_merging=False)
+surface = surface.clean()
+logger.info(surface)
+
+logger.info("removing vertices not near coords")
+# tag vertices not in coords
+V = np.floor(surface.points).astype(int)
+coord_at_V = coords[V[:, 0], V[:, 1], V[:, 2]]
+valid_mask = np.logical_and(coord_at_V > 0, coord_at_V < 1)
+logger.info(f"found {np.sum(valid_mask)} valid vertices")
+# largest connected component on invalid vertices
+badVmesh = deepcopy(surface)
+badVmesh.points[valid_mask] = np.nan
+badVmesh = remove_nan_vertices(badVmesh)
+badVmesh = badVmesh.extract_largest()
+logger.info(f"NaNing {badVmesh.n_points} connected invalid vertices")
+# Use KDTree to map badVmesh.points back to surface.points
+tree = cKDTree(surface.points)
+_, inds = tree.query(badVmesh.points, k=1)
+surface.points[inds] = np.nan
+# remove the nan-valued vertices
+logger.info("Removing nan-valued vertices")
+surface = remove_nan_vertices(surface)
 logger.info(surface)
 
 logger.info("Extracting largest connected component")
