@@ -5,7 +5,7 @@ import nibabel.gifti as gifti
 from collections import Counter
 from scipy.signal import argrelextrema
 from lib.utils import setup_logger
-from lib.surface import write_label_gii
+from lib.surface import write_label_gii, read_surface_from_gifti
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
@@ -72,7 +72,70 @@ for k in range(num_labels):
             f"Label {k} has less than minimum number of vertices, {nmin}, label_counts={label_counts}"
         )
 
-logger.info(["Final label counts:", label_counts])
+logger.info(["Label counts before enforcing label contiguity:", label_counts])
+
+
+def enforce_label_contiguity(labels, boundary_vertices, surface, logger=None):
+    """
+    Enforce spatial contiguity of each label on boundary vertices.
+    Keeps the largest component and reassigns strays using surface topology.
+    """
+    import networkx as nx
+
+    label_map = dict(zip(boundary_vertices, labels))
+    new_labels = labels.copy()
+
+    # Build connectivity graph from mesh topology
+    connectivity_graph = nx.Graph()
+    faces = surface.faces.reshape((-1, 4))[:, 1:4]
+
+    for face in faces:
+        for i in range(3):
+            for j in range(i + 1, 3):
+                u, v = face[i], face[j]
+                if u in label_map and v in label_map:
+                    connectivity_graph.add_edge(u, v)
+
+    for label in np.unique(labels):
+        nodes = [v for v in boundary_vertices if label_map[v] == label]
+        subgraph = connectivity_graph.subgraph(nodes)
+        components = list(nx.connected_components(subgraph))
+
+        if logger:
+            logger.info(f"Label {label}: found {len(components)} connected components")
+
+        if len(components) <= 1:
+            continue
+
+        components = sorted(components, key=len, reverse=True)
+        keep = components[0]
+        reassigned_count = 0
+
+        for comp in components[1:]:
+            for v in comp:
+                neighbors = list(connectivity_graph.neighbors(v))
+                neighbor_labels = [
+                    label_map[n] for n in neighbors if label_map[n] != label
+                ]
+                if neighbor_labels:
+                    new_label = max(set(neighbor_labels), key=neighbor_labels.count)
+                else:
+                    new_label = label  # fallback
+                new_labels[np.where(boundary_vertices == v)[0][0]] = new_label
+                reassigned_count += 1
+
+        if logger:
+            logger.info(f"Label {label}: reassigned {reassigned_count} stray vertices")
+
+    return new_labels
+
+
+logger.info("Loading surface from GIFTI...")
+surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
+logger.info(f"Surface loaded: {surface.n_points} vertices, {surface.n_faces} faces.")
+
+boundary_vertices = np.where(edges == 1)[0]
+labels = enforce_label_contiguity(labels, boundary_vertices, surface, logger=logger)
 
 
 ap_srcsink = np.zeros((len(edges)), dtype=np.int32)
