@@ -103,6 +103,7 @@ rule calculate_gyrification:
                 root=root,
                 datatype="metric",
                 suffix="gyrification.shape.gii",
+                desc="unnorm",
                 den="native",
                 hemi="{hemi}",
                 label="{label}",
@@ -138,6 +139,7 @@ rule calculate_curvature:
                 datatype="metric",
                 suffix="curvature.shape.gii",
                 den="native",
+                desc="unnorm",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -180,6 +182,7 @@ rule calculate_thickness:
                 datatype="metric",
                 suffix="thickness.shape.gii",
                 den="native",
+                desc="unnorm",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -191,3 +194,39 @@ rule calculate_thickness:
         "subj"
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
+
+
+rule soft_tanh_normalization:
+    """ Normalize the surface shape metrics (thick, curv, gyr) to smoothly 
+    reject outliers that can cause issues with registration"""
+    input:
+        gii=bids(
+            root=root,
+            datatype="metric",
+            suffix="{metric}.shape.gii",
+            den="native",
+            desc="unnorm",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        norm_limit=5.0,
+    output:
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="{metric,thickness|curvature|gyrification}.shape.gii",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "wb_command -metric-math '{params.norm_limit}*tanh(X/{params.norm_limit})' {output.gii} -var X {input.gii}"
