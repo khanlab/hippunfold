@@ -140,6 +140,16 @@ rule postproc_boundary_vertices:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     params:
         min_terminal_vertices=5,  # min number of vertices per src/sink
         max_iterations=100,
