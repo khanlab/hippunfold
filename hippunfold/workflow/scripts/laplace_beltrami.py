@@ -96,7 +96,13 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
         solution[boundary_indices] = boundary_values
         try:
             logger.info("about to solve")
+
+            # Apply Tikhonov regularization
+            eps = 1e-8 * laplacian.diagonal().mean()
+            free_laplacian += eps * sp.eye(free_laplacian.shape[0], format="csr")
+
             solution[free_indices] = sp.linalg.spsolve(free_laplacian, free_b)
+
             logger.info("done solve")
         except sp.linalg.MatrixRankWarning:
             logger.info("Warning: Laplacian matrix is singular or ill-conditioned.")
