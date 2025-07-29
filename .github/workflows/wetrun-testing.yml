@@ -30,6 +30,7 @@ jobs:
           repository: ${{ github.repository }}
           repository_name: ${{ github.event.repository.name }}
           repository_owner: ${{ github.repository_owner }}
+          RUNNER_PAT: ${{ secrets.RUNNER_PAT }}
 
   run-wet-run:
     needs: launch-runner
