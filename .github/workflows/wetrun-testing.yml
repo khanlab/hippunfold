@@ -133,7 +133,7 @@ jobs:
             -H "Authorization: token $GITHUB_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/$REPO/actions/runners \
-            | jq -r --arg NAME "runner-pr-$PR_NUMBER" \
+            | jq -r --arg NAME "${{ github.event.repository.name }}-pr-$PR_NUMBER" \
                 '.runners[] | select(.name==$NAME) | .id')
 
           if [ -n "$runner_id" ]; then
@@ -143,5 +143,5 @@ jobs:
               -H "Accept: application/vnd.github+json" \
               https://api.github.com/repos/$REPO/actions/runners/$runner_id
           else
-            echo "No runner 'runner-pr-$PR_NUMBER' found in $REPO"
+            echo "No runner '${{ github.event.repository.name }}-pr-$PR_NUMBER' found in $REPO"
           fi
