@@ -9,6 +9,15 @@ permissions:
   contents: read
   actions: write
 
+env:
+  OS_AUTH_TYPE:                      "v3applicationcredential"
+  OS_AUTH_URL:                       "https://arbutus.cloud.computecanada.ca:5000/v3"
+  OS_USERNAME:                       "djay"
+  OS_USER_DOMAIN_NAME:               "CCDB"
+  OS_APPLICATION_CREDENTIAL_ID:      ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+  OS_APPLICATION_CREDENTIAL_SECRET: "${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}"
+  RUNNER_PAT: ${{ secrets.RUNNER_PAT }}
+
 
 jobs:
   launch-runner:
@@ -21,16 +30,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: khanlab/actions/.github/actions/action-setup_task-launchRunner@djay/add-wetRunTestLogic
+      - uses: khanlab/actions/.github/actions/action-setup_task-setupRunner@djay/add-wetRunTestLogic
         id: launch
         with:
-          OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
-          OS_APPLICATION_CREDENTIAL_SECRET: "${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}"
           pr_number: ${{ github.event.pull_request.number }}
           repository: ${{ github.repository }}
           repository_name: ${{ github.event.repository.name }}
           repository_owner: ${{ github.repository_owner }}
-          RUNNER_PAT: ${{ secrets.RUNNER_PAT }}
 
   run-wet-run:
     needs: launch-runner
