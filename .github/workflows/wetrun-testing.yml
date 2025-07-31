@@ -10,16 +10,6 @@ permissions:
   contents: read
   actions: write
 
-env:
-  OS_AUTH_TYPE:                      "v3applicationcredential"
-  OS_AUTH_URL:                       "https://arbutus.cloud.computecanada.ca:5000/v3"
-  OS_USERNAME:                       "djay"
-  OS_USER_DOMAIN_NAME:               "CCDB"
-  OS_APPLICATION_CREDENTIAL_ID:      ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
-  OS_APPLICATION_CREDENTIAL_SECRET: "${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}"
-  RUNNER_PAT: ${{ secrets.RUNNER_PAT }}
-
-
 jobs:
   launch-runner:
     # if: >
@@ -52,12 +42,11 @@ jobs:
     - name: Setup Miniforge env with snakebids
       uses: khanlab/actions/.github/actions/action-setup_task-setupSnakebidsEnv@djay/add-wetRunTestLogic
 
-    - name: Download lowresMRI dataset
-      run: |
-        mkdir -p /mnt/data
-        cd /mnt/data
-        wget -q -O lowresMRI.zip "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
-        unzip -q lowresMRI.zip -d lowresMRI
+    - name: Download wet run test dataset
+      uses: khanlab/actions/.github/actions/action-setup_task-downloadDataset@djay/add-wetRunTestLogic
+      with:
+        destination_dir: "/mnt/data"
+        download_url: "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/?zip="
 
     - name: Setup env for hippunfold
       run: |
