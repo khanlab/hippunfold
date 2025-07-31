@@ -84,7 +84,7 @@ jobs:
   cleanup:
     needs: [launch-runner, run-wet-run]
     if: always()
-    uses: khanlab/actions/.github/workflows/workflow-pr_task-removeRunner.yaml@djay/add-wetRunTestLogic
+    uses: khanlab/actions/.github/workflows/workflow-pr_task-removeRunner.yml@djay/add-wetRunTestLogic
     with:
       pr_number: ${{ github.event.pull_request.number }}
       repository: ${{ github.repository }}
