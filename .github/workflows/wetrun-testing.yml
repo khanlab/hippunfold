@@ -27,17 +27,15 @@ jobs:
     #      github.event.label.name == 'ready-for-wet-run')
     #   ||
     #   (github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    uses: khanlab/actions/.github/workflows/workflow-pr_task-launchRunner.yml@djay/add-wetRunTestLogic
+    id: launch
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      repository: ${{ github.repository }}
+      repository_name: ${{ github.event.repository.name }}
+      repository_owner: ${{ github.repository_owner }}
     outputs: 
       vm_id: ${{ steps.launch.outputs.vm_id }}
-    steps:
-      - uses: khanlab/actions/.github/actions/action-setup_task-setupRunner@djay/add-wetRunTestLogic
-        id: launch
-        with:
-          pr_number: ${{ github.event.pull_request.number }}
-          repository: ${{ github.repository }}
-          repository_name: ${{ github.event.repository.name }}
-          repository_owner: ${{ github.repository_owner }}
 
   run-wet-run:
     needs: launch-runner
@@ -85,12 +83,10 @@ jobs:
 
   cleanup:
     needs: [launch-runner, run-wet-run]
-    runs-on: ubuntu-latest
     if: always()
-    steps:
-      - uses: khanlab/actions/.github/actions/action-setup_task-removeRunner@djay/add-wetRunTestLogic
-        with:
-          pr_number: ${{ github.event.pull_request.number }}
-          repository: ${{ github.repository }}
-          repository_name: ${{ github.event.repository.name }}
-          vm_id: ${{ needs.launch-runner.outputs.vm_id }}
+    uses: khanlab/actions/.github/workflows/workflow-pr_task-removeRunner.yaml@djay/add-wetRunTestLogic
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      repository: ${{ github.repository }}
+      repository_name: ${{ github.event.repository.name }}
+      vm_id: ${{ needs.launch-runner.outputs.vm_id }}
