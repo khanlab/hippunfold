@@ -10,6 +10,10 @@ permissions:
   contents: read
   actions: write
 
+concurrency:
+  group: pr-wet-run-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   launch-runner:
     # if: >
