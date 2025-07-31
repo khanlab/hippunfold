@@ -34,6 +34,10 @@ jobs:
       repository: ${{ github.repository }}
       repository_name: ${{ github.event.repository.name }}
       repository_owner: ${{ github.repository_owner }}
+    secrets:
+      OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+      OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
+      RUNNER_PAT: ${{ secrets.RUNNER_PAT }}
 
   run-wet-run:
     needs: launch-runner
@@ -88,3 +92,7 @@ jobs:
       repository: ${{ github.repository }}
       repository_name: ${{ github.event.repository.name }}
       vm_id: ${{ needs.launch-runner.outputs.vm_id }}
+    secrets:
+      OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+      OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
+      RUNNER_PAT: ${{ secrets.RUNNER_PAT }}
