@@ -29,14 +29,12 @@ jobs:
     #   ||
     #   (github.event_name == 'workflow_dispatch')
     uses: khanlab/actions/.github/workflows/workflow-pr_task-launchRunner.yml@djay/add-wetRunTestLogic
-    id: launch
+    id: launch-runner
     with:
       pr_number: ${{ github.event.pull_request.number }}
       repository: ${{ github.repository }}
       repository_name: ${{ github.event.repository.name }}
       repository_owner: ${{ github.repository_owner }}
-    outputs: 
-      vm_id: ${{ steps.launch.outputs.vm_id }}
 
   run-wet-run:
     needs: launch-runner
