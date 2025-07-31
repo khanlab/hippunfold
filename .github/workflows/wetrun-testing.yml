@@ -49,19 +49,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setup Miniforge and mamba
-      uses: conda-incubator/setup-miniconda@v3
-      with:
-        miniforge-variant: Miniforge3
-        miniforge-version: latest
-        mamba-version: "*"
-        use-mamba: true
-        conda-solver: libmamba
-        auto-activate-base: true
-
-    - name: Install snakebids
-      run: |
-        mamba install snakebids -c bioconda -c conda-forge -y
+    - name: Setup Miniforge env with snakebids
+      uses: khanlab/actions/.github/actions/action-setup_task-setupSnakebidsEnv@djay/add-wetRunTestLogic
 
     - name: Download lowresMRI dataset
       run: |
@@ -74,11 +63,8 @@ jobs:
       run: |
         echo "HIPPUNFOLD_CACHE_DIR=/mnt/test_data/hippunfold_cache_dir" >> $GITHUB_ENV
 
-    - name: activate snakebids-env and run wet run
+    - name: Run wet run
       run: |
-        PR=${{ github.event.pull_request.number }}
-        git fetch origin pull/${PR}/head:pr-${PR}
-        git checkout pr-${PR}
         ./hippunfold/run.py /mnt/data/lowresMRI /mnt/test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
 
   cleanup:
