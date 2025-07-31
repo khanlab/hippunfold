@@ -1,6 +1,7 @@
 name: Hippunfold PR Wet-Run (Ephemeral Runner)
 
 on:
+  workflow_dispatch:
   pull_request:
     # types: [labeled]
     types: [opened, synchronize, reopened]
