@@ -1,6 +1,6 @@
 ---
 name: Other questions
-about: General questions about ANTs.
+about: General questions about Hippunfold.
 ---
 
 <!--
