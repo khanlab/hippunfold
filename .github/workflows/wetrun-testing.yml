@@ -61,8 +61,9 @@ jobs:
         echo "HIPPUNFOLD_CACHE_DIR=/mnt/test_data/hippunfold_cache_dir" >> $GITHUB_ENV
 
     - name: Run wet run
+      env:
+        CONDA_PKGS_DIRS: /mnt/conda-pkgs
       run: |
-        export CONDA_PKGS_DIRS=/mnt/conda-pkgs
         ./hippunfold/run.py /mnt/data/lowresMRI /mnt/test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
 
   cleanup:
