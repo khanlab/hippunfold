@@ -62,6 +62,7 @@ jobs:
 
     - name: Run wet run
       run: |
+        export CONDA_PKGS_DIRS=/mnt/conda-pkgs
         ./hippunfold/run.py /mnt/data/lowresMRI /mnt/test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
 
   cleanup:
