@@ -49,6 +49,7 @@ jobs:
     - name: Setup Miniforge env with snakebids
       uses: khanlab/actions/.github/actions/action-setup_task-setupSnakebidsEnv@djay/add-wetRunTestLogic
 
+    # /mnt with 576 gb of space is automatically mounted on Arbutus Cloud VMs
     - name: Download wet run test dataset
       uses: khanlab/actions/.github/actions/action-setup_task-downloadDataset@djay/add-wetRunTestLogic
       with:
