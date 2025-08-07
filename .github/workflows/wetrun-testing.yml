@@ -57,7 +57,7 @@ jobs:
     - name: Download wet run test dataset
       uses: khanlab/actions/.github/actions/action-setup_task-downloadDataset@djay/add-wetRunTestLogic
       with:
-        destination_dir: "/mnt/data"
+        destination_dir: "/mnt/data/lowresMRI"
         download_url: "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
 
     - name: Setup env for hippunfold
