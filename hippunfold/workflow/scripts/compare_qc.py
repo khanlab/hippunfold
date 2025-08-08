@@ -1,7 +1,9 @@
 from PIL import Image
 import os
 
-ref_path = "ref_data/qc/sub-01_space-cropT1w_desc-subfields_atlas-multihist7_volumes.png"
+ref_path = (
+    "ref_data/qc/sub-01_space-cropT1w_desc-subfields_atlas-multihist7_volumes.png"
+)
 new_path = "/mnt/test_out/sub-01/qc/sub-01_space-cropT1w_desc-subfields_atlas-multihist7_volumes.png"
 out_path = "sub-01_qc_comparison.png"
 
