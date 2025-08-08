@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   actions: write
+  pull-requests: write
 
 concurrency:
   group: pr-wet-run-${{ github.event.pull_request.number }}
