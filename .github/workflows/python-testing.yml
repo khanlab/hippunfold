@@ -12,23 +12,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install non-python dependencies
-        run: |
-          sudo apt-get install -y graphviz-dev
+      - name: Clone repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.base_ref }}
 
       - name: Setup Python environment
-        uses: khanlab/actions/.github/actions/action-setup_task-installPyProject@v0.3.2
+        uses: prefix-dev/setup-pixi@v0.8.14
         with:
-          python-version: "3.11"
+          environments: >-
+            dev-only
+          activate-environment: dev-only
 
       - name: isort
-        run: poetry run isort hippunfold/*.py -c
+        run: isort hippunfold/*.py -c
 
       - name: Black
-        run: poetry run black hippunfold --check
+        run: black hippfunfold --check
 
       - name: snakefmt
-        run: poetry run snakefmt hippunfold --check
+        run: snakefmt hippunfold --check
 
   test:
     runs-on: ubuntu-latest
@@ -42,19 +45,10 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Miniforge and mamba
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Setup Pixi environment
+        uses: prefix-dev/setup-pixi@v0.8.14
         with:
-          miniforge-variant: Miniforge3
-          miniforge-version: latest
-          mamba-version: "*"
-          use-mamba: true
-          conda-solver: libmamba
-          auto-activate-base: true
-
-      - name: Install snakebids
-        run: |
-          mamba install snakebids -c bioconda -c conda-forge -y
+          activate-environment: true
 
       - name: Setup env for hippunfold
         run: |
