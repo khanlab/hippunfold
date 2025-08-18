@@ -28,7 +28,7 @@ jobs:
         run: isort hippunfold/*.py -c
 
       - name: Black
-        run: black hippfunfold --check
+        run: black hippunfold --check
 
       - name: snakefmt
         run: snakefmt hippunfold --check
