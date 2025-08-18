@@ -48,7 +48,9 @@ jobs:
       - name: Setup Pixi environment
         uses: prefix-dev/setup-pixi@v0.8.14
         with:
-          activate-environment: true
+          environments: >-
+            runtime
+          activate-environment: runtime
 
       - name: Setup env for hippunfold
         run: |
