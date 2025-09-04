@@ -152,12 +152,12 @@ def sync_atlas_repo():
                 repo.git.pull("--ff-only")
             else:
                 logger.warning(
-                    "WARNING: No internet connectivity, not updating the existing atlas repository"
+                    "WARNING: Git repo not accessible, not updating the existing atlas repository"
                 )
         else:
             if not internet:
                 raise ConnectionError(
-                    "No internet connectivity, error cloning atlas repository"
+                    "Git repo not accessible, error cloning atlas repository"
                 )
             repo = Repo.clone_from(repo_url, atlas_dir)
             repo.git.checkout(branch)
