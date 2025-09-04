@@ -8,7 +8,7 @@ from typing import Any
 
 import attrs
 from appdirs import AppDirs
-from git import GitCommandError, Repo
+from git import GitCommandError, Repo, cmd
 from snakebids import bidsapp
 from snakebids.bidsapp.args import ArgumentGroups
 from snakebids.plugins.base import PluginBase
@@ -126,21 +126,13 @@ def validate_output_density(atlas, output_densities, atlas_config):
 # helper functions for hippunfold-atlases
 
 
-def is_internet_available(host="github.com", port=443, timeout=2):
-    try:
-        socket.create_connection((host, port), timeout)
-        return True
-    except OSError:
-        return False
-
-
 def sync_atlas_repo():
     """
     Ensures the atlas folder is synced from the public GitHub repository using GitPython.
     """
     repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
     atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
-    internet = is_internet_available()
+    internet = True if cmd.Git().ls_remote(repo_url) else False
 
     branch = ATLAS_REPO_COMMIT
     try:
