@@ -25,6 +25,7 @@ getting_started/docker
 
 
 usage/cli
+usage/HCP.md
 usage/useful_options
 usage/specializedScans
 usage/templates.md
