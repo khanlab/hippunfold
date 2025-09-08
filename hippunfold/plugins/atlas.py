@@ -132,7 +132,7 @@ def sync_atlas_repo():
     """
     repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
     atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
-    internet = True if cmd.Git().ls_remote(repo_url) else False
+    internet = False
 
     branch = ATLAS_REPO_COMMIT
     try:
