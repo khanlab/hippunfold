@@ -1,24 +1,15 @@
 # Command-line interface
 
 
-## HippUnfold-Quick Command-line interface
-
-```{argparse}
----
-filename: ../hippunfold/run_quick.py
-func: gen_parser
-prog: hippunfold_quick
----
-```
-
-
-
 ## HippUnfold Command-line interface
 
- The following can also be seen by entering ``hippunfold -h`` into your terminal. 
+HippUnfold expects to parse all required files from all subjects in a BIDS directory. Thus a typical HippUnfold could simply be:
 
-These are all the required and optional arguments HippUnfold accepts in order to run flexibly on many different input data types and with many options, but in most cases only the required arguments are needed. 
+```bash
+hippunfold /PATH/TO/YOUR/DATA /PATH/TO/OUTPUT participant --modality T1w
+```
 
+However, HippUnfold also has many flags that can be used to customize both the workflow and the input files being parsed. These can be seen by entering ``hippunfold -h`` into your terminal, which returns the following:
 
 ```{argparse}
 ---
@@ -44,5 +35,3 @@ func: get_argument_parser
 prog: snakemake
 ---
 ```
-
-
