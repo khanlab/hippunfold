@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 import argparse
 import logging
 import socket
@@ -132,7 +133,12 @@ def sync_atlas_repo():
     """
     repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
     atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
-    internet = False
+    internet = True
+    while True:
+        try: subprocess.run(["git", "ls-remote", "https://github.com/khanlab/hippunfold-atlases.git"], timeout=6)
+        except subprocess.TimeoutExpired: internet = False
+        break
+
 
     branch = ATLAS_REPO_COMMIT
     try:
