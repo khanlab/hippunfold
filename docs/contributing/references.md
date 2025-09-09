@@ -1,6 +1,6 @@
 # References
 
-Thank you for using HippUnfold. Conisder contributing your own data to [HippoMaps](https://hippomaps.readthedocs.io/en/latest/), or using it in your own analyses!
+Thank you for using HippUnfold. Consider contributing your own data to [HippoMaps](https://hippomaps.readthedocs.io/en/latest/), or using it in your own analyses!
 
 ### HippUnfold methods paper
 
