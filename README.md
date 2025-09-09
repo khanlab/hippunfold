@@ -24,10 +24,10 @@ This is especially useful for:
 - Retesselation of surfaces for more uniform face sizes
 - Modified Laplace coordinate system to minimize distortion between folded and unfolded spaces
 - Better robustness to topological breaks (a rare but annoying issue with previous version)
-- New UNet models for neonates, Alzheimer's disease, contrast-agnostic processing, and more on the way
+- New U-net models for neonates, Alzheimer's disease, contrast-agnostic processing, and more on the way
 - Easier installation and instructions
 
-An overivew of these changes and epiricial testing coming soon to **biorxiv**
+An overview of these changes and epiricial testing coming soon to **biorxiv**
 
 ## Workflow 
 
