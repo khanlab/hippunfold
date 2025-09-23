@@ -11,7 +11,6 @@
 
 getting_started/installation
 getting_started/conda_advanced
-getting_started/HCP
 ```
 
 
