@@ -111,16 +111,25 @@ def get_cmd_copy_inputs(wildcards, input):
         return " && ".join(cmd)
 
 
+rule unpack_nnunet_model:
+    """ Unpack nnunet model tar to temp folder to check contents"""
+    input:
+        get_model_tar(),
+    output:
+        get_model_tar() + "unpacked",
+    shell:
+        "mkdir -p {output} && tar -xf {input} -C {output}"
+
+
 rule run_inference:
     """ This rule uses either GPU or CPU .
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
     input:
         in_img=get_nnunet_input,
-        model_tar=get_model_tar(),
+        model_dir=get_model_tar() + "unpacked",
     params:
         cmd_copy_inputs=get_cmd_copy_inputs,
         temp_lbl="templbl/temp.nii.gz",
-        model_dir="tempmodel",
         in_folder="tempimg",
         out_folder="templbl",
         task=parse_task_from_tar,
@@ -159,15 +168,13 @@ rule run_inference:
     shell:
         #create temp folders
         #cp input image to temp folder
-        #extract model
         #set nnunet env var to point to model
         #set threads
         # run inference
         #copy from temp output folder to final output
-        "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
+        "mkdir -p {params.in_folder} {params.out_folder} && "
         "{params.cmd_copy_inputs} && "
-        "tar -xf {input.model_tar} -C {params.model_dir} && "
-        "export RESULTS_FOLDER={params.model_dir} && "
+        "export RESULTS_FOLDER={input.model_dir} && "
         "export nnUNet_n_proc_DA={threads} && "
         "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
         "cp {params.temp_lbl} {output.nnunet_seg}"
