@@ -116,7 +116,11 @@ rule unpack_nnunet_model:
     input:
         get_model_tar(),
     output:
-        get_model_tar() + "unpacked",
+        Path(download_dir)
+        / "model"
+        / config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
+        if config["force_nnunet_model"]
+        else config["resource_urls"]["nnunet_model"][config["modality"]] + "unpacked",
     shell:
         "mkdir -p {output} && tar -xf {input} -C {output}"
 
@@ -126,7 +130,15 @@ rule run_inference:
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
     input:
         in_img=get_nnunet_input,
-        model_dir=get_model_tar() + "unpacked",
+        model_tar=get_model_tar(),
+        model_dir=(
+            Path(download_dir)
+            / "model"
+            / config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
+            if config["force_nnunet_model"]
+            else config["resource_urls"]["nnunet_model"][config["modality"]]
+            + "unpacked"
+        ),
     params:
         cmd_copy_inputs=get_cmd_copy_inputs,
         temp_lbl="templbl/temp.nii.gz",
