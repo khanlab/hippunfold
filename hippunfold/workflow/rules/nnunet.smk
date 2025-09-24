@@ -52,7 +52,11 @@ def get_model_tar():
     if local_tar == None:
         print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
 
-    return (Path(download_dir) / "model" / Path(local_tar).name).absolute()
+    return str((Path(download_dir) / "model" / Path(local_tar).name).absolute())
+
+
+def get_model_dir():
+    return get_model_tar().removesuffix(".tar")
 
 
 rule download_nnunet_model:
@@ -64,37 +68,37 @@ rule download_nnunet_model:
         ),
         model_dir=Path(download_dir) / "model",
     output:
-        model_tar=get_model_tar(),
+        model_tar=temp(get_model_tar()),
     conda:
         "../envs/curl.yaml"
     shell:
         "mkdir -p {params.model_dir} && curl -L https://{params.url} -o {output}"
 
 
-def parse_task_from_tar(wildcards, input):
-    match = re.search(r"Task[0-9]{3}_[\w]+", input.model_tar)
+def parse_task_from_dir(wildcards, input):
+    match = re.search(r"Task[0-9]{3}_[\w]+", input.model_dir)
     if match:
         task = match.group(0)
     else:
-        raise ValueError("cannot parse Task from model tar")
+        raise ValueError("cannot parse Task from model dir")
     return task
 
 
-def parse_chkpnt_from_tar(wildcards, input):
-    match = re.search(r"^.*\.(\w+)\.tar", input.model_tar)
+def parse_chkpnt_from_dir(wildcards, input):
+    match = re.search(r"^.*\.(\w+)", input.model_dir)
     if match:
         chkpnt = match.group(1)
     else:
-        raise ValueError("cannot parse chkpnt from model tar")
+        raise ValueError("cannot parse chkpnt from model dir")
     return chkpnt
 
 
-def parse_trainer_from_tar(wildcards, input):
-    match = re.search(r"^.*\.(\w+)\..*.tar", input.model_tar)
+def parse_trainer_from_dir(wildcards, input):
+    match = re.search(r"^.*\.(\w+)\..*", input.model_dir)
     if match:
         trainer = match.group(1)
     else:
-        raise ValueError("cannot parse chkpnt from model tar")
+        raise ValueError("cannot parse chkpnt from model dir")
     return trainer
 
 
@@ -116,11 +120,7 @@ rule unpack_nnunet_model:
     input:
         get_model_tar(),
     output:
-        Path(download_dir)
-        / "model"
-        / config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
-        if config["force_nnunet_model"]
-        else config["resource_urls"]["nnunet_model"][config["modality"]] + "unpacked",
+        directory(get_model_dir()),
     shell:
         "mkdir -p {output} && tar -xf {input} -C {output}"
 
@@ -131,22 +131,15 @@ rule run_inference:
     input:
         in_img=get_nnunet_input,
         model_tar=get_model_tar(),
-        model_dir=(
-            Path(download_dir)
-            / "model"
-            / config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
-            if config["force_nnunet_model"]
-            else config["resource_urls"]["nnunet_model"][config["modality"]]
-            + "unpacked"
-        ),
+        model_dir=get_model_dir(),
     params:
         cmd_copy_inputs=get_cmd_copy_inputs,
         temp_lbl="templbl/temp.nii.gz",
         in_folder="tempimg",
         out_folder="templbl",
-        task=parse_task_from_tar,
-        chkpnt=parse_chkpnt_from_tar,
-        trainer=parse_trainer_from_tar,
+        task=parse_task_from_dir,
+        chkpnt=parse_chkpnt_from_dir,
+        trainer=parse_trainer_from_dir,
         tta="" if config["nnunet_enable_tta"] else "--disable_tta",
     output:
         nnunet_seg=temp(
