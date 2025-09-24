@@ -106,12 +106,12 @@ def get_cmd_copy_inputs(wildcards, input):
     in_img = input.in_img
     if isinstance(in_img, str):
         # we have one input image
-        return f"ln -s {in_img} tempimg/temp_0000.nii.gz"
+        return f"cp {in_img} tempimg/temp_0000.nii.gz"
     else:
         cmd = []
         # we have multiple input images
         for i, img in enumerate(input.in_img):
-            cmd.append(f"ln -s {img} tempimg/temp_{i:04d}.nii.gz")
+            cmd.append(f"cp {img} tempimg/temp_{i:04d}.nii.gz")
         return " && ".join(cmd)
 
 
