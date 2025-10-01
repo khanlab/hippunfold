@@ -9,11 +9,10 @@ useful when working with network drives.
 import argparse
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
-
-from snakebids.app import SnakeBidsApp
 
 
 def create_bids_dataset(input_file, subject_id, tempdir, modality="T2w"):
@@ -47,6 +46,11 @@ def create_bids_dataset(input_file, subject_id, tempdir, modality="T2w"):
     output_filename = f"sub-{subject_id}_{modality}.nii.gz"
     output_path = subj_dir / output_filename
     shutil.copy2(input_file, output_path)
+
+    # Create minimal JSON sidecar for BIDS compliance
+    json_filename = f"sub-{subject_id}_{modality}.json"
+    json_path = subj_dir / json_filename
+    json_path.write_text('{"Modality": "' + modality + '"}\n')
 
     return bids_dir
 
@@ -126,19 +130,16 @@ def main():
             args.subject,
         ] + hippunfold_args
 
-        # Run hippunfold using SnakeBidsApp
-        # Temporarily modify sys.argv for the app
-        original_argv = sys.argv
-        sys.argv = ["hippunfold"] + hippunfold_cli_args
+        # Run hippunfold using subprocess
+        # Build the command to run hippunfold
+        # Use the same Python interpreter and call run.py directly
+        run_py_path = os.path.join(os.path.dirname(__file__), "run.py")
+        cmd = [sys.executable, run_py_path] + hippunfold_cli_args
 
-        try:
-            app = SnakeBidsApp(
-                os.path.abspath(os.path.dirname(__file__)),
-                configfile_path="config/snakebids.yml",
-            )
-            app.run_snakemake()
-        finally:
-            sys.argv = original_argv
+        result = subprocess.run(cmd, capture_output=False)
+
+        if result.returncode != 0:
+            raise RuntimeError(f"Hippunfold failed with exit code {result.returncode}")
 
         # Copy results from temp output to final output
         print(f"\nCopying results to final output directory: {final_output_dir}")
