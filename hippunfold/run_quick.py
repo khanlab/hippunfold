@@ -4,7 +4,35 @@
 This script creates a temporary BIDS dataset from input files and runs hippunfold
 using temporary directories for both input and output. After successful completion,
 results are copied back to the specified output directory. This is particularly
-useful when working with network drives.
+useful when working with network drives where local temporary storage provides
+better I/O performance.
+
+Usage:
+    hippunfold_quick INPUT_FILE OUTPUT_DIR [OPTIONS]
+
+    Basic example:
+        hippunfold_quick sub-001_T2w.nii.gz /path/to/output
+
+    With custom subject ID and modality:
+        hippunfold_quick brain.nii.gz /output --subject 123 --modality T1w
+
+    With additional hippunfold options:
+        hippunfold_quick input.nii.gz /output -n --cores 8 --hemi L
+
+    Keep temporary files for debugging:
+        hippunfold_quick input.nii.gz /output --keep-temp
+
+The script performs the following steps:
+    1. Creates a temporary BIDS dataset from the input file
+    2. Creates a temporary output directory in the same temp location
+    3. Runs hippunfold using the temporary directories
+    4. Copies the subject results from temp to the final output directory
+    5. Cleans up temporary files (unless --keep-temp is specified)
+
+This approach improves efficiency when:
+    - Output directory is on a network drive (e.g., NFS, CIFS)
+    - You want to isolate the workflow from the final output location
+    - You need to process single images without manually creating BIDS structure
 """
 import argparse
 import os
