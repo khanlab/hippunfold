@@ -23,7 +23,7 @@ jobs:
     #      github.event.label.name == 'ready-for-wet-run')
     #   ||
     #   (github.event_name == 'workflow_dispatch')
-    uses: khanlab/actions/.github/workflows/workflow-pr_task-launchRunner.yml@djay/add-wetRunTestLogic
+    uses: khanlab/actions/.github/workflows/workflow-pr_task-launchRunner.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
       repository: ${{ github.repository }}
@@ -48,7 +48,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup Miniforge env with snakebids
-      uses: khanlab/actions/.github/actions/action-setup_task-setupSnakebidsEnv@djay/add-wetRunTestLogic
+      uses: khanlab/actions/.github/actions/action-setup_task-setupSnakebidsEnv
 
     - name: Install QC dependencies
       run: |
@@ -56,7 +56,7 @@ jobs:
 
     # /mnt with 576 gb of space is automatically mounted on Arbutus Cloud VMs
     - name: Download wet run test dataset
-      uses: khanlab/actions/.github/actions/action-setup_task-downloadDataset@djay/add-wetRunTestLogic
+      uses: khanlab/actions/.github/actions/action-setup_task-downloadDataset
       with:
         destination_dir: "/mnt/data/lowresMRI"
         download_url: "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
@@ -100,7 +100,7 @@ jobs:
   cleanup:
     needs: [launch-runner, run-wet-run]
     if: always()
-    uses: khanlab/actions/.github/workflows/workflow-pr_task-removeRunner.yml@djay/add-wetRunTestLogic
+    uses: khanlab/actions/.github/workflows/workflow-pr_task-removeRunner.yml
     with:
       pr_number: ${{ github.event.pull_request.number }}
       repository: ${{ github.repository }}
