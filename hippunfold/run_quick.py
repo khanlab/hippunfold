@@ -131,11 +131,15 @@ def main():
         # copy the input file
         shutil.copy(args.input, temp_input_file)
 
+        # create temporary output directory within temp_dir
+        temp_output_dir = Path(temp_dir) / "output"
+        temp_output_dir.mkdir(parents=True, exist_ok=True)
+
         # run hippunfold
         command = [
             script_path,
             temp_dir,
-            args.output,
+            str(temp_output_dir),
             "participant",
             "-c",
             "all",
@@ -167,6 +171,28 @@ def main():
         try:
             subprocess.run(command, check=True)
             print("hippunfold completed successfully.")
+
+            # copy results from temp output to final output
+            # only copy the hippunfold/sub-{subject} directory
+            temp_subject_dir = temp_output_dir / "hippunfold" / f"sub-{args.subject}"
+            final_output_dir = Path(args.output)
+
+            if temp_subject_dir.exists():
+                # create the final output structure
+                final_hippunfold_dir = final_output_dir / "hippunfold"
+                final_subject_dir = final_hippunfold_dir / f"sub-{args.subject}"
+
+                # copy the subject directory
+                if final_subject_dir.exists():
+                    shutil.rmtree(final_subject_dir)
+                final_hippunfold_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(temp_subject_dir, final_subject_dir)
+                print(f"Results copied to {final_subject_dir}")
+            else:
+                print(
+                    f"Warning: Expected output directory {temp_subject_dir} not found."
+                )
+
         except subprocess.CalledProcessError as e:
             print(f"Error: {e}")
 
