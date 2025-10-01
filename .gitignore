@@ -1,3 +1,4 @@
 hippunfold.egg-info
 hippunfold/.snakemake
 hippunfold/__pycache__
+/config/
