@@ -126,6 +126,7 @@ def validate_output_density(atlas, output_densities, atlas_config):
 
 # helper functions for hippunfold-atlases
 
+
 def git_ls_remote_with_timeout(repo_url: str, timeout: int = 10) -> bool:
     """
     Return True if `git ls-remote <repo_url>` succeeds within `timeout` seconds,
@@ -147,7 +148,9 @@ def git_ls_remote_with_timeout(repo_url: str, timeout: int = 10) -> bool:
         print(f"git ls-remote timed out after {timeout}s")
         return False
     except subprocess.CalledProcessError as e:
-        print(f"git ls-remote returned non-zero: {(e.stderr or e.stdout or str(e))[:400]}")
+        print(
+            f"git ls-remote returned non-zero: {(e.stderr or e.stdout or str(e))[:400]}"
+        )
         return False
 
 
