@@ -14,7 +14,7 @@ SHELL ["/bin/bash", "-c"]
 # ---- ONE SINGLE RUN ----
 RUN set -e && \
     conda install -n base -c conda-forge mamba -y && \
-    mamba create -y -n snakebids-env -c conda-forge -c bioconda snakebids unzip && \
+    mamba create -y -n snakebids-env -c conda-forge -c bioconda snakebids unzip python=3.11 && \
     source /opt/conda/etc/profile.d/conda.sh && \
     conda activate snakebids-env && \
     ./hippunfold/run.py test_data/bids_singleT2w test_out participant  --modality T2w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
