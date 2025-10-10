@@ -13,6 +13,7 @@ getting_started/installation
 getting_started/conda
 getting_started/apptainer
 getting_started/docker
+getting_started/pixi
 ```
 
 
