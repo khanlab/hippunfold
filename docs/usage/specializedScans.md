@@ -1,4 +1,4 @@
-# Specialized scans
+# Tutorial - specialized scans
 
 This tutorial will cover how HippUnfold can be applied to non-standard
 data including ex-vivo scans, super-high resolution data (eg. \<0.3mm
@@ -41,15 +41,15 @@ Here is an example of what the input directory might look like:
 
 This can be unfolded with the command:
 
-    hippunfold . PATH_TO_OUTPUT_DIR participant --modality cropseg \
-    --path_cropseg exvivo/sub-{subject}/sub-{subject}_hemi-{hemi}_desc-hippo_dseg.nii.gz \
+    hippunfold . PATH_TO_OUTPUT_DIR participant --modality dsegtissue \
+    --path_dsegtissue exvivo/sub-{subject}/sub-{subject}_hemi-{hemi}_desc-hippo_dseg.nii.gz \
     --hemi R --skip_inject_template_labels
 
-Explanation: `--modality cropseg` informs HippUnfold that the input
+Explanation: `--modality dsegtissue` informs HippUnfold that the input
 manual segmentation should not be resampled and UNet does not need to be
 run. Because of a limitation in bids parsing for the `hemi`
 entity, we need to use the generic path input,
-`--path_cropseg` in this case, making sure we use the
+`--path_dsegtissue` in this case, making sure we use the
 `{subject}` and `{hemi}` wildcards in the
 filename. Output files will be named with `space-corobl` because
 HippUnfold is coded to effectively treat all files as already being in

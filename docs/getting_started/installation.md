@@ -1,88 +1,124 @@
-# Installation
+# Installation (Quickstart)
 
-BIDS App for Hippocampal AutoTop (automated hippocampal unfolding and
-subfield segmentation)
+## Requirements & data
 
-## Requirements
-
-HippUnfold can be run either with Conda, or with containers
--   Conda (Linux/Mac only, no containers needed)
--   **--OR--**  Docker (Intel Mac/Windows/Linux) or Apptainer (formerly known as Singularity) (Linux)
--   For those wishing to contribute or modify the code, see [Contributing to HippUnfold](https://hippunfold.readthedocs.io/en/latest/contributing/contributing.html).
--   GPU not required
-
-### Notes:
-
--   Inputs to HippUnfold should typically be a BIDS dataset including T1w images or T2w images. Higher-resolution data are preferred (\<= 0.8mm) but the pipeline will still work with 1mm T1w images. See [Tutorials](https://hippunfold.readthedocs.io/en/latest/tutorials/standardBIDS.html).
--   Other 3D imaging modalities (eg. ex-vivo MRI, 3D histology, etc.) can be used, but may require manual tissue segmentation as the current workflow relies on U-net segmentation trained only on common MRI modalities.
+* Inputs should be **BIDS** with **T1w** or **T2w** images. Higher‑res (≤ 0.8 mm) preferred; **1.0 mm** works.
+* Other 3D modalities (e.g., ex‑vivo MRI, histology) may require manual tissue segmentation (UNet models are trained on common MRI only).
 
 
-## Comparison of methods for running HippUnfold
+**Pick one way to run it:**
 
-There are several different ways of running HippUnfold:
+* **Conda (Linux/macOS)** — more flexible, good for HPC environments, developers.
+* **Containers (Docker or Apptainer/Singularity)** — easiest, best for Windows, or when you want fully pinned dependencies.
+  > **Note:** Containers must be given access to input/output directories by mounting them.
 
-1. Conda Environment (Linux/macOS)
-2. Apptainer/Singularity Container on Linux
-3. Docker Container on Windows/Mac (Intel)/Linux
-4. CBRAIN Web-based Platform
-
-### Conda
-
-As of version **2.0.0**, HippUnfold is available via [Conda](https://docs.conda.io/), offering a container-free way to run the tool on Linux and macOS systems.
-
-#### Pros:
-- No need for any containers
-- Easy to install via `conda`
-- Compatible with Snakemake execution profiles
-- Good option for users who prefer Python virtual environments
-
-#### Cons:
-- Not compatible with Windows
-- Requires installation of Conda or Miniconda
-
-### Apptainer
-
-The same docker container can also be used with Singularity (now Apptainer). Instructions can be found below.
-
-#### Pros:
-- All dependencies+models (* See Note 1) in a single container 
-- Container stored as a single file (.sif)
-
-#### Cons:
-- Compatible on shared systems with Singularity installed
-- Cannot use Snakemake cluster execution profiles
-- Cannot edit code
-
-### Docker
-
-The HippUnfold BIDS App is available on a DockerHub as versioned releases and development branches.
-
-#### Pros:
-- Compatible with non-Linux systems 
-- All dependencies+models (* See Note 1) in a single container
-
-#### Cons:
-- Typically not possible on shared machines
-- Cannot use Snakemake cluster execution profiles
-- Cannot edit code
+| Method                  | OS                            | Edit code? | Cluster profiles | Notes                                   |
+| ----------------------- | ----------------------------- | ---------- | ---------------- | --------------------------------------- |
+| Conda                   | Linux, macOS                  | ✅          | ✅                | Simple, container‑free. Not on Windows. |
+| Docker                  | Windows, Linux, macOS (Intel) | ❌          | ❌                | Mount paths required; portable.         |
+| Apptainer (Singularity) | Linux                         | ❌          | ❌                | Common on HPC; portable single `.sif`.  |
 
 
-### CBRAIN
+## Quickstart (choose one)
 
-HippUnfold is available on the [CBRAIN platform](https://github.com/aces/cbrain/wiki), a 
-web-based platform for batch high-performance computing that is free for researchers.
+### Option A — Conda (Linux/macOS)
 
-#### Pros:
-- No software installation required
-- Fully point and click interface (no CLI)
-- Can perform batch-processing
+```bash
+# create env & install (channels templated)
+conda create --name hippunfold-env {{ conda_channel }} -c conda-forge -c bioconda hippunfold
+conda activate hippunfold-env
 
-#### Cons:
-- Must upload data for processing
-- Limited command-line options exposed
-- Cannot edit code
+# check it works
+hippunfold -h
+```
 
+Run a one‑subject example:
 
-## Note 1: 
-As of version 1.3.0 of HippUnfold, containers are no longer shipped with all the models, and the models are downloaded as part of the workflow. By default, models are placed in `~/.cache/hippunfold` unless you set the `HIPPUNFOLD_CACHE_DIR` environment variable. See [Deep learning nnU-net model files](https://hippunfold.readthedocs.io/en/latest/contributing/contributing.html#deep-learning-nnu-net-model-files) for more information.
+```bash
+curl -L https://www.dropbox.com/s/mdbmpmmq6fi8sk0/hippunfold_test_data.tar -o hippunfold_test_data.tar
+tar -xvf hippunfold_test_data.tar
+hippunfold ds002168 ds002168_hippunfold participant --modality T1w --cores all
+```
 
+### Option B — Containers (Docker or Apptainer)
+
+Containers share nearly identical commands. Replace `docker run` with `apptainer run` depending on your environment. Both need directory mounts to access your data.
+
+#### 1. Pull the container
+
+Docker:
+
+```bash
+docker pull khanlab/hippunfold:{{ current_tag }}
+```
+
+Apptainer:
+
+```bash
+apptainer pull hippunfold_{{ current_tag }}.sif docker://khanlab/hippunfold:{{ current_tag }}
+```
+
+#### 2. Dry‑run
+
+```bash
+# Docker
+docker run -it --rm \
+  -v /directory/to/mount:/data \
+  khanlab/hippunfold:{{ current_tag }} \
+  /data/ds002168 /data/ds002168_hippunfold participant --modality T1w -n
+
+# Apptainer
+apptainer run -e \
+  --bind /directory/to/mount:/data \
+  hippunfold_{{ current_tag }}.sif \
+  /data/ds002168 /data/ds002168_hippunfold participant --modality T1w -n
+```
+
+#### 3. Run with all cores
+
+```bash
+# Docker
+docker run -it --rm \
+  -v /directory/to/mount:/data \
+  khanlab/hippunfold:{{ current_tag }} \
+  /data/ds002168 /data/ds002168_hippunfold participant --modality T1w -p --cores all
+
+# Apptainer
+apptainer run -e \
+  --bind /directory/to/mount:/data \
+  hippunfold_{{ current_tag }}.sif \
+  /data/ds002168 /data/ds002168_hippunfold participant --modality T1w -p --cores all
+```
+
+#### Note on mounting
+
+* Docker uses `-v host_path:container_path`
+* Apptainer uses `--bind host_path:container_path`
+
+To avoid repeating mounts on every command, you can set:
+
+```bash
+# Apptainer
+env APPTAINER_BINDPATH=/project:/project,/data:/data
+
+# Docker (in docker-compose or wrapper scripts)
+# e.g., export DOCKER_OPTS="-v /project:/project -v /data:/data"
+```
+
+This way, input/output paths are automatically accessible.
+
+## Models & cache (Note)
+
+As of **v1.3.0+**, containers no longer ship all models; they’re downloaded on demand.
+
+Default cache:
+
+```bash
+~/.cache/hippunfold
+```
+
+Override with:
+
+```bash
+export HIPPUNFOLD_CACHE_DIR=/path/to/cache
+```

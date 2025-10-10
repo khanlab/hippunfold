@@ -7,12 +7,10 @@
 :caption: Getting started
 :name: getting_started
 :hidden:
-:maxdepth: 2
+:maxdepth: 1
 
 getting_started/installation
-getting_started/conda
-getting_started/apptainer
-getting_started/docker
+getting_started/conda_advanced
 ```
 
 
@@ -21,14 +19,15 @@ getting_started/docker
 :caption: Usage Notes
 :name: usage
 :hidden:
-:maxdepth: 2
+:maxdepth: 1
 
 
 usage/cli
-usage/useful_options
+usage/quick
+usage/tutorial_inputs
 usage/specializedScans
-usage/templates.md
-usage/faq.md
+usage/templates
+usage/faq
 ```
 
 
@@ -58,13 +57,12 @@ outputs/QC
 
 
 ```{toctree}
-:caption: Contributing
+:caption: References
 :name: contributing
 :hidden:
 :maxdepth: 2
 
 contributing/references
-contributing/contributing
 ```
 
 
