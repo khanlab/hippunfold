@@ -20,7 +20,7 @@ def get_labels_for_laplace(wildcards):
 
 def get_gm_labels(wildcards):
     lbl_list = " ".join(
-        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["IO"]["gm"]]
+        [str(lbl) for lbl in config["laplace_labels"][wildcards.label]["gm"]]
     )
     return lbl_list
 
@@ -221,9 +221,7 @@ rule prep_dseg_for_laynii:
         gm_labels=lambda wildcards: " ".join(
             [
                 str(lbl)
-                for lbl in config["laplace_labels"][wildcards.label][wildcards.dir][
-                    "gm"
-                ]
+                for lbl in config["laplace_labels"][wildcards.label]["gm"]
             ]
         ),
         src_labels=lambda wildcards: " ".join(

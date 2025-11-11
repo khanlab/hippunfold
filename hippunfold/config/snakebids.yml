@@ -108,6 +108,7 @@ parse_args:
   --inject_template:
     choices:
       - 'upenn'
+      - 'layers'
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
@@ -244,6 +245,7 @@ parse_args:
       - neonateT1w
       - synthseg_v0.1
       - synthseg_v0.2
+      - synthlayer_v0.3
       - neonateT1w_v2
       - ADNI_T1w_v1
 
@@ -371,6 +373,13 @@ template_files:
     hemi_wildcards:
       - R
 
+  layers:
+    T1w: tpl-layers_desc-hipptissue_dseg.nii.gz
+    dseg: tpl-layers_desc-hipptissue_dseg.nii.gz
+    dseg_dentate: tpl-layers_desc-hipptissue_dseg.nii.gz # hack: thi is the same file (for now)
+    hemi_wildcards:
+      - R
+
   bbhist:
     T1w: sub-bbhist_hemi-{hemi}_100um.nii.gz
     dseg: sub-bbhist_hemi-{hemi}_100um_dseg.nii.gz # aka dsegtissue
@@ -406,9 +415,13 @@ template_files:
 # set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
 tissue_atlas_mapping:
   tissue:
-    dg: 8
-    srlm: 2
-    cyst: 7
+    dg:
+      - 5
+      - 6
+    srlm: 
+      - 7
+    cyst: 
+      - 8
   magdeburg:
     dg: 3
     srlm: 9
@@ -434,6 +447,7 @@ resource_urls:
     T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
+    synthlayer_v0.3: 'zenodo.org/record/17581085/files/trained_model.3d_fullres.Task100_synthlayer.nnUNetTrainerV2.model_best'
     ADNI_T1w_v1: 'zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
   atlas:
     bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
@@ -449,6 +463,7 @@ resource_urls:
     MBMv2: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0887852d133ca597dd/?zip='
     MBMv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
     upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
+    layers: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395a9504e8970b9b3a7640/?zip='
     CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
     ABAv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip='
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/666b1bc765e1de5972893e59/?zip='
@@ -511,72 +526,74 @@ shape_inject:
     - 4
     - 5
     - 6
-    - 8
-  labels_reinsert:
     - 7
+  labels_reinsert:
+    - 8 # cysts
+    - 13 # alveus
   labels_overwrite:
-    - 2  
+    - 7
+    - 0
   label_smoothing_stdev: '0.5x0.5x0.5mm'
 
 
 laplace_labels:
   hipp:
+    gm:
+      - 1
+      - 2
+      - 3
+      - 4
     AP: 
-      gm:
-        - 1
-        - 8
       src:
-        - 5
-      sink:
-        - 6
-    PD:
-      gm:
-        - 1
-        - 8
-      src:
-        - 3
-      sink:
-        - 8   
-    IO:
-      gm:
-        - 1
-        - 8
-      src:
-        - 2
-        - 4
-        - 7
         - 9
+      sink:
+        - 10
+    PD:
+      src:
+        - 15
+      sink:
+        - 5
+        - 6
+    IO:
+      src:
+        - 7
+        - 8
+        - 11
       sink:
         - 0 
         - 10
+        - 12
+        - 13
+        - 14
+        - 18
   dentate:
-    AP:
-      gm:
-        - 8
-      src:
-        - 5
-      sink:
-        - 6
-    PD:
-      gm:
-        - 8
+    gm:
+      - 5
+      - 6
+    AP: 
       src:
         - 9
       sink:
         - 10
+    PD:
+      src:
+        - 12
+      sink:
+        - 11
     IO:
-      gm:
-        - 8
       src:
         - 1
-        - 3
-      sink:
         - 2
+        - 3
         - 4
+      sink:
+        - 0 
         - 7
-        - 9
+        - 8
         - 10
-        - 0
+        - 13
+         -14
+        - 18
 
       
 tight_crop_labels: #defines what labels to use for tight cropping (for upsampled ref)

@@ -1,0 +1,14 @@
+name: nnunetv2
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.10
+  - numpy=1.26.*
+  - pytorch=1.13.1
+  - torchvision=0.14.1
+  - pip:
+    - nnunetv2
+    - acvl-utils>=0.2
+    - dynamic-network-architectures>=0.3
