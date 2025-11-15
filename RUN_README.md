@@ -77,7 +77,7 @@ You can run HippUnfold in two ways:
 Run commands directly without entering a shell:
 
 ```bash
-pixi run hippunfold --modality <modality> <input_bids_dir> <output_dir> participant --cores <N> --template dHCP
+pixi run hippunfold --modality <modality> <input_bids_dir> <output_dir> participant --cores <N> --template dHCP --force_nnunet_model <model>
 ```
 
 ### Option 2: Using `pixi shell`
@@ -86,13 +86,13 @@ Enter the development environment shell, then run commands:
 
 ```bash
 pixi shell
-hippunfold --modality <modality> <input_bids_dir> <output_dir> participant --cores <N> --template dHCP
+hippunfold --modality <modality> <input_bids_dir> <output_dir> participant --cores <N> --template dHCP --force_nnunet_model <model>
 exit  # when done
 ```
 
 ## Step 6: Neonatal Models
 
-### Neonatal T1w Model
+### Neonatal T1w Model (nnUNet v2)
 
 ```bash
 pixi run hippunfold --modality T1w <input_dir> <output_dir> participant \
