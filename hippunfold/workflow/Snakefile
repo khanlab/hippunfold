@@ -105,7 +105,10 @@ if config["modality"] == "dsegtissue":
 
 else:
 
+    include: "rules/model_router.smk"
     include: "rules/nnunet.smk"
+    include: "rules/nnunetv2.smk"
+    include: "rules/qc_nnunet.smk"
 
 
 if "T2w" in limit_to_list or config["generate_myelin_map"]:
