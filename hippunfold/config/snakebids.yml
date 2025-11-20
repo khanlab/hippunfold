@@ -108,6 +108,12 @@ parse_args:
   --inject_template:
     choices:
       - 'upenn'
+      - 'dHCP'
+      - 'MBMv2'
+      - 'MBMv3'
+      - 'CIVM'
+      - 'ABAv3'
+      - 'bigbrain'      
     default: 'upenn'
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
@@ -323,7 +329,8 @@ template_files:
     crop_ref: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
-    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuedsegtissue_dseg.nii.gz
+    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
+    dseg_dentate: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissueDGmanualseg_dseg.nii.gz
     coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
@@ -344,9 +351,10 @@ template_files:
     T1w: tpl-MBMv3_T1w.nii.gz
     T2w: tpl-MBMv3_T2w.nii.gz
     xfm_corobl: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv3_hemi-R_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-MBMv3_hemi-R_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv3_hemi-R_space-corobl_desc-tissuemanual_dseg.nii.gz
+    crop_ref: tpl-MBMv3_hemi-{hemi}_space-corobl_{modality}.nii.gz
+    Mask_crop: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    dseg: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissue_dseg.nii.gz
+    dseg_dentate: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissueDG_dseg.nii.gz
     coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - R
@@ -384,6 +392,7 @@ template_files:
     crop_ref: tpl-ABAv3_hemi-{hemi}_space-corobl_T1w.nii.gz
     Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
     dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+    dseg_dentate: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissueDGmanual_dseg.nii.gz
     coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
