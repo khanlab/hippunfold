@@ -341,6 +341,7 @@ template_files:
     dseg_dentate: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissueDG_dseg.nii.gz
     coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
+      - L
       - R
   CIVM:
     T1w: tpl-CIVM_T1w.nii.gz
