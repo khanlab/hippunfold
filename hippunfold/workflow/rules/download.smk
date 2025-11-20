@@ -158,13 +158,17 @@ rule import_template_anat:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"
         / config["inject_template"]
-        / config["template_files"][config["inject_template"]]["crop_ref"].format(**wildcards),
+        / config["template_files"][config["inject_template"]]["crop_ref"].format(
+            **wildcards
+        ),
         copy_or_flip_cmd=lambda wildcards: copy_or_flip(
             wildcards,
             Path(download_dir)
             / "template"
             / config["inject_template"]
-            / config["template_files"][config["inject_template"]]["crop_ref"].format(**wildcards),
+            / config["template_files"][config["inject_template"]]["crop_ref"].format(
+                **wildcards
+            ),
         ),
     output:
         template_anat=temp(
