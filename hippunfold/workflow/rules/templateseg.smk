@@ -26,7 +26,8 @@ rule template_reg:
             suffix="{modality}.nii.gz".format(
                 modality=get_modality_suffix(config["modality"])
             ),
-            space="template",
+            desc="template",
+            space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),

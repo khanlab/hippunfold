@@ -339,7 +339,7 @@ template_files:
     Mask_crop: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
     dseg: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissue_dseg.nii.gz
     dseg_dentate: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissueDG_dseg.nii.gz
-    coords: tpl-MBMv3_dir-{dir}_hemi-R_space-corobl_label-{label}_desc-laplace_coords.nii.gz
+    coords: tpl-MBMv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
       - R

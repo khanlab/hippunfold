@@ -158,15 +158,53 @@ rule import_template_anat:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"
         / config["inject_template"]
-        / config["template_files"][config["inject_template"]]["crop_ref"].format(
-            **wildcards
-        ),
+        / config["template_files"][config["inject_template"]][
+            get_modality_suffix(config["modality"])
+        ].format(**wildcards),
         copy_or_flip_cmd=lambda wildcards: copy_or_flip(
             wildcards,
             Path(download_dir)
             / "template"
             / config["inject_template"]
-            / config["template_files"][config["inject_template"]]["crop_ref"].format(
+            / config["template_files"][config["inject_template"]][
+                get_modality_suffix(config["modality"])
+            ].format(**wildcards),
+        ),
+    output:
+        template_anat=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                space="template",
+                **inputs.subj_wildcards,
+                hemi="{hemi}",
+                suffix="{modality}.nii.gz".format(
+                    modality=get_modality_suffix(config["modality"])
+                ),
+            ),
+        ),
+    group:
+        "subj"
+    conda:
+        "../envs/c3d.yaml"
+    shell:
+        "{params.copy_or_flip_cmd} {output.template_anat}"
+
+
+rule import_template_anat_crop:  # used only in templateseg workflow
+    input:
+        template_dir=Path(download_dir) / "template" / config["template"],
+    params:
+        template_anat=lambda wildcards: Path(download_dir)
+        / "template"
+        / config["template"]
+        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
+        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
+            wildcards,
+            Path(download_dir)
+            / "template"
+            / config["template"]
+            / config["template_files"][config["template"]]["crop_ref"].format(
                 **wildcards
             ),
         ),
@@ -175,7 +213,8 @@ rule import_template_anat:
             bids(
                 root=root,
                 datatype="anat",
-                space="template",
+                desc="template",
+                space="corobl",
                 **inputs.subj_wildcards,
                 hemi="{hemi}",
                 suffix="{modality}.nii.gz".format(
