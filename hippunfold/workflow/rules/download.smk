@@ -193,18 +193,20 @@ rule import_template_anat:
 
 rule import_template_anat_crop:  # used only in templateseg workflow
     input:
-        template_dir=Path(download_dir) / "template" / config["template"],
+        template_dir=Path(download_dir) / "template" / config["inject_template"],
     params:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"
-        / config["template"]
-        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
+        / config["inject_template"]
+        / config["template_files"][config["inject_template"]]["crop_ref"].format(
+            **wildcards
+        ),
         copy_or_flip_cmd=lambda wildcards: copy_or_flip(
             wildcards,
             Path(download_dir)
             / "template"
-            / config["template"]
-            / config["template_files"][config["template"]]["crop_ref"].format(
+            / config["inject_template"]
+            / config["template_files"][config["inject_template"]]["crop_ref"].format(
                 **wildcards
             ),
         ),

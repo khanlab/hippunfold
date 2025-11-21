@@ -260,7 +260,8 @@ rule warp_template_anat:
             suffix="{modality}.nii.gz".format(
                 modality=get_modality_suffix(config["modality"])
             ),
-            space="template",
+            space="corobl",
+            desc="template",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
