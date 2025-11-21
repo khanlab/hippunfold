@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 import argparse
 import logging
 import socket
@@ -126,13 +127,40 @@ def validate_output_density(atlas, output_densities, atlas_config):
 # helper functions for hippunfold-atlases
 
 
+def git_ls_remote_with_timeout(repo_url: str, timeout: int = 10) -> bool:
+    """
+    Return True if `git ls-remote <repo_url>` succeeds within `timeout` seconds,
+    otherwise False. Does not hang indefinitely.
+    """
+    env = os.environ.copy()
+    env.setdefault("GIT_TERMINAL_PROMPT", "0")
+    try:
+        subprocess.run(
+            ["git", "ls-remote", repo_url],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=env,
+        )
+        return True
+    except subprocess.TimeoutExpired:
+        print(f"git ls-remote timed out after {timeout}s")
+        return False
+    except subprocess.CalledProcessError as e:
+        print(
+            f"git ls-remote returned non-zero: {(e.stderr or e.stdout or str(e))[:400]}"
+        )
+        return False
+
+
 def sync_atlas_repo():
     """
     Ensures the atlas folder is synced from the public GitHub repository using GitPython.
     """
     repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
     atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
-    internet = True if cmd.Git().ls_remote(repo_url) else False
+    internet = git_ls_remote_with_timeout(repo_url)
 
     branch = ATLAS_REPO_COMMIT
     try:
