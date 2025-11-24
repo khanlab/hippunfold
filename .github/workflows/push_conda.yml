@@ -73,7 +73,7 @@ jobs:
         shell: bash -l {0}
         run: |
           conda activate base
-          anaconda login \
+          anaconda login -y \
             --username ${{ secrets.ANACONDA_USERNAME }} \
             --password ${{ secrets.ANACONDA_PASSWORD }}
           anaconda upload "$PACKAGE_PATH" \
