@@ -436,7 +436,7 @@ def get_input_for_shape_inject(wildcards):
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
-            desc="nnunet",
+            desc="tissues",
             space="corobl",
             hemi="{hemi}",
         ).format(**wildcards)

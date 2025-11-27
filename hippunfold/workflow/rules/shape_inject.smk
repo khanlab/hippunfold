@@ -18,7 +18,7 @@ def get_input_splitseg_for_shape_inject(wildcards):
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dsegsplit",
-            desc="nnunet",
+            desc="tissues",
             space="corobl",
             hemi="{hemi}",
         ).format(**wildcards)

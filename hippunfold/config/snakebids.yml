@@ -249,6 +249,7 @@ parse_args:
       - neonateT2w_v2
       - neonateT1w_v2
       - neonateT1wT2w_v2
+      - neonate_synthseg
 
   --enable-bids-validation:
     help: |
@@ -441,8 +442,9 @@ resource_urls:
     neonateT2w_v2: 'zenodo.org/records/17618449/files/Dataset302_dhcp_T2w_manuallycorrected.tar.gz'
     neonateT1w_v2: 'zenodo.org/records/17618439/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz'
     neonateT1wT2w_v2: 'zenodo.org/records/17618437/files/Dataset303_dhcp_T1wT2w_manuallycorrected.tar.gz'
+    neonate_synthseg: 'zenodo.org/records/17742012/files/synthseg.tar.xz'
   
-  # nnUNet model versions
+  # Model versions (nnUNet v1, nnUNet v2, SynthSeg)
   nnunet_model_version:
     T1w: 'v1'
     T2w: 'v1'
@@ -456,6 +458,7 @@ resource_urls:
     neonateT2w_v2: 'v2'
     neonateT1w_v2: 'v2'
     neonateT1wT2w_v2: 'v2'
+    neonate_synthseg: 'synth_v1'
   atlas:
     bbhist: 'www.dropbox.com/scl/fi/fdqujkekhlzbnxsah5kqr/atlas-bbhist_20250108.zip?rlkey=dupo8jtwjynbdou6xmr736txt&st=aiaqzpri&dl=0'
     multihist7: 'www.dropbox.com/scl/fi/g07u7la7v1kwfgsty6ujc/atlas-multihist7_20250108.zip?rlkey=bi7wbdsm93upgnn3bmlv4f1hx&st=5iv33isc&dl=0'

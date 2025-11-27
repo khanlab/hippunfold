@@ -108,6 +108,7 @@ else:
     include: "rules/model_router.smk"
     include: "rules/nnunet.smk"
     include: "rules/nnunetv2.smk"
+    include: "rules/synthseg.smk"
     include: "rules/qc_nnunet.smk"
 
 

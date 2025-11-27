@@ -50,12 +50,19 @@ def get_inference_output_for_routing(wildcards):
     """Return appropriate input based on model version from config"""
     version = get_model_version()
     
+    if version == "synth_v1":
+        desc = "synthseg"
+    elif version == "v2":
+        desc = "nnunetv2"
+    else:
+        desc = "nnunetv1"
+    
     bids_path = bids(
         root=root,
         datatype="anat",
         **inputs.subj_wildcards,
         suffix="dseg.nii.gz",
-        desc="nnunetv2" if version == "v2" else "nnunetv1",
+        desc=desc,
         space="corobl",
         hemi="{hemi}",
     )
@@ -75,7 +82,7 @@ rule route_nnunet_inference:
                 datatype="anat",
                 **inputs.subj_wildcards,
                 suffix="dseg.nii.gz",
-                desc="nnunet",
+                desc="tissues",
                 space="corobl",
                 hemi="{hemi}",
             )

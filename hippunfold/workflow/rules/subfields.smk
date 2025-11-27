@@ -492,7 +492,7 @@ rule resample_unet_to_orig:
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
-            desc="nnunet",
+            desc="tissues",
             space="corobl",
             hemi="{hemi}",
         ),

@@ -36,7 +36,7 @@ rule qc_nnunet_f3d:
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
-            desc="nnunet",
+            desc="tissues",
             space="corobl",
             hemi="{hemi}",
         ),
