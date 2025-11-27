@@ -212,7 +212,7 @@ rule run_inference:
         "{params.cmd_copy_inputs} && "
         "export nnUNet_results={input.model_dir}/trained_models && "
         "export nnUNet_n_proc_DA={threads} && "
-        "nnUNetv2_predict -i {params.in_folder} -o {params.out_folder} -d 001 -c 3d_fullres &> {log} -device cpu {params.tta} && "
+        "nnUNetv2_predict -i {params.in_folder} -o {params.out_folder} -d 001 -c 3d_fullres -device cpu {params.tta} &> {log} && "
         "cp {params.out_file} {output.nnunet_seg}"
 
 rule post_inference:
