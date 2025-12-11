@@ -151,7 +151,7 @@ rule postproc_boundary_vertices:
             **inputs.subj_wildcards,
         ),
     params:
-        min_terminal_vertices=5,  # min number of vertices per src/sink
+        min_terminal_vertices=2,  # min number of vertices per src/sink (original was 5)
         max_iterations=100,
         shifting_epsilon=0.1,  #could be proportional to voxel spacing
     output:
