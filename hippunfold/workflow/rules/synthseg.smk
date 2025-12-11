@@ -51,6 +51,88 @@ def get_synthseg_input(wildcards):
         raise ValueError(f"Unsupported modality for SynthSeg: {config['modality']}")
 
 
+def get_synthseg_input_for_flip(wildcards):
+    """Get the appropriate input image for flipping before SynthSeg inference (left hemi only)"""
+    
+    if config["modality"] == "T2w":
+        return bids(
+            root=root,
+            datatype="anat",
+            space="corobl",
+            desc="preproc",
+            hemi="{hemi}",
+            suffix="T2w.nii.gz",
+            **inputs.subj_wildcards,
+        ).format(**wildcards)
+    elif config["modality"] == "T1w":
+        return bids(
+            root=root,
+            datatype="anat",
+            space="corobl",
+            desc="preproc", 
+            hemi="{hemi}",
+            suffix="T1w.nii.gz",
+            **inputs.subj_wildcards,
+        ).format(**wildcards)
+    elif config["modality"] == "hippb500":
+        return bids(
+            root=root,
+            datatype="dwi",
+            space="corobl",
+            desc="preproc",
+            hemi="{hemi}",
+            suffix="b500.nii.gz",
+            **inputs.subj_wildcards,
+        ).format(**wildcards)
+    elif config["modality"] == "dsegtissue":
+        return bids(
+            root=root,
+            datatype="anat",
+            space="corobl",
+            desc="cropped",
+            hemi="{hemi}",
+            suffix="dseg.nii.gz",
+            **inputs.subj_wildcards,
+        ).format(**wildcards)
+    else:
+        raise ValueError(f"Unsupported modality for SynthSeg: {config['modality']}")
+
+
+# Rule to flip left hemisphere input before SynthSeg inference
+rule flip_left_hemi_for_synthseg:
+    """Flip left hemisphere image along x-axis before SynthSeg inference.
+    
+    SynthSeg models are typically trained on right hemisphere data,
+    so we flip left hemisphere to match the expected orientation.
+    """
+    input:
+        in_img=get_synthseg_input_for_flip,
+    output:
+        flipped_img=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="flipped.nii.gz",
+                desc="synthseginput",
+                space="corobl",
+                hemi="{hemi,L}",
+            )
+        ),
+    log:
+        bids_log(
+            "flip_left_hemi_for_synthseg",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+        ),
+    group:
+        "subj"
+    conda:
+        "../envs/c3d.yaml"
+    shell:
+        "c3d {input.in_img} -flip x -o {output.flipped_img} &> {log}"
+
+
 def get_cmd_copy_inputs_synthseg(wildcards, input):
     """Copy input images with SynthSeg naming convention"""
     in_img = input.in_img
@@ -61,10 +143,32 @@ def get_cmd_copy_inputs_synthseg(wildcards, input):
     return cmd
 
 
+def get_synthseg_inference_input(wildcards):
+    """Get input for SynthSeg inference - flipped for left hemi, original for right hemi"""
+    if wildcards.hemi == "L":
+        # Left hemisphere: use flipped image
+        return bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="flipped.nii.gz",
+            desc="synthseginput",
+            space="corobl",
+            hemi="{hemi}",
+        ).format(**wildcards)
+    else:
+        # Right hemisphere: use original image
+        return get_synthseg_input(wildcards)
+
+
 rule run_inference_synthseg:
-    """SynthSeg inference with checkpoint extraction in shadow directory"""
+    """SynthSeg inference with checkpoint extraction in shadow directory.
+    
+    For left hemisphere: input is pre-flipped, output will be unflipped in next rule.
+    For right hemisphere: input and output are used as-is.
+    """
     input:
-        in_img=get_synthseg_input,
+        in_img=get_synthseg_inference_input,
         model_tar=get_model_tar(),
     params:
         model_dir="tempmodel",
@@ -78,7 +182,7 @@ rule run_inference_synthseg:
                 datatype="anat",
                 **inputs.subj_wildcards,
                 suffix="dseg.nii.gz",
-                desc="synthseg",
+                desc="synthsegraw",
                 space="corobl",
                 hemi="{hemi}",
             )
@@ -114,3 +218,80 @@ rule run_inference_synthseg:
         "--output {output.synthseg_seg} "
         "--device {params.device} "
         "&> {log}"
+
+
+# Rule to unflip left hemisphere prediction after SynthSeg inference
+rule unflip_left_hemi_synthseg_output:
+    """Unflip left hemisphere SynthSeg output along x-axis.
+    
+    After SynthSeg inference on flipped left hemisphere,
+    we flip the prediction back to original orientation.
+    """
+    input:
+        seg=bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="synthsegraw",
+            space="corobl",
+            hemi="{hemi,L}",
+        ),
+    output:
+        unflipped_seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="synthseg",
+                space="corobl",
+                hemi="{hemi,L}",
+            )
+        ),
+    log:
+        bids_log(
+            "unflip_left_hemi_synthseg_output",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+        ),
+    group:
+        "subj"
+    conda:
+        "../envs/c3d.yaml"
+    shell:
+        "c3d {input.seg} -flip x -o {output.unflipped_seg} &> {log}"
+
+
+# Rule to pass through right hemisphere without flipping
+rule passthrough_right_hemi_synthseg_output:
+    """Pass through right hemisphere SynthSeg output without modification.
+    
+    Right hemisphere doesn't need flipping, so we just rename the file.
+    """
+    input:
+        seg=bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="synthsegraw",
+            space="corobl",
+            hemi="{hemi,R}",
+        ),
+    output:
+        seg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="synthseg",
+                space="corobl",
+                hemi="{hemi,R}",
+            )
+        ),
+    group:
+        "subj"
+    shell:
+        "cp {input.seg} {output.seg}"
