@@ -1,0 +1,16 @@
+{
+    "Name": "Subset of: Pattern Separation beyond the Hippocampus: A High-Resolution Whole-Brain Investigation of Mnemonic Discrimination in Healthy Adults",
+    "Description": "Anatomical data from a single subject used for testing purposes",
+    "BIDSVersion": "1.1.1",
+    "License": "CC0",
+    "Authors": [
+        "Michelle I. Nash",
+        "Cooper B. Hodges",
+        "Nathan M. Muncy",
+        "C. Brock Kirwan"
+    ],
+    "ReferencesAndLinks": [
+        "https://doi.org/10.1002/hipo.23299"
+    ],
+    "DatasetDOI": "10.18112/openneuro.ds002168.v1.1.0"
+}
