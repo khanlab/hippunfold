@@ -1,3 +1,5 @@
+from pathlib import Path
+
 # lookup tables for structure:
 hemi_to_structure = {"L": "CORTEX_LEFT", "Lflip": "CORTEX_LEFT", "R": "CORTEX_RIGHT"}
 surf_to_secondary_type = {
@@ -10,12 +12,14 @@ surf_to_secondary_type = {
 rule cp_template_to_unfold:
     """cp template unfold surf to subject"""
     input:
-        gii=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_{autotop}",
-            "tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii",
+        gii=str(
+            (
+                Path(workflow.basedir)
+                / ".."
+                / "resources"
+                / "unfold_template_{autotop}"
+                / "tpl-avg_space-unfold_den-{density}_{surfname}.surf.gii"
+            ).resolve()
         ),
     params:
         structure_type=lambda wildcards: hemi_to_structure[wildcards.hemi],
@@ -45,12 +49,14 @@ rule cp_template_to_unfold:
 rule calc_unfold_template_coords:
     """ Creates a coords.shape.gii from the unfolded template """
     input:
-        midthickness_gii=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        midthickness_gii=str(
+            (
+                Path(workflow.basedir)
+                / ".."
+                / "resources"
+                / "unfold_template"
+                / "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii"
+            ).resolve()
         ),
     params:
         coords_xyz="coords-XYZ.shape.gii",
@@ -282,12 +288,14 @@ rule calculate_gyrification1:
             label="hipp",
             **config["subj_wildcards"]
         ),
-        unfold_surfarea=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_hipp",
-            "tpl-avg_space-unfold_den-{density}_surfarea.shape.gii",
+        unfold_surfarea=str(
+            (
+                Path(workflow.basedir)
+                / ".."
+                / "resources"
+                / "unfold_template_hipp"
+                / "tpl-avg_space-unfold_den-{density}_surfarea.shape.gii"
+            ).resolve()
         ),
     output:
         gii=bids(
@@ -899,12 +907,14 @@ rule calculate_gyrification2:
             label="{autotop}",
             **config["subj_wildcards"]
         ),
-        unfold_surfarea=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_{autotop}",
-            "tpl-avg_space-unfold_den-{density}_surfarea.shape.gii",
+        unfold_surfarea=str(
+            (
+                Path(workflow.basedir)
+                / ".."
+                / "resources"
+                / "unfold_template_{autotop}"
+                / "tpl-avg_space-unfold_den-{density}_surfarea.shape.gii"
+            ).resolve()
         ),
     output:
         gii=bids(
@@ -1100,12 +1110,14 @@ rule nii_to_label_gii:
             atlas="{atlas}",
             **config["subj_wildcards"]
         ),
-        surf=os.path.join(
-            workflow.basedir,
-            "..",
-            "resources",
-            "unfold_template_hipp",
-            "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii",
+        surf=str(
+            (
+                Path(workflow.basedir)
+                / ".."
+                / "resources"
+                / "unfold_template_hipp"
+                / "tpl-avg_space-unfold_den-{density}_midthickness.surf.gii"
+            ).resolve()
         ),
         atlas_dir=lambda wildcards: Path(download_dir) / "atlas" / wildcards.atlas,
     params:

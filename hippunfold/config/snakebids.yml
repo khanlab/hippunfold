@@ -325,11 +325,15 @@ parse_args:
       - b1000
       - trimodal
       - hippb500
-      - neonateT1w
+      - neonateT1w_Finetune
       - synthseg_v0.1
       - synthseg_v0.2
-      - neonateT1w_v2
+      - neonateT1w
       - ADNI_T1w_v1
+      - neonateT2w_v2
+      - neonateT1w_v2
+      - neonateT1wT2w_v2
+      - neonate_synthseg
 
 
 
@@ -374,6 +378,7 @@ cifti_metric_types:
 
 singularity:
   autotop: 'docker://khanlab/hippunfold_deps:v0.5.1'
+  nnunetv2: 'oras://docker.io/mahmoud1yaser/nnunetv2:latest'
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
@@ -555,12 +560,32 @@ resource_urls:
     T1w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
     T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar'
     hippb500: 'zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
-    neonateT1w: 'zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
-    neonateT1w_v2: 'zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
+    neonateT1w_Finetune: 'zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
+    neonateT1w: 'zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
     T1T2w: 'zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.1: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     synthseg_v0.2: 'zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
     ADNI_T1w_v1: 'zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
+    neonateT2w_v2: 'zenodo.org/records/17618449/files/Dataset302_dhcp_T2w_manuallycorrected.tar.gz'
+    neonateT1w_v2: 'zenodo.org/records/17618439/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz'
+    neonateT1wT2w_v2: 'zenodo.org/records/17618437/files/Dataset303_dhcp_T1wT2w_manuallycorrected.tar.gz'
+    neonate_synthseg: 'zenodo.org/records/17742012/files/synthseg.tar.xz'
+  
+  # Model versions (nnUNet v1, nnUNet v2, SynthSeg)
+  nnunet_model_version:
+    T1w: 'v1'
+    T2w: 'v1'
+    hippb500: 'v1'
+    neonateT1w_Finetune: 'v1'
+    neonateT1w: 'v1'
+    T1T2w: 'v1'
+    synthseg_v0.1: 'v1'
+    synthseg_v0.2: 'v1'
+    ADNI_T1w_v1: 'v1'
+    neonateT2w_v2: 'v2'
+    neonateT1w_v2: 'v2'
+    neonateT1wT2w_v2: 'v2'
+    neonate_synthseg: 'synth_v1'
   atlas:
     multihist7: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b782827451220b86dd8/?zip='
     bigbrain: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395b8b13d27b123094c96f/?zip='
@@ -714,3 +739,5 @@ no_unfolded_reg: False
 root: results
 use_template_seg: False
 template_seg_smoothing_factor: 2
+
+resample_dseg_for_templatereg: 0.3x0.3x0.3mm

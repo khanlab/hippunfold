@@ -126,7 +126,12 @@ elif config["modality"] == "cropseg":
 
 else:
 
+
+    include: "rules/model_router.smk"
     include: "rules/nnunet.smk"
+    include: "rules/nnunetv2.smk"
+    include: "rules/synthseg.smk"
+
 
 
 if "T2w" in limit_to_list or config["generate_myelin_map"]:
@@ -155,6 +160,7 @@ include: "rules/resample_final_to_crop_native.smk"
 
 
 include: "rules/qc.smk"
+include: "rules/qc_nnunet.smk"
 
 
 include: "rules/myelin_map.smk"

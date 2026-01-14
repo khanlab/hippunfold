@@ -60,7 +60,7 @@ def get_input_for_shape_inject(wildcards):
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dseg.nii.gz",
-            desc="nnunet",
+            desc="tissues",
             space="corobl",
             hemi="{hemi}",
         ).format(**wildcards)
@@ -95,7 +95,7 @@ def get_input_splitseg_for_shape_inject(wildcards):
             datatype="anat",
             **config["subj_wildcards"],
             suffix="dsegsplit",
-            desc="nnunet",
+            desc="tissues",
             space="corobl",
             hemi="{hemi}",
         ).format(**wildcards)

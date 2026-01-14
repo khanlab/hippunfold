@@ -13,6 +13,11 @@ Jinja2 = "^3.0.3"
 pygraphviz = "1.7"
 Pygments = "^2.10.0"
 pulp = "<2.8.0"
+numpy = "*"
+torch = ">=2.0"
+torchvision = "*"
+nibabel = {version = "^5.3.3", python = ">=3.9"}
+cornucopia = "*"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
