@@ -124,33 +124,64 @@ rule unpack_nnunet_model:
     shell:
         "mkdir -p {output} && tar -xf {input} -C {output}"
 
+rule prep_inference:
+    input: get_nnunet_input,
+    output: 
+        temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="img.nii.gz",
+                desc="nnunet",
+                space="coroblflip",
+                hemi="{hemi}",
+            )
+        )
+    params:
+        flip = lambda wildcards: " -flip x " if wildcards.hemi=="R" else ""
+    conda:
+        "../envs/c3d.yaml"
+    shell:
+        "c3d {input} {params.flip} -o {output}"
+
 
 rule run_inference:
     """ This rule uses either GPU or CPU .
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
     input:
-        in_img=get_nnunet_input,
+        in_img=bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="img.nii.gz",
+            desc="nnunet",
+            space="coroblflip",
+            hemi="{hemi}",
+        ),
         model_tar=get_model_tar(),
         model_dir=get_model_dir(),
     params:
         cmd_copy_inputs=get_cmd_copy_inputs,
-        temp_lbl="templbl/temp.nii.gz",
         in_folder="tempimg",
         out_folder="templbl",
+        out_file="templbl/temp.nii.gz",
         task=parse_task_from_dir,
         chkpnt=parse_chkpnt_from_dir,
         trainer=parse_trainer_from_dir,
         tta="" if config["nnunet_enable_tta"] else "--disable_tta",
     output:
-        nnunet_seg=temp(
-            bids(
-                root=root,
-                datatype="anat",
-                **inputs.subj_wildcards,
-                suffix="dseg.nii.gz",
-                desc="nnunet",
-                space="corobl",
-                hemi="{hemi}",
+        nnunet_seg=(
+            temp(
+                bids(
+                    root=root,
+                    datatype="anat",
+                    **inputs.subj_wildcards,
+                    suffix="dseg.nii.gz",
+                    desc="nnunet",
+                    space="coroblflip",
+                    hemi="{hemi}",
+                )
             )
         ),
     log:
@@ -169,7 +200,7 @@ rule run_inference:
     group:
         "subj"
     conda:
-        "../envs/nnunet.yaml"
+        "../envs/nnunetv2.yaml"
     shell:
         #create temp folders
         #cp input image to temp folder
@@ -179,10 +210,38 @@ rule run_inference:
         #copy from temp output folder to final output
         "mkdir -p {params.in_folder} {params.out_folder} && "
         "{params.cmd_copy_inputs} && "
-        "export RESULTS_FOLDER={input.model_dir} && "
+        "export nnUNet_results={input.model_dir}/trained_models && "
         "export nnUNet_n_proc_DA={threads} && "
-        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
-        "cp {params.temp_lbl} {output.nnunet_seg}"
+        "nnUNetv2_predict -i {params.in_folder} -o {params.out_folder} -d 001 -c 3d_fullres -device cpu {params.tta} &> {log} && "
+        "cp {params.out_file} {output.nnunet_seg}"
+
+rule post_inference:
+    input: 
+        bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="nnunet",
+            space="coroblflip",
+            hemi="{hemi}",
+        )
+    params:
+        flip = lambda wildcards: " -flip x " if wildcards.hemi=="R" else ""
+    output:
+        temp(bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="nnunet",
+            space="corobl",
+            hemi="{hemi}",
+        )),
+    conda:
+        "../envs/c3d.yaml"
+    shell:
+        "c3d {input} {params.flip} -o {output}"
 
 
 def get_f3d_ref(wildcards, input):

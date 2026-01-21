@@ -220,10 +220,9 @@ def get_tissue_atlas_remapping_dentate(wildcards):
     remap = []
 
     for label in ["dg"]:
-        in_label = mapping["tissue"][label]
-        out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
-
-        remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
+        for in_label in mapping["tissue"][label]:
+            out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
+            remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
 
     return " ".join(remap)
 
@@ -234,10 +233,9 @@ def get_tissue_atlas_remapping(wildcards):
     remap = []
 
     for label in mapping["tissue"].keys():
-        in_label = mapping["tissue"][label]
-        out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
-
-        remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
+        for in_label in mapping["tissue"][label]:
+            out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
+            remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
 
     return " ".join(remap)
 
