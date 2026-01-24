@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 import argparse
 import logging
 import socket
@@ -126,13 +127,40 @@ def validate_output_density(atlas, output_densities, atlas_config):
 # helper functions for hippunfold-atlases
 
 
+def git_ls_remote_with_timeout(repo_url: str, timeout: int = 10) -> bool:
+    """
+    Return True if `git ls-remote <repo_url>` succeeds within `timeout` seconds,
+    otherwise False. Does not hang indefinitely.
+    """
+    env = os.environ.copy()
+    env.setdefault("GIT_TERMINAL_PROMPT", "0")
+    try:
+        subprocess.run(
+            ["git", "ls-remote", repo_url],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=env,
+        )
+        return True
+    except subprocess.TimeoutExpired:
+        print(f"git ls-remote timed out after {timeout}s")
+        return False
+    except subprocess.CalledProcessError as e:
+        print(
+            f"git ls-remote returned non-zero: {(e.stderr or e.stdout or str(e))[:400]}"
+        )
+        return False
+
+
 def sync_atlas_repo():
     """
     Ensures the atlas folder is synced from the public GitHub repository using GitPython.
     """
     repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
     atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
-    internet = True if cmd.Git().ls_remote(repo_url) else False
+    internet = git_ls_remote_with_timeout(repo_url)
 
     branch = ATLAS_REPO_COMMIT
     try:
@@ -274,12 +302,23 @@ class AtlasConfig(PluginBase):
         )
         self.try_add_argument(
             group,
-            "--atlas-metrics",
-            "--atlas_metrics",
-            choices=["curvature", "gyrification", "thickness", "subfields"],
+            "--new_atlas_subfields_from",
+            "--new-atlas-subfields-from",
+            type=str,
+            choices=["unfoldreg", "native"],
+            dest="new_atlas_subfields_from",
+            help=(
+                "Method for defining subfields for the new atlas, either 'unfoldreg' to use unfoldreg with existing --atlas, or 'native' to use native space subfield segmentations. Note: if 'native' subfields are selected, data from both hemispheres will be concatenated."
+            ),
+        )
+        self.try_add_argument(
+            group,
+            "--new-atlas-metrics",
+            "--new_atlas_metrics",
+            choices=["curvature", "gyrification", "thickness", "myelin"],
             action="store",
             type=str,
-            dest="atlas_metrics",
+            dest="new_atlas_metrics",
             default=["curvature", "gyrification", "thickness"],
             nargs="+",
             help=(
@@ -301,45 +340,38 @@ class AtlasConfig(PluginBase):
             + format_density_help(self.atlas_config)
             + " (default: %(default)s)",
         )
-        self.try_add_argument(
-            group,
-            "--resample-factors",
-            "--resample_factors",
-            action="store",
-            type=float,
-            dest="resample_factors",
-            default=DEFAULT_RESAMPLE_FACTORS,
-            nargs="+",
-            help=(
-                f"Sets the downsampling factors of the surface mesh relative to native, as a percent of the original unfoldiso (256x128 for hipp) surface.  Only used in group_create_atlas (default: %(default)s), which corresponds to {DEFAULT_RESAMPLE_FACTORS_SPACING_HELP}"
-            ),
-        )
 
     @bidsapp.hookimpl
     def update_cli_namespace(self, namespace: dict[str, Any], config: dict[str, Any]):
         """Add atlas to config."""
         atlas = self.pop(namespace, "atlas")
         new_atlas_name = self.pop(namespace, "new_atlas_name")
+        new_atlas_subfields_from = self.pop(namespace, "new_atlas_subfields_from")
         output_density = self.pop(namespace, "output_density")
-        resample_factors = self.pop(namespace, "resample_factors")
 
-        if (
-            namespace["analysis_level"] == "group_create_atlas"
-            and new_atlas_name == None
-        ):
-            raise argparse.ArgumentTypeError(
-                "--new_atlas_name must be specified when using group_create_atlas"
-            )
+        if namespace["analysis_level"] == "group_create_atlas":
+
+            if new_atlas_name == None:
+                raise argparse.ArgumentTypeError(
+                    "--new_atlas_name must be specified when using group_create_atlas"
+                )
+            if new_atlas_subfields_from == None:
+                raise argparse.ArgumentTypeError(
+                    "--new_atlas_subfields_from must be specified when using group_create_atlas"
+                )
 
         validate_output_density(atlas, output_density, self.atlas_config)
 
         config["atlas"] = atlas
         config["new_atlas_name"] = new_atlas_name
+        config["new_atlas_subfields_from"] = new_atlas_subfields_from
         config["atlas_metadata"] = self.atlas_config
         config["output_density"] = output_density
         config["unfoldreg_density"] = get_unfoldreg_density(self.atlas_config, atlas)
-        config["resample_factors"] = resample_factors
-        config["density_choices"] = resample_factors_to_densities(resample_factors)
+        config["resample_factors"] = DEFAULT_RESAMPLE_FACTORS
+        config["density_choices"] = resample_factors_to_densities(
+            DEFAULT_RESAMPLE_FACTORS
+        )
         config["unused_density"] = get_unused_densities(
             self.atlas_config, atlas, output_density
         )

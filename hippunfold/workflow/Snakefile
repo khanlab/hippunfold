@@ -53,7 +53,8 @@ elif "T1w" in config["modality"]:
     template_modality = "T1w"
 
 if config["analysis_level"] == "group_create_atlas":
-    limit_to_list.add("dsegsubfields")
+    if config["new_atlas_subfields_from"] == "native":
+        limit_to_list.add("dsegsubfields")
 
 limit_to_list.add(config["modality"])
 
@@ -161,8 +162,6 @@ rule all:
 if config["analysis_level"] == "group_create_atlas":
 
     include: "rules/atlas_gen.smk"
-
-    config["atlas"] = config["new_atlas_name"]
 
 
 rule all_create_atlas:
