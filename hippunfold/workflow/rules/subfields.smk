@@ -57,6 +57,8 @@ rule subfields_to_label_gifti:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "subj"
     conda:
         "../envs/workbench.yaml"
     shell:
@@ -121,7 +123,82 @@ rule native_label_gii_to_unfold_nii:
             bids(
                 root=root,
                 datatype="anat",
-                suffix="subfields.nii.gz",
+                suffix="subfieldsfromnative.nii.gz",
+                space="unfold",
+                hemi="{hemi}",
+                label="{label,hipp}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
+        " {params.interp}"
+
+
+rule unfoldreg_label_gii_to_unfold_nii:
+    """converts subfields label .gii files from atlas to subject unfold space, for creating template with new_atlas_subfields_from==unfoldreg"""
+    input:
+        label_gii=bids(
+            root=root,
+            datatype="metric",
+            suffix="subfields.label.gii",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            atlas=config["atlas"],
+            **inputs.subj_wildcards,
+        ),
+        inner_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="inner.surf.gii",
+            space="unfoldreg",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        midthickness_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="unfoldreg",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        outer_surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="outer.surf.gii",
+            space="unfoldreg",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        ref_nii=bids(
+            root=root,
+            datatype="warps",
+            suffix="refvol.nii.gz",
+            space="unfold",
+            desc="slice",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        interp="-nearest-vertex 10",
+    output:
+        label_nii=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="subfieldsfromunfoldreg.nii.gz",
                 space="unfold",
                 hemi="{hemi}",
                 label="{label,hipp}",
