@@ -370,7 +370,7 @@ rule label_gm_with_nearest_subfields:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            label="{label,hipp}",
+            label="{label}",
             **inputs.subj_wildcards,
         ),
         gm=bids(

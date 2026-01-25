@@ -1,7 +1,8 @@
 import pandas as pd
 
-#first surface is used as a reference when generating average shape
-ref_hemi=inputs[config['modality']].zip_lists['hemi'][0]
+# first surface is used as a reference when generating average shape
+ref_hemi = inputs[config["modality"]].zip_lists["hemi"][0]
+
 
 def get_cmd_templategen_subj_csv(wildcards, input, output):
 
@@ -392,6 +393,37 @@ rule update_unfold_mesh_metadata:
         " -surface-secondary-type {params.secondary_type}"
 
 
+rule apply_unfold_rotate:
+    input:
+        surf_gii=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            den="{density}",
+            space="unfold",
+            hemi="{hemi}",
+            suffix="{surfname}.surf.gii",
+        ),
+        rot_xfm=lambda wildcards: Path(workflow.basedir)
+        / f"../resources/etc/unfoldrot.{wildcards.hemi}.txt",
+    params:
+        cmd=lambda wildcards, input, output: f"wb_command -surface-apply-affine {input.surf_gii} {input.rot_xfm} {output.surf_gii}",
+    output:
+        surf_gii=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            den="{density}",
+            space="unfoldrot",
+            hemi="{hemi}",
+            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    shell:
+        "{params.cmd}"
+
+
 rule avgtemplate_metric_vol_to_surf:
     input:
         metric_nii=bids_atlas(
@@ -735,7 +767,7 @@ def get_atlas_inputs(wildcards):
                         space="{space}",
                         suffix="{surfname}.surf.gii",
                     ),
-                    space=["unfold", "native"],
+                    space=["unfold", "unfoldrot", "native"],
                     surfname=["inner", "outer", "midthickness"],
                     density=config["density_choices"],
                 )
@@ -765,7 +797,6 @@ def density_to_resample(density_wildcard):
     return resample
 
 
-
 rule register_surf_to_ref:
     input:
         ref_surf=lambda wildcards: inputs[config["modality"]].expand(
@@ -786,35 +817,35 @@ rule register_surf_to_ref:
             hemi=wildcards.hemi,
         )[0],
         surf=lambda wildcards: bids(
-                root=root,
-                datatype="surf",
-                label="{label}",
-                space="corobl",
-                resample="{resample}".format(
-                    resample=density_to_resample(wildcards.density)
-                ),
-                hemi=wildcards.hemi,
-                suffix="{surfname}.surf.gii",
-                **inputs.subj_wildcards,
-            )        
+            root=root,
+            datatype="surf",
+            label="{label}",
+            space="corobl",
+            resample="{resample}".format(
+                resample=density_to_resample(wildcards.density)
+            ),
+            hemi=wildcards.hemi,
+            suffix="{surfname}.surf.gii",
+            **inputs.subj_wildcards,
+        ),
     output:
         surf=bids(
-                root=root,
-                datatype="surf",
-                label="{label}",
-                space="coroblaligned",
-                density="{density}",
-                hemi="{hemi}",
-                suffix="{surfname}.surf.gii",
-                **inputs.subj_wildcards,
-            )        
+            root=root,
+            datatype="surf",
+            label="{label}",
+            space="coroblaligned",
+            density="{density}",
+            hemi="{hemi}",
+            suffix="{surfname}.surf.gii",
+            **inputs.subj_wildcards,
+        ),
     conda:
         "../envs/workbench.yaml"
-    shadow: "minimal"
+    shadow:
+        "minimal"
     shell:
         "wb_command -surface-affine-regression {input.surf} {input.ref_surf} affine.xfm && "
         "wb_command -surface-apply-affine {input.surf} affine.xfm {output.surf}"
-
 
 
 rule average_native_surfs:
@@ -853,6 +884,7 @@ rule average_native_surfs:
     shell:
         "wb_command -surface-average {output} {params.surf_args}"
 
+
 rule flip_average_native_surf:
     input:
         surf=bids_atlas(
@@ -865,7 +897,9 @@ rule flip_average_native_surf:
             suffix="{surfname}.surf.gii",
         ),
     params:
-        structure_type=lambda wildcards: get_structure("L" if ref_hemi == "R" else "R", wildcards.label)
+        structure_type=lambda wildcards: get_structure(
+            "L" if ref_hemi == "R" else "R", wildcards.label
+        ),
     output:
         surf=bids_atlas(
             root=get_atlas_dir(),
@@ -881,8 +915,6 @@ rule flip_average_native_surf:
     shell:
         "wb_command -surface-flip-lr {input} {output} && "
         "wb_command -set-structure {output} {params.structure_type}"
-
-
 
 
 rule write_template_json:

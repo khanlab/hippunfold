@@ -32,7 +32,7 @@ rule cp_atlas_unfold:
             hemi="{hemi}",
             label="{label}",
             den="{density}",
-            space="unfold",
+            space="{space}",
             suffix="{surf_name}.surf.gii",
         ),
     output:
@@ -40,7 +40,7 @@ rule cp_atlas_unfold:
             root=root,
             datatype="surf",
             suffix="{surf_name,midthickness}.surf.gii",
-            space="unfold",
+            space="{space,unfold|unfoldrot}",
             den="{density,[0-9k]+}",
             hemi="{hemi}",
             label="{label}",
