@@ -5,7 +5,7 @@ description = "BIDS App for Hippocampal AutoTop (automated hippocampal unfolding
 readme = "README.md"
 license = "MIT"
 authors = [{name = "Jordan DeKraker & Ali R. Khan", email = "alik@robarts.ca"}]
-requires-python = ">= 3.11"
+requires-python = ">= 3.11, <3.13"
 dependencies = []
 scripts = { hippunfold = "hippunfold.run:app.run", "hippunfold-quick" = "hippunfold.run_quick:main" }
 
