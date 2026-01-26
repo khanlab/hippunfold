@@ -130,7 +130,6 @@ rule run_inference:
     It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
     input:
         in_img=get_nnunet_input,
-        model_tar=get_model_tar(),
         model_dir=get_model_dir(),
     params:
         cmd_copy_inputs=get_cmd_copy_inputs,
