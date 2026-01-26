@@ -389,11 +389,12 @@ rule update_unfold_mesh_metadata:
     conda:
         "../envs/workbench.yaml"
     shell:
-        "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        "cp {input} {output} && "
+        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
 
-rule apply_unfold_rotate:
+rule apply_unfold_rotate_to_atlas:
     input:
         surf_gii=bids_atlas(
             root=get_atlas_dir(),
@@ -407,7 +408,9 @@ rule apply_unfold_rotate:
         rot_xfm=lambda wildcards: Path(workflow.basedir)
         / f"../resources/etc/unfoldrot.{wildcards.hemi}.txt",
     params:
-        cmd=lambda wildcards, input, output: f"wb_command -surface-apply-affine {input.surf_gii} {input.rot_xfm} {output.surf_gii}",
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type="FLAT",
     output:
         surf_gii=bids_atlas(
             root=get_atlas_dir(),
@@ -421,7 +424,9 @@ rule apply_unfold_rotate:
     conda:
         "../envs/workbench.yaml"
     shell:
-        "{params.cmd}"
+        "wb_command -surface-apply-affine {input.surf_gii} {input.rot_xfm} {output.surf_gii} && "
+        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        " -surface-secondary-type {params.secondary_type}"
 
 
 rule avgtemplate_metric_vol_to_surf:

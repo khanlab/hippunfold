@@ -29,7 +29,7 @@ rule get_boundary_vertices:
         "../envs/pyvista.yaml"
     log:
         bids_log(
-            "get_boundary_verticies",
+            "get_boundary_vertices",
             **inputs.subj_wildcards,
             hemi="{hemi}",
             label="{label}",
@@ -447,3 +447,37 @@ rule set_surface_z_level:
         "../envs/pyvista.yaml"
     script:
         "../scripts/set_surface_z_level.py"
+
+
+rule apply_unfold_rotate:
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfold",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        rot_xfm=lambda wildcards: Path(workflow.basedir)
+        / f"../resources/etc/unfoldrot.{wildcards.hemi}.txt",
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+    output:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="unfoldrot",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    shell:
+        "wb_command -surface-apply-affine {input.surf_gii} {input.rot_xfm} {output.surf_gii} && "
+        "wb_command -set-structure {output.surf_gii} {params.structure_type}"

@@ -51,7 +51,8 @@ multi_line_output = 3
 [tool.pixi.pypi-dependencies]
 hippunfold = { path = ".", editable = true }
 
-[tool.pixi.tasks]
+
+[tool.pixi.feature.dev.tasks]
 quality_check = "isort hippunfold/*.py hippunfold/plugins/*.py -c && black hippunfold --check && snakefmt hippunfold --check"
 quality_fix = "isort hippunfold/*.py hippunfold/plugins/*.py && black hippunfold  && snakefmt hippunfold"
 
