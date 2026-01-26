@@ -465,6 +465,13 @@ rule apply_unfold_rotate:
         / f"../resources/etc/unfoldrot.{wildcards.hemi}.txt",
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type="FLAT",
+        flip_normals=lambda wildcards, input, output: (
+            ""
+            if wildcards.hemi == "L"
+            else f"wb_command -surface-flip-normals {output.surf_gii} {output.surf_gii} && "
+        ),
     output:
         surf_gii=bids(
             root=root,
@@ -482,4 +489,6 @@ rule apply_unfold_rotate:
         "subj"
     shell:
         "wb_command -surface-apply-affine {input.surf_gii} {input.rot_xfm} {output.surf_gii} && "
-        "wb_command -set-structure {output.surf_gii} {params.structure_type}"
+        "{params.flip_normals}"
+        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        " -surface-secondary-type {params.secondary_type}"
