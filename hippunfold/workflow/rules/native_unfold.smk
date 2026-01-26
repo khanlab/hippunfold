@@ -478,6 +478,8 @@ rule apply_unfold_rotate:
         ),
     conda:
         "../envs/workbench.yaml"
+    group:
+        "subj"
     shell:
         "wb_command -surface-apply-affine {input.surf_gii} {input.rot_xfm} {output.surf_gii} && "
         "wb_command -set-structure {output.surf_gii} {params.structure_type}"

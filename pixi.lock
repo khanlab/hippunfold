@@ -2947,7 +2947,7 @@ packages:
 - pypi: ./
   name: hippunfold
   version: 1.5.2rc2
-  sha256: 1a5ce1afa7772ebc5c341af1226d3bd3a322538adcff3274bebefcb5f85a2167
+  sha256: 07332e699e21a8e567a29b097ffea892bd203d6a745055e2d24ad5b39b0823f2
   requires_python: '>=3.11,<3.13'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/noarch/hpack-4.1.0-pyhd8ed1ab_0.conda
