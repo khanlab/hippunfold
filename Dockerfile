@@ -27,7 +27,7 @@ RUN set -e && \
     ./hippunfold/run.py test_data/bids_singleT2w test_out participant  --modality T2w --output_space T1w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_T1w test_out participant  --modality T1w --use-template-seg --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     ./hippunfold/run.py test_data/bids_singleT2w test_out participant  --modality T2w --generate-myelin-map --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
-    ./hippunfold/run.py test_data/bids_dsegtissue test_out group_create_atlas  --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
+    ./hippunfold/run.py test_data/bids_dsegtissue test_out group_create_atlas  --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --new_atlas_subfields_from native --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     conda clean --all -y && \
     rm -rf /opt/conda/pkgs /root/.cache && \
     cp /src/entrypoint_quick.sh /usr/local/bin/hippunfold-quick 
