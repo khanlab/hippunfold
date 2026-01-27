@@ -104,7 +104,7 @@ rule update_native_mesh_structure:
                 root=root,
                 datatype="surf",
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
-                space="{space,corobl|unfold}",
+                space="{space,corobl}",
                 den="native",
                 hemi="{hemi}",
                 label="{label}",
@@ -117,6 +117,52 @@ rule update_native_mesh_structure:
         "subj"
     shell:
         "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        " -surface-secondary-type {params.secondary_type}"
+
+
+rule update_native_mesh_structure_unfold:
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            space="{space}",
+            den="native",
+            desc="nostruct",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type=lambda wildcards: get_surface_type(wildcards.space),
+        flip_normals=lambda wildcards, output: (
+            ""
+            if wildcards.hemi == "R"
+            else f"wb_command -surface-flip-normals {output} {output} && "
+        ),
+    output:
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname,midthickness|inner|outer}.surf.gii",
+                space="{space,unfold}",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    group:
+        "subj"
+    shell:
+        "cp {input} {output} && "
+        "{params.flip_normals} "
+        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
 
