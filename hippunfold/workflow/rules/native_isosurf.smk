@@ -97,7 +97,7 @@ rule update_native_mesh_structure:
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="ANATOMICAL",
+        surface_type=lambda wildcards: get_surface_type(wildcards.space),
     output:
         surf_gii=temp(
             bids(
