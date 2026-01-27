@@ -1,7 +1,7 @@
 import pandas as pd
 
 # first surface is used as a reference when generating average shape
-ref_hemi = inputs[config["modality"]].zip_lists["hemi"][0]
+ref_hemi = inputs[config["modality"]].zip_lists.get("hemi", ["L"])[0]
 
 
 def get_cmd_templategen_subj_csv(wildcards, input, output):
@@ -875,6 +875,7 @@ rule average_native_surfs:
             surfname=wildcards.surfname,
             label=wildcards.label,
             density=wildcards.density,
+            hemi=ref_hemi,
         ),
     params:
         surf_args=lambda wildcards, input: " ".join(
