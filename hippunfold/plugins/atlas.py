@@ -6,6 +6,9 @@ import logging
 import socket
 from pathlib import Path
 from typing import Any
+import urllib.request
+import zipfile
+import tarfile
 
 import attrs
 from appdirs import AppDirs
@@ -27,8 +30,6 @@ except ImportError:
 # ====================================================================================
 # This section is edited by hand:
 # ------------------------------------------------------------------------------------
-# Global variable to store the commit hash or branch name
-ATLAS_REPO_COMMIT = "atlas-cli"
 
 DEFAULT_OUTPUT_DENSITY = ["8k"]
 
@@ -126,73 +127,6 @@ def validate_output_density(atlas, output_densities, atlas_config):
 
 # helper functions for hippunfold-atlases
 
-
-def git_ls_remote_with_timeout(repo_url: str, timeout: int = 10) -> bool:
-    """
-    Return True if `git ls-remote <repo_url>` succeeds within `timeout` seconds,
-    otherwise False. Does not hang indefinitely.
-    """
-    env = os.environ.copy()
-    env.setdefault("GIT_TERMINAL_PROMPT", "0")
-    try:
-        subprocess.run(
-            ["git", "ls-remote", repo_url],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            env=env,
-        )
-        return True
-    except subprocess.TimeoutExpired:
-        print(f"git ls-remote timed out after {timeout}s")
-        return False
-    except subprocess.CalledProcessError as e:
-        print(
-            f"git ls-remote returned non-zero: {(e.stderr or e.stdout or str(e))[:400]}"
-        )
-        return False
-
-
-def sync_atlas_repo():
-    """
-    Ensures the atlas folder is synced from the public GitHub repository using GitPython.
-    """
-    repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
-    atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
-    internet = git_ls_remote_with_timeout(repo_url)
-
-    branch = ATLAS_REPO_COMMIT
-    try:
-        if atlas_dir.exists() and (atlas_dir / ".git").exists():
-            if internet:
-                repo = Repo(atlas_dir)
-                origin = repo.remotes.origin
-                origin.fetch()
-
-                # Make sure the branch exists locally and tracks remote
-                if branch not in repo.heads:
-                    repo.git.checkout("-b", branch, f"origin/{branch}")
-                else:
-                    repo.git.checkout(branch)
-
-                # Pull latest updates (fast-forward only)
-                repo.git.pull("--ff-only")
-            else:
-                logger.warning(
-                    "WARNING: Git repo not accessible, not updating the existing atlas repository"
-                )
-        else:
-            if not internet:
-                raise ConnectionError(
-                    "Git repo not accessible, error cloning atlas repository"
-                )
-            repo = Repo.clone_from(repo_url, atlas_dir)
-            repo.git.checkout(branch)
-    except GitCommandError as e:
-        logger.error(f"Git error while syncing atlas repository: {e}")
-
-
 def load_atlas_configs(atlas_dirs):
     """
     Loads surface atlas configurations from multiple directories.
@@ -226,6 +160,36 @@ def load_atlas_configs(atlas_dirs):
 
     return atlas
 
+def download_extract():
+    """
+    Download atlases from zenodo and store them in the cache directory.
+
+    """
+
+    url = "zenodo.org/api/records/18393412/files-archive"
+
+    unzip_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
+
+    outdir = str(unzip_dir)
+    os.makedirs(outdir, exist_ok=True)
+
+    zip_path = os.path.join(outdir, "temp.zip")
+    urllib.request.urlretrieve("https://" + url, zip_path)
+
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        zf.extractall(outdir)
+
+    os.remove(zip_path)
+
+    for tar_path in unzip_dir.iterdir():
+        if tar_path.is_file():  # optional safety check
+            extract_dir = tar_path.parent
+            
+            with tarfile.open(tar_path, "r:gz") as tar:
+                tar.extractall(path=extract_dir)
+
+            tar_path.unlink()
+
 
 def get_atlas_configs():
     """
@@ -235,14 +199,15 @@ def get_atlas_configs():
         dict: Merged atlas configurations, prioritizing user-defined ones.
     """
 
-    # Sync the atlas repository
-    sync_atlas_repo()
-
     # Define search locations
     cache_dir = utils.get_download_dir()
 
+    atlas_dir = Path(cache_dir) / "hippunfold-atlases"
+
+    None if atlas_dir.exists() else download_extract()
+
     atlas_dirs = []
-    atlas_dirs.append(Path(cache_dir) / "hippunfold-atlases")
+    atlas_dirs.append(atlas_dir)
 
     return load_atlas_configs(atlas_dirs)
 
