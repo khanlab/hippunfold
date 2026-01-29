@@ -137,11 +137,6 @@ rule update_native_mesh_structure_unfold:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
         surface_type=lambda wildcards: get_surface_type(wildcards.space),
-        flip_normals=lambda wildcards, output: (
-            ""
-            if wildcards.hemi == "R"
-            else f"wb_command -surface-flip-normals {output} {output} && "
-        ),
     output:
         surf_gii=temp(
             bids(
@@ -161,7 +156,7 @@ rule update_native_mesh_structure_unfold:
         "subj"
     shell:
         "cp {input} {output} && "
-        "{params.flip_normals} "
+        "wb_command -surface-flip-normals {output} {output} && "
         "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
