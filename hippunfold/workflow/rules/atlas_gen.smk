@@ -394,47 +394,6 @@ rule update_unfold_mesh_metadata:
         " -surface-secondary-type {params.secondary_type}"
 
 
-rule apply_unfold_rotate_to_atlas:
-    input:
-        surf_gii=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["new_atlas_name"],
-            label="{label}",
-            den="{density}",
-            space="unfold",
-            hemi="{hemi}",
-            suffix="{surfname}.surf.gii",
-        ),
-        rot_xfm=lambda wildcards: Path(workflow.basedir)
-        / f"../resources/etc/unfoldrot.{wildcards.hemi}.txt",
-    params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type="FLAT",
-        flip_normals=lambda wildcards, input, output: (
-            ""
-            if wildcards.hemi == "L"
-            else f"wb_command -surface-flip-normals {output.surf_gii} {output.surf_gii} && "
-        ),
-    output:
-        surf_gii=bids_atlas(
-            root=get_atlas_dir(),
-            template=config["new_atlas_name"],
-            label="{label}",
-            den="{density}",
-            space="unfoldrot",
-            hemi="{hemi}",
-            suffix="{surfname,midthickness|inner|outer}.surf.gii",
-        ),
-    conda:
-        "../envs/workbench.yaml"
-    shell:
-        "wb_command -surface-apply-affine {input.surf_gii} {input.rot_xfm} {output.surf_gii} && "
-        "{params.flip_normals}"
-        "wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
-        " -surface-secondary-type {params.secondary_type}"
-
-
 rule avgtemplate_metric_vol_to_surf:
     input:
         metric_nii=bids_atlas(
@@ -778,7 +737,7 @@ def get_atlas_inputs(wildcards):
                         space="{space}",
                         suffix="{surfname}.surf.gii",
                     ),
-                    space=["unfold", "unfoldrot", "native"],
+                    space=["unfold", "native"],
                     surfname=["inner", "outer", "midthickness"],
                     density=config["density_choices"],
                 )
