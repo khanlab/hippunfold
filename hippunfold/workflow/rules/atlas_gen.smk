@@ -15,6 +15,42 @@ def get_cmd_templategen_subj_csv(wildcards, input, output):
     return " && ".join(cmds)
 
 
+rule align_lr_unfold_2d:
+    """we average L and R together, this ensures they are in the same space"""
+    input:
+        img=bids(
+            root=root,
+            datatype="anat",
+            suffix="{metric}.nii.gz",
+            space="unfold2d",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "extra_per_hemi"
+        ][wildcards.hemi],
+    output:
+        img=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfold2dLR",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d {input} {params.extra_per_hemi} -o {output}"
+
+
 rule templategen_subj_csv:
     input:
         metric_nii=expand(
@@ -22,7 +58,7 @@ rule templategen_subj_csv:
                 root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfold2d",
+                space="unfold2dLR",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -38,7 +74,7 @@ rule templategen_subj_csv:
                 root=root,
                 datatype="anat",
                 suffix="metrics.csv",
-                space="unfold2d",
+                space="unfold2dLR",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -55,7 +91,7 @@ rule template_gen_combined_csv:
                 root=root,
                 datatype="anat",
                 suffix="metrics.csv",
-                space="unfold2d",
+                space="unfold2dLR",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -85,7 +121,7 @@ rule gen_atlas_reg_ants:
                 root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfold2d",
+                space="unfold2dLR",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -129,7 +165,7 @@ rule copy_avgtemplate_warps:
                 root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfold2d",
+                space="unfold2dLR",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -284,17 +320,25 @@ rule reset_header_2d_warp_atlasgen:
 
 
 rule create_unfold_ref_2d:
+    """ sets offset to midthickness val"""
     params:
         dims=lambda wildcards: "x".join(
             config["unfold_vol_ref"][wildcards.label]["dims"][:2]
-        ),
+        )
+        + "x1",
         voxdims=lambda wildcards: "x".join(
-            config["unfold_vol_ref"][wildcards.label]["voxdims"][:2]
+            config["unfold_vol_ref"][wildcards.label]["voxdims"]
         ),
         origin=lambda wildcards: "x".join(
             config["unfold_vol_ref"][wildcards.label]["origin"][:2]
+        )
+        + "x"
+        + str(
+            float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
+            * config["surf_thresholds"]["midthickness"]
+            * -1.0
         ),
-        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"][:2],
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
         extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
             "extra_per_hemi"
         ][wildcards.hemi],
@@ -315,7 +359,7 @@ rule create_unfold_ref_2d:
     shadow:
         "minimal"
     shell:
-        "c2d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.extra_per_hemi} -scale 0 -shift 1 -binarize  -o {output}"
+        "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.extra_per_hemi} -slice z 50%  -o {output}"
 
 
 rule create_unfold_ref_2d_resampled:
@@ -380,7 +424,7 @@ rule gen_unfold_atlas_mesh:
                 label="{label}",
                 resample="{resample}",
                 space="unfold",
-                hemi="{hemi}",
+                hemi="{hemi,R}",
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
             )
         ),
@@ -388,6 +432,37 @@ rule gen_unfold_atlas_mesh:
         "../envs/pyvista.yaml"
     script:
         "../scripts/gen_unfold_atlas_mesh.py"
+
+
+rule gen_unfold_atlas_mesh_flip:
+    input:
+        surf_gii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            resample="{resample}",
+            space="unfold",
+            hemi="R",
+            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+        ),
+    params:
+        z_level=get_unfold_z_level,
+    output:
+        surf_gii=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                resample="{resample}",
+                space="unfold",
+                hemi="{hemi,L}",
+                suffix="{surfname,midthickness|inner|outer}.surf.gii",
+            )
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    shell:
+        "wb_command -surface-flip-lr {input} {output}"
 
 
 def get_unfold_mesh_resample(wildcards):
