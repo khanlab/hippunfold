@@ -215,20 +215,13 @@ rule reset_header_2d_metric_nii:
     """ adjusts header to match the original data
      (since this seems to get garbled in z by ants)"""
     input:
-        ref_nii=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfold2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            label=wildcards.label,
-            metric=wildcards.metric,
-            hemi=wildcards.hemi,
-        )[0],
+        ref_nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            suffix="metricref.nii.gz",
+        ),
         nii=bids_atlas(
             root=root,
             template=config["new_atlas_name"],
@@ -255,20 +248,13 @@ rule reset_header_2d_warp_atlasgen:
     """ adjusts header to match the original data
      (since this seems to get garbled in z by ants)"""
     input:
-        ref_nii=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfold2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            label=wildcards.label,
-            metric=config["new_atlas_metrics"][0],
-            hemi=wildcards.hemi,
-        )[0],
+        ref_nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            suffix="metricref.nii.gz",
+        ),
         nii=bids(
             root=root,
             datatype="warps",
@@ -297,15 +283,62 @@ rule reset_header_2d_warp_atlasgen:
         "../scripts/set_metric_nii_header.py"
 
 
-rule make_metric_ref:
-    input:
-        metric_nii=bids_atlas(
-            root=root,
-            template=config["new_atlas_name"],
-            label="{label}",
-            hemi="{hemi}",
-            suffix="{metric}.nii.gz".format(metric=config["new_atlas_metrics"][0]),
+rule create_unfold_ref_2d:
+    params:
+        dims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["dims"][:2]
         ),
+        voxdims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["voxdims"][:2]
+        ),
+        origin=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["origin"][:2]
+        ),
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"][:2],
+        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "extra_per_hemi"
+        ][wildcards.hemi],
+    output:
+        metric_ref=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                suffix="metricref.nii.gz",
+            )
+        ),
+    group:
+        "subj"
+    conda:
+        "../envs/c3d.yaml"
+    shadow:
+        "minimal"
+    shell:
+        "c2d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.extra_per_hemi} -scale 0 -shift 1 -binarize  -o {output}"
+
+
+rule create_unfold_ref_2d_resampled:
+    params:
+        dims=lambda wildcards: "x".join(
+            [
+                str(int(float(d) * float(wildcards.resample) / 100.0))
+                for d in config["unfold_vol_ref"][wildcards.label]["dims"][:2]
+            ]
+        ),
+        voxdims=lambda wildcards: "x".join(
+            [
+                str(float(d) / (float(wildcards.resample) / 100.0))
+                for d in config["unfold_vol_ref"][wildcards.label]["voxdims"][:2]
+            ]
+        ),
+        origin=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["origin"][:2]
+        ),
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"][:2],
+        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "extra_per_hemi"
+        ][wildcards.hemi],
     output:
         metric_ref=temp(
             bids_atlas(
@@ -317,10 +350,14 @@ rule make_metric_ref:
                 suffix="metricref.nii.gz",
             )
         ),
+    group:
+        "subj"
     conda:
         "../envs/c3d.yaml"
+    shadow:
+        "minimal"
     shell:
-        "c2d {input} -resample {wildcards.resample}% -scale 0 -shift 1 -binarize -o {output}"
+        "c2d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.extra_per_hemi} -scale 0 -shift 1 -binarize  -o {output}"
 
 
 rule gen_unfold_atlas_mesh:
@@ -600,20 +637,13 @@ rule reset_header_2d_subfields_nii:
     """ adjusts header to match the original data
      (since this seems to get garbled in z by ants)"""
     input:
-        ref_nii=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfold2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            label=wildcards.label,
-            metric=config["new_atlas_metrics"],
-            hemi=wildcards.hemi,
-        )[0],
+        ref_nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            suffix="metricref.nii.gz",
+        ),
         nii=bids_atlas(
             root=root,
             template=config["new_atlas_name"],

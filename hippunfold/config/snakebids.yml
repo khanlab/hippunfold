@@ -484,7 +484,7 @@ unfold_vol_ref:
     orient: LAS
     extra_per_hemi:
       L: "-flip xz"
-      R: "-flip xz"
+      R: "-flip z"
 
 
   dentate:
@@ -507,7 +507,7 @@ unfold_vol_ref:
     orient: LAS
     extra_per_hemi:
       L: "-flip xz"
-      R: "-flip xz"
+      R: "-flip z"
 
 
 
