@@ -217,7 +217,7 @@ rule copy_avgtemplate_warps:
         "cp {params.glob_input_invwarp} {output.invwarp}"
 
 
-rule copy_avgtemplate_metric:
+rule unflip_avgtemplate_metric:
     """ copy avgtemplate metric out of avgtemplate folder"""
     input:
         avgtemplate_dir=bids_atlas(
@@ -232,6 +232,9 @@ rule copy_avgtemplate_metric:
             avgtemplate_dir=input.avgtemplate_dir,
             i=config["new_atlas_metrics"].index(wildcards.metric),
         ),
+        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "extra_per_hemi"
+        ][wildcards.hemi],
     output:
         metric=temp(
             bids_atlas(
@@ -243,8 +246,10 @@ rule copy_avgtemplate_metric:
                 suffix="{metric}.nii.gz",
             )
         ),
+    conda:
+        "../envs/c3d.yaml"
     shell:
-        "cp {params.in_metric} {output.metric}"
+        "c3d {params.in_metric} {params.extra_per_hemi} -o {output.metric}"
 
 
 rule reset_header_2d_metric_nii:
@@ -352,8 +357,6 @@ rule create_unfold_ref_2d:
                 suffix="metricref.nii.gz",
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/c3d.yaml"
     shadow:
