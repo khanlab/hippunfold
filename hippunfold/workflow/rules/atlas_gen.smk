@@ -646,7 +646,7 @@ rule warp_subfields_to_avg:
             suffix="subfieldsfrom{subfields_from}.nii.gz".format(
                 subfields_from=config["new_atlas_subfields_from"]
             ),
-            space="unfold2d",
+            space="unfoldLR2d",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -727,7 +727,7 @@ rule reset_header_2d_subfields_nii:
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            desc="subfields",
+            desc="subfieldsunflip",
             suffix="dseg.nii.gz",
         ),
     output:
@@ -736,13 +736,44 @@ rule reset_header_2d_subfields_nii:
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            desc="subfieldsfixhdr",
+            desc="subfieldsunflipfixhdr",
             suffix="dseg.nii.gz",
         ),
     conda:
         "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
+
+
+rule unflip_avg_subfields_nii:
+    input:
+        nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            desc="subfields",
+            suffix="dseg.nii.gz",
+        ),
+    params:
+        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "extra_per_hemi"
+        ][wildcards.hemi],
+    output:
+        nii=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                desc="subfieldsunflip",
+                suffix="dseg.nii.gz",
+            )
+        ),
+    conda:
+        "../envs/c3d.yaml"
+    shell:
+        "c3d {input} {params.extra_per_hemi} -o {output}"
 
 
 rule import_avg_subfields_as_label:
@@ -753,7 +784,7 @@ rule import_avg_subfields_as_label:
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            desc="subfieldsfixhdr",
+            desc="subfieldsunflipfixhdr",
             suffix="dseg.nii.gz",
         ),
         label_list=Path(workflow.basedir)
