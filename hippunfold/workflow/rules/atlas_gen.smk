@@ -28,8 +28,8 @@ rule align_lr_unfold_2d:
             **inputs.subj_wildcards,
         ),
     params:
-        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
-            "extra_per_hemi"
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
         ][wildcards.hemi],
     output:
         img=temp(
@@ -48,7 +48,7 @@ rule align_lr_unfold_2d:
     group:
         "subj"
     shell:
-        "c3d {input} {params.extra_per_hemi} -o {output}"
+        "c3d {input} {params.flip_per_hemi} -o {output}"
 
 
 rule templategen_subj_csv:
@@ -232,8 +232,8 @@ rule unflip_avgtemplate_metric:
             avgtemplate_dir=input.avgtemplate_dir,
             i=config["new_atlas_metrics"].index(wildcards.metric),
         ),
-        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
-            "extra_per_hemi"
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
         ][wildcards.hemi],
     output:
         metric=temp(
@@ -249,7 +249,7 @@ rule unflip_avgtemplate_metric:
     conda:
         "../envs/c3d.yaml"
     shell:
-        "c3d {params.in_metric} {params.extra_per_hemi} -o {output.metric}"
+        "c3d {params.in_metric} {params.flip_per_hemi} -o {output.metric}"
 
 
 rule reset_header_2d_metric_nii:
@@ -344,8 +344,8 @@ rule create_unfold_ref_2d:
             * -1.0
         ),
         orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
-        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
-            "extra_per_hemi"
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
         ][wildcards.hemi],
     output:
         metric_ref=temp(
@@ -362,7 +362,7 @@ rule create_unfold_ref_2d:
     shadow:
         "minimal"
     shell:
-        "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.extra_per_hemi} -slice z 50%  -o {output}"
+        "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -slice z 50%  -o {output}"
 
 
 rule create_unfold_ref_2d_resampled:
@@ -383,8 +383,8 @@ rule create_unfold_ref_2d_resampled:
             config["unfold_vol_ref"][wildcards.label]["origin"][:2]
         ),
         orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"][:2],
-        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
-            "extra_per_hemi"
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
         ][wildcards.hemi],
     output:
         metric_ref=temp(
@@ -404,7 +404,7 @@ rule create_unfold_ref_2d_resampled:
     shadow:
         "minimal"
     shell:
-        "c2d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.extra_per_hemi} -scale 0 -shift 1 -binarize  -o {output}"
+        "c2d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -scale 0 -shift 1 -binarize  -o {output}"
 
 
 rule gen_unfold_atlas_mesh:
@@ -756,8 +756,8 @@ rule unflip_avg_subfields_nii:
             suffix="dseg.nii.gz",
         ),
     params:
-        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
-            "extra_per_hemi"
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
         ][wildcards.hemi],
     output:
         nii=temp(
@@ -773,7 +773,7 @@ rule unflip_avg_subfields_nii:
     conda:
         "../envs/c3d.yaml"
     shell:
-        "c3d {input} {params.extra_per_hemi} -o {output}"
+        "c3d {input} {params.flip_per_hemi} -o {output}"
 
 
 rule import_avg_subfields_as_label:

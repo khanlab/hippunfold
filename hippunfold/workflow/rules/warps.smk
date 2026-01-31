@@ -218,8 +218,8 @@ rule create_unfold_ref:
             config["unfold_vol_ref"][wildcards.label]["origin"]
         ),
         orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
-        extra_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
-            "extra_per_hemi"
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
         ][wildcards.hemi],
     output:
         nii=temp(
@@ -238,4 +238,4 @@ rule create_unfold_ref:
     conda:
         "../envs/c3d.yaml"
     shell:
-        "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.extra_per_hemi} -o {output.nii} "
+        "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -o {output.nii} "

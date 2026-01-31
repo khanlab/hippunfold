@@ -482,7 +482,7 @@ unfold_vol_ref:
       - '40'
       - '2.5'
     orient: LAS
-    extra_per_hemi:
+    flip_per_hemi:
       L: "-flip xz"
       R: "-flip z"
 
@@ -505,7 +505,7 @@ unfold_vol_ref:
       - '40'
       - '2.5'
     orient: LAS
-    extra_per_hemi:
+    flip_per_hemi:
       L: "-flip xz"
       R: "-flip z"
 
