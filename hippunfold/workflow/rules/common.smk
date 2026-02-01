@@ -24,7 +24,7 @@ def bids_log(rule_name, **kwargs):
 
 
 def get_atlas_dir():
-    return Path(utils.get_download_dir()) / "atlas"
+    return Path(utils.get_download_dir()) / "atlases"
 
 
 def expand_hemi():

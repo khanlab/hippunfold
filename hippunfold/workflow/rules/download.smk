@@ -21,7 +21,7 @@ rule download_surf_template_atlas:
             config["resource_urls"]["atlas"][wildcards.atlas]
         ),
     output:
-        unzip_dir=temp(directory(Path(download_dir) / "atlas_dl" / "{atlas}")),
+        unzip_dir=temp(directory(Path(download_dir) / "atlases_dl" / "tpl-{atlas}")),
     shadow:
         "minimal"
     shell:
@@ -30,7 +30,7 @@ rule download_surf_template_atlas:
 
 rule cp_atlas_surf_gii:
     input:
-        unzip_dir=Path(download_dir) / "atlas_dl" / "{atlas}",
+        unzip_dir=Path(download_dir) / "atlases_dl" / "tpl-{atlas}",
     params:
         path=lambda wildcards, input: bids_atlas(
             root=input.unzip_dir,
@@ -55,9 +55,9 @@ rule cp_atlas_surf_gii:
         "cp {params.path} {output}"
 
 
-rule cp_atlas_shape_gii:
+rule cp_atlas_metric_gii:
     input:
-        unzip_dir=Path(download_dir) / "atlas_dl" / "{atlas}",
+        unzip_dir=Path(download_dir) / "atlases_dl" / "tpl-{atlas}",
     params:
         path=lambda wildcards, input: bids_atlas(
             root=input.unzip_dir,
