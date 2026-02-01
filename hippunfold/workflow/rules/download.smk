@@ -15,6 +15,69 @@ rule download_extract_template:
         "../scripts/download.py"
 
 
+rule download_surf_template_atlas:
+    params:
+        url=lambda wildcards: config["resource_urls"]["atlas"][wildcards.atlas],
+    output:
+        unzip_dir=temp(directory(Path(download_dir) / "atlas_dl" / "{atlas}")),
+    shadow:
+        "minimal"
+    script:
+        "../scripts/download.py"
+
+
+rule cp_atlas_surf_gii:
+    input:
+        unzip_dir=Path(download_dir) / "atlas_dl" / "{atlas}",
+    params:
+        path=lambda wildcards, input: bids_atlas(
+            root=input.unzip_dir,
+            template=wildcards.atlas,
+            hemi=wildcards.hemi,
+            label=wildcards.label,
+            den=wildcards.density,
+            space=wildcards.space,
+            suffix=f"{wildcards.surf_name}.surf.gii",
+        ),
+    output:
+        atlas_file=bids_atlas(
+            root=get_atlas_dir(),
+            template="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            space="{space}",
+            suffix="{surf_name}.surf.gii",
+        ),
+    shell:
+        "cp {params.path} {output}"
+
+
+rule cp_atlas_shape_gii:
+    input:
+        unzip_dir=Path(download_dir) / "atlas_dl" / "{atlas}",
+    params:
+        path=lambda wildcards, input: bids_atlas(
+            root=input.unzip_dir,
+            template=wildcards.atlas,
+            hemi=wildcards.hemi,
+            label=wildcards.label,
+            den=wildcards.density,
+            suffix=f"{wildcards.metricname}.{wildcards.metrictype}.gii",
+        ),
+    output:
+        atlas_file=bids_atlas(
+            root=get_atlas_dir(),
+            template="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            suffix="{metricname}.{metrictype}.gii",
+        ),
+    shell:
+        "cp {params.path} {output}"
+
+
 ## unpack template
 # this is used in both shape_inject.smk and templateseg.smk, so instead of having redundant rules I will simply apply them hemisphere
 # Template-based segmentation supports templates that have only a single hemisphere

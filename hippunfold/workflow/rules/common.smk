@@ -24,7 +24,7 @@ def bids_log(rule_name, **kwargs):
 
 
 def get_atlas_dir():
-    return Path(utils.get_download_dir()) / "hippunfold-atlases"
+    return Path(utils.get_download_dir()) / "atlas"
 
 
 def expand_hemi():
