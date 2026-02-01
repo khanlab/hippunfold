@@ -466,41 +466,49 @@ hippdwi_opts:
 unfold_vol_ref:
   hipp:
     dims:
-      - '256'
       - '128' 
+      - '256'
       - '16'
     voxdims:
       - '0.15625'
       - '0.15625'
       - '0.15625'
     origin:
-      - '0'
       - '200'
       - '0'
+      - '0'
     extent:
-      - '40'
       - '20'
+      - '40'
       - '2.5'
-    orient: RPI
+    orient: LAS
+    flip_per_hemi:
+      L: "-flip xz"
+      R: "-flip z"
+
 
   dentate:
     dims:
-      - '256'
       - '32'
+      - '256'
       - '16'
     voxdims:
       - '0.15625'
       - '0.15625'
       - '0.15625'
     origin:
-      - '0'
       - '200'
       - '0'
+      - '0'
     extent:
-      - '40'
       - '5'
+      - '40'
       - '2.5'
-    orient: RPI
+    orient: LAS
+    flip_per_hemi:
+      L: "-flip xz"
+      R: "-flip z"
+
 
 
 shape_inject:

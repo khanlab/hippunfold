@@ -13,7 +13,7 @@ def get_structure(hemi, label):
 
 
 def get_surface_type(space):
-    if space == "unfold" or space == "unfoldrot":
+    if space == "unfold":
         return "FLAT"
     else:
         return "ANATOMICAL"

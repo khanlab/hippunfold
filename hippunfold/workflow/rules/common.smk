@@ -168,7 +168,7 @@ def get_inputs_spec_file(label, density):
             ),
             surfname=["midthickness"],
             density=density,
-            space=["unfold", "unfoldrot"],
+            space=["unfold"],
             allow_missing=True,
         )
     )
