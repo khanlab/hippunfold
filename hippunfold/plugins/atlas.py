@@ -39,7 +39,7 @@ ATLAS_METADATA = {
 
 
 DEFAULT_OUTPUT_DENSITY = ["8k"]
-OUTPUT_DENSITIES = ["native","512", "2k", "8k", "18k"]
+OUTPUT_DENSITIES = ["native", "512", "2k", "8k", "18k"]
 
 # Default settings for atlas creation
 DEFAULT_RESAMPLE_FACTORS = [

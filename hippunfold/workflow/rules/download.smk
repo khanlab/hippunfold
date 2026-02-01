@@ -16,14 +16,16 @@ rule download_extract_template:
 
 
 rule download_surf_template_atlas:
-    params:
-        url=lambda wildcards: config["resource_urls"]["atlas"][wildcards.atlas],
+    input:
+        zip_file=lambda wildcards: storage(
+            config["resource_urls"]["atlas"][wildcards.atlas]
+        ),
     output:
         unzip_dir=temp(directory(Path(download_dir) / "atlas_dl" / "{atlas}")),
     shadow:
         "minimal"
-    script:
-        "../scripts/download.py"
+    shell:
+        "unzip {input} -d {output}"
 
 
 rule cp_atlas_surf_gii:
