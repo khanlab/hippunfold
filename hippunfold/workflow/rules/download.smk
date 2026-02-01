@@ -35,7 +35,7 @@ rule cp_atlas_surf_gii:
         unzip_dir=Path(download_dir) / "atlases_dl" / "tpl-{atlas}",
     params:
         path=lambda wildcards, input: bids_atlas(
-            root=input.unzip_dir,
+            root=Path(input.unzip_dir).parent,
             template=wildcards.atlas,
             hemi=wildcards.hemi,
             label=wildcards.label,
@@ -62,7 +62,7 @@ rule cp_atlas_metric_gii:
         unzip_dir=Path(download_dir) / "atlases_dl" / "tpl-{atlas}",
     params:
         path=lambda wildcards, input: bids_atlas(
-            root=input.unzip_dir,
+            root=Path(input.unzip_dir).parent,
             template=wildcards.atlas,
             hemi=wildcards.hemi,
             label=wildcards.label,
