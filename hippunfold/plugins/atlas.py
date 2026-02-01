@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import socket
-import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -78,6 +76,57 @@ def get_unused_densities(output_density):
 # snakebids plugin definition
 
 
+def load_atlas_configs(atlas_dirs):
+    """
+    Loads surface atlas configurations from multiple directories.
+
+    Args:
+        atlas_dirs (list of str or Path): List of directories to search for surface atlas.
+        The later directories in the list override the earlier ones.
+
+    Returns:
+        dict: A dictionary where keys are atlas names and values are their configurations.
+    """
+    atlas = {}
+
+    for atlas_dir in atlas_dirs:
+        atlas_path = Path(atlas_dir)
+        if not atlas_path.exists():
+            continue
+
+        for subdir in atlas_path.iterdir():
+            if subdir.is_dir():
+                template_json = subdir / "template_description.json"
+                if template_json.exists():
+                    try:
+                        with open(template_json, "r") as f:
+                            config_data = json.load(f)
+                        atlas[subdir.name.removeprefix("tpl-")] = (
+                            config_data  # Override existing atlas if needed
+                        )
+                    except (json.JSONDecodeError, IOError) as e:
+                        print(f"Warning: Failed to load {template_json}: {e}")
+
+    return atlas
+
+
+def get_atlas_configs():
+    """
+    Gets surface atlas configurations from the cache directory.
+
+    Returns:
+        dict: Merged atlas configurations, prioritizing user-defined ones.
+    """
+
+    # Define search locations
+    cache_dir = utils.get_download_dir()
+
+    atlas_dirs = []
+    atlas_dirs.append(Path(cache_dir) / "atlases")
+
+    return load_atlas_configs(atlas_dirs)
+
+
 @attrs.define
 class AtlasConfig(PluginBase):
     """Dynamically add CLI parameters for the atlas.
@@ -95,6 +144,7 @@ class AtlasConfig(PluginBase):
     """
 
     argument_group: str | None = None
+    atlas_config: dict = attrs.field(factory=get_atlas_configs)
 
     @bidsapp.hookimpl
     def add_cli_arguments(
@@ -109,7 +159,6 @@ class AtlasConfig(PluginBase):
         self.try_add_argument(
             group,
             "--atlas",
-            choices=ATLASES,
             action="store",
             type=str,
             dest="atlas",
@@ -196,4 +245,7 @@ class AtlasConfig(PluginBase):
             DEFAULT_RESAMPLE_FACTORS
         )
         config["unused_density"] = get_unused_densities(output_density)
+        config["builtin_atlases"] = ATLASES
+
         config["atlas_metadata"] = ATLAS_METADATA
+        config["atlas_metadata"].update(self.atlas_config)

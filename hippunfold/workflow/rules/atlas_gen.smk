@@ -446,7 +446,7 @@ rule gen_unfold_atlas_mesh_flip:
             resample="{resample}",
             space="unfold",
             hemi="R",
-            suffix="{surfname,midthickness|inner|outer}.surf.gii",
+            suffix="{surfname}.surf.gii",
         ),
     params:
         z_level=get_unfold_z_level,
@@ -1059,3 +1059,6 @@ rule write_template_json:
         ),
     script:
         "../scripts/write_template_json.py"
+
+
+# TODO add rule to create zip file of new atlas and push to zenodo (need to add CLI to enable this)

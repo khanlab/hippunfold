@@ -22,6 +22,8 @@ rule download_surf_template_atlas:
         ),
     output:
         unzip_dir=temp(directory(Path(download_dir) / "atlases_dl" / "tpl-{atlas}")),
+    wildcard_constraints:
+        atlas="|".join(config["builtin_atlases"]),
     shadow:
         "minimal"
     shell:
