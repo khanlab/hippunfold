@@ -504,7 +504,7 @@ rule update_unfold_mesh_metadata:
     conda:
         "../envs/workbench.yaml"
     shell:
-        "wb_command -surface-flip-normals {input} {output} &&"
+        "wb_command -surface-flip-normals {input} {output} && "
         "wb_command -set-structure {output} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
