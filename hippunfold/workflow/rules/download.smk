@@ -5,6 +5,7 @@ download_dir = utils.get_download_dir()
 
 
 rule download_extract_template:
+    """Note: OSF urls don't seem to be supported with snakemake storage plugin"""
     params:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
