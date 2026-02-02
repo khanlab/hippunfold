@@ -2,14 +2,11 @@ from __future__ import annotations
 
 import argparse
 import logging
-import socket
-import subprocess
 from pathlib import Path
 from typing import Any
 
 import attrs
 from appdirs import AppDirs
-from git import GitCommandError, Repo, cmd
 from snakebids import bidsapp
 from snakebids.bidsapp.args import ArgumentGroups
 from snakebids.plugins.base import PluginBase
@@ -27,10 +24,20 @@ except ImportError:
 # ====================================================================================
 # This section is edited by hand:
 # ------------------------------------------------------------------------------------
-# Global variable to store the commit hash or branch name
-ATLAS_REPO_COMMIT = "atlas-cli"
+
+ATLASES = ["multihist7"]
+DEFAULT_ATLAS = "multihist7"
+
+ATLAS_METADATA = {
+    "multihist7": {
+        "metric_wildcards": ["curvature", "gyrification", "thickness"],
+        "label_wildcards": ["hipp", "dentate"],
+    }
+}
+
 
 DEFAULT_OUTPUT_DENSITY = ["8k"]
+OUTPUT_DENSITIES = ["native", "512", "2k", "8k", "18k"]
 
 # Default settings for atlas creation
 DEFAULT_RESAMPLE_FACTORS = [
@@ -61,136 +68,12 @@ def resample_factors_to_densities(resample_factors):
     return [resample_to_density(r) for r in resample_factors]
 
 
-def sort_densities(densities):
-    def parse_density(d):
-        if isinstance(d, str) and d.endswith("k"):
-            return int(float(d[:-1]) * 1000)
-        return int(d)
-
-    return sorted(densities, key=parse_density)
-
-
-def get_all_densities(atlas_config):
-    """Return a sorted list of all unique output densities across all atlases."""
-    densities = set()
-    for config in atlas_config.values():
-        densities.update(config.get("density_wildcards", []))
-    return ["native"] + sort_densities(densities)
-
-
-def get_unfoldreg_density(atlas_config, atlas):
-    """Get the density to use for unfoldreg, which is the highest density available for the chosen atlas."""
-    return sort_densities(atlas_config[atlas]["density_wildcards"])[-1]
-
-
-def get_unused_densities(atlas_config, atlas, output_density):
+def get_unused_densities(output_density):
     """Gets the list of densities not used, so we can delete intermediate files."""
-    return list(
-        set(["native"] + atlas_config[atlas]["density_wildcards"]) - set(output_density)
-    )
+    return list(set(OUTPUT_DENSITIES) - set(output_density))
 
 
-def format_density_help(atlas_config):
-    lines = ["Available output densities per atlas:\n"]
-    for atlas, config in atlas_config.items():
-        if "density_wildcards" in config:
-            densities = ", ".join(config["density_wildcards"])
-            lines.append(f"  {atlas}=[{densities}]")
-    return "\n".join(lines)
-
-
-def validate_output_density(atlas, output_densities, atlas_config):
-    """
-    Validate that each output_density is allowed for the selected atlas.
-
-    Parameters:
-        atlas (str): The name of the selected atlas.
-        output_densities (str or list): One or more densities to validate.
-        atlas_config (dict): Dictionary of atlas options, with allowed densities under ['density_wildcards'].
-
-    Raises:
-        ValueError: If any of the provided densities are invalid.
-    """
-    if isinstance(output_densities, str):
-        output_densities = [output_densities]
-
-    allowed = set(atlas_config[atlas]["density_wildcards"]) | {"native"}
-
-    invalid = [d for d in output_densities if d not in allowed]
-    if invalid:
-        raise ValueError(
-            f"Invalid output_density value(s) for atlas '{atlas}': {invalid}. "
-            f"Allowed values: {sorted(allowed)}"
-        )
-
-
-# helper functions for hippunfold-atlases
-
-
-def git_ls_remote_with_timeout(repo_url: str, timeout: int = 10) -> bool:
-    """
-    Return True if `git ls-remote <repo_url>` succeeds within `timeout` seconds,
-    otherwise False. Does not hang indefinitely.
-    """
-    env = os.environ.copy()
-    env.setdefault("GIT_TERMINAL_PROMPT", "0")
-    try:
-        subprocess.run(
-            ["git", "ls-remote", repo_url],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            env=env,
-        )
-        return True
-    except subprocess.TimeoutExpired:
-        print(f"git ls-remote timed out after {timeout}s")
-        return False
-    except subprocess.CalledProcessError as e:
-        print(
-            f"git ls-remote returned non-zero: {(e.stderr or e.stdout or str(e))[:400]}"
-        )
-        return False
-
-
-def sync_atlas_repo():
-    """
-    Ensures the atlas folder is synced from the public GitHub repository using GitPython.
-    """
-    repo_url = "https://github.com/khanlab/hippunfold-atlases.git"
-    atlas_dir = Path(utils.get_download_dir()) / "hippunfold-atlases"
-    internet = git_ls_remote_with_timeout(repo_url)
-
-    branch = ATLAS_REPO_COMMIT
-    try:
-        if atlas_dir.exists() and (atlas_dir / ".git").exists():
-            if internet:
-                repo = Repo(atlas_dir)
-                origin = repo.remotes.origin
-                origin.fetch()
-
-                # Make sure the branch exists locally and tracks remote
-                if branch not in repo.heads:
-                    repo.git.checkout("-b", branch, f"origin/{branch}")
-                else:
-                    repo.git.checkout(branch)
-
-                # Pull latest updates (fast-forward only)
-                repo.git.pull("--ff-only")
-            else:
-                logger.warning(
-                    "WARNING: Git repo not accessible, not updating the existing atlas repository"
-                )
-        else:
-            if not internet:
-                raise ConnectionError(
-                    "Git repo not accessible, error cloning atlas repository"
-                )
-            repo = Repo.clone_from(repo_url, atlas_dir)
-            repo.git.checkout(branch)
-    except GitCommandError as e:
-        logger.error(f"Git error while syncing atlas repository: {e}")
+# snakebids plugin definition
 
 
 def load_atlas_configs(atlas_dirs):
@@ -229,25 +112,19 @@ def load_atlas_configs(atlas_dirs):
 
 def get_atlas_configs():
     """
-    Gets surface atlas configurations from both the centralized repo and cache directory.
+    Gets surface atlas configurations from the cache directory.
 
     Returns:
         dict: Merged atlas configurations, prioritizing user-defined ones.
     """
 
-    # Sync the atlas repository
-    sync_atlas_repo()
-
     # Define search locations
     cache_dir = utils.get_download_dir()
 
     atlas_dirs = []
-    atlas_dirs.append(Path(cache_dir) / "hippunfold-atlases")
+    atlas_dirs.append(Path(cache_dir) / "atlases")
 
     return load_atlas_configs(atlas_dirs)
-
-
-# snakebids plugin definition
 
 
 @attrs.define
@@ -282,14 +159,27 @@ class AtlasConfig(PluginBase):
         self.try_add_argument(
             group,
             "--atlas",
-            choices=list(self.atlas_config.keys()),
             action="store",
             type=str,
             dest="atlas",
-            default="multihist7",
+            default=DEFAULT_ATLAS,
             help=(
                 "Select the atlas (unfolded space) to use for subfield labels. (default: %(default)s)"
             ),
+        )
+
+        self.try_add_argument(
+            group,
+            "--output-density",
+            "--output_density",
+            action="store",
+            type=str,
+            dest="output_density",
+            default=DEFAULT_OUTPUT_DENSITY,
+            choices=OUTPUT_DENSITIES,
+            nargs="+",
+            help="Sets the output vertex density for participant-level results. Note: the density refers to the number of vertices in the hipp surface; the dentate has 1/4 the number of vertices.\n"
+            + " (default: %(default)s)",
         )
 
         self.try_add_argument(
@@ -326,21 +216,6 @@ class AtlasConfig(PluginBase):
             ),
         )
 
-        self.try_add_argument(
-            group,
-            "--output-density",
-            "--output_density",
-            action="store",
-            type=str,
-            dest="output_density",
-            default=DEFAULT_OUTPUT_DENSITY,
-            choices=get_all_densities(self.atlas_config),
-            nargs="+",
-            help="Sets the output vertex density for participant-level results. Note: the density refers to the number of vertices in the hipp surface; the dentate has 1/4 the number of vertices.\n"
-            + format_density_help(self.atlas_config)
-            + " (default: %(default)s)",
-        )
-
     @bidsapp.hookimpl
     def update_cli_namespace(self, namespace: dict[str, Any], config: dict[str, Any]):
         """Add atlas to config."""
@@ -360,18 +235,17 @@ class AtlasConfig(PluginBase):
                     "--new_atlas_subfields_from must be specified when using group_create_atlas"
                 )
 
-        validate_output_density(atlas, output_density, self.atlas_config)
-
         config["atlas"] = atlas
         config["new_atlas_name"] = new_atlas_name
         config["new_atlas_subfields_from"] = new_atlas_subfields_from
-        config["atlas_metadata"] = self.atlas_config
         config["output_density"] = output_density
-        config["unfoldreg_density"] = get_unfoldreg_density(self.atlas_config, atlas)
+        config["unfoldreg_density"] = OUTPUT_DENSITIES[-1]
         config["resample_factors"] = DEFAULT_RESAMPLE_FACTORS
         config["density_choices"] = resample_factors_to_densities(
             DEFAULT_RESAMPLE_FACTORS
         )
-        config["unused_density"] = get_unused_densities(
-            self.atlas_config, atlas, output_density
-        )
+        config["unused_density"] = get_unused_densities(output_density)
+        config["builtin_atlases"] = ATLASES
+
+        config["atlas_metadata"] = ATLAS_METADATA
+        config["atlas_metadata"].update(self.atlas_config)
