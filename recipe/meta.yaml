@@ -23,7 +23,7 @@ build:
 requirements:
   host:
     - python
-    - poetry-core
+    - hatchling
     - pip
   run:
     - python >=3.9,<4.0
