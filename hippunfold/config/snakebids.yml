@@ -487,7 +487,7 @@ nnunet_models:
   neonateT2w_v2:
     url: 'https://zenodo.org/records/17618449/files/Dataset302_dhcp_T2w_manuallycorrected.tar.gz'
     nnunet_version: v2
-    dataset_id: Dataset302_dhcp_T2w_manuallycorrected
+    dataset_id: 302
     configuration: 3d_fullres
     trainer: nnUNetTrainer
     plans: nnUNetPlans
@@ -496,7 +496,7 @@ nnunet_models:
   neonateT1w_v2:
     url: 'https://zenodo.org/records/17618439/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz'
     nnunet_version: v2
-    dataset_id: Dataset301_dhcp_T1w_manuallycorrected
+    dataset_id: 301
     configuration: 3d_fullres
     trainer: nnUNetTrainer
     plans: nnUNetPlans
@@ -505,7 +505,7 @@ nnunet_models:
   neonateT1T2w_v2:
     url: 'https://zenodo.org/records/17618437/files/Dataset303_dhcp_T1wT2w_manuallycorrected.tar.gz'
     nnunet_version: v2
-    dataset_id: Dataset303_dhcp_T1wT2w_manuallycorrected
+    dataset_id: 303
     configuration: 3d_fullres
     trainer: nnUNetTrainer
     plans: nnUNetPlans

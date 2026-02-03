@@ -47,29 +47,21 @@ def get_model_tar():
     if url == None:
         print(f"ERROR: {model_name} does not exist in nnunet_models in the config file")
 
-    tarfile = str(
-        (Path(download_dir) / "model" / Path(url).name).absolute()
-    ).removesuffix(".gz")
+    tarfile = str((Path(download_dir) / "model" / Path(url).name).absolute())
     return tarfile
 
 
 def get_model_dir():
-    return get_model_tar().removesuffix(".tar")
+    return get_model_tar().removesuffix(".gz").removesuffix(".tar")
 
 
 rule download_nnunet_model:
     input:
         url=storage(model_dict["url"]),
-    params:
-        cmd=lambda wildcards, input: (
-            "gunzip -c {input} > {output}"
-            if Path(input.url).suffix == ".gz"
-            else "cp {input} {output}"
-        ),
     output:
         model_tar=temp(get_model_tar()),
     shell:
-        "{params.cmd}"
+        "cp {input} {output}"
 
 
 def get_cmd_copy_inputs(wildcards, input):
@@ -88,11 +80,13 @@ def get_cmd_copy_inputs(wildcards, input):
 rule unpack_nnunet_model:
     """ Unpack nnunet model tar to temp folder to check contents"""
     input:
-        get_model_tar(),
+        tar=get_model_tar(),
+    params:
+        tar_opts=lambda wildcards, input: "-xzf" if input.tar[-2:] == "gz" else "-xf",
     output:
         directory(get_model_dir()),
     shell:
-        "mkdir -p {output} && tar -xf {input} -C {output}"
+        "mkdir -p {output} && tar {params.tar_opts} {input} -C {output}"
 
 
 if model_dict["nnunet_version"] == "v1":
@@ -160,6 +154,9 @@ if model_dict["nnunet_version"] == "v2":
             model_tar=get_model_tar(),
         params:
             cmd_copy_inputs=get_cmd_copy_inputs,
+            tar_opts=lambda wildcards, input: (
+                "-xzf" if input.model_tar[-2:] == "gz" else "-xf"
+            ),
             temp_lbl="templbl/temp.nii.gz",
             model_dir="tempmodel",
             in_folder="tempimg",
@@ -205,7 +202,7 @@ if model_dict["nnunet_version"] == "v2":
 
             "{params.cmd_copy_inputs} && "
 
-            "tar -xf {input.model_tar} -C {params.model_dir} && "
+            "tar {params.tar_opts} {input.model_tar} -C {params.model_dir} && "
 
             "export nnUNet_results={params.model_dir}/nnunet_v2 && "
             "export nnUNet_raw={params.model_dir}/nnunet_v2/nnUNet_raw && "
