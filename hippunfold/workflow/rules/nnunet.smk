@@ -143,12 +143,6 @@ if model_dict["nnunet_version"] == "v1":
         conda:
             "../envs/nnunet.yaml"
         shell:
-            #create temp folders
-            #cp input image to temp folder
-            #set nnunet env var to point to model
-            #set threads
-            # run inference
-            #copy from temp output folder to final output
             "mkdir -p {params.in_folder} {params.out_folder} && "
             "{params.cmd_copy_inputs} && "
             "export RESULTS_FOLDER={input.model_dir} && "
@@ -207,7 +201,6 @@ if model_dict["nnunet_version"] == "v2":
         conda:
             "../envs/nnunetv2.yaml"
         shell:
-            # Create temp folders
             "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
 
             "{params.cmd_copy_inputs} && "
@@ -233,14 +226,7 @@ if model_dict["nnunet_version"] == "v2":
             "-device {params.device} "
             "{params.tta} "
             "&> {log} && "
-
             "cp {params.temp_lbl} {output.nnunet_seg}"
-            # Copy input images
-            # Extract model tar
-            # Set nnUNet v2 environment variables - handle nested nnunet directory structure
-            # Detect available folds
-            # Run nnUNet v2 prediction with explicit device specification
-            # Copy output
 
 
 def get_f3d_ref(wildcards, input):

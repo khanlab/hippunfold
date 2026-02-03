@@ -494,7 +494,7 @@ nnunet_models:
     checkpoint: checkpoint_best.pth
 
   neonateT1w_v2:
-    url: 'https://zenodo.org/records/17618449/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz'
+    url: 'https://zenodo.org/records/17618439/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz'
     nnunet_version: v2
     dataset_id: Dataset301_dhcp_T1w_manuallycorrected
     configuration: 3d_fullres
