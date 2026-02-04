@@ -245,7 +245,10 @@ parse_args:
       - synthseg_v0.1
       - synthseg_v0.2
       - neonateT1w_v2
+      - neonateT2w_v2
+      - neonateT12w_v2
       - ADNI_T1w_v1
+      - neonate_synthseg
 
   --enable-bids-validation:
     help: |
@@ -427,66 +430,66 @@ tissue_atlas_mapping:
 nnunet_models:
   T1w:
     url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
-    nnunet_version: v1
+    arch_version: nnunet_v1
     task: Task101_hcp1200_T1w
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
   T2w:
     url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar'
-    nnunet_version: v1
+    arch_version: nnunet_v1
     task: Task102_hcp1200_T2w
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
   hippb500: 
     url: 'https://zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
-    nnunet_version: v1
+    arch_version: nnunet_v1
     task: Task110_hcp1200_b1000crop
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
 #  neonateT1w:
 #    url: 'https://zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
-#    nnunet_version: v1
+#    arch_version: nnunet_v1
 #    task: Task205_hcp1200_b1000_finetuneround2_dhcp_T1w
 #    checkpoint:  model_best
 #    trainer: nnUNetTrainerV2
   neonateT1w: 
     url: 'https://zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
-    nnunet_version: v1
+    arch_version: nnunet_v1
     task: Task301_dhcp_T1w_synthseg_manuallycorrected
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
 
   T1T2w:
     url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
-    nnunet_version: v1
+    arch_version: nnunet_v1
     task: Task103_hcp1200_T1T2w
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
 
   synthseg_v0.1: 
     url: 'https://zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
-    nnunet_version: v1
+    arch_version: nnunet_v1
     task: Task102_synsegGenDetailed
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
 
   synthseg_v0.2:
     url: 'https://zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
-    nnunet_version: v1
+    arch_version: nnunet_v1
     task: Task203_synthseg
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
 
   ADNI_T1w_v1:
     url: 'https://zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
-    nnunet_version: v1
+    arch_version: nnunet_v1
     task: Task301_ADNI_T1w_successful
     checkpoint:  model_best # --- confirm this
     trainer: nnUNetTrainer  # --- confirm this
 
   neonateT2w_v2:
     url: 'https://zenodo.org/records/17618449/files/Dataset302_dhcp_T2w_manuallycorrected.tar.gz'
-    nnunet_version: v2
+    arch_version: nnunet_v2
     dataset_id: 302
     configuration: 3d_fullres
     trainer: nnUNetTrainer
@@ -495,7 +498,7 @@ nnunet_models:
 
   neonateT1w_v2:
     url: 'https://zenodo.org/records/17618439/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz'
-    nnunet_version: v2
+    arch_version: nnunet_v2
     dataset_id: 301
     configuration: 3d_fullres
     trainer: nnUNetTrainer
@@ -504,13 +507,17 @@ nnunet_models:
 
   neonateT1T2w_v2:
     url: 'https://zenodo.org/records/17618437/files/Dataset303_dhcp_T1wT2w_manuallycorrected.tar.gz'
-    nnunet_version: v2
+    arch_version: nnunet_v2
     dataset_id: 303
     configuration: 3d_fullres
     trainer: nnUNetTrainer
     plans: nnUNetPlans
     checkpoint: checkpoint_best.pth
 
+  neonate_synthseg:
+    url: 'https://zenodo.org/records/17742012/files/synthseg.tar.xz'
+    arch_version: synthseg_v2
+    checkpoint: last.ckpt
 
 
 

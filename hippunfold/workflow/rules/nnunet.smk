@@ -89,7 +89,7 @@ rule unpack_nnunet_model:
         "mkdir -p {output} && tar {params.tar_opts} {input} -C {output}"
 
 
-if model_dict["nnunet_version"] == "v1":
+if model_dict["arch_version"] == "nnunet_v1":
 
     rule run_inference_nnunet_v1:
         """This rule uses either GPU or CPU .
@@ -144,8 +144,7 @@ if model_dict["nnunet_version"] == "v1":
             "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
             "cp {params.temp_lbl} {output.nnunet_seg}"
 
-
-if model_dict["nnunet_version"] == "v2":
+elif model_dict["arch_version"] == "nnunet_v2":
 
     rule run_inference_nnunet_v2:
         """nnUNet v2 inference with tar extraction in shadow directory"""
@@ -224,6 +223,127 @@ if model_dict["nnunet_version"] == "v2":
             "{params.tta} "
             "&> {log} && "
             "cp {params.temp_lbl} {output.nnunet_seg}"
+
+elif model_dict["arch_version"] == "synthseg_v2":
+
+    rule flip_synthseg_input:
+        input:
+            nii=bids(
+                root=root,
+                datatype="{datatype}",
+                suffix="{suffix}.nii.gz",
+                desc="preproc",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            ),
+        output:
+            nii=temp(
+                bids(
+                    root=root,
+                    datatype="{datatype}",
+                    suffix="{suffix}.nii.gz",
+                    desc="preproc",
+                    space="corobl",
+                    hemi="{hemi}flip",
+                    **inputs.subj_wildcards,
+                )
+            ),
+        conda:
+            "../envs/c3d.yaml"
+        group:
+            "subj"
+        shell:
+            "c3d {input} -flip x {output}"
+
+    rule run_inference_synthseg_v2:
+        """SynthSeg inference with checkpoint extraction in shadow directory.
+
+        For left hemisphere: input is pre-flipped, output will be unflipped in next rule.
+        For right hemisphere: input and output are used as-is.
+        """
+        input:
+            in_img=get_nnunet_input,
+            model_tar=get_model_tar(),
+        params:
+            model_dir="tempmodel",
+            checkpoint_path="tempmodel/synthseg/{chkpt}".format(
+                chkpt=model_dict["checkpoint"]
+            ),
+            device="cuda" if config["use_gpu"] else "cpu",
+        output:
+            synthseg_seg=temp(
+                bids(
+                    root=root,
+                    datatype="anat",
+                    suffix="dseg.nii.gz",
+                    desc="nnunet",
+                    space="corobl",
+                    hemi="{hemi,Lflip|R}",
+                    **inputs.subj_wildcards,
+                )
+            ),
+        log:
+            bids_log(
+                "run_inference_synthseg",
+                **inputs.subj_wildcards,
+                hemi="{hemi}",
+            ),
+        shadow:
+            "minimal"
+        threads: 8
+        resources:
+            gpus=1 if config["use_gpu"] else 0,
+            mem_mb=16000,
+            time=15 if config["use_gpu"] else 60,
+        group:
+            "subj"
+        conda:
+            "../envs/synthseg.yaml"
+        shell:
+            # Create temp model directory
+            "mkdir -p {params.model_dir} && "
+
+            "tar -xf {input.model_tar} -C {params.model_dir} && "
+
+            "python {workflow.basedir}/scripts/seg_synthseg.py "
+            "{input.in_img} "
+            "{params.checkpoint_path} "
+            "--output {output.synthseg_seg} "
+            "--device {params.device} "
+            "&> {log}"
+            # Extract model tar
+            # Run SynthSeg inference
+
+    rule unflip_synthseg_output:
+        input:
+            nii=bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="nnunet",
+                space="corobl",
+                hemi="{hemi}flip",
+                **inputs.subj_wildcards,
+            ),
+        output:
+            nii=temp(
+                bids(
+                    root=root,
+                    datatype="anat",
+                    suffix="dseg.nii.gz",
+                    desc="nnunet",
+                    space="corobl",
+                    hemi="{hemi,L}",
+                    **inputs.subj_wildcards,
+                )
+            ),
+        conda:
+            "../envs/c3d.yaml"
+        group:
+            "subj"
+        shell:
+            "c3d {input} -flip x {output}"
 
 
 def get_f3d_ref(wildcards, input):
