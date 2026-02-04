@@ -62,7 +62,7 @@ if config["force_nnunet_model"]:
 else:
     model_name = config["modality"]
 
-model_dict = config["nnunet_models"][model_name]
+model_dict = config["nnunet_models"].get(model_name,None)
 
 
 limit_to_list.add(config["modality"])
