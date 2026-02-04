@@ -60,19 +60,16 @@ def get_model_dir():
 
 
 rule download_nnunet_model:
-    params:
-        url=(
+    input:
+        url=storage(
             config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
             if config["force_nnunet_model"]
             else config["resource_urls"]["nnunet_model"][config["modality"]]
         ),
-        model_dir=Path(download_dir) / "model",
     output:
         model_tar=temp(get_model_tar()),
-    conda:
-        "../envs/curl.yaml"
     shell:
-        "mkdir -p {params.model_dir} && curl -L https://{params.url} -o {output}"
+        "cp {input} {output}"
 
 
 def parse_task_from_dir(wildcards, input):

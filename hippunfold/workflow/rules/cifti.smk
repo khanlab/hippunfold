@@ -12,6 +12,13 @@ def get_structure(hemi, label):
             return "HIPPOCAMPUS_DENTATE_RIGHT"
 
 
+def get_surface_type(space):
+    if space == "unfold":
+        return "FLAT"
+    else:
+        return "ANATOMICAL"
+
+
 surf_to_secondary_type = {
     "midthickness": "MIDTHICKNESS",
     "inner": "INNER",
@@ -22,9 +29,11 @@ surf_to_secondary_type = {
 def get_cmd_cifti_metric(wildcards, input, output):
     cmd = f"wb_command  -cifti-create-dense-scalar {output}"
     if "L" in config["hemi"]:
-        cmd = cmd + f" -left-metric {input.left_metric}"
+        structure = get_structure("L", wildcards.label)
+        cmd = cmd + f" -metric {structure} {input.left_metric}"
     if "R" in config["hemi"]:
-        cmd = cmd + f" -right-metric {input.right_metric}"
+        structure = get_structure("R", wildcards.label)
+        cmd = cmd + f" -metric {structure} {input.right_metric}"
     return cmd
 
 
@@ -113,9 +122,9 @@ def get_inputs_cifti_label(wildcards):
 def get_cmd_cifti_label(wildcards, input, output):
     cmd = f"wb_command  -cifti-create-label {output}"
     if "L" in config["hemi"]:
-        cmd = cmd + f" -left-label {input.left_label}"
+        cmd = cmd + f" -label HIPPOCAMPUS_LEFT {input.left_label}"
     if "R" in config["hemi"]:
-        cmd = cmd + f" -right-label {input.right_label}"
+        cmd = cmd + f" -label HIPPOCAMPUS_RIGHT {input.right_label}"
     return cmd
 
 

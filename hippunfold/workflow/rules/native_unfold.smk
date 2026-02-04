@@ -29,7 +29,7 @@ rule get_boundary_vertices:
         "../envs/pyvista.yaml"
     log:
         bids_log(
-            "get_boundary_verticies",
+            "get_boundary_vertices",
             **inputs.subj_wildcards,
             hemi="{hemi}",
             label="{label}",

@@ -1,5 +1,8 @@
 import pandas as pd
 
+# first surface is used as a reference when generating average shape
+ref_hemi = inputs[config["modality"]].zip_lists.get("hemi", ["L"])[0]
+
 
 def get_cmd_templategen_subj_csv(wildcards, input, output):
 
@@ -12,6 +15,42 @@ def get_cmd_templategen_subj_csv(wildcards, input, output):
     return " && ".join(cmds)
 
 
+rule align_lr_unfold_2d:
+    """we average L and R together, this ensures they are in the same space"""
+    input:
+        img=bids(
+            root=root,
+            datatype="anat",
+            suffix="{metric}.nii.gz",
+            space="unfold",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    params:
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
+        ][wildcards.hemi],
+    output:
+        img=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                suffix="{metric}.nii.gz",
+                space="unfoldLR",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    conda:
+        "../envs/c3d.yaml"
+    group:
+        "subj"
+    shell:
+        "c3d {input} {params.flip_per_hemi} -o {output}"
+
+
 rule templategen_subj_csv:
     input:
         metric_nii=expand(
@@ -19,7 +58,7 @@ rule templategen_subj_csv:
                 root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfold2d",
+                space="unfoldLR2d",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -35,7 +74,7 @@ rule templategen_subj_csv:
                 root=root,
                 datatype="anat",
                 suffix="metrics.csv",
-                space="unfold2d",
+                space="unfoldLR2d",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -52,7 +91,7 @@ rule template_gen_combined_csv:
                 root=root,
                 datatype="anat",
                 suffix="metrics.csv",
-                space="unfold2d",
+                space="unfoldLR2d",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -82,7 +121,7 @@ rule gen_atlas_reg_ants:
                 root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfold2d",
+                space="unfoldLR2d",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -126,7 +165,7 @@ rule copy_avgtemplate_warps:
                 root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfold2d",
+                space="unfoldLR2d",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -178,7 +217,7 @@ rule copy_avgtemplate_warps:
         "cp {params.glob_input_invwarp} {output.invwarp}"
 
 
-rule copy_avgtemplate_metric:
+rule unflip_avgtemplate_metric:
     """ copy avgtemplate metric out of avgtemplate folder"""
     input:
         avgtemplate_dir=bids_atlas(
@@ -193,6 +232,9 @@ rule copy_avgtemplate_metric:
             avgtemplate_dir=input.avgtemplate_dir,
             i=config["new_atlas_metrics"].index(wildcards.metric),
         ),
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
+        ][wildcards.hemi],
     output:
         metric=temp(
             bids_atlas(
@@ -204,28 +246,23 @@ rule copy_avgtemplate_metric:
                 suffix="{metric}.nii.gz",
             )
         ),
+    conda:
+        "../envs/c3d.yaml"
     shell:
-        "cp {params.in_metric} {output.metric}"
+        "c3d {params.in_metric} {params.flip_per_hemi} -o {output.metric}"
 
 
 rule reset_header_2d_metric_nii:
     """ adjusts header to match the original data
      (since this seems to get garbled in z by ants)"""
     input:
-        ref_nii=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfold2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            label=wildcards.label,
-            metric=wildcards.metric,
-            hemi=wildcards.hemi,
-        )[0],
+        ref_nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            suffix="metricref.nii.gz",
+        ),
         nii=bids_atlas(
             root=root,
             template=config["new_atlas_name"],
@@ -252,20 +289,13 @@ rule reset_header_2d_warp_atlasgen:
     """ adjusts header to match the original data
      (since this seems to get garbled in z by ants)"""
     input:
-        ref_nii=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfold2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            label=wildcards.label,
-            metric=config["new_atlas_metrics"][0],
-            hemi=wildcards.hemi,
-        )[0],
+        ref_nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            suffix="metricref.nii.gz",
+        ),
         nii=bids(
             root=root,
             datatype="warps",
@@ -294,15 +324,68 @@ rule reset_header_2d_warp_atlasgen:
         "../scripts/set_metric_nii_header.py"
 
 
-rule make_metric_ref:
-    input:
-        metric_nii=bids_atlas(
-            root=root,
-            template=config["new_atlas_name"],
-            label="{label}",
-            hemi="{hemi}",
-            suffix="{metric}.nii.gz".format(metric=config["new_atlas_metrics"][0]),
+rule create_unfold_ref_2d:
+    """ sets offset to midthickness val"""
+    params:
+        dims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["dims"][:2]
+        )
+        + "x1",
+        voxdims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["voxdims"]
         ),
+        origin=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["origin"][:2]
+        )
+        + "x"
+        + str(
+            float(config["unfold_vol_ref"][wildcards.label]["extent"][-1])
+            * config["surf_thresholds"]["midthickness"]
+            * -1.0
+        ),
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
+        ][wildcards.hemi],
+    output:
+        metric_ref=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                suffix="metricref.nii.gz",
+            )
+        ),
+    conda:
+        "../envs/c3d.yaml"
+    shadow:
+        "minimal"
+    shell:
+        "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -slice z 50%  -o {output}"
+
+
+rule create_unfold_ref_2d_resampled:
+    params:
+        dims=lambda wildcards: "x".join(
+            [
+                str(int(float(d) * float(wildcards.resample) / 100.0))
+                for d in config["unfold_vol_ref"][wildcards.label]["dims"][:2]
+            ]
+        ),
+        voxdims=lambda wildcards: "x".join(
+            [
+                str(float(d) / (float(wildcards.resample) / 100.0))
+                for d in config["unfold_vol_ref"][wildcards.label]["voxdims"][:2]
+            ]
+        ),
+        origin=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["origin"][:2]
+        ),
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"][:2],
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
+        ][wildcards.hemi],
     output:
         metric_ref=temp(
             bids_atlas(
@@ -314,10 +397,14 @@ rule make_metric_ref:
                 suffix="metricref.nii.gz",
             )
         ),
+    group:
+        "subj"
     conda:
         "../envs/c3d.yaml"
+    shadow:
+        "minimal"
     shell:
-        "c2d {input} -resample {wildcards.resample}% -scale 0 -shift 1 -binarize -o {output}"
+        "c2d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -scale 0 -shift 1 -binarize  -o {output}"
 
 
 rule gen_unfold_atlas_mesh:
@@ -340,7 +427,7 @@ rule gen_unfold_atlas_mesh:
                 label="{label}",
                 resample="{resample}",
                 space="unfold",
-                hemi="{hemi}",
+                hemi="{hemi,R}",
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
             )
         ),
@@ -348,6 +435,37 @@ rule gen_unfold_atlas_mesh:
         "../envs/pyvista.yaml"
     script:
         "../scripts/gen_unfold_atlas_mesh.py"
+
+
+rule gen_unfold_atlas_mesh_flip:
+    input:
+        surf_gii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            resample="{resample}",
+            space="unfold",
+            hemi="R",
+            suffix="{surfname}.surf.gii",
+        ),
+    params:
+        z_level=get_unfold_z_level,
+    output:
+        surf_gii=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                resample="{resample}",
+                space="unfold",
+                hemi="{hemi,L}",
+                suffix="{surfname,midthickness|inner|outer}.surf.gii",
+            )
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    shell:
+        "wb_command -surface-flip-lr {input} {output}"
 
 
 def get_unfold_mesh_resample(wildcards):
@@ -386,7 +504,8 @@ rule update_unfold_mesh_metadata:
     conda:
         "../envs/workbench.yaml"
     shell:
-        "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
+        "wb_command -surface-flip-normals {input} {output} && "
+        "wb_command -set-structure {output} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
 
 
@@ -527,7 +646,7 @@ rule warp_subfields_to_avg:
             suffix="subfieldsfrom{subfields_from}.nii.gz".format(
                 subfields_from=config["new_atlas_subfields_from"]
             ),
-            space="unfold2d",
+            space="unfoldLR2d",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
@@ -596,26 +715,19 @@ rule reset_header_2d_subfields_nii:
     """ adjusts header to match the original data
      (since this seems to get garbled in z by ants)"""
     input:
-        ref_nii=lambda wildcards: inputs[config["modality"]].expand(
-            bids(
-                root=root,
-                datatype="anat",
-                suffix="{metric}.nii.gz",
-                space="unfold2d",
-                hemi="{hemi}",
-                label="{label}",
-                **inputs.subj_wildcards,
-            ),
-            label=wildcards.label,
-            metric=config["new_atlas_metrics"],
-            hemi=wildcards.hemi,
-        )[0],
+        ref_nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            suffix="metricref.nii.gz",
+        ),
         nii=bids_atlas(
             root=root,
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            desc="subfields",
+            desc="subfieldsunflip",
             suffix="dseg.nii.gz",
         ),
     output:
@@ -624,13 +736,44 @@ rule reset_header_2d_subfields_nii:
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            desc="subfieldsfixhdr",
+            desc="subfieldsunflipfixhdr",
             suffix="dseg.nii.gz",
         ),
     conda:
         "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
+
+
+rule unflip_avg_subfields_nii:
+    input:
+        nii=bids_atlas(
+            root=root,
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="{hemi}",
+            desc="subfields",
+            suffix="dseg.nii.gz",
+        ),
+    params:
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
+        ][wildcards.hemi],
+    output:
+        nii=temp(
+            bids_atlas(
+                root=root,
+                template=config["new_atlas_name"],
+                label="{label}",
+                hemi="{hemi}",
+                desc="subfieldsunflip",
+                suffix="dseg.nii.gz",
+            )
+        ),
+    conda:
+        "../envs/c3d.yaml"
+    shell:
+        "c3d {input} {params.flip_per_hemi} -o {output}"
 
 
 rule import_avg_subfields_as_label:
@@ -641,7 +784,7 @@ rule import_avg_subfields_as_label:
             template=config["new_atlas_name"],
             label="{label}",
             hemi="{hemi}",
-            desc="subfieldsfixhdr",
+            desc="subfieldsunflipfixhdr",
             suffix="dseg.nii.gz",
         ),
         label_list=Path(workflow.basedir)
@@ -763,9 +906,9 @@ def density_to_resample(density_wildcard):
     return resample
 
 
-rule average_native_surfs:
+rule register_surf_to_ref:
     input:
-        surfs=lambda wildcards: inputs[config["modality"]].expand(
+        ref_surf=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="surf",
@@ -781,6 +924,56 @@ rule average_native_surfs:
             surfname=wildcards.surfname,
             label=wildcards.label,
             hemi=wildcards.hemi,
+        )[0],
+        surf=lambda wildcards: bids(
+            root=root,
+            datatype="surf",
+            label="{label}",
+            space="corobl",
+            resample="{resample}".format(
+                resample=density_to_resample(wildcards.density)
+            ),
+            hemi=wildcards.hemi,
+            suffix="{surfname}.surf.gii",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        surf=bids(
+            root=root,
+            datatype="surf",
+            label="{label}",
+            space="coroblaligned",
+            density="{density}",
+            hemi="{hemi}",
+            suffix="{surfname}.surf.gii",
+            **inputs.subj_wildcards,
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    shadow:
+        "minimal"
+    shell:
+        "wb_command -surface-affine-regression {input.surf} {input.ref_surf} affine.xfm && "
+        "wb_command -surface-apply-affine {input.surf} affine.xfm {output.surf}"
+
+
+rule average_native_surfs:
+    input:
+        surfs=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="surf",
+                label="{label}",
+                space="coroblaligned",
+                density="{density}",
+                hemi="{hemi}",
+                suffix="{surfname}.surf.gii",
+                **inputs.subj_wildcards,
+            ),
+            surfname=wildcards.surfname,
+            label=wildcards.label,
+            density=wildcards.density,
+            hemi=ref_hemi,
         ),
     params:
         surf_args=lambda wildcards, input: " ".join(
@@ -791,7 +984,7 @@ rule average_native_surfs:
             root=get_atlas_dir(),
             template=config["new_atlas_name"],
             label="{label}",
-            hemi="{hemi}",
+            hemi=ref_hemi,
             den="{density}",
             space="native",
             suffix="{surfname}.surf.gii",
@@ -800,6 +993,38 @@ rule average_native_surfs:
         "../envs/workbench.yaml"
     shell:
         "wb_command -surface-average {output} {params.surf_args}"
+
+
+rule flip_average_native_surf:
+    input:
+        surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi=ref_hemi,
+            den="{density}",
+            space="native",
+            suffix="{surfname}.surf.gii",
+        ),
+    params:
+        structure_type=lambda wildcards: get_structure(
+            "L" if ref_hemi == "R" else "R", wildcards.label
+        ),
+    output:
+        surf=bids_atlas(
+            root=get_atlas_dir(),
+            template=config["new_atlas_name"],
+            label="{label}",
+            hemi="L" if ref_hemi == "R" else "R",
+            den="{density}",
+            space="native",
+            suffix="{surfname}.surf.gii",
+        ),
+    conda:
+        "../envs/workbench.yaml"
+    shell:
+        "wb_command -surface-flip-lr {input} {output} && "
+        "wb_command -set-structure {output} {params.structure_type}"
 
 
 rule write_template_json:
@@ -834,3 +1059,6 @@ rule write_template_json:
         ),
     script:
         "../scripts/write_template_json.py"
+
+
+# TODO add rule to create zip file of new atlas and push to zenodo (need to add CLI to enable this)

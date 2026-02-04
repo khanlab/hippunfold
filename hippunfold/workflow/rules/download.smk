@@ -5,6 +5,7 @@ download_dir = utils.get_download_dir()
 
 
 rule download_extract_template:
+    """Note: OSF urls don't seem to be supported with snakemake storage plugin"""
     params:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
@@ -13,6 +14,73 @@ rule download_extract_template:
         "minimal"
     script:
         "../scripts/download.py"
+
+
+rule download_surf_template_atlas:
+    input:
+        zip_file=lambda wildcards: storage(
+            config["resource_urls"]["atlas"][wildcards.atlas]
+        ),
+    output:
+        unzip_dir=temp(directory(Path(download_dir) / "atlases_dl" / "tpl-{atlas}")),
+    wildcard_constraints:
+        atlas="|".join(config["builtin_atlases"]),
+    shadow:
+        "minimal"
+    shell:
+        "unzip {input} -d {output}"
+
+
+rule cp_atlas_surf_gii:
+    input:
+        unzip_dir=Path(download_dir) / "atlases_dl" / "tpl-{atlas}",
+    params:
+        path=lambda wildcards, input: bids_atlas(
+            root=Path(input.unzip_dir).parent,
+            template=wildcards.atlas,
+            hemi=wildcards.hemi,
+            label=wildcards.label,
+            den=wildcards.density,
+            space=wildcards.space,
+            suffix=f"{wildcards.surf_name}.surf.gii",
+        ),
+    output:
+        atlas_file=bids_atlas(
+            root=get_atlas_dir(),
+            template="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            space="{space}",
+            suffix="{surf_name}.surf.gii",
+        ),
+    shell:
+        "cp {params.path} {output}"
+
+
+rule cp_atlas_metric_gii:
+    input:
+        unzip_dir=Path(download_dir) / "atlases_dl" / "tpl-{atlas}",
+    params:
+        path=lambda wildcards, input: bids_atlas(
+            root=Path(input.unzip_dir).parent,
+            template=wildcards.atlas,
+            hemi=wildcards.hemi,
+            label=wildcards.label,
+            den=wildcards.density,
+            suffix=f"{wildcards.metricname}.{wildcards.metrictype}.gii",
+        ),
+    output:
+        atlas_file=bids_atlas(
+            root=get_atlas_dir(),
+            template="{atlas}",
+            hemi="{hemi}",
+            label="{label}",
+            den="{density}",
+            suffix="{metricname}.{metrictype}.gii",
+        ),
+    shell:
+        "cp {params.path} {output}"
 
 
 ## unpack template

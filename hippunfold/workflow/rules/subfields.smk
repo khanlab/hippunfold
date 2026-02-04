@@ -110,6 +110,7 @@ rule native_label_gii_to_unfold_nii:
         ref_nii=bids(
             root=root,
             datatype="warps",
+            hemi="{hemi}",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -185,6 +186,7 @@ rule unfoldreg_label_gii_to_unfold_nii:
         ref_nii=bids(
             root=root,
             datatype="warps",
+            hemi="{hemi}",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -370,7 +372,7 @@ rule label_gm_with_nearest_subfields:
             space="corobl",
             hemi="{hemi}",
             atlas="{atlas}",
-            label="{label,hipp}",
+            label="{label}",
             **inputs.subj_wildcards,
         ),
         gm=bids(
