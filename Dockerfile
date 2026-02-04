@@ -6,9 +6,10 @@ COPY . .
 # Install pixi environment and create shell-hook
 RUN pixi install --locked
 RUN pixi shell-hook -s bash > /shell-hook
-RUN echo "#!/bin/bash" > /app/entrypoint.sh
-RUN cat /shell-hook >> /app/entrypoint.sh
-RUN echo 'exec "$@"' >> /app/entrypoint.sh
+RUN mkdir -p /app && \
+    echo "#!/bin/bash" > /app/entrypoint.sh && \
+    cat /shell-hook >> /app/entrypoint.sh && \
+    echo 'exec "$@"' >> /app/entrypoint.sh
 
 FROM ubuntu:24.04 AS production
 
@@ -48,9 +49,9 @@ RUN set -e && \
     /app/entrypoint.sh hippunfold test_data/bids_dsegtissue test_out group_create_atlas --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --new_atlas_subfields_from native --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     rm -rf /root/.cache
 
-# Create hippunfold-quick wrapper
+# Create hippunfold-quick wrapper that uses pixi entrypoint
 RUN echo '#!/bin/bash' > /usr/local/bin/hippunfold-quick && \
-    echo 'exec /app/entrypoint.sh hippunfold-quick "$@"' >> /usr/local/bin/hippunfold-quick && \
+    echo 'exec /app/entrypoint.sh /src/hippunfold/run_quick.py "$@"' >> /usr/local/bin/hippunfold-quick && \
     chmod +x /usr/local/bin/hippunfold-quick
 
 ENV SNAKEMAKE_PROFILE=/src/hippunfold/workflow/profiles/docker-conda
