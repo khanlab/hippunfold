@@ -43,9 +43,17 @@ def get_nnunet_input(wildcards):
 
 
 def get_model_tar():
-    url = config["nnunet_models"].get(model_name, None)["url"]
-    if url == None:
-        print(f"ERROR: {model_name} does not exist in nnunet_models in the config file")
+    model_cfg = config["nnunet_models"].get(model_name, None)
+    if model_cfg is None:
+        raise KeyError(
+            f"Model '{model_name}' does not exist in 'nnunet_models' in the config file"
+        )
+
+    url = model_cfg.get("url")
+    if not url:
+        raise ValueError(
+            f"Model '{model_name}' in 'nnunet_models' is missing a valid 'url' entry"
+        )
 
     tarfile = str((Path(download_dir) / "model" / Path(url).name).absolute())
     return tarfile
