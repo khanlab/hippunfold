@@ -47,12 +47,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setup Miniforge env with snakebids
-      uses: khanlab/actions/.github/actions/action-setup_task-setupSnakebidsEnv@main
+    - name: Setup Pixi environment
+      uses: prefix-dev/setup-pixi@v0.8.14
+      with:
+        activate-environment: true
 
     - name: Install QC dependencies
       run: |
-        conda install -y pillow matplotlib
+        conda install -y pillow matplotlib -c conda-forge
 
     # /mnt with 576 gb of space is automatically mounted on Arbutus Cloud VMs
     - name: Download wet run test dataset

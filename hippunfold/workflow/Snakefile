@@ -56,6 +56,15 @@ if config["analysis_level"] == "group_create_atlas":
     if config["new_atlas_subfields_from"] == "native":
         limit_to_list.add("dsegsubfields")
 
+# setup global vars for nnunet model
+if config["force_nnunet_model"]:
+    model_name = config["force_nnunet_model"]
+else:
+    model_name = config["modality"]
+
+model_dict = config["nnunet_models"].get(model_name, None)
+
+
 limit_to_list.add(config["modality"])
 
 
