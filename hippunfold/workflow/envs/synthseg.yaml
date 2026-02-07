@@ -1,0 +1,13 @@
+name: synthseg
+channels:
+  - balbasty
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.9
+  - numpy
+  - pytorch>=2.0
+  - torchvision
+  - nibabel
+  - cornucopia

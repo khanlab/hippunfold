@@ -43,57 +43,34 @@ def get_nnunet_input(wildcards):
 
 
 def get_model_tar():
-    if config["force_nnunet_model"]:
-        model_name = config["force_nnunet_model"]
-    else:
-        model_name = config["modality"]
+    model_cfg = config["nnunet_models"].get(model_name, None)
+    if model_cfg is None:
+        raise KeyError(
+            f"Model '{model_name}' does not exist in 'nnunet_models' in the config file"
+        )
 
-    local_tar = config["resource_urls"]["nnunet_model"].get(model_name, None)
-    if local_tar == None:
-        print(f"ERROR: {model_name} does not exist in nnunet_model in the config file")
+    url = model_cfg.get("url")
+    if not url:
+        raise ValueError(
+            f"Model '{model_name}' in 'nnunet_models' is missing a valid 'url' entry"
+        )
+    tarfile = str((Path(download_dir) / "model" / Path(url).name).absolute())
+    return tarfile
 
-    return (Path(download_dir) / "model" / Path(local_tar).name).absolute()
+
+def get_model_dir():
+    return get_model_tar().removesuffix(".gz").removesuffix(".tar")
 
 
 rule download_nnunet_model:
-    params:
-        url=config["resource_urls"]["nnunet_model"][config["force_nnunet_model"]]
-        if config["force_nnunet_model"]
-        else config["resource_urls"]["nnunet_model"][config["modality"]],
-        model_dir=Path(download_dir) / "model",
+    input:
+        url=storage(model_dict["url"]),
     output:
         model_tar=get_model_tar(),
     container:
         config["singularity"]["autotop"]
     shell:
         "mkdir -p {params.model_dir} && wget https://{params.url} -O {output}"
-
-
-def parse_task_from_tar(wildcards, input):
-    match = re.search("Task[0-9]{3}_[\w]+", input.model_tar)
-    if match:
-        task = match.group(0)
-    else:
-        raise ValueError("cannot parse Task from model tar")
-    return task
-
-
-def parse_chkpnt_from_tar(wildcards, input):
-    match = re.search("^.*\.(\w+)\.tar", input.model_tar)
-    if match:
-        chkpnt = match.group(1)
-    else:
-        raise ValueError("cannot parse chkpnt from model tar")
-    return chkpnt
-
-
-def parse_trainer_from_tar(wildcards, input):
-    match = re.search("^.*\.(\w+)\..*.tar", input.model_tar)
-    if match:
-        trainer = match.group(1)
-    else:
-        raise ValueError("cannot parse chkpnt from model tar")
-    return trainer
 
 
 def get_cmd_copy_inputs(wildcards, input):
@@ -109,66 +86,273 @@ def get_cmd_copy_inputs(wildcards, input):
         return " && ".join(cmd)
 
 
-rule run_inference:
-    """ This rule uses either GPU or CPU .
-    It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained"""
+rule unpack_nnunet_model:
+    """ Unpack nnunet model tar to temp folder to check contents"""
     input:
-        in_img=get_nnunet_input,
-        model_tar=get_model_tar(),
+        tar=get_model_tar(),
     params:
-        cmd_copy_inputs=get_cmd_copy_inputs,
-        temp_lbl="templbl/temp.nii.gz",
-        model_dir="tempmodel",
-        in_folder="tempimg",
-        out_folder="templbl",
-        task=parse_task_from_tar,
-        chkpnt=parse_chkpnt_from_tar,
-        trainer=parse_trainer_from_tar,
-        tta="" if config["nnunet_enable_tta"] else "--disable_tta",
+        tar_opts=lambda wildcards, input: "-xzf" if input.tar[-2:] == "gz" else "-xf",
     output:
-        nnunet_seg=bids(
-            root=work,
-            datatype="anat",
-            **config["subj_wildcards"],
-            suffix="dseg.nii.gz",
-            desc="nnunet",
-            space="corobl",
-            hemi="{hemi,Lflip|R}"
-        ),
-    log:
-        bids(
-            root="logs",
-            **config["subj_wildcards"],
-            suffix="nnunet.txt",
-            space="corobl",
-            hemi="{hemi,Lflip|R}"
-        ),
-    shadow:
-        "minimal"
-    threads: 16
-    resources:
-        gpus=1 if config["use_gpu"] else 0,
-        mem_mb=16000,
-        time=30 if config["use_gpu"] else 60,
-    group:
-        "subj"
-    container:
-        config["singularity"]["autotop"]
+        directory(get_model_dir()),
     shell:
-        #create temp folders
-        #cp input image to temp folder
-        #extract model
-        #set nnunet env var to point to model
-        #set threads
-        # run inference
-        #copy from temp output folder to final output
-        "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
-        "{params.cmd_copy_inputs} && "
-        "tar -xf {input.model_tar} -C {params.model_dir} && "
-        "export RESULTS_FOLDER={params.model_dir} && "
-        "export nnUNet_n_proc_DA={threads} && "
-        "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
-        "cp {params.temp_lbl} {output.nnunet_seg}"
+        "mkdir -p {output} && tar {params.tar_opts} {input} -C {output}"
+
+
+if model_dict["arch_version"] == "nnunet_v1":
+
+    rule run_inference_nnunet_v1:
+        """This rule uses either GPU or CPU .
+        It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained
+        """
+        input:
+            in_img=get_nnunet_input,
+            model_dir=get_model_dir(),
+        params:
+            cmd_copy_inputs=get_cmd_copy_inputs,
+            temp_lbl="templbl/temp.nii.gz",
+            in_folder="tempimg",
+            out_folder="templbl",
+            task=model_dict["task"],
+            chkpnt=model_dict["checkpoint"],
+            trainer=model_dict["trainer"],
+            tta="" if config["nnunet_enable_tta"] else "--disable_tta",
+        output:
+            nnunet_seg=temp(
+                bids(
+                    root=root,
+                    datatype="anat",
+                    **inputs.subj_wildcards,
+                    suffix="dseg.nii.gz",
+                    desc="nnunet",
+                    space="corobl",
+                    hemi="{hemi}",
+                )
+            ),
+        log:
+            bids_log(
+                "run_inference",
+                **inputs.subj_wildcards,
+                hemi="{hemi}",
+            ),
+        shadow:
+            "minimal"
+        threads: 16
+        resources:
+            gpus=1 if config["use_gpu"] else 0,
+            mem_mb=16000,
+            time=30 if config["use_gpu"] else 60,
+        group:
+            "subj"
+        conda:
+            "../envs/nnunet.yaml"
+        shell:
+            "mkdir -p {params.in_folder} {params.out_folder} && "
+            "{params.cmd_copy_inputs} && "
+            "export RESULTS_FOLDER={input.model_dir} && "
+            "export nnUNet_n_proc_DA={threads} && "
+            "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
+            "cp {params.temp_lbl} {output.nnunet_seg}"
+
+elif model_dict["arch_version"] == "nnunet_v2":
+
+    rule run_inference_nnunet_v2:
+        """nnUNet v2 inference with tar extraction in shadow directory"""
+        input:
+            in_img=get_nnunet_input,
+            model_tar=get_model_tar(),
+        params:
+            cmd_copy_inputs=get_cmd_copy_inputs,
+            tar_opts=lambda wildcards, input: (
+                "-xzf" if input.model_tar[-2:] == "gz" else "-xf"
+            ),
+            temp_lbl="templbl/temp.nii.gz",
+            model_dir="tempmodel",
+            in_folder="tempimg",
+            out_folder="templbl",
+            dataset_id=model_dict["dataset_id"],
+            configuration=model_dict["configuration"],
+            trainer=model_dict["trainer"],
+            plans=model_dict["plans"],
+            chkpnt=model_dict["checkpoint"],
+            tta="" if config["nnunet_enable_tta"] else "--disable_tta",
+            device="cuda" if config["use_gpu"] else "cpu",
+        output:
+            nnunet_seg=temp(
+                bids(
+                    root=root,
+                    datatype="anat",
+                    **inputs.subj_wildcards,
+                    suffix="dseg.nii.gz",
+                    desc="nnunet",
+                    space="corobl",
+                    hemi="{hemi}",
+                )
+            ),
+        log:
+            bids_log(
+                "run_inference_nnunet_v2",
+                **inputs.subj_wildcards,
+                hemi="{hemi}",
+            ),
+        shadow:
+            "minimal"
+        threads: 16
+        resources:
+            gpus=1 if config["use_gpu"] else 0,
+            mem_mb=48000,
+            time=30 if config["use_gpu"] else 120,
+        group:
+            "subj"
+        conda:
+            "../envs/nnunetv2.yaml"
+        shell:
+            "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
+
+            "{params.cmd_copy_inputs} && "
+
+            "tar {params.tar_opts} {input.model_tar} -C {params.model_dir} && "
+
+            "export nnUNet_results={params.model_dir}/nnunet_v2 && "
+            "export nnUNet_raw={params.model_dir}/nnunet_v2/nnUNet_raw && "
+            "export nnUNet_preprocessed={params.model_dir}/nnunet_v2/nnUNet_preprocessed && "
+            "export nnUNet_n_proc_DA={threads} && "
+
+            "FOLDS=$(find {params.model_dir}/nnunet_v2/Dataset{params.dataset_id}_*/nnUNetTrainer* -maxdepth 1 -type d -name 'fold_*' | sed 's/.*fold_//' | sort -n | tr '\\n' ' ' | sed 's/ $//' ) && "
+
+            "nnUNetv2_predict "
+            "-i {params.in_folder} "
+            "-o {params.out_folder} "
+            "-d {params.dataset_id} "
+            "-c {params.configuration} "
+            "-tr {params.trainer} "
+            "-p {params.plans} "
+            "-f $FOLDS "
+            "-chk {params.chkpnt} "
+            "-device {params.device} "
+            "{params.tta} "
+            "&> {log} && "
+            "cp {params.temp_lbl} {output.nnunet_seg}"
+
+elif model_dict["arch_version"] == "synthseg_v2":
+
+    rule flip_synthseg_input:
+        input:
+            nii=bids(
+                root=root,
+                datatype="{datatype}",
+                suffix="{suffix}.nii.gz",
+                desc="preproc",
+                space="corobl",
+                hemi="{hemi}",
+                **inputs.subj_wildcards,
+            ),
+        output:
+            nii=temp(
+                bids(
+                    root=root,
+                    datatype="{datatype}",
+                    suffix="{suffix}.nii.gz",
+                    desc="preproc",
+                    space="corobl",
+                    hemi="{hemi}flip",
+                    **inputs.subj_wildcards,
+                )
+            ),
+        conda:
+            "../envs/c3d.yaml"
+        group:
+            "subj"
+        shell:
+            "c3d {input} -flip x {output}"
+
+    rule run_inference_synthseg_v2:
+        """SynthSeg inference with checkpoint extraction in shadow directory.
+
+        For left hemisphere: input is pre-flipped, output will be unflipped in next rule.
+        For right hemisphere: input and output are used as-is.
+        """
+        input:
+            in_img=get_nnunet_input,
+            model_tar=get_model_tar(),
+        params:
+            model_dir="tempmodel",
+            checkpoint_path="tempmodel/synthseg/{chkpt}".format(
+                chkpt=model_dict["checkpoint"]
+            ),
+            device="cuda" if config["use_gpu"] else "cpu",
+        output:
+            synthseg_seg=temp(
+                bids(
+                    root=root,
+                    datatype="anat",
+                    suffix="dseg.nii.gz",
+                    desc="nnunet",
+                    space="corobl",
+                    hemi="{hemi,Lflip|R}",
+                    **inputs.subj_wildcards,
+                )
+            ),
+        log:
+            bids_log(
+                "run_inference_synthseg",
+                **inputs.subj_wildcards,
+                hemi="{hemi}",
+            ),
+        shadow:
+            "minimal"
+        threads: 8
+        resources:
+            gpus=1 if config["use_gpu"] else 0,
+            mem_mb=16000,
+            time=15 if config["use_gpu"] else 60,
+        group:
+            "subj"
+        conda:
+            "../envs/synthseg.yaml"
+        shell:
+            # Create temp model directory
+            "mkdir -p {params.model_dir} && "
+
+            "tar -xf {input.model_tar} -C {params.model_dir} && "
+
+            "python {workflow.basedir}/scripts/seg_synthseg.py "
+            "{input.in_img} "
+            "{params.checkpoint_path} "
+            "--output {output.synthseg_seg} "
+            "--device {params.device} "
+            "&> {log}"
+            # Extract model tar
+            # Run SynthSeg inference
+
+    rule unflip_synthseg_output:
+        input:
+            nii=bids(
+                root=root,
+                datatype="anat",
+                suffix="dseg.nii.gz",
+                desc="nnunet",
+                space="corobl",
+                hemi="{hemi}flip",
+                **inputs.subj_wildcards,
+            ),
+        output:
+            nii=temp(
+                bids(
+                    root=root,
+                    datatype="anat",
+                    suffix="dseg.nii.gz",
+                    desc="nnunet",
+                    space="corobl",
+                    hemi="{hemi,L}",
+                    **inputs.subj_wildcards,
+                )
+            ),
+        conda:
+            "../envs/c3d.yaml"
+        group:
+            "subj"
+        shell:
+            "c3d {input} -flip x {output}"
 
 
 rule unflip_nnunet_nii:
