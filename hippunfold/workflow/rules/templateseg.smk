@@ -26,16 +26,13 @@ rule template_reg:
             suffix="{modality}.nii.gz".format(
                 modality=get_modality_suffix(config["modality"])
             ),
-            space="template",
+            desc="template",
+            space="corobl",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
-        xfm_corobl=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["xfm_corobl"].format(
-            **wildcards
-        ),
         general_opts="-d 3 -m NCC 2x2x2",
         smoothing_opts=get_smoothing_opt,
         iteration_opts="-n 100x50x10",  #default -n 100x100
@@ -63,7 +60,7 @@ rule template_reg:
     shell:
         "greedy -threads {threads} {params.general_opts} "
         " {params.smoothing_opts} {params.iteration_opts} "
-        " -i {input.fixed_img} {input.moving_img} -it {params.xfm_corobl} -o {output.warp} &> {log}"
+        " -i {input.fixed_img} {input.moving_img} -o {output.warp} &> {log}"
 
 
 rule warp_template_dseg:
@@ -72,11 +69,10 @@ rule warp_template_dseg:
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
-            suffix="ref.nii.gz",
-            desc="resampled",
+            suffix=f"{config['modality']}.nii.gz",
             space="corobl",
+            desc="preproc",
             hemi="{hemi}",
-            label="{label}",
         ),
         warp=bids(
             root=root,
@@ -110,7 +106,7 @@ rule warp_template_dseg:
                 desc="postproc",
                 space="corobl",
                 hemi="{hemi}",
-                label="{label}",
+                label="hipp",
             )
         ),
     group:
@@ -122,10 +118,9 @@ rule warp_template_dseg:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"
 
 
-rule warp_template_coords:
+rule warp_template_dseg_dentate:
     input:
-        template_dir=Path(download_dir) / "template" / config["template"],
-        ref=bids(
+        upsampled_ref=bids(
             root=root,
             datatype="anat",
             **inputs.subj_wildcards,
@@ -145,89 +140,28 @@ rule warp_template_coords:
             space="corobl",
             hemi="{hemi}",
         ),
-        template_coords=bids(
-            root=root,
-            datatype="coords",
-            **inputs.subj_wildcards,
-            dir="{dir}",
-            label="{label}",
-            suffix="coords.nii.gz",
-            desc="init",
-            space="template",
-            hemi="{hemi}",
-        ),
-    params:
-        interp_opt="-ri NN",
-    output:
-        init_coords=temp(
-            bids(
-                root=root,
-                datatype="coords",
-                **inputs.subj_wildcards,
-                dir="{dir}",
-                label="{label}",
-                suffix="coords.nii.gz",
-                desc="init",
-                space="corobl",
-                hemi="{hemi}",
-            )
-        ),
-    group:
-        "subj"
-    conda:
-        "../envs/greedy.yaml"
-    threads: 8
-    shell:
-        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.ref} -rm {input.template_coords} {output.init_coords}  -r {input.warp}"
-
-
-rule warp_template_anat:
-    input:
-        ref=bids(
+        template_dseg=bids(
             root=root,
             datatype="anat",
-            **inputs.subj_wildcards,
-            suffix=f"{config['modality']}.nii.gz",
-            space="corobl",
-            desc="preproc",
-            hemi="{hemi}",
-        ),
-        warp=bids(
-            root=root,
-            **inputs.subj_wildcards,
-            suffix="xfm.nii.gz",
-            datatype="warps",
-            desc="greedytemplatereg",
-            from_="template",
-            to="subject",
-            space="corobl",
-            hemi="{hemi}",
-        ),
-        template_anat=bids(
-            root=root,
-            datatype="anat",
-            suffix="{modality}.nii.gz".format(
-                modality=get_modality_suffix(config["modality"])
-            ),
+            suffix="dseg.nii.gz",
+            desc="dentatetissue",
             space="template",
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
     params:
-        xfm_corobl=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["xfm_corobl"].format(
-            **wildcards
-        ),
+        interp_opt="-ri LABEL 0.2vox",
     output:
-        warped=temp(
+        inject_seg=temp(
             bids(
                 root=root,
                 datatype="anat",
                 **inputs.subj_wildcards,
-                suffix=f"{config['modality']}.nii.gz",
-                desc="warpedtemplate",
+                suffix="dseg.nii.gz",
+                desc="postproc",
                 space="corobl",
                 hemi="{hemi}",
+                label="dentate",
             )
         ),
     group:
@@ -236,4 +170,4 @@ rule warp_template_anat:
         "../envs/greedy.yaml"
     threads: 8
     shell:
-        "greedy -d 3 -threads {threads} -rf {input.ref} -rm {params.template_anat} {output.warped}  -r  {input.warp} {params.xfm_corobl}"
+        "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"

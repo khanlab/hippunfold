@@ -49,6 +49,9 @@ if "T2w" in config["modality"]:
     else:
         template_modality = "T2w"
 
+if config["use_template_seg"]:
+    config["inject_template"] = config["template"]
+
 elif "T1w" in config["modality"]:
     template_modality = "T1w"
 
