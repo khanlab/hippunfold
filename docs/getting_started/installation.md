@@ -1,12 +1,7 @@
-# Installation (Quickstart)
-
-## Requirements & data
-
-* Inputs should be **BIDS** with **T1w** or **T2w** images. Higher‑res (≤ 0.8 mm) preferred; **1.0 mm** works.
-* Other 3D modalities (e.g., ex‑vivo MRI, histology) may require manual tissue segmentation (UNet models are trained on common MRI only).
+# Installation (advanced)
 
 
-**Pick one way to run it:**
+These are more advanced ways to run hippunfold. To simply get started (install using pixi instead).
 
 * **Conda (Linux/macOS)** — more flexible, good for HPC environments, developers.
 * **Containers (Docker or Apptainer/Singularity)** — easiest, best for Windows, or when you want fully pinned dependencies.
