@@ -71,7 +71,6 @@ else:
 model_dict = config["nnunet_models"].get(model_name, None)
 
 
-
 # add seg (if chosen) and the modality to the inputs
 if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg
     limit_to_list.add("seg")

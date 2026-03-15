@@ -63,8 +63,9 @@ def get_model_dir():
 
 
 rule download_nnunet_model:
-    input:
-        url=storage(model_dict["url"]),
+    params:
+        url=model_dict["url"],
+        model_dir=get_model_dir(),
     output:
         model_tar=get_model_tar(),
     container:
@@ -119,20 +120,22 @@ if model_dict["arch_version"] == "nnunet_v1":
         output:
             nnunet_seg=temp(
                 bids(
-                    root=root,
+                    root=work,
                     datatype="anat",
-                    **inputs.subj_wildcards,
                     suffix="dseg.nii.gz",
                     desc="nnunet",
                     space="corobl",
-                    hemi="{hemi}",
+                    hemi="{hemi,Lflip|R}",
+                    **config["subj_wildcards"]
                 )
             ),
         log:
-            bids_log(
-                "run_inference",
-                **inputs.subj_wildcards,
-                hemi="{hemi}",
+            bids(
+                root="logs",
+                **config["subj_wildcards"],
+                suffix="nnunet.txt",
+                space="corobl",
+                hemi="{hemi,Lflip|R}"
             ),
         shadow:
             "minimal"
@@ -143,8 +146,8 @@ if model_dict["arch_version"] == "nnunet_v1":
             time=30 if config["use_gpu"] else 60,
         group:
             "subj"
-        conda:
-            "../envs/nnunet.yaml"
+        container:
+            config["singularity"]["autotop"]
         shell:
             "mkdir -p {params.in_folder} {params.out_folder} && "
             "{params.cmd_copy_inputs} && "
@@ -179,20 +182,22 @@ elif model_dict["arch_version"] == "nnunet_v2":
         output:
             nnunet_seg=temp(
                 bids(
-                    root=root,
+                    root=work,
                     datatype="anat",
                     **inputs.subj_wildcards,
                     suffix="dseg.nii.gz",
                     desc="nnunet",
                     space="corobl",
-                    hemi="{hemi}",
+                    hemi="{hemi,Lflip|R}",
                 )
             ),
         log:
-            bids_log(
-                "run_inference_nnunet_v2",
-                **inputs.subj_wildcards,
-                hemi="{hemi}",
+            bids(
+                root="logs",
+                **config["subj_wildcards"],
+                suffix="nnunetv2.txt",
+                space="corobl",
+                hemi="{hemi,Lflip|R}"
             ),
         shadow:
             "minimal"
@@ -203,8 +208,8 @@ elif model_dict["arch_version"] == "nnunet_v2":
             time=30 if config["use_gpu"] else 120,
         group:
             "subj"
-        conda:
-            "../envs/nnunetv2.yaml"
+        container:
+            config["singularity"]["autotop"]
         shell:
             "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
 
@@ -244,7 +249,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
                 desc="preproc",
                 space="corobl",
                 hemi="{hemi}",
-                **inputs.subj_wildcards,
+                **config["subj_wildcards"]
             ),
         output:
             nii=temp(
@@ -255,11 +260,11 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     desc="preproc",
                     space="corobl",
                     hemi="{hemi}flip",
-                    **inputs.subj_wildcards,
+                    **config["subj_wildcards"]
                 )
             ),
-        conda:
-            "../envs/c3d.yaml"
+        container:
+            config["singularity"]["autotop"]
         group:
             "subj"
         shell:
@@ -283,20 +288,22 @@ elif model_dict["arch_version"] == "synthseg_v2":
         output:
             synthseg_seg=temp(
                 bids(
-                    root=root,
+                    root=work,
                     datatype="anat",
                     suffix="dseg.nii.gz",
                     desc="nnunet",
                     space="corobl",
                     hemi="{hemi,Lflip|R}",
-                    **inputs.subj_wildcards,
+                    **config["subj_wildcards"]
                 )
             ),
         log:
-            bids_log(
-                "run_inference_synthseg",
-                **inputs.subj_wildcards,
-                hemi="{hemi}",
+            bids(
+                root="logs",
+                **config["subj_wildcards"],
+                suffix="nnunetsynthseg.txt",
+                space="corobl",
+                hemi="{hemi,Lflip|R}"
             ),
         shadow:
             "minimal"
@@ -307,8 +314,8 @@ elif model_dict["arch_version"] == "synthseg_v2":
             time=15 if config["use_gpu"] else 60,
         group:
             "subj"
-        conda:
-            "../envs/synthseg.yaml"
+        container:
+            config["singularity"]["autotop"]
         shell:
             # Create temp model directory
             "mkdir -p {params.model_dir} && "
@@ -333,7 +340,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
                 desc="nnunet",
                 space="corobl",
                 hemi="{hemi}flip",
-                **inputs.subj_wildcards,
+                **config["subj_wildcards"]
             ),
         output:
             nii=temp(
@@ -344,11 +351,11 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     desc="nnunet",
                     space="corobl",
                     hemi="{hemi,L}",
-                    **inputs.subj_wildcards,
+                    **config["subj_wildcards"]
                 )
             ),
-        conda:
-            "../envs/c3d.yaml"
+        container:
+            config["singularity"]["autotop"]
         group:
             "subj"
         shell:
