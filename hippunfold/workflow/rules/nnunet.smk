@@ -59,7 +59,12 @@ def get_model_tar():
 
 
 def get_model_dir():
-    return get_model_tar().removesuffix(".gz").removesuffix(".tar")
+    model = get_model_tar()
+    if model.endswith(".gz"):
+        model = model[:-3]
+    if model.endswith(".tar"):
+        model = model[:-4]
+    return model
 
 
 rule download_nnunet_model:
