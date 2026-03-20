@@ -131,8 +131,7 @@ rule import_template_dseg:
                 suffix="dseg.nii.gz",
             )
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -170,8 +169,7 @@ rule import_template_dseg_dentate:
                 suffix="dseg.nii.gz",
             )
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -211,8 +209,7 @@ rule import_template_coords:
                 hemi="{hemi}",
             )
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -251,8 +248,7 @@ rule import_template_anat:
                 ),
             ),
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -292,8 +288,7 @@ rule import_template_anat_crop:  # used only in templateseg workflow
                 ),
             ),
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/c3d.yaml"
     shell:

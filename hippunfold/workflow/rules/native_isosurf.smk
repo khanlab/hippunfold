@@ -65,8 +65,7 @@ rule gen_native_mesh:
                 )
             )
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/pyvista.yaml"
     log:
@@ -113,8 +112,7 @@ rule update_native_mesh_structure:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
@@ -152,8 +150,7 @@ rule update_native_mesh_structure_unfold:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "cp {input} {output} && "
         "wb_command -surface-flip-normals {output} {output} && "
@@ -193,7 +190,6 @@ rule smooth_surface:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -surface-smoothing {input} {params.smoothing_strength} {params.smoothing_iterations} {output}"

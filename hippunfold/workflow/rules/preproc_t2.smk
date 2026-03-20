@@ -10,8 +10,6 @@ rule import_t2:
                 **inputs["T2w"].wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "cp {input} {output}"
 
@@ -37,8 +35,6 @@ rule n4_t2:
     threads: 8
     conda:
         "../envs/ants.yaml"
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "N4BiasFieldCorrection -d 3 -i {input} -o {output}"
@@ -107,8 +103,6 @@ rule reg_t2_to_ref:
         ),
     conda:
         "../envs/niftyreg.yaml"
-    group:
-        "subj"
     shell:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac"
 
@@ -140,8 +134,6 @@ rule ras_to_itk_reg_t2:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
     shell:
         "c3d_affine_tool  {input.xfm_ras} -oitk {output.xfm_itk}"
 
@@ -183,8 +175,7 @@ if config["skip_preproc"]:
                 suffix="T2w.nii.gz",
                 desc="preproc",
             ),
-        group:
-            "subj"
+
         shell:
             "cp {input} {output}"
 
@@ -207,8 +198,7 @@ else:
             ),
         conda:
             "../envs/c3d.yaml"
-        group:
-            "subj"
+
         shell:
             "{params.cmd}"
 
@@ -257,8 +247,6 @@ rule reg_t2_to_t1_part1:
         ),
     conda:
         "../envs/niftyreg.yaml"
-    group:
-        "subj"
     shell:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log}"
 
@@ -290,8 +278,6 @@ rule reg_t2_to_t1_part2:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
     shell:
         "c3d_affine_tool {input.xfm_ras} -oitk {output.xfm_itk}"
 
@@ -389,8 +375,6 @@ rule compose_t2_xfm_corobl:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
     shell:
         "{params.cmd} > {log}"
 
@@ -453,8 +437,6 @@ rule warp_t2_to_corobl_crop:
         ),
     conda:
         "../envs/ants.yaml"
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {params.ref}  -t {input.xfm}"

@@ -29,8 +29,6 @@ rule qc_reg_to_template:
             caption="../report/t1w_template_regqc.rst",
             category="Registration QC",
         ),
-    group:
-        "subj"
     conda:
         "../envs/neurovis.yaml"
     script:
@@ -58,8 +56,6 @@ rule get_subfield_vols_subj:
             allow_missing=True,
         ),
         lookup_tsv=Path(workflow.basedir) / "../resources/label_lut/subfields_dseg.tsv",
-    group:
-        "subj"
     output:
         tsv=bids(
             root=root,
@@ -101,8 +97,6 @@ rule plot_subj_subfields:
             caption="../report/subj_volume_plot.rst",
             category="Subfield Volumes",
         ),
-    group:
-        "subj"
     conda:
         "../envs/neurovis.yaml"
     script:
@@ -185,8 +179,6 @@ rule qc_subfield:
             caption="../report/subfield_qc.rst",
             category="Segmentation QC",
         ),
-    group:
-        "subj"
     conda:
         "../envs/neurovis.yaml"
     script:
@@ -221,8 +213,6 @@ rule qc_subfield_surf:
             caption="../report/subfield_qc.rst",
             category="Segmentation QC",
         ),
-    group:
-        "subj"
     conda:
         "../envs/neurovis.yaml"
     script:
@@ -247,8 +237,6 @@ rule concat_subj_vols_tsv:
             space=wildcards.space,
             atlas=wildcards.atlas,
         ),
-    group:
-        "aggregate"
     output:
         tsv=bids(
             root=root,

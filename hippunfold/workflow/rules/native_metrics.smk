@@ -25,8 +25,7 @@ rule calculate_surface_area:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -surface-vertex-areas {input} {output}"
 
@@ -69,8 +68,7 @@ rule metric_smoothing:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -metric-smoothing {input.surface} {input.metric} {params.fwhm} {output.metric} -fwhm"
 
@@ -112,8 +110,7 @@ rule calculate_gyrification:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         'wb_command -metric-math "nativearea/unfoldarea" {output.gii}'
         " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea}"
@@ -147,8 +144,7 @@ rule calculate_curvature:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -surface-curvature {input} -mean {output}"
 
@@ -190,8 +186,7 @@ rule calculate_thickness:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
 
@@ -226,7 +221,6 @@ rule soft_tanh_normalization:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -metric-math '{params.norm_limit}*tanh(X/{params.norm_limit})' {output.gii} -var X {input.gii}"

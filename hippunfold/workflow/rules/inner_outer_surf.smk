@@ -41,8 +41,7 @@ rule compute_halfthick_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -86,8 +85,7 @@ rule register_midthickness:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
+
     threads: 16
     conda:
         "../envs/greedy.yaml"
@@ -153,8 +151,7 @@ rule apply_halfsurf_warp_to_img:
                 )
             )
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/greedy.yaml"
     shell:
@@ -191,8 +188,7 @@ rule convert_inout_warp_from_itk_to_world:
                 )
             )
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/workbench.yaml"
     shell:
@@ -240,8 +236,7 @@ rule warp_midthickness_to_inout:
         "../envs/workbench.yaml"
     shadow:
         "minimal"
-    group:
-        "subj"
+
     log:
         bids_log(
             "warp_midthickness_to_inout",

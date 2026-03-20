@@ -141,8 +141,7 @@ if model_dict["arch_version"] == "nnunet_v1":
             gpus=1 if config["use_gpu"] else 0,
             mem_mb=16000,
             time=30 if config["use_gpu"] else 60,
-        group:
-            "subj"
+
         conda:
             "../envs/nnunet.yaml"
         shell:
@@ -201,8 +200,7 @@ elif model_dict["arch_version"] == "nnunet_v2":
             gpus=1 if config["use_gpu"] else 0,
             mem_mb=48000,
             time=30 if config["use_gpu"] else 120,
-        group:
-            "subj"
+
         conda:
             "../envs/nnunetv2.yaml"
         shell:
@@ -260,8 +258,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
             ),
         conda:
             "../envs/c3d.yaml"
-        group:
-            "subj"
+
         shell:
             "c3d {input} -flip x {output}"
 
@@ -305,8 +302,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
             gpus=1 if config["use_gpu"] else 0,
             mem_mb=16000,
             time=15 if config["use_gpu"] else 60,
-        group:
-            "subj"
         conda:
             "../envs/synthseg.yaml"
         shell:
@@ -349,8 +344,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
             ),
         conda:
             "../envs/c3d.yaml"
-        group:
-            "subj"
+
         shell:
             "c3d {input} -flip x {output}"
 
@@ -436,8 +430,6 @@ rule qc_nnunet_f3d:
             **inputs.subj_wildcards,
             hemi="{hemi}",
         ),
-    group:
-        "subj"
     shell:
         "reg_f3d -flo {input.img} -ref {params.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
         "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {params.ref} -res {output.res_mask} -inter 0 &> {log}"
@@ -476,8 +468,6 @@ rule qc_nnunet_dice:
             caption="../report/nnunet_qc.rst",
             category="Segmentation QC",
         ),
-    group:
-        "subj"
     conda:
         "../envs/pyunfold.yaml"
     script:

@@ -45,8 +45,7 @@ rule align_lr_unfold_2d:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
+
     shell:
         "c3d {input} {params.flip_per_hemi} -o {output}"
 
@@ -397,8 +396,7 @@ rule create_unfold_ref_2d_resampled:
                 suffix="metricref.nii.gz",
             )
         ),
-    group:
-        "subj"
+
     conda:
         "../envs/c3d.yaml"
     shadow:
@@ -800,8 +798,7 @@ rule import_avg_subfields_as_label:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -volume-label-import {input.vol_dseg} {input.label_list} {output.label_dseg}"
 

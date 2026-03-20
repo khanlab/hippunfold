@@ -26,8 +26,7 @@ rule extract_unfold_ref_slice:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
+
     shell:
         "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
 
@@ -100,8 +99,7 @@ rule native_metric_to_unfold_nii:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " {params.interp}"
@@ -172,8 +170,7 @@ rule atlas_metric_to_unfold_nii:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
@@ -208,8 +205,7 @@ rule slice_3d_to_2d_subject:
         ),
     conda:
         "../envs/neurovis.yaml"
-    group:
-        "subj"
+
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -247,8 +243,7 @@ rule slice_3d_to_2d_atlas:
         ),
     conda:
         "../envs/neurovis.yaml"
-    group:
-        "subj"
+
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -350,8 +345,7 @@ rule unfoldreg_antsquick:
         ),
     conda:
         "../envs/ants.yaml"
-    group:
-        "subj"
+
     log:
         bids_log(
             "unfoldreg_antsquick",
@@ -416,8 +410,7 @@ rule reset_header_2d_warp_unfoldreg:
         ),
     conda:
         "../envs/neurovis.yaml"
-    group:
-        "subj"
+
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -464,8 +457,7 @@ rule warp_unfold_native_to_unfoldreg:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+
     shadow:
         "minimal"
     shell:

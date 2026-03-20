@@ -50,8 +50,6 @@ rule template_reg:
                 hemi="{hemi}",
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/greedy.yaml"
     log:
@@ -109,8 +107,6 @@ rule warp_template_dseg:
                 label="hipp",
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/greedy.yaml"
     threads: 8
@@ -164,8 +160,6 @@ rule warp_template_dseg_dentate:
                 label="dentate",
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/greedy.yaml"
     threads: 8

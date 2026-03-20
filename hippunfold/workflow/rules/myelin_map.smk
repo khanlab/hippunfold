@@ -31,8 +31,6 @@ rule divide_t1_by_t2:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -92,8 +90,6 @@ rule sample_myelin_map_surf:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     conda:
         "../envs/workbench.yaml"
     shell:

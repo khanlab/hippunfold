@@ -33,8 +33,6 @@ rule prep_segs_for_greedy:
         smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
     output:
         temp(directory("{prefix}_dsegsplit")),
-    group:
-        "subj"
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -117,8 +115,6 @@ rule resample_template_dseg_tissue_for_reg:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
     shell:
         "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
 
@@ -168,8 +164,6 @@ rule template_shape_reg:
                 hemi="{hemi}",
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/greedy.yaml"
     threads: 8
@@ -212,8 +206,6 @@ rule dilate_dentate_pd_src_sink:
                 suffix="dseg.nii.gz",
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/neurovis.yaml"
     script:
@@ -286,8 +278,6 @@ rule template_shape_inject:
             hemi="{hemi}",
             label="{label}",
         ),
-    group:
-        "subj"
     conda:
         "../envs/greedy.yaml"
     threads: 8
@@ -334,8 +324,6 @@ rule reinsert_subject_labels:
                 label="{label}",
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/c3d.yaml"
     shell:
