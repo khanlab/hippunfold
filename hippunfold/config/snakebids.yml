@@ -333,6 +333,7 @@ parse_args:
       - neonateT12w_v2
       - ADNI_T1w_v1
       - neonate_synthseg
+      - maguire_T2w
 
 
 
@@ -377,6 +378,7 @@ cifti_metric_types:
 
 singularity:
   autotop: 'docker://khanlab/hippunfold_deps:v0.5.1'
+  nnunetv2:  'oras://docker.io/mahmoud1yaser/nnunetv2:latest'
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
@@ -645,7 +647,14 @@ nnunet_models:
     arch_version: synthseg_v2
     checkpoint: last.ckpt
 
-
+  maguire_T2w:
+    url: https://zenodo.org/records/18432751/files/Dataset001_HippUnfoldMag.nnUNetTrainer__nnUNetPlans__3d_fullres.tar.gz
+    arch_version: nnunet_v2
+    dataset_id: 101
+    configuration: 3d_fullres
+    trainer: nnUNetTrainer
+    plans: nnUNetPlans
+    checkpoint: checkpoint_best.pth
 
 #these will be downloaded to ~/.cache/hippunfold
 resource_urls:

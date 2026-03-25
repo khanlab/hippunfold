@@ -189,11 +189,11 @@ elif model_dict["arch_version"] == "nnunet_v2":
                 bids(
                     root=work,
                     datatype="anat",
-                    **inputs.subj_wildcards,
                     suffix="dseg.nii.gz",
                     desc="nnunet",
                     space="corobl",
                     hemi="{hemi,Lflip|R}",
+                    **config["subj_wildcards"],
                 )
             ),
         log:
@@ -214,7 +214,7 @@ elif model_dict["arch_version"] == "nnunet_v2":
         group:
             "subj"
         container:
-            config["singularity"]["autotop"]
+            config["singularity"]["nnunetv2"]
         shell:
             "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
 
