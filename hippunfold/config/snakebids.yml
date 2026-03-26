@@ -650,7 +650,7 @@ nnunet_models:
   maguire_T2w:
     url: https://zenodo.org/records/18432751/files/Dataset001_HippUnfoldMag.nnUNetTrainer__nnUNetPlans__3d_fullres.tar.gz
     arch_version: nnunet_v2
-    dataset_id: 101
+    dataset_id: '001'
     configuration: 3d_fullres
     trainer: nnUNetTrainer
     plans: nnUNetPlans

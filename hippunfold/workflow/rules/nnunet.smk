@@ -76,7 +76,7 @@ rule download_nnunet_model:
     container:
         config["singularity"]["autotop"]
     shell:
-        "mkdir -p {params.model_dir} && wget https://{params.url} -O {output}"
+        "mkdir -p {params.model_dir} && wget {params.url} -O {output}"
 
 
 def get_cmd_copy_inputs(wildcards, input):
