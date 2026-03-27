@@ -68,6 +68,7 @@ rule download_nnunet_model:
         url=storage(model_dict["url"]),
     output:
         model_tar=temp(get_model_tar()),
+    localrule: True
     shell:
         "cp {input} {output}"
 

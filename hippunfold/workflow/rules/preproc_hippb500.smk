@@ -57,5 +57,6 @@ rule cp_b500_to_anat_dir:
                 **inputs.subj_wildcards,
             )
         ),
+    localrule: True
     shell:
         "cp {input} {output}"

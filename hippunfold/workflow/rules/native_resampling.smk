@@ -46,7 +46,7 @@ rule cp_atlas_unfold:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-
+    localrule: True
     shell:
         "cp {input} {output}"
 
@@ -266,7 +266,7 @@ rule cp_atlas_subfields_label_gii:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    localrule: True
     shell:
         "cp {input} {output}"
 

@@ -3,6 +3,13 @@ from lib import utils as utils
 
 download_dir = utils.get_download_dir()
 
+localrules:
+    import_template_dseg,
+    import_template_dseg_dentate,
+    import_template_coords,
+    import_template_anat,
+    import_template_anat_crop
+
 
 rule download_extract_template:
     """Note: OSF urls don't seem to be supported with snakemake storage plugin"""
@@ -54,6 +61,7 @@ rule cp_atlas_surf_gii:
             space="{space}",
             suffix="{surf_name}.surf.gii",
         ),
+    localrule: True
     shell:
         "cp {params.path} {output}"
 
@@ -79,6 +87,7 @@ rule cp_atlas_metric_gii:
             den="{density}",
             suffix="{metricname}.{metrictype}.gii",
         ),
+    localrule: True
     shell:
         "cp {params.path} {output}"
 

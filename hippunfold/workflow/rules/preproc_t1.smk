@@ -13,6 +13,7 @@ rule import_t1:
                 suffix="T1w.nii.gz",
             )
         ),
+    localrule: True
     shell:
         "cp {input} {output}"
 
@@ -30,6 +31,7 @@ if config["skip_preproc"]:
                 suffix="T1w.nii.gz",
                 desc="preproc",
             ),
+        localrule: True
         shell:
             "cp {input} {output}"
 

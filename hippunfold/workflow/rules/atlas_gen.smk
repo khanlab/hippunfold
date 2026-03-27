@@ -211,6 +211,7 @@ rule copy_avgtemplate_warps:
                 **inputs.subj_wildcards,
             )
         ),
+    localrule: True
     shell:
         "cp {params.glob_input_warp} {output.warp} && "
         "cp {params.glob_input_invwarp} {output.invwarp}"

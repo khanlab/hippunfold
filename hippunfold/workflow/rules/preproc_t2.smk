@@ -10,6 +10,7 @@ rule import_t2:
                 **inputs["T2w"].wildcards,
             )
         ),
+    localrule: True
     shell:
         "cp {input} {output}"
 
@@ -175,7 +176,7 @@ if config["skip_preproc"]:
                 suffix="T2w.nii.gz",
                 desc="preproc",
             ),
-
+        localrule: True
         shell:
             "cp {input} {output}"
 
