@@ -253,7 +253,9 @@ rule prep_dseg_for_laynii:
         ),
     conda:
         "../envs/c3d.yaml"
-
+    threads: 8
+    resources:
+        mem_mb = 32000
     shell:
         "c3d -background -1 {input} -as DSEG -retain-labels {params.gm_labels} -binarize -scale 3 -popas GM -push DSEG -retain-labels {params.src_labels} -binarize -scale 2 -popas WM -push DSEG -retain-labels {params.sink_labels} -binarize -scale 1 -popas PIAL -push GM -push WM -add -push PIAL -add -o {output}"
 
@@ -297,7 +299,9 @@ rule laynii_layers_equidist:
             label="{label}",
             hemi="{hemi}",
         ),
-
+    threads: 8
+    resources:
+        mem_mb = 32000
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz &> {log} && "

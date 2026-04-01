@@ -68,6 +68,9 @@ rule gen_native_mesh:
 
     conda:
         "../envs/pyvista.yaml"
+    threads: 8
+    resources:
+        mem_mb = 32000
     log:
         bids_log(
             "gen_native_mesh",

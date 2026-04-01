@@ -167,6 +167,8 @@ rule template_shape_reg:
     conda:
         "../envs/greedy.yaml"
     threads: 8
+    resources:
+        mem_mb=32000
     log:
         bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     shell:
@@ -281,6 +283,8 @@ rule template_shape_inject:
     conda:
         "../envs/greedy.yaml"
     threads: 8
+    resources:
+        mem_mb = 32000
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
@@ -326,6 +330,9 @@ rule reinsert_subject_labels:
         ),
     conda:
         "../envs/c3d.yaml"
+    threads: 8
+    resources:
+        mem_mb = 32000
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
         " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "

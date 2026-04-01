@@ -86,7 +86,9 @@ rule register_midthickness:
             )
         ),
 
-    threads: 16
+    threads: 8
+    resources:
+        mem_mb = 32000
     conda:
         "../envs/greedy.yaml"
     log:
