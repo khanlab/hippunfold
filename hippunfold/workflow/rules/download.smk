@@ -17,8 +17,6 @@ rule download_extract_template:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
         unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
-    shadow:
-        "minimal"
     script:
         "../scripts/download.py"
 
@@ -32,8 +30,6 @@ rule download_surf_template_atlas:
         unzip_dir=temp(directory(Path(download_dir) / "atlases_dl" / "tpl-{atlas}")),
     wildcard_constraints:
         atlas="|".join(config["builtin_atlases"]),
-    shadow:
-        "minimal"
     shell:
         "unzip {input} -d {output}"
 
