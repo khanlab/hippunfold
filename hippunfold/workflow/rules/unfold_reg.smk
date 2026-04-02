@@ -99,7 +99,10 @@ rule native_metric_to_unfold_nii:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    threads: 1
+    resources:
+        mem_mb = 1000,
+        time = 10
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " {params.interp}"
@@ -205,7 +208,10 @@ rule slice_3d_to_2d_subject:
         ),
     conda:
         "../envs/neurovis.yaml"
-
+    threads: 1
+    resources:
+        mem_mb = 1000,
+        time = 10
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -356,11 +362,12 @@ rule unfoldreg_antsquick:
         ),
     shadow:
         "minimal"
-    threads: 16
+    threads: 4
     resources:
-        mem_mb=16000,
+        mem_mb=2000,
         time=10,
     shell:
+        "export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads}"
         "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args} &> {log} && "
         "{params.cmd_copy_warps}"
 

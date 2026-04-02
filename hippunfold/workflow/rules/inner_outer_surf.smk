@@ -86,9 +86,10 @@ rule register_midthickness:
             )
         ),
 
-    threads: 8
+    threads: 1
     resources:
-        mem_mb = 32000
+        mem_mb = 2000,
+        time = 10
     conda:
         "../envs/greedy.yaml"
     log:
@@ -190,7 +191,10 @@ rule convert_inout_warp_from_itk_to_world:
                 )
             )
         ),
-
+    threads: 1
+    resources:
+        mem_mb = 1000,
+        time = 10
     conda:
         "../envs/workbench.yaml"
     shell:
@@ -238,7 +242,10 @@ rule warp_midthickness_to_inout:
         "../envs/workbench.yaml"
     shadow:
         "minimal"
-
+    threads: 1
+    resources:
+        mem_mb = 1000,
+        time = 5
     log:
         bids_log(
             "warp_midthickness_to_inout",
