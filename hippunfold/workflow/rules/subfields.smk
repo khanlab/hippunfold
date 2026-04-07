@@ -489,6 +489,9 @@ rule resample_subfields_to_orig:
         ),
     conda:
         "../envs/ants.yaml"
+    threads: 8
+    resources:
+        mem_mb = 16000
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"

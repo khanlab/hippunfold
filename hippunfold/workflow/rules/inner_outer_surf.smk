@@ -85,10 +85,9 @@ rule register_midthickness:
                 **inputs.subj_wildcards,
             )
         ),
-
-    threads: 1
+    threads: 8
     resources:
-        mem_mb = 2000,
+        mem_mb = 16000,
         time = 10
     conda:
         "../envs/greedy.yaml"

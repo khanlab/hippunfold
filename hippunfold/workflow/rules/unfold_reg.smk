@@ -362,12 +362,11 @@ rule unfoldreg_antsquick:
         ),
     shadow:
         "minimal"
-    threads: 4
+    threads: 8
     resources:
-        mem_mb=2000,
+        mem_mb=16000,
         time=10,
     shell:
-        "export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads}"
         "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args} &> {log} && "
         "{params.cmd_copy_warps}"
 

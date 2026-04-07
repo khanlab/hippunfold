@@ -53,7 +53,9 @@ else:
                 desc="preproc",
                 suffix="T1w.nii.gz",
             ),
-        threads: 8
+        resources:
+            mem_mb = 64000
+        threads: 16
         conda:
             "../envs/ants.yaml"
         shell:
@@ -101,6 +103,9 @@ rule warp_t1_to_corobl_crop:
         ),
     conda:
         "../envs/ants.yaml"
+    threads: 8
+    resources:
+        mem_mb = 32000
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {params.ref}  -t {input.xfm}"

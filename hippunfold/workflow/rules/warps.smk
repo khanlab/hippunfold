@@ -58,6 +58,9 @@ rule reg_to_template:
             from_="{modality,T1w|T2w}",
             to=config["template"],
         ),
+    threads: 8
+    resources:
+        mem_mb = 32000
     conda:
         "../envs/niftyreg.yaml"
     shell:
