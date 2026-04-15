@@ -35,6 +35,9 @@ rule prep_segs_for_greedy:
         temp(directory("{prefix}_dsegsplit")),
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
@@ -115,6 +118,9 @@ rule resample_template_dseg_tissue_for_reg:
         ),
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb = 2048,
+        runtime = 15
     shell:
         "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
 
@@ -168,7 +174,8 @@ rule template_shape_reg:
         "../envs/greedy.yaml"
     threads: 8
     resources:
-        mem_mb=32000
+        mem_mb=16000,
+        runtime = 60
     log:
         bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     shell:
@@ -284,7 +291,8 @@ rule template_shape_inject:
         "../envs/greedy.yaml"
     threads: 8
     resources:
-        mem_mb = 32000
+        mem_mb = 4000,
+        runtime = 10
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
@@ -330,9 +338,9 @@ rule reinsert_subject_labels:
         ),
     conda:
         "../envs/c3d.yaml"
-    threads: 8
     resources:
-        mem_mb = 32000
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
         " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "

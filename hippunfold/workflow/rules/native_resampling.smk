@@ -88,7 +88,9 @@ rule resample_native_surf_to_atlas_density:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     log:
         bids_log(
             "resample_native_surf_to_atlas_density",
@@ -136,7 +138,9 @@ rule resample_native_metric_to_atlas_density:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     log:
         bids_log(
             "resample_native_metric_to_atlas_density",
@@ -187,7 +191,9 @@ rule resample_native_coords_to_atlas_density:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     log:
         bids_log(
             "resample_native_coords_to_atlas_density",
@@ -238,7 +244,9 @@ rule resample_atlas_subfields_to_native_surf:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
@@ -360,6 +368,8 @@ rule affine_gii_corobl_to_orig:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"

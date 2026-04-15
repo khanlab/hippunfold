@@ -82,7 +82,9 @@ rule create_dscalar_metric_cifti:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "{params.cmd}"
 
@@ -144,7 +146,9 @@ rule create_dlabel_cifti_subfields:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 2048,
+        runtime = 10
     shell:
         "{params.cmd}"
 
@@ -182,7 +186,9 @@ rule create_spec_file:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "{params.cmds}"
 
@@ -224,7 +230,9 @@ rule merge_lr_spec_file:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "{params.cmd}"
 
@@ -255,6 +263,8 @@ rule merge_hipp_dentate_spec_file:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "{params.cmd}"

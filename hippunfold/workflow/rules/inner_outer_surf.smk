@@ -41,7 +41,9 @@ rule compute_halfthick_mask:
                 **inputs.subj_wildcards,
             )
         ),
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -85,10 +87,8 @@ rule register_midthickness:
                 **inputs.subj_wildcards,
             )
         ),
-    threads: 8
     resources:
-        mem_mb = 16000,
-        time = 10
+        mem_mb = 4096,
     conda:
         "../envs/greedy.yaml"
     log:
@@ -190,10 +190,9 @@ rule convert_inout_warp_from_itk_to_world:
                 )
             )
         ),
-    threads: 1
     resources:
-        mem_mb = 1000,
-        time = 10
+        mem_mb = 1024,
+        runtime = 10
     conda:
         "../envs/workbench.yaml"
     shell:
@@ -241,10 +240,9 @@ rule warp_midthickness_to_inout:
         "../envs/workbench.yaml"
     shadow:
         "minimal"
-    threads: 1
     resources:
-        mem_mb = 1000,
-        time = 5
+        mem_mb = 1024,
+        runtime = 5
     log:
         bids_log(
             "warp_midthickness_to_inout",

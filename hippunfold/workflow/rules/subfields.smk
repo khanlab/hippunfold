@@ -270,6 +270,9 @@ rule map_surf_subfields_to_volume:
         ),
     conda:
         "../envs/workbench.yaml"
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     log:
         bids_log(
             "map_nearest_surf_subfields_to_volume",
@@ -344,6 +347,9 @@ rule combine_dentate_subfield_labels_corobl:
         ),
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -type uchar -o {output}"
 
@@ -389,6 +395,9 @@ rule label_gm_with_nearest_subfields:
         ),
     conda:
         "../envs/pyunfold.yaml"
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     log:
         bids_log(
             "label_gm_with_nearest_subfields",
@@ -440,6 +449,9 @@ rule combine_tissue_subfield_labels_corobl:
         ),
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 
@@ -491,7 +503,8 @@ rule resample_subfields_to_orig:
         "../envs/ants.yaml"
     threads: 8
     resources:
-        mem_mb = 16000
+        mem_mb = 20000,
+        runtime = 15
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"

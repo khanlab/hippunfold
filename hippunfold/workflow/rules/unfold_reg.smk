@@ -26,7 +26,9 @@ rule extract_unfold_ref_slice:
         ),
     conda:
         "../envs/c3d.yaml"
-
+    resources:
+        mem_mb = 4096,
+        runtime = 10
     shell:
         "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
 
@@ -99,10 +101,9 @@ rule native_metric_to_unfold_nii:
         ),
     conda:
         "../envs/workbench.yaml"
-    threads: 1
     resources:
-        mem_mb = 1000,
-        time = 10
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " {params.interp}"
@@ -173,7 +174,9 @@ rule atlas_metric_to_unfold_nii:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
@@ -208,10 +211,9 @@ rule slice_3d_to_2d_subject:
         ),
     conda:
         "../envs/neurovis.yaml"
-    threads: 1
     resources:
-        mem_mb = 1000,
-        time = 10
+        mem_mb = 1024,
+        runtime = 10
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -249,7 +251,9 @@ rule slice_3d_to_2d_atlas:
         ),
     conda:
         "../envs/neurovis.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -364,8 +368,8 @@ rule unfoldreg_antsquick:
         "minimal"
     threads: 8
     resources:
-        mem_mb=16000,
-        time=10,
+        mem_mb=1024,
+        runtime=10,
     shell:
         "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args} &> {log} && "
         "{params.cmd_copy_warps}"
@@ -416,7 +420,9 @@ rule reset_header_2d_warp_unfoldreg:
         ),
     conda:
         "../envs/neurovis.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -463,7 +469,9 @@ rule warp_unfold_native_to_unfoldreg:
         ),
     conda:
         "../envs/workbench.yaml"
-
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     shadow:
         "minimal"
     shell:

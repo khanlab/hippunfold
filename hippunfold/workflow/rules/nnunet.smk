@@ -94,6 +94,9 @@ rule unpack_nnunet_model:
         tar_opts=lambda wildcards, input: "-xzf" if input.tar[-2:] == "gz" else "-xf",
     output:
         directory(get_model_dir()),
+    resources:
+        mem_mb=3000,
+        runtime=10
     shell:
         "mkdir -p {output} && tar {params.tar_opts} {input} -C {output}"
 
@@ -140,7 +143,7 @@ if model_dict["arch_version"] == "nnunet_v1":
         threads: 8
         resources:
             gpus=1 if config["use_gpu"] else 0,
-            mem_mb=32000,
+            mem_mb=24000,
             time=30 if config["use_gpu"] else 60,
 
         conda:
@@ -425,6 +428,9 @@ rule qc_nnunet_f3d:
         ),
     conda:
         "../envs/niftyreg.yaml"
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     log:
         bids_log(
             "qc_nnunet_f3d",
@@ -471,5 +477,8 @@ rule qc_nnunet_dice:
         ),
     conda:
         "../envs/pyunfold.yaml"
+    resources:
+        mem_mb = 1024,
+        runtime = 10
     script:
         "../scripts/dice.py"
