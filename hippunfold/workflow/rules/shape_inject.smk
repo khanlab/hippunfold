@@ -119,7 +119,7 @@ rule resample_template_dseg_tissue_for_reg:
     conda:
         "../envs/c3d.yaml"
     resources:
-        mem_mb = 2048,
+        mem_mb = 1024,
         runtime = 15
     shell:
         "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
@@ -172,10 +172,10 @@ rule template_shape_reg:
         ),
     conda:
         "../envs/greedy.yaml"
-    threads: 8
+    threads: 2
     resources:
-        mem_mb=16000,
-        runtime = 60
+        mem_mb = 2048,
+        runtime = 10
     log:
         bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     shell:
@@ -289,9 +289,9 @@ rule template_shape_inject:
         ),
     conda:
         "../envs/greedy.yaml"
-    threads: 8
+    threads: 2
     resources:
-        mem_mb = 4000,
+        mem_mb = 4096,
         runtime = 10
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"

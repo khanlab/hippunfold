@@ -54,7 +54,7 @@ else:
                 suffix="T1w.nii.gz",
             ),
         resources:
-            mem_mb = 32000,
+            mem_mb = 36000,
             runtime = 60
         threads: 16
         conda:
@@ -104,9 +104,9 @@ rule warp_t1_to_corobl_crop:
         ),
     conda:
         "../envs/ants.yaml"
-    threads: 8
+    threads: 1
     resources:
-        mem_mb = 16000,
+        mem_mb = 16384,
         runtime = 30
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "

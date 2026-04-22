@@ -35,7 +35,7 @@ rule create_crop_ref:
         ),
     conda:
         "../envs/c3d.yaml"
-    threads: 16
+    threads: 1
     resources:
         mem_mb = 16000,
         runtime = 10
@@ -275,7 +275,7 @@ rule resample_to_crop:
         ),
     conda:
         "../envs/ants.yaml"
-    threads: 8
+    threads: 2
     resources:
         mem_mb = 16000,
         runtime = 10

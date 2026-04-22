@@ -87,6 +87,7 @@ rule register_midthickness:
                 **inputs.subj_wildcards,
             )
         ),
+    threads: 1
     resources:
         mem_mb = 4096,
     conda:
@@ -242,7 +243,7 @@ rule warp_midthickness_to_inout:
         "minimal"
     resources:
         mem_mb = 1024,
-        runtime = 5
+        runtime = 10
     log:
         bids_log(
             "warp_midthickness_to_inout",

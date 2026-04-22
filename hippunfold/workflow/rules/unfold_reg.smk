@@ -26,8 +26,9 @@ rule extract_unfold_ref_slice:
         ),
     conda:
         "../envs/c3d.yaml"
+    threads: 1
     resources:
-        mem_mb = 4096,
+        mem_mb = 1024,
         runtime = 10
     shell:
         "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"

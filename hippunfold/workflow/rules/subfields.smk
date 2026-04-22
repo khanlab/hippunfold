@@ -503,7 +503,7 @@ rule resample_subfields_to_orig:
         "../envs/ants.yaml"
     threads: 8
     resources:
-        mem_mb = 20000,
+        mem_mb = 24000,
         runtime = 15
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "

@@ -147,7 +147,7 @@ rule create_dlabel_cifti_subfields:
     conda:
         "../envs/workbench.yaml"
     resources:
-        mem_mb = 2048,
+        mem_mb = 1024,
         runtime = 10
     shell:
         "{params.cmd}"

@@ -143,7 +143,7 @@ if model_dict["arch_version"] == "nnunet_v1":
         threads: 8
         resources:
             gpus=1 if config["use_gpu"] else 0,
-            mem_mb=24000,
+            mem_mb=32000,
             time=30 if config["use_gpu"] else 60,
 
         conda:

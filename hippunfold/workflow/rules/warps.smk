@@ -60,7 +60,7 @@ rule reg_to_template:
         ),
     threads: 8
     resources:
-        mem_mb = 20000,
+        mem_mb = 24000,
         runtime = 60
     conda:
         "../envs/niftyreg.yaml"
