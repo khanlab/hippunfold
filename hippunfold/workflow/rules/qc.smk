@@ -227,7 +227,6 @@ rule qc_subfield_surf:
         ),
     resources:
         mem_mb = 1024,
-        runtime = 10
     conda:
         "../envs/neurovis.yaml"
     script:
