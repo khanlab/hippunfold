@@ -680,12 +680,12 @@ nnunet_models:
     checkpoint: epoch=336-step=198830.ckpt
 
   hippls_synthtopo:
-    url: 'https://zenodo.org/records/20129033/files/hippls_synthtopo.zip'
+    url: 'https://zenodo.org/records/20137132/files/hippls_synthtopo.zip'
     arch_version: synthtopo
     nb_classes: 11
     seg_nb_levels: 6
     seg_features: [16, 32, 64, 128, 256, 512]
-    checkpoint: epoch=373-step=220660.ckpt
+    checkpoint: epoch=397-step=234820.ckpt
 
 
 
