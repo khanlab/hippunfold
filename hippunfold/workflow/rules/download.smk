@@ -8,7 +8,11 @@ localrules:
     import_template_dseg_dentate,
     import_template_coords,
     import_template_anat,
-    import_template_anat_crop
+    import_template_anat_crop,
+    cp_atlas_surf_gii,
+    cp_atlas_metric_gii,
+    download_extract_template,
+    download_surf_template_atlas
 
 
 rule download_extract_template:
@@ -57,7 +61,6 @@ rule cp_atlas_surf_gii:
             space="{space}",
             suffix="{surf_name}.surf.gii",
         ),
-    localrule: True
     shell:
         "cp {params.path} {output}"
 
@@ -83,7 +86,6 @@ rule cp_atlas_metric_gii:
             den="{density}",
             suffix="{metricname}.{metrictype}.gii",
         ),
-    localrule: True
     shell:
         "cp {params.path} {output}"
 
