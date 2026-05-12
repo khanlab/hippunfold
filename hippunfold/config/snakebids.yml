@@ -100,6 +100,22 @@ parse_args:
       - 'MBMv3'
       - 'CIVM'
       - 'ABAv3'
+      - 'fetalGA21'
+      - 'fetalGA22'
+      - 'fetalGA23'
+      - 'fetalGA24'
+      - 'fetalGA25'
+      - 'fetalGA26'
+      - 'fetalGA27'
+      - 'fetalGA28'
+      - 'fetalGA29'
+      - 'fetalGA30'
+      - 'fetalGA31'
+      - 'fetalGA32'
+      - 'fetalGA33'
+      - 'fetalGA34'
+      - 'fetalGA35'
+      - 'fetalGA36'  
     default: 'CITI168'
     help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv3 is for marmoset data, CIVM is for in vivo macaque data, and ABAv3 is for mouse data. When using a non-human template, consider using a corresponding atlas. (default: %(default)s)'
 
@@ -243,6 +259,7 @@ parse_args:
       - b1000
       - trimodal
       - hippb500
+      - neonateT1w_v1
       - neonateT1w
       - synthseg_v0.1
       - synthseg_v0.2
@@ -251,6 +268,8 @@ parse_args:
       - neonateT12w_v2
       - ADNI_T1w_v1
       - neonate_synthseg
+      - hippls_synthseg
+      - hippls_synthtopo
 
   --enable-bids-validation:
     help: |
@@ -374,6 +393,165 @@ template_files:
     hemi_wildcards:
       - L
       - R
+  fetalGA21:
+    T1w:         tpl-fetalGA21_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA21_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA21_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA21_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA21_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA22:
+    T1w:         tpl-fetalGA22_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA22_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA22_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA22_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA22_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA23:
+    T1w:         tpl-fetalGA23_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA23_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA23_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA23_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA23_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA24:
+    T1w:         tpl-fetalGA24_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA24_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA24_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA24_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA24_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA25:
+    T1w:         tpl-fetalGA25_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA25_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA25_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA25_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA25_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA26:
+    T1w:         tpl-fetalGA26_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA26_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA26_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA26_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA26_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA27:
+    T1w:         tpl-fetalGA27_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA27_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA27_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA27_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA27_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA28:
+    T1w:         tpl-fetalGA28_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA28_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA28_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA28_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA28_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA29:
+    T1w:         tpl-fetalGA29_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA29_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA29_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA29_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA29_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA30:
+    T1w:         tpl-fetalGA30_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA30_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA30_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA30_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA30_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA31:
+    T1w:         tpl-fetalGA31_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA31_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA31_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA31_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA31_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA32:
+    T1w:         tpl-fetalGA32_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA32_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA32_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA32_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA32_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA33:
+    T1w:         tpl-fetalGA33_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA33_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA33_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA33_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA33_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA34:
+    T1w:         tpl-fetalGA34_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA34_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA34_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA34_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA34_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA35:
+    T1w:         tpl-fetalGA35_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA35_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA35_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA35_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA35_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
+
+  fetalGA36:
+    T1w:         tpl-fetalGA36_res-1_T1w.nii.gz
+    T2w:         tpl-fetalGA36_res-1_T2w.nii.gz
+    xfm_corobl:  tpl-fetalGA36_to-corobl_affine.txt
+    crop_ref:    tpl-fetalGA36_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    crop_refT1w: tpl-fetalGA36_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+    hemi_wildcards:
+      - L
+      - R
 
 
 #values to use for re-mapping tissue labels when combining with subfields.
@@ -417,18 +595,18 @@ nnunet_models:
     task: Task110_hcp1200_b1000crop
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
-#  neonateT1w:
-#    url: 'https://zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
-#    arch_version: nnunet_v1
-#    task: Task205_hcp1200_b1000_finetuneround2_dhcp_T1w
-#    checkpoint:  model_best
-#    trainer: nnUNetTrainerV2
+  neonateT1w_v1:
+   url: 'https://zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
+   arch_version: nnunet_v1
+   task: Task205_hcp1200_b1000_finetuneround2_dhcp_T1w
+   checkpoint:  model_best
+   trainer: nnUNetTrainerV2
   neonateT1w: 
     url: 'https://zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
     arch_version: nnunet_v1
     task: Task301_dhcp_T1w_synthseg_manuallycorrected
     checkpoint:  model_best
-    trainer: nnUNetTrainerV2
+    trainer: nnUNetTrainer
 
   T1T2w:
     url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
@@ -487,8 +665,27 @@ nnunet_models:
 
   neonate_synthseg:
     url: 'https://zenodo.org/records/17742012/files/synthseg.tar.xz'
-    arch_version: synthseg_v2
+    arch_version: synthtopo
+    nb_classes: 9
+    seg_nb_levels: 6
+    seg_features: [16, 24, 32, 48, 64, 96]
     checkpoint: last.ckpt
+
+  hippls_synthseg:
+    url: 'https://zenodo.org/records/20129041/files/hippls_synthseg.zip'
+    arch_version: synthtopo
+    nb_classes: 11
+    seg_nb_levels: 6
+    seg_features: [16, 32, 64, 128, 256, 512]
+    checkpoint: epoch=336-step=198830.ckpt
+
+  hippls_synthtopo:
+    url: 'https://zenodo.org/records/20129033/files/hippls_synthtopo.zip'
+    arch_version: synthtopo
+    nb_classes: 11
+    seg_nb_levels: 6
+    seg_features: [16, 32, 64, 128, 256, 512]
+    checkpoint: epoch=373-step=220660.ckpt
 
 
 
@@ -503,6 +700,22 @@ resource_urls:
     upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
     CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
     ABAv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip='
+    fetalGA21: 'zenodo.org/records/20129108/files/fetalGA21.zip'
+    fetalGA22: 'zenodo.org/records/20129107/files/fetalGA22.zip'
+    fetalGA23: 'zenodo.org/records/18699506/files/fetalGA23.zip'
+    fetalGA24: 'zenodo.org/records/20129105/files/fetalGA24.zip'
+    fetalGA25: 'zenodo.org/records/20129104/files/fetalGA25.zip'
+    fetalGA26: 'zenodo.org/records/20129103/files/fetalGA26.zip'
+    fetalGA27: 'zenodo.org/records/20129102/files/fetalGA27.zip'
+    fetalGA28: 'zenodo.org/records/20129101/files/fetalGA28.zip'
+    fetalGA29: 'zenodo.org/records/20129100/files/fetalGA29.zip'
+    fetalGA30: 'zenodo.org/records/20129099/files/fetalGA30.zip'
+    fetalGA31: 'zenodo.org/records/20129097/files/fetalGA31.zip'
+    fetalGA32: 'zenodo.org/records/20129096/files/fetalGA32.zip'
+    fetalGA33: 'zenodo.org/records/20129095/files/fetalGA33.zip'
+    fetalGA34: 'zenodo.org/records/20129094/files/fetalGA34.zip'
+    fetalGA35: 'zenodo.org/records/20129086/files/fetalGA35.zip'
+    fetalGA36: 'zenodo.org/records/20129079/files/fetalGA36.zip'
 #to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 

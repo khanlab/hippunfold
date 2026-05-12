@@ -122,7 +122,7 @@ if model_dict["arch_version"] == "nnunet_v1":
                     datatype="anat",
                     **inputs.subj_wildcards,
                     suffix="dseg.nii.gz",
-                    desc="nnunet",
+                    desc="pred",
                     space="corobl",
                     hemi="{hemi}",
                 )
@@ -182,7 +182,7 @@ elif model_dict["arch_version"] == "nnunet_v2":
                     datatype="anat",
                     **inputs.subj_wildcards,
                     suffix="dseg.nii.gz",
-                    desc="nnunet",
+                    desc="pred",
                     space="corobl",
                     hemi="{hemi}",
                 )
@@ -232,7 +232,7 @@ elif model_dict["arch_version"] == "nnunet_v2":
             "&> {log} && "
             "cp {params.temp_lbl} {output.nnunet_seg}"
 
-elif model_dict["arch_version"] == "synthseg_v2":
+elif model_dict["arch_version"] == "synthtopo":
 
     rule flip_synthseg_input:
         input:
@@ -264,8 +264,8 @@ elif model_dict["arch_version"] == "synthseg_v2":
         shell:
             "c3d {input} -flip x {output}"
 
-    rule run_inference_synthseg_v2:
-        """SynthSeg inference with checkpoint extraction in shadow directory.
+    rule run_inference_synthtopo:
+        """SynthTopo inference with checkpoint extraction in shadow directory.
 
         For left hemisphere: input is pre-flipped, output will be unflipped in next rule.
         For right hemisphere: input and output are used as-is.
@@ -275,8 +275,11 @@ elif model_dict["arch_version"] == "synthseg_v2":
             model_tar=get_model_tar(),
         params:
             model_dir="tempmodel",
-            checkpoint_path="tempmodel/synthseg/{chkpt}".format(
-                chkpt=model_dict["checkpoint"]
+            checkpoint_name=model_dict["checkpoint"],
+            nb_classes=model_dict.get("nb_classes", 9),
+            seg_nb_levels=model_dict.get("seg_nb_levels", 6),
+            seg_features=" ".join(
+                str(x) for x in model_dict.get("seg_features", [16, 24, 32, 48, 64, 96])
             ),
             device="cuda" if config["use_gpu"] else "cpu",
         output:
@@ -285,7 +288,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     root=root,
                     datatype="anat",
                     suffix="dseg.nii.gz",
-                    desc="nnunet",
+                    desc="pred",
                     space="corobl",
                     hemi="{hemi,Lflip|R}",
                     **inputs.subj_wildcards,
@@ -307,18 +310,29 @@ elif model_dict["arch_version"] == "synthseg_v2":
         group:
             "subj"
         conda:
-            "../envs/synthseg.yaml"
+            "../envs/synthtopo.yaml"
         shell:
             # Create temp model directory
             "mkdir -p {params.model_dir} && "
 
-            "tar -xf {input.model_tar} -C {params.model_dir} && "
+            # Extract model archive (tar.* or zip)
+            "case \"{input.model_tar}\" in "
+            "  *.zip) unzip -q \"{input.model_tar}\" -d \"{params.model_dir}\" ;; "
+            "  *) tar -xf \"{input.model_tar}\" -C \"{params.model_dir}\" ;; "
+            "esac && "
 
-            "python {workflow.basedir}/scripts/seg_synthseg.py "
+            # Locate checkpoint inside extracted tree
+            "CHKPT=\"$(find \"{params.model_dir}\" -type f -name \"{params.checkpoint_name}\" -print -quit)\" && "
+            "if [ -z \"$CHKPT\" ]; then echo \"ERROR: checkpoint not found: {params.checkpoint_name}\" 1>&2; exit 1; fi && "
+
+            "python {workflow.basedir}/scripts/synthtopo.py "
             "{input.in_img} "
-            "{params.checkpoint_path} "
+            "\"$CHKPT\" "
             "--output {output.synthseg_seg} "
             "--device {params.device} "
+            "--nb-classes {params.nb_classes} "
+            "--seg-nb-levels {params.seg_nb_levels} "
+            "--seg-features {params.seg_features} "
             "&> {log}"
             # Extract model tar
             # Run SynthSeg inference
@@ -329,7 +343,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
                 root=root,
                 datatype="anat",
                 suffix="dseg.nii.gz",
-                desc="nnunet",
+                desc="pred",
                 space="corobl",
                 hemi="{hemi}flip",
                 **inputs.subj_wildcards,
@@ -340,7 +354,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     root=root,
                     datatype="anat",
                     suffix="dseg.nii.gz",
-                    desc="nnunet",
+                    desc="pred",
                     space="corobl",
                     hemi="{hemi,L}",
                     **inputs.subj_wildcards,
@@ -368,6 +382,18 @@ def get_f3d_ref(wildcards, input):
     return nii
 
 
+def get_mask_crop_ref(wildcards, input):
+    template_name = config.get("template")
+    template_cfg = config.get("template_files", {}).get(template_name, {})
+    mask_tpl = template_cfg.get("Mask_crop")
+    if not mask_tpl:
+        raise ValueError(
+            f"Dice QC requires template_files.{template_name}.Mask_crop to be set; "
+            "either add it to the config or omit the unetf3d dice QC output."
+        )
+    return Path(input.template_dir) / mask_tpl.format(**wildcards)
+
+
 rule qc_nnunet_f3d:
     input:
         img=(
@@ -386,7 +412,7 @@ rule qc_nnunet_f3d:
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
-            desc="nnunet",
+            desc="pred",
             space="corobl",
             hemi="{hemi}",
         ),
@@ -456,12 +482,7 @@ rule qc_nnunet_dice:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         hipp_lbls=[1, 2, 7, 8],
-        ref=lambda wildcards, input: (
-            Path(input.template_dir)
-            / config["template_files"][config["template"]]["Mask_crop"].format(
-                **wildcards
-            )
-        ),
+        ref=get_mask_crop_ref,
     output:
         dice=report(
             bids(

@@ -1,4 +1,4 @@
-name: synthseg
+name: synthtopo
 channels:
   - balbasty
   - pytorch
@@ -11,3 +11,4 @@ dependencies:
   - torchvision
   - nibabel
   - cornucopia
+  - unzip

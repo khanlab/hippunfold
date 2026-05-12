@@ -376,20 +376,22 @@ def get_final_qc():
         )
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
         if not config["use_template_seg"]:
-            qc.extend(
-                inputs[config["modality"]].expand(
-                    bids(
-                        root=root,
-                        datatype="qc",
-                        desc="unetf3d",
-                        suffix="dice.tsv",
-                        hemi="{hemi}",
-                        **inputs.subj_wildcards,
-                    ),
-                    hemi=config["hemi"],
-                    allow_missing=True,
+            template_cfg = config.get("template_files", {}).get(config.get("template"), {})
+            if "Mask_crop" in template_cfg:
+                qc.extend(
+                    inputs[config["modality"]].expand(
+                        bids(
+                            root=root,
+                            datatype="qc",
+                            desc="unetf3d",
+                            suffix="dice.tsv",
+                            hemi="{hemi}",
+                            **inputs.subj_wildcards,
+                        ),
+                        hemi=config["hemi"],
+                        allow_missing=True,
+                    )
                 )
-            )
     return qc
 
 
@@ -450,7 +452,7 @@ def get_input_for_shape_inject(wildcards):
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
-            desc="nnunet",
+            desc="pred",
             space="corobl",
             hemi="{hemi}",
         ).format(**wildcards)

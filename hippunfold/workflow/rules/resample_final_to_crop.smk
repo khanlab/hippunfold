@@ -48,7 +48,7 @@ rule resample_unet_crop:
             datatype="anat",
             **inputs.subj_wildcards,
             suffix="dseg.nii.gz",
-            desc="nnunet",
+            desc="pred",
             space="corobl",
             hemi="{hemi}",
         ),
