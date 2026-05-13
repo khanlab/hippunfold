@@ -91,6 +91,7 @@ rule resample_native_surf_to_atlas_density:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: surface_geometry
     log:
         bids_log(
             "resample_native_surf_to_atlas_density",
@@ -150,6 +151,7 @@ rule resample_native_metric_to_atlas_density:
             den="{density,[0-9k]+}",
             desc="{metric}-{metrictype}",
         ),
+    group: morphometry_stats
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
@@ -204,6 +206,7 @@ rule resample_native_coords_to_atlas_density:
             dir="{dir}",
             desc="{desc}",
         ),
+    group: surface_geometry
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 

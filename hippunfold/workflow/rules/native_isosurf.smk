@@ -79,6 +79,7 @@ rule gen_native_mesh:
             label="{label}",
             desc="{surfname}",
         ),
+    group: surface_geometry
     script:
         "../scripts/gen_isosurface.py"
 
@@ -118,6 +119,7 @@ rule update_native_mesh_structure:
     resources:
         mem_mb = 1024,
         runtime = 5
+    group: surface_geometry
     shell:
         "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
@@ -158,6 +160,7 @@ rule update_native_mesh_structure_unfold:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: surface_geometry
     shell:
         "cp {input} {output} && "
         "wb_command -surface-flip-normals {output} {output} && "
@@ -200,5 +203,6 @@ rule smooth_surface:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: surface_geometry
     shell:
         "wb_command -surface-smoothing {input} {params.smoothing_strength} {params.smoothing_iterations} {output}"

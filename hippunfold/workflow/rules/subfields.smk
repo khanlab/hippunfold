@@ -350,6 +350,7 @@ rule combine_dentate_subfield_labels_corobl:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: segmentation_engine
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -type uchar -o {output}"
 
@@ -406,6 +407,7 @@ rule label_gm_with_nearest_subfields:
             label="{label}",
             atlas="{atlas}",
         ),
+    group: segmentation_engine
     script:
         "../scripts/label_gm_with_nearest_subfields.py"
 
@@ -452,6 +454,7 @@ rule combine_tissue_subfield_labels_corobl:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: segmentation_engine
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 

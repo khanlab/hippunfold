@@ -74,6 +74,7 @@ rule get_subfield_vols_subj:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: morphometry_stats
     script:
         "../scripts/gen_volume_tsv.py"
 
@@ -108,6 +109,7 @@ rule plot_subj_subfields:
     resources:
         mem_mb = 1024,
         runtime = 15
+    group: atlas_and_qc
     script:
         "../scripts/plot_subj_subfields.py"
 
@@ -229,6 +231,7 @@ rule qc_subfield_surf:
         mem_mb = 1024,
     conda:
         "../envs/neurovis.yaml"
+    group: atlas_and_qc
     script:
         "../scripts/vis_qc_surf.py"
 

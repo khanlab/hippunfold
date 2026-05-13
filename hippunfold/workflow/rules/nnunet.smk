@@ -69,6 +69,7 @@ rule download_nnunet_model:
     output:
         model_tar=temp(get_model_tar()),
     localrule: True
+    group: io_and_preproc
     shell:
         "cp {input} {output}"
 
@@ -148,6 +149,7 @@ if model_dict["arch_version"] == "nnunet_v1":
 
         conda:
             "../envs/nnunet.yaml"
+        group: segmentation_engine
         shell:
             "mkdir -p {params.in_folder} {params.out_folder} && "
             "{params.cmd_copy_inputs} && "
@@ -480,5 +482,6 @@ rule qc_nnunet_dice:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: atlas_and_qc
     script:
         "../scripts/dice.py"

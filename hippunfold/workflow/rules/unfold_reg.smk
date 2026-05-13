@@ -105,6 +105,7 @@ rule native_metric_to_unfold_nii:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: morphometry_stats
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " {params.interp}"
@@ -178,6 +179,7 @@ rule atlas_metric_to_unfold_nii:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: atlas_and_qc
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"

@@ -35,6 +35,7 @@ rule get_boundary_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
+    group: surface_geometry
     script:
         "../scripts/get_boundary_vertices.py"
 
@@ -82,6 +83,7 @@ rule map_src_sink_sdt_to_surf:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: unfolding_math
     shell:
         "wb_command -volume-to-surface-mapping {input.sdt} {input.surf_gii} {output.sdt} -trilinear"
 
@@ -195,6 +197,7 @@ rule postproc_boundary_vertices:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: surface_geometry
     script:
         "../scripts/postproc_boundary_vertices.py"
 
@@ -249,6 +252,7 @@ rule laplace_beltrami:
             label="{label}",
             dir="{dir}",
         ),
+    group: unfolding_math
     script:
         "../scripts/laplace_beltrami.py"
 
@@ -314,6 +318,7 @@ rule warp_native_mesh_to_unfold:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: surface_geometry
     script:
         "../scripts/rewrite_vertices_to_flat.py"
 
@@ -374,6 +379,7 @@ rule space_unfold_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
+    group: unfolding_math
     script:
         "../scripts/space_unfold_vertices.py"
 
@@ -412,6 +418,7 @@ rule unfold_surface_smoothing:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: surface_geometry
     shell:
         "wb_command -surface-smoothing {input} {params} {output}"
 
@@ -450,5 +457,6 @@ rule set_surface_z_level:
         runtime = 10
     conda:
         "../envs/pyvista.yaml"
+    group: surface_geometry
     script:
         "../scripts/set_surface_z_level.py"
