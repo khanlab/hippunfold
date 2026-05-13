@@ -788,6 +788,7 @@ shape_inject:
   labels_overwrite:
     - 2  
   label_smoothing_stdev: '0.5x0.5x0.5mm'
+  # ideally for this UNet model we would merge label 2&10 and label 0&9, but this will require anadditional snake rule. can skip for now
 
 
 laplace_labels:
@@ -816,10 +817,10 @@ laplace_labels:
         - 2
         - 4
         - 7
-        - 9
+        - 10
       sink:
         - 0 
-        - 10
+        - 9
   dentate:
     AP:
       gm:
