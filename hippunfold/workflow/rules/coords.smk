@@ -74,7 +74,7 @@ rule get_label_mask:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: unfolding_math
+    group: "unfolding_math"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -123,7 +123,7 @@ rule get_src_sink_mask:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: unfolding_math
+    group: "unfolding_math"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -161,7 +161,7 @@ rule get_src_sink_sdt:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: unfolding_math
+    group: "unfolding_math"
     shell:
         "c3d {input} -sdt -o {output}"
 
@@ -190,7 +190,7 @@ rule get_nan_mask:
     resources:
         mem_mb = 1024,
         runtim = 10
-    group: unfolding_math
+    group: "unfolding_math"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 

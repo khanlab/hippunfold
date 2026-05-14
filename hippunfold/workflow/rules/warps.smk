@@ -241,6 +241,6 @@ rule create_unfold_ref:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: unfolding_math
+    group: "unfolding_math"
     shell:
         "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -o {output.nii} "

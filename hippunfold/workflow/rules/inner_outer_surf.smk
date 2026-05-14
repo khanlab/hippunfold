@@ -46,7 +46,7 @@ rule compute_halfthick_mask:
         runtime = 10
     conda:
         "../envs/c3d.yaml"
-    group: unfolding_math
+    group: "unfolding_math"
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -101,7 +101,7 @@ rule register_midthickness:
             label="{label}",
             to="{inout}",
         ),
-    group: surface_geometry
+    group: "surface_geometry"
     shell:
         "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp} &> {log}"
 
@@ -254,7 +254,7 @@ rule warp_midthickness_to_inout:
             label="{label}",
             to="{surfname}",
         ),
-    group: surface_geometry
+    group: "surface_geometry"
     shell:
         """
         (

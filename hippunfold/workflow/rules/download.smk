@@ -21,7 +21,7 @@ rule download_extract_template:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
         unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
-    group: io_and_preproc
+    group: "io_and_preproc"
     script:
         "../scripts/download.py"
 
@@ -62,7 +62,7 @@ rule cp_atlas_surf_gii:
             space="{space}",
             suffix="{surf_name}.surf.gii",
         ),
-    group: atlas_and_qc
+    group: "atlas_and_qc"
     shell:
         "cp {params.path} {output}"
 
@@ -88,7 +88,7 @@ rule cp_atlas_metric_gii:
             den="{density}",
             suffix="{metricname}.{metrictype}.gii",
         ),
-    group: atlas_and_qc
+    group: "atlas_and_qc"
     shell:
         "cp {params.path} {output}"
 

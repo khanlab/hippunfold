@@ -39,7 +39,7 @@ rule create_crop_ref:
     resources:
         mem_mb = 16000,
         runtime = 10
-    group: io_and_preproc
+    group: "io_and_preproc"
     shell:
         "c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample-mm {params.resample} -pad-to {params.pad_to} 0 -scale 0 -type uchar {output}"
 
@@ -280,7 +280,7 @@ rule resample_to_crop:
     resources:
         mem_mb = 16000,
         runtime = 10
-    group: io_and_preproc
+    group: "io_and_preproc"
     shell:
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} "
 

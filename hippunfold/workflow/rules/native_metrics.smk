@@ -28,7 +28,7 @@ rule calculate_surface_area:
         runtime = 10
     conda:
         "../envs/workbench.yaml"
-    group: morphometry_stats
+    group: "morphometry_stats"
     shell:
         "wb_command -surface-vertex-areas {input} {output}"
 
@@ -74,7 +74,7 @@ rule metric_smoothing:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: surface_geometry
+    group: "surface_geometry"
     shell:
         "wb_command -metric-smoothing {input.surface} {input.metric} {params.fwhm} {output.metric} -fwhm"
 
@@ -119,7 +119,7 @@ rule calculate_gyrification:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: morphometry_stats
+    group: "morphometry_stats"
     shell:
         'wb_command -metric-math "nativearea/unfoldarea" {output.gii}'
         " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea}"
@@ -156,7 +156,7 @@ rule calculate_curvature:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: morphometry_stats
+    group: "morphometry_stats"
     shell:
         "wb_command -surface-curvature {input} -mean {output}"
 
@@ -201,7 +201,7 @@ rule calculate_thickness:
     resources:
         mem_mb=1024,
         runtime=10
-    group: morphometry_stats
+    group: "morphometry_stats"
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
 
@@ -239,6 +239,6 @@ rule soft_tanh_normalization:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: unfolding_math
+    group: "unfolding_math"
     shell:
         "wb_command -metric-math '{params.norm_limit}*tanh(X/{params.norm_limit})' {output.gii} -var X {input.gii}"

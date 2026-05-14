@@ -38,7 +38,7 @@ rule prep_segs_for_greedy:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: segmentation_engine
+    group: "segmentation_engine"
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
@@ -294,7 +294,7 @@ rule template_shape_inject:
     resources:
         mem_mb = 4096,
         runtime = 10
-    group: atlas_and_qc
+    group: "atlas_and_qc"
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
@@ -343,7 +343,7 @@ rule reinsert_subject_labels:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: segmentation_engine
+    group: "segmentation_engine"
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
         " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "
