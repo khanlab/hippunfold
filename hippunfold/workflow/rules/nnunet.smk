@@ -115,6 +115,7 @@ if model_dict["arch_version"] == "nnunet_v1":
             chkpnt=model_dict["checkpoint"],
             trainer=model_dict["trainer"],
             tta="" if config["nnunet_enable_tta"] else "--disable_tta",
+            cuda_visible_devices="" if config["use_gpu"] else "CUDA_VISIBLE_DEVICES=-1",
         output:
             nnunet_seg=temp(
                 bids(
@@ -149,7 +150,7 @@ if model_dict["arch_version"] == "nnunet_v1":
             "{params.cmd_copy_inputs} && "
             "export RESULTS_FOLDER={input.model_dir} && "
             "export nnUNet_n_proc_DA={threads} && "
-            "nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
+            "{params.cuda_visible_devices} nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
             "cp {params.temp_lbl} {output.nnunet_seg}"
 
 elif model_dict["arch_version"] == "nnunet_v2":
