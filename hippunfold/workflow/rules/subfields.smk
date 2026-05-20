@@ -293,32 +293,57 @@ rule map_surf_subfields_to_volume:
         " -ribbon-constrained {input.inner_surf} {input.outer_surf} &>> {log}"
 
 
-def get_tissue_atlas_remapping_dentate(wildcards):
+def _ensure_label_list(labels):
+    if isinstance(labels, str):
+        return [label.strip() for label in labels.split(",")]
+    if isinstance(labels, list):
+        return labels
+    return [labels]
+
+
+def _get_tissue_atlas_remapping(wildcards, labels):
     mapping = config["tissue_atlas_mapping"]
 
     remap = []
+    n_input_labels = sum(
+        len(_ensure_label_list(mapping["tissue"][label])) for label in labels
+    )
 
-    for label in ["dg"]:
-        in_label = mapping["tissue"][label]
+    remap.extend(["-dup"] * (n_input_labels - 1))
+
+    for label in labels:
+        in_labels = _ensure_label_list(mapping["tissue"][label])
         out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
 
-        remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
+        if len(in_labels) == 1:
+            in_label = in_labels[0]
+            remap.append(
+                f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}"
+            )
+        else:
+            source_labels = []
+            for i, in_label in enumerate(in_labels):
+                source_label = f"{label}{i}"
+                source_labels.append(source_label)
+                remap.append(
+                    f"-threshold {in_label} {in_label} {out_label} 0 -popas {source_label}"
+                )
+            remap.append(f"-push {source_labels[0]}")
+            for source_label in source_labels[1:]:
+                remap.append(f"-push {source_label} -max")
+            remap.append(f"-popas {label}")
 
     return " ".join(remap)
+
+
+def get_tissue_atlas_remapping_dentate(wildcards):
+    return _get_tissue_atlas_remapping(wildcards, ["dg"])
 
 
 def get_tissue_atlas_remapping(wildcards):
-    mapping = config["tissue_atlas_mapping"]
-
-    remap = []
-
-    for label in mapping["tissue"].keys():
-        in_label = mapping["tissue"][label]
-        out_label = mapping.get(wildcards.atlas, mapping.get("default"))[label]
-
-        remap.append(f"-threshold {in_label} {in_label} {out_label} 0 -popas {label}")
-
-    return " ".join(remap)
+    return _get_tissue_atlas_remapping(
+        wildcards, config["tissue_atlas_mapping"]["tissue"].keys()
+    )
 
 
 rule combine_dentate_subfield_labels_corobl:
@@ -357,7 +382,7 @@ rule combine_dentate_subfield_labels_corobl:
     group:
         "subj"
     shell:
-        "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -type uchar -o {output}"
+        "c3d {input.tissue} {params.remap} {input.subfields} -push dg -max -type uchar -o {output}"
 
 
 rule label_gm_with_nearest_subfields:
@@ -457,7 +482,7 @@ rule combine_tissue_subfield_labels_corobl:
     group:
         "subj"
     shell:
-        "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
+        "c3d {input.tissue} {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 
 
 rule resample_subfields_to_orig:

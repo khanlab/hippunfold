@@ -559,7 +559,9 @@ template_files:
 tissue_atlas_mapping:
   tissue:
     dg: 8
-    srlm: 2
+    srlm:
+      - 2
+      - 10
     cyst: 7
   magdeburg:
     dg: 3
@@ -821,6 +823,7 @@ laplace_labels:
       sink:
         - 0 
         - 9
+        - 11
   dentate:
     AP:
       gm:
@@ -848,6 +851,7 @@ laplace_labels:
         - 7
         - 9
         - 10
+        - 11
         - 0
 
       
