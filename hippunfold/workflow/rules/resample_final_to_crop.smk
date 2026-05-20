@@ -39,7 +39,7 @@ rule create_crop_ref:
     resources:
         mem_mb = 16000,
         runtime = 10
-    group: "io_and_preproc"
+    group: "resample_final_to_crop"
     shell:
         "c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample-mm {params.resample} -pad-to {params.pad_to} 0 -scale 0 -type uchar {output}"
 
@@ -191,6 +191,7 @@ rule resample_subfields_crop:
     resources:
         mem_mb = 1024,
         runtime = 10
+    group: "resample_subfields_crop"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -280,7 +281,7 @@ rule resample_to_crop:
     resources:
         mem_mb = 16000,
         runtime = 10
-    group: "io_and_preproc"
+    group: "resample_final_to_crop"
     shell:
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} "
 

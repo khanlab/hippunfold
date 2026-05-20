@@ -21,7 +21,7 @@ rule download_extract_template:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
         unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
-    group: "io_and_preproc"
+    group: "download"
     script:
         "../scripts/download.py"
 
@@ -144,6 +144,7 @@ rule import_template_dseg:
 
     conda:
         "../envs/c3d.yaml"
+    group: "download"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -182,6 +183,7 @@ rule import_template_dseg_dentate:
 
     conda:
         "../envs/c3d.yaml"
+    group: "download"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 

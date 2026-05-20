@@ -454,7 +454,7 @@ rule combine_tissue_subfield_labels_corobl:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: "segmentation_engine"
+    group: "subfields"
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 
@@ -508,6 +508,7 @@ rule resample_subfields_to_orig:
     resources:
         mem_mb = 24000,
         runtime = 15
+    group: "subfields"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"

@@ -46,7 +46,7 @@ rule compute_halfthick_mask:
         runtime = 10
     conda:
         "../envs/c3d.yaml"
-    group: "unfolding_math"
+    group: "inner_outer_surf"
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -101,7 +101,7 @@ rule register_midthickness:
             label="{label}",
             to="{inout}",
         ),
-    group: "surface_geometry"
+    group: "inner_outer_surf"
     shell:
         "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp} &> {log}"
 
@@ -198,6 +198,7 @@ rule convert_inout_warp_from_itk_to_world:
         runtime = 10
     conda:
         "../envs/workbench.yaml"
+    group: "inner_outer_surf"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -254,7 +255,7 @@ rule warp_midthickness_to_inout:
             label="{label}",
             to="{surfname}",
         ),
-    group: "surface_geometry"
+    group: "inner_outer_surf"
     shell:
         """
         (

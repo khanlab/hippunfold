@@ -69,7 +69,7 @@ rule download_nnunet_model:
     output:
         model_tar=temp(get_model_tar()),
     localrule: True
-    group: "io_and_preproc"
+    group: "nnunet"
     shell:
         "cp {input} {output}"
 
@@ -149,7 +149,7 @@ if model_dict["arch_version"] == "nnunet_v1":
 
         conda:
             "../envs/nnunet.yaml"
-        group: "segmentation_engine"
+        group: "nnunet"
         shell:
             "mkdir -p {params.in_folder} {params.out_folder} && "
             "{params.cmd_copy_inputs} && "
@@ -206,9 +206,9 @@ elif model_dict["arch_version"] == "nnunet_v2":
             gpus=1 if config["use_gpu"] else 0,
             mem_mb=48000,
             time=30 if config["use_gpu"] else 120,
-
         conda:
             "../envs/nnunetv2.yaml"
+        group: "nnunet"
         shell:
             "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
 
@@ -439,6 +439,7 @@ rule qc_nnunet_f3d:
             **inputs.subj_wildcards,
             hemi="{hemi}",
         ),
+    group: "nnunet"
     shell:
         "reg_f3d -flo {input.img} -ref {params.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
         "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {params.ref} -res {output.res_mask} -inter 0 &> {log}"
@@ -482,6 +483,6 @@ rule qc_nnunet_dice:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: "atlas_and_qc"
+    group: "nnunet"
     script:
         "../scripts/dice.py"
