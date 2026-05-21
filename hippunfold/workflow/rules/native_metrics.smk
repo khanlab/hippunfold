@@ -239,6 +239,5 @@ rule soft_tanh_normalization:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: "unfolding_math"
     shell:
         "wb_command -metric-math '{params.norm_limit}*tanh(X/{params.norm_limit})' {output.gii} -var X {input.gii}"

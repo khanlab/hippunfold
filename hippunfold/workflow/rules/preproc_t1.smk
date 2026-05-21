@@ -14,7 +14,7 @@ rule import_t1:
             )
         ),
     localrule: True
-    group: "preproc_t1"
+    group: "preproc_t1_and_warp"
     shell:
         "cp {input} {output}"
 
@@ -58,7 +58,7 @@ else:
             mem_mb = 36000,
             runtime = 60
         threads: 16
-        group: "preproc_t1"
+        group: "preproc_t1_and_warp"
         conda:
             "../envs/ants.yaml"
         shell:
@@ -110,7 +110,7 @@ rule warp_t1_to_corobl_crop:
     resources:
         mem_mb = 16384,
         runtime = 30
-    group: "preproc_t1"
+    group: "preproc_t1_and_warp"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {params.ref}  -t {input.xfm}"

@@ -160,7 +160,6 @@ rule update_native_mesh_structure_unfold:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: "surface_geometry"
     shell:
         "cp {input} {output} && "
         "wb_command -surface-flip-normals {output} {output} && "

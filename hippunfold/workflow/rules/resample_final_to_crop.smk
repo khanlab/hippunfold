@@ -191,7 +191,6 @@ rule resample_subfields_crop:
     resources:
         mem_mb = 1024,
         runtime = 10
-    group: "resample_subfields_crop"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
