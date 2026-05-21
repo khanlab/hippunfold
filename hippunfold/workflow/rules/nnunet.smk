@@ -457,7 +457,7 @@ rule qc_nnunet_dice:
         template_dir=Path(download_dir) / "template" / config["template"],
     params:
         hipp_lbls=[1, 2, 7, 8],
-        ref=lambda wildcards, input: (
+        ref=lambda wildcards, input: str(
             Path(input.template_dir)
             / config["template_files"][config["template"]]["Mask_crop"].format(
                 **wildcards
