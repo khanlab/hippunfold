@@ -199,7 +199,6 @@ else:
             ),
         conda:
             "../envs/c3d.yaml"
-
         shell:
             "{params.cmd}"
 

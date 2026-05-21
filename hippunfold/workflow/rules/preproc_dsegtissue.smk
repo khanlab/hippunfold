@@ -22,6 +22,5 @@ rule import_dseg_tissue:
         ),
     conda:
         "../envs/c3d.yaml"
-
     shell:
         "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"

@@ -65,12 +65,11 @@ rule gen_native_mesh:
                 )
             )
         ),
-
     conda:
         "../envs/pyvista.yaml"
     resources:
-        mem_mb = 2048,
-        runtime = 10
+        mem_mb=2048,
+        runtime=10,
     log:
         bids_log(
             "gen_native_mesh",
@@ -79,7 +78,8 @@ rule gen_native_mesh:
             label="{label}",
             desc="{surfname}",
         ),
-    group: "native_isosurf"
+    group:
+        "native_isosurf"
     script:
         "../scripts/gen_isosurface.py"
 
@@ -117,9 +117,10 @@ rule update_native_mesh_structure:
     conda:
         "../envs/workbench.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 5
-    group: "native_isosurf"
+        mem_mb=1024,
+        runtime=5,
+    group:
+        "native_isosurf"
     shell:
         "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
@@ -158,8 +159,8 @@ rule update_native_mesh_structure_unfold:
     conda:
         "../envs/workbench.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
+        mem_mb=1024,
+        runtime=10,
     shell:
         "cp {input} {output} && "
         "wb_command -surface-flip-normals {output} {output} && "
@@ -200,8 +201,9 @@ rule smooth_surface:
     conda:
         "../envs/workbench.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "native_isosurf"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "native_isosurf"
     shell:
         "wb_command -surface-smoothing {input} {params.smoothing_strength} {params.smoothing_iterations} {output}"

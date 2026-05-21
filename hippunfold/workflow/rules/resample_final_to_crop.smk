@@ -37,9 +37,10 @@ rule create_crop_ref:
         "../envs/c3d.yaml"
     threads: 1
     resources:
-        mem_mb = 16000,
-        runtime = 10
-    group: "resample_final_to_crop"
+        mem_mb=16000,
+        runtime=10,
+    group:
+        "resample_final_to_crop"
     shell:
         "c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample-mm {params.resample} -pad-to {params.pad_to} 0 -scale 0 -type uchar {output}"
 
@@ -87,7 +88,6 @@ rule resample_unet_crop:
         ),
     conda:
         "../envs/ants.yaml"
-
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -137,7 +137,6 @@ rule resample_postproc_crop:
         ),
     conda:
         "../envs/ants.yaml"
-
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -189,8 +188,8 @@ rule resample_subfields_crop:
     conda:
         "../envs/ants.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
+        mem_mb=1024,
+        runtime=10,
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -241,7 +240,6 @@ rule resample_coords_crop:
         ),
     conda:
         "../envs/ants.yaml"
-
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -278,9 +276,10 @@ rule resample_to_crop:
         "../envs/ants.yaml"
     threads: 2
     resources:
-        mem_mb = 16000,
-        runtime = 10
-    group: "resample_final_to_crop"
+        mem_mb=16000,
+        runtime=10,
+    group:
+        "resample_final_to_crop"
     shell:
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} "
 
@@ -336,7 +335,6 @@ rule resample_t2_to_crop:
         ),
     conda:
         "../envs/ants.yaml"
-
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} {params.xfm_opt}"

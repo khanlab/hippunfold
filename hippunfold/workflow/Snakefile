@@ -7,7 +7,11 @@ from tempfile import mkdtemp
 
 configfile: "config/snakebids.yml"
 
-localrules: download_nnunet_model, download_extract_template, download_surf_template_atlas
+
+localrules:
+    download_nnunet_model,
+    download_extract_template,
+    download_surf_template_atlas,
 
 
 set_bids_spec("v0_0_0")

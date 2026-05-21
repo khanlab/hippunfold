@@ -42,11 +42,12 @@ rule compute_halfthick_mask:
             )
         ),
     resources:
-        mem_mb = 1024,
-        runtime = 10
+        mem_mb=1024,
+        runtime=10,
     conda:
         "../envs/c3d.yaml"
-    group: "inner_outer_surf"
+    group:
+        "inner_outer_surf"
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -90,7 +91,7 @@ rule register_midthickness:
         ),
     threads: 1
     resources:
-        mem_mb = 4096,
+        mem_mb=4096,
     conda:
         "../envs/greedy.yaml"
     log:
@@ -101,7 +102,8 @@ rule register_midthickness:
             label="{label}",
             to="{inout}",
         ),
-    group: "inner_outer_surf"
+    group:
+        "inner_outer_surf"
     shell:
         "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp} &> {log}"
 
@@ -156,7 +158,6 @@ rule apply_halfsurf_warp_to_img:
                 )
             )
         ),
-
     conda:
         "../envs/greedy.yaml"
     shell:
@@ -194,11 +195,12 @@ rule convert_inout_warp_from_itk_to_world:
             )
         ),
     resources:
-        mem_mb = 1024,
-        runtime = 10
+        mem_mb=1024,
+        runtime=10,
     conda:
         "../envs/workbench.yaml"
-    group: "inner_outer_surf"
+    group:
+        "inner_outer_surf"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -245,8 +247,8 @@ rule warp_midthickness_to_inout:
     shadow:
         "minimal"
     resources:
-        mem_mb = 1024,
-        runtime = 10
+        mem_mb=1024,
+        runtime=10,
     log:
         bids_log(
             "warp_midthickness_to_inout",
@@ -255,7 +257,8 @@ rule warp_midthickness_to_inout:
             label="{label}",
             to="{surfname}",
         ),
-    group: "inner_outer_surf"
+    group:
+        "inner_outer_surf"
     shell:
         """
         (

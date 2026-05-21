@@ -3,6 +3,7 @@ from lib import utils as utils
 
 download_dir = utils.get_download_dir()
 
+
 localrules:
     import_template_dseg,
     import_template_dseg_dentate,
@@ -12,7 +13,7 @@ localrules:
     cp_atlas_surf_gii,
     cp_atlas_metric_gii,
     download_extract_template,
-    download_surf_template_atlas
+    download_surf_template_atlas,
 
 
 rule download_extract_template:
@@ -21,7 +22,8 @@ rule download_extract_template:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     output:
         unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
-    group: "download"
+    group:
+        "download"
     script:
         "../scripts/download.py"
 
@@ -62,7 +64,8 @@ rule cp_atlas_surf_gii:
             space="{space}",
             suffix="{surf_name}.surf.gii",
         ),
-    group: "atlas_and_qc"
+    group:
+        "atlas_and_qc"
     shell:
         "cp {params.path} {output}"
 
@@ -88,7 +91,8 @@ rule cp_atlas_metric_gii:
             den="{density}",
             suffix="{metricname}.{metrictype}.gii",
         ),
-    group: "atlas_and_qc"
+    group:
+        "atlas_and_qc"
     shell:
         "cp {params.path} {output}"
 
@@ -141,10 +145,10 @@ rule import_template_dseg:
                 suffix="dseg.nii.gz",
             )
         ),
-
     conda:
         "../envs/c3d.yaml"
-    group: "download"
+    group:
+        "download"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -180,10 +184,10 @@ rule import_template_dseg_dentate:
                 suffix="dseg.nii.gz",
             )
         ),
-
     conda:
         "../envs/c3d.yaml"
-    group: "download"
+    group:
+        "download"
     shell:
         "{params.copy_or_flip_cmd} {output.template_seg}"
 
@@ -221,7 +225,6 @@ rule import_template_coords:
                 hemi="{hemi}",
             )
         ),
-
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -260,7 +263,6 @@ rule import_template_anat:
                 ),
             ),
         ),
-
     conda:
         "../envs/c3d.yaml"
     shell:
@@ -300,7 +302,6 @@ rule import_template_anat_crop:  # used only in templateseg workflow
                 ),
             ),
         ),
-
     conda:
         "../envs/c3d.yaml"
     shell:

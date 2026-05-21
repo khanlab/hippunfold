@@ -69,7 +69,8 @@ rule download_nnunet_model:
     output:
         model_tar=temp(get_model_tar()),
     localrule: True
-    group: "nnunet"
+    group:
+        "nnunet"
     shell:
         "cp {input} {output}"
 
@@ -97,7 +98,7 @@ rule unpack_nnunet_model:
         directory(get_model_dir()),
     resources:
         mem_mb=3000,
-        runtime=10
+        runtime=10,
     shell:
         "mkdir -p {output} && tar {params.tar_opts} {input} -C {output}"
 
@@ -146,10 +147,10 @@ if model_dict["arch_version"] == "nnunet_v1":
             gpus=1 if config["use_gpu"] else 0,
             mem_mb=32000,
             time=30 if config["use_gpu"] else 60,
-
         conda:
             "../envs/nnunet.yaml"
-        group: "nnunet"
+        group:
+            "nnunet"
         shell:
             "mkdir -p {params.in_folder} {params.out_folder} && "
             "{params.cmd_copy_inputs} && "
@@ -208,7 +209,8 @@ elif model_dict["arch_version"] == "nnunet_v2":
             time=30 if config["use_gpu"] else 120,
         conda:
             "../envs/nnunetv2.yaml"
-        group: "nnunet"
+        group:
+            "nnunet"
         shell:
             "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
 
@@ -264,7 +266,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
             ),
         conda:
             "../envs/c3d.yaml"
-
         shell:
             "c3d {input} -flip x {output}"
 
@@ -350,7 +351,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
             ),
         conda:
             "../envs/c3d.yaml"
-
         shell:
             "c3d {input} -flip x {output}"
 
@@ -431,15 +431,16 @@ rule qc_nnunet_f3d:
     conda:
         "../envs/niftyreg.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
+        mem_mb=1024,
+        runtime=10,
     log:
         bids_log(
             "qc_nnunet_f3d",
             **inputs.subj_wildcards,
             hemi="{hemi}",
         ),
-    group: "nnunet"
+    group:
+        "nnunet"
     shell:
         "reg_f3d -flo {input.img} -ref {params.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
         "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {params.ref} -res {output.res_mask} -inter 0 &> {log}"
@@ -481,8 +482,9 @@ rule qc_nnunet_dice:
     conda:
         "../envs/pyunfold.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "nnunet"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "nnunet"
     script:
         "../scripts/dice.py"

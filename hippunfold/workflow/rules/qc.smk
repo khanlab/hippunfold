@@ -32,9 +32,10 @@ rule qc_reg_to_template:
     conda:
         "../envs/neurovis.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "qc"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "qc"
     script:
         "../scripts/vis_regqc.py"
 
@@ -73,9 +74,10 @@ rule get_subfield_vols_subj:
     conda:
         "../envs/pyunfold.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "qc"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "qc"
     script:
         "../scripts/gen_volume_tsv.py"
 
@@ -108,9 +110,10 @@ rule plot_subj_subfields:
     conda:
         "../envs/neurovis.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 15
-    group: "qc"
+        mem_mb=1024,
+        runtime=15,
+    group:
+        "qc"
     script:
         "../scripts/plot_subj_subfields.py"
 
@@ -194,9 +197,10 @@ rule qc_subfield:
     conda:
         "../envs/neurovis.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "qc"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "qc"
     script:
         "../scripts/vis_qc_dseg.py"
 
@@ -230,10 +234,11 @@ rule qc_subfield_surf:
             category="Segmentation QC",
         ),
     resources:
-        mem_mb = 1024,
+        mem_mb=1024,
     conda:
         "../envs/neurovis.yaml"
-    group: "qc"
+    group:
+        "qc"
     script:
         "../scripts/vis_qc_surf.py"
 

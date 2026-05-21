@@ -68,13 +68,13 @@ rule get_label_mask:
                 **inputs.subj_wildcards,
             )
         ),
-
     conda:
         "../envs/c3d.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "coords"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "coords"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -121,9 +121,10 @@ rule get_src_sink_mask:
     conda:
         "../envs/c3d.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "coords"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "coords"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -159,9 +160,10 @@ rule get_src_sink_sdt:
     conda:
         "../envs/c3d.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "coords"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "coords"
     shell:
         "c3d {input} -sdt -o {output}"
 
@@ -188,9 +190,10 @@ rule get_nan_mask:
     conda:
         "../envs/c3d.yaml"
     resources:
-        mem_mb = 1024,
-        runtim = 10
-    group: "coords"
+        mem_mb=1024,
+        runtim=10,
+    group:
+        "coords"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -218,9 +221,10 @@ rule create_upsampled_coords_ref:
     conda:
         "../envs/c3d.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "coords"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "coords"
     shell:
         "c3d {input} -retain-labels {params.tight_crop_labels} -trim {params.trim_padding} -resample-mm {params.resample_res} -o {output}"
 
@@ -270,9 +274,10 @@ rule prep_dseg_for_laynii:
     conda:
         "../envs/c3d.yaml"
     resources:
-        mem_mb = 2048,
-        runtime = 10
-    group: "coords"
+        mem_mb=2048,
+        runtime=10,
+    group:
+        "coords"
     shell:
         "c3d -background -1 {input} -as DSEG -retain-labels {params.gm_labels} -binarize -scale 3 -popas GM -push DSEG -retain-labels {params.src_labels} -binarize -scale 2 -popas WM -push DSEG -retain-labels {params.sink_labels} -binarize -scale 1 -popas PIAL -push GM -push WM -add -push PIAL -add -o {output}"
 
@@ -318,9 +323,10 @@ rule laynii_layers_equidist:
         ),
     threads: 4
     resources:
-        mem_mb = 4000,
-        runtime = 15
-    group: "coords"
+        mem_mb=4000,
+        runtime=15,
+    group:
+        "coords"
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz &> {log} && "
@@ -366,7 +372,6 @@ rule laynii_layers_equivol:
             label="{label}",
             hemi="{hemi}",
         ),
-
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz -equivol &> {log} && "

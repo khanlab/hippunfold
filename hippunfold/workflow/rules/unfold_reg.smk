@@ -28,9 +28,10 @@ rule extract_unfold_ref_slice:
         "../envs/c3d.yaml"
     threads: 1
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "unfold_reg"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "unfold_reg"
     shell:
         "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
 
@@ -104,9 +105,10 @@ rule native_metric_to_unfold_nii:
     conda:
         "../envs/workbench.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "unfold_reg"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "unfold_reg"
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " {params.interp}"
@@ -178,9 +180,10 @@ rule atlas_metric_to_unfold_nii:
     conda:
         "../envs/workbench.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "unfold_reg"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "unfold_reg"
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
@@ -216,9 +219,10 @@ rule slice_3d_to_2d_subject:
     conda:
         "../envs/neurovis.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "unfold_reg"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "unfold_reg"
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -257,9 +261,10 @@ rule slice_3d_to_2d_atlas:
     conda:
         "../envs/neurovis.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "unfold_reg"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "unfold_reg"
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -361,7 +366,6 @@ rule unfoldreg_antsquick:
         ),
     conda:
         "../envs/ants.yaml"
-
     log:
         bids_log(
             "unfoldreg_antsquick",
@@ -376,7 +380,8 @@ rule unfoldreg_antsquick:
     resources:
         mem_mb=1024,
         runtime=10,
-    group: "unfold_reg"
+    group:
+        "unfold_reg"
     shell:
         "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args} &> {log} && "
         "{params.cmd_copy_warps}"
@@ -428,9 +433,10 @@ rule reset_header_2d_warp_unfoldreg:
     conda:
         "../envs/neurovis.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
-    group: "unfold_reg"
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "unfold_reg"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -478,10 +484,11 @@ rule warp_unfold_native_to_unfoldreg:
     conda:
         "../envs/workbench.yaml"
     resources:
-        mem_mb = 1024,
-        runtime = 10
+        mem_mb=1024,
+        runtime=10,
     shadow:
         "minimal"
-    group: "unfold_reg"
+    group:
+        "unfold_reg"
     shell:
         "{params.cmd}"
