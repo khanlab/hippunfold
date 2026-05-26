@@ -9,6 +9,7 @@ on:
   push:
     branches:
     - dev-v2.0.0
+    - djay/fix-docker-ci
   workflow_dispatch:
   release:
     types: [published]
