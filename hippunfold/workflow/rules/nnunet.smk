@@ -59,14 +59,19 @@ def get_model_tar():
 
 
 def get_model_dir():
-    model = get_model_tar()
-    if model.endswith(".gz"):
-        model = model[:-3]
-    if model.endswith(".tar"):
-        model = model[:-4]
-    return model
+    model_path = Path(get_model_tar())
+    suffixes = model_path.suffixes
 
+    # Strip common archive suffix combinations to get the model directory name
+    if len(suffixes) >= 2 and suffixes[-2:] in ([".tar", ".gz"], [".tar", ".xz"]):
+        # Remove both the compression and .tar suffixes
+        model_path = model_path.with_suffix("")  # remove last suffix (e.g., .gz / .xz)
+        model_path = model_path.with_suffix("")  # remove .tar
+    elif suffixes and suffixes[-1] == ".tgz":
+        # Treat .tgz as a single archive suffix
+        model_path = model_path.with_suffix("")
 
+    return str(model_path)
 rule download_nnunet_model:
     params:
         url=model_dict["url"],
