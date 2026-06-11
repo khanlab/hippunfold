@@ -330,7 +330,7 @@ parse_args:
       - synthseg_v0.2
       - neonateT1w_v2
       - neonateT2w_v2
-      - neonateT12w_v2
+      - neonateT1T2w_v2
       - ADNI_T1w_v1
       - neonate_synthseg
       - maguire_T2w
