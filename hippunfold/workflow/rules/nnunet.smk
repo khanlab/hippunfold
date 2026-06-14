@@ -72,6 +72,8 @@ def get_model_dir():
         model_path = model_path.with_suffix("")
 
     return str(model_path)
+
+
 rule download_nnunet_model:
     params:
         url=model_dict["url"],
