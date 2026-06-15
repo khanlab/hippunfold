@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - dev-v2.0.0
-      - djay/fix-CI
   workflow_dispatch:
 
 jobs:
