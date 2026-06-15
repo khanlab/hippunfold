@@ -251,6 +251,7 @@ parse_args:
       - neonateT12w_v2
       - ADNI_T1w_v1
       - neonate_synthseg
+      - maguire_T2w
 
   --enable-bids-validation:
     help: |
