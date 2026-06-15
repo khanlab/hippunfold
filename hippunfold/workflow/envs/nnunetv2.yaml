@@ -1,0 +1,12 @@
+name: nnunetv2
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python>=3.9,<4.0
+  - pytorch>=2.0,<3.0
+  - torchvision
+  - pip
+  - pip:
+    - nnunetv2>=2.0,<3.0

@@ -62,6 +62,13 @@ elif "T1w" in config["modality"]:
 if config["skip_inject_template_labels"]:  # TODO do we need this?
     config["autotop_labels"] = ["hipp"]
 
+# setup global vars for nnunet model
+if config["force_nnunet_model"]:
+    model_name = config["force_nnunet_model"]
+else:
+    model_name = config["modality"]
+
+model_dict = config["nnunet_models"].get(model_name, None)
 
 # add seg (if chosen) and the modality to the inputs
 if config["modality"][:3] == "seg":  # if modality is segT2w, then add seg
