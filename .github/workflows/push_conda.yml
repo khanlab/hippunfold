@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - dev-v2.0.0
+      - djay/fix-CI
   workflow_dispatch:
 
 jobs:
@@ -36,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          mamba install -y -c conda-forge conda-build anaconda-client boa
+          conda install -y -c conda-forge conda-build anaconda-client python=3.11
 
       - name: Get latest commit SHA from dev-v2.0.0
         id: get_sha
