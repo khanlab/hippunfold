@@ -44,8 +44,8 @@ RUN set -e && \
     /app/entrypoint.sh hippunfold test_data/bids_dsegtissue test_out participant --modality dsegtissue --derivatives test_data/bids_dsegtissue --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     /app/entrypoint.sh hippunfold test_data/bids_singleT2w test_out participant --modality T2w --t1_reg_template --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     /app/entrypoint.sh hippunfold test_data/bids_singleT2w test_out participant --modality T2w --output_space T1w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
-    /app/entrypoint.sh hippunfold test_data/bids_T1w test_out participant --modality T1w --use-template-seg --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     /app/entrypoint.sh hippunfold test_data/bids_singleT2w test_out participant --modality T2w --generate-myelin-map --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
+    /app/entrypoint.sh hippunfold test_data/bids_T1w test_out participant --modality T1w --use-template-seg --template MBMv3 --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     /app/entrypoint.sh hippunfold test_data/bids_dsegtissue test_out group_create_atlas --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --new_atlas_subfields_from native --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     rm -rf /root/.cache
 
