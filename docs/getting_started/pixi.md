@@ -1,12 +1,11 @@
-# Running HippUnfold with pixi
+# Running HippUnfold with Pixi
 
-HippUnfold can be installed and run using pixi on **Linux** system only. Pixi will manage all Python dependencies and non-python dependencies (c3d, greedy, ANTS) through conda environments.
+[Pixi](https://pixi.prefix.dev) is an easy-to-use package management tool that supports Python and Conda. HippUnfold can be installed and run using Pixi on **Linux** system only. Pixi will manage all Python dependencies and non-python dependencies (c3d, greedy, ANTS) through conda environments.
 
-**Note:** Pixi installation is **not supported on Windows** at this time. If you are on Windows, please refer to the [Docker instructions](docker.md) instead.
+**Note:** Running HippUnfold with Pixi is **not supported on Windows** at this time. If you are on Windows, please refer to the [Docker instructions](docker.md) instead.
 
 
-## For Users: Installing HippUnfold via Pixi
-
+## Installing HippUnfold via Pixi
 
 ### Steps
  1. Install pixi (if not already installed):
@@ -17,7 +16,6 @@ HippUnfold can be installed and run using pixi on **Linux** system only. Pixi wi
  2. Install hippunfold
     ```bash
     pixi global install hippunfold -c conda-forge -c khanlab -c bioconda
-
     ```
 
 
