@@ -112,8 +112,14 @@ def main():
 
     with tempfile.TemporaryDirectory(prefix=prefix) as temp_dir:
 
+        # create temporary input directory within temp_dir
+        temp_input_dir = Path(temp_dir) / "input"
+        temp_input_dir.mkdir(parents=True, exist_ok=True)
+
+        temp_output_dir = Path(temp_dir) / "output"
+
         # create subject folder
-        subject_folder = Path(temp_dir) / "anat" / f"sub-{args.subject}"
+        subject_folder = temp_input_dir / "anat" / f"sub-{args.subject}"
         subject_folder.mkdir(parents=True, exist_ok=True)
 
         # create new file name
@@ -131,14 +137,10 @@ def main():
         # copy the input file
         shutil.copy(args.input, temp_input_file)
 
-        # create temporary output directory within temp_dir
-        temp_output_dir = Path(temp_dir) / "output"
-        temp_output_dir.mkdir(parents=True, exist_ok=True)
-
         # run hippunfold
         command = [
             script_path,
-            temp_dir,
+            str(temp_input_dir),
             str(temp_output_dir),
             "participant",
             "-c",
@@ -149,6 +151,7 @@ def main():
             args.modality,
             "--use-conda",
             "--quiet",
+            "all",
         ]
 
         if args.dry_run:
@@ -174,18 +177,17 @@ def main():
 
             # copy results from temp output to final output
             # only copy the hippunfold/sub-{subject} directory
-            temp_subject_dir = temp_output_dir / "hippunfold" / f"sub-{args.subject}"
+            temp_subject_dir = temp_output_dir / f"sub-{args.subject}"
             final_output_dir = Path(args.output)
 
             if temp_subject_dir.exists():
                 # create the final output structure
-                final_hippunfold_dir = final_output_dir / "hippunfold"
-                final_subject_dir = final_hippunfold_dir / f"sub-{args.subject}"
+                final_subject_dir = final_output_dir / f"sub-{args.subject}"
 
                 # copy the subject directory
                 if final_subject_dir.exists():
                     shutil.rmtree(final_subject_dir)
-                final_hippunfold_dir.mkdir(parents=True, exist_ok=True)
+                final_output_dir.mkdir(parents=True, exist_ok=True)
                 shutil.copytree(temp_subject_dir, final_subject_dir)
                 print(f"Results copied to {final_subject_dir}")
             else:
