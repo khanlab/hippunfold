@@ -159,14 +159,14 @@ def main():
 
         if IMAGE_MODALITY[args.modality]["use_derivatives"]:
             # need to have desc file in bids dir to use --derivatives
-            desc_file = Path(temp_dir) / "dataset_description.json"
+            desc_file = temp_input_dir / "dataset_description.json"
             desc_file.write_text(
                 '{"Name": "Generated Derivatives", '
                 '"BIDSVersion": "1.0.2", '
                 '"GeneratedBy": [{"Name": "hippunfold-quick"}]}'
             )
             command.append("--derivatives")
-            command.append(Path(temp_dir))
+            command.append(str(temp_input_dir))
             command.append("--hemi")
             command.append(args.hemi)
 
