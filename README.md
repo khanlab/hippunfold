@@ -18,6 +18,14 @@ This is especially useful for:
 - Morphometry (eg. thickness, surface area, curvature, and gyrification measures)
 - Quantitative mapping (eg. map your qT1 MRI data to a midthickness surface; extract laminar profiles perpendicular to this surface)
 
+## Easy install
+
+```bash
+pixi global install hippunfold -c conda-forge -c khanlab -c bioconda
+
+```
+But see [Full Documentation](https://hippunfold.readthedocs.io/en/latest/?badge=latest) for details.
+
 ## What's new in version 2.0? 
 
 - Better surface precision for capturing individual variability in gyral/sulcal/digitation patterning
