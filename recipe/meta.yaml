@@ -23,7 +23,7 @@ build:
 requirements:
   host:
     - python
-    - poetry-core
+    - hatchling
     - pip
   run:
     - python >=3.9,<4.0
@@ -31,6 +31,8 @@ requirements:
     - appdirs >=1.4.4,<2.0.0
     - pulp <2.8.0  # [py<311]
     - pyvista >=0.44.2,<0.45.0
+    - snakemake-storage-plugin-http >=0.3.0,<0.4
+    - unzip >=6.0,<7
 
 
 test:

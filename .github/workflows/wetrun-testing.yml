@@ -1,0 +1,113 @@
+name: Hippunfold PR Wet-Run (Ephemeral Runner)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [labeled]
+    # types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  actions: write
+  pull-requests: write
+
+concurrency:
+  group: pr-wet-run-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  launch-runner:
+    if: >
+      (github.event_name == 'pull_request' &&
+         github.event.action == 'labeled' &&
+         github.event.label.name == 'ready-for-wet-run')
+      ||
+      (github.event_name == 'workflow_dispatch')
+    uses: khanlab/actions/.github/workflows/workflow-pr_task-launchRunner.yml@main
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      repository: ${{ github.repository }}
+    secrets:
+      OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+      OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
+      RUNNER_PAT: ${{ secrets.RUNNER_PAT }}
+
+  run-wet-run:
+    needs: launch-runner
+    strategy:
+      matrix:
+        runner_label: ["${{ github.event.repository.name }}-pr-${{ github.event.pull_request.number }}"]
+    runs-on: [self-hosted, "${{ matrix.runner_label }}"]
+    defaults:
+      run:
+        shell: bash -l {0}
+    timeout-minutes: 60  # max 1 hour
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Pixi environment
+      uses: prefix-dev/setup-pixi@v0.8.14
+      with:
+        activate-environment: true
+
+    - name: Install QC dependencies
+      run: |
+        conda install -y pillow matplotlib -c conda-forge
+
+    # /mnt with 576 gb of space is automatically mounted on Arbutus Cloud VMs
+    - name: Download wet run test dataset
+      uses: khanlab/actions/.github/actions/action-setup_task-downloadDataset@main
+      with:
+        destination_dir: "/mnt/data/lowresMRI"
+        download_url: "https://files.ca-1.osf.io/v1/resources/k2nme/providers/osfstorage/66759a948dfe890189cb7178/?zip="
+
+    - name: Setup env for hippunfold
+      run: |
+        echo "HIPPUNFOLD_CACHE_DIR=/mnt/test_data/hippunfold_cache_dir" >> $GITHUB_ENV
+
+    - name: Run wet run
+      env:
+        CONDA_PKGS_DIRS: /mnt/conda-pkgs
+      run: |
+        ./hippunfold/run.py /mnt/data/lowresMRI /mnt/test_out participant --participant-label 01 --modality T1w --cores all --conda-prefix /mnt/conda-envs
+
+    - name: Generate side-by-side QC comparison
+      run: |
+        python hippunfold/workflow/scripts/compare_qc.py
+
+    - name: Upload QC comparison artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sub-01_qc_comparison
+        path: sub-01_qc_comparison.png
+
+    - name: Comment on PR with QC info
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          🔬 **Wet run QC result**
+
+          A side-by-side hippocampal subfield volume plot was generated:
+          - Left: `main` reference
+          - Right: this PR
+
+          🖼️ Artifact: `sub-01_qc_comparison`  
+          📥 [Download from "Artifacts" tab in Actions](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          Let us know if anything looks off!
+
+  cleanup:
+    needs: [launch-runner, run-wet-run]
+    if: always()
+    uses: khanlab/actions/.github/workflows/workflow-pr_task-removeRunner.yml@main
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      repository: ${{ github.repository }}
+      vm_id: ${{ needs.launch-runner.outputs.vm_id }}
+    secrets:
+      OS_APPLICATION_CREDENTIAL_ID: ${{ secrets.OS_APPLICATION_CREDENTIAL_ID }}
+      OS_APPLICATION_CREDENTIAL_SECRET: ${{ secrets.OS_APPLICATION_CREDENTIAL_SECRET }}
+      RUNNER_PAT: ${{ secrets.RUNNER_PAT }}

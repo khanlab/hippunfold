@@ -9,13 +9,15 @@ surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
 ap = read_metric_from_gii(snakemake.input.coords_AP)
 pd = read_metric_from_gii(snakemake.input.coords_PD)
 
+pd_flip = 1.0 if snakemake.wildcards.hemi == "R" else -1.0
 
-surface.points[:, 0] = ap * -float(snakemake.params.vertspace["extent"][0]) - float(
-    snakemake.params.vertspace["origin"][0]
+surface.points[:, 1] = ap * -float(snakemake.params.vertspace["extent"][1]) - float(
+    snakemake.params.vertspace["origin"][1]
 )
 
-surface.points[:, 1] = pd * float(snakemake.params.vertspace["extent"][1]) - float(
-    snakemake.params.vertspace["origin"][1]
+surface.points[:, 0] = pd_flip * (
+    pd * float(snakemake.params.vertspace["extent"][0])
+    - float(snakemake.params.vertspace["origin"][0])
 )
 
 surface.points[:, 2] = snakemake.params.z_level

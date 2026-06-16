@@ -5,6 +5,7 @@ rule extract_unfold_ref_slice:
         ref_3d_nii=bids(
             root=root,
             datatype="warps",
+            hemi="{hemi}",
             suffix="refvol.nii.gz",
             space="unfold",
             label="{label}",
@@ -15,6 +16,7 @@ rule extract_unfold_ref_slice:
             bids(
                 root=root,
                 datatype="warps",
+                hemi="{hemi}",
                 suffix="refvol.nii.gz",
                 space="unfold",
                 desc="slice",
@@ -75,6 +77,7 @@ rule native_metric_to_unfold_nii:
         ref_nii=bids(
             root=root,
             datatype="warps",
+            hemi="{hemi}",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -111,6 +114,7 @@ rule atlas_metric_to_unfold_nii:
         ref_nii=bids(
             root=root,
             datatype="warps",
+            hemi="{hemi}",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",
@@ -182,18 +186,21 @@ rule slice_3d_to_2d_subject:
             root=root,
             datatype="anat",
             suffix="{metric}.nii.gz",
-            space="unfold",
+            space="{unfold}",
             hemi="{hemi}",
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    params:
+        clip_min=-5.0,
+        clip_max=+5.0,
     output:
         img=temp(
             bids(
                 root=root,
                 datatype="anat",
                 suffix="{metric}.nii.gz",
-                space="unfold2d",
+                space="{unfold,unfold|unfoldLR}2d",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -221,6 +228,9 @@ rule slice_3d_to_2d_atlas:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
+    params:
+        clip_min=-5.0,
+        clip_max=+5.0,
     output:
         img=temp(
             bids(
@@ -381,6 +391,7 @@ rule reset_header_2d_warp_unfoldreg:
         ref_nii=bids(
             root=root,
             datatype="warps",
+            hemi="{hemi}",
             suffix="refvol.nii.gz",
             space="unfold",
             desc="slice",

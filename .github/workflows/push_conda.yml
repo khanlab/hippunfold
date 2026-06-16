@@ -36,7 +36,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          mamba install -y -c conda-forge conda-build anaconda-client boa
+          conda install -y -c conda-forge conda-build anaconda-client python=3.11
 
       - name: Get latest commit SHA from dev-v2.0.0
         id: get_sha
@@ -67,15 +67,20 @@ jobs:
           cd recipe
           OUT=$(conda build . -c conda-forge -c bioconda --output 2>/dev/null)
           echo "PACKAGE_PATH=$OUT" >> $GITHUB_ENV
-          conda mambabuild . -c conda-forge -c bioconda
+          conda build . -c conda-forge -c bioconda
 
       - name: Upload package to Khanlab channel
         shell: bash -l {0}
-        run: |
+        env:
+          BINSTAR_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
+        run: |-            
+          set -euv
           conda activate base
-          anaconda login \
-            --username ${{ secrets.ANACONDA_USERNAME }} \
-            --password ${{ secrets.ANACONDA_PASSWORD }}
-          anaconda upload "$PACKAGE_PATH" \
+          
+          export ANACONDA_API_TOKEN=$BINSTAR_TOKEN
+
+          anaconda upload \
+            --user khanlab \
             --label main \
             --force \
+            "$PACKAGE_PATH"

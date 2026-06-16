@@ -24,7 +24,7 @@ def bids_log(rule_name, **kwargs):
 
 
 def get_atlas_dir():
-    return Path(utils.get_download_dir()) / "hippunfold-atlases"
+    return Path(utils.get_download_dir()) / "atlases"
 
 
 def expand_hemi():
@@ -36,6 +36,20 @@ def expand_hemi():
         # hemi is not an input wildcard,
         # so we additionally expand using the config hemi
         return {"hemi": config["hemi"]}
+
+
+def expand_hemi_atlas_gen(wildcards):
+    if config["new_atlas_subfields_from"] == "native":
+        return expand_hemi()
+    else:
+        return {"hemi": wildcards.hemi}
+
+
+def hemi_wildcard_atlas_gen():
+    if config["new_atlas_subfields_from"] == "native":
+        return {}
+    else:
+        return {"hemi": "{hemi}"}
 
 
 def expand_label():
