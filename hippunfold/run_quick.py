@@ -112,8 +112,14 @@ def main():
 
     with tempfile.TemporaryDirectory(prefix=prefix) as temp_dir:
 
+        # create temporary input directory within temp_dir
+        temp_input_dir = Path(temp_dir) / "input"
+        temp_input_dir.mkdir(parents=True, exist_ok=True)
+
+        temp_output_dir = Path(temp_dir) / "output"
+
         # create subject folder
-        subject_folder = Path(temp_dir) / "anat" / f"sub-{args.subject}"
+        subject_folder = temp_input_dir / "anat" / f"sub-{args.subject}"
         subject_folder.mkdir(parents=True, exist_ok=True)
 
         # create new file name
@@ -134,8 +140,8 @@ def main():
         # run hippunfold
         command = [
             script_path,
-            temp_dir,
-            args.output,
+            str(temp_input_dir),
+            str(temp_output_dir),
             "participant",
             "-c",
             "all",
@@ -145,6 +151,7 @@ def main():
             args.modality,
             "--use-conda",
             "--quiet",
+            "all",
         ]
 
         if args.dry_run:
@@ -152,14 +159,14 @@ def main():
 
         if IMAGE_MODALITY[args.modality]["use_derivatives"]:
             # need to have desc file in bids dir to use --derivatives
-            desc_file = Path(temp_dir) / "dataset_description.json"
+            desc_file = temp_input_dir / "dataset_description.json"
             desc_file.write_text(
                 '{"Name": "Generated Derivatives", '
                 '"BIDSVersion": "1.0.2", '
                 '"GeneratedBy": [{"Name": "hippunfold-quick"}]}'
             )
             command.append("--derivatives")
-            command.append(Path(temp_dir))
+            command.append(str(temp_input_dir))
             command.append("--hemi")
             command.append(args.hemi)
 
@@ -167,6 +174,27 @@ def main():
         try:
             subprocess.run(command, check=True)
             print("hippunfold completed successfully.")
+
+            # copy results from temp output to final output
+            # only copy the hippunfold/sub-{subject} directory
+            temp_subject_dir = temp_output_dir / f"sub-{args.subject}"
+            final_output_dir = Path(args.output)
+
+            if temp_subject_dir.exists():
+                # create the final output structure
+                final_subject_dir = final_output_dir / f"sub-{args.subject}"
+
+                # copy the subject directory
+                if final_subject_dir.exists():
+                    shutil.rmtree(final_subject_dir)
+                final_output_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copytree(temp_subject_dir, final_subject_dir)
+                print(f"Results copied to {final_subject_dir}")
+            else:
+                print(
+                    f"Warning: Expected output directory {temp_subject_dir} not found."
+                )
+
         except subprocess.CalledProcessError as e:
             print(f"Error: {e}")
 
