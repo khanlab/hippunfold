@@ -21,12 +21,12 @@ RUN apt-get update && \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy application code
+COPY . /src/
+
 # Copy pixi environment from build stage
 COPY --from=build /src/.pixi/envs/default /src/.pixi/envs/default
 COPY --from=build --chmod=0755 /app/entrypoint.sh /app/entrypoint.sh
-
-# Copy application code
-COPY . /src/
 
 # Disable user site packages
 ENV PYTHONNOUSERSITE=1
@@ -47,7 +47,8 @@ RUN set -e && \
     /app/entrypoint.sh hippunfold test_data/bids_singleT2w test_out participant --modality T2w --generate-myelin-map --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     /app/entrypoint.sh hippunfold test_data/bids_T1w test_out participant --modality T1w --use-template-seg --template MBMv3 --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     /app/entrypoint.sh hippunfold test_data/bids_dsegtissue test_out group_create_atlas --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --new_atlas_subfields_from native --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
-    rm -rf /root/.cache
+    /app/entrypoint.sh mamba clean --all -y && \
+    rm -rf /root/.cache /src/.pixi/envs/default/pkgs/*
 
 # Create hippunfold-quick wrapper that uses pixi entrypoint
 RUN echo '#!/bin/bash' > /usr/local/bin/hippunfold-quick && \
