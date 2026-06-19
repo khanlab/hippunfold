@@ -58,5 +58,3 @@ ENV SNAKEMAKE_PROFILE=/src/hippunfold/workflow/profiles/docker-conda
 
 # Set entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]
-
-

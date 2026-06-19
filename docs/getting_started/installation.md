@@ -60,13 +60,13 @@ apptainer pull hippunfold_{{ current_tag }}.sif docker://khanlab/hippunfold:{{ c
 docker run -it --rm \
   -v /directory/to/mount:/data \
   khanlab/hippunfold:{{ current_tag }} \
-  /data/ds002168 /data/ds002168_hippunfold participant --modality T1w -n
+  hippunfold /data/ds002168 /data/ds002168_hippunfold participant --modality T1w -n
 
 # Apptainer
 apptainer run -e \
   --bind /directory/to/mount:/data \
   hippunfold_{{ current_tag }}.sif \
-  /data/ds002168 /data/ds002168_hippunfold participant --modality T1w -n
+  hippunfold /data/ds002168 /data/ds002168_hippunfold participant --modality T1w -n
 ```
 
 #### 3. Run with all cores
