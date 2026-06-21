@@ -100,7 +100,9 @@ rule register_midthickness:
             to="{inout}",
         ),
     shell:
-        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp} &> {log}"
+        #"greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 30x0 -o {output.warp} &> {log}"
+        #"greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 100x50 -o {output.warp} &> {log}"
+        "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 100x100 -s 1.0vox 0.3vox -o {output.warp} &> {log}"
 
 
 rule apply_halfsurf_warp_to_img:
