@@ -253,6 +253,23 @@ parse_args:
       - neonate_synthseg
       - maguire_T2w
 
+  --inner_outer_reg_method:
+    help: |
+      Image registration method to use for the image registration to warp midthickness to 
+      inner and outer surfaces.
+    choices: 
+      - greedy
+      - syn
+    default: greedy
+
+  --inner_outer_reg_smoothing:
+    help: |
+      Variance of the Gaussian used to smooth the update field (or gradient step)
+      (in units of voxels) for the image registration to warp midthickness to 
+      inner and outer surfaces. Default value in ANTS is 3. Note for greedy, 
+      the square-root is taken to obtain the sigma.
+    default: 3.0
+
   --enable-bids-validation:
     help: |
       Enable validation of BIDS dataset. BIDS validation would be performed
