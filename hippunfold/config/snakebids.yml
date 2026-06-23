@@ -253,6 +253,21 @@ parse_args:
       - neonate_synthseg
       - maguire_T2w
 
+  --inner_outer_reg_method:
+    help: |
+      Image registration method used to warp midthickness to the inner and outer surfaces.
+    choices: 
+      - greedy
+      - syn
+    default: greedy
+
+  --inner_outer_reg_smoothing:
+    help: |
+      Update-field smoothing variance (vox^2) used by inner/outer image registration.
+      For greedy, sqrt(variance) is used as the Gaussian sigma passed to `greedy -s`.
+      For SyN, the value is passed as the updateFieldVariance in `antsRegistration --transform SyN[...]`.
+    default: 3.0
+
   --enable-bids-validation:
     help: |
       Enable validation of BIDS dataset. BIDS validation would be performed
