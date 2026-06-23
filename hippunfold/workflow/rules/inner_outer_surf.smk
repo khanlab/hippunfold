@@ -131,23 +131,25 @@ rule register_midthickness_syn:
         "minimal"
     shell:
         r"""
-        tmp_prefix=ants_midthickness
+        (
+            tmp_prefix=ants_midthickness
 
-        antsRegistration \
-            --dimensionality 3 \
-            --float 1 \
-            --interpolation Linear \
-            --use-histogram-matching 0 \
-            --transform SyN[{params.syn_gradient_step},{params.syn_update_field_variance},{params.syn_total_field_variance}] \
-            --metric {params.metric}[{input.fixed},{input.moving},{params.metric_weight},{params.radius}] \
-            --convergence [{params.convergence},{params.convergence_thresh},{params.convergence_window}] \
-            --shrink-factors {params.shrink_factors} \
-            --smoothing-sigmas {params.smoothing_sigmas} \
-            --output [${{tmp_prefix}},${{tmp_prefix}}Warped.nii.gz] \
-            --verbose 1 
+            ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} antsRegistration \
+                --dimensionality 3 \
+                --float 1 \
+                --interpolation Linear \
+                --use-histogram-matching 0 \
+                --transform SyN[{params.syn_gradient_step},{params.syn_update_field_variance},{params.syn_total_field_variance}] \
+                --metric {params.metric}[{input.fixed},{input.moving},{params.metric_weight},{params.radius}] \
+                --convergence [{params.convergence},{params.convergence_thresh},{params.convergence_window}] \
+                --shrink-factors {params.shrink_factors} \
+                --smoothing-sigmas {params.smoothing_sigmas} \
+                --output [${{tmp_prefix}},${{tmp_prefix}}Warped.nii.gz] \
+                --verbose 1
 
-        mv ${{tmp_prefix}}0Warp.nii.gz {output.warp}
-        mv ${{tmp_prefix}}0InverseWarp.nii.gz {output.invwarp}
+            mv ${{tmp_prefix}}0Warp.nii.gz {output.warp}
+            mv ${{tmp_prefix}}0InverseWarp.nii.gz {output.invwarp}
+        ) &> {log}
         """
 
 
