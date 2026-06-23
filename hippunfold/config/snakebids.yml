@@ -255,8 +255,7 @@ parse_args:
 
   --inner_outer_reg_method:
     help: |
-      Image registration method to use for the image registration to warp midthickness to 
-      inner and outer surfaces.
+      Image registration method used to warp midthickness to the inner and outer surfaces.
     choices: 
       - greedy
       - syn
