@@ -263,10 +263,9 @@ parse_args:
 
   --inner_outer_reg_smoothing:
     help: |
-      Variance of the Gaussian used to smooth the update field (or gradient step)
-      (in units of voxels) for the image registration to warp midthickness to 
-      inner and outer surfaces. Default value in ANTS is 3. Note for greedy, 
-      the square-root is taken to obtain the sigma.
+      Update-field smoothing variance (vox^2) used by inner/outer image registration.
+      For greedy, sqrt(variance) is used as the Gaussian sigma passed to `greedy -s`.
+      For SyN, the value is passed as the updateFieldVariance in `antsRegistration --transform SyN[...]`.
     default: 3.0
 
   --enable-bids-validation:
