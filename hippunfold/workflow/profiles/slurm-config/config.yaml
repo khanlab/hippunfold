@@ -1,0 +1,7 @@
+# profiles/slurm-config/config.yaml
+executor: slurm
+# other slurm specific options
+slurm-args:
+  # Direct logs to a 'slurm_logs' folder, organized by job name and ID
+  o: "slurm_logs/%x-%j.log"
+  e: "slurm_logs/%x-%j.err"

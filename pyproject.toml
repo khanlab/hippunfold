@@ -54,6 +54,7 @@ hippunfold = { path = ".", editable = true }
 [tool.pixi.dependencies]
 snakemake-storage-plugin-http = ">=0.3.0,<0.4"
 unzip = ">=6.0,<7"
+snakemake-executor-plugin-slurm = ">=2.5.4,<3"
 
 
 [tool.pixi.feature.dev.tasks]

@@ -23,8 +23,9 @@ rule get_boundary_vertices:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     conda:
         "../envs/pyvista.yaml"
     log:
@@ -34,6 +35,8 @@ rule get_boundary_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
+    group:
+        "native_unfold"
     script:
         "../scripts/get_boundary_vertices.py"
 
@@ -78,8 +81,11 @@ rule map_src_sink_sdt_to_surf:
         ),
     conda:
         "../envs/workbench.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     group:
-        "subj"
+        "native_unfold"
     shell:
         "wb_command -volume-to-surface-mapping {input.sdt} {input.surf_gii} {output.sdt} -trilinear"
 
@@ -190,8 +196,11 @@ rule postproc_boundary_vertices:
         ),
     conda:
         "../envs/pyvista.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     group:
-        "subj"
+        "native_unfold"
     script:
         "../scripts/postproc_boundary_vertices.py"
 
@@ -233,11 +242,9 @@ rule laplace_beltrami:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
-    threads: 1
     resources:
-        mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
+        mem_mb=1024,
+        runtime=15,
     conda:
         "../envs/pyvista.yaml"
     log:
@@ -248,6 +255,8 @@ rule laplace_beltrami:
             label="{label}",
             dir="{dir}",
         ),
+    group:
+        "native_unfold"
     script:
         "../scripts/laplace_beltrami.py"
 
@@ -310,8 +319,11 @@ rule warp_native_mesh_to_unfold:
         ),
     conda:
         "../envs/pyvista.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     group:
-        "subj"
+        "native_unfold"
     script:
         "../scripts/rewrite_vertices_to_flat.py"
 
@@ -362,8 +374,9 @@ rule space_unfold_vertices:
         ),
     conda:
         "../envs/pyvista.yaml"
-    group:
-        "subj"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     log:
         bids_log(
             "space_unfold_vertices",
@@ -371,6 +384,8 @@ rule space_unfold_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
+    group:
+        "native_unfold"
     script:
         "../scripts/space_unfold_vertices.py"
 
@@ -406,8 +421,11 @@ rule unfold_surface_smoothing:
         ),
     conda:
         "../envs/workbench.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     group:
-        "subj"
+        "native_unfold"
     shell:
         "wb_command -surface-smoothing {input} {params} {output}"
 
@@ -441,9 +459,12 @@ rule set_surface_z_level:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     conda:
         "../envs/pyvista.yaml"
+    group:
+        "native_unfold"
     script:
         "../scripts/set_surface_z_level.py"

@@ -25,8 +25,6 @@ rule resample_hippdwi_to_template:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
     shell:
         "c3d {input} -resample {params.resample_dim} -as UPSAMPLED "
         " -push UPSAMPLED -cmv -pop -popas COORDY -popas COORDX "
@@ -59,7 +57,6 @@ rule cp_b500_to_anat_dir:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
+    localrule: True
     shell:
         "cp {input} {output}"

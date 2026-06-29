@@ -9,6 +9,7 @@ def download_extract(unzip_dir, url):
     os.makedirs(outdir, exist_ok=True)
 
     zip_path = os.path.join(outdir, "temp.zip")
+    print("https://" + url)
     urllib.request.urlretrieve("https://" + url, zip_path)
 
     with zipfile.ZipFile(zip_path, "r") as zf:

@@ -58,10 +58,14 @@ rule reg_to_template:
             from_="{modality,T1w|T2w}",
             to=config["template"],
         ),
+    threads: 8
+    resources:
+        mem_mb=24000,
+        runtime=60,
     conda:
         "../envs/niftyreg.yaml"
     group:
-        "subj"
+        "preproc_t1_and_warp"
     shell:
         "{params.cmd} > {log}"
 
@@ -93,8 +97,11 @@ rule convert_template_xfm_ras2itk:
         ),
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     group:
-        "subj"
+        "preproc_t1_and_warp"
     shell:
         "c3d_affine_tool {input}  -oitk {output}"
 
@@ -133,8 +140,11 @@ rule compose_template_xfm_corobl:
         ),
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     group:
-        "subj"
+        "preproc_t1_and_warp"
     shell:
         "c3d_affine_tool -itk {input.sub_to_std} -itk {params.std_to_cor} -mult -oitk {output}"
 
@@ -166,8 +176,6 @@ rule invert_template_xfm_itk2ras:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
     shell:
         "c3d_affine_tool -itk {input} -inv -o {output}"
 
@@ -199,8 +207,11 @@ rule template_xfm_itk2ras:
         ),
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     group:
-        "subj"
+        "preproc_t1_and_warp"
     shell:
         "c3d_affine_tool -itk {input} -o {output}"
 
@@ -233,9 +244,12 @@ rule create_unfold_ref:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "preproc_t1_and_warp"
     shell:
         "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -o {output.nii} "

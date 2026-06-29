@@ -18,8 +18,6 @@ rule import_dseg_subfields:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
     shell:
         "wb_command -volume-label-import {input.vol_dseg} {input.label_list} {output.label_dseg}"
 
@@ -57,8 +55,6 @@ rule subfields_to_label_gifti:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     conda:
         "../envs/workbench.yaml"
     shell:
@@ -133,8 +129,6 @@ rule native_label_gii_to_unfold_nii:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " {params.interp}"
@@ -209,8 +203,6 @@ rule unfoldreg_label_gii_to_unfold_nii:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " {params.interp}"
@@ -278,8 +270,9 @@ rule map_surf_subfields_to_volume:
         ),
     conda:
         "../envs/workbench.yaml"
-    group:
-        "subj"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     log:
         bids_log(
             "map_nearest_surf_subfields_to_volume",
@@ -354,8 +347,9 @@ rule combine_dentate_subfield_labels_corobl:
         ),
     conda:
         "../envs/c3d.yaml"
-    group:
-        "subj"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -type uchar -o {output}"
 
@@ -401,8 +395,9 @@ rule label_gm_with_nearest_subfields:
         ),
     conda:
         "../envs/pyunfold.yaml"
-    group:
-        "subj"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     log:
         bids_log(
             "label_gm_with_nearest_subfields",
@@ -454,8 +449,11 @@ rule combine_tissue_subfield_labels_corobl:
         ),
     conda:
         "../envs/c3d.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
     group:
-        "subj"
+        "subfields"
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 
@@ -505,8 +503,12 @@ rule resample_subfields_to_orig:
         ),
     conda:
         "../envs/ants.yaml"
+    threads: 8
+    resources:
+        mem_mb=24000,
+        runtime=15,
     group:
-        "subj"
+        "subfields"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -556,8 +558,6 @@ rule resample_postproc_to_orig:
         ),
     conda:
         "../envs/ants.yaml"
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -606,8 +606,6 @@ rule resample_unet_to_orig:
         ),
     conda:
         "../envs/ants.yaml"
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -649,8 +647,6 @@ rule resample_subfields_to_unfold:
         ),
     conda:
         "../envs/ants.yaml"
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.xfm}  -t {input.xfm}"

@@ -13,8 +13,9 @@ rule import_t1:
                 suffix="T1w.nii.gz",
             )
         ),
+    localrule: True
     group:
-        "subj"
+        "preproc_t1_and_warp"
     shell:
         "cp {input} {output}"
 
@@ -32,8 +33,7 @@ if config["skip_preproc"]:
                 suffix="T1w.nii.gz",
                 desc="preproc",
             ),
-        group:
-            "subj"
+        localrule: True
         shell:
             "cp {input} {output}"
 
@@ -55,11 +55,14 @@ else:
                 desc="preproc",
                 suffix="T1w.nii.gz",
             ),
-        threads: 8
+        resources:
+            mem_mb=36000,
+            runtime=60,
+        threads: 16
+        group:
+            "preproc_t1_and_warp"
         conda:
             "../envs/ants.yaml"
-        group:
-            "subj"
         shell:
             "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
             "N4BiasFieldCorrection -d 3 -i {input.t1} -o {output}"
@@ -105,8 +108,12 @@ rule warp_t1_to_corobl_crop:
         ),
     conda:
         "../envs/ants.yaml"
+    threads: 1
+    resources:
+        mem_mb=16384,
+        runtime=30,
     group:
-        "subj"
+        "preproc_t1_and_warp"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {params.ref}  -t {input.xfm}"

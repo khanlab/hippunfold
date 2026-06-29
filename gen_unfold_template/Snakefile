@@ -211,7 +211,6 @@ rule examplesurf_to_final_name:
 #    output:
 #        gii = bids(root=config['out_root'],subject='{subject}',hemi='{hemi,R|Lflip}',space='unfolded',
 #                suffix='{surfname}.surf.gii',desc='constrainbbox',targetarea='{targetarea}',nbins='{nbins}'),
-#    group: 'subj'
 #    script: 'constrain_surf_to_bbox.py'
 
 #warp from subj unfolded to corobl

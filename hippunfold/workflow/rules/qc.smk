@@ -29,10 +29,13 @@ rule qc_reg_to_template:
             caption="../report/t1w_template_regqc.rst",
             category="Registration QC",
         ),
-    group:
-        "subj"
     conda:
         "../envs/neurovis.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "qc"
     script:
         "../scripts/vis_regqc.py"
 
@@ -58,8 +61,6 @@ rule get_subfield_vols_subj:
             allow_missing=True,
         ),
         lookup_tsv=Path(workflow.basedir) / "../resources/label_lut/subfields_dseg.tsv",
-    group:
-        "subj"
     output:
         tsv=bids(
             root=root,
@@ -72,6 +73,11 @@ rule get_subfield_vols_subj:
         ),
     conda:
         "../envs/pyunfold.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "qc"
     script:
         "../scripts/gen_volume_tsv.py"
 
@@ -101,10 +107,13 @@ rule plot_subj_subfields:
             caption="../report/subj_volume_plot.rst",
             category="Subfield Volumes",
         ),
-    group:
-        "subj"
     conda:
         "../envs/neurovis.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=15,
+    group:
+        "qc"
     script:
         "../scripts/plot_subj_subfields.py"
 
@@ -185,10 +194,13 @@ rule qc_subfield:
             caption="../report/subfield_qc.rst",
             category="Segmentation QC",
         ),
-    group:
-        "subj"
     conda:
         "../envs/neurovis.yaml"
+    resources:
+        mem_mb=1024,
+        runtime=10,
+    group:
+        "qc"
     script:
         "../scripts/vis_qc_dseg.py"
 
@@ -221,10 +233,12 @@ rule qc_subfield_surf:
             caption="../report/subfield_qc.rst",
             category="Segmentation QC",
         ),
-    group:
-        "subj"
+    resources:
+        mem_mb=1024,
     conda:
         "../envs/neurovis.yaml"
+    group:
+        "qc"
     script:
         "../scripts/vis_qc_surf.py"
 
@@ -247,8 +261,6 @@ rule concat_subj_vols_tsv:
             space=wildcards.space,
             atlas=wildcards.atlas,
         ),
-    group:
-        "aggregate"
     output:
         tsv=bids(
             root=root,
