@@ -1,31 +1,29 @@
-#list of analysis levels in the bids app 
-analysis_levels: 
- - participant
- - group_create_atlas
- - group
-  
+#list of analysis levels in the bids app
+analysis_levels:
+  - participant
+  - group_create_atlas
+  - group
 
 #mapping from analysis_level to set of target rules or files
 targets_by_analysis_level:
   participant:
-    - 'all'  # if '', then the first rule is run
+    - "all" # if '', then the first rule is run
   group_create_atlas:
-    - 'all_create_atlas'
+    - "all_create_atlas"
   group:
-    - 'all_group_tsv'
+    - "all_group_tsv"
 
 #this configures the pybids grabber - create an entry for each type of input you want to grab
 # indexed by name of input
 #   dictionary for each input is passed directly to pybids get()
 #    https://bids-standard.github.io/pybids/generated/bids.layout.BIDSLayout.html#bids.layout.BIDSLayout.get
 
-
 pybids_inputs:
   T2w:
     filters:
-      suffix: 'T2w'
-      extension: '.nii.gz'
-      datatype: 'anat'
+      suffix: "T2w"
+      extension: ".nii.gz"
+      datatype: "anat"
     wildcards:
       - subject
       - session
@@ -34,18 +32,18 @@ pybids_inputs:
 
   hippb500:
     filters:
-      suffix: 'b500'
-      extension: '.nii.gz'
-      datatype: 'dwi'
+      suffix: "b500"
+      extension: ".nii.gz"
+      datatype: "dwi"
     wildcards:
       - subject
       - session
 
   T1w:
     filters:
-      suffix: 'T1w'
-      extension: '.nii.gz'
-      datatype: 'anat'
+      suffix: "T1w"
+      extension: ".nii.gz"
+      datatype: "anat"
     wildcards:
       - subject
       - session
@@ -54,38 +52,35 @@ pybids_inputs:
 
   dsegtissue:
     filters:
-      suffix: 'dseg'
-      extension: '.nii.gz'
-      datatype: 'anat'
-      desc: 'tissue'
+      suffix: "dseg"
+      extension: ".nii.gz"
+      datatype: "anat"
+      desc: "tissue"
     wildcards:
       - subject
       - session
       - hemi
       - acquisition
       - run
-
 
   dsegsubfields:
     filters:
-      suffix: 'dseg'
-      extension: '.nii.gz'
-      datatype: 'anat'
-      desc: 'subfields'
+      suffix: "dseg"
+      extension: ".nii.gz"
+      datatype: "anat"
+      desc: "subfields"
     wildcards:
       - subject
       - session
       - hemi
       - acquisition
       - run
-
 
 #configuration for the command-line parameters to make available
 # passed on the argparse add_argument()
 parse_args:
-
   --modality:
-    help: 'Type of image to run hippunfold on. For dsegtissue and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with separate hemi-L|R in the name(s). (default: %(default)s)'
+    help: "Type of image to run hippunfold on. For dsegtissue and be sure to match the label scheme applied in the look up table (lut) online. For best performance, please also make sure the input is approximately aligned to the template space, with separate hemi-L|R in the name(s). (default: %(default)s)"
     required: True
     choices:
       - T1w
@@ -95,103 +90,102 @@ parse_args:
 
   --template:
     choices:
-      - 'CITI168'
-      - 'dHCP'
-      - 'MBMv3'
-      - 'CIVM'
-      - 'ABAv3'
-      - 'fetalGA21'
-      - 'fetalGA22'
-      - 'fetalGA23'
-      - 'fetalGA24'
-      - 'fetalGA25'
-      - 'fetalGA26'
-      - 'fetalGA27'
-      - 'fetalGA28'
-      - 'fetalGA29'
-      - 'fetalGA30'
-      - 'fetalGA31'
-      - 'fetalGA32'
-      - 'fetalGA33'
-      - 'fetalGA34'
-      - 'fetalGA35'
-      - 'fetalGA36'  
-    default: 'CITI168'
-    help: 'Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv3 is for marmoset data, CIVM is for in vivo macaque data, and ABAv3 is for mouse data. When using a non-human template, consider using a corresponding atlas. (default: %(default)s)'
+      - "CITI168"
+      - "dHCP"
+      - "MBMv3"
+      - "CIVM"
+      - "ABAv3"
+      - "fetalGA21"
+      - "fetalGA22"
+      - "fetalGA23"
+      - "fetalGA24"
+      - "fetalGA25"
+      - "fetalGA26"
+      - "fetalGA27"
+      - "fetalGA28"
+      - "fetalGA29"
+      - "fetalGA30"
+      - "fetalGA31"
+      - "fetalGA32"
+      - "fetalGA33"
+      - "fetalGA34"
+      - "fetalGA35"
+      - "fetalGA36"
+    default: "CITI168"
+    help: "Set the template to use for registration to coronal oblique (and optionally for template-based segmentation if --use-template-seg is enabled). CITI168 is for adult human data, dHCP is for neonatal human data, MBMv3 is for marmoset data, CIVM is for in vivo macaque data, and ABAv3 is for mouse data. When using a non-human template, consider using a corresponding atlas. (default: %(default)s)"
 
   --inject_template:
     choices:
-      - 'upenn'
-      - 'dHCP'
-      - 'MBMv3'
-      - 'CIVM'
-      - 'ABAv3'
-    default: 'upenn'
-    help: 'Set the template to use for shape injection. (default: %(default)s)'
+      - "upenn"
+      - "dHCP"
+      - "MBMv3"
+      - "CIVM"
+      - "ABAv3"
+    default: "upenn"
+    help: "Set the template to use for shape injection. (default: %(default)s)"
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv3 (marmoset) or CIVM (macaque) template. (default: %(default)s)'
+    help: "Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv3 (marmoset) or CIVM (macaque) template. (default: %(default)s)"
     default: False
-    action: 'store_true'
+    action: "store_true"
 
-  --template_seg_smoothing_factor: 
-    help: 'Scales the default smoothing sigma for gradient and warp in greedy registration for template-based segmentation. Using a value higher than 1 will use result in a smoother warp. (default: %(default)s)'
+  --template_seg_smoothing_factor:
+    help: "Scales the default smoothing sigma for gradient and warp in greedy registration for template-based segmentation. Using a value higher than 1 will use result in a smoother warp. (default: %(default)s)"
     default: 2.0
 
   --skip_preproc:
-    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed (default: %(default)s)'
+    help: "Set this flag if your inputs (e.g. T2w, dwi) are already pre-processed (default: %(default)s)"
     default: False
-    action: 'store_true'
+    action: "store_true"
 
   --skip_coreg:
-    help: 'Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s)'
+    help: "Set this flag if your inputs (e.g. T2w, dwi) are already registered to T1w space (default: %(default)s)"
     default: False
-    action: 'store_true'
+    action: "store_true"
 
   --skip_inject_template_labels:
-    help: 'Set this flag to skip post-processing template injection into CNN segmentation. Note this will disable generation of DG surfaces. (default: %(default)s)'
+    help: "Set this flag to skip post-processing template injection into CNN segmentation. Note this will disable generation of DG surfaces. (default: %(default)s)"
     default: False
-    action: 'store_true'
+    action: "store_true"
 
-  
-  --inject_template_smoothing_factor: 
-    help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
+  --inject_template_smoothing_factor:
+    help: "Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)"
     default: 1.0
 
   --rigid_reg_template:
-    help: 'Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)'
+    help: "Use rigid instead of affine for registration to template. Try this if your images are reduced FOV (default: %(default)s)"
     default: False
-    action: 'store_true'
+    action: "store_true"
 
   --no_reg_template:
-    help: 'Use if input data is already in space-CITI168 (default: %(default)s)'
+    help: "Use if input data is already in space-CITI168 (default: %(default)s)"
     default: False
-    action: 'store_true'
-  
+    action: "store_true"
+
   --t1_reg_template:
-    help: 'Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)'
+    help: "Use T1w to register to template space, instead of the segmentation modality. Note: this was the default behavior prior to v1.0.0.  (default: %(default)s)"
     default: false
     action: store_true
 
   --crop_res:
-    help: 'Sets the bounding box resolution for the crop original modality (e.g. cropT1w space). Under the hood, hippUnfold operates at higher resolution than the original image, so this tries to preserve some of that detail. (default: %(default)s)'
-    default: '0.2x0.2x0.2mm'
+    help: "Sets the bounding box resolution for the crop original modality (e.g. cropT1w space). Under the hood, hippUnfold operates at higher resolution than the original image, so this tries to preserve some of that detail. (default: %(default)s)"
+    default: "0.2x0.2x0.2mm"
 
   --crop_box:
-    help: 'Sets the bounding box size for the crop original modality (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)'
-    default: '256x256x256vox'
+    help: "Sets the bounding box size for the crop original modality (e.g. cropT1w space). Make this larger if your hippocampi in crop{T1w,T2w} space are getting cut-off. This must be in voxels (vox) not millimeters (mm). (default: %(default)s)"
+    default: "256x256x256vox"
 
   --resample_dsegtissue:
     help: 'Resample the manual segmentation (for --modality dsegtissue), keeping the bounding box the same, but changing the number of voxels in the image. This can be specified as voxels ("300x300x300"), or a percentage ("20%%") or percentage in each direction ("20x20x40%%"). Note: the segmentation will always be subsequently cropped around the segmentation, with a padding of 5 voxels.  (default: %(default)s)'
     default: null
 
   --laminar_coords_res_hipp:
-    help: 'Set the resolution that the laminar (IO) coords will be computed with for hippocampus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
-    default: '0.3x0.3x0.3mm'
+    help: "Set the resolution that the laminar (IO) coords will be computed with for hippocampus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)"
+    default: "0.3x0.3x0.3mm"
 
   --laminar_coords_res_dentate:
-    help: 'Set the resolution that the laminar (IO) coords will be computed with for the dentate gyrus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
-    default: '0.1x0.1x0.1mm'
+    help: "Set the resolution that the laminar (IO) coords will be computed with for the dentate gyrus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)"
+    default: "0.1x0.1x0.1mm"
 
   --no_unfolded_reg:
     help: "Do not perform unfolded space (2D) registration based on surface metrics (e.g. thickness, curvature, and gyrification) for closer alignment to the reference atlas. (default: %(default)s)"
@@ -199,58 +193,58 @@ parse_args:
     action: store_true
 
   --generate_myelin_map:
-    help: 'Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)'
+    help: "Generate myelin map using T1w divided by T2w, and map to surface with ribbon approach. Requires both T1w and T2w images to be present. (default: %(default)s)"
     default: False
     action: store_true
 
   --use_gpu:
-    help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
+    help: "Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)"
     default: False
-    action: 'store_true'
+    action: "store_true"
 
   --nnunet_enable_tta:
-    help: 'Enable test-time augmentation for nnU-net inference, slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
+    help: "Enable test-time augmentation for nnU-net inference, slows down inference by 8x, but potentially increases accuracy (default: %(default)s)"
     default: False
-    action: 'store_true'
+    action: "store_true"
 
   --output_spaces:
-    choices: 
-      - 'T1w'
-      - 'corobl'
-    nargs: '+'
+    choices:
+      - "T1w"
+      - "corobl"
+    nargs: "+"
     default: []
-    help: 'Sets output spaces for results (default: %(default)s)'
+    help: "Sets output spaces for results (default: %(default)s)"
 
   --hemi:
     choices:
-      - 'L'
-      - 'R'
+      - "L"
+      - "R"
     default:
-      - 'L'
-      - 'R'
-    nargs: '+'
-    help: 'Hemisphere(s) to process (default: %(default)s)'
+      - "L"
+      - "R"
+    nargs: "+"
+    help: "Hemisphere(s) to process (default: %(default)s)"
 
   --laminar_coords_method:
     choices:
-      - 'laplace'
-      - 'equivol'
-      - 'equidist'
-    default: 'equidist'
-    help: 'Method to use for laminar coordinates. Equivol and equidist are from the laynii LN2_LAYERS tool.  (default: %(default)s)' 
+      - "laplace"
+      - "equivol"
+      - "equidist"
+    default: "equidist"
+    help: "Method to use for laminar coordinates. Equivol and equidist are from the laynii LN2_LAYERS tool.  (default: %(default)s)"
 
   --autotop_labels:
     choices:
-      - 'hipp'
-      - 'dentate'
+      - "hipp"
+      - "dentate"
     default:
-      - 'hipp'
-      - 'dentate'
-    nargs: '+'
-    help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
+      - "hipp"
+      - "dentate"
+    nargs: "+"
+    help: "Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)"
 
   --force_nnunet_model:
-    help: 'Force nnunet model to use (expert option). (default: %(default)s)'
+    help: "Force nnunet model to use (expert option). (default: %(default)s)"
     default: False
     choices:
       - T1w
@@ -266,8 +260,11 @@ parse_args:
       - neonateT1w_v2
       - neonateT2w_v2
       - neonateT12w_v2
+      - neonateT1w_v2_stdSplit
       - ADNI_T1w_v1
       - neonate_synthseg
+      - hippneo_synthseg
+      - hippneo_synthtopo
       - hippls_synthseg
       - hippls_synthtopo
 
@@ -281,16 +278,15 @@ parse_args:
     default: True
 
   --version:
-    help: 'Print the version of HippUnfold'
+    help: "Print the version of HippUnfold"
     action: version
     version: "2.0.0"
 
-
-# --- surface specific configuration -- 
+# --- surface specific configuration --
 
 autotop_labels:
-  - 'hipp'
-  - 'dentate'
+  - "hipp"
+  - "dentate"
 
 surf_types:
   hipp:
@@ -304,15 +300,15 @@ surf_types:
 
 gifti_metric_types:
   hipp:
-    - gyrification.shape 
+    - gyrification.shape
     - curvature.shape
     - thickness.shape
   dentate:
-    - gyrification.shape 
+    - gyrification.shape
     - curvature.shape
     - thickness.shape
-  
-cifti_metric_types: 
+
+cifti_metric_types:
   hipp:
     - gyrification.dscalar
     - curvature.dscalar
@@ -322,7 +318,7 @@ cifti_metric_types:
     - curvature.dscalar
     - thickness.dscalar
 
-#--- workflow specific configuration -- 
+#--- workflow specific configuration --
 
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
@@ -335,8 +331,8 @@ template_files:
     crop_ref: T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
     crop_refT1w: T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
     Mask_crop: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
-    dseg:  sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz 
-    coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{label}_desc-laplace_coords.nii.gz 
+    dseg: sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz
+    coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{label}_desc-laplace_coords.nii.gz
     hemi_wildcards:
       - L
       - R
@@ -394,165 +390,164 @@ template_files:
       - L
       - R
   fetalGA21:
-    T1w:         tpl-fetalGA21_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA21_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA21_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA21_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA21_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA21_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA21_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA21_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA21_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA22:
-    T1w:         tpl-fetalGA22_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA22_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA22_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA22_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA22_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA22_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA22_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA22_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA22_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA23:
-    T1w:         tpl-fetalGA23_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA23_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA23_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA23_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA23_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA23_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA23_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA23_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA23_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA24:
-    T1w:         tpl-fetalGA24_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA24_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA24_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA24_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA24_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA24_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA24_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA24_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA24_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA25:
-    T1w:         tpl-fetalGA25_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA25_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA25_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA25_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA25_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA25_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA25_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA25_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA25_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA26:
-    T1w:         tpl-fetalGA26_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA26_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA26_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA26_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA26_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA26_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA26_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA26_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA26_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA27:
-    T1w:         tpl-fetalGA27_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA27_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA27_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA27_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA27_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA27_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA27_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA27_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA27_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA28:
-    T1w:         tpl-fetalGA28_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA28_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA28_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA28_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA28_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA28_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA28_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA28_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA28_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA29:
-    T1w:         tpl-fetalGA29_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA29_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA29_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA29_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA29_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA29_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA29_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA29_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA29_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA30:
-    T1w:         tpl-fetalGA30_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA30_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA30_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA30_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA30_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA30_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA30_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA30_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA30_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA31:
-    T1w:         tpl-fetalGA31_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA31_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA31_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA31_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA31_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA31_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA31_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA31_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA31_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA32:
-    T1w:         tpl-fetalGA32_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA32_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA32_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA32_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA32_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA32_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA32_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA32_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA32_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA33:
-    T1w:         tpl-fetalGA33_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA33_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA33_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA33_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA33_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA33_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA33_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA33_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA33_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA34:
-    T1w:         tpl-fetalGA34_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA34_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA34_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA34_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA34_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA34_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA34_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA34_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA34_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA35:
-    T1w:         tpl-fetalGA35_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA35_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA35_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA35_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA35_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA35_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA35_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA35_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA35_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
 
   fetalGA36:
-    T1w:         tpl-fetalGA36_res-1_T1w.nii.gz
-    T2w:         tpl-fetalGA36_res-1_T2w.nii.gz
-    xfm_corobl:  tpl-fetalGA36_to-corobl_affine.txt
-    crop_ref:    tpl-fetalGA36_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+    T1w: tpl-fetalGA36_res-1_T1w.nii.gz
+    T2w: tpl-fetalGA36_res-1_T2w.nii.gz
+    xfm_corobl: tpl-fetalGA36_to-corobl_affine.txt
+    crop_ref: tpl-fetalGA36_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
     crop_refT1w: tpl-fetalGA36_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
     hemi_wildcards:
       - L
       - R
-
 
 #values to use for re-mapping tissue labels when combining with subfields.
 # set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
@@ -575,71 +570,69 @@ tissue_atlas_mapping:
     dg: 6
     srlm: 7
     cyst: 8
-   
-
 
 nnunet_models:
   T1w:
-    url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
+    url: "https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar"
     arch_version: nnunet_v1
     task: Task101_hcp1200_T1w
-    checkpoint:  model_best
+    checkpoint: model_best
     trainer: nnUNetTrainerV2
   T2w:
-    url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar'
+    url: "https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar"
     arch_version: nnunet_v1
     task: Task102_hcp1200_T2w
-    checkpoint:  model_best
+    checkpoint: model_best
     trainer: nnUNetTrainerV2
-  hippb500: 
-    url: 'https://zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
+  hippb500:
+    url: "https://zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar"
     arch_version: nnunet_v1
     task: Task110_hcp1200_b1000crop
-    checkpoint:  model_best
+    checkpoint: model_best
     trainer: nnUNetTrainerV2
   neonateT1w_v1:
-   url: 'https://zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
-   arch_version: nnunet_v1
-   task: Task205_hcp1200_b1000_finetuneround2_dhcp_T1w
-   checkpoint:  model_best
-   trainer: nnUNetTrainerV2
-  neonateT1w: 
-    url: 'https://zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
+    url: "https://zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar"
+    arch_version: nnunet_v1
+    task: Task205_hcp1200_b1000_finetuneround2_dhcp_T1w
+    checkpoint: model_best
+    trainer: nnUNetTrainerV2
+  neonateT1w:
+    url: "https://zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar"
     arch_version: nnunet_v1
     task: Task301_dhcp_T1w_synthseg_manuallycorrected
-    checkpoint:  model_best
+    checkpoint: model_best
     trainer: nnUNetTrainer
 
   T1T2w:
-    url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
+    url: "https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar"
     arch_version: nnunet_v1
     task: Task103_hcp1200_T1T2w
-    checkpoint:  model_best
+    checkpoint: model_best
     trainer: nnUNetTrainerV2
 
-  synthseg_v0.1: 
-    url: 'https://zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
+  synthseg_v0.1:
+    url: "https://zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar"
     arch_version: nnunet_v1
     task: Task102_synsegGenDetailed
-    checkpoint:  model_best
+    checkpoint: model_best
     trainer: nnUNetTrainerV2
 
   synthseg_v0.2:
-    url: 'https://zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
+    url: "https://zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar"
     arch_version: nnunet_v1
     task: Task203_synthseg
-    checkpoint:  model_best
+    checkpoint: model_best
     trainer: nnUNetTrainerV2
 
   ADNI_T1w_v1:
-    url: 'https://zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
+    url: "https://zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar"
     arch_version: nnunet_v1
     task: Task301_ADNI_T1w_successful
-    checkpoint:  model_best # --- confirm this
-    trainer: nnUNetTrainer  # --- confirm this
+    checkpoint: model_best # --- confirm this
+    trainer: nnUNetTrainer # --- confirm this
 
   neonateT2w_v2:
-    url: 'https://zenodo.org/records/17618449/files/Dataset302_dhcp_T2w_manuallycorrected.tar.gz'
+    url: "https://zenodo.org/records/17618449/files/Dataset302_dhcp_T2w_manuallycorrected.tar.gz"
     arch_version: nnunet_v2
     dataset_id: 302
     configuration: 3d_fullres
@@ -648,7 +641,7 @@ nnunet_models:
     checkpoint: checkpoint_best.pth
 
   neonateT1w_v2:
-    url: 'https://zenodo.org/records/17618439/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz'
+    url: "https://zenodo.org/records/17618439/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz"
     arch_version: nnunet_v2
     dataset_id: 301
     configuration: 3d_fullres
@@ -657,7 +650,7 @@ nnunet_models:
     checkpoint: checkpoint_best.pth
 
   neonateT1T2w_v2:
-    url: 'https://zenodo.org/records/17618437/files/Dataset303_dhcp_T1wT2w_manuallycorrected.tar.gz'
+    url: "https://zenodo.org/records/17618437/files/Dataset303_dhcp_T1wT2w_manuallycorrected.tar.gz"
     arch_version: nnunet_v2
     dataset_id: 303
     configuration: 3d_fullres
@@ -665,16 +658,41 @@ nnunet_models:
     plans: nnUNetPlans
     checkpoint: checkpoint_best.pth
 
+  neonateT1w_v2_stdSplit:
+    url: "https://zenodo.org/records/20636799/files/Dataset301_dhcp_T1w_manuallycorrected.tar.gz"
+    arch_version: nnunet_v2
+    dataset_id: 301
+    configuration: 3d_fullres
+    trainer: nnUNetTrainer
+    plans: nnUNetPlans
+    checkpoint: checkpoint_best.pth
+
   neonate_synthseg:
-    url: 'https://zenodo.org/records/17742012/files/synthseg.tar.xz'
+    url: "https://zenodo.org/records/17742012/files/synthseg.tar.xz"
     arch_version: synthtopo
     nb_classes: 9
     seg_nb_levels: 6
     seg_features: [16, 24, 32, 48, 64, 96]
     checkpoint: last.ckpt
 
+  hippneo_synthseg:
+    url: "https://zenodo.org/records/20600018/files/hippneo_synthseg.zip"
+    arch_version: synthtopo
+    nb_classes: 11
+    seg_nb_levels: 6
+    seg_features: [16, 32, 64, 128, 256, 512]
+    checkpoint: epoch=2013-step=66462.ckpt
+
+  hippneo_synthtopo:
+    url: "https://zenodo.org/records/20582534/files/hippneo_synthtopo.zip"
+    arch_version: synthtopo
+    nb_classes: 11
+    seg_nb_levels: 6
+    seg_features: [16, 32, 64, 128, 256, 512]
+    checkpoint: epoch=2172-step=71709.ckpt
+
   hippls_synthseg:
-    url: 'https://zenodo.org/records/20129041/files/hippls_synthseg.zip'
+    url: "https://zenodo.org/records/20129041/files/hippls_synthseg.zip"
     arch_version: synthtopo
     nb_classes: 11
     seg_nb_levels: 6
@@ -682,102 +700,96 @@ nnunet_models:
     checkpoint: epoch=336-step=198830.ckpt
 
   hippls_synthtopo:
-    url: 'https://zenodo.org/records/20137132/files/hippls_synthtopo.zip'
+    url: "https://zenodo.org/records/21112080/files/hippls_synthtopo_alveus.zip"
     arch_version: synthtopo
-    nb_classes: 11
+    nb_classes: 12
     seg_nb_levels: 6
     seg_features: [16, 32, 64, 128, 256, 512]
-    checkpoint: epoch=397-step=234820.ckpt
-
-
+    checkpoint: epoch=823-step=438800.ckpt  
 
 #these will be downloaded to ~/.cache/hippunfold
 resource_urls:
-  atlas: 
-    multihist7: 'https://zenodo.org/records/18451323/files/tpl-multihist7_flatdir.zip'
+  atlas:
+    multihist7: "https://zenodo.org/records/18451323/files/tpl-multihist7_flatdir.zip"
   template:
-    CITI168: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
-    dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
-    MBMv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
-    upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
-    CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
-    ABAv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip='
-    fetalGA21: 'zenodo.org/records/20129108/files/fetalGA21.zip'
-    fetalGA22: 'zenodo.org/records/20129107/files/fetalGA22.zip'
-    fetalGA23: 'zenodo.org/records/18699506/files/fetalGA23.zip'
-    fetalGA24: 'zenodo.org/records/20129105/files/fetalGA24.zip'
-    fetalGA25: 'zenodo.org/records/20129104/files/fetalGA25.zip'
-    fetalGA26: 'zenodo.org/records/20129103/files/fetalGA26.zip'
-    fetalGA27: 'zenodo.org/records/20129102/files/fetalGA27.zip'
-    fetalGA28: 'zenodo.org/records/20129101/files/fetalGA28.zip'
-    fetalGA29: 'zenodo.org/records/20129100/files/fetalGA29.zip'
-    fetalGA30: 'zenodo.org/records/20129099/files/fetalGA30.zip'
-    fetalGA31: 'zenodo.org/records/20129097/files/fetalGA31.zip'
-    fetalGA32: 'zenodo.org/records/20129096/files/fetalGA32.zip'
-    fetalGA33: 'zenodo.org/records/20129095/files/fetalGA33.zip'
-    fetalGA34: 'zenodo.org/records/20129094/files/fetalGA34.zip'
-    fetalGA35: 'zenodo.org/records/20129086/files/fetalGA35.zip'
-    fetalGA36: 'zenodo.org/records/20129079/files/fetalGA36.zip'
+    CITI168: "files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip="
+    dHCP: "files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip="
+    MBMv3: "files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip="
+    upenn: "files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip="
+    CIVM: "files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip="
+    ABAv3: "files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip="
+    fetalGA21: "zenodo.org/records/20129108/files/fetalGA21.zip"
+    fetalGA22: "zenodo.org/records/20129107/files/fetalGA22.zip"
+    fetalGA23: "zenodo.org/records/18699506/files/fetalGA23.zip"
+    fetalGA24: "zenodo.org/records/20129105/files/fetalGA24.zip"
+    fetalGA25: "zenodo.org/records/20129104/files/fetalGA25.zip"
+    fetalGA26: "zenodo.org/records/20129103/files/fetalGA26.zip"
+    fetalGA27: "zenodo.org/records/20129102/files/fetalGA27.zip"
+    fetalGA28: "zenodo.org/records/20129101/files/fetalGA28.zip"
+    fetalGA29: "zenodo.org/records/20129100/files/fetalGA29.zip"
+    fetalGA30: "zenodo.org/records/20129099/files/fetalGA30.zip"
+    fetalGA31: "zenodo.org/records/20129097/files/fetalGA31.zip"
+    fetalGA32: "zenodo.org/records/20129096/files/fetalGA32.zip"
+    fetalGA33: "zenodo.org/records/20129095/files/fetalGA33.zip"
+    fetalGA34: "zenodo.org/records/20129094/files/fetalGA34.zip"
+    fetalGA35: "zenodo.org/records/20129086/files/fetalGA35.zip"
+    fetalGA36: "zenodo.org/records/20129079/files/fetalGA36.zip"
 #to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
-
 hippdwi_opts:
-  resample_dim: '734x720x67' # from 220x216x20 @ 1x1x1mm -> 0.3mm
+  resample_dim: "734x720x67" # from 220x216x20 @ 1x1x1mm -> 0.3mm
   bbox_x:
-    L: '383 510'
-    R: '224 351'
-  bbox_y: '198 453'
+    L: "383 510"
+    R: "224 351"
+  bbox_y: "198 453"
 
 unfold_vol_ref:
   hipp:
     dims:
-      - '128' 
-      - '256'
-      - '16'
+      - "128"
+      - "256"
+      - "16"
     voxdims:
-      - '0.15625'
-      - '0.15625'
-      - '0.15625'
+      - "0.15625"
+      - "0.15625"
+      - "0.15625"
     origin:
-      - '200'
-      - '0'
-      - '0'
+      - "200"
+      - "0"
+      - "0"
     extent:
-      - '20'
-      - '40'
-      - '2.5'
+      - "20"
+      - "40"
+      - "2.5"
     orient: LAS
     flip_per_hemi:
       L: "-flip xz"
       R: "-flip z"
-
 
   dentate:
     dims:
-      - '32'
-      - '256'
-      - '16'
+      - "32"
+      - "256"
+      - "16"
     voxdims:
-      - '0.15625'
-      - '0.15625'
-      - '0.15625'
+      - "0.15625"
+      - "0.15625"
+      - "0.15625"
     origin:
-      - '200'
-      - '0'
-      - '0'
+      - "200"
+      - "0"
+      - "0"
     extent:
-      - '5'
-      - '40'
-      - '2.5'
+      - "5"
+      - "40"
+      - "2.5"
     orient: LAS
     flip_per_hemi:
       L: "-flip xz"
       R: "-flip z"
 
-
-
 shape_inject:
-  labels_reg: 
+  labels_reg:
     - 1
     - 2
     - 3
@@ -788,14 +800,13 @@ shape_inject:
   labels_reinsert:
     - 7
   labels_overwrite:
-    - 2  
-  label_smoothing_stdev: '0.5x0.5x0.5mm'
+    - 2
+  label_smoothing_stdev: "0.5x0.5x0.5mm"
   # ideally for this UNet model we would merge label 2&10 and label 0&9, but this will require anadditional snake rule. can skip for now
-
 
 laplace_labels:
   hipp:
-    AP: 
+    AP:
       gm:
         - 1
         - 8
@@ -810,7 +821,7 @@ laplace_labels:
       src:
         - 3
       sink:
-        - 8   
+        - 8
     IO:
       gm:
         - 1
@@ -821,7 +832,7 @@ laplace_labels:
         - 7
         - 10
       sink:
-        - 0 
+        - 0
         - 9
         - 11
   dentate:
@@ -854,7 +865,6 @@ laplace_labels:
         - 11
         - 0
 
-      
 tight_crop_labels: #defines what labels to use for tight cropping (for upsampled ref)
   hipp:
     - 1
