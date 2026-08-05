@@ -643,6 +643,16 @@ def main():
         img = img.unsqueeze(0)  # (1,1,D,H,W)
     else:
         raise ValueError(f"Unexpected input shape {img.shape}")
+
+    # Normalize input intensities to [0, 1] for stable model input scale.
+    img_min = img.amin()
+    img_max = img.amax()
+    img_range = img_max - img_min
+    if img_range > 0:
+        img = (img - img_min) / img_range
+    else:
+        img = torch.zeros_like(img)
+
     start_inference_time = time.time()
     with torch.no_grad():
         pred_logits = model(img)
