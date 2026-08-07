@@ -52,6 +52,8 @@ multi_line_output = 3
 hippunfold = { path = ".", editable = true }
 
 [tool.pixi.dependencies]
+python = ">=3.11,<3.13"
+snakemake = "==9.9.0"
 snakemake-storage-plugin-http = ">=0.3.0,<0.4"
 unzip = ">=6.0,<7"
 
@@ -59,4 +61,3 @@ unzip = ">=6.0,<7"
 [tool.pixi.feature.dev.tasks]
 quality_check = "isort hippunfold/*.py hippunfold/plugins/*.py -c && black hippunfold --check && snakefmt hippunfold --check"
 quality_fix = "isort hippunfold/*.py hippunfold/plugins/*.py && black hippunfold  && snakefmt hippunfold"
-
