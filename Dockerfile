@@ -49,6 +49,11 @@ RUN set -e && \
     /app/entrypoint.sh hippunfold test_data/bids_dsegtissue test_out group_create_atlas --modality dsegtissue --derivatives test_data/bids_dsegtissue --new-atlas-name mytestatlas --new_atlas_subfields_from native --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs --conda-frontend mamba && \
     rm -rf /root/.cache
 
+# Create hippunfold wrapper that uses pixi entrypoint
+RUN echo '#!/bin/bash' > /usr/local/bin/hippunfold && \
+    echo 'exec /app/entrypoint.sh /src/hippunfold/run.py "$@"' >> /usr/local/bin/hippunfold && \
+    chmod +x /usr/local/bin/hippunfold
+
 # Create hippunfold-quick wrapper that uses pixi entrypoint
 RUN echo '#!/bin/bash' > /usr/local/bin/hippunfold-quick && \
     echo 'exec /app/entrypoint.sh /src/hippunfold/run_quick.py "$@"' >> /usr/local/bin/hippunfold-quick && \
