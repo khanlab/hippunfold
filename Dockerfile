@@ -51,7 +51,7 @@ RUN set -e && \
 
 # Create hippunfold wrapper that uses pixi entrypoint
 RUN echo '#!/bin/bash' > /usr/local/bin/hippunfold && \
-    echo 'exec /app/entrypoint.sh hippunfold "$@"' >> /usr/local/bin/hippunfold && \
+    echo 'exec /app/entrypoint.sh /src/hippunfold/run.py "$@"' >> /usr/local/bin/hippunfold && \
     chmod +x /usr/local/bin/hippunfold
 
 # Create hippunfold-quick wrapper that uses pixi entrypoint
