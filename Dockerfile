@@ -37,6 +37,8 @@ SHELL ["/bin/bash", "-c"]
 # Build snakemake conda environments
 RUN set -e && \
     /app/entrypoint.sh hippunfold test_data/bids_singleT2w test_out participant --modality T2w --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs && \
+    /app/entrypoint.sh hippunfold test_data/bids_singleT2w test_out participant --modality T2w --force-nnunet-model neonateT1w_v2 --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs && \
+    /app/entrypoint.sh hippunfold test_data/bids_singleT2w test_out participant --modality T2w --force-nnunet-model neonate_synthseg --use-conda --conda-create-envs-only --cores all --conda-prefix /src/conda-envs && \
     rm -rf /root/.cache
 
 # Create hippunfold wrapper that uses pixi entrypoint
