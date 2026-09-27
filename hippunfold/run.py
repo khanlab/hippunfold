@@ -6,10 +6,10 @@ from snakebids import bidsapp, plugins
 
 try:
     from hippunfold.plugins import atlas as atlas_plugin  # Works when run as a package
-    from hippunfold.workflow.lib import utils as utils
+    from hippunfold.workflow.lib import utils
 except ImportError:
     from plugins import atlas as atlas_plugin  # Works when run directly
-    from workflow.lib import utils as utils
+    from workflow.lib import utils
 
 
 if "__file__" not in globals():

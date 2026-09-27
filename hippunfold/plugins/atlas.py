@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 import attrs
-from appdirs import AppDirs
 from snakebids import bidsapp
 from snakebids.bidsapp.args import ArgumentGroups
 from snakebids.plugins.base import PluginBase
@@ -14,12 +13,11 @@ from snakebids.plugins.base import PluginBase
 logger = logging.getLogger(__name__)
 
 import json
-import os
 
 try:
-    from hippunfold.workflow.lib import utils as utils
+    from hippunfold.workflow.lib import utils
 except ImportError:
-    from workflow.lib import utils as utils
+    from workflow.lib import utils
 
 # ====================================================================================
 # This section is edited by hand:
@@ -48,7 +46,7 @@ DEFAULT_RESAMPLE_FACTORS = [
 ]  # percent, relative to native
 
 # Default associated help (indicating approx vertex spacing for each factor)
-DEFAULT_RESAMPLE_FACTORS_SPACING_HELP = ", ".join(["~2mm", "~1mm", "~0.5mm", "0.3mm"])
+DEFAULT_RESAMPLE_FACTORS_SPACING_HELP = "~2mm, ~1mm, ~0.5mm, 0.3mm"
 # ====================================================================================
 
 
@@ -104,7 +102,7 @@ def load_atlas_configs(atlas_dirs):
                         atlas[subdir.name.removeprefix("tpl-")] = (
                             config_data  # Override existing atlas if needed
                         )
-                    except (json.JSONDecodeError, IOError) as e:
+                    except (OSError, json.JSONDecodeError) as e:
                         print(f"Warning: Failed to load {template_json}: {e}")
 
     return atlas
@@ -225,7 +223,6 @@ class AtlasConfig(PluginBase):
         output_density = self.pop(namespace, "output_density")
 
         if namespace["analysis_level"] == "group_create_atlas":
-
             if new_atlas_name == None:
                 raise argparse.ArgumentTypeError(
                     "--new_atlas_name must be specified when using group_create_atlas"

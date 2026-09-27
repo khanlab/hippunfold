@@ -50,8 +50,6 @@ rule metric_smoothing:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        fwhm=lambda wildcards: str(wildcards.fwhm).replace("p", "."),
     output:
         metric=temp(
             bids(
@@ -67,6 +65,8 @@ rule metric_smoothing:
         ),
     group:
         "subj"
+    params:
+        fwhm=lambda wildcards: str(wildcards.fwhm).replace("p", "."),
     shell:
         "wb_command -metric-smoothing {input.surface} {input.metric} {params.fwhm} {output.metric} -fwhm"
 
@@ -187,7 +187,7 @@ rule calculate_thickness:
 
 
 rule soft_tanh_normalization:
-    """ Normalize the surface shape metrics (thick, curv, gyr) to smoothly 
+    """Normalize the surface shape metrics (thick, curv, gyr) to smoothly
     reject outliers that can cause issues with registration"""
     input:
         gii=bids(
@@ -200,8 +200,6 @@ rule soft_tanh_normalization:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        norm_limit=5.0,
     output:
         gii=temp(
             bids(
@@ -216,5 +214,7 @@ rule soft_tanh_normalization:
         ),
     group:
         "subj"
+    params:
+        norm_limit=5.0,
     shell:
         "wb_command -metric-math '{params.norm_limit}*tanh(X/{params.norm_limit})' {output.gii} -var X {input.gii}"

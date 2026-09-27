@@ -1,8 +1,5 @@
-from nilearn import plotting
-import matplotlib.pyplot as plt
-
-
 import matplotlib
+from nilearn import plotting
 
 matplotlib.use("Agg")
 

@@ -45,10 +45,6 @@ rule gen_native_mesh:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        threshold=lambda wildcards: config["surf_thresholds"][wildcards.surfname],
-        decimate_opts=0.75,
-        hole_fill_radius=10.0,
     output:
         surf_gii=temp(
             temp(
@@ -65,8 +61,6 @@ rule gen_native_mesh:
                 )
             )
         ),
-    group:
-        "subj"
     log:
         bids_log(
             "gen_native_mesh",
@@ -75,6 +69,12 @@ rule gen_native_mesh:
             label="{label}",
             desc="{surfname}",
         ),
+    group:
+        "subj"
+    params:
+        threshold=lambda wildcards: config["surf_thresholds"][wildcards.surfname],
+        decimate_opts=0.75,
+        hole_fill_radius=10.0,
     script:
         "../scripts/gen_isosurface.py"
 
@@ -92,10 +92,6 @@ rule update_native_mesh_structure:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type=lambda wildcards: get_surface_type(wildcards.space),
     output:
         surf_gii=temp(
             bids(
@@ -111,6 +107,10 @@ rule update_native_mesh_structure:
         ),
     group:
         "subj"
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type=lambda wildcards: get_surface_type(wildcards.space),
     shell:
         "cp {input} {output} && wb_command -set-structure {output.surf_gii} {params.structure_type} -surface-type {params.surface_type}"
         " -surface-secondary-type {params.secondary_type}"
@@ -129,10 +129,6 @@ rule update_native_mesh_structure_unfold:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
-        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
-        surface_type=lambda wildcards: get_surface_type(wildcards.space),
     output:
         surf_gii=temp(
             bids(
@@ -148,6 +144,10 @@ rule update_native_mesh_structure_unfold:
         ),
     group:
         "subj"
+    params:
+        structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
+        secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
+        surface_type=lambda wildcards: get_surface_type(wildcards.space),
     shell:
         "cp {input} {output} && "
         "wb_command -surface-flip-normals {output} {output} && "
@@ -156,7 +156,7 @@ rule update_native_mesh_structure_unfold:
 
 
 rule smooth_surface:
-    """ slight smoothing of surface to improve curvature estimation """
+    """slight smoothing of surface to improve curvature estimation"""
     input:
         surf_gii=bids(
             root=root,
@@ -168,9 +168,6 @@ rule smooth_surface:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        smoothing_strength=0.8,
-        smoothing_iterations=10,
     output:
         surf_gii=temp(
             bids(
@@ -187,5 +184,8 @@ rule smooth_surface:
         ),
     group:
         "subj"
+    params:
+        smoothing_strength=0.8,
+        smoothing_iterations=10,
     shell:
         "wb_command -surface-smoothing {input} {params.smoothing_strength} {params.smoothing_iterations} {output}"

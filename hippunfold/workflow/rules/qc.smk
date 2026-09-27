@@ -9,13 +9,6 @@ rule qc_reg_to_template:
             desc="affine",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
-    params:
-        ref=lambda wildcards, input: str(
-            Path(input.template_dir)
-            / config["template_files"][config["template"]][wildcards.modality].format(
-                **wildcards
-            )
-        ),
     output:
         png=report(
             bids(
@@ -31,6 +24,13 @@ rule qc_reg_to_template:
         ),
     group:
         "subj"
+    params:
+        ref=lambda wildcards, input: str(
+            Path(input.template_dir)
+            / config["template_files"][config["template"]][wildcards.modality].format(
+                **wildcards
+            )
+        ),
     script:
         "../scripts/vis_regqc.py"
 
@@ -56,8 +56,6 @@ rule get_subfield_vols_subj:
             allow_missing=True,
         ),
         lookup_tsv=Path(workflow.basedir) / "../resources/label_lut/subfields_dseg.tsv",
-    group:
-        "subj"
     output:
         tsv=bids(
             root=root,
@@ -68,6 +66,8 @@ rule get_subfield_vols_subj:
             suffix="volumes.tsv",
             **inputs.subj_wildcards,
         ),
+    group:
+        "subj"
     script:
         "../scripts/gen_volume_tsv.py"
 
@@ -222,7 +222,7 @@ rule qc_subfield_surf:
 rule concat_subj_vols_tsv:
     """Concatenate all subject tsv files into a single tsv"""
     input:
-        tsv=lambda wildcards: inputs[get_modality_key(config["modality"])].expand(
+        tsv=lambda wildcards: inputs[get_modality_suffix(config["modality"])].expand(
             bids(
                 root=root,
                 datatype="anat",
@@ -232,13 +232,11 @@ rule concat_subj_vols_tsv:
                 suffix="volumes.tsv",
                 **inputs.subj_wildcards,
             ),
-            subject=inputs[get_modality_key(config["modality"])].zip_lists["subject"],
-            session=inputs[get_modality_key(config["modality"])].zip_lists["session"],
+            subject=inputs.subjects,
+            session=inputs.sessions,
             space=wildcards.space,
             atlas=wildcards.atlas,
         ),
-    group:
-        "aggregate"
     output:
         tsv=bids(
             root=root,
@@ -249,5 +247,7 @@ rule concat_subj_vols_tsv:
             from_="{modality}",
             suffix="volumes.tsv",
         ),
+    group:
+        "aggregate"
     script:
         "../scripts/concat_tsv.py"

@@ -15,7 +15,7 @@ def reg_to_template_cmd(wildcards, input, output):
 
 
 rule reg_to_template:
-    """ generic for T1w or T2w right now """
+    """generic for T1w or T2w right now"""
     input:
         flo=bids(
             root=root,
@@ -26,8 +26,6 @@ rule reg_to_template:
         ),
         xfm_identity=os.path.join(workflow.basedir, "..", config["xfm_identity"]),
         template_dir=Path(download_dir) / "template" / config["template"],
-    params:
-        cmd=reg_to_template_cmd,
     output:
         warped_subj=temp(
             bids(
@@ -60,6 +58,8 @@ rule reg_to_template:
         ),
     group:
         "subj"
+    params:
+        cmd=reg_to_template_cmd,
     shell:
         "{params.cmd} > {log}"
 
@@ -109,11 +109,6 @@ rule compose_template_xfm_corobl:
             type_="itk",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
-    params:
-        std_to_cor=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["xfm_corobl"].format(
-            **wildcards
-        ),
     output:
         sub_to_cor=temp(
             bids(
@@ -129,6 +124,11 @@ rule compose_template_xfm_corobl:
         ),
     group:
         "subj"
+    params:
+        std_to_cor=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["xfm_corobl"].format(
+            **wildcards
+        ),
     shell:
         "c3d_affine_tool -itk {input.sub_to_std} -itk {params.std_to_cor} -mult -oitk {output}"
 
@@ -197,20 +197,6 @@ rule template_xfm_itk2ras:
 
 # unfold ref nifti
 rule create_unfold_ref:
-    params:
-        dims=lambda wildcards: "x".join(
-            config["unfold_vol_ref"][wildcards.label]["dims"]
-        ),
-        voxdims=lambda wildcards: "x".join(
-            config["unfold_vol_ref"][wildcards.label]["voxdims"]
-        ),
-        origin=lambda wildcards: "x".join(
-            config["unfold_vol_ref"][wildcards.label]["origin"]
-        ),
-        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
-        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
-            "flip_per_hemi"
-        ][wildcards.hemi],
     output:
         nii=temp(
             bids(
@@ -225,5 +211,19 @@ rule create_unfold_ref:
         ),
     group:
         "subj"
+    params:
+        dims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["dims"]
+        ),
+        voxdims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["voxdims"]
+        ),
+        origin=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["origin"]
+        ),
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
+        ][wildcards.hemi],
     shell:
         "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -o {output.nii} "

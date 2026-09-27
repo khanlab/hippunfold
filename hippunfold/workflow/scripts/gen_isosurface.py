@@ -1,14 +1,14 @@
-import pyvista as pv
+from copy import deepcopy
+
 import nibabel as nib
 import numpy as np
-from scipy.spatial import cKDTree
-from lib.utils import setup_logger
+import pyvista as pv
 from lib.surface import (
-    write_surface_to_gifti,
-    apply_affine_transform,
     remove_nan_vertices,
+    write_surface_to_gifti,
 )
-from copy import deepcopy
+from lib.utils import setup_logger
+from scipy.spatial import cKDTree
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
@@ -83,7 +83,7 @@ surface = surface.decimate(snakemake.params.decimate_opts)
 logger.info(surface)
 
 
-logger.info(f"final surface clean to remove overlapping vertices, etc.")
+logger.info("final surface clean to remove overlapping vertices, etc.")
 surface = surface.clean()
 
 # apply affine to go from matrix to image space

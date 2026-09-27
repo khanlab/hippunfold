@@ -1,7 +1,7 @@
-import pyvista as pv
 import numpy as np
+import pyvista as pv
+from lib.surface import find_boundary_vertices, read_surface_from_gifti, write_label_gii
 from lib.utils import setup_logger
-from lib.surface import read_surface_from_gifti, find_boundary_vertices, write_label_gii
 
 # Setup logger
 log_file = snakemake.log[0] if snakemake.log else None

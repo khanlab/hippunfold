@@ -1,8 +1,7 @@
 import nibabel as nib
 import numpy as np
-from scipy.spatial import Delaunay
 from lib.surface import write_points_faces_to_gifti
-
+from scipy.spatial import Delaunay
 
 # Load metric files
 metric_ref = nib.load(snakemake.input.metric_ref).get_fdata()

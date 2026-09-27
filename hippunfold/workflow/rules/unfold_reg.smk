@@ -82,8 +82,6 @@ rule native_metric_to_unfold_nii:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        interp="-nearest-vertex 10",
     output:
         metric_nii=temp(
             bids(
@@ -98,14 +96,16 @@ rule native_metric_to_unfold_nii:
         ),
     group:
         "subj"
+    params:
+        interp="-nearest-vertex 10",
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " {params.interp}"
 
 
 rule atlas_metric_to_unfold_nii:
-    """converts metric .gii files to .nii for use in ANTs. 
-        This rule is for the surface template"""
+    """converts metric .gii files to .nii for use in ANTs.
+    This rule is for the surface template"""
     input:
         ref_nii=bids(
             root=root,
@@ -185,9 +185,6 @@ rule slice_3d_to_2d_subject:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        clip_min=-5.0,
-        clip_max=+5.0,
     output:
         img=temp(
             bids(
@@ -202,6 +199,9 @@ rule slice_3d_to_2d_subject:
         ),
     group:
         "subj"
+    params:
+        clip_min=-5.0,
+        clip_max=+5.0,
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -220,9 +220,6 @@ rule slice_3d_to_2d_atlas:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    params:
-        clip_min=-5.0,
-        clip_max=+5.0,
     output:
         img=temp(
             bids(
@@ -239,6 +236,9 @@ rule slice_3d_to_2d_atlas:
         ),
     group:
         "subj"
+    params:
+        clip_min=-5.0,
+        clip_max=+5.0,
     script:
         "../scripts/slice_3d_to_2d.py"
 
@@ -287,26 +287,12 @@ rule unfoldreg_antsquick:
     Note: fixed and moving are swapped as compared to v1 unfoldreg.
 
     TODO: this currently uses NMI as a metric, which doesn't work very well for
-        deformable registraiton (won't warp very much).. should also use the 
+        deformable registraiton (won't warp very much).. should also use the
         antsRegistration tool directly instead of the simple wrapper to provide
-        more flexibility with specifying parameters. """
+        more flexibility with specifying parameters."""
     input:
         fixed_images=get_fixed_images_unfoldreg,
         moving_images=get_moving_images_unfoldreg,
-    params:
-        antsparams="-d 2 -t so -o tmp",
-        fixed_args=lambda wildcards, input: " ".join(
-            ["-f {img}".format(img=img) for img in input.fixed_images]
-        ),
-        moving_args=lambda wildcards, input: " ".join(
-            ["-m {img}".format(img=img) for img in input.moving_images]
-        ),
-        cmd_copy_warps=lambda wildcards, output: " && ".join(
-            [
-                f"cp tmp1Warp.nii.gz {output.warp}",
-                f"cp tmp1InverseWarp.nii.gz {output.invwarp}",
-            ]
-        ),
     output:
         warp=temp(
             bids(
@@ -338,8 +324,6 @@ rule unfoldreg_antsquick:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     log:
         bids_log(
             "unfoldreg_antsquick",
@@ -348,20 +332,36 @@ rule unfoldreg_antsquick:
             hemi="{hemi}",
             label="{label}",
         ),
+    group:
+        "subj"
     shadow:
         "minimal"
     threads: 16
     resources:
         mem_mb=16000,
         time=10,
+    params:
+        antsparams="-d 2 -t so -o tmp",
+        fixed_args=lambda wildcards, input: " ".join(
+            ["-f {img}".format(img=img) for img in input.fixed_images]
+        ),
+        moving_args=lambda wildcards, input: " ".join(
+            ["-m {img}".format(img=img) for img in input.moving_images]
+        ),
+        cmd_copy_warps=lambda wildcards, output: " && ".join(
+            [
+                f"cp tmp1Warp.nii.gz {output.warp}",
+                f"cp tmp1InverseWarp.nii.gz {output.invwarp}",
+            ]
+        ),
     shell:
         "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args} &> {log} && "
         "{params.cmd_copy_warps}"
 
 
 rule reset_header_2d_warp_unfoldreg:
-    """ adjusts header to match the original data
-     (since this seems to get garbled in z by ants)"""
+    """adjusts header to match the original data
+    (since this seems to get garbled in z by ants)"""
     input:
         nii=bids(
             root=root,
@@ -433,8 +433,6 @@ rule warp_unfold_native_to_unfoldreg:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        cmd=get_cmd_warp_surface_2d_warp,
     output:
         surf_gii=temp(
             bids(
@@ -452,5 +450,7 @@ rule warp_unfold_native_to_unfoldreg:
         "subj"
     shadow:
         "minimal"
+    params:
+        cmd=get_cmd_warp_surface_2d_warp,
     shell:
         "{params.cmd}"

@@ -24,11 +24,8 @@ jobs:
             dev-only
           activate-environment: dev-only
 
-      - name: isort
-        run: isort hippunfold/*.py -c
-
-      - name: Black
-        run: black hippunfold --check
+      - name: ruff
+        run: ruff check hippunfold
 
       - name: snakefmt
         run: snakefmt hippunfold --check

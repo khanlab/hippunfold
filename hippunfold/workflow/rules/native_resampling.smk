@@ -87,8 +87,6 @@ rule resample_native_surf_to_atlas_density:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     log:
         bids_log(
             "resample_native_surf_to_atlas_density",
@@ -99,6 +97,8 @@ rule resample_native_surf_to_atlas_density:
             den="{density}",
             desc="{surf_name}",
         ),
+    group:
+        "subj"
     shell:
         "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check &> {log}"
 
@@ -134,8 +134,6 @@ rule resample_native_metric_to_atlas_density:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     log:
         bids_log(
             "resample_native_metric_to_atlas_density",
@@ -145,6 +143,8 @@ rule resample_native_metric_to_atlas_density:
             den="{density,[0-9k]+}",
             desc="{metric}-{metrictype}",
         ),
+    group:
+        "subj"
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
@@ -184,8 +184,6 @@ rule resample_native_coords_to_atlas_density:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     log:
         bids_log(
             "resample_native_coords_to_atlas_density",
@@ -196,6 +194,8 @@ rule resample_native_coords_to_atlas_density:
             dir="{dir}",
             desc="{desc}",
         ),
+    group:
+        "subj"
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
@@ -269,10 +269,10 @@ rule cp_atlas_subfields_label_gii:
 
 rule atlas_label_to_unfold_nii:
     """converts metric .gii files to .nii - this is a band-aid fix since we make use of the volumetric
-        subfield labels in unfold space for painting the native volumetric dseg. Ie this uses the unfold volumetric (or effectively unfoldiso)
-        to perform mapping from atlas to subject. better approach would be to adjust the downstream  volumetric dseg function to 
-        make use of gifti labels instead.. 
-"""
+    subfield labels in unfold space for painting the native volumetric dseg. Ie this uses the unfold volumetric (or effectively unfoldiso)
+    to perform mapping from atlas to subject. better approach would be to adjust the downstream  volumetric dseg function to
+    make use of gifti labels instead..
+    """
     input:
         ref_nii=bids(
             root=root,

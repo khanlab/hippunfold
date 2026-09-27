@@ -69,8 +69,6 @@ def get_inputs_cifti_metric(wildcards):
 rule create_dscalar_metric_cifti:
     input:
         unpack(get_inputs_cifti_metric),
-    params:
-        cmd=get_cmd_cifti_metric,
     output:
         cifti=bids(
             root=root,
@@ -82,6 +80,8 @@ rule create_dscalar_metric_cifti:
         ),
     group:
         "subj"
+    params:
+        cmd=get_cmd_cifti_metric,
     shell:
         "{params.cmd}"
 
@@ -129,8 +129,6 @@ def get_cmd_cifti_label(wildcards, input, output):
 rule create_dlabel_cifti_subfields:
     input:
         unpack(get_inputs_cifti_label),
-    params:
-        cmd=get_cmd_cifti_label,
     output:
         cifti=bids(
             root=root,
@@ -143,6 +141,8 @@ rule create_dlabel_cifti_subfields:
         ),
     group:
         "subj"
+    params:
+        cmd=get_cmd_cifti_label,
     shell:
         "{params.cmd}"
 
@@ -164,8 +164,6 @@ def get_cmd_spec_file(wildcards, input, output):
 rule create_spec_file:
     input:
         lambda wildcards: get_inputs_spec_file(wildcards.label, wildcards.density),
-    params:
-        cmds=get_cmd_spec_file,
     output:
         spec_file=temp(
             bids(
@@ -180,6 +178,8 @@ rule create_spec_file:
         ),
     group:
         "subj"
+    params:
+        cmds=get_cmd_spec_file,
     shell:
         "{params.cmds}"
 
@@ -206,8 +206,6 @@ rule merge_lr_spec_file:
             hemi=config["hemi"],
             allow_missing=True,
         ),
-    params:
-        cmd=get_cmd_merge_spec,
     output:
         spec_file=temp(
             bids(
@@ -221,6 +219,8 @@ rule merge_lr_spec_file:
         ),
     group:
         "subj"
+    params:
+        cmd=get_cmd_merge_spec,
     shell:
         "{params.cmd}"
 
@@ -239,8 +239,6 @@ rule merge_hipp_dentate_spec_file:
             label=config["autotop_labels"],
             allow_missing=True,
         ),
-    params:
-        cmd=get_cmd_merge_spec,
     output:
         spec_file=bids(
             root=root,
@@ -251,5 +249,7 @@ rule merge_hipp_dentate_spec_file:
         ),
     group:
         "subj"
+    params:
+        cmd=get_cmd_merge_spec,
     shell:
         "{params.cmd}"

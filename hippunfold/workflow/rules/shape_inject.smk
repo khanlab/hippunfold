@@ -28,13 +28,13 @@ def get_input_splitseg_for_shape_inject(wildcards):
 rule prep_segs_for_greedy:
     input:
         "{prefix}_dseg.nii.gz",
-    params:
-        labels=" ".join(str(label) for label in config["shape_inject"]["labels_reg"]),
-        smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
     output:
         temp(directory("{prefix}_dsegsplit")),
     group:
         "subj"
+    params:
+        labels=" ".join(str(label) for label in config["shape_inject"]["labels_reg"]),
+        smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
@@ -96,11 +96,6 @@ rule resample_template_dseg_tissue_for_reg:
             hemi="{hemi}",
             suffix="dseg.nii.gz",
         ),
-    params:
-        resample_cmd="-resample-mm {res}".format(
-            res=config["resample_dseg_for_templatereg"]
-        ),
-        crop_cmd="-trim 5vox",  #leave 5 voxel padding
     output:
         template_seg=temp(
             bids(
@@ -115,6 +110,11 @@ rule resample_template_dseg_tissue_for_reg:
         ),
     group:
         "subj"
+    params:
+        resample_cmd="-resample-mm {res}".format(
+            res=config["resample_dseg_for_templatereg"]
+        ),
+        crop_cmd="-trim 5vox",  #leave 5 voxel padding
     shell:
         "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
 
@@ -131,11 +131,6 @@ rule template_shape_reg:
             suffix="dsegsplit",
         ),
         subject_seg=get_input_splitseg_for_shape_inject,
-    params:
-        general_opts="-d 3 -m SSD",
-        affine_opts="-moments 2 -det 1",
-        greedy_opts=get_inject_scaling_opt,
-        img_pairs=get_image_pairs,
     output:
         matrix=temp(
             bids(
@@ -164,11 +159,16 @@ rule template_shape_reg:
                 hemi="{hemi}",
             )
         ),
+    log:
+        bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     group:
         "subj"
     threads: 8
-    log:
-        bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
+    params:
+        general_opts="-d 3 -m SSD",
+        affine_opts="-moments 2 -det 1",
+        greedy_opts=get_inject_scaling_opt,
+        img_pairs=get_image_pairs,
     shell:
         #affine (with moments), then greedy
         "greedy -threads {threads} {params.general_opts} {params.affine_opts} {params.img_pairs} -o {output.matrix}  &> {log} && "
@@ -176,7 +176,7 @@ rule template_shape_reg:
 
 
 rule dilate_dentate_pd_src_sink:
-    """ The PD src/sink labels can disappear after label propagation
+    """The PD src/sink labels can disappear after label propagation
     as they are very small. This dilates them into relative background labels"""
     input:
         template_seg=bids(
@@ -188,12 +188,6 @@ rule dilate_dentate_pd_src_sink:
             hemi="{hemi}",
             suffix="dseg.nii.gz",
         ),
-    params:
-        src_label=config["laplace_labels"]["dentate"]["PD"]["src"][0],
-        sink_label=config["laplace_labels"]["dentate"]["PD"]["sink"][0],
-        src_bg=2,
-        sink_bg=10,
-        struc_elem_size=3,
     output:
         template_seg=temp(
             bids(
@@ -208,6 +202,12 @@ rule dilate_dentate_pd_src_sink:
         ),
     group:
         "subj"
+    params:
+        src_label=config["laplace_labels"]["dentate"]["PD"]["src"][0],
+        sink_label=config["laplace_labels"]["dentate"]["PD"]["sink"][0],
+        src_bg=2,
+        sink_bg=10,
+        struc_elem_size=3,
     script:
         "../scripts/dilate_dentate_pd_src_sink.py"
 
@@ -256,8 +256,6 @@ rule template_shape_inject:
             space="corobl",
             hemi="{hemi}",
         ),
-    params:
-        interp_opt="-ri LABEL 0.1mm",  # smoothing sigma = 100micron
     output:
         inject_seg=temp(
             bids(
@@ -281,17 +279,19 @@ rule template_shape_inject:
     group:
         "subj"
     threads: 8
+    params:
+        interp_opt="-ri LABEL 0.1mm",  # smoothing sigma = 100micron
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
 
 
 rule reinsert_subject_labels:
-    """ c3d command to:
-                1) get the labels to retain
-                2) reslice to injected seg
-                3) limit to labels_overwrite (e.g. SRLM)
-                4) set injected seg to zero where retained labels are
-                5) and add this to retained labels"""
+    """c3d command to:
+    1) get the labels to retain
+    2) reslice to injected seg
+    3) limit to labels_overwrite (e.g. SRLM)
+    4) set injected seg to zero where retained labels are
+    5) and add this to retained labels"""
     input:
         inject_seg=bids(
             root=root,
@@ -304,13 +304,6 @@ rule reinsert_subject_labels:
             label="{label}",
         ),
         subject_seg=get_input_for_shape_inject,
-    params:
-        labels=" ".join(
-            str(label) for label in config["shape_inject"]["labels_reinsert"]
-        ),
-        labels_overwrite=" ".join(
-            str(label) for label in config["shape_inject"]["labels_overwrite"]
-        ),
     output:
         postproc_seg=temp(
             bids(
@@ -326,6 +319,13 @@ rule reinsert_subject_labels:
         ),
     group:
         "subj"
+    params:
+        labels=" ".join(
+            str(label) for label in config["shape_inject"]["labels_reinsert"]
+        ),
+        labels_overwrite=" ".join(
+            str(label) for label in config["shape_inject"]["labels_overwrite"]
+        ),
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
         " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "

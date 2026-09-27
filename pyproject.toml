@@ -49,12 +49,10 @@ convert3d = {version=">=1.4.2,<2", channel="khanlab"}
 [tool.pixi.feature.dev.dependencies]
 pytest-console-scripts = ">=1,<2"
 pygraphviz = "*"
+ruff = ">=0.16.9,<0.17"
 Jinja2 = ">=3,<4"
-black = ">=26,<27"
-isort = ">=9,<10"
 pytest = ">=9,<10"
 snakefmt = ">=2,<3"
-poethepoet = ">=0.10,<0.11"
 
 
 [tool.pixi.environments.default]
@@ -66,14 +64,21 @@ features = ["runtime", "dev"]
 [tool.pixi.environments.dev-only]
 features = ["dev"]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
+[tool.ruff]
+builtins = ["snakemake"]
+
+[tool.ruff.lint]
+ignore = ["SIM115"] # for logging redirect
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+force-single-line = false
+
 
 [tool.pixi.pypi-dependencies]
 hippunfold = { path = ".", editable = true }
 
 
 [tool.pixi.feature.dev.tasks]
-quality_check = "isort hippunfold --check-only && black hippunfold --check && snakefmt hippunfold --check"
-quality_fix = "isort hippunfold && black hippunfold && snakefmt hippunfold"
+quality_check = "ruff check hippunfold && snakefmt hippunfold --check"
+quality_fix = "ruff check --fix hippunfold && ruff format hippunfold && snakefmt hippunfold"

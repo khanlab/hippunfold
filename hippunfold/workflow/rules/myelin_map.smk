@@ -39,7 +39,7 @@ rule divide_t1_by_t2:
 
 # sample on hipp & dg midthickness surfaces
 rule sample_myelin_map_surf:
-    """ samples myelin map on surf using corobl space """
+    """samples myelin map on surf using corobl space"""
     input:
         vol=bids(
             root=root,

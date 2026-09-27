@@ -113,8 +113,6 @@ rule native_label_gii_to_unfold_nii:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        interp="-nearest-vertex 10",
     output:
         label_nii=temp(
             bids(
@@ -129,6 +127,8 @@ rule native_label_gii_to_unfold_nii:
         ),
     group:
         "subj"
+    params:
+        interp="-nearest-vertex 10",
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " {params.interp}"
@@ -187,8 +187,6 @@ rule unfoldreg_label_gii_to_unfold_nii:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        interp="-nearest-vertex 10",
     output:
         label_nii=temp(
             bids(
@@ -203,15 +201,19 @@ rule unfoldreg_label_gii_to_unfold_nii:
         ),
     group:
         "subj"
+    params:
+        interp="-nearest-vertex 10",
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " {params.interp}"
 
 
 rule map_surf_subfields_to_volume:
-    """ surface to volume mapping to obtain subfields in volume space - note: these are
+    """surface to volume mapping to obtain subfields in volume space - note: these are
     jittered wrt original volumetric segmentations because of smoothing and interpolation
-    so are ultimately used with nearest voxel mapping in the label_gm_with_nearest_subfields rule"""
+    so are ultimately used with nearest voxel mapping in the label_gm_with_nearest_subfields rule
+
+    """
     input:
         ref_nii=get_labels_for_laplace,
         midthickness_surf=bids(
@@ -268,8 +270,6 @@ rule map_surf_subfields_to_volume:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     log:
         bids_log(
             "map_nearest_surf_subfields_to_volume",
@@ -278,6 +278,8 @@ rule map_surf_subfields_to_volume:
             label="{label}",
             atlas="{atlas}",
         ),
+    group:
+        "subj"
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.nii_label}"
         " -ribbon-constrained {input.inner_surf} {input.outer_surf} &>> {log}"
@@ -326,8 +328,6 @@ rule combine_dentate_subfield_labels_corobl:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        remap=get_tissue_atlas_remapping_dentate,
     output:
         combined=temp(
             bids(
@@ -344,12 +344,14 @@ rule combine_dentate_subfield_labels_corobl:
         ),
     group:
         "subj"
+    params:
+        remap=get_tissue_atlas_remapping_dentate,
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -type uchar -o {output}"
 
 
 rule label_gm_with_nearest_subfields:
-    """ Labels the GM mask with the nearest subfield from surface to volume mapping, after dentate
+    """Labels the GM mask with the nearest subfield from surface to volume mapping, after dentate
     has been added in"""
     input:
         subfields=bids(
@@ -387,8 +389,6 @@ rule label_gm_with_nearest_subfields:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     log:
         bids_log(
             "label_gm_with_nearest_subfields",
@@ -397,6 +397,8 @@ rule label_gm_with_nearest_subfields:
             label="{label}",
             atlas="{atlas}",
         ),
+    group:
+        "subj"
     script:
         "../scripts/label_gm_with_nearest_subfields.py"
 
@@ -408,6 +410,7 @@ rule combine_tissue_subfield_labels_corobl:
 
     first remap tissue labels to get three sep labels
     then, we just need to add those in, using max(old,new) to override old with new in case of conflict
+
     """
     input:
         tissue=get_labels_for_laplace,
@@ -422,8 +425,6 @@ rule combine_tissue_subfield_labels_corobl:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        remap=get_tissue_atlas_remapping,
     output:
         combined=temp(
             bids(
@@ -440,6 +441,8 @@ rule combine_tissue_subfield_labels_corobl:
         ),
     group:
         "subj"
+    params:
+        remap=get_tissue_atlas_remapping,
     shell:
         "c3d {input.tissue} -dup -dup {params.remap} {input.subfields} -push dg -max -push srlm -max -push cyst -max -type uchar -o {output}"
 

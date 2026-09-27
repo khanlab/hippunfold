@@ -24,10 +24,6 @@ rule compute_halfthick_mask:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        threshold_tofrom=lambda wildcards: (
-            "0.5 1" if wildcards.inout == "inner" else "0 0.5"
-        ),
     output:
         nii=temp(
             bids(
@@ -44,6 +40,10 @@ rule compute_halfthick_mask:
         ),
     group:
         "subj"
+    params:
+        threshold_tofrom=lambda wildcards: (
+            "0.5 1" if wildcards.inout == "inner" else "0 0.5"
+        ),
     shell:
         "c3d {input.coords} -threshold {params.threshold_tofrom} 1 0 {input.mask} -multiply -o {output}"
 
@@ -100,8 +100,18 @@ rule register_midthickness_syn:
                 **inputs.subj_wildcards,
             )
         ),
+    log:
+        bids_log(
+            "register_midthickness_ants",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            to="{inout}",
+        ),
     group:
         "subj"
+    shadow:
+        "minimal"
     threads: 16
     params:
         metric="MeanSquares",
@@ -115,16 +125,6 @@ rule register_midthickness_syn:
         syn_gradient_step=0.1,
         syn_update_field_variance=config["inner_outer_reg_smoothing"],
         syn_total_field_variance=0,
-    log:
-        bids_log(
-            "register_midthickness_ants",
-            **inputs.subj_wildcards,
-            hemi="{hemi}",
-            label="{label}",
-            to="{inout}",
-        ),
-    shadow:
-        "minimal"
     shell:
         r"""
         (
@@ -145,7 +145,7 @@ rule register_midthickness_syn:
 
             mv ${{tmp_prefix}}0Warp.nii.gz {output.warp}
             mv ${{tmp_prefix}}0InverseWarp.nii.gz {output.invwarp}
-        ) &> {log}
+        ) &>{log}
         """
 
 
@@ -172,8 +172,6 @@ rule register_midthickness_greedy:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        update_field_sigma=math.sqrt(float(config["inner_outer_reg_smoothing"])),
     output:
         warp=temp(
             bids(
@@ -189,9 +187,6 @@ rule register_midthickness_greedy:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
-    threads: 16
     log:
         bids_log(
             "register_midthickness",
@@ -200,6 +195,11 @@ rule register_midthickness_greedy:
             label="{label}",
             to="{inout}",
         ),
+    group:
+        "subj"
+    threads: 16
+    params:
+        update_field_sigma=math.sqrt(float(config["inner_outer_reg_smoothing"])),
     shell:
         "greedy -threads {threads} -d 3 -i {input.fixed} {input.moving} -n 50x50x50 -s {params.update_field_sigma}vox 0.707vox -o {output.warp} &> {log}"
 
@@ -337,10 +337,6 @@ rule warp_midthickness_to_inout:
                 **inputs.subj_wildcards,
             )
         ),
-    shadow:
-        "minimal"
-    group:
-        "subj"
     log:
         bids_log(
             "warp_midthickness_to_inout",
@@ -349,12 +345,16 @@ rule warp_midthickness_to_inout:
             label="{label}",
             to="{surfname}",
         ),
+    group:
+        "subj"
+    shadow:
+        "minimal"
     shell:
         """
         (
-            wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear &&
-            wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii &&
-            wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii &&
-            wb_command -surface-set-coordinates {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}
-        ) &> {log}
+            wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} warp.shape.gii -trilinear \
+                && wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii \
+                && wb_command -metric-math 'COORDS + WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP warp.shape.gii \
+                && wb_command -surface-set-coordinates {input.surf_gii} warpedcoords.shape.gii {output.surf_gii}
+        ) &>{log}
         """

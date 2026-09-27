@@ -55,9 +55,9 @@ else:
                 desc="preproc",
                 suffix="T1w.nii.gz",
             ),
-        threads: 8
         group:
             "subj"
+        threads: 8
         shell:
             "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
             "N4BiasFieldCorrection -d 3 -i {input.t1} -o {output}"
@@ -84,11 +84,6 @@ rule warp_t1_to_corobl_crop:
             type_="itk",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
-    params:
-        ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"].format(
-            **wildcards, modality="T1w"
-        ),
     output:
         t1=temp(
             bids(
@@ -103,6 +98,11 @@ rule warp_t1_to_corobl_crop:
         ),
     group:
         "subj"
+    params:
+        ref=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["crop_ref"].format(
+            **wildcards, modality="T1w"
+        ),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {params.ref}  -t {input.xfm}"

@@ -34,9 +34,9 @@ rule n4_t2:
                 **inputs["T2w"].wildcards,
             )
         ),
-    threads: 8
     group:
         "subj"
+    threads: 8
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "N4BiasFieldCorrection -d 3 -i {input} -o {output}"
@@ -189,8 +189,6 @@ else:
         input:
             ref=get_ref_n4_t2,
             flo=get_aligned_n4_t2,
-        params:
-            cmd=get_avg_or_cp_scans_cmd,
         output:
             bids(
                 root=root,
@@ -201,6 +199,8 @@ else:
             ),
         group:
             "subj"
+        params:
+            cmd=get_avg_or_cp_scans_cmd,
         shell:
             "{params.cmd}"
 
@@ -355,8 +355,6 @@ def get_cmd_compose_t2_xfm_corobl(wildcards, input, output):
 rule compose_t2_xfm_corobl:
     input:
         unpack(get_inputs_compose_t2_xfm_corobl),
-    params:
-        cmd=get_cmd_compose_t2_xfm_corobl,
     output:
         t2_to_cor=temp(
             bids(
@@ -377,6 +375,8 @@ rule compose_t2_xfm_corobl:
         ),
     group:
         "subj"
+    params:
+        cmd=get_cmd_compose_t2_xfm_corobl,
     shell:
         "{params.cmd} > {log}"
 
@@ -422,9 +422,6 @@ rule warp_t2_to_corobl_crop:
         ),
         xfm=get_xfm_to_corobl(),
         template_dir=Path(download_dir) / "template" / config["template"],
-    params:
-        ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     output:
         nii=temp(
             bids(
@@ -439,6 +436,9 @@ rule warp_t2_to_corobl_crop:
         ),
     group:
         "subj"
+    params:
+        ref=lambda wildcards, input: Path(input.template_dir)
+        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {params.ref}  -t {input.xfm}"

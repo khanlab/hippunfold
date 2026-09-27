@@ -53,8 +53,6 @@ def get_nan_labels(wildcards):
 rule get_label_mask:
     input:
         labelmap=get_labels_for_laplace,
-    params:
-        labels=get_gm_labels,
     output:
         mask=temp(
             bids(
@@ -70,6 +68,8 @@ rule get_label_mask:
         ),
     group:
         "subj"
+    params:
+        labels=get_gm_labels,
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -97,8 +97,6 @@ def get_inputs_laplace(wildcards):
 rule get_src_sink_mask:
     input:
         labelmap=get_labels_for_laplace,
-    params:
-        labels=get_src_sink_labels,
     output:
         mask=temp(
             bids(
@@ -115,6 +113,8 @@ rule get_src_sink_mask:
         ),
     group:
         "subj"
+    params:
+        labels=get_src_sink_labels,
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -156,8 +156,6 @@ rule get_src_sink_sdt:
 rule get_nan_mask:
     input:
         labelmap=get_labels_for_laplace,
-    params:
-        labels=get_nan_labels,
     output:
         mask=temp(
             bids(
@@ -174,6 +172,8 @@ rule get_nan_mask:
         ),
     group:
         "subj"
+    params:
+        labels=get_nan_labels,
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -181,10 +181,6 @@ rule get_nan_mask:
 rule create_upsampled_coords_ref:
     input:
         seg=get_input_for_shape_inject,
-    params:
-        tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
-        resample_res=lambda wildcards: config[f"laminar_coords_res_{wildcards.label}"],
-        trim_padding="5mm",
     output:
         upsampled_ref=temp(
             bids(
@@ -200,6 +196,10 @@ rule create_upsampled_coords_ref:
         ),
     group:
         "subj"
+    params:
+        tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
+        resample_res=lambda wildcards: config[f"laminar_coords_res_{wildcards.label}"],
+        trim_padding="5mm",
     shell:
         "c3d {input} -retain-labels {params.tight_crop_labels} -trim {params.trim_padding} -resample-mm {params.resample_res} -o {output}"
 
@@ -207,6 +207,22 @@ rule create_upsampled_coords_ref:
 rule prep_dseg_for_laynii:
     input:
         dseg_tissue=get_labels_for_laplace,
+    output:
+        dseg_rim=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                dir="{dir,IO}",
+                desc="laynii",
+                label="{label}",
+                space="corobl",
+                hemi="{hemi}",
+            )
+        ),
+    group:
+        "subj"
     params:
         gm_labels=lambda wildcards: " ".join(
             [
@@ -232,22 +248,6 @@ rule prep_dseg_for_laynii:
                 ]
             ]
         ),
-    output:
-        dseg_rim=temp(
-            bids(
-                root=root,
-                datatype="anat",
-                **inputs.subj_wildcards,
-                suffix="dseg.nii.gz",
-                dir="{dir,IO}",
-                desc="laynii",
-                label="{label}",
-                space="corobl",
-                hemi="{hemi}",
-            )
-        ),
-    group:
-        "subj"
     shell:
         "c3d -background -1 {input} -as DSEG -retain-labels {params.gm_labels} -binarize -scale 3 -popas GM -push DSEG -retain-labels {params.src_labels} -binarize -scale 2 -popas WM -push DSEG -retain-labels {params.sink_labels} -binarize -scale 1 -popas PIAL -push GM -push WM -add -push PIAL -add -o {output}"
 
@@ -279,8 +279,6 @@ rule laynii_layers_equidist:
                 **inputs.subj_wildcards,
             )
         ),
-    shadow:
-        "minimal"
     log:
         bids_log(
             "laynii_layers_equidist",
@@ -291,6 +289,8 @@ rule laynii_layers_equidist:
         ),
     group:
         "subj"
+    shadow:
+        "minimal"
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz &> {log} && "
@@ -324,8 +324,6 @@ rule laynii_layers_equivol:
                 **inputs.subj_wildcards,
             )
         ),
-    shadow:
-        "minimal"
     log:
         bids_log(
             "laynii_layers_equivol",
@@ -336,6 +334,8 @@ rule laynii_layers_equivol:
         ),
     group:
         "subj"
+    shadow:
+        "minimal"
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz -equivol &> {log} && "
