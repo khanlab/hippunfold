@@ -5,7 +5,7 @@ name: Build and Upload Conda Package
 on:
   push:
     branches:
-      - dev-v2.0.0
+      - dev-v2.0.0-DISABLE
   workflow_dispatch:
 
 jobs:
