@@ -1,8 +1,0 @@
-name: workbench
-channels:
-  - khanlab
-  - conda-forge
-  - defaults
-dependencies:
-  - python=3.12
-  - dev-connectome-workbench
