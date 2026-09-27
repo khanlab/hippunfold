@@ -25,8 +25,6 @@ rule get_boundary_vertices:
         ),
     group:
         "subj"
-    conda:
-        "../envs/pyvista.yaml"
     log:
         bids_log(
             "get_boundary_vertices",
@@ -76,8 +74,6 @@ rule map_src_sink_sdt_to_surf:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -188,8 +184,6 @@ rule postproc_boundary_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
-    conda:
-        "../envs/pyvista.yaml"
     group:
         "subj"
     script:
@@ -238,8 +232,6 @@ rule laplace_beltrami:
     threads: 1
     resources:
         mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
-    conda:
-        "../envs/pyvista.yaml"
     log:
         bids_log(
             "laplace_beltrami",
@@ -308,8 +300,6 @@ rule warp_native_mesh_to_unfold:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/pyvista.yaml"
     group:
         "subj"
     script:
@@ -360,8 +350,6 @@ rule space_unfold_vertices:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/pyvista.yaml"
     group:
         "subj"
     log:
@@ -404,8 +392,6 @@ rule unfold_surface_smoothing:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -443,7 +429,5 @@ rule set_surface_z_level:
         ),
     group:
         "subj"
-    conda:
-        "../envs/pyvista.yaml"
     script:
         "../scripts/set_surface_z_level.py"

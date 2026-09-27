@@ -20,8 +20,6 @@ rule import_dseg_tissue:
                 hemi="{hemi,L|R}",
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:

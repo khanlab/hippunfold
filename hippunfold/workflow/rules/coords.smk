@@ -70,8 +70,6 @@ rule get_label_mask:
         ),
     group:
         "subj"
-    conda:
-        "../envs/c3d.yaml"
     shell:
         "c3d {input} -background -1 -retain-labels {params} -binarize {output}"
 
@@ -115,8 +113,6 @@ rule get_src_sink_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -151,8 +147,6 @@ rule get_src_sink_sdt:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -178,8 +172,6 @@ rule get_nan_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -206,8 +198,6 @@ rule create_upsampled_coords_ref:
                 hemi="{hemi}",
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -256,8 +246,6 @@ rule prep_dseg_for_laynii:
                 hemi="{hemi}",
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -293,8 +281,6 @@ rule laynii_layers_equidist:
         ),
     shadow:
         "minimal"
-    conda:
-        "../envs/laynii.yaml"
     log:
         bids_log(
             "laynii_layers_equidist",
@@ -340,8 +326,6 @@ rule laynii_layers_equivol:
         ),
     shadow:
         "minimal"
-    conda:
-        "../envs/laynii.yaml"
     log:
         bids_log(
             "laynii_layers_equivol",

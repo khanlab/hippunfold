@@ -56,8 +56,6 @@ else:
                 suffix="T1w.nii.gz",
             ),
         threads: 8
-        conda:
-            "../envs/ants.yaml"
         group:
             "subj"
         shell:
@@ -103,8 +101,6 @@ rule warp_t1_to_corobl_crop:
                 hemi="{hemi,L|R}",
             )
         ),
-    conda:
-        "../envs/ants.yaml"
     group:
         "subj"
     shell:

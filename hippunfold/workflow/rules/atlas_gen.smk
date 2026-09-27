@@ -43,8 +43,6 @@ rule align_lr_unfold_2d:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -151,8 +149,6 @@ rule gen_atlas_reg_ants:
                 **hemi_wildcard_atlas_gen(),
             )
         ),
-    conda:
-        "../envs/ants.yaml"
     shell:
         "antsMultivariateTemplateConstruction2.sh "
         " -d 2 -o {params.warp_prefix} -n 0 -l 0 -k {params.num_modalities} {input.metrics_csv} "
@@ -246,8 +242,6 @@ rule unflip_avgtemplate_metric:
                 suffix="{metric}.nii.gz",
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     shell:
         "c3d {params.in_metric} {params.flip_per_hemi} -o {output.metric}"
 
@@ -279,8 +273,6 @@ rule reset_header_2d_metric_nii:
             hemi="{hemi}",
             suffix="{metric,[a-zA-Z0-9]+}.nii.gz",
         ),
-    conda:
-        "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -318,8 +310,6 @@ rule reset_header_2d_warp_atlasgen:
             desc="3D",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -357,8 +347,6 @@ rule create_unfold_ref_2d:
                 suffix="metricref.nii.gz",
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     shadow:
         "minimal"
     shell:
@@ -399,8 +387,6 @@ rule create_unfold_ref_2d_resampled:
         ),
     group:
         "subj"
-    conda:
-        "../envs/c3d.yaml"
     shadow:
         "minimal"
     shell:
@@ -431,8 +417,6 @@ rule gen_unfold_atlas_mesh:
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
             )
         ),
-    conda:
-        "../envs/pyvista.yaml"
     script:
         "../scripts/gen_unfold_atlas_mesh.py"
 
@@ -462,8 +446,6 @@ rule gen_unfold_atlas_mesh_flip:
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     shell:
         "wb_command -surface-flip-lr {input} {output}"
 
@@ -501,8 +483,6 @@ rule update_unfold_mesh_metadata:
             hemi="{hemi}",
             suffix="{surfname,midthickness|inner|outer}.surf.gii",
         ),
-    conda:
-        "../envs/workbench.yaml"
     shell:
         "wb_command -surface-flip-normals {input} {output} && "
         "wb_command -set-structure {output} {params.structure_type} -surface-type {params.surface_type}"
@@ -538,8 +518,6 @@ rule avgtemplate_metric_vol_to_surf:
             hemi="{hemi}",
             suffix="{metric}.shape.gii",
         ),
-    conda:
-        "../envs/workbench.yaml"
     shell:
         "wb_command -volume-to-surface-mapping {input.metric_nii} {input.midthickness} {output.metric_gii} -trilinear && "
         "wb_command -set-structure {output.metric_gii} {params.structure_type}"
@@ -581,8 +559,6 @@ rule warp_subj_unfold_surf_to_avg:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/workbench.yaml"
     shadow:
         "minimal"
     shell:
@@ -631,8 +607,6 @@ rule resample_subj_native_surf_to_avg:
             suffix="{surfname}.surf.gii",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/workbench.yaml"
     shell:
         "wb_command -surface-resample {input.subj_native} {input.subj_unfold} {input.atlas_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
 
@@ -673,8 +647,6 @@ rule warp_subfields_to_avg:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/ants.yaml"
     shell:
         "antsApplyTransforms -d 2 -i {input.img} -o {output.img} -t {input.warp} -r {input.img} -n NearestNeighbor -v"
 
@@ -705,8 +677,6 @@ rule vote_subfield_labels:
                 label="{label}",
             )
         ),
-    conda:
-        "../envs/neurovis.yaml"
     script:
         "../scripts/majority_voting.py"
 
@@ -739,8 +709,6 @@ rule reset_header_2d_subfields_nii:
             desc="subfieldsunflipfixhdr",
             suffix="dseg.nii.gz",
         ),
-    conda:
-        "../envs/neurovis.yaml"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -770,8 +738,6 @@ rule unflip_avg_subfields_nii:
                 suffix="dseg.nii.gz",
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     shell:
         "c3d {input} {params.flip_per_hemi} -o {output}"
 
@@ -798,8 +764,6 @@ rule import_avg_subfields_as_label:
             desc="subfieldswithlbl",
             suffix="dseg.nii.gz",
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -836,8 +800,6 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             hemi="{hemi}",
             suffix="dseg.label.gii",
         ),
-    conda:
-        "../envs/workbench.yaml"
     shell:
         "wb_command -volume-label-to-surface-mapping {input.subfields_nii} {input.midthickness} {output.metric_gii} && "
         "wb_command -set-structure {output.metric_gii} {params.structure_type}"
@@ -948,8 +910,6 @@ rule register_surf_to_ref:
             suffix="{surfname}.surf.gii",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/workbench.yaml"
     shadow:
         "minimal"
     shell:
@@ -989,8 +949,6 @@ rule average_native_surfs:
             space="native",
             suffix="{surfname}.surf.gii",
         ),
-    conda:
-        "../envs/workbench.yaml"
     shell:
         "wb_command -surface-average {output} {params.surf_args}"
 
@@ -1020,8 +978,6 @@ rule flip_average_native_surf:
             space="native",
             suffix="{surfname}.surf.gii",
         ),
-    conda:
-        "../envs/workbench.yaml"
     shell:
         "wb_command -surface-flip-lr {input} {output} && "
         "wb_command -set-structure {output} {params.structure_type}"

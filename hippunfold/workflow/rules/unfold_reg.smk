@@ -24,8 +24,6 @@ rule extract_unfold_ref_slice:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -98,8 +96,6 @@ rule native_metric_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -170,8 +166,6 @@ rule atlas_metric_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -206,8 +200,6 @@ rule slice_3d_to_2d_subject:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/neurovis.yaml"
     group:
         "subj"
     script:
@@ -245,8 +237,6 @@ rule slice_3d_to_2d_atlas:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/neurovis.yaml"
     group:
         "subj"
     script:
@@ -348,8 +338,6 @@ rule unfoldreg_antsquick:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/ants.yaml"
     group:
         "subj"
     log:
@@ -414,8 +402,6 @@ rule reset_header_2d_warp_unfoldreg:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/neurovis.yaml"
     group:
         "subj"
     script:
@@ -462,8 +448,6 @@ rule warp_unfold_native_to_unfoldreg:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shadow:

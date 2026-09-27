@@ -35,8 +35,6 @@ rule prep_segs_for_greedy:
         temp(directory("{prefix}_dsegsplit")),
     group:
         "subj"
-    conda:
-        "../envs/c3d.yaml"
     shell:
         "mkdir -p {output} && "
         "c3d {input} -retain-labels {params.labels} -split -foreach -smooth {params.smoothing_stdev} -endfor -oo {output}/label_%02d.nii.gz"
@@ -115,8 +113,6 @@ rule resample_template_dseg_tissue_for_reg:
                 suffix="dseg.nii.gz",
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:
@@ -170,8 +166,6 @@ rule template_shape_reg:
         ),
     group:
         "subj"
-    conda:
-        "../envs/greedy.yaml"
     threads: 8
     log:
         bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
@@ -214,8 +208,6 @@ rule dilate_dentate_pd_src_sink:
         ),
     group:
         "subj"
-    conda:
-        "../envs/neurovis.yaml"
     script:
         "../scripts/dilate_dentate_pd_src_sink.py"
 
@@ -288,8 +280,6 @@ rule template_shape_inject:
         ),
     group:
         "subj"
-    conda:
-        "../envs/greedy.yaml"
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_seg} {output.inject_seg}  -r {input.warp} {input.matrix} &> {log}"
@@ -336,8 +326,6 @@ rule reinsert_subject_labels:
         ),
     group:
         "subj"
-    conda:
-        "../envs/c3d.yaml"
     shell:
         "c3d {input.subject_seg} -retain-labels {params.labels} -popas LBL "
         " -int 0 {input.inject_seg} -as SEG -push LBL -reslice-identity -popas LBL_RESLICE "

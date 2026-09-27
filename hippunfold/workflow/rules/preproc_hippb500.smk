@@ -23,8 +23,6 @@ rule resample_hippdwi_to_template:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
     shell:

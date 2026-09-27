@@ -80,8 +80,6 @@ rule create_dscalar_metric_cifti:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -143,8 +141,6 @@ rule create_dlabel_cifti_subfields:
             label="hipp",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -182,8 +178,6 @@ rule create_spec_file:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -225,8 +219,6 @@ rule merge_lr_spec_file:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -257,8 +249,6 @@ rule merge_hipp_dentate_spec_file:
             suffix="surfaces.spec",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:

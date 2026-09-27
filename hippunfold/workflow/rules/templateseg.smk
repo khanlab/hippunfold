@@ -52,8 +52,6 @@ rule template_reg:
         ),
     group:
         "subj"
-    conda:
-        "../envs/greedy.yaml"
     log:
         bids_log("template_reg", **inputs.subj_wildcards, hemi="{hemi}"),
     threads: 8
@@ -111,8 +109,6 @@ rule warp_template_dseg:
         ),
     group:
         "subj"
-    conda:
-        "../envs/greedy.yaml"
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"
@@ -166,8 +162,6 @@ rule warp_template_dseg_dentate:
         ),
     group:
         "subj"
-    conda:
-        "../envs/greedy.yaml"
     threads: 8
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"

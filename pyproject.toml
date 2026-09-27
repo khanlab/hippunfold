@@ -17,16 +17,34 @@ build-backend = "hatchling.build"
 requires = ["hatchling"]
 
 [tool.pixi.workspace]
+#channels = ["conda-forge", "bioconda", "khanlab"]
 channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64"]
 
 [tool.pixi.feature.runtime.dependencies]
+python = ">=3.12,<3.15"
 snakebids = ">=0.14.0,<0.15"
 appdirs   = ">=1.4.4,<2.0.0"
-pyvista   = ">=0.44.2,<0.45.0"
 conda = ">=26,<27"
 snakemake-storage-plugin-http = ">=0.3.0,<0.4"
 unzip = ">=6,<7"
+laynii = ">=2.7.0,<3"
+nilearn = ">=0.13.1,<0.15"
+matplotlib = ">=3.9.1,<4"
+pandas = ">=2.3.3,<4"
+seaborn = ">=0.13.2,<0.14"
+niftyreg = ">=1.5.69.6,<2"
+numpy = ">=2.5.3,<3"
+astropy = ">=8.0.1,<9"
+nibabel = ">=5.4.2,<6"
+scikit-fmm = ">=2025.6.23,<2026"
+scipy = ">=1.18.1,<2"
+networkx = ">=3.7,<4"
+connectome-workbench-cli = ">=2.2.1,<3"
+pyvista = ">=0.49.0,<0.50"
+ants = ">=2.6.5,<3"
+#convert3d = ">=1.4.2,<2"
+greedyreg = ">=0.0.20250712,<0.0.20250713"
 
 
 [tool.pixi.feature.dev.dependencies]
