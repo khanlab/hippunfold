@@ -4,7 +4,7 @@
 
 name: Lint and test workflow
 on:
-  push:
+  #push:
   workflow_dispatch:
 
 jobs:
