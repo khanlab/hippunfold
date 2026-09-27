@@ -5,25 +5,42 @@ description = "BIDS App for Hippocampal AutoTop (automated hippocampal unfolding
 readme = "README.md"
 license = "MIT"
 authors = [
-    {name = "Ali R. Khan", email = "alik@robarts.ca"},
-    {name = "Jordan DeKraker", email = "jordandekraker@gmail.com"},
-    ]
+    { name = "Ali R. Khan", email = "alik@robarts.ca" },
+    { name = "Jordan DeKraker", email = "jordandekraker@gmail.com" },
+]
 requires-python = ">=3.12,<3.15"
 dependencies = []
-scripts = { hippunfold = "hippunfold.run:app.run", "hippunfold-quick" = "hippunfold.run_quick:main" }
+
+[project.scripts]
+hippunfold = "hippunfold.run:app.run"
+hippunfold-quick = "hippunfold.run_quick:main"
 
 [build-system]
 build-backend = "hatchling.build"
 requires = ["hatchling"]
 
+
+# ----------------------------------------------------------------------
+# Pixi workspace
+# ----------------------------------------------------------------------
+
 [tool.pixi.workspace]
 channels = ["conda-forge", "bioconda", "khanlab"]
 platforms = ["linux-64"]
+preview = ["pixi-build"]
 
-[tool.pixi.feature.runtime.dependencies]
+
+# ----------------------------------------------------------------------
+# Shared dependency specifications
+#
+# These are the canonical versions used both by the Pixi runtime
+# environment and by the published conda package.
+# ----------------------------------------------------------------------
+
+[tool.pixi.workspace.dependencies]
 python = ">=3.12,<3.15"
 snakebids = ">=0.14.0,<0.15"
-appdirs   = ">=1.4.4,<2.0.0"
+appdirs = ">=1.4.4,<2.0.0"
 conda = ">=26,<27"
 snakemake-storage-plugin-http = ">=0.3.0,<0.4"
 unzip = ">=6,<7"
@@ -43,8 +60,87 @@ connectome-workbench-cli = ">=2.2.1,<3"
 pyvista = ">=0.49.0,<0.50"
 ants = ">=2.6.5,<3"
 greedyreg = ">=0.0.20250712,<0.0.20250713"
-convert3d = {version=">=1.4.2,<2", channel="khanlab"}
+convert3d = { version = ">=1.4.2,<2", channel = "khanlab" }
 
+
+# ----------------------------------------------------------------------
+# Conda package
+# ----------------------------------------------------------------------
+
+[tool.pixi.package]
+name = "hippunfold"
+version = "1.5.2-pre.2"
+publish = true
+
+[tool.pixi.package.build.backend]
+name = "pixi-build-python"
+version = "*"
+channels = ["conda-forge"]
+
+
+[tool.pixi.package.host-dependencies]
+python = { workspace = true }
+hatchling = "*"
+
+[tool.pixi.package.run-dependencies]
+python = { workspace = true }
+snakebids = { workspace = true }
+appdirs = { workspace = true }
+conda = { workspace = true }
+snakemake-storage-plugin-http = { workspace = true }
+unzip = { workspace = true }
+laynii = { workspace = true }
+nilearn = { workspace = true }
+matplotlib = { workspace = true }
+pandas = { workspace = true }
+seaborn = { workspace = true }
+niftyreg = { workspace = true }
+numpy = { workspace = true }
+astropy = { workspace = true }
+nibabel = { workspace = true }
+scikit-fmm = { workspace = true }
+scipy = { workspace = true }
+networkx = { workspace = true }
+connectome-workbench-cli = { workspace = true }
+pyvista = { workspace = true }
+ants = { workspace = true }
+greedyreg = { workspace = true }
+convert3d = { workspace = true }
+
+
+# ----------------------------------------------------------------------
+# Runtime environment
+# ----------------------------------------------------------------------
+
+[tool.pixi.feature.runtime.dependencies]
+python = { workspace = true }
+snakebids = { workspace = true }
+appdirs = { workspace = true }
+conda = { workspace = true }
+snakemake-storage-plugin-http = { workspace = true }
+unzip = { workspace = true }
+laynii = { workspace = true }
+nilearn = { workspace = true }
+matplotlib = { workspace = true }
+pandas = { workspace = true }
+seaborn = { workspace = true }
+niftyreg = { workspace = true }
+numpy = { workspace = true }
+astropy = { workspace = true }
+nibabel = { workspace = true }
+scikit-fmm = { workspace = true }
+scipy = { workspace = true }
+networkx = { workspace = true }
+connectome-workbench-cli = { workspace = true }
+pyvista = { workspace = true }
+ants = { workspace = true }
+greedyreg = { workspace = true }
+convert3d = { workspace = true }
+
+
+# ----------------------------------------------------------------------
+# Development dependencies
+# ----------------------------------------------------------------------
 
 [tool.pixi.feature.dev.dependencies]
 pytest-console-scripts = ">=1,<2"
@@ -55,6 +151,10 @@ pytest = ">=9,<10"
 snakefmt = ">=2,<3"
 
 
+# ----------------------------------------------------------------------
+# Environments
+# ----------------------------------------------------------------------
+
 [tool.pixi.environments.default]
 features = ["runtime"]
 
@@ -63,6 +163,28 @@ features = ["runtime", "dev"]
 
 [tool.pixi.environments.dev-only]
 features = ["dev"]
+
+
+# ----------------------------------------------------------------------
+# Local editable Python package
+# ----------------------------------------------------------------------
+
+[tool.pixi.pypi-dependencies]
+hippunfold = { path = ".", editable = true }
+
+
+# ----------------------------------------------------------------------
+# Development tasks
+# ----------------------------------------------------------------------
+
+[tool.pixi.feature.dev.tasks]
+quality_check = "ruff check hippunfold && snakefmt hippunfold --check"
+quality_fix = "ruff check --fix hippunfold && ruff format hippunfold && snakefmt hippunfold"
+
+
+# ----------------------------------------------------------------------
+# Ruff
+# ----------------------------------------------------------------------
 
 [tool.ruff]
 builtins = ["snakemake"]
@@ -74,11 +196,3 @@ ignore = ["SIM115"] # for logging redirect
 combine-as-imports = true
 force-single-line = false
 
-
-[tool.pixi.pypi-dependencies]
-hippunfold = { path = ".", editable = true }
-
-
-[tool.pixi.feature.dev.tasks]
-quality_check = "ruff check hippunfold && snakefmt hippunfold --check"
-quality_fix = "ruff check --fix hippunfold && ruff format hippunfold && snakefmt hippunfold"
