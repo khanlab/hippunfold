@@ -8,7 +8,7 @@ name: Publish Docker image
 on:
   push:
     branches:
-    - dev-v2.0.0
+    - dev-v2.0.0-DISABLE
   workflow_dispatch:
   release:
     types: [published]
