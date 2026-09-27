@@ -26,7 +26,14 @@ sub_mesh = pv.PolyData(surface.points, surface.faces).extract_points(
 )
 
 # Compute connectivity to find all connected components in the sub-mesh
+# note: we have to re-save the original point ids as a different name
+#  since pyvista now strips these after connectivity().
+
+sub_mesh.point_data["orig_point_ids"] = sub_mesh.point_data["vtkOriginalPointIds"]
+
+
 connected_sub_mesh = sub_mesh.connectivity()
+# now conn.point_data['orig_point_ids'] survives, since it's a different array name
 
 # Extract RegionId (connected component labels)
 region_ids = connected_sub_mesh.point_data["RegionId"]
@@ -55,7 +62,7 @@ for region_id, size in enumerate(component_sizes):
 
     # Mask of points in this region
     region_mask = region_ids == region_id
-    point_ids = connected_sub_mesh.point_data["vtkOriginalPointIds"][region_mask]
+    point_ids = connected_sub_mesh.point_data["orig_point_ids"][region_mask]
     boundary_scalars[point_ids] = 2
     coords = surface.points[point_ids]
 
@@ -68,7 +75,7 @@ for region_id, size in enumerate(component_sizes):
     logger.info(f"  → Estimated radius of component {region_id}: {radius:.3f}")
 
 # Map back to original surface point indices
-largest_component_indices = connected_sub_mesh.point_data["vtkOriginalPointIds"][
+largest_component_indices = connected_sub_mesh.point_data["orig_point_ids"][
     largest_component_mask
 ]
 
