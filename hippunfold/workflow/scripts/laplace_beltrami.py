@@ -1,10 +1,9 @@
-import numpy as np
 import nibabel as nib
+import numpy as np
 import scipy.sparse as sp
+from lib.surface import read_surface_from_gifti, write_metric_gii
 from lib.utils import setup_logger
 from scipy.sparse import coo_matrix, diags
-from lib.surface import read_surface_from_gifti, write_metric_gii
-
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
@@ -13,9 +12,6 @@ logger = setup_logger(log_file)
 def cotangent_laplacian(vertices, faces):
     n_vertices = vertices.shape[0]
     # Step 1: Compute cotangent weights
-    row_indices = []
-    col_indices = []
-    values = []
     weights = coo_matrix(
         (n_vertices, n_vertices), dtype=np.float64
     ).tocsr()  # Initialize sparse matrix.

@@ -86,13 +86,13 @@ def get_cmd_copy_inputs(wildcards, input):
 
 
 rule unpack_nnunet_model:
-    """ Unpack nnunet model tar to temp folder to check contents"""
+    """Unpack nnunet model tar to temp folder to check contents"""
     input:
         tar=get_model_tar(),
-    params:
-        tar_opts=lambda wildcards, input: "-xzf" if input.tar[-2:] == "gz" else "-xf",
     output:
         directory(get_model_dir()),
+    params:
+        tar_opts=lambda wildcards, input: "-xzf" if input.tar[-2:] == "gz" else "-xf",
     shell:
         "mkdir -p {output} && tar {params.tar_opts} {input} -C {output}"
 
@@ -106,16 +106,6 @@ if model_dict["arch_version"] == "nnunet_v1":
         input:
             in_img=get_nnunet_input,
             model_dir=get_model_dir(),
-        params:
-            cmd_copy_inputs=get_cmd_copy_inputs,
-            temp_lbl="templbl/temp.nii.gz",
-            in_folder="tempimg",
-            out_folder="templbl",
-            task=model_dict["task"],
-            chkpnt=model_dict["checkpoint"],
-            trainer=model_dict["trainer"],
-            tta="" if config["nnunet_enable_tta"] else "--disable_tta",
-            cuda_visible_devices="" if config["use_gpu"] else "CUDA_VISIBLE_DEVICES=-1",
         output:
             nnunet_seg=temp(
                 bids(
@@ -134,17 +124,27 @@ if model_dict["arch_version"] == "nnunet_v1":
                 **inputs.subj_wildcards,
                 hemi="{hemi}",
             ),
+        group:
+            "subj"
         shadow:
             "minimal"
+        conda:
+            "../envs/nnunet.yaml"
         threads: 16
         resources:
             gpus=1 if config["use_gpu"] else 0,
             mem_mb=16000,
             time=30 if config["use_gpu"] else 60,
-        group:
-            "subj"
-        conda:
-            "../envs/nnunet.yaml"
+        params:
+            cmd_copy_inputs=get_cmd_copy_inputs,
+            temp_lbl="templbl/temp.nii.gz",
+            in_folder="tempimg",
+            out_folder="templbl",
+            task=model_dict["task"],
+            chkpnt=model_dict["checkpoint"],
+            trainer=model_dict["trainer"],
+            tta="" if config["nnunet_enable_tta"] else "--disable_tta",
+            cuda_visible_devices="" if config["use_gpu"] else "CUDA_VISIBLE_DEVICES=-1",
         shell:
             "mkdir -p {params.in_folder} {params.out_folder} && "
             "{params.cmd_copy_inputs} && "
@@ -160,22 +160,6 @@ elif model_dict["arch_version"] == "nnunet_v2":
         input:
             in_img=get_nnunet_input,
             model_tar=get_model_tar(),
-        params:
-            cmd_copy_inputs=get_cmd_copy_inputs,
-            tar_opts=lambda wildcards, input: (
-                "-xzf" if input.model_tar[-2:] == "gz" else "-xf"
-            ),
-            temp_lbl="templbl/temp.nii.gz",
-            model_dir="tempmodel",
-            in_folder="tempimg",
-            out_folder="templbl",
-            dataset_id=model_dict["dataset_id"],
-            configuration=model_dict["configuration"],
-            trainer=model_dict["trainer"],
-            plans=model_dict["plans"],
-            chkpnt=model_dict["checkpoint"],
-            tta="" if config["nnunet_enable_tta"] else "--disable_tta",
-            device="cuda" if config["use_gpu"] else "cpu",
         output:
             nnunet_seg=temp(
                 bids(
@@ -194,31 +178,42 @@ elif model_dict["arch_version"] == "nnunet_v2":
                 **inputs.subj_wildcards,
                 hemi="{hemi}",
             ),
+        group:
+            "subj"
         shadow:
             "minimal"
+        conda:
+            "../envs/nnunetv2.yaml"
         threads: 16
         resources:
             gpus=1 if config["use_gpu"] else 0,
             mem_mb=48000,
             time=30 if config["use_gpu"] else 120,
-        group:
-            "subj"
-        conda:
-            "../envs/nnunetv2.yaml"
+        params:
+            cmd_copy_inputs=get_cmd_copy_inputs,
+            tar_opts=lambda wildcards, input: (
+                "-xzf" if input.model_tar[-2:] == "gz" else "-xf"
+            ),
+            temp_lbl="templbl/temp.nii.gz",
+            model_dir="tempmodel",
+            in_folder="tempimg",
+            out_folder="templbl",
+            dataset_id=model_dict["dataset_id"],
+            configuration=model_dict["configuration"],
+            trainer=model_dict["trainer"],
+            plans=model_dict["plans"],
+            chkpnt=model_dict["checkpoint"],
+            tta="" if config["nnunet_enable_tta"] else "--disable_tta",
+            device="cuda" if config["use_gpu"] else "cpu",
         shell:
             "mkdir -p {params.model_dir} {params.in_folder} {params.out_folder} && "
-
             "{params.cmd_copy_inputs} && "
-
             "tar {params.tar_opts} {input.model_tar} -C {params.model_dir} && "
-
             "export nnUNet_results={params.model_dir}/nnunet_v2 && "
             "export nnUNet_raw={params.model_dir}/nnunet_v2/nnUNet_raw && "
             "export nnUNet_preprocessed={params.model_dir}/nnunet_v2/nnUNet_preprocessed && "
             "export nnUNet_n_proc_DA={threads} && "
-
             "FOLDS=$(find {params.model_dir}/nnunet_v2/Dataset{params.dataset_id}_*/nnUNetTrainer* -maxdepth 1 -type d -name 'fold_*' | sed 's/.*fold_//' | sort -n | tr '\\n' ' ' | sed 's/ $//' ) && "
-
             "nnUNetv2_predict "
             "-i {params.in_folder} "
             "-o {params.out_folder} "
@@ -258,8 +253,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     **inputs.subj_wildcards,
                 )
             ),
-        conda:
-            "../envs/c3d.yaml"
         group:
             "subj"
         shell:
@@ -274,12 +267,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
         input:
             in_img=get_nnunet_input,
             model_tar=get_model_tar(),
-        params:
-            model_dir="tempmodel",
-            checkpoint_path="tempmodel/synthseg/{chkpt}".format(
-                chkpt=model_dict["checkpoint"]
-            ),
-            device="cuda" if config["use_gpu"] else "cpu",
         output:
             synthseg_seg=temp(
                 bids(
@@ -298,31 +285,32 @@ elif model_dict["arch_version"] == "synthseg_v2":
                 **inputs.subj_wildcards,
                 hemi="{hemi}",
             ),
+        group:
+            "subj"
         shadow:
             "minimal"
+        conda:
+            "../envs/synthseg.yaml"
         threads: 8
         resources:
             gpus=1 if config["use_gpu"] else 0,
             mem_mb=16000,
             time=15 if config["use_gpu"] else 60,
-        group:
-            "subj"
-        conda:
-            "../envs/synthseg.yaml"
+        params:
+            model_dir="tempmodel",
+            checkpoint_path="tempmodel/synthseg/{chkpt}".format(
+                chkpt=model_dict["checkpoint"]
+            ),
+            device="cuda" if config["use_gpu"] else "cpu",
         shell:
-            # Create temp model directory
             "mkdir -p {params.model_dir} && "
-
             "tar -xf {input.model_tar} -C {params.model_dir} && "
-
             "python {workflow.basedir}/scripts/seg_synthseg.py "
             "{input.in_img} "
             "{params.checkpoint_path} "
             "--output {output.synthseg_seg} "
             "--device {params.device} "
             "&> {log}"
-            # Extract model tar
-            # Run SynthSeg inference
 
     rule unflip_synthseg_output:
         input:
@@ -347,8 +335,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     **inputs.subj_wildcards,
                 )
             ),
-        conda:
-            "../envs/c3d.yaml"
         group:
             "subj"
         shell:
@@ -392,8 +378,6 @@ rule qc_nnunet_f3d:
             hemi="{hemi}",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
-    params:
-        ref=get_f3d_ref,
     output:
         cpp=temp(
             bids(
@@ -428,8 +412,6 @@ rule qc_nnunet_f3d:
                 hemi="{hemi}",
             )
         ),
-    conda:
-        "../envs/niftyreg.yaml"
     log:
         bids_log(
             "qc_nnunet_f3d",
@@ -438,6 +420,8 @@ rule qc_nnunet_f3d:
         ),
     group:
         "subj"
+    params:
+        ref=get_f3d_ref,
     shell:
         "reg_f3d -flo {input.img} -ref {params.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
         "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {params.ref} -res {output.res_mask} -inter 0 &> {log}"
@@ -455,14 +439,6 @@ rule qc_nnunet_dice:
             hemi="{hemi}",
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
-    params:
-        hipp_lbls=[1, 2, 7, 8],
-        ref=lambda wildcards, input: str(
-            Path(input.template_dir)
-            / config["template_files"][config["template"]]["Mask_crop"].format(
-                **wildcards
-            )
-        ),
     output:
         dice=report(
             bids(
@@ -478,7 +454,13 @@ rule qc_nnunet_dice:
         ),
     group:
         "subj"
-    conda:
-        "../envs/pyunfold.yaml"
+    params:
+        hipp_lbls=[1, 2, 7, 8],
+        ref=lambda wildcards, input: str(
+            Path(input.template_dir)
+            / config["template_files"][config["template"]]["Mask_crop"].format(
+                **wildcards
+            )
+        ),
     script:
         "../scripts/dice.py"

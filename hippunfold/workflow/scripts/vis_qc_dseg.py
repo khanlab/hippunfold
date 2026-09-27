@@ -1,14 +1,10 @@
-from nilearn import plotting
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-
 import matplotlib
+import matplotlib.pyplot as plt
+from nilearn import plotting
 
 matplotlib.use("Agg")
 
-dim = (
-    -0.5
-)  # seems to be more reliable, dim=-1 was blacking out some images that had low dynamic range..
+dim = -0.5  # seems to be more reliable, dim=-1 was blacking out some images that had low dynamic range..
 
 
 fig, (ax1, ax2, ax3) = plt.subplots(3, 1)

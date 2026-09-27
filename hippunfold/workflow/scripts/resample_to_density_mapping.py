@@ -1,9 +1,8 @@
 import re
+
 import numpy as np
 import pandas as pd
-import pyvista as pv
 from lib.surface import compute_edge_lengths, read_surface_from_gifti
-
 
 density_list = []
 
@@ -20,7 +19,7 @@ for surf_gii in snakemake.input.surf_giis:
 
     n_vertices = surface.points.shape[0]
     if n_vertices > 850:
-        density = "{n}k".format(n=int(np.round(n_vertices / 1000)))
+        density = f"{int(np.round(n_vertices / 1000))}k"
     else:
         density = str(n_vertices)
 

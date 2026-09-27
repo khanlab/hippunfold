@@ -1,8 +1,9 @@
-import pyvista as pv
+from collections import defaultdict
+
 import nibabel as nib
 import numpy as np
+import pyvista as pv
 from nibabel.gifti.gifti import intent_codes
-from collections import defaultdict
 
 
 def read_surface_from_gifti(surf_gii):
@@ -90,16 +91,17 @@ def write_metric_gii(scalars, out_metric_gii, metadata=None):
     nib.save(image, out_metric_gii)
 
 
-def write_label_gii(label_scalars, out_label_gii, label_dict={}, metadata=None):
+def write_label_gii(label_scalars, out_label_gii, label_dict=None, metadata=None):
 
     # Create a GIFTI label data array
+    if label_dict is None:
+        label_dict = {}
     gii_data = nib.gifti.GiftiDataArray(label_scalars, intent="NIFTI_INTENT_LABEL")
 
     # Create a Label Table (LUT)
     label_table = nib.gifti.GiftiLabelTable()
 
     for label_name, label_kwargs in label_dict.items():
-
         lbl = nib.gifti.GiftiLabel(**label_kwargs)
         lbl.label = label_name
         label_table.labels.append(lbl)
@@ -157,7 +159,6 @@ def find_boundary_vertices(mesh):
     Returns:
         list: List of vertex indices that are boundary vertices, sorted in ascending order.
     """
-    vertices = mesh.points
     faces = mesh.faces.reshape((-1, 4))[:, 1:4]  # Extract triangle indices
 
     edge_count = defaultdict(int)

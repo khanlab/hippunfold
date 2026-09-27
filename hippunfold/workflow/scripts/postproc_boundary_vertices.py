@@ -1,11 +1,7 @@
-import pyvista as pv
-import numpy as np
 import nibabel as nib
-import nibabel.gifti as gifti
-from collections import Counter
-from scipy.signal import argrelextrema
+import numpy as np
+from lib.surface import read_surface_from_gifti, write_label_gii
 from lib.utils import setup_logger
-from lib.surface import write_label_gii, read_surface_from_gifti
 
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
@@ -33,7 +29,7 @@ logger.info("Assigning labels apsrc, apsink, pdsrc, pdsink")
 distances = np.vstack(
     (ap_src[edges == 1], ap_sink[edges == 1], pd_src[edges == 1], pd_sink[edges == 1])
 ).T
-shifting_factors = np.zeros((4))
+shifting_factors = np.zeros(4)
 num_labels = 4  # starts at 0
 
 for _ in range(max_iterations):
@@ -58,9 +54,9 @@ for _ in range(max_iterations):
     # Update scaling factors for underrepresented labels
     for k in range(num_labels):
         if label_counts[k] < nmin:
-            shifting_factors[
-                k
-            ] += shifting_epsilon  # Increase competitiveness of the label
+            shifting_factors[k] += (
+                shifting_epsilon  # Increase competitiveness of the label
+            )
             logger.info(
                 f"Shifting distances of label {k} to bump up competitiveness, factor = {shifting_factors[k]}"
             )
@@ -108,7 +104,7 @@ def enforce_label_contiguity(labels, boundary_vertices, surface, logger=None):
             continue
 
         components = sorted(components, key=len, reverse=True)
-        keep = components[0]
+        components[0]
         reassigned_count = 0
 
         for comp in components[1:]:

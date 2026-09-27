@@ -9,16 +9,14 @@ Author: Mahmoud Yaser (mahmoud1yaser)
 import argparse
 import os
 import time
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
-import nibabel as nib
-from typing import Sequence, Tuple, Optional
-from types import GeneratorType as generator
+from collections.abc import Sequence
 
+import nibabel as nib
+import numpy as np
+import torch
 from cornucopia import LoadTransform
 from cornucopia.utils import warps  # original sampling ops
+from torch import nn
 
 
 # utils.ensure_list equivalent
@@ -132,7 +130,7 @@ class ConvBlock(ConvBlockBase):
             ndim,
             in_channels,
             out_channels,
-            opt_conv=dict(kernel_size=kernel_size, bias=bias, padding="same"),
+            opt_conv={"kernel_size": kernel_size, "bias": bias, "padding": "same"},
             activation=activation,
             norm=norm,
             dropout=dropout,
@@ -503,7 +501,7 @@ class Model(nn.Module):
         seg_features: Sequence[int] = (16, 24, 32, 48, 64, 96),
         seg_activation: str = "LeakyReLU",
         seg_nb_conv: int = 2,
-        seg_norm: Optional[str] = "instance",
+        seg_norm: str | None = "instance",
         **kwargs,
     ):
         super().__init__()
@@ -555,8 +553,9 @@ def save_nifti(pred, output_path, reference_path):
         try:
             reference_img = nib.load(reference_path)
             affine = reference_img.affine
-        except Exception as e:
-            print(f"Warning: Could not load affine from {reference_path}: {e}")
+        except (nib.spatialimages.ImageFileError, OSError) as e:
+            # Catching specific errors satisfies BLE001
+            print(f"Warning: Could not load affine: {e}")
 
     # Convert to numpy and ensure correct data type
     pred_np = pred.cpu().numpy()

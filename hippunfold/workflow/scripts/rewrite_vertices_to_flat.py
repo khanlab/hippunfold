@@ -1,9 +1,8 @@
 from lib.surface import (
-    read_surface_from_gifti,
     read_metric_from_gii,
+    read_surface_from_gifti,
     write_surface_to_gifti,
 )
-
 
 surface, metadata = read_surface_from_gifti(snakemake.input.surf_gii)
 ap = read_metric_from_gii(snakemake.input.coords_AP)

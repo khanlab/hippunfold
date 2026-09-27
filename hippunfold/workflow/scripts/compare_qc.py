@@ -1,5 +1,6 @@
-from PIL import Image
 import os
+
+from PIL import Image
 
 ref_path = (
     "ref_data/qc/sub-01_space-cropT1w_desc-subfields_atlas-multihist7_volumes.png"

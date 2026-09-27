@@ -19,9 +19,6 @@ rule create_crop_ref:
             atlas=config["atlas"],
             allow_missing=True,
         ),
-    params:
-        resample=config["crop_res"],
-        pad_to=config["crop_box"],
     output:
         ref=temp(
             bids(
@@ -33,10 +30,11 @@ rule create_crop_ref:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/c3d.yaml"
     group:
         "subj"
+    params:
+        resample=config["crop_res"],
+        pad_to=config["crop_box"],
     shell:
         "c3d {input} -binarize -interpolation NearestNeighbor -trim 0vox -resample-mm {params.resample} -pad-to {params.pad_to} 0 -scale 0 -type uchar {output}"
 
@@ -82,8 +80,6 @@ rule resample_unet_crop:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -133,8 +129,6 @@ rule resample_postproc_crop:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -185,8 +179,6 @@ rule resample_subfields_crop:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -237,8 +229,6 @@ rule resample_coords_crop:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -273,8 +263,6 @@ rule resample_to_crop:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/ants.yaml"
     group:
         "subj"
     shell:
@@ -317,10 +305,6 @@ rule resample_t2_to_crop:
             **inputs.subj_wildcards,
         ),
         xfm=get_xfm_t2_to_t1(),
-    params:
-        xfm_opt=lambda wildcards, input: (
-            "" if len(input.xfm) == 0 else f"-t {input.xfm}"
-        ),
     output:
         nii=bids(
             root=root,
@@ -331,10 +315,12 @@ rule resample_t2_to_crop:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    conda:
-        "../envs/ants.yaml"
     group:
         "subj"
+    params:
+        xfm_opt=lambda wildcards, input: (
+            "" if len(input.xfm) == 0 else f"-t {input.xfm}"
+        ),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} {params.xfm_opt}"

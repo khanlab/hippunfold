@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import pygraphviz as pgv
 import sys
 from pathlib import Path
+
+import pygraphviz as pgv
 
 if len(sys.argv) < 2:
     print("DAG should be provided in stdin (i.e. piped in from snakemake or cat)")
@@ -16,7 +17,7 @@ from glob import glob
 
 # first, parse the smk files
 pattern = re.compile(r"rule (\w+):")
-subgraphs = dict()
+subgraphs = {}
 
 for smk in glob("../workflow/rules/*.smk"):
     smk_name = re.findall(re.compile(r"/(\w+).smk"), smk)[0]
@@ -44,7 +45,7 @@ Gwithclusters = G.copy()
 
 
 for i, cluster_name in enumerate(subgraphs.keys()):
-    cluster_nodes = list()
+    cluster_nodes = []
     for n in G.nodes():
         label = n.attr["label"]
         label = label.split("\\")[0]  # strip off wildcards in the label

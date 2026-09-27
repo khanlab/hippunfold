@@ -32,10 +32,6 @@ rule template_reg:
             **inputs.subj_wildcards,
         ),
         template_dir=Path(download_dir) / "template" / config["template"],
-    params:
-        general_opts="-d 3 -m NCC 2x2x2",
-        smoothing_opts=get_smoothing_opt,
-        iteration_opts="-n 100x50x10",  #default -n 100x100
     output:
         warp=temp(
             bids(
@@ -50,13 +46,15 @@ rule template_reg:
                 hemi="{hemi}",
             )
         ),
-    group:
-        "subj"
-    conda:
-        "../envs/greedy.yaml"
     log:
         bids_log("template_reg", **inputs.subj_wildcards, hemi="{hemi}"),
+    group:
+        "subj"
     threads: 8
+    params:
+        general_opts="-d 3 -m NCC 2x2x2",
+        smoothing_opts=get_smoothing_opt,
+        iteration_opts="-n 100x50x10",  #default -n 100x100
     shell:
         "greedy -threads {threads} {params.general_opts} "
         " {params.smoothing_opts} {params.iteration_opts} "
@@ -94,8 +92,6 @@ rule warp_template_dseg:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    params:
-        interp_opt="-ri LABEL 0.2vox",
     output:
         inject_seg=temp(
             bids(
@@ -111,9 +107,9 @@ rule warp_template_dseg:
         ),
     group:
         "subj"
-    conda:
-        "../envs/greedy.yaml"
     threads: 8
+    params:
+        interp_opt="-ri LABEL 0.2vox",
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"
 
@@ -149,8 +145,6 @@ rule warp_template_dseg_dentate:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    params:
-        interp_opt="-ri LABEL 0.2vox",
     output:
         inject_seg=temp(
             bids(
@@ -166,8 +160,8 @@ rule warp_template_dseg_dentate:
         ),
     group:
         "subj"
-    conda:
-        "../envs/greedy.yaml"
     threads: 8
+    params:
+        interp_opt="-ri LABEL 0.2vox",
     shell:
         "greedy -d 3 -threads {threads} {params.interp_opt} -rf {input.upsampled_ref} -rm {input.template_dseg} {output.inject_seg}  -r {input.warp}"

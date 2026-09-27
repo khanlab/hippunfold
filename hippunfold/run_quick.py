@@ -111,7 +111,6 @@ def main():
         prefix = None
 
     with tempfile.TemporaryDirectory(prefix=prefix) as temp_dir:
-
         # create temporary input directory within temp_dir
         temp_input_dir = Path(temp_dir) / "input"
         temp_input_dir.mkdir(parents=True, exist_ok=True)

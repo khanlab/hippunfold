@@ -23,10 +23,6 @@ rule get_boundary_vertices:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
-    conda:
-        "../envs/pyvista.yaml"
     log:
         bids_log(
             "get_boundary_vertices",
@@ -34,12 +30,14 @@ rule get_boundary_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
+    group:
+        "subj"
     script:
         "../scripts/get_boundary_vertices.py"
 
 
 rule map_src_sink_sdt_to_surf:
-    """ Maps the distance to src/sink mask """
+    """Maps the distance to src/sink mask"""
     input:
         surf_gii=bids(
             root=root,
@@ -76,8 +74,6 @@ rule map_src_sink_sdt_to_surf:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
     shell:
@@ -85,7 +81,7 @@ rule map_src_sink_sdt_to_surf:
 
 
 rule postproc_boundary_vertices:
-    """ ensures non-overlapping and full labelling of AP/PD edges """
+    """ensures non-overlapping and full labelling of AP/PD edges"""
     input:
         ap_src=bids(
             root=root,
@@ -150,10 +146,6 @@ rule postproc_boundary_vertices:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        min_terminal_vertices=5,  # min number of vertices per src/sink
-        max_iterations=100,
-        shifting_epsilon=0.1,  #could be proportional to voxel spacing
     output:
         ap=temp(
             bids(
@@ -188,10 +180,12 @@ rule postproc_boundary_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
-    conda:
-        "../envs/pyvista.yaml"
     group:
         "subj"
+    params:
+        min_terminal_vertices=5,  # min number of vertices per src/sink
+        max_iterations=100,
+        shifting_epsilon=0.1,  #could be proportional to voxel spacing
     script:
         "../scripts/postproc_boundary_vertices.py"
 
@@ -233,13 +227,6 @@ rule laplace_beltrami:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
-    threads: 1
-    resources:
-        mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
-    conda:
-        "../envs/pyvista.yaml"
     log:
         bids_log(
             "laplace_beltrami",
@@ -248,6 +235,11 @@ rule laplace_beltrami:
             label="{label}",
             dir="{dir}",
         ),
+    group:
+        "subj"
+    threads: 1
+    resources:
+        mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
     script:
         "../scripts/laplace_beltrami.py"
 
@@ -291,9 +283,6 @@ rule warp_native_mesh_to_unfold:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    params:
-        vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
-        z_level=get_unfold_z_level,
     output:
         surf_gii=temp(
             bids(
@@ -308,19 +297,20 @@ rule warp_native_mesh_to_unfold:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/pyvista.yaml"
     group:
         "subj"
+    params:
+        vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
+        z_level=get_unfold_z_level,
     script:
         "../scripts/rewrite_vertices_to_flat.py"
 
 
 rule space_unfold_vertices:
-    """ this irons out the surface to result in more even
-        vertex spacing. the resulting shape will be more
-        individual (e.g. the surface area in unfolded space
-        would be similar to native) """
+    """this irons out the surface to result in more even
+    vertex spacing. the resulting shape will be more
+    individual (e.g. the surface area in unfolded space
+    would be similar to native)"""
     input:
         surf_gii=bids(
             root=root,
@@ -343,9 +333,6 @@ rule space_unfold_vertices:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        step_size=0.1,
-        max_iterations=10000,
     output:
         surf_gii=temp(
             bids(
@@ -360,10 +347,6 @@ rule space_unfold_vertices:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/pyvista.yaml"
-    group:
-        "subj"
     log:
         bids_log(
             "space_unfold_vertices",
@@ -371,6 +354,11 @@ rule space_unfold_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
+    group:
+        "subj"
+    params:
+        step_size=0.1,
+        max_iterations=10000,
     script:
         "../scripts/space_unfold_vertices.py"
 
@@ -388,9 +376,6 @@ rule unfold_surface_smoothing:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        strength=1,
-        iterations=5,
     output:
         surf_gii=temp(
             bids(
@@ -404,10 +389,11 @@ rule unfold_surface_smoothing:
                 **inputs.subj_wildcards,
             )
         ),
-    conda:
-        "../envs/workbench.yaml"
     group:
         "subj"
+    params:
+        strength=1,
+        iterations=5,
     shell:
         "wb_command -surface-smoothing {input} {params} {output}"
 
@@ -425,8 +411,6 @@ rule set_surface_z_level:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    params:
-        z_level=get_unfold_z_level,
     output:
         surf_gii=temp(
             bids(
@@ -443,7 +427,7 @@ rule set_surface_z_level:
         ),
     group:
         "subj"
-    conda:
-        "../envs/pyvista.yaml"
+    params:
+        z_level=get_unfold_z_level,
     script:
         "../scripts/set_surface_z_level.py"
