@@ -11,6 +11,7 @@ environments:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/bioconda/
+    - url: https://conda.anaconda.org/khanlab/
     indexes:
     - https://pypi.org/simple
     packages:
@@ -586,11 +587,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/yarl-1.24.5-pyh7db6752_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/yte-1.9.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/khanlab/linux-64/convert3d-1.4.2-h109cef4_0.conda
       - pypi: ./
   dev:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/bioconda/
+    - url: https://conda.anaconda.org/khanlab/
     indexes:
     - https://pypi.org/simple
     packages:
@@ -1194,11 +1197,13 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/yarl-1.24.5-pyh7db6752_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/yte-1.9.4-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/khanlab/linux-64/convert3d-1.4.2-h109cef4_0.conda
       - pypi: ./
   dev-only:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/bioconda/
+    - url: https://conda.anaconda.org/khanlab/
     indexes:
     - https://pypi.org/simple
     packages:
@@ -11129,6 +11134,17 @@ packages:
   run_exports: {}
   size: 24190
   timestamp: 1779159948016
+- conda: https://conda.anaconda.org/khanlab/linux-64/convert3d-1.4.2-h109cef4_0.conda
+  sha256: 29e8da303b5f8500e6dc8a0791ac4a40ef70abe9cb8b0766ad316fe6d89ff3c4
+  md5: a55392a659bec3d5f02a273fe0ae18c1
+  depends:
+  - __glibc >=2.17,<3.0.a0
+  - libgcc >=15
+  - libitk >=5.4.7,<5.5.0a0
+  - libstdcxx >=15
+  license: GPL-3.0-or-later
+  size: 14132614
+  timestamp: 1790477215112
 - pypi: ./
   name: hippunfold
   requires_python: '>=3.12,<3.15'
