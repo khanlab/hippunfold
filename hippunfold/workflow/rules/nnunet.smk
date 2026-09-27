@@ -258,8 +258,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     **inputs.subj_wildcards,
                 )
             ),
-        conda:
-            "../envs/c3d.yaml"
         group:
             "subj"
         shell:
@@ -347,8 +345,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     **inputs.subj_wildcards,
                 )
             ),
-        conda:
-            "../envs/c3d.yaml"
         group:
             "subj"
         shell:
@@ -428,8 +424,6 @@ rule qc_nnunet_f3d:
                 hemi="{hemi}",
             )
         ),
-    conda:
-        "../envs/niftyreg.yaml"
     log:
         bids_log(
             "qc_nnunet_f3d",
@@ -478,7 +472,5 @@ rule qc_nnunet_dice:
         ),
     group:
         "subj"
-    conda:
-        "../envs/pyunfold.yaml"
     script:
         "../scripts/dice.py"
