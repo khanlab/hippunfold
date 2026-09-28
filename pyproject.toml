@@ -1,6 +1,6 @@
 [project]
 name = "hippunfold"
-version = "1.5.2-pre.2"
+version = "2.1.0-rc1"
 description = "BIDS App for Hippocampal AutoTop (automated hippocampal unfolding and subfield segmentation)"
 readme = "README.md"
 license = "MIT"
@@ -25,7 +25,7 @@ requires = ["hatchling"]
 # ----------------------------------------------------------------------
 
 [tool.pixi.workspace]
-channels = ["conda-forge", "bioconda", "khanlab"]
+channels = ["conda-forge", "bioconda", "https://prefix.dev/akhanf/khanlab" ]
 platforms = ["linux-64"]
 preview = ["pixi-build"]
 
@@ -60,8 +60,7 @@ connectome-workbench-cli = ">=2.2.1,<3"
 pyvista = ">=0.49.0,<0.50"
 ants = ">=2.6.5,<3"
 greedyreg = ">=0.0.20250712,<0.0.20250713"
-convert3d = { version = ">=1.4.2,<2", channel = "khanlab" }
-
+convert3d = { version = ">=1.4.2,<2", build = "libitk547_*" }
 
 # ----------------------------------------------------------------------
 # Conda package
@@ -69,8 +68,12 @@ convert3d = { version = ">=1.4.2,<2", channel = "khanlab" }
 
 [tool.pixi.package]
 name = "hippunfold"
-version = "1.5.2-pre.2"
+version = "2.1.0-rc1"
 publish = true
+
+
+[tool.pixi.package.build.config]
+noarch = false
 
 [tool.pixi.package.build.backend]
 name = "pixi-build-python"
@@ -163,14 +166,6 @@ features = ["runtime", "dev"]
 
 [tool.pixi.environments.dev-only]
 features = ["dev"]
-
-
-# ----------------------------------------------------------------------
-# Local editable Python package
-# ----------------------------------------------------------------------
-
-[tool.pixi.pypi-dependencies]
-hippunfold = { path = ".", editable = true }
 
 
 # ----------------------------------------------------------------------
