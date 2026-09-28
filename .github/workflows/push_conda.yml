@@ -64,8 +64,9 @@ jobs:
           #  exit 1
           #fi
           
-      # Build and publish in one step -- no stored secrets needed!
-      - name: Build and publish in one step
+      - name: Publish and upload
         env:
           PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
-        run: pixi publish --target-channel "https://prefix.dev/${PREFIX_CHANNEL}"
+        run: |
+          pixi publish 
+          pixi upload prefix --channel ${PREFIX_CHANNEL} *.conda
