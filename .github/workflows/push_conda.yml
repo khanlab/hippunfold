@@ -45,32 +45,26 @@ jobs:
           auth-token: ${{ secrets.PREFIX_API_KEY }}
           run-install: false
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - name: Validate release version matches package metadata
         env:
           RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import os
-          import pathlib
-          import tomllib
+          project_version=$(awk -F'"' '
+            /^\[project\]/ { in_project=1; next }
+            /^\[/ && in_project { exit }
+            in_project && /^version = "/ { print $2; exit }
+          ' pyproject.toml)
+          package_version=$(awk -F'"' '
+            /^\[tool\.pixi\.package\]/ { in_package=1; next }
+            /^\[/ && in_package { exit }
+            in_package && /^version = "/ { print $2; exit }
+          ' pyproject.toml)
 
-          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
-          release_version = os.environ["RELEASE_VERSION"]
-          project_version = data["project"]["version"]
-          package_version = data["tool"]["pixi"]["package"]["version"]
-
-          if project_version != release_version or package_version != release_version:
-              raise SystemExit(
-                  f"Release version {release_version} must match project.version "
-                  f"({project_version}) and tool.pixi.package.version ({package_version})."
-              )
-          PY
+          if [ "${project_version}" != "${RELEASE_VERSION}" ] || [ "${package_version}" != "${RELEASE_VERSION}" ]; then
+            echo "Release version ${RELEASE_VERSION} must match project.version (${project_version}) and tool.pixi.package.version (${package_version})."
+            exit 1
+          fi
 
       - name: Build conda package from release
         run: |
