@@ -28,7 +28,7 @@ But see [Full Documentation](https://hippunfold.readthedocs.io/en/latest/?badge=
 
 ## Release process
 
-- Create and publish a GitHub Release tag in the format `vX.Y.Z` (or prerelease tags like `vX.Y.Z-rc1`).
+- Create and publish a GitHub Release tag in the format `vX.Y.Z` (or prerelease tags like `vX.Y.Zrc1`).
 - Publishing the release triggers both publish workflows:
   - Conda package publication
   - Docker image publication
