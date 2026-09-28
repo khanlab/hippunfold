@@ -4,6 +4,13 @@ on:
   release:
     types: [published]
 
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag/version to simulate (e.g. v2.1.0a0) - for testing only"
+        required: true
+        type: string
+
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
