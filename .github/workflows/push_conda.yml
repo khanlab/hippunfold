@@ -1,6 +1,9 @@
 name: Build and Upload Conda Package
 
 on:
+  push:
+    branches:
+      - copilot/build-conda-packages-from-releases #testing
   release:
     types: [published]
   workflow_dispatch:
