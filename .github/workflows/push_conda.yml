@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: read
     env:
-      PREFIX_UPLOAD_URL: https://prefix.dev/api/v1/upload/akhanf/khanlab
+      PREFIX_CHANNEL: akhanf/khanlab
       PACKAGE_OUTPUT_DIR: ${{ runner.temp }}/pixi-conda-dist
 
     steps:
@@ -89,4 +89,4 @@ jobs:
             echo "No conda package artifact found in ${PACKAGE_OUTPUT_DIR} after pixi publish."
             exit 1
           fi
-          pixi upload "${PREFIX_UPLOAD_URL}" "${packages[@]}"
+          pixi upload prefix "${packages[@]}" --channel "${PREFIX_CHANNEL}"
