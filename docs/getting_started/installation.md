@@ -16,15 +16,35 @@ These are more advanced ways to run hippunfold. To simply get started (install u
 
 ## Quickstart (choose one)
 
-### Option A — Conda (Linux/macOS)
+### Option A — Pixi / Conda / Micromamba (Linux/macOS)
 
 ```bash
-# create env & install (channels templated)
-conda create --name hippunfold-env {{ conda_channel }} -c conda-forge -c bioconda hippunfold
-conda activate hippunfold-env
+# pixi global install
+pixi global install --channel https://prefix.dev/conda-forge --channel https://prefix.dev/akhanf/khanlab --channel https://prefix.dev/bioconda hippunfold
 
 # check it works
 hippunfold -h
+```
+
+Conda:
+
+```bash
+conda config --add channels https://prefix.dev/bioconda
+conda config --add channels https://prefix.dev/akhanf/khanlab
+conda config --add channels https://prefix.dev/conda-forge
+conda install hippunfold
+
+# or
+mamba install hippunfold
+```
+
+Micromamba:
+
+```bash
+micromamba config prepend channels https://prefix.dev/bioconda
+micromamba config prepend channels https://prefix.dev/akhanf/khanlab
+micromamba config prepend channels https://prefix.dev/conda-forge
+micromamba install hippunfold
 ```
 
 Run a one‑subject example:
