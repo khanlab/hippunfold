@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write  # Required for OIDC token
     env:
       PREFIX_CHANNEL: akhanf/khanlab
       PACKAGE_OUTPUT_DIR: ${{ runner.temp }}/pixi-conda-dist
@@ -39,10 +40,8 @@ jobs:
           ref: ${{ steps.release.outputs.release_tag }}
 
       - name: Setup pixi
-        uses: prefix-dev/setup-pixi@v0.8.14
+        uses: prefix-dev/setup-pixi@v0.10.2
         with:
-          auth-host: prefix.dev
-          auth-token: ${{ secrets.PREFIX_API_KEY }}
           run-install: false
 
       - name: Validate release version matches package metadata
@@ -65,22 +64,7 @@ jobs:
             echo "Release version ${RELEASE_VERSION} must match project.version (${project_version}) and tool.pixi.package.version (${package_version})."
             exit 1
           fi
-
-      - name: Build conda package from release
-        run: |
-          rm -rf "${PACKAGE_OUTPUT_DIR}"
-          mkdir -p "${PACKAGE_OUTPUT_DIR}"
-          pixi publish --target-dir "${PACKAGE_OUTPUT_DIR}"
-
-      - name: Upload package to prefix.dev
-        shell: bash -l {0}
-        run: |
-          set -euo pipefail
-          mapfile -t packages < <(
-            find "${PACKAGE_OUTPUT_DIR}" -type f \( -name "*.conda" -o -name "*.tar.bz2" \)
-          )
-          if [ ${#packages[@]} -eq 0 ]; then
-            echo "No conda package artifact found in ${PACKAGE_OUTPUT_DIR} after pixi publish."
-            exit 1
-          fi
-          pixi upload prefix "${packages[@]}" --channel "${PREFIX_CHANNEL}"
+          
+      # Build and publish in one step -- no stored secrets needed!
+      - name: Build and publish in one step
+        run: pixi publish --target-channel https://prefix.dev/<channel-name>
