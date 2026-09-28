@@ -77,7 +77,7 @@ jobs:
           pixi publish --target-dir "${PACKAGE_OUTPUT_DIR}"
 
       - name: Upload package to prefix.dev
-        shell: bash
+        shell: bash -l {0}
         env:
           PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
         run: |
