@@ -110,6 +110,9 @@ ants = { workspace = true }
 greedyreg = { workspace = true }
 convert3d = { workspace = true }
 
+[tool.pixi.pypi-dependencies]
+hippunfold = { path = ".", editable = true }
+
 
 # ----------------------------------------------------------------------
 # Runtime environment
