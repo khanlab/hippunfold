@@ -42,6 +42,11 @@ jobs:
         with:
           run-install: false
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Validate release version matches package metadata
         env:
           RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
