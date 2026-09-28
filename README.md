@@ -26,6 +26,17 @@ pixi global install hippunfold -c conda-forge -c khanlab -c bioconda
 ```
 But see [Full Documentation](https://hippunfold.readthedocs.io/en/latest/?badge=latest) for details.
 
+## Release process
+
+- Create and publish a GitHub Release tag in the format `vX.Y.Z`, with optional PEP 440 suffixes (for example `vX.Y.Zrc1`, `vX.Y.Z-rc1`, `vX.Y.Z.post1`, `vX.Y.Z.dev1`, or `vX.Y.Z.post1.dev2`).
+- Publishing the release triggers both publish workflows:
+  - Conda package publication
+  - Docker image publication
+- Package versioning is now tag-driven:
+  - Python package version is derived dynamically from git tags at build time.
+  - Conda package version is injected from the release tag in CI before publish.
+- Docker images are tagged with both `vX.Y.Z` and `X.Y.Z`; `latest` is only pushed for non-prereleases.
+
 ## What's new in version 2.0? 
 
 - Better surface precision for capturing individual variability in gyral/sulcal/digitation patterning

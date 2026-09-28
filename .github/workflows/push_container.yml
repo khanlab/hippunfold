@@ -1,23 +1,82 @@
 ---
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Publish Docker image
 on:
-  push:
-    branches:
-    - dev-v2.0.0-DISABLE
-  workflow_dispatch:
   release:
     types: [published]
 
+env:
+  IMAGE_NAME: khanlab/hippunfold
+
 jobs:
   push_to_registries:
-    uses: khanlab/actions/.github/workflows/workflow-release_task-deployDocker.yml@no-latest
-    with:
-      maximize_space: true
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Resolve release metadata
+        id: release
+        run: |
+          set -euo pipefail
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          PRERELEASE="${{ github.event.release.prerelease }}"
+          RELEASE_VERSION="${RELEASE_TAG#v}"
+          NORMALIZED_VERSION=$(RELEASE_TAG="$RELEASE_TAG" RELEASE_VERSION="$RELEASE_VERSION" python - <<'PY'
+          import os
+          from packaging.version import InvalidVersion, Version
+
+          release_tag = os.environ["RELEASE_TAG"]
+          release_version = os.environ["RELEASE_VERSION"]
+
+          if not release_tag.startswith("v"):
+              raise SystemExit(
+                  f"Release tag must start with 'v' and include a valid PEP 440 version, got: {release_tag}"
+              )
+
+          try:
+              print(str(Version(release_version)))
+          except InvalidVersion as exc:
+              raise SystemExit(f"Release tag must contain a valid PEP 440 version after 'v': {exc}") from exc
+          PY
+          )
+          PUSH_LATEST=true
+          if [ "${PRERELEASE}" = "true" ]; then
+            PUSH_LATEST=false
+          fi
+
+          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "release_version=${NORMALIZED_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "push_latest=${PUSH_LATEST}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release.outputs.release_tag }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.release.outputs.release_tag }}
+            type=raw,value=${{ steps.release.outputs.release_version }}
+            type=raw,value=latest,enable=${{ steps.release.outputs.push_latest == 'true' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
