@@ -21,7 +21,7 @@ This is especially useful for:
 ## Easy install
 
 ```bash
-pixi global install hippunfold -c conda-forge -c khanlab -c bioconda
+pixi global install --channel https://prefix.dev/conda-forge --channel https://prefix.dev/akhanf/khanlab --channel https://prefix.dev/bioconda hippunfold
 
 ```
 But see [Full Documentation](https://hippunfold.readthedocs.io/en/latest/?badge=latest) for details.

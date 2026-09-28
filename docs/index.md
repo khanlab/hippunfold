@@ -62,7 +62,7 @@ outputs/QC
 :hidden:
 :maxdepth: 2
 
+contributing/contributing
 contributing/references
 ```
-
 

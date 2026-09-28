@@ -15,10 +15,9 @@
     
  2. Install hippunfold
     ```bash
-    pixi global install hippunfold -c conda-forge -c khanlab -c bioconda
+    pixi global install --channel https://prefix.dev/conda-forge --channel https://prefix.dev/akhanf/khanlab --channel https://prefix.dev/bioconda hippunfold
     ```
-
-
+    
 ## Usage
 
 ### Test the installation
@@ -101,9 +100,11 @@ This is useful when working on shared systems, when home directory storage is li
 
     
 ## Development
-For development work, use the development environment which includes additional tools like formatters and linters:
+For development work, clone the repository and install the development environment which includes additional tools like formatters and linters:
 
 ```bash
+git clone https://github.com/khanlab/hippunfold.git
+cd hippunfold
 pixi install --environment dev
 ```
 
