@@ -41,6 +41,8 @@ jobs:
       - name: Setup pixi
         uses: prefix-dev/setup-pixi@v0.8.14
         with:
+          auth-host: prefix.dev
+          auth-token: ${{ secrets.PREFIX_API_KEY }}
           run-install: false
 
       - name: Setup Python
@@ -78,15 +80,12 @@ jobs:
 
       - name: Upload package to prefix.dev
         shell: bash -l {0}
-        env:
-          PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
         run: |
           set -euo pipefail
-          test -n "${PREFIX_API_KEY}"
           shopt -s nullglob
           packages=("${PACKAGE_OUTPUT_DIR}"/*.conda "${PACKAGE_OUTPUT_DIR}"/*.tar.bz2)
           if [ ${#packages[@]} -eq 0 ]; then
             echo "No conda package artifact found in ${PACKAGE_OUTPUT_DIR} after pixi publish."
             exit 1
           fi
-          pixi upload "${PREFIX_UPLOAD_URL}" "${packages[@]}" --api-key "${PREFIX_API_KEY}"
+          pixi upload "${PREFIX_UPLOAD_URL}" "${packages[@]}"
