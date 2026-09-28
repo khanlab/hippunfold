@@ -21,7 +21,6 @@ jobs:
       id-token: write  # Required for OIDC token
     env:
       PREFIX_CHANNEL: akhanf/khanlab
-      PACKAGE_OUTPUT_DIR: ${{ runner.temp }}/pixi-conda-dist
 
     steps:
       - name: Resolve release metadata
@@ -70,4 +69,5 @@ jobs:
           
       # Build and publish in one step -- no stored secrets needed!
       - name: Build and publish in one step
-        run: pixi publish --target-channel https://prefix.dev/<channel-name>
+        run: pixi publish --target-channel https://prefix.dev/${PREFIX_CHANNEL}
+        
