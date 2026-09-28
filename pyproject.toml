@@ -23,7 +23,7 @@ requires = ["hatchling", "hatch-vcs"]
 source = "vcs"
 
 [tool.hatch.version.raw-options]
-tag_regex = "^(?:.+-)?v(?P<version>\\d+\\.\\d+\\.\\d+(?:[.-][0-9A-Za-z.]+)?)$"
+tag_regex = "^v(?P<version>\\d+\\.\\d+\\.\\d+(?:[.-][0-9A-Za-z.]+)?)$"
 fallback_version = "0.0.0.dev0"
 version_scheme = "no-guess-dev"
 local_scheme = "no-local-version"

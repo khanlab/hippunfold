@@ -54,26 +54,17 @@ jobs:
           RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
         run: |
           set -euo pipefail
+          python -m pip install --quiet tomlkit
           python - <<'PY'
           import os
           import pathlib
-          import re
+          import tomlkit
 
           release_version = os.environ["RELEASE_VERSION"]
           pyproject_path = pathlib.Path("pyproject.toml")
-          pyproject_text = pyproject_path.read_text(encoding="utf-8")
-
-          updated_text, count = re.subn(
-              r'(\[tool\.pixi\.package\][^\[]*?^version = ")[^"]+(")',
-              rf'\g<1>{release_version}\2',
-              pyproject_text,
-              count=1,
-              flags=re.MULTILINE | re.DOTALL,
-          )
-          if count != 1:
-              raise SystemExit("Failed to update [tool.pixi.package] version in pyproject.toml")
-
-          pyproject_path.write_text(updated_text, encoding="utf-8")
+          pyproject_data = tomlkit.parse(pyproject_path.read_text(encoding="utf-8"))
+          pyproject_data["tool"]["pixi"]["package"]["version"] = release_version
+          pyproject_path.write_text(tomlkit.dumps(pyproject_data), encoding="utf-8")
           PY
 
           package_version=$(awk -F'"' '
