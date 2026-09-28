@@ -57,7 +57,7 @@ outputs/QC
 
 
 ```{toctree}
-:caption: References
+:caption: Contributing and references
 :name: contributing
 :hidden:
 :maxdepth: 2
@@ -65,4 +65,3 @@ outputs/QC
 contributing/contributing
 contributing/references
 ```
-
