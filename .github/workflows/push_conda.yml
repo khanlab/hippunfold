@@ -82,8 +82,9 @@ jobs:
         shell: bash -l {0}
         run: |
           set -euo pipefail
-          shopt -s nullglob
-          packages=("${PACKAGE_OUTPUT_DIR}"/*.conda "${PACKAGE_OUTPUT_DIR}"/*.tar.bz2)
+          mapfile -t packages < <(
+            find "${PACKAGE_OUTPUT_DIR}" -type f \( -name "*.conda" -o -name "*.tar.bz2" \)
+          )
           if [ ${#packages[@]} -eq 0 ]; then
             echo "No conda package artifact found in ${PACKAGE_OUTPUT_DIR} after pixi publish."
             exit 1
