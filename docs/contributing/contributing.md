@@ -14,16 +14,15 @@ If you want the development tools as well, install the development environment:
 pixi install --environment dev
 ```
 
-## Deep learning / nnU-net model files
+## Release process
 
-HippUnfold downloads nnU-net model files on demand and stores them in the cache directory by default:
+- Create and publish a GitHub Release tag in the format `vX.Y.Z`, with optional PEP 440 suffixes (for example `vX.Y.Zrc1`).
+- Publishing the release triggers both publish workflows:
+  - Conda package publication to prefix.dev
+  - Docker image publication to both dockerhub and ghcr.io
+- Package versioning is now tag-driven:
+  - Python package version is derived dynamically from git tags at build time.
+  - Conda package version is injected from the release tag in CI before publish.
+- Docker images are tagged with both `vX.Y.Z` and `X.Y.Z`; `latest` is only pushed for non-prereleases.
 
-```bash
-~/.cache/hippunfold/
-```
 
-You can override this location with:
-
-```bash
-export HIPPUNFOLD_CACHE_DIR=/path/to/custom/cache
-```
