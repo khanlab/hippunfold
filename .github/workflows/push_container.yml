@@ -3,17 +3,6 @@ name: Publish Docker image
 on:
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: "Release tag to build (for example v2.1.0)"
-        required: true
-        type: string
-      prerelease:
-        description: "Mark manual dispatch as prerelease (skips latest tag)"
-        required: false
-        default: false
-        type: boolean
 
 env:
   IMAGE_NAME: khanlab/hippunfold
@@ -29,13 +18,8 @@ jobs:
         id: release
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "release" ]; then
-            RELEASE_TAG="${{ github.event.release.tag_name }}"
-            PRERELEASE="${{ github.event.release.prerelease }}"
-          else
-            RELEASE_TAG="${{ github.event.inputs.release_tag }}"
-            PRERELEASE="${{ github.event.inputs.prerelease }}"
-          fi
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          PRERELEASE="${{ github.event.release.prerelease }}"
 
           if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]]; then
             echo "Release tag must match vX.Y.Z or a PEP 440 prerelease form such as vX.Y.Zrc1, got: ${RELEASE_TAG}"

@@ -3,12 +3,6 @@ name: Build and Upload Conda Package
 on:
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      release_tag:
-        description: "Release tag to build (for example v2.1.0)"
-        required: true
-        type: string
 
 jobs:
   build-and-upload:
@@ -24,11 +18,7 @@ jobs:
         id: release
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "release" ]; then
-            RELEASE_TAG="${{ github.event.release.tag_name }}"
-          else
-            RELEASE_TAG="${{ github.event.inputs.release_tag }}"
-          fi
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
 
           if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]]; then
             echo "Release tag must match vX.Y.Z or a PEP 440 prerelease form such as vX.Y.Zrc1, got: ${RELEASE_TAG}"
@@ -54,17 +44,33 @@ jobs:
           RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
         run: |
           set -euo pipefail
-          python -m pip install --quiet tomlkit
           python - <<'PY'
           import os
           import pathlib
-          import tomlkit
 
           release_version = os.environ["RELEASE_VERSION"]
           pyproject_path = pathlib.Path("pyproject.toml")
-          pyproject_data = tomlkit.parse(pyproject_path.read_text(encoding="utf-8"))
-          pyproject_data["tool"]["pixi"]["package"]["version"] = release_version
-          pyproject_path.write_text(tomlkit.dumps(pyproject_data), encoding="utf-8")
+          lines = pyproject_path.read_text(encoding="utf-8").splitlines(keepends=True)
+
+          in_package_section = False
+          version_updated = False
+
+          for idx, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped == "[tool.pixi.package]":
+              in_package_section = True
+              continue
+            if in_package_section and stripped.startswith("[") and stripped != "[tool.pixi.package]":
+              break
+            if in_package_section and stripped.startswith("version = "):
+              lines[idx] = f'version = "{release_version}"\n'
+              version_updated = True
+              break
+
+          if not version_updated:
+            raise SystemExit("Failed to update [tool.pixi.package] version in pyproject.toml")
+
+          pyproject_path.write_text("".join(lines), encoding="utf-8")
           PY
 
           package_version=$(awk -F'"' '
