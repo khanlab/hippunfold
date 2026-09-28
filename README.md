@@ -21,17 +21,16 @@ This is especially useful for:
 ## Easy install
 
 ```bash
-pixi global install hippunfold -c conda-forge -c khanlab -c bioconda
-
+pixi global install --channel https://prefix.dev/conda-forge --channel https://prefix.dev/akhanf/khanlab --channel https://prefix.dev/bioconda hippunfold
 ```
 But see [Full Documentation](https://hippunfold.readthedocs.io/en/latest/?badge=latest) for details.
 
 ## Release process
 
-- Create and publish a GitHub Release tag in the format `vX.Y.Z`, with optional PEP 440 suffixes (for example `vX.Y.Zrc1`, `vX.Y.Z-rc1`, `vX.Y.Z.post1`, `vX.Y.Z.dev1`, or `vX.Y.Z.post1.dev2`).
+- Create and publish a GitHub Release tag in the format `vX.Y.Z`, with optional PEP 440 suffixes (for example `vX.Y.Zrc1`).
 - Publishing the release triggers both publish workflows:
-  - Conda package publication
-  - Docker image publication
+  - Conda package publication to prefix.dev
+  - Docker image publication to both dockerhub and ghcr.io
 - Package versioning is now tag-driven:
   - Python package version is derived dynamically from git tags at build time.
   - Conda package version is injected from the release tag in CI before publish.
@@ -40,13 +39,14 @@ But see [Full Documentation](https://hippunfold.readthedocs.io/en/latest/?badge=
 ## What's new in version 2.0? 
 
 - Better surface precision for capturing individual variability in gyral/sulcal/digitation patterning
-- Retesselation of surfaces for more uniform face sizes
+- Re-tesselation of surfaces for more uniform face sizes
 - Modified Laplace coordinate system to minimize distortion between folded and unfolded spaces
 - Better robustness to topological breaks (a rare but annoying issue with previous version)
 - New U-net models for neonates, Alzheimer's disease, contrast-agnostic processing, and more on the way
 - Easier installation and instructions
 
-An overview of these changes and epiricial testing coming soon to **biorxiv**
+An overview of these changes and empiricial testing can be found in this [pre-print](https://www.biorxiv.org/content/10.64898/2026.07.22.740127v1)
+
 
 ## Workflow 
 
