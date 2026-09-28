@@ -30,7 +30,7 @@ jobs:
             RELEASE_TAG="${{ github.event.inputs.release_tag }}"
           fi
 
-          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+|\.post[0-9]+|\.dev[0-9]+)?$ ]]; then
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]+)?$ ]]; then
             echo "Release tag must match vX.Y.Z or a PEP 440 prerelease form such as vX.Y.Zrc1, got: ${RELEASE_TAG}"
             exit 1
           fi
