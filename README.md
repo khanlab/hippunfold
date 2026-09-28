@@ -3,7 +3,7 @@
 ![Version](https://img.shields.io/github/v/tag/khanlab/hippunfold?label=version)
 <img align="right" width="200" src="https://github.com/khanlab/hippunfold/assets/25106300/0c16d33e-893a-4ac3-b127-21fa843823d5">
 
-**Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/latest/?badge=latest)
+**Full Documentation:**  [here](https://hippunfold.readthedocs.io/en/main/?badge=main)
 
 # HippUnfold
 
@@ -19,22 +19,11 @@ This is especially useful for:
 - Quantitative mapping (eg. map your qT1 MRI data to a midthickness surface; extract laminar profiles perpendicular to this surface)
 
 ## Easy install
-
+Install [Pixi](https://pixi.prefix.dev/latest/installation/), then:
 ```bash
 pixi global install --channel https://prefix.dev/conda-forge --channel https://prefix.dev/akhanf/khanlab --channel https://prefix.dev/bioconda hippunfold
 ```
-But see [Full Documentation](https://hippunfold.readthedocs.io/en/latest/?badge=latest) for details.
-
-## Release process
-
-- Create and publish a GitHub Release tag in the format `vX.Y.Z`, with optional PEP 440 suffixes (for example `vX.Y.Zrc1`).
-- Publishing the release triggers both publish workflows:
-  - Conda package publication to prefix.dev
-  - Docker image publication to both dockerhub and ghcr.io
-- Package versioning is now tag-driven:
-  - Python package version is derived dynamically from git tags at build time.
-  - Conda package version is injected from the release tag in CI before publish.
-- Docker images are tagged with both `vX.Y.Z` and `X.Y.Z`; `latest` is only pushed for non-prereleases.
+But see [Full Documentation](https://hippunfold.readthedocs.io/en/main/?badge=main) for details.
 
 ## What's new in version 2.0? 
 
