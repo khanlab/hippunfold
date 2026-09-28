@@ -29,6 +29,12 @@ jobs:
           else
             RELEASE_TAG="${{ github.event.inputs.release_tag }}"
           fi
+
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.]+)?$ ]]; then
+            echo "Release tag must match vX.Y.Z or vX.Y.Z-suffix, got: ${RELEASE_TAG}"
+            exit 1
+          fi
+
           RELEASE_VERSION="${RELEASE_TAG#v}"
           echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
           echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
@@ -43,26 +49,43 @@ jobs:
         with:
           run-install: false
 
-      - name: Validate release version matches package metadata
+      - name: Inject release version into conda package metadata
         env:
           RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
         run: |
           set -euo pipefail
-          project_version=$(awk -F'"' '
-            /^\[project\]/ { in_project=1; next }
-            /^\[/ && in_project { exit }
-            in_project && /^version = "/ { print $2; exit }
-          ' pyproject.toml)
+          python - <<'PY'
+          import os
+          import pathlib
+          import re
+
+          release_version = os.environ["RELEASE_VERSION"]
+          pyproject_path = pathlib.Path("pyproject.toml")
+          pyproject_text = pyproject_path.read_text(encoding="utf-8")
+
+          updated_text, count = re.subn(
+              r'(\[tool\.pixi\.package\][^\[]*?^version = ")[^"]+(")',
+              rf'\g<1>{release_version}\2',
+              pyproject_text,
+              count=1,
+              flags=re.MULTILINE | re.DOTALL,
+          )
+          if count != 1:
+              raise SystemExit("Failed to update [tool.pixi.package] version in pyproject.toml")
+
+          pyproject_path.write_text(updated_text, encoding="utf-8")
+          PY
+
           package_version=$(awk -F'"' '
             /^\[tool\.pixi\.package\]/ { in_package=1; next }
             /^\[/ && in_package { exit }
             in_package && /^version = "/ { print $2; exit }
           ' pyproject.toml)
 
-          #if [ "${project_version}" != "${RELEASE_VERSION}" ] || [ "${package_version}" != "${RELEASE_VERSION}" ]; then
-          #  echo "Release version ${RELEASE_VERSION} must match project.version (${project_version}) and tool.pixi.package.version (${package_version})."
-          #  exit 1
-          #fi
+          if [ "${package_version}" != "${RELEASE_VERSION}" ]; then
+            echo "Failed to set conda package version to release version ${RELEASE_VERSION}."
+            exit 1
+          fi
           
       - name: Publish and upload
         env:

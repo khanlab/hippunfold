@@ -20,9 +20,9 @@ jobs:
           echo "Comments: ${{ github.event.inputs.comments }}"
 
       - name: Checkout main branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          ref: refs/heads/master
+          ref: refs/heads/main
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -51,7 +51,7 @@ jobs:
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git diff-index --quiet HEAD || git add docs/images || commit -m "Add updated dags [skip ci]"
+          git diff-index --quiet HEAD || (git add docs/images && git commit -m "Add updated dags [skip ci]")
 
       - name: Push changes
         uses: ad-m/github-push-action@v0.8.0
