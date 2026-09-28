@@ -68,4 +68,4 @@ jobs:
       - name: Build and publish in one step
         env:
           PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
-        run: pixi publish --token "$PREFIX_API_KEY" --target-channel "https://prefix.dev/${PREFIX_CHANNEL}"
+        run: pixi publish --api-key "$PREFIX_API_KEY" --target-channel "https://prefix.dev/${PREFIX_CHANNEL}"
