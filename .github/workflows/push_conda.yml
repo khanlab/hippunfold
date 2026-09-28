@@ -17,6 +17,7 @@ jobs:
       contents: read
     env:
       PREFIX_UPLOAD_URL: https://prefix.dev/api/v1/upload/akhanf/khanlab
+      PACKAGE_OUTPUT_DIR: ${{ runner.temp }}/pixi-conda-dist
 
     steps:
       - name: Resolve release metadata
@@ -70,7 +71,10 @@ jobs:
           PY
 
       - name: Build conda package from release
-        run: pixi publish --target-dir dist
+        run: |
+          rm -rf "${PACKAGE_OUTPUT_DIR}"
+          mkdir -p "${PACKAGE_OUTPUT_DIR}"
+          pixi publish --target-dir "${PACKAGE_OUTPUT_DIR}"
 
       - name: Upload package to prefix.dev
         env:
@@ -79,9 +83,9 @@ jobs:
           set -euo pipefail
           test -n "${PREFIX_API_KEY}"
           shopt -s nullglob
-          packages=(dist/*.conda dist/*.tar.bz2)
+          packages=("${PACKAGE_OUTPUT_DIR}"/*.conda "${PACKAGE_OUTPUT_DIR}"/*.tar.bz2)
           if [ ${#packages[@]} -eq 0 ]; then
-            echo "No conda package artifact found in dist/ after pixi publish."
+            echo "No conda package artifact found in ${PACKAGE_OUTPUT_DIR} after pixi publish."
             exit 1
           fi
           pixi upload "${PREFIX_UPLOAD_URL}" "${packages[@]}" --api-key "${PREFIX_API_KEY}"
