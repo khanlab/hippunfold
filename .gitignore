@@ -161,3 +161,4 @@ cython_debug/
 # pixi environments
 .pixi
 *.egg-info
+hippunfold/_version.py
