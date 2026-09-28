@@ -23,9 +23,10 @@ jobs:
     steps:
       - name: Resolve release metadata
         id: release
+        env:
+            RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.release_tag }}
         run: |
           set -euo pipefail
-          RELEASE_TAG="${{ github.event.release.tag_name }}"
           RELEASE_VERSION="${RELEASE_TAG#v}"
           NORMALIZED_VERSION=$(RELEASE_TAG="$RELEASE_TAG" RELEASE_VERSION="$RELEASE_VERSION" python - <<'PY'
           import os
