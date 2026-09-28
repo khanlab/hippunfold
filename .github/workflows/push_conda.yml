@@ -1,4 +1,4 @@
-name: Build and Upload Conda Package
+name: Publish Conda package
 
 on:
   release:
@@ -7,106 +7,41 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Release tag/version to simulate (e.g. v2.1.0a0) - for testing only"
+        description: "Release tag to simulate, e.g. v2.1.0a0"
         required: true
         type: string
 
+      upload:
+        description: "Actually upload package"
+        required: true
+        default: false
+        type: boolean
+
 jobs:
-  build-and-upload:
+  publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write  # Required for OIDC token
-    env:
-      PREFIX_CHANNEL: akhanf/khanlab
 
     steps:
-      - name: Resolve release metadata
-        id: release
-        env:
-            RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.release_tag }}
-        run: |
-          set -euo pipefail
-          RELEASE_VERSION="${RELEASE_TAG#v}"
-          NORMALIZED_VERSION=$(RELEASE_TAG="$RELEASE_TAG" RELEASE_VERSION="$RELEASE_VERSION" python - <<'PY'
-          import os
-          from packaging.version import InvalidVersion, Version
-
-          release_tag = os.environ["RELEASE_TAG"]
-          release_version = os.environ["RELEASE_VERSION"]
-
-          if not release_tag.startswith("v"):
-              raise SystemExit(
-                  f"Release tag must start with 'v' and include a valid PEP 440 version, got: {release_tag}"
-              )
-
-          try:
-              print(str(Version(release_version)))
-          except InvalidVersion as exc:
-              raise SystemExit(f"Release tag must contain a valid PEP 440 version after 'v': {exc}") from exc
-          PY
-          )
-          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
-          echo "release_version=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Checkout release tag or latest commit if a test run
+      - name: Checkout source
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
-          
-      - name: Setup pixi
-        uses: prefix-dev/setup-pixi@v0.10.2
+          ref: >-
+            ${{ github.event_name == 'release'
+                && github.event.release.tag_name
+                || github.ref }}
+          fetch-depth: 0
+
+      - name: Build and publish
+        uses: khanlab/actions/.github/actions/action-pixi_task-publish@df4211abe672b61c81f4177eef5b9516edf2944e
         with:
-          run-install: false
+          release-tag: >-
+            ${{ github.event_name == 'release'
+                && github.event.release.tag_name
+                || inputs.release_tag }}
+          channel: akhanf/khanlab
+          api-key: ${{ secrets.PREFIX_API_KEY }}
+          upload: >-
+            ${{ github.event_name == 'release'
+                || inputs.upload }}
 
-      - name: Inject release version into conda package metadata
-        env:
-          RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import os
-          import pathlib
 
-          release_version = os.environ["RELEASE_VERSION"]
-          pyproject_path = pathlib.Path("pyproject.toml")
-          lines = pyproject_path.read_text(encoding="utf-8").splitlines(keepends=True)
-
-          in_package_section = False
-          version_updated = False
-
-          for idx, line in enumerate(lines):
-            stripped = line.strip()
-            if stripped == "[tool.pixi.package]":
-              in_package_section = True
-              continue
-            if in_package_section and stripped.startswith("[") and stripped != "[tool.pixi.package]":
-              break
-            if in_package_section and stripped.startswith("version = "):
-              lines[idx] = f'version = "{release_version}"\n'
-              version_updated = True
-              break
-
-          if not version_updated:
-            raise SystemExit("Failed to update [tool.pixi.package] version in pyproject.toml")
-
-          pyproject_path.write_text("".join(lines), encoding="utf-8")
-          PY
-
-          package_version=$(awk -F'"' '
-            /^\[tool\.pixi\.package\]/ { in_package=1; next }
-            /^\[/ && in_package { exit }
-            in_package && /^version = "/ { print $2; exit }
-          ' pyproject.toml)
-
-          if [ "${package_version}" != "${RELEASE_VERSION}" ]; then
-            echo "Failed to set conda package version to release version ${RELEASE_VERSION}."
-            exit 1
-          fi
-          
-      - name: Publish and upload
-        env:
-          PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
-        run: |
-          pixi publish 
-          pixi upload prefix --channel ${PREFIX_CHANNEL} *.conda
