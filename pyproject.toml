@@ -96,6 +96,7 @@ channels = ["conda-forge"]
 [tool.pixi.package.host-dependencies]
 python = { workspace = true }
 hatchling = "*"
+hatch-vcs = "*"
 
 [tool.pixi.package.run-dependencies]
 python = { workspace = true }
