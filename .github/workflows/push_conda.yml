@@ -1,86 +1,76 @@
-# .github/workflows/build-conda.yml
-
 name: Build and Upload Conda Package
 
 on:
-  push:
-    branches:
-      - dev-v2.0.0-DISABLE
+  release:
+    types: [published]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to build (for example v2.1.0)"
+        required: true
+        type: string
 
 jobs:
   build-and-upload:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      PREFIX_UPLOAD_URL: https://prefix.dev/api/v1/upload/akhanf/khanlab
 
     steps:
-      - name: Checkout repository
+      - name: Resolve release metadata
+        id: release
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "release" ]; then
+            RELEASE_TAG="${{ github.event.release.tag_name }}"
+          else
+            RELEASE_TAG="${{ github.event.inputs.release_tag }}"
+          fi
+          RELEASE_VERSION="${RELEASE_TAG#v}"
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout release tag
         uses: actions/checkout@v4
-
-      - name: Cache conda build cache
-        uses: actions/cache@v3
         with:
-          path: /home/runner/miniconda3/conda-bld
-          key: ${{ runner.os }}-conda-bld-${{ hashFiles('recipe/meta.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-conda-bld-
+          ref: ${{ steps.release.outputs.release_tag }}
 
-      - name: Setup Miniforge and mamba
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Setup pixi
+        uses: prefix-dev/setup-pixi@v0.8.14
         with:
-          miniforge-variant: Miniforge3
-          miniforge-version: latest
-          mamba-version: "*"
-          use-mamba: true
-          conda-solver: libmamba
-          auto-activate-base: true
+          run-install: false
 
-      - name: Install dependencies
-        run: |
-          conda install -y -c conda-forge conda-build anaconda-client python=3.11
-
-      - name: Get latest commit SHA from dev-v2.0.0
-        id: get_sha
-        run: |
-          echo "Fetching latest commit on dev-v2.0.0 branch..."
-          COMMIT_SHA=$(git ls-remote origin refs/heads/dev-v2.0.0 | cut -f1)
-          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
-
-      - name: Update meta.yaml with latest ref and sha256
-        run: |
-          echo "Updating meta.yaml with commit: $COMMIT_SHA"
-
-          # 1) Update the Jinja-set 'ref' (this is fine)
-          sed -i "s|^{% set ref = \".*\" %}|{% set ref = \"$COMMIT_SHA\" %}|" ./recipe/meta.yaml
-
-          # 2) Download the tarball and compute the checksum
-          curl -L -o source.tar.gz \
-            https://github.com/khanlab/hippunfold/archive/${COMMIT_SHA}.tar.gz
-          SHA256_SUM=$(sha256sum source.tar.gz | awk '{print $1}')
-          echo "New sha256: $SHA256_SUM"
-
-          # 3) Replace the literal 'sha256:' line under source:
-          sed -i "s|^\(\s*sha256:\s*\).*|\1$SHA256_SUM|" ./recipe/meta.yaml
-
-      - name: Build & capture path
-        id: build
-        run: |
-          cd recipe
-          OUT=$(conda build . -c conda-forge -c bioconda --output 2>/dev/null)
-          echo "PACKAGE_PATH=$OUT" >> $GITHUB_ENV
-          conda build . -c conda-forge -c bioconda
-
-      - name: Upload package to Khanlab channel
-        shell: bash -l {0}
+      - name: Validate release version matches package metadata
         env:
-          BINSTAR_TOKEN: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
-        run: |-            
-          set -euv
-          conda activate base
-          
-          export ANACONDA_API_TOKEN=$BINSTAR_TOKEN
+          RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          import pathlib
+          import tomllib
 
-          anaconda upload \
-            --user khanlab \
-            --label main \
-            --force \
-            "$PACKAGE_PATH"
+          data = tomllib.loads(pathlib.Path("pyproject.toml").read_text())
+          release_version = os.environ["RELEASE_VERSION"]
+          project_version = data["project"]["version"]
+          package_version = data["tool"]["pixi"]["package"]["version"]
+
+          if project_version != release_version or package_version != release_version:
+              raise SystemExit(
+                  f"Release version {release_version} must match project.version "
+                  f"({project_version}) and tool.pixi.package.version ({package_version})."
+              )
+          PY
+
+      - name: Build conda package from release
+        run: pixi publish --target-dir dist
+
+      - name: Upload package to prefix.dev
+        env:
+          PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${PREFIX_API_KEY}"
+          pixi upload "${PREFIX_UPLOAD_URL}" dist/*.conda --api-key "${PREFIX_API_KEY}"
