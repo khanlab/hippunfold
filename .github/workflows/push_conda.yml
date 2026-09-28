@@ -73,4 +73,10 @@ jobs:
         run: |
           set -euo pipefail
           test -n "${PREFIX_API_KEY}"
-          pixi upload "${PREFIX_UPLOAD_URL}" dist/*.conda --api-key "${PREFIX_API_KEY}"
+          shopt -s nullglob
+          packages=(dist/*.conda)
+          if [ ${#packages[@]} -eq 0 ]; then
+            echo "No .conda package found in dist/ after pixi publish."
+            exit 1
+          fi
+          pixi upload "${PREFIX_UPLOAD_URL}" "${packages[@]}" --api-key "${PREFIX_API_KEY}"
