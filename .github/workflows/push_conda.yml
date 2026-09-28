@@ -66,5 +66,6 @@ jobs:
           
       # Build and publish in one step -- no stored secrets needed!
       - name: Build and publish in one step
-        run: pixi publish --target-channel https://prefix.dev/${PREFIX_CHANNEL}
-        
+        env:
+          PREFIX_API_KEY: ${{ secrets.PREFIX_API_KEY }}
+        run: pixi publish --token "$PREFIX_API_KEY" --target-channel "https://prefix.dev/${PREFIX_CHANNEL}"
