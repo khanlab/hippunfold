@@ -49,11 +49,11 @@ jobs:
           echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
           echo "release_version=$NORMALIZED_VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout release tag
+      - name: Checkout release tag or latest commit if a test run
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.release.outputs.release_tag }}
-
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref }}
+          
       - name: Setup pixi
         uses: prefix-dev/setup-pixi@v0.10.2
         with:
