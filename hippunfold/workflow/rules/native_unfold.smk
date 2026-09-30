@@ -190,7 +190,7 @@ rule postproc_boundary_vertices:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(5),
+        runtime=scale_by_attempt(2),
     params:
         min_terminal_vertices=5,  # min number of vertices per src/sink
         max_iterations=100,
@@ -371,7 +371,7 @@ rule space_unfold_vertices:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(10),
+        runtime=scale_by_attempt(5),
     params:
         step_size=0.1,
         max_iterations=10000,

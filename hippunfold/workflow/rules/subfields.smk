@@ -294,7 +294,7 @@ rule map_surf_subfields_to_volume:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(10),
+        runtime=scale_by_attempt(5),
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.nii_label}"
         " -ribbon-constrained {input.inner_surf} {input.outer_surf} &>> {log}"
@@ -518,7 +518,7 @@ rule resample_subfields_to_orig:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(5),
+        runtime=scale_by_attempt(2),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"

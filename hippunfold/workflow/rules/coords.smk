@@ -311,7 +311,7 @@ rule laynii_layers_equidist:
         "minimal"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(5),
+        runtime=scale_by_attempt(2),
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz &> {log} && "

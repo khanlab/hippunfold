@@ -354,7 +354,7 @@ rule unfoldreg_antsquick:
     threads: 4
     resources:
         mem_mb=scale_by_attempt(4000),
-        runtime=scale_by_attempt(5),
+        runtime=scale_by_attempt(2),
     params:
         antsparams="-d 2 -t so -o tmp",
         fixed_args=lambda wildcards, input: " ".join(

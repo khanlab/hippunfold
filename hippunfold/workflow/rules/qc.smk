@@ -192,7 +192,7 @@ rule qc_subfield:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(5),
+        runtime=scale_by_attempt(2),
     script:
         "../scripts/vis_qc_dseg.py"
 
@@ -229,7 +229,7 @@ rule qc_subfield_surf:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(5),
+        runtime=scale_by_attempt(2),
     script:
         "../scripts/vis_qc_surf.py"
 

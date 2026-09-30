@@ -206,7 +206,7 @@ rule register_midthickness_greedy:
     threads: 4
     resources:
         mem_mb=scale_by_attempt(6000),
-        runtime=scale_by_attempt(10),
+        runtime=scale_by_attempt(5),
     params:
         update_field_sigma=math.sqrt(float(config["inner_outer_reg_smoothing"])),
     shell:

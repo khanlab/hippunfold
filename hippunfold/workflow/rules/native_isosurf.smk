@@ -73,7 +73,7 @@ rule gen_native_mesh:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(5),
+        runtime=scale_by_attempt(2),
     params:
         threshold=lambda wildcards: config["surf_thresholds"][wildcards.surfname],
         decimate_opts=0.75,
