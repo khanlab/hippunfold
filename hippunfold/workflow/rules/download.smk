@@ -3,6 +3,13 @@ from lib import utils as utils
 
 download_dir = utils.get_download_dir()
 
+# run on the host (not submitted to a cluster), since compute nodes may lack internet access
+localrules:
+    download_extract_template,
+    download_surf_template_atlas,
+    cp_atlas_surf_gii,
+    cp_atlas_metric_gii,
+
 
 rule download_extract_template:
     output:

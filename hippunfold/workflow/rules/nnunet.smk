@@ -63,6 +63,12 @@ def get_model_dir():
     return get_model_tar().removesuffix(".gz").removesuffix(".tar")
 
 
+# run on the host (not submitted to a cluster), since compute nodes may lack internet access
+localrules:
+    download_nnunet_model,
+    unpack_nnunet_model,
+
+
 rule download_nnunet_model:
     input:
         url=storage(model_dict["url"]),

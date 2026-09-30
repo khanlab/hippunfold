@@ -3,6 +3,7 @@ analysis_levels:
  - participant
  - group_create_atlas
  - group
+ - download
   
 
 #mapping from analysis_level to set of target rules or files
@@ -13,6 +14,8 @@ targets_by_analysis_level:
     - 'all_create_atlas'
   group:
     - 'all_group_tsv'
+  download:
+    - 'all'  # restricted to the download rules with --until (see plugins/download.py)
 
 #this configures the pybids grabber - create an entry for each type of input you want to grab
 # indexed by name of input
