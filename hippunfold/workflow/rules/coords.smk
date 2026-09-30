@@ -70,7 +70,7 @@ rule get_label_mask:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         labels=get_gm_labels,
     shell:
@@ -118,7 +118,7 @@ rule get_src_sink_mask:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         labels=get_src_sink_labels,
     shell:
@@ -157,7 +157,7 @@ rule get_src_sink_sdt:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     shell:
         "c3d {input} -sdt -o {output}"
 
@@ -183,7 +183,7 @@ rule get_nan_mask:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         labels=get_nan_labels,
     shell:
@@ -240,7 +240,7 @@ rule prep_dseg_for_laynii:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         gm_labels=lambda wildcards: " ".join(
             [

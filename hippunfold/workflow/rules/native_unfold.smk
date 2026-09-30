@@ -34,7 +34,7 @@ rule get_boundary_vertices:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     script:
         "../scripts/get_boundary_vertices.py"
 
@@ -81,7 +81,7 @@ rule map_src_sink_sdt_to_surf:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     shell:
         "wb_command -volume-to-surface-mapping {input.sdt} {input.surf_gii} {output.sdt} -trilinear"
 
@@ -311,7 +311,7 @@ rule warp_native_mesh_to_unfold:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
         z_level=get_unfold_z_level,
@@ -409,7 +409,7 @@ rule unfold_surface_smoothing:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         strength=1,
         iterations=5,
@@ -448,7 +448,7 @@ rule set_surface_z_level:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         z_level=get_unfold_z_level,
     script:

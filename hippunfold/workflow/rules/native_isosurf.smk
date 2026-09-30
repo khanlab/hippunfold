@@ -112,7 +112,7 @@ rule update_native_mesh_structure:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -152,7 +152,7 @@ rule update_native_mesh_structure_unfold:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -195,7 +195,7 @@ rule smooth_surface:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         smoothing_strength=0.8,
         smoothing_iterations=10,

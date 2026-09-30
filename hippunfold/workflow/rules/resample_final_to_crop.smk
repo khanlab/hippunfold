@@ -34,7 +34,7 @@ rule create_crop_ref:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     params:
         resample=config["crop_res"],
         pad_to=config["crop_box"],

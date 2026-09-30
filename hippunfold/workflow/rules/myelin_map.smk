@@ -97,6 +97,6 @@ rule sample_myelin_map_surf:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
+        runtime=0,  # counted within the surf group job
     shell:
         "wb_command -volume-to-surface-mapping {input.vol} {input.mid} {output.metric} -ribbon-constrained {input.outer} {input.inner}"
