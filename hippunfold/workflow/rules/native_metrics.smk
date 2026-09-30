@@ -27,7 +27,7 @@ rule calculate_surface_area:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -surface-vertex-areas {input} {output}"
 
@@ -70,7 +70,7 @@ rule metric_smoothing:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         fwhm=lambda wildcards: str(wildcards.fwhm).replace("p", "."),
     shell:
@@ -116,7 +116,7 @@ rule calculate_gyrification:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         'wb_command -metric-math "nativearea/unfoldarea" {output.gii}'
         " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea}"
@@ -152,7 +152,7 @@ rule calculate_curvature:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -surface-curvature {input} -mean {output}"
 
@@ -196,7 +196,7 @@ rule calculate_thickness:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -surface-to-surface-3d-distance {input.outer} {input.inner} {output}"
 
@@ -231,7 +231,7 @@ rule soft_tanh_normalization:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         norm_limit=5.0,
     shell:

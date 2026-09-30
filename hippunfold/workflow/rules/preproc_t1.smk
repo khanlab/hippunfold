@@ -17,7 +17,7 @@ rule import_t1:
         "preproc"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "cp {input} {output}"
 
@@ -39,7 +39,7 @@ if config["skip_preproc"]:
             "preproc"
         resources:
             mem_mb=scale_by_attempt(1000),
-            runtime=scale_by_attempt(2),
+            runtime=scale_by_attempt(1),
         shell:
             "cp {input} {output}"
 

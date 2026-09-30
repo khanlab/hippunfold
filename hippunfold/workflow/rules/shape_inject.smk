@@ -34,7 +34,7 @@ rule prep_segs_for_greedy:
         "shapeinject"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         labels=" ".join(str(label) for label in config["shape_inject"]["labels_reg"]),
         smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
@@ -115,7 +115,7 @@ rule resample_template_dseg_tissue_for_reg:
         "shapeinject"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         resample_cmd="-resample-mm {res}".format(
             res=config["resample_dseg_for_templatereg"]
@@ -213,7 +213,7 @@ rule dilate_dentate_pd_src_sink:
         "shapeinject"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         src_label=config["laplace_labels"]["dentate"]["PD"]["src"][0],
         sink_label=config["laplace_labels"]["dentate"]["PD"]["sink"][0],
@@ -336,7 +336,7 @@ rule reinsert_subject_labels:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         labels=" ".join(
             str(label) for label in config["shape_inject"]["labels_reinsert"]

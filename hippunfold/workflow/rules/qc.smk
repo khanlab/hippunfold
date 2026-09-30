@@ -73,7 +73,7 @@ rule get_subfield_vols_subj:
         "subj"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     script:
         "../scripts/gen_volume_tsv.py"
 
@@ -107,7 +107,7 @@ rule plot_subj_subfields:
         "subj"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     script:
         "../scripts/plot_subj_subfields.py"
 

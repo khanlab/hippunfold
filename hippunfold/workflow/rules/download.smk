@@ -59,7 +59,7 @@ rule cp_atlas_surf_gii:
         ),
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         path=lambda wildcards, input: bids_atlas(
             root=Path(input.unzip_dir).parent,
@@ -88,7 +88,7 @@ rule cp_atlas_metric_gii:
         ),
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         path=lambda wildcards, input: bids_atlas(
             root=Path(input.unzip_dir).parent,
@@ -138,7 +138,7 @@ rule import_template_dseg:
         "shapeinject"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         template_seg=lambda wildcards: Path(download_dir)
         / "template"
@@ -178,7 +178,7 @@ rule import_template_dseg_dentate:
         "shapeinject"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         template_seg=lambda wildcards: Path(download_dir)
         / "template"
@@ -220,7 +220,7 @@ rule import_template_coords:
         "shapeinject"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         template_coords=lambda wildcards: Path(download_dir)
         / "template"
@@ -261,7 +261,7 @@ rule import_template_anat:
         "shapeinject"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"
@@ -303,7 +303,7 @@ rule import_template_anat_crop:  # used only in templateseg workflow
         "shapeinject"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"

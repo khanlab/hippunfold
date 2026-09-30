@@ -28,7 +28,7 @@ rule extract_unfold_ref_slice:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
 
@@ -101,7 +101,7 @@ rule native_metric_to_unfold_nii:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         interp="-nearest-vertex 10",
     shell:
@@ -176,7 +176,7 @@ rule atlas_metric_to_unfold_nii:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
@@ -210,7 +210,7 @@ rule slice_3d_to_2d_subject:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         clip_min=-5.0,
         clip_max=+5.0,
@@ -250,7 +250,7 @@ rule slice_3d_to_2d_atlas:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         clip_min=-5.0,
         clip_max=+5.0,
@@ -421,7 +421,7 @@ rule reset_header_2d_warp_unfoldreg:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -470,7 +470,7 @@ rule warp_unfold_native_to_unfoldreg:
         "minimal"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         cmd=get_cmd_warp_surface_2d_warp,
     shell:

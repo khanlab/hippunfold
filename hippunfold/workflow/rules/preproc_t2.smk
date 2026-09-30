@@ -14,7 +14,7 @@ rule import_t2:
         "preproc"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "cp {input} {output}"
 
@@ -147,7 +147,7 @@ rule ras_to_itk_reg_t2:
         "preproc"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "c3d_affine_tool  {input.xfm_ras} -oitk {output.xfm_itk}"
 
@@ -193,7 +193,7 @@ if config["skip_preproc"]:
             "preproc"
         resources:
             mem_mb=scale_by_attempt(1000),
-            runtime=scale_by_attempt(2),
+            runtime=scale_by_attempt(1),
         shell:
             "cp {input} {output}"
 
@@ -303,7 +303,7 @@ rule reg_t2_to_t1_part2:
         "preproc"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "c3d_affine_tool {input.xfm_ras} -oitk {output.xfm_itk}"
 
@@ -401,7 +401,7 @@ rule compose_t2_xfm_corobl:
         "preproc"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         cmd=get_cmd_compose_t2_xfm_corobl,
     shell:

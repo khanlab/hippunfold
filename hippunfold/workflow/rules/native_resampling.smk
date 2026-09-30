@@ -50,7 +50,7 @@ rule cp_atlas_unfold:
         "subj"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "cp {input} {output}"
 
@@ -104,7 +104,7 @@ rule resample_native_surf_to_atlas_density:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check &> {log}"
 
@@ -153,7 +153,7 @@ rule resample_native_metric_to_atlas_density:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
@@ -207,7 +207,7 @@ rule resample_native_coords_to_atlas_density:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
@@ -250,7 +250,7 @@ rule resample_atlas_subfields_to_native_surf:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
@@ -280,7 +280,7 @@ rule cp_atlas_subfields_label_gii:
         "subj"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "cp {input} {output}"
 
@@ -335,7 +335,7 @@ rule atlas_label_to_unfold_nii:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " -nearest-vertex 1000"
@@ -378,6 +378,6 @@ rule affine_gii_corobl_to_orig:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"

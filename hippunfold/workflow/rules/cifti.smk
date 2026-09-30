@@ -82,7 +82,7 @@ rule create_dscalar_metric_cifti:
         "subj"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         cmd=get_cmd_cifti_metric,
     shell:
@@ -146,7 +146,7 @@ rule create_dlabel_cifti_subfields:
         "subj"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         cmd=get_cmd_cifti_label,
     shell:
@@ -186,7 +186,7 @@ rule create_spec_file:
         "subj"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         cmds=get_cmd_spec_file,
     shell:
@@ -230,7 +230,7 @@ rule merge_lr_spec_file:
         "subj"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         cmd=get_cmd_merge_spec,
     shell:
@@ -263,7 +263,7 @@ rule merge_hipp_dentate_spec_file:
         "subj"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         cmd=get_cmd_merge_spec,
     shell:

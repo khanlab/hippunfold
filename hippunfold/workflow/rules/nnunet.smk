@@ -265,7 +265,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
             "preproc"
         resources:
             mem_mb=scale_by_attempt(1000),
-            runtime=scale_by_attempt(2),
+            runtime=scale_by_attempt(1),
         shell:
             "c3d {input} -flip x {output}"
 
@@ -348,7 +348,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
             "shapeinject"
         resources:
             mem_mb=scale_by_attempt(1000),
-            runtime=scale_by_attempt(2),
+            runtime=scale_by_attempt(1),
         shell:
             "c3d {input} -flip x {output}"
 
@@ -471,7 +471,7 @@ rule qc_nnunet_dice:
         "qc_nnunet"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         hipp_lbls=[1, 2, 7, 8],
         ref=lambda wildcards, input: str(

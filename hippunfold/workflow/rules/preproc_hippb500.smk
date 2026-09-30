@@ -64,6 +64,6 @@ rule cp_b500_to_anat_dir:
         "preproc"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "cp {input} {output}"

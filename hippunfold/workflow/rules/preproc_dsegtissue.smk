@@ -17,7 +17,7 @@ rule import_dseg_tissue:
         "preproc"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         resample_cmd=(
             ""

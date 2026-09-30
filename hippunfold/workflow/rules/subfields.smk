@@ -20,7 +20,7 @@ rule import_dseg_subfields:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -volume-label-import {input.vol_dseg} {input.label_list} {output.label_dseg}"
 
@@ -62,7 +62,7 @@ rule subfields_to_label_gifti:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
 
@@ -135,7 +135,7 @@ rule native_label_gii_to_unfold_nii:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         interp="-nearest-vertex 10",
     shell:
@@ -212,7 +212,7 @@ rule unfoldreg_label_gii_to_unfold_nii:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         interp="-nearest-vertex 10",
     shell:
@@ -361,7 +361,7 @@ rule combine_dentate_subfield_labels_corobl:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         remap=get_tissue_atlas_remapping_dentate,
     shell:
@@ -419,7 +419,7 @@ rule label_gm_with_nearest_subfields:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     script:
         "../scripts/label_gm_with_nearest_subfields.py"
 
@@ -464,7 +464,7 @@ rule combine_tissue_subfield_labels_corobl:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(2),
+        runtime=scale_by_attempt(1),
     params:
         remap=get_tissue_atlas_remapping,
     shell:
