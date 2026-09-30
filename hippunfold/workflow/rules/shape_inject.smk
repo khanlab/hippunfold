@@ -336,7 +336,7 @@ rule reinsert_subject_labels:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=0,  # counted within the surf group job
+        runtime=scale_by_attempt(1),
     params:
         labels=" ".join(
             str(label) for label in config["shape_inject"]["labels_reinsert"]

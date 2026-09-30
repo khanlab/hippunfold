@@ -228,7 +228,7 @@ rule create_unfold_ref:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=0,  # counted within the surf group job
+        runtime=scale_by_attempt(1),
     params:
         dims=lambda wildcards: "x".join(
             config["unfold_vol_ref"][wildcards.label]["dims"]

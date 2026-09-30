@@ -42,7 +42,7 @@ rule compute_halfthick_mask:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=0,  # counted within the surf group job
+        runtime=scale_by_attempt(1),
     params:
         threshold_tofrom=lambda wildcards: (
             "0.5 1" if wildcards.inout == "inner" else "0 0.5"
@@ -309,7 +309,7 @@ rule convert_inout_warp_from_itk_to_world:
         "surf"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=0,  # counted within the surf group job
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -366,7 +366,7 @@ rule warp_midthickness_to_inout:
         "minimal"
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=0,  # counted within the surf group job
+        runtime=scale_by_attempt(1),
     shell:
         """
         (
