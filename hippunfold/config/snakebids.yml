@@ -191,7 +191,7 @@ parse_args:
     action: store_true
 
   --use_gpu:
-    help: 'Enable gpu for inference by setting resource gpu=1 in run_inference rule (default: %(default)s)'
+    help: 'Enable gpu for inference by setting resource gpus=1 in run_inference rule (default: %(default)s)'
     default: False
     action: 'store_true'
 

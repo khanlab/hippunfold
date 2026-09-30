@@ -4,48 +4,23 @@
 New in v2.2.0: HippUnfold includes resource specifications for every rule and groups short-running jobs together, so it can be run directly on a SLURM cluster with Snakemake's SLURM executor ([#574](https://github.com/khanlab/hippunfold/pull/574)).
 ```
 
-HippUnfold is a [Snakemake](https://snakemake.readthedocs.io/) workflow, so it can submit its jobs to a SLURM scheduler instead of running them all on one machine. You run `hippunfold` once, on a login node (or in a long-running job), and it submits each step to SLURM with appropriate memory, runtime and CPU requests, waits for them to finish, and submits the next steps as their inputs become available.
+HippUnfold is a [Snakemake](https://snakemake.readthedocs.io/) workflow, so it can submit its jobs to a SLURM scheduler instead of running them all on one machine. This is the recommended way to run HippUnfold on a cluster: you run `hippunfold` once for your whole dataset, and Snakemake submits each step as a SLURM job with appropriate memory, runtime and CPU requests, waits for them to finish, and submits the next steps as their inputs become available. Steps that need internet access (downloading the nnU-net model, templates and atlases) are run by the main `hippunfold` process itself rather than submitted, so they work even if your compute nodes have no internet access.
 
-The [SLURM executor plugin](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html) (`snakemake-executor-plugin-slurm`) is installed with HippUnfold, so no additional installation is needed.
+The [SLURM executor plugin](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html) (`snakemake-executor-plugin-slurm`) is installed with HippUnfold, so no additional installation is needed.[^executors]
 
 ## Quick start
 
-1. **Download the models, templates and atlases** on a node with internet access (e.g. a login node). This only needs to be done once per cache directory:
-
-    ```bash
-    hippunfold /path/to/bids /path/to/output download --modality T1w --cores 1
-    ```
-
-2. **Run the participant level with the SLURM executor**:
-
-    ```bash
-    hippunfold /path/to/bids /path/to/output participant --modality T1w \
-        --executor slurm \
-        --jobs 50 \
-        --default-resources slurm_account=<your-account> \
-        --retries 2
-    ```
-
-    If your cluster does not require an account, replace `--default-resources slurm_account=<your-account>` with `--slurm-no-account`.
-
-The `hippunfold` process in step 2 must keep running until the workflow is complete, since it is what submits and monitors the jobs. Run it in a terminal multiplexer such as `tmux` or `screen` on a login node, or submit it as its own long, low-resource SLURM job (e.g. 1 CPU, 4 GB, for as long as you expect the whole dataset to take) if your cluster does not allow long-running processes on login nodes.
-
-## Downloading resources first
-
-HippUnfold downloads the nnU-net model, templates and surface atlases into a shared cache directory (`~/.cache/hippunfold` by default, or `HIPPUNFOLD_CACHE_DIR`) the first time they are needed. The `download` analysis level runs only these download steps, so that:
-
-- the downloads happen on a node with internet access (compute nodes often have none), and
-- several HippUnfold runs started afterwards (e.g. one per `--participant-label`) do not race each other writing to the cache.
-
-Use the same `--modality`, and any options that change what is downloaded (`--atlas`, `--template`, `--inject_template`, `--force_nnunet_model`, `--hemi`), as for your participant-level runs. The downloads do not depend on the subject, so you can add e.g. `--participant-label 001` to make this step faster on large datasets.
-
-The download steps are also marked as local rules, so even if you forget this step they run on the node running `hippunfold` rather than being submitted to a compute node.
-
-The nnU-net inference step runs in a separate conda environment, which is created in the cache directory the first time it is needed. If you will start several HippUnfold runs in parallel, create it beforehand as well:
-
 ```bash
-hippunfold /path/to/bids /path/to/output participant --modality T1w --conda-create-envs-only --cores 1
+hippunfold /path/to/bids /path/to/output participant --modality T1w \
+    --executor slurm \
+    --jobs 50 \
+    --default-resources slurm_account=<your-account> \
+    --retries 2
 ```
+
+If your cluster does not require an account, replace `--default-resources slurm_account=<your-account>` with `--slurm-no-account`.
+
+The `hippunfold` process must keep running until the workflow is complete, since it is what submits and monitors the jobs. Run it on a login node in a terminal multiplexer such as `tmux` or `screen`, or submit it as its own long, low-resource SLURM job (e.g. 1 CPU, 4 GB, for as long as you expect the whole dataset to take) if your cluster does not allow long-running processes on login nodes. In the latter case, make sure that job runs on a node with internet access, or that the models, templates and atlases have already been downloaded to the cache (see [](download-first)).
 
 ## Common options
 
@@ -57,7 +32,6 @@ hippunfold /path/to/bids /path/to/output participant --modality T1w --conda-crea
 | `--slurm-no-account` | Submit without an account, for clusters that do not use them. |
 | `--default-resources slurm_partition=<name>` | Partition to submit jobs to (otherwise the cluster's default partition is used). |
 | `--retries N` | Resubmit failed jobs up to N times. Memory and runtime requests double with each attempt (see [below](#resources-and-retries)). |
-| `--use_gpu` | Request a GPU for the nnU-net inference jobs. |
 | `--slurm-logdir <dir>` | Where to write the SLURM log files (default: `.snakemake/slurm_logs` in the output directory). |
 | `--slurm-keep-successful-logs` | Keep SLURM logs of successful jobs, not just failed ones. |
 | `--slurm-jobname-prefix <prefix>` | Prefix added to SLURM job names, e.g. `hippunfold`. |
@@ -99,7 +73,7 @@ Each HippUnfold rule specifies its memory (`mem_mb`), runtime and number of thre
 | `surf` | Laplace coordinates, surfaces, metrics, unfolded registration, subfields and QC | 1 per hemisphere and label (hipp, dentate) |
 | `subj` | CIFTI and spec files combining both hemispheres, and subfield volumes | 1–2 |
 
-For a typical T1w subject this is about 13 SLURM jobs. With the nnU-net inference on CPU, a subject takes roughly 15 minutes from start to finish when jobs start right away.
+For a typical T1w subject this is about 13 SLURM jobs. With the nnU-net inference on CPU, a subject takes roughly 15 minutes from start to finish when jobs start right away. Jobs for different subjects run in parallel, up to `--jobs` at a time.
 
 The runtime requested for a group job is the sum of its steps' runtimes, so it is longer than the group actually takes (e.g. the `surf` groups request about an hour but usually finish in a few minutes).
 
@@ -121,6 +95,8 @@ Rule names can be listed with `hippunfold ... --list-rules`. For submitted jobs,
 
 ## Running many subjects
 
-The simplest approach is a single `hippunfold` run on the whole dataset: it submits jobs for all subjects, up to `--jobs` at a time.
+Run `hippunfold` once on the whole dataset: Snakemake submits the jobs for all subjects, up to `--jobs` at a time, and takes care of downloading the shared models, templates and atlases once.
 
-If you prefer to split the dataset into several runs (e.g. one per `--participant-label`), run the `download` step (and `--conda-create-envs-only`) first as described above. Snakemake locks the output directory while it runs, so either give each run its own output directory, or add `--nolock` to runs that share an output directory but process different participants.
+If you instead run several `hippunfold` processes at the same time (e.g. one per `--participant-label` in a SLURM job array), they share the cache directory and can race each other downloading the same files. In that case, run the `download` analysis level once beforehand, as described in [](download-first).
+
+[^executors]: Snakemake supports many other executors besides SLURM (e.g. other cluster schedulers and cloud platforms); see the [Snakemake plugin catalog](https://snakemake.github.io/snakemake-plugin-catalog/). These can be installed in the same environment as HippUnfold to enable them, and used with `--executor <name>`.
