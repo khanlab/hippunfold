@@ -4,11 +4,17 @@ from pathlib import Path
 
 from snakebids import bidsapp, plugins
 
-try:
-    from hippunfold.plugins import atlas as atlas_plugin  # Works when run as a package
+try:  # Works when run as a package
+    from hippunfold.plugins import (
+        atlas as atlas_plugin,
+        download as download_plugin,
+    )
     from hippunfold.workflow.lib import utils
-except ImportError:
-    from plugins import atlas as atlas_plugin  # Works when run directly
+except ImportError:  # Works when run directly
+    from plugins import (
+        atlas as atlas_plugin,
+        download as download_plugin,
+    )
     from workflow.lib import utils
 
 
@@ -24,6 +30,7 @@ app = bidsapp.app(
         plugins.CliConfig("parse_args"),
         plugins.ComponentEdit("pybids_inputs"),
         atlas_plugin.AtlasConfig(argument_group="ATLASES"),
+        download_plugin.DownloadConfig(),
     ]
 )
 

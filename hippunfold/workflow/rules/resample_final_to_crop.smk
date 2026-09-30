@@ -31,7 +31,10 @@ rule create_crop_ref:
             )
         ),
     group:
-        "subj"
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         resample=config["crop_res"],
         pad_to=config["crop_box"],
@@ -81,7 +84,10 @@ rule resample_unet_crop:
             )
         ),
     group:
-        "subj"
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -130,7 +136,10 @@ rule resample_postproc_crop:
             )
         ),
     group:
-        "subj"
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -180,7 +189,10 @@ rule resample_subfields_crop:
             **inputs.subj_wildcards,
         ),
     group:
-        "subj"
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(2),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -230,7 +242,10 @@ rule resample_coords_crop:
             **inputs.subj_wildcards,
         ),
     group:
-        "subj"
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -264,7 +279,10 @@ rule resample_to_crop:
             **inputs.subj_wildcards,
         ),
     group:
-        "subj"
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} "
@@ -316,7 +334,10 @@ rule resample_t2_to_crop:
             **inputs.subj_wildcards,
         ),
     group:
-        "subj"
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         xfm_opt=lambda wildcards, input: (
             "" if len(input.xfm) == 0 else f"-t {input.xfm}"

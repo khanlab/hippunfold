@@ -73,6 +73,7 @@ pyvista = ">=0.49.0,<0.50"
 ants = ">=2.6.5,<3"
 greedyreg = ">=0.0.20250712,<0.0.20250713"
 convert3d = { version = ">=1.4.2,<2", build = "libitk547_*" }
+snakemake-executor-plugin-slurm = "*"
 
 # ----------------------------------------------------------------------
 # Conda package
@@ -155,6 +156,7 @@ pyvista = { workspace = true }
 ants = { workspace = true }
 greedyreg = { workspace = true }
 convert3d = { workspace = true }
+snakemake-executor-plugin-slurm = { workspace = true }
 
 
 # ----------------------------------------------------------------------
@@ -182,6 +184,7 @@ features = ["runtime", "dev"]
 
 [tool.pixi.environments.dev-only]
 features = ["dev"]
+
 
 
 # ----------------------------------------------------------------------

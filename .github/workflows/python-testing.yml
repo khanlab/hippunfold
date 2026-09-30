@@ -112,6 +112,14 @@ jobs:
         run: |
           ./hippunfold/run.py test_data/bids_singleT2w test_out participant -np --modality T1w --generate-myelin-map
 
+      - name: Test download analysis level
+        run: |
+          ./hippunfold/run.py test_data/bids_singleT2w test_out download -np --modality T2w
+
+      - name: Test download analysis level, manualseg (no nnunet model)
+        run: |
+          ./hippunfold/run.py test_data/bids_dsegtissue test_out download -np --modality dsegtissue --derivatives test_data/bids_dsegtissue
+
       - name: Test atlasgen with native
         run: |
           ./hippunfold/run.py test_data/bids_atlasgen_native test_atlasgen group_create_atlas --modality dsegtissue --new-atlas-name testatlas --new-atlas-subfields-from native --derivatives test_data/bids_atlasgen_native -np

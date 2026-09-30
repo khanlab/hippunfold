@@ -4,11 +4,22 @@ from lib import utils as utils
 download_dir = utils.get_download_dir()
 
 
+# run on the host (not submitted to a cluster), since compute nodes may lack internet access
+localrules:
+    download_extract_template,
+    download_surf_template_atlas,
+    cp_atlas_surf_gii,
+    cp_atlas_metric_gii,
+
+
 rule download_extract_template:
     output:
         unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(10),
     params:
         url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
     script:
@@ -26,6 +37,9 @@ rule download_surf_template_atlas:
         atlas="|".join(config["builtin_atlases"]),
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(10),
     shell:
         "unzip {input} -d {output}"
 
@@ -43,6 +57,9 @@ rule cp_atlas_surf_gii:
             space="{space}",
             suffix="{surf_name}.surf.gii",
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         path=lambda wildcards, input: bids_atlas(
             root=Path(input.unzip_dir).parent,
@@ -69,6 +86,9 @@ rule cp_atlas_metric_gii:
             den="{density}",
             suffix="{metricname}.{metrictype}.gii",
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         path=lambda wildcards, input: bids_atlas(
             root=Path(input.unzip_dir).parent,
@@ -115,7 +135,10 @@ rule import_template_dseg:
             )
         ),
     group:
-        "subj"
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         template_seg=lambda wildcards: Path(download_dir)
         / "template"
@@ -152,7 +175,10 @@ rule import_template_dseg_dentate:
             )
         ),
     group:
-        "subj"
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         template_seg=lambda wildcards: Path(download_dir)
         / "template"
@@ -191,7 +217,10 @@ rule import_template_coords:
             )
         ),
     group:
-        "subj"
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         template_coords=lambda wildcards: Path(download_dir)
         / "template"
@@ -229,7 +258,10 @@ rule import_template_anat:
             ),
         ),
     group:
-        "subj"
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"
@@ -268,7 +300,10 @@ rule import_template_anat_crop:  # used only in templateseg workflow
             ),
         ),
     group:
-        "subj"
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"

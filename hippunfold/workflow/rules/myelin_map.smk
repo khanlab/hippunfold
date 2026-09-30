@@ -32,7 +32,10 @@ rule divide_t1_by_t2:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     shell:
         "c3d {input.t2} {input.t1} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
 
@@ -91,6 +94,9 @@ rule sample_myelin_map_surf:
             **inputs.subj_wildcards,
         ),
     group:
-        "subj"
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     shell:
         "wb_command -volume-to-surface-mapping {input.vol} {input.mid} {output.metric} -ribbon-constrained {input.outer} {input.inner}"

@@ -14,7 +14,10 @@ rule import_dseg_tissue:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         resample_cmd=(
             ""

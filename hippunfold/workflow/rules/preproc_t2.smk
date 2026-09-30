@@ -11,7 +11,10 @@ rule import_t2:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     shell:
         "cp {input} {output}"
 
@@ -35,8 +38,11 @@ rule n4_t2:
             )
         ),
     group:
-        "subj"
+        "preproc"
     threads: 8
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(15),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "N4BiasFieldCorrection -d 3 -i {input} -o {output}"
@@ -104,7 +110,10 @@ rule reg_t2_to_ref:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(15),
     shell:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac"
 
@@ -135,7 +144,10 @@ rule ras_to_itk_reg_t2:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     shell:
         "c3d_affine_tool  {input.xfm_ras} -oitk {output.xfm_itk}"
 
@@ -178,7 +190,10 @@ if config["skip_preproc"]:
                 desc="preproc",
             ),
         group:
-            "subj"
+            "preproc"
+        resources:
+            mem_mb=scale_by_attempt(1000),
+            runtime=scale_by_attempt(1),
         shell:
             "cp {input} {output}"
 
@@ -198,7 +213,10 @@ else:
                 desc="preproc",
             ),
         group:
-            "subj"
+            "preproc"
+        resources:
+            mem_mb=scale_by_attempt(2000),
+            runtime=scale_by_attempt(5),
         params:
             cmd=get_avg_or_cp_scans_cmd,
         shell:
@@ -248,7 +266,10 @@ rule reg_t2_to_t1_part1:
             **inputs.subj_wildcards,
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(15),
     shell:
         "reg_aladin -flo {input.flo} -ref {input.ref} -res {output.warped} -aff {output.xfm_ras} -rigOnly -nac &> {log}"
 
@@ -279,7 +300,10 @@ rule reg_t2_to_t1_part2:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     shell:
         "c3d_affine_tool {input.xfm_ras} -oitk {output.xfm_itk}"
 
@@ -374,7 +398,10 @@ rule compose_t2_xfm_corobl:
             **inputs.subj_wildcards,
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     params:
         cmd=get_cmd_compose_t2_xfm_corobl,
     shell:
@@ -435,7 +462,10 @@ rule warp_t2_to_corobl_crop:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         ref=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),

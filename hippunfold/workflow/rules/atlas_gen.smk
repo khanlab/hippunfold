@@ -39,8 +39,9 @@ rule align_lr_unfold_2d:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
             "flip_per_hemi"
@@ -76,6 +77,9 @@ rule templategen_subj_csv:
                 **inputs.subj_wildcards,
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         cmd=get_cmd_templategen_subj_csv,
     shell:
@@ -106,6 +110,9 @@ rule template_gen_combined_csv:
             suffix="metrics.csv",
             **hemi_wildcard_atlas_gen(),
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         cmd=lambda wildcards, input, output: f"cat {input.metrics_csvs} > {output.metrics_csv}",
     shell:
@@ -146,6 +153,9 @@ rule gen_atlas_reg_ants:
                 **hemi_wildcard_atlas_gen(),
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(16000),
+        runtime=scale_by_attempt(720),
     params:
         num_modalities=len(config["new_atlas_metrics"]),
         warp_prefix=lambda wildcards, output: f"{output.avgtemplate_dir}/",
@@ -199,6 +209,9 @@ rule copy_avgtemplate_warps:
                 **inputs.subj_wildcards,
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         glob_input_warp=lambda wildcards, input: "{avgtemplate_dir}/input*-{filename}-1Warp.nii.gz".format(
             avgtemplate_dir=input.avgtemplate_dir,
@@ -234,6 +247,9 @@ rule unflip_avgtemplate_metric:
                 suffix="{metric}.nii.gz",
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         in_metric=lambda wildcards, input: "{avgtemplate_dir}/template{i}.nii.gz".format(
             avgtemplate_dir=input.avgtemplate_dir,
@@ -273,6 +289,9 @@ rule reset_header_2d_metric_nii:
             hemi="{hemi}",
             suffix="{metric,[a-zA-Z0-9]+}.nii.gz",
         ),
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -310,6 +329,9 @@ rule reset_header_2d_warp_atlasgen:
             desc="3D",
             **inputs.subj_wildcards,
         ),
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -327,6 +349,9 @@ rule create_unfold_ref_2d:
         ),
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         dims=lambda wildcards: "x".join(
             config["unfold_vol_ref"][wildcards.label]["dims"][:2]
@@ -364,10 +389,11 @@ rule create_unfold_ref_2d_resampled:
                 suffix="metricref.nii.gz",
             )
         ),
-    group:
-        "subj"
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         dims=lambda wildcards: "x".join(
             [
@@ -414,6 +440,9 @@ rule gen_unfold_atlas_mesh:
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(15),
     params:
         z_level=get_unfold_z_level,
     script:
@@ -443,6 +472,9 @@ rule gen_unfold_atlas_mesh_flip:
                 suffix="{surfname,midthickness|inner|outer}.surf.gii",
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         z_level=get_unfold_z_level,
     shell:
@@ -478,6 +510,9 @@ rule update_unfold_mesh_metadata:
             hemi="{hemi}",
             suffix="{surfname,midthickness|inner|outer}.surf.gii",
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -515,6 +550,9 @@ rule avgtemplate_metric_vol_to_surf:
             hemi="{hemi}",
             suffix="{metric}.shape.gii",
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
     shell:
@@ -558,6 +596,9 @@ rule warp_subj_unfold_surf_to_avg:
         ),
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         cmd=get_cmd_warp_surface_2d_warp,
     shell:
@@ -606,6 +647,9 @@ rule resample_subj_native_surf_to_avg:
             suffix="{surfname}.surf.gii",
             **inputs.subj_wildcards,
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     shell:
         "wb_command -surface-resample {input.subj_native} {input.subj_unfold} {input.atlas_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check"
 
@@ -646,6 +690,9 @@ rule warp_subfields_to_avg:
                 **inputs.subj_wildcards,
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     shell:
         "antsApplyTransforms -d 2 -i {input.img} -o {output.img} -t {input.warp} -r {input.img} -n NearestNeighbor -v"
 
@@ -676,6 +723,9 @@ rule vote_subfield_labels:
                 label="{label}",
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(15),
     script:
         "../scripts/majority_voting.py"
 
@@ -708,6 +758,9 @@ rule reset_header_2d_subfields_nii:
             desc="subfieldsunflipfixhdr",
             suffix="dseg.nii.gz",
         ),
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -733,6 +786,9 @@ rule unflip_avg_subfields_nii:
                 suffix="dseg.nii.gz",
             )
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
             "flip_per_hemi"
@@ -763,8 +819,9 @@ rule import_avg_subfields_as_label:
             desc="subfieldswithlbl",
             suffix="dseg.nii.gz",
         ),
-    group:
-        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     shell:
         "wb_command -volume-label-import {input.vol_dseg} {input.label_list} {output.label_dseg}"
 
@@ -797,6 +854,9 @@ rule avgtemplate_subfield_voted_vol_to_surf:
             hemi="{hemi}",
             suffix="dseg.label.gii",
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
     shell:
@@ -911,6 +971,9 @@ rule register_surf_to_ref:
         ),
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     shell:
         "wb_command -surface-affine-regression {input.surf} {input.ref_surf} affine.xfm && "
         "wb_command -surface-apply-affine {input.surf} affine.xfm {output.surf}"
@@ -944,6 +1007,9 @@ rule average_native_surfs:
             space="native",
             suffix="{surfname}.surf.gii",
         ),
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         surf_args=lambda wildcards, input: " ".join(
             [f"-surf {surf}" for surf in input.surfs]
@@ -973,6 +1039,9 @@ rule flip_average_native_surf:
             space="native",
             suffix="{surfname}.surf.gii",
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         structure_type=lambda wildcards: get_structure(
             "L" if ref_hemi == "R" else "R", wildcards.label
@@ -995,6 +1064,9 @@ rule write_template_json:
             )
             / "template_description.json"
         ),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(5),
     params:
         template_description={
             "Identifier": config["new_atlas_name"],

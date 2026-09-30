@@ -20,7 +20,10 @@ rule resample_hippdwi_to_template:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         resample_dim=config["hippdwi_opts"]["resample_dim"],
         bbox_x=lambda wildcards: config["hippdwi_opts"]["bbox_x"][wildcards.hemi],
@@ -58,6 +61,9 @@ rule cp_b500_to_anat_dir:
             )
         ),
     group:
-        "subj"
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
     shell:
         "cp {input} {output}"

@@ -4,6 +4,7 @@
 2. [](no-input-images)
 3. [](container-size)
 4. [](model-files)
+5. [](download-first)
 
 
 (run-inference-mem)=
@@ -56,4 +57,13 @@ models in the container itself. This drops the container size significantly (<4G
 This folder is where the nnU-net model parameters are stored by default. You can override the location with the `HIPPUNFOLD_CACHE_DIR` environment variable. See [](../contributing/contributing.md#deep-learning-nnu-net-model-files) for more details.
 
 
+(download-first)=
+## How do I download the models/templates/atlases before running many subjects in parallel?
 
+HippUnfold downloads the nnU-net model, templates and surface atlases into the shared cache (`~/.cache/hippunfold` or `HIPPUNFOLD_CACHE_DIR`) the first time they are needed. If you launch several HippUnfold runs at once (e.g. one per subject with `--participant-label`) on an empty cache, the runs can race each other writing to the cache. To avoid this, first run the `download` analysis level, which only runs the download rules:
+
+```bash
+hippunfold /PATH/TO/YOUR/DATA /PATH/TO/OUTPUT download --modality T1w --cores 1
+```
+
+Use the same `--modality` (and any options that change what gets downloaded, e.g. `--atlas`, `--template`, `--inject_template`, `--force_nnunet_model`, `--hemi`) that you will use for the participant-level runs. Only one subject is needed, so you can add e.g. `--participant-label 001` to speed up building the workflow. The download rules are also `localrules`, so when using a cluster executor they run on the submit host rather than on compute nodes, which may not have internet access.
