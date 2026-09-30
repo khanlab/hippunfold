@@ -24,6 +24,7 @@ getting_started/installation
 
 usage/cli
 usage/quick
+usage/slurm
 usage/tutorial_inputs
 usage/specializedScans
 usage/templates
