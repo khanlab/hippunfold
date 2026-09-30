@@ -3,6 +3,7 @@ from lib import utils as utils
 
 download_dir = utils.get_download_dir()
 
+
 # run on the host (not submitted to a cluster), since compute nodes may lack internet access
 localrules:
     download_extract_template,
