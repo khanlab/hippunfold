@@ -16,8 +16,6 @@ rule import_dseg_subfields:
                 hemi="{hemi,L|R}",
             )
         ),
-    group:
-        "subj"
     shell:
         "wb_command -volume-label-import {input.vol_dseg} {input.label_list} {output.label_dseg}"
 
@@ -55,8 +53,6 @@ rule subfields_to_label_gifti:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "wb_command -volume-label-to-surface-mapping {input.vol} {input.surf_gii} {output.label_gii}"
 
@@ -125,8 +121,6 @@ rule native_label_gii_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         interp="-nearest-vertex 10",
     shell:
@@ -199,8 +193,6 @@ rule unfoldreg_label_gii_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         interp="-nearest-vertex 10",
     shell:
@@ -278,8 +270,6 @@ rule map_surf_subfields_to_volume:
             label="{label}",
             atlas="{atlas}",
         ),
-    group:
-        "subj"
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.nii_label}"
         " -ribbon-constrained {input.inner_surf} {input.outer_surf} &>> {log}"
@@ -342,8 +332,6 @@ rule combine_dentate_subfield_labels_corobl:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         remap=get_tissue_atlas_remapping_dentate,
     shell:
@@ -397,8 +385,6 @@ rule label_gm_with_nearest_subfields:
             label="{label}",
             atlas="{atlas}",
         ),
-    group:
-        "subj"
     script:
         "../scripts/label_gm_with_nearest_subfields.py"
 
@@ -439,8 +425,6 @@ rule combine_tissue_subfield_labels_corobl:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         remap=get_tissue_atlas_remapping,
     shell:
@@ -490,8 +474,6 @@ rule resample_subfields_to_orig:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -539,8 +521,6 @@ rule resample_postproc_to_orig:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -587,8 +567,6 @@ rule resample_unet_to_orig:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -628,8 +606,6 @@ rule resample_subfields_to_unfold:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.xfm}  -t {input.xfm}"

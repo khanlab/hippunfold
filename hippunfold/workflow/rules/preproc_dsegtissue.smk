@@ -13,8 +13,6 @@ rule import_dseg_tissue:
                 hemi="{hemi,L|R}",
             )
         ),
-    group:
-        "subj"
     params:
         resample_cmd=(
             ""

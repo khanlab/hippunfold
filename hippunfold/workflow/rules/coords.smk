@@ -66,8 +66,6 @@ rule get_label_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         labels=get_gm_labels,
     shell:
@@ -111,8 +109,6 @@ rule get_src_sink_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         labels=get_src_sink_labels,
     shell:
@@ -147,8 +143,6 @@ rule get_src_sink_sdt:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "c3d {input} -sdt -o {output}"
 
@@ -170,8 +164,6 @@ rule get_nan_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         labels=get_nan_labels,
     shell:
@@ -194,8 +186,6 @@ rule create_upsampled_coords_ref:
                 hemi="{hemi}",
             )
         ),
-    group:
-        "subj"
     params:
         tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
         resample_res=lambda wildcards: config[f"laminar_coords_res_{wildcards.label}"],
@@ -221,8 +211,6 @@ rule prep_dseg_for_laynii:
                 hemi="{hemi}",
             )
         ),
-    group:
-        "subj"
     params:
         gm_labels=lambda wildcards: " ".join(
             [
@@ -287,8 +275,6 @@ rule laynii_layers_equidist:
             label="{label}",
             hemi="{hemi}",
         ),
-    group:
-        "subj"
     shadow:
         "minimal"
     shell:
@@ -332,8 +318,6 @@ rule laynii_layers_equivol:
             label="{label}",
             hemi="{hemi}",
         ),
-    group:
-        "subj"
     shadow:
         "minimal"
     shell:

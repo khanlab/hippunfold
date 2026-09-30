@@ -38,8 +38,6 @@ rule compute_halfthick_mask:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         threshold_tofrom=lambda wildcards: (
             "0.5 1" if wildcards.inout == "inner" else "0 0.5"
@@ -108,8 +106,6 @@ rule register_midthickness_syn:
             label="{label}",
             to="{inout}",
         ),
-    group:
-        "subj"
     shadow:
         "minimal"
     threads: 16
@@ -195,8 +191,6 @@ rule register_midthickness_greedy:
             label="{label}",
             to="{inout}",
         ),
-    group:
-        "subj"
     threads: 16
     params:
         update_field_sigma=math.sqrt(float(config["inner_outer_reg_smoothing"])),
@@ -255,8 +249,6 @@ rule apply_halfsurf_warp_to_img:
                 )
             )
         ),
-    group:
-        "subj"
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
@@ -293,8 +285,6 @@ rule convert_inout_warp_from_itk_to_world:
                 )
             )
         ),
-    group:
-        "subj"
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -345,8 +335,6 @@ rule warp_midthickness_to_inout:
             label="{label}",
             to="{surfname}",
         ),
-    group:
-        "subj"
     shadow:
         "minimal"
     shell:

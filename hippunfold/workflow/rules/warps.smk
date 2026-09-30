@@ -56,8 +56,6 @@ rule reg_to_template:
             from_="{modality,T1w|T2w}",
             to=config["template"],
         ),
-    group:
-        "subj"
     params:
         cmd=reg_to_template_cmd,
     shell:
@@ -89,8 +87,6 @@ rule convert_template_xfm_ras2itk:
                 type_="itk",
             )
         ),
-    group:
-        "subj"
     shell:
         "c3d_affine_tool {input}  -oitk {output}"
 
@@ -122,8 +118,6 @@ rule compose_template_xfm_corobl:
                 type_="itk",
             )
         ),
-    group:
-        "subj"
     params:
         std_to_cor=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["xfm_corobl"].format(
@@ -158,8 +152,6 @@ rule invert_template_xfm_itk2ras:
                 type_="ras",
             )
         ),
-    group:
-        "subj"
     shell:
         "c3d_affine_tool -itk {input} -inv -o {output}"
 
@@ -189,8 +181,6 @@ rule template_xfm_itk2ras:
                 type_="ras",
             )
         ),
-    group:
-        "subj"
     shell:
         "c3d_affine_tool -itk {input} -o {output}"
 
@@ -209,8 +199,6 @@ rule create_unfold_ref:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         dims=lambda wildcards: "x".join(
             config["unfold_vol_ref"][wildcards.label]["dims"]

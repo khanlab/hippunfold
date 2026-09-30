@@ -19,8 +19,6 @@ rule resample_hippdwi_to_template:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         resample_dim=config["hippdwi_opts"]["resample_dim"],
         bbox_x=lambda wildcards: config["hippdwi_opts"]["bbox_x"][wildcards.hemi],
@@ -57,7 +55,5 @@ rule cp_b500_to_anat_dir:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "cp {input} {output}"

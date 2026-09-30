@@ -124,8 +124,6 @@ if model_dict["arch_version"] == "nnunet_v1":
                 **inputs.subj_wildcards,
                 hemi="{hemi}",
             ),
-        group:
-            "subj"
         shadow:
             "minimal"
         conda:
@@ -178,8 +176,6 @@ elif model_dict["arch_version"] == "nnunet_v2":
                 **inputs.subj_wildcards,
                 hemi="{hemi}",
             ),
-        group:
-            "subj"
         shadow:
             "minimal"
         conda:
@@ -253,8 +249,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     **inputs.subj_wildcards,
                 )
             ),
-        group:
-            "subj"
         shell:
             "c3d {input} -flip x {output}"
 
@@ -285,8 +279,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
                 **inputs.subj_wildcards,
                 hemi="{hemi}",
             ),
-        group:
-            "subj"
         shadow:
             "minimal"
         conda:
@@ -335,8 +327,6 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     **inputs.subj_wildcards,
                 )
             ),
-        group:
-            "subj"
         shell:
             "c3d {input} -flip x {output}"
 
@@ -418,8 +408,6 @@ rule qc_nnunet_f3d:
             **inputs.subj_wildcards,
             hemi="{hemi}",
         ),
-    group:
-        "subj"
     params:
         ref=get_f3d_ref,
     shell:
@@ -452,8 +440,6 @@ rule qc_nnunet_dice:
             caption="../report/nnunet_qc.rst",
             category="Segmentation QC",
         ),
-    group:
-        "subj"
     params:
         hipp_lbls=[1, 2, 7, 8],
         ref=lambda wildcards, input: str(

@@ -30,8 +30,6 @@ rule create_crop_ref:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         resample=config["crop_res"],
         pad_to=config["crop_box"],
@@ -80,8 +78,6 @@ rule resample_unet_crop:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -129,8 +125,6 @@ rule resample_postproc_crop:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -179,8 +173,6 @@ rule resample_subfields_crop:
             label="{label,hipp}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation MultiLabel -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -229,8 +221,6 @@ rule resample_coords_crop:
             label="{label}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation NearestNeighbor -i {input.nii} -o {output.nii} -r {input.ref}  -t [{input.xfm},1]"
@@ -263,8 +253,6 @@ rule resample_to_crop:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
         "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref} "
@@ -315,8 +303,6 @@ rule resample_t2_to_crop:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-    group:
-        "subj"
     params:
         xfm_opt=lambda wildcards, input: (
             "" if len(input.xfm) == 0 else f"-t {input.xfm}"

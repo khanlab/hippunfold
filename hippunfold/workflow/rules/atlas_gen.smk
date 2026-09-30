@@ -39,8 +39,6 @@ rule align_lr_unfold_2d:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
             "flip_per_hemi"
@@ -364,8 +362,6 @@ rule create_unfold_ref_2d_resampled:
                 suffix="metricref.nii.gz",
             )
         ),
-    group:
-        "subj"
     shadow:
         "minimal"
     params:
@@ -763,8 +759,6 @@ rule import_avg_subfields_as_label:
             desc="subfieldswithlbl",
             suffix="dseg.nii.gz",
         ),
-    group:
-        "subj"
     shell:
         "wb_command -volume-label-import {input.vol_dseg} {input.label_list} {output.label_dseg}"
 

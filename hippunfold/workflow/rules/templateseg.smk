@@ -48,8 +48,6 @@ rule template_reg:
         ),
     log:
         bids_log("template_reg", **inputs.subj_wildcards, hemi="{hemi}"),
-    group:
-        "subj"
     threads: 8
     params:
         general_opts="-d 3 -m NCC 2x2x2",
@@ -105,8 +103,6 @@ rule warp_template_dseg:
                 label="hipp",
             )
         ),
-    group:
-        "subj"
     threads: 8
     params:
         interp_opt="-ri LABEL 0.2vox",
@@ -158,8 +154,6 @@ rule warp_template_dseg_dentate:
                 label="dentate",
             )
         ),
-    group:
-        "subj"
     threads: 8
     params:
         interp_opt="-ri LABEL 0.2vox",

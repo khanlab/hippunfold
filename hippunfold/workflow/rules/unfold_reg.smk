@@ -24,8 +24,6 @@ rule extract_unfold_ref_slice:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
 
@@ -94,8 +92,6 @@ rule native_metric_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         interp="-nearest-vertex 10",
     shell:
@@ -166,8 +162,6 @@ rule atlas_metric_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "wb_command -metric-to-volume-mapping {input.metric_gii} {input.midthickness_surf} {input.ref_nii} {output.metric_nii} "
         " -ribbon-constrained {input.inner_surf} {input.outer_surf}"
@@ -197,8 +191,6 @@ rule slice_3d_to_2d_subject:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         clip_min=-5.0,
         clip_max=+5.0,
@@ -234,8 +226,6 @@ rule slice_3d_to_2d_atlas:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         clip_min=-5.0,
         clip_max=+5.0,
@@ -332,8 +322,6 @@ rule unfoldreg_antsquick:
             hemi="{hemi}",
             label="{label}",
         ),
-    group:
-        "subj"
     shadow:
         "minimal"
     threads: 16
@@ -402,8 +390,6 @@ rule reset_header_2d_warp_unfoldreg:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     script:
         "../scripts/set_metric_nii_header.py"
 
@@ -446,8 +432,6 @@ rule warp_unfold_native_to_unfoldreg:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shadow:
         "minimal"
     params:

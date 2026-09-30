@@ -114,8 +114,6 @@ rule import_template_dseg:
                 suffix="dseg.nii.gz",
             )
         ),
-    group:
-        "subj"
     params:
         template_seg=lambda wildcards: Path(download_dir)
         / "template"
@@ -151,8 +149,6 @@ rule import_template_dseg_dentate:
                 suffix="dseg.nii.gz",
             )
         ),
-    group:
-        "subj"
     params:
         template_seg=lambda wildcards: Path(download_dir)
         / "template"
@@ -190,8 +186,6 @@ rule import_template_coords:
                 hemi="{hemi}",
             )
         ),
-    group:
-        "subj"
     params:
         template_coords=lambda wildcards: Path(download_dir)
         / "template"
@@ -228,8 +222,6 @@ rule import_template_anat:
                 ),
             ),
         ),
-    group:
-        "subj"
     params:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"
@@ -267,8 +259,6 @@ rule import_template_anat_crop:  # used only in templateseg workflow
                 ),
             ),
         ),
-    group:
-        "subj"
     params:
         template_anat=lambda wildcards: Path(download_dir)
         / "template"

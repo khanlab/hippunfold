@@ -13,8 +13,6 @@ rule import_t1:
                 suffix="T1w.nii.gz",
             )
         ),
-    group:
-        "subj"
     shell:
         "cp {input} {output}"
 
@@ -32,8 +30,6 @@ if config["skip_preproc"]:
                 suffix="T1w.nii.gz",
                 desc="preproc",
             ),
-        group:
-            "subj"
         shell:
             "cp {input} {output}"
 
@@ -55,8 +51,6 @@ else:
                 desc="preproc",
                 suffix="T1w.nii.gz",
             ),
-        group:
-            "subj"
         threads: 8
         shell:
             "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
@@ -96,8 +90,6 @@ rule warp_t1_to_corobl_crop:
                 hemi="{hemi,L|R}",
             )
         ),
-    group:
-        "subj"
     params:
         ref=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["crop_ref"].format(

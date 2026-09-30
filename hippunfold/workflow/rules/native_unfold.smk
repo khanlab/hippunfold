@@ -30,8 +30,6 @@ rule get_boundary_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
-    group:
-        "subj"
     script:
         "../scripts/get_boundary_vertices.py"
 
@@ -74,8 +72,6 @@ rule map_src_sink_sdt_to_surf:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     shell:
         "wb_command -volume-to-surface-mapping {input.sdt} {input.surf_gii} {output.sdt} -trilinear"
 
@@ -180,8 +176,6 @@ rule postproc_boundary_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
-    group:
-        "subj"
     params:
         min_terminal_vertices=5,  # min number of vertices per src/sink
         max_iterations=100,
@@ -235,8 +229,6 @@ rule laplace_beltrami:
             label="{label}",
             dir="{dir}",
         ),
-    group:
-        "subj"
     threads: 1
     resources:
         mem_mb=36000,  #requires this much memory for the large ex vivo scans, depends on decimation too
@@ -297,8 +289,6 @@ rule warp_native_mesh_to_unfold:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         vertspace=lambda wildcards: config["unfold_vol_ref"][wildcards.label],
         z_level=get_unfold_z_level,
@@ -354,8 +344,6 @@ rule space_unfold_vertices:
             hemi="{hemi}",
             label="{label}",
         ),
-    group:
-        "subj"
     params:
         step_size=0.1,
         max_iterations=10000,
@@ -389,8 +377,6 @@ rule unfold_surface_smoothing:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         strength=1,
         iterations=5,
@@ -425,8 +411,6 @@ rule set_surface_z_level:
                 **inputs.subj_wildcards,
             )
         ),
-    group:
-        "subj"
     params:
         z_level=get_unfold_z_level,
     script:

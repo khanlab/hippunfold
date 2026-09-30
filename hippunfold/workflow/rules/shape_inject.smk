@@ -30,8 +30,6 @@ rule prep_segs_for_greedy:
         "{prefix}_dseg.nii.gz",
     output:
         temp(directory("{prefix}_dsegsplit")),
-    group:
-        "subj"
     params:
         labels=" ".join(str(label) for label in config["shape_inject"]["labels_reg"]),
         smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
@@ -108,8 +106,6 @@ rule resample_template_dseg_tissue_for_reg:
                 suffix="dseg.nii.gz",
             )
         ),
-    group:
-        "subj"
     params:
         resample_cmd="-resample-mm {res}".format(
             res=config["resample_dseg_for_templatereg"]
@@ -161,8 +157,6 @@ rule template_shape_reg:
         ),
     log:
         bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
-    group:
-        "subj"
     threads: 8
     params:
         general_opts="-d 3 -m SSD",
@@ -200,8 +194,6 @@ rule dilate_dentate_pd_src_sink:
                 suffix="dseg.nii.gz",
             )
         ),
-    group:
-        "subj"
     params:
         src_label=config["laplace_labels"]["dentate"]["PD"]["src"][0],
         sink_label=config["laplace_labels"]["dentate"]["PD"]["sink"][0],
@@ -276,8 +268,6 @@ rule template_shape_inject:
             hemi="{hemi}",
             label="{label}",
         ),
-    group:
-        "subj"
     threads: 8
     params:
         interp_opt="-ri LABEL 0.1mm",  # smoothing sigma = 100micron
@@ -317,8 +307,6 @@ rule reinsert_subject_labels:
                 label="{label}",
             )
         ),
-    group:
-        "subj"
     params:
         labels=" ".join(
             str(label) for label in config["shape_inject"]["labels_reinsert"]
