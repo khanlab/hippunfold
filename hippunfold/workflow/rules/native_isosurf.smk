@@ -69,6 +69,11 @@ rule gen_native_mesh:
             label="{label}",
             desc="{surfname}",
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         threshold=lambda wildcards: config["surf_thresholds"][wildcards.surfname],
         decimate_opts=0.75,
@@ -103,6 +108,11 @@ rule update_native_mesh_structure:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -138,6 +148,11 @@ rule update_native_mesh_structure_unfold:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         structure_type=lambda wildcards: get_structure(wildcards.hemi, wildcards.label),
         secondary_type=lambda wildcards: surf_to_secondary_type[wildcards.surfname],
@@ -176,6 +191,11 @@ rule smooth_surface:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         smoothing_strength=0.8,
         smoothing_iterations=10,

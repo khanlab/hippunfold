@@ -56,6 +56,11 @@ rule reg_to_template:
             from_="{modality,T1w|T2w}",
             to=config["template"],
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(10),
     params:
         cmd=reg_to_template_cmd,
     shell:
@@ -87,6 +92,11 @@ rule convert_template_xfm_ras2itk:
                 type_="itk",
             )
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "c3d_affine_tool {input}  -oitk {output}"
 
@@ -118,6 +128,11 @@ rule compose_template_xfm_corobl:
                 type_="itk",
             )
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         std_to_cor=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["xfm_corobl"].format(
@@ -152,6 +167,11 @@ rule invert_template_xfm_itk2ras:
                 type_="ras",
             )
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "c3d_affine_tool -itk {input} -inv -o {output}"
 
@@ -181,6 +201,11 @@ rule template_xfm_itk2ras:
                 type_="ras",
             )
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "c3d_affine_tool -itk {input} -o {output}"
 
@@ -199,6 +224,11 @@ rule create_unfold_ref:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         dims=lambda wildcards: "x".join(
             config["unfold_vol_ref"][wildcards.label]["dims"]

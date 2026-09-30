@@ -30,6 +30,11 @@ rule prep_segs_for_greedy:
         "{prefix}_dseg.nii.gz",
     output:
         temp(directory("{prefix}_dsegsplit")),
+    group:
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         labels=" ".join(str(label) for label in config["shape_inject"]["labels_reg"]),
         smoothing_stdev=config["shape_inject"]["label_smoothing_stdev"],
@@ -106,6 +111,11 @@ rule resample_template_dseg_tissue_for_reg:
                 suffix="dseg.nii.gz",
             )
         ),
+    group:
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         resample_cmd="-resample-mm {res}".format(
             res=config["resample_dseg_for_templatereg"]
@@ -157,7 +167,12 @@ rule template_shape_reg:
         ),
     log:
         bids_log("template_shape_reg", **inputs.subj_wildcards, hemi="{hemi}"),
+    group:
+        "shapeinject"
     threads: 8
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(10),
     params:
         general_opts="-d 3 -m SSD",
         affine_opts="-moments 2 -det 1",
@@ -194,6 +209,11 @@ rule dilate_dentate_pd_src_sink:
                 suffix="dseg.nii.gz",
             )
         ),
+    group:
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(2),
     params:
         src_label=config["laplace_labels"]["dentate"]["PD"]["src"][0],
         sink_label=config["laplace_labels"]["dentate"]["PD"]["sink"][0],
@@ -268,7 +288,12 @@ rule template_shape_inject:
             hemi="{hemi}",
             label="{label}",
         ),
-    threads: 8
+    group:
+        "shapeinject"
+    threads: 4
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         interp_opt="-ri LABEL 0.1mm",  # smoothing sigma = 100micron
     shell:
@@ -307,6 +332,11 @@ rule reinsert_subject_labels:
                 label="{label}",
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         labels=" ".join(
             str(label) for label in config["shape_inject"]["labels_reinsert"]

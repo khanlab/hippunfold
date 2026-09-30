@@ -13,6 +13,11 @@ rule import_t1:
                 suffix="T1w.nii.gz",
             )
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "cp {input} {output}"
 
@@ -30,6 +35,11 @@ if config["skip_preproc"]:
                 suffix="T1w.nii.gz",
                 desc="preproc",
             ),
+        group:
+            "preproc"
+        resources:
+            mem_mb=scale_by_attempt(1000),
+            runtime=scale_by_attempt(2),
         shell:
             "cp {input} {output}"
 
@@ -51,7 +61,12 @@ else:
                 desc="preproc",
                 suffix="T1w.nii.gz",
             ),
+        group:
+            "preproc"
         threads: 8
+        resources:
+            mem_mb=scale_by_attempt(4000),
+            runtime=scale_by_attempt(15),
         shell:
             "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
             "N4BiasFieldCorrection -d 3 -i {input.t1} -o {output}"
@@ -90,6 +105,11 @@ rule warp_t1_to_corobl_crop:
                 hemi="{hemi,L|R}",
             )
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         ref=lambda wildcards, input: Path(input.template_dir)
         / config["template_files"][config["template"]]["crop_ref"].format(

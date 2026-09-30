@@ -68,6 +68,9 @@ rule download_nnunet_model:
         url=storage(model_dict["url"]),
     output:
         model_tar=temp(get_model_tar()),
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(10),
     shell:
         "cp {input} {output}"
 
@@ -91,6 +94,9 @@ rule unpack_nnunet_model:
         tar=get_model_tar(),
     output:
         directory(get_model_dir()),
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(10),
     params:
         tar_opts=lambda wildcards, input: "-xzf" if input.tar[-2:] == "gz" else "-xf",
     shell:
@@ -131,8 +137,8 @@ if model_dict["arch_version"] == "nnunet_v1":
         threads: 16
         resources:
             gpus=1 if config["use_gpu"] else 0,
-            mem_mb=16000,
-            time=30 if config["use_gpu"] else 60,
+            mem_mb=scale_by_attempt(32000),
+            runtime=scale_by_attempt(15 if config["use_gpu"] else 30),
         params:
             cmd_copy_inputs=get_cmd_copy_inputs,
             temp_lbl="templbl/temp.nii.gz",
@@ -183,8 +189,8 @@ elif model_dict["arch_version"] == "nnunet_v2":
         threads: 16
         resources:
             gpus=1 if config["use_gpu"] else 0,
-            mem_mb=48000,
-            time=30 if config["use_gpu"] else 120,
+            mem_mb=scale_by_attempt(48000),
+            runtime=scale_by_attempt(30 if config["use_gpu"] else 120),
         params:
             cmd_copy_inputs=get_cmd_copy_inputs,
             tar_opts=lambda wildcards, input: (
@@ -249,6 +255,11 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     **inputs.subj_wildcards,
                 )
             ),
+        group:
+            "preproc"
+        resources:
+            mem_mb=scale_by_attempt(1000),
+            runtime=scale_by_attempt(2),
         shell:
             "c3d {input} -flip x {output}"
 
@@ -286,8 +297,8 @@ elif model_dict["arch_version"] == "synthseg_v2":
         threads: 8
         resources:
             gpus=1 if config["use_gpu"] else 0,
-            mem_mb=16000,
-            time=15 if config["use_gpu"] else 60,
+            mem_mb=scale_by_attempt(16000),
+            runtime=scale_by_attempt(15 if config["use_gpu"] else 60),
         params:
             model_dir="tempmodel",
             checkpoint_path="tempmodel/synthseg/{chkpt}".format(
@@ -327,6 +338,11 @@ elif model_dict["arch_version"] == "synthseg_v2":
                     **inputs.subj_wildcards,
                 )
             ),
+        group:
+            "shapeinject"
+        resources:
+            mem_mb=scale_by_attempt(1000),
+            runtime=scale_by_attempt(2),
         shell:
             "c3d {input} -flip x {output}"
 
@@ -408,6 +424,11 @@ rule qc_nnunet_f3d:
             **inputs.subj_wildcards,
             hemi="{hemi}",
         ),
+    group:
+        "qc_nnunet"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(10),
     params:
         ref=get_f3d_ref,
     shell:
@@ -440,6 +461,11 @@ rule qc_nnunet_dice:
             caption="../report/nnunet_qc.rst",
             category="Segmentation QC",
         ),
+    group:
+        "qc_nnunet"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(2),
     params:
         hipp_lbls=[1, 2, 7, 8],
         ref=lambda wildcards, input: str(

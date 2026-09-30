@@ -46,6 +46,11 @@ rule cp_atlas_unfold:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "cp {input} {output}"
 
@@ -95,6 +100,11 @@ rule resample_native_surf_to_atlas_density:
             den="{density}",
             desc="{surf_name}",
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "wb_command -surface-resample {input.native} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.native_resampled} -bypass-sphere-check &> {log}"
 
@@ -139,6 +149,11 @@ rule resample_native_metric_to_atlas_density:
             den="{density,[0-9k]+}",
             desc="{metric}-{metrictype}",
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
@@ -188,6 +203,11 @@ rule resample_native_coords_to_atlas_density:
             dir="{dir}",
             desc="{desc}",
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "wb_command -metric-resample {input.native_metric} {input.native_unfold} {input.ref_unfold} BARYCENTRIC {output.metric_resampled} -bypass-sphere-check &> {log}"
 
@@ -226,6 +246,11 @@ rule resample_atlas_subfields_to_native_surf:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "wb_command -label-resample {input.label_gii} {input.ref_unfold} {input.native_unfold} BARYCENTRIC {output.label_gii} -bypass-sphere-check"
 
@@ -251,6 +276,11 @@ rule cp_atlas_subfields_label_gii:
             atlas="{atlas}",
             **inputs.subj_wildcards,
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "cp {input} {output}"
 
@@ -301,6 +331,11 @@ rule atlas_label_to_unfold_nii:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "wb_command -label-to-volume-mapping {input.label_gii} {input.midthickness_surf} {input.ref_nii} {output.label_nii} "
         " -nearest-vertex 1000"
@@ -339,5 +374,10 @@ rule affine_gii_corobl_to_orig:
             label="{label,hipp|dentate}",
             **inputs.subj_wildcards,
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "wb_command -surface-apply-affine {input.gii} {input.xfm} {output.gii}"

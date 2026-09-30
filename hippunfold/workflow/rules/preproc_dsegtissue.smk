@@ -13,6 +13,11 @@ rule import_dseg_tissue:
                 hemi="{hemi,L|R}",
             )
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         resample_cmd=(
             ""

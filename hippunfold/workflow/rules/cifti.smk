@@ -78,6 +78,11 @@ rule create_dscalar_metric_cifti:
             label="{label}",
             **inputs.subj_wildcards,
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         cmd=get_cmd_cifti_metric,
     shell:
@@ -137,6 +142,11 @@ rule create_dlabel_cifti_subfields:
             label="hipp",
             **inputs.subj_wildcards,
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         cmd=get_cmd_cifti_label,
     shell:
@@ -172,6 +182,11 @@ rule create_spec_file:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         cmds=get_cmd_spec_file,
     shell:
@@ -211,6 +226,11 @@ rule merge_lr_spec_file:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         cmd=get_cmd_merge_spec,
     shell:
@@ -239,6 +259,11 @@ rule merge_hipp_dentate_spec_file:
             suffix="surfaces.spec",
             **inputs.subj_wildcards,
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         cmd=get_cmd_merge_spec,
     shell:

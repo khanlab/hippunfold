@@ -66,6 +66,11 @@ rule get_label_mask:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         labels=get_gm_labels,
     shell:
@@ -109,6 +114,11 @@ rule get_src_sink_mask:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         labels=get_src_sink_labels,
     shell:
@@ -143,6 +153,11 @@ rule get_src_sink_sdt:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "c3d {input} -sdt -o {output}"
 
@@ -164,6 +179,11 @@ rule get_nan_mask:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         labels=get_nan_labels,
     shell:
@@ -186,6 +206,11 @@ rule create_upsampled_coords_ref:
                 hemi="{hemi}",
             )
         ),
+    group:
+        "shapeinject"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         tight_crop_labels=lambda wildcards: config["tight_crop_labels"][wildcards.label],
         resample_res=lambda wildcards: config[f"laminar_coords_res_{wildcards.label}"],
@@ -211,6 +236,11 @@ rule prep_dseg_for_laynii:
                 hemi="{hemi}",
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         gm_labels=lambda wildcards: " ".join(
             [
@@ -275,8 +305,13 @@ rule laynii_layers_equidist:
             label="{label}",
             hemi="{hemi}",
         ),
+    group:
+        "surf"
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz &> {log} && "
@@ -318,8 +353,13 @@ rule laynii_layers_equivol:
             label="{label}",
             hemi="{hemi}",
         ),
+    group:
+        "surf"
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(10),
     shell:
         "cp {input} dseg.nii.gz && "
         "LN2_LAYERS  -rim dseg.nii.gz -equivol &> {log} && "

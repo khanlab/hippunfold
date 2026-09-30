@@ -38,6 +38,11 @@ rule compute_halfthick_mask:
                 **inputs.subj_wildcards,
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     params:
         threshold_tofrom=lambda wildcards: (
             "0.5 1" if wildcards.inout == "inner" else "0 0.5"
@@ -106,9 +111,14 @@ rule register_midthickness_syn:
             label="{label}",
             to="{inout}",
         ),
+    group:
+        "surf"
     shadow:
         "minimal"
     threads: 16
+    resources:
+        mem_mb=scale_by_attempt(8000),
+        runtime=scale_by_attempt(30),
     params:
         metric="MeanSquares",
         metric_weight=1,
@@ -191,7 +201,12 @@ rule register_midthickness_greedy:
             label="{label}",
             to="{inout}",
         ),
-    threads: 16
+    group:
+        "surf"
+    threads: 8
+    resources:
+        mem_mb=scale_by_attempt(6000),
+        runtime=scale_by_attempt(10),
     params:
         update_field_sigma=math.sqrt(float(config["inner_outer_reg_smoothing"])),
     shell:
@@ -249,6 +264,11 @@ rule apply_halfsurf_warp_to_img:
                 )
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     shell:
         "greedy -d 3  -rf {input.fixed} -rm {input.moving} {output.warped}  -r {input.warp} "
 
@@ -285,6 +305,11 @@ rule convert_inout_warp_from_itk_to_world:
                 )
             )
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         "wb_command -convert-warpfield -from-itk {input} -to-world {output}"
 
@@ -335,8 +360,13 @@ rule warp_midthickness_to_inout:
             label="{label}",
             to="{surfname}",
         ),
+    group:
+        "surf"
     shadow:
         "minimal"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(2),
     shell:
         """
         (

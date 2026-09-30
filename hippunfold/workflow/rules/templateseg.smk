@@ -48,7 +48,12 @@ rule template_reg:
         ),
     log:
         bids_log("template_reg", **inputs.subj_wildcards, hemi="{hemi}"),
+    group:
+        "shapeinject"
     threads: 8
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(15),
     params:
         general_opts="-d 3 -m NCC 2x2x2",
         smoothing_opts=get_smoothing_opt,
@@ -103,7 +108,12 @@ rule warp_template_dseg:
                 label="hipp",
             )
         ),
+    group:
+        "shapeinject"
     threads: 8
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         interp_opt="-ri LABEL 0.2vox",
     shell:
@@ -154,7 +164,12 @@ rule warp_template_dseg_dentate:
                 label="dentate",
             )
         ),
+    group:
+        "shapeinject"
     threads: 8
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         interp_opt="-ri LABEL 0.2vox",
     shell:

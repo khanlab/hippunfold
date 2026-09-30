@@ -23,6 +23,30 @@ def bids_log(rule_name, **kwargs):
     return bids(**log_params)
 
 
+def scale_by_attempt(base, factor=2):
+    """
+    Resource callable that scales with the attempt number, so that jobs
+    resubmitted with --retries get more memory/runtime each time.
+
+    Use in a rule as e.g.:
+        resources:
+            mem_mb=scale_by_attempt(2000),
+            runtime=scale_by_attempt(5),
+
+    Args:
+        base (int): Resource value for the first attempt (mem_mb in MB, runtime in minutes).
+        factor (float): Multiplier applied for each subsequent attempt.
+
+    Returns:
+        callable: Function of (wildcards, attempt) returning base * factor**(attempt-1).
+    """
+
+    def _scaled(wildcards, attempt):
+        return int(base * factor ** (attempt - 1))
+
+    return _scaled
+
+
 def get_atlas_dir():
     return Path(utils.get_download_dir()) / "atlases"
 

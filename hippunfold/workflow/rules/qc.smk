@@ -22,6 +22,11 @@ rule qc_reg_to_template:
             caption="../report/t1w_template_regqc.rst",
             category="Registration QC",
         ),
+    group:
+        "preproc"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     params:
         ref=lambda wildcards, input: str(
             Path(input.template_dir)
@@ -64,6 +69,11 @@ rule get_subfield_vols_subj:
             suffix="volumes.tsv",
             **inputs.subj_wildcards,
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(2),
     script:
         "../scripts/gen_volume_tsv.py"
 
@@ -93,6 +103,11 @@ rule plot_subj_subfields:
             caption="../report/subj_volume_plot.rst",
             category="Subfield Volumes",
         ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(2),
     script:
         "../scripts/plot_subj_subfields.py"
 
@@ -173,6 +188,11 @@ rule qc_subfield:
             caption="../report/subfield_qc.rst",
             category="Segmentation QC",
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     script:
         "../scripts/vis_qc_dseg.py"
 
@@ -205,6 +225,11 @@ rule qc_subfield_surf:
             caption="../report/subfield_qc.rst",
             category="Segmentation QC",
         ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     script:
         "../scripts/vis_qc_surf.py"
 
@@ -237,5 +262,8 @@ rule concat_subj_vols_tsv:
             from_="{modality}",
             suffix="volumes.tsv",
         ),
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
     script:
         "../scripts/concat_tsv.py"
