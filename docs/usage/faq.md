@@ -58,12 +58,20 @@ This folder is where the nnU-net model parameters are stored by default. You can
 
 
 (download-first)=
-## How do I download the models/templates/atlases before running many subjects in parallel?
+## How do I download the models/templates/atlases before running several HippUnfold runs in parallel?
 
-HippUnfold downloads the nnU-net model, templates and surface atlases into the shared cache (`~/.cache/hippunfold` or `HIPPUNFOLD_CACHE_DIR`) the first time they are needed. If you launch several HippUnfold runs at once (e.g. one per subject with `--participant-label`) on an empty cache, the runs can race each other writing to the cache. To avoid this, first run the `download` analysis level, which only runs the download rules:
+HippUnfold downloads the nnU-net model, templates and surface atlases into a cache directory (`~/.cache/hippunfold`, or `HIPPUNFOLD_CACHE_DIR`) the first time they are needed. Within a single HippUnfold run this is handled automatically, including when running on a cluster with an executor such as SLURM (see [](slurm.md)), which is the recommended way to process many subjects.
+
+However, if you run several HippUnfold processes at the same time, for example one per subject with `--participant-label` in a job array, they can race each other writing the same files if these have not been downloaded yet. This happens most often when the runs share a `HIPPUNFOLD_CACHE_DIR`, even if they write to different output folders, and also when concurrent runs write to the same output folder with `--nolock`. To avoid this, first run the `download` analysis level once, which only runs the download rules:
 
 ```bash
 hippunfold /PATH/TO/YOUR/DATA /PATH/TO/OUTPUT download --modality T1w --cores 1
 ```
 
-Use the same `--modality` (and any options that change what gets downloaded, e.g. `--atlas`, `--template`, `--inject_template`, `--force_nnunet_model`, `--hemi`) that you will use for the participant-level runs. Only one subject is needed, so you can add e.g. `--participant-label 001` to speed up building the workflow. The download rules are also `localrules`, so when using a cluster executor they run on the submit host rather than on compute nodes, which may not have internet access.
+Use the same `--modality` (and any options that change what gets downloaded, e.g. `--atlas`, `--template`, `--inject_template`, `--force_nnunet_model`, `--hemi`) that you will use for the participant-level runs. The downloads do not depend on the subject, so you can add e.g. `--participant-label 001` to speed up building the workflow.
+
+The conda environment used for nnU-net inference is also created in the cache directory the first time it is needed, so for parallel runs you can create it beforehand too:
+
+```bash
+hippunfold /PATH/TO/YOUR/DATA /PATH/TO/OUTPUT participant --modality T1w --conda-create-envs-only --cores 1
+```
