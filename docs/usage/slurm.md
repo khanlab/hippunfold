@@ -14,7 +14,7 @@ The [SLURM executor plugin](https://snakemake.github.io/snakemake-plugin-catalog
 hippunfold /path/to/bids /path/to/output participant --modality T1w \
     --executor slurm \
     --jobs 50 \
-    --default-resources slurm_account=<your-account> \
+    --default-resources slurm_account=def-mylab \
     --retries 2
 ```
 
