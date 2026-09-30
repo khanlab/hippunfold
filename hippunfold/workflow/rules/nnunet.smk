@@ -142,7 +142,7 @@ if model_dict["arch_version"] == "nnunet_v1":
             "../envs/nnunet.yaml"
         threads: 16
         resources:
-            gpus=1 if config["use_gpu"] else 0,
+            gpu=1 if config["use_gpu"] else 0,
             mem_mb=scale_by_attempt(32000),
             runtime=scale_by_attempt(15 if config["use_gpu"] else 30),
         params:
@@ -194,7 +194,7 @@ elif model_dict["arch_version"] == "nnunet_v2":
             "../envs/nnunetv2.yaml"
         threads: 16
         resources:
-            gpus=1 if config["use_gpu"] else 0,
+            gpu=1 if config["use_gpu"] else 0,
             mem_mb=scale_by_attempt(48000),
             runtime=scale_by_attempt(30 if config["use_gpu"] else 120),
         params:
@@ -302,7 +302,7 @@ elif model_dict["arch_version"] == "synthseg_v2":
             "../envs/synthseg.yaml"
         threads: 8
         resources:
-            gpus=1 if config["use_gpu"] else 0,
+            gpu=1 if config["use_gpu"] else 0,
             mem_mb=scale_by_attempt(16000),
             runtime=scale_by_attempt(15 if config["use_gpu"] else 60),
         params:
