@@ -32,6 +32,7 @@ jobs:
           fetch-depth: 0
 
       - name: Build and publish
+        id: publish
         uses: khanlab/actions/.github/actions/action-pixi_task-publish@df4211abe672b61c81f4177eef5b9516edf2944e
         with:
           release-tag: >-
@@ -44,4 +45,11 @@ jobs:
             ${{ github.event_name == 'release'
                 || inputs.upload }}
 
-
+      - name: Upload to Anaconda.org
+        if: >-
+          ${{ github.event_name == 'release'
+              || inputs.upload }}
+        env:
+          ANACONDA_API_KEY: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
+          PACKAGE: ${{ steps.publish.outputs.package }}
+        run: pixi upload anaconda --owner khanlab "${PACKAGE}"
