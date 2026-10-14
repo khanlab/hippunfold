@@ -357,8 +357,11 @@ rule unfoldreg_antsquick:
         runtime=scale_by_attempt(2),
     params:
         antsparams="-d 2 -t so -o tmp",
-        # init with image centres (identity, since unfolded images share a grid) instead of
-        # the default centre-of-mass, which is ill-defined for signed metrics like curvature
+        # ANTs' default init (-i [f,m,1]) translates by the intensity-weighted centre of
+        # mass of the first metric (curvature). Curvature is signed and roughly zero-mean,
+        # so that centre is unstable and gives a spurious shift that SyN-only can't undo.
+        # Subject and atlas maps share the same unfolded grid, so use the geometric
+        # centre (-i [f,m,0]), which gives a zero initial translation.
         init_args=lambda wildcards, input: "-i [{fixed},{moving},0]".format(
             fixed=input.fixed_images[0], moving=input.moving_images[0]
         ),
