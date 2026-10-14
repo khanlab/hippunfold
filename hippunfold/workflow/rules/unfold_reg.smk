@@ -357,6 +357,14 @@ rule unfoldreg_antsquick:
         runtime=scale_by_attempt(2),
     params:
         antsparams="-d 2 -t so -o tmp",
+        # ANTs' default init (-i [f,m,1]) translates by the intensity-weighted centre of
+        # mass of the first metric (curvature). Curvature is signed and roughly zero-mean,
+        # so that centre is unstable and gives a spurious shift that SyN-only can't undo.
+        # Subject and atlas maps share the same unfolded grid, so use the geometric
+        # centre (-i [f,m,0]), which gives a zero initial translation.
+        init_args=lambda wildcards, input: "-i [{fixed},{moving},0]".format(
+            fixed=input.fixed_images[0], moving=input.moving_images[0]
+        ),
         fixed_args=lambda wildcards, input: " ".join(
             ["-f {img}".format(img=img) for img in input.fixed_images]
         ),
@@ -370,7 +378,7 @@ rule unfoldreg_antsquick:
             ]
         ),
     shell:
-        "antsRegistrationSyNQuick.sh {params.antsparams} {params.fixed_args} {params.moving_args} &> {log} && "
+        "antsRegistrationSyNQuick.sh {params.antsparams} {params.init_args} {params.fixed_args} {params.moving_args} &> {log} && "
         "{params.cmd_copy_warps}"
 
 
