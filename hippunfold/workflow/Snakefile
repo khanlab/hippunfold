@@ -118,7 +118,7 @@ if config["modality"] == "dsegtissue":
 
 else:
 
-    include: "rules/nnunet.smk"
+    include: "rules/pred.smk"
 
 
 if "T2w" in limit_to_list or config["generate_myelin_map"]:
