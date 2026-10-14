@@ -400,7 +400,9 @@ def get_final_qc():
         )
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
         if not config["use_template_seg"]:
-            template_cfg = config.get("template_files", {}).get(config.get("template"), {})
+            template_cfg = config.get("template_files", {}).get(
+                config.get("template"), {}
+            )
             if "Mask_crop" in template_cfg:
                 qc.extend(
                     inputs[config["modality"]].expand(

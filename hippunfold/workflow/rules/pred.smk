@@ -311,23 +311,21 @@ elif model_dict["arch_version"] == "synthtopo":
             nb_classes=model_dict.get("nb_classes", 9),
             seg_nb_levels=model_dict.get("seg_nb_levels", 6),
             seg_features=" ".join(
-                str(x) for x in model_dict.get("seg_features", [16, 24, 32, 48, 64, 96])
+                str(x)
+                for x in model_dict.get("seg_features", [16, 24, 32, 48, 64, 96])
             ),
             device="cuda" if config["use_gpu"] else "cpu",
-
         shell:
             "mkdir -p {params.model_dir} && "
-            "case \"{input.model_tar}\" in "
-            "  *.zip) unzip -q \"{input.model_tar}\" -d \"{params.model_dir}\" ;; "
-            "  *) tar -xf \"{input.model_tar}\" -C \"{params.model_dir}\" ;; "
+            'case "{input.model_tar}" in '
+            '  *.zip) unzip -q "{input.model_tar}" -d "{params.model_dir}" ;; '
+            '  *) tar -xf "{input.model_tar}" -C "{params.model_dir}" ;; '
             "esac && "
-
-            "CHKPT=\"$(find \"{params.model_dir}\" -type f -name \"{params.checkpoint_name}\" -print -quit)\" && "
-            "if [ -z \"$CHKPT\" ]; then echo \"ERROR: checkpoint not found: {params.checkpoint_name}\" 1>&2; exit 1; fi && "
-
+            'CHKPT="$(find "{params.model_dir}" -type f -name "{params.checkpoint_name}" -print -quit)" && '
+            'if [ -z "$CHKPT" ]; then echo "ERROR: checkpoint not found: {params.checkpoint_name}" 1>&2; exit 1; fi && '
             "python {workflow.basedir}/scripts/synthtopo.py "
             "{input.in_img} "
-            "\"$CHKPT\" "
+            '"$CHKPT" '
             "--output {output.synthseg_seg} "
             "--device {params.device} "
             "--nb-classes {params.nb_classes} "
