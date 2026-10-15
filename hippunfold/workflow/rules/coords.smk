@@ -73,9 +73,19 @@ def get_dentate_gm_labels(wildcards):
     return config["laplace_labels"]["dentate"]["AP"]["gm"]
 
 
+def get_hipp_tissue_labels(wildcards):
+    """GM, DG and SRLM labels, used to find concavities of the hipp tissue"""
+    if wildcards.label == "dentate":
+        return []
+    return config["laplace_labels"]["hipp"]["IO"]["gm"] + _ensure_label_list(
+        config["tissue_atlas_mapping"]["tissue"]["srlm"]
+    )
+
+
 rule prep_labels_without_inject:
     """Without template shape injection, the same segmentation is used for hipp and dentate.
-    For hipp, the dentate PD src voxels are set to background and the dentate PD sink voxels
+    For hipp, the dentate PD src voxels are set to background, except where they fill a
+    concavity of the hipp tissue (then nearest tissue label), and the dentate PD sink voxels
     are replaced by their nearest non-DG label, as in the hipp tissue from injection."""
     input:
         dseg=get_input_for_shape_inject,
@@ -101,6 +111,8 @@ rule prep_labels_without_inject:
         bg_labels=lambda wildcards: get_dentate_pd_labels(wildcards, "src"),
         fill_labels=lambda wildcards: get_dentate_pd_labels(wildcards, "sink"),
         exclude_labels=get_dentate_gm_labels,
+        tissue_labels=get_hipp_tissue_labels,
+        closing_radius_mm=config["dentate_pd_src_closing_radius_mm"],
     script:
         "../scripts/fill_labels_with_nearest.py"
 

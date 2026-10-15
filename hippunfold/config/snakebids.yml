@@ -619,6 +619,11 @@ shape_inject:
   # ideally for this UNet model we would merge label 2&10 and label 0&9, but this will require anadditional snake rule. can skip for now
 
 
+#without template shape injection, the dentate PD src voxels become background for hipp,
+# except where they fill a concavity of the hipp tissue (closing radius in mm, so the number
+# of voxels scales with the resolution of the segmentation)
+dentate_pd_src_closing_radius_mm: 0.6
+
 laplace_labels:
   hipp:
     AP: 
