@@ -1,6 +1,11 @@
 import nibabel as nib
 import numpy as np
-from scipy.ndimage import convolve, distance_transform_edt, generate_binary_structure
+from scipy.ndimage import (
+    convolve,
+    distance_transform_edt,
+    generate_binary_structure,
+    label,
+)
 
 # --- Load NIfTI files ---
 binary_img = nib.load(snakemake.input.gm)
@@ -15,11 +20,22 @@ bbox = tuple(
 )
 gm_crop = gm[bbox]
 labels_crop = labels[bbox]
+label_values = np.unique(labels_crop[labels_crop > 0])
+
+# --- Keep only the largest connected piece of each subfield ---
+# (surface to volume mapping can leave small disconnected pieces where the surface folds
+# back on itself; these are unlabelled here and refilled from their neighbours below)
+connectivity = generate_binary_structure(3, 3)
+for value in label_values:
+    pieces, n_pieces = label(labels_crop == value, structure=connectivity)
+    if n_pieces > 1:
+        sizes = np.bincount(pieces.ravel())
+        sizes[0] = 0
+        labels_crop[(pieces > 0) & (pieces != sizes.argmax())] = 0
 
 # --- Grow labels into unlabelled GM one voxel layer at a time ---
 # (labels only spread through face-connected GM, so they can't jump across a fold or
 # the SRLM to whichever voxel is nearest in straight-line distance)
-label_values = np.unique(labels_crop[labels_crop > 0])
 neighbours = generate_binary_structure(3, 1).astype(np.uint8)
 neighbours[1, 1, 1] = 0
 
