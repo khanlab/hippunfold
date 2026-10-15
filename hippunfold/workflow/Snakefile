@@ -67,6 +67,10 @@ else:
 
 model_dict = config["nnunet_models"].get(model_name, None)
 
+# models that already produce topologically-correct labels don't need template shape injection
+if model_dict is not None and not model_dict.get("shape_inject", True):
+    config["skip_inject_template_labels"] = True
+
 
 limit_to_list.add(config["modality"])
 
@@ -118,7 +122,7 @@ if config["modality"] == "dsegtissue":
 
 else:
 
-    include: "rules/nnunet.smk"
+    include: "rules/pred.smk"
 
 
 if "T2w" in limit_to_list or config["generate_myelin_map"]:
