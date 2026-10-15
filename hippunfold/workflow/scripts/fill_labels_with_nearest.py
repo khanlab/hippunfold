@@ -7,14 +7,17 @@ data = np.asarray(img.dataobj).astype(np.int32)
 
 fill_mask = np.isin(data, snakemake.params.fill_labels)
 if fill_mask.any():
-    # for every voxel, index of the nearest voxel that is not being filled
+    # labels that may be copied into the filled voxels
+    source_mask = ~fill_mask & ~np.isin(data, snakemake.params.exclude_labels)
+
+    # for every voxel, index of the nearest source voxel
     nearest_idx = distance_transform_edt(
-        fill_mask,
+        ~source_mask,
         sampling=img.header.get_zooms()[:3],
         return_distances=False,
         return_indices=True,
     )
-    data = data[tuple(nearest_idx)]
+    data[fill_mask] = data[tuple(nearest_idx)][fill_mask]
 
 out_img = nib.Nifti1Image(
     data.astype(img.get_data_dtype()), affine=img.affine, header=img.header

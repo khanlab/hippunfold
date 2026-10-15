@@ -60,8 +60,8 @@ def get_nan_labels(wildcards):
 
 
 def get_dentate_only_labels(wildcards):
-    """The dentate PD src/sink labels only exist in the dentate tissue scheme (they are carved
-    out of GM, SRLM and background), so they are removed for the other labels"""
+    """The dentate PD src/sink labels only exist in the dentate tissue scheme (carved out of
+    GM, SRLM and background, never DG), so they are removed for the other labels"""
     if wildcards.label == "dentate":
         return []
     return (
@@ -70,10 +70,16 @@ def get_dentate_only_labels(wildcards):
     )
 
 
+def get_dentate_gm_labels(wildcards):
+    if wildcards.label == "dentate":
+        return []
+    return config["laplace_labels"]["dentate"]["AP"]["gm"]
+
+
 rule prep_labels_without_inject:
     """Without template shape injection, the same segmentation is used for hipp and dentate.
-    For hipp, the dentate PD src/sink voxels are replaced by their nearest other label, as in
-    the hipp tissue template used for injection."""
+    For hipp, the dentate PD src/sink voxels are replaced by their nearest other non-DG label,
+    as in the hipp tissue template used for injection."""
     input:
         dseg=get_input_for_shape_inject,
     output:
@@ -96,6 +102,7 @@ rule prep_labels_without_inject:
         runtime=scale_by_attempt(1),
     params:
         fill_labels=get_dentate_only_labels,
+        exclude_labels=get_dentate_gm_labels,
     script:
         "../scripts/fill_labels_with_nearest.py"
 
