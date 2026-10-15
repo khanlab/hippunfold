@@ -403,7 +403,6 @@ tissue_atlas_mapping:
     dg: 8
     srlm:
       - 2
-      - 10
     cyst: 7
   magdeburg:
     dg: 3
