@@ -521,7 +521,7 @@ nnunet_models:
     seg_nb_levels: 6
     seg_features: [16, 32, 64, 128, 256, 512]
     checkpoint: epoch=823-step=438800.ckpt
-    shape_inject: false
+    # shape_inject: false
 
   maguire_T2w:
     url: https://zenodo.org/records/18432751/files/Dataset001_HippUnfoldMag.nnUNetTrainer__nnUNetPlans__3d_fullres.tar.gz
