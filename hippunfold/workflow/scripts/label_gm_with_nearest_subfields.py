@@ -1,30 +1,54 @@
 import nibabel as nib
 import numpy as np
-from scipy.spatial import cKDTree
+from scipy.ndimage import convolve, distance_transform_edt, generate_binary_structure
 
 # --- Load NIfTI files ---
 binary_img = nib.load(snakemake.input.gm)
 label_img = nib.load(snakemake.input.subfields)
 
-binary_data = binary_img.get_fdata().astype(np.uint8)
-label_data = label_img.get_fdata().astype(np.uint8)
+gm = binary_img.get_fdata() == 1
+labels = np.asarray(label_img.dataobj).astype(np.int32)
 
-# --- Get voxel coordinates ---
-foreground_coords = np.argwhere(binary_data == 1)
-label_coords = np.argwhere(label_data > 0)
-label_values = label_data[label_data > 0]
+# --- Crop to the region of interest for speed ---
+bbox = tuple(
+    slice(max(idx.min() - 1, 0), idx.max() + 2) for idx in np.nonzero(gm | (labels > 0))
+)
+gm_crop = gm[bbox]
+labels_crop = labels[bbox]
 
-# --- Build KD-Tree on label coords ---
-tree = cKDTree(label_coords)
+# --- Grow labels into unlabelled GM one voxel layer at a time ---
+# (labels only spread through face-connected GM, so they can't jump across a fold or
+# the SRLM to whichever voxel is nearest in straight-line distance)
+label_values = np.unique(labels_crop[labels_crop > 0])
+neighbours = generate_binary_structure(3, 1).astype(np.uint8)
+neighbours[1, 1, 1] = 0
 
-# --- Find nearest labels for each foreground voxel ---
-_, nearest_idx = tree.query(foreground_coords)
-nearest_labels = label_values[nearest_idx]
+unlabelled = gm_crop & (labels_crop == 0)
+while unlabelled.any() and label_values.size > 0:
+    counts = np.stack(
+        [
+            convolve(
+                (labels_crop == value).astype(np.uint8), neighbours, mode="constant"
+            )
+            for value in label_values
+        ]
+    )
+    reached = unlabelled & (counts.max(axis=0) > 0)
+    if not reached.any():
+        break
+    labels_crop[reached] = label_values[counts.argmax(axis=0)][reached]
+    unlabelled &= ~reached
 
-# --- Create output image ---
-output_data = np.zeros_like(binary_data)
-for i, coord in enumerate(foreground_coords):
-    output_data[tuple(coord)] = nearest_labels[i]
+# --- GM not connected to any label: fall back to straight-line nearest label ---
+if unlabelled.any() and label_values.size > 0:
+    nearest_idx = distance_transform_edt(
+        labels_crop == 0, return_distances=False, return_indices=True
+    )
+    labels_crop[unlabelled] = labels_crop[tuple(nearest_idx)][unlabelled]
+
+# --- Create output image (GM voxels only) ---
+output_data = np.zeros(gm.shape, dtype=np.uint8)
+output_data[bbox] = np.where(gm_crop, labels_crop, 0)
 
 # --- Save result ---
 output_img = nib.Nifti1Image(
