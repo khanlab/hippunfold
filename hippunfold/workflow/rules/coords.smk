@@ -3,7 +3,16 @@ def get_labels_for_laplace(wildcards):
         config["analysis_level"] == "group_create_atlas"
         and config["modality"] == "dsegtissue"
     ):
-        seg = get_input_for_shape_inject(wildcards)
+        seg = bids(
+            root=root,
+            datatype="anat",
+            **inputs.subj_wildcards,
+            suffix="dseg.nii.gz",
+            desc="noinject",
+            space="corobl",
+            hemi="{hemi}",
+            label="{label}",
+        ).format(**wildcards)
     else:
         seg = bids(
             root=root,
@@ -48,6 +57,47 @@ def get_nan_labels(wildcards):
         ]
     )
     return lbl_list
+
+
+def get_dentate_only_labels(wildcards):
+    """The dentate PD src/sink labels only exist in the dentate tissue scheme (they are carved
+    out of GM, SRLM and background), so they are removed for the other labels"""
+    if wildcards.label == "dentate":
+        return []
+    return (
+        config["laplace_labels"]["dentate"]["PD"]["src"]
+        + config["laplace_labels"]["dentate"]["PD"]["sink"]
+    )
+
+
+rule prep_labels_without_inject:
+    """Without template shape injection, the same segmentation is used for hipp and dentate.
+    For hipp, the dentate PD src/sink voxels are replaced by their nearest other label, as in
+    the hipp tissue template used for injection."""
+    input:
+        dseg=get_input_for_shape_inject,
+    output:
+        dseg=temp(
+            bids(
+                root=root,
+                datatype="anat",
+                **inputs.subj_wildcards,
+                suffix="dseg.nii.gz",
+                desc="noinject",
+                space="corobl",
+                hemi="{hemi}",
+                label="{label}",
+            )
+        ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(1),
+    params:
+        fill_labels=get_dentate_only_labels,
+    script:
+        "../scripts/fill_labels_with_nearest.py"
 
 
 rule get_label_mask:
