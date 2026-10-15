@@ -5,6 +5,8 @@ from scipy.ndimage import distance_transform_edt
 img = nib.load(snakemake.input.dseg)
 data = np.asarray(img.dataobj).astype(np.int32)
 
+data[np.isin(data, snakemake.params.bg_labels)] = 0
+
 fill_mask = np.isin(data, snakemake.params.fill_labels)
 if fill_mask.any():
     # labels that may be copied into the filled voxels
