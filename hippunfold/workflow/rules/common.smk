@@ -481,22 +481,45 @@ def get_input_for_shape_inject(wildcards):
     return seg
 
 
+def get_unfold_midthickness_z(label):
+    """z-level (mm) of the midthickness plane in unfolded space, which is where
+    the single-slice 2D unfold ref (and hence any 2D warps) are defined"""
+    extent = float(config["unfold_vol_ref"][label]["extent"][-1])
+    return config["surf_thresholds"]["midthickness"] * extent
+
+
 def get_cmd_warp_surface_2d_warp(wildcards, input, output):
     """Using this workaround for warping meshes with 2D warps, since surface-apply-warpfield was
-    giving bounding box issues"""
+    giving bounding box issues.
+
+    The 2D warp is a single slice at the midthickness z-level, so the warp is sampled
+    at the surface vertices projected onto that plane (otherwise trilinear sampling
+    outside the slice returns zero), and the xy displacement is then applied to the
+    original coordinates."""
+
+    z_level = get_unfold_midthickness_z(wildcards.label)
 
     cmds = []
     cmds.append(
-        f"wb_command -volume-to-surface-mapping {input.warp} {input.surf_gii} xywarp.shape.gii -trilinear"
+        f"wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -metric-math '{z_level}' zlevel.shape.gii -var DUMMY coords.shape.gii -column 1"
+    )
+    cmds.append(
+        f"wb_command -metric-merge projcoords.shape.gii -metric coords.shape.gii -column 1 -metric coords.shape.gii -column 2 -metric zlevel.shape.gii"
+    )
+    cmds.append(
+        f"wb_command -surface-set-coordinates {input.surf_gii} projcoords.shape.gii proj.surf.gii"
+    )
+    cmds.append(
+        f"wb_command -volume-to-surface-mapping {input.warp} proj.surf.gii xywarp.shape.gii -trilinear"
     )
     cmds.append(
         f"wb_command -metric-math '0' zwarp.shape.gii -var DUMMY xywarp.shape.gii -column 1"
     )
     cmds.append(
         f"wb_command -metric-merge xyzwarp.shape.gii -metric xywarp.shape.gii  -metric zwarp.shape.gii"
-    )
-    cmds.append(
-        f"wb_command -surface-coordinates-to-metric {input.surf_gii} coords.shape.gii"
     )
     cmds.append(
         f"wb_command -metric-math 'COORDS - WARP' warpedcoords.shape.gii -var COORDS coords.shape.gii -var WARP xyzwarp.shape.gii"
