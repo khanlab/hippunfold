@@ -1,7 +1,12 @@
 import nibabel as nib
 import numpy as np
 import scipy.sparse as sp
-from lib.surface import read_surface_from_gifti, write_metric_gii
+from lib.surface import (
+    get_boundary_loop,
+    monotone_free_arcs,
+    read_surface_from_gifti,
+    write_metric_gii,
+)
 from lib.utils import setup_logger
 from scipy.sparse import coo_matrix, diags
 
@@ -136,6 +141,27 @@ coords = solve_laplace_beltrami_open_mesh(
     boundary_conditions,
     clamp_negative_weights=snakemake.params.clamp_negative_weights,
 )
+
+if snakemake.params.monotone_boundary:
+    # make the coordinate monotone along the free arcs of the boundary loop, then
+    # re-solve with the whole loop fixed. Where it already is, this gives the same
+    # solution; elsewhere it removes folds of the unfolded mapping at the boundary.
+    src_mask = np.zeros(len(vertices), dtype=bool)
+    src_mask[src_indices] = True
+    sink_mask = np.zeros(len(vertices), dtype=bool)
+    sink_mask[sink_indices] = True
+    loop = get_boundary_loop(faces, np.unique(faces))
+    loop_values, n_changed = monotone_free_arcs(loop, coords, src_mask, sink_mask)
+    logger.info(
+        f"{n_changed} of {len(loop)} boundary loop vertices made monotone; "
+        "re-solving with the whole loop fixed"
+    )
+    coords = solve_laplace_beltrami_open_mesh(
+        vertices,
+        faces,
+        {**dict(zip(loop.tolist(), loop_values)), **boundary_conditions},
+        clamp_negative_weights=snakemake.params.clamp_negative_weights,
+    )
 
 # make fully uniform distribution
 domain = np.setdiff1d(
