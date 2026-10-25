@@ -180,3 +180,217 @@ def find_boundary_vertices(mesh):
         boundary_vertices.update(edge)
     # Convert the set to a sorted list (array)
     return np.array(sorted(boundary_vertices), dtype=np.int32)
+
+
+# terminal labels, in the order of the distance columns
+AP_SRC, AP_SINK, PD_SRC, PD_SINK = 0, 1, 2, 3
+TERMINAL_NAMES = ["AP src", "AP sink", "PD src", "PD sink"]
+
+# Valid cyclic orders of terminals around the boundary loop, starting at AP src.
+# AP and PD terminals alternate, so each AP terminal is opposite the other, and
+# likewise for PD. The two orders are mirror images (the loop can be walked
+# either way, and hemispheres are mirrored), so both are allowed.
+TERMINAL_ORDERS = (
+    (AP_SRC, PD_SRC, AP_SINK, PD_SINK),
+    (AP_SRC, PD_SINK, AP_SINK, PD_SRC),
+)
+
+# Expected order along the loop when walked in face-winding order, per
+# hemisphere: the two hemispheres are mirror images. Used as a QC check, not a
+# constraint, so a flipped surface or swapped terminals is reported.
+EXPECTED_TERMINAL_ORDER = {"L": TERMINAL_ORDERS[0], "R": TERMINAL_ORDERS[1]}
+
+
+def _mesh_edges(faces):
+    """Directed edges of each triangle, in face winding order."""
+    return np.vstack([faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]]])
+
+
+def get_boundary_loop(faces, boundary_vertices):
+    """
+    Get the outer boundary loop of a mesh, as an ordered cycle of vertices.
+
+    Only boundary edges (edges in exactly one face) with both vertices in
+    boundary_vertices are used, and the largest loop is returned. The cycle
+    follows the face winding, so its direction is consistent with the mesh
+    orientation.
+    """
+    import networkx as nx
+
+    directed = _mesh_edges(faces)
+    undirected, counts = np.unique(
+        np.sort(directed, axis=1), axis=0, return_counts=True
+    )
+    boundary_edges = undirected[counts == 1]
+    in_set = np.isin(boundary_edges, boundary_vertices).all(axis=1)
+
+    graph = nx.Graph()
+    graph.add_edges_from(map(tuple, boundary_edges[in_set]))
+    if graph.number_of_nodes() == 0:
+        raise ValueError("No boundary edges found among boundary vertices")
+    largest = graph.subgraph(max(nx.connected_components(graph), key=len))
+    # a manifold boundary is a single cycle; otherwise take the longest one
+    loop = max(nx.cycle_basis(largest), key=len)
+
+    # orient the loop to follow the face winding
+    directed_set = set(map(tuple, directed))
+    if (loop[0], loop[1]) not in directed_set:
+        loop = loop[::-1]
+    return np.array(loop)
+
+
+def _fit_cyclic_arcs(costs, order, nmin):
+    """
+    Split a cyclic sequence into contiguous arcs, one per terminal in order.
+
+    costs is (m, 4), the cost of assigning each loop vertex to each terminal.
+    Returns (total cost, labels) for the minimum cost split with every arc at
+    least nmin long. Each split is found by dynamic programming over the
+    sequence unrolled at each possible start of the first arc.
+    """
+    m = costs.shape[0]
+    n_arcs = len(order)
+    best_cost, best = np.inf, None
+
+    for start in range(m):
+        rolled = np.roll(costs, -start, axis=0)
+        # prefix[k][i] is the cost of assigning the first i vertices to order[k]
+        prefix = [np.concatenate([[0.0], np.cumsum(rolled[:, k])]) for k in order]
+
+        # dp[j][b] is the min cost of arcs 0..j covering the first b vertices
+        dp = [np.where(np.arange(m + 1) >= nmin, prefix[0], np.inf)]
+        for j in range(1, n_arcs):
+            prev_minus = dp[-1] - prefix[j]
+            running_min = np.minimum.accumulate(prev_minus)
+            cur = np.full(m + 1, np.inf)
+            cur[nmin:] = prefix[j][nmin:] + running_min[: m + 1 - nmin]
+            dp.append(cur)
+
+        if dp[-1][m] < best_cost:
+            best_cost, best = dp[-1][m], (start, dp, prefix)
+
+    if best is None:
+        return np.inf, None
+
+    # backtrack the arc boundaries for the best start
+    start, dp, prefix = best
+    cuts = [m]
+    for j in range(n_arcs - 1, 0, -1):
+        end = cuts[-1]
+        candidates = dp[j - 1][: end - nmin + 1] - prefix[j][: end - nmin + 1]
+        cuts.append(int(np.argmin(candidates)))
+    cuts = [0] + cuts[::-1]
+
+    rolled_labels = np.empty(m, dtype=int)
+    for j, label in enumerate(order):
+        rolled_labels[cuts[j] : cuts[j + 1]] = label
+    return best_cost, np.roll(rolled_labels, start)
+
+
+def assign_boundary_terminals(
+    distances, boundary_vertices, surface, nmin, ap_length_penalty=0.0, logger=None
+):
+    """
+    Assign AP/PD src/sink terminal labels to boundary vertices.
+
+    The terminals are fit to the outer boundary loop of the (topological disk)
+    surface as four contiguous arcs, in alternating AP/PD order, so that the
+    AP src and sink are on opposite sides, as are the PD src and sink. The arcs
+    minimise the summed distance of each loop vertex to its assigned terminal,
+    plus ap_length_penalty per vertex in the AP arcs, which favours short,
+    point-like AP terminals. Every arc has at least nmin vertices.
+
+    The remaining boundary vertices (the band of interior vertices adjacent to
+    the loop) take the label of their nearest loop vertex, so each label is
+    contiguous.
+
+    Parameters:
+        distances (np.ndarray): (n, 4) signed distance from each boundary vertex
+            to the AP src, AP sink, PD src and PD sink.
+        boundary_vertices (np.ndarray): (n,) mesh indices of the boundary vertices.
+        surface: mesh with pyvista-style faces.
+        nmin (int): minimum number of loop vertices per terminal.
+        ap_length_penalty (float): cost per vertex of AP src/sink arcs, in the
+            units of distances.
+
+    Returns:
+        labels (np.ndarray): (n,) terminal labels, 0-3, for boundary_vertices.
+        info (dict): diagnostics, with the boundary loop (mesh indices, in
+            face-winding order), the fitted and nearest-terminal labels along
+            it, the fitted terminal order, and the number of band vertices not
+            connected to the loop.
+    """
+    from collections import deque
+
+    faces = surface.faces.reshape((-1, 4))[:, 1:4]
+    vertex_to_idx = {v: i for i, v in enumerate(boundary_vertices)}
+
+    loop = get_boundary_loop(faces, boundary_vertices)
+    loop_idx = np.array([vertex_to_idx[v] for v in loop])
+    m = len(loop)
+    if m < 4 * nmin:
+        raise ValueError(
+            f"Boundary loop has {m} vertices, too few for 4 terminals of at least "
+            f"{nmin} vertices"
+        )
+
+    costs = np.asarray(distances, dtype=float)[loop_idx].copy()
+    costs[:, [AP_SRC, AP_SINK]] += ap_length_penalty
+
+    fits = [_fit_cyclic_arcs(costs, order, nmin) for order in TERMINAL_ORDERS]
+    best = int(np.argmin([cost for cost, _ in fits]))
+    loop_labels = fits[best][1]
+    unconstrained = np.argmin(distances[loop_idx], axis=1)
+
+    if logger:
+        names = " -> ".join(TERMINAL_NAMES[k] for k in TERMINAL_ORDERS[best])
+        logger.info(
+            f"Boundary loop has {m} of {len(boundary_vertices)} boundary vertices"
+        )
+        logger.info(f"Terminal order along loop (face winding): {names}")
+        logger.info(
+            "Loop vertices per terminal: "
+            + ", ".join(
+                f"{TERMINAL_NAMES[k]}={np.sum(loop_labels == k)}" for k in range(4)
+            )
+        )
+        logger.info(
+            f"{np.sum(loop_labels != unconstrained)} loop vertices differ from the "
+            "nearest-terminal labels"
+        )
+
+    # label the rest of the band by nearest loop vertex (multi-source BFS)
+    neighbors = [[] for _ in boundary_vertices]
+    for u, v in _mesh_edges(faces):
+        if u in vertex_to_idx and v in vertex_to_idx:
+            neighbors[vertex_to_idx[u]].append(vertex_to_idx[v])
+            neighbors[vertex_to_idx[v]].append(vertex_to_idx[u])
+
+    labels = np.full(len(boundary_vertices), -1, dtype=int)
+    labels[loop_idx] = loop_labels
+    queue = deque(loop_idx)
+    while queue:
+        i = queue.popleft()
+        for j in neighbors[i]:
+            if labels[j] < 0:
+                labels[j] = labels[i]
+                queue.append(j)
+
+    unreached = labels < 0
+    if np.any(unreached):
+        # not connected to the loop, so fall back to the nearest terminal
+        if logger:
+            logger.warning(
+                f"{np.sum(unreached)} boundary vertices are not connected to the "
+                "boundary loop, assigning nearest terminal"
+            )
+        labels[unreached] = np.argmin(distances[unreached], axis=1)
+
+    info = {
+        "loop": loop,
+        "loop_labels": loop_labels,
+        "loop_nearest_labels": unconstrained,
+        "order": TERMINAL_ORDERS[best],
+        "n_unreached": int(np.sum(unreached)),
+    }
+    return labels, info

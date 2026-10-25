@@ -267,3 +267,139 @@ rule concat_subj_vols_tsv:
         runtime=scale_by_attempt(5),
     script:
         "../scripts/concat_tsv.py"
+
+
+# --- QC checks and reports ---
+#
+# Each QC step (e.g. srcsink) writes QC metrics JSON files (see lib/qc.py),
+# usually from the rule that computes what is being checked. Those are then
+# visualized by a report rule, producing:
+#   sub-*/qc/sub-*_desc-{qc}_qc.html
+# and verified by qc_verify, which also requires the report so that it is
+# always available to inspect when a check fails:
+#   sub-*/qc/sub-*_desc-{qc}_qcchecks.tsv
+# To add a QC step: write its metrics JSONs, add a report rule, and register
+# a function returning its metrics JSONs in qc_metrics_inputs.
+
+
+def get_srcsink_qc_metrics(wildcards):
+    return (
+        inputs[config["modality"]]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=root,
+                datatype="qc",
+                suffix="qcmetrics.json",
+                desc="srcsink",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            hemi=config["hemi"],
+            label=config["autotop_labels"],
+        )
+    )
+
+
+def get_srcsink_qc_surf_inputs(wildcards, **kwargs):
+    return (
+        inputs[config["modality"]]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=root,
+                hemi="{hemi}",
+                label="{label}",
+                den="native",
+                **kwargs,
+                **inputs.subj_wildcards,
+            ),
+            hemi=config["hemi"],
+            label=config["autotop_labels"],
+        )
+    )
+
+
+qc_metrics_inputs = {
+    "srcsink": get_srcsink_qc_metrics,
+}
+
+
+rule qc_report_srcsink:
+    """HTML report of the AP/PD src/sink terminals on the boundary of each surface"""
+    input:
+        metrics=get_srcsink_qc_metrics,
+        surf=lambda wildcards: get_srcsink_qc_surf_inputs(
+            wildcards,
+            datatype="surf",
+            space="corobl",
+            suffix="midthickness.surf.gii",
+        ),
+        coords_ap=lambda wildcards: get_srcsink_qc_surf_inputs(
+            wildcards,
+            datatype="metric",
+            dir="AP",
+            desc="laplace",
+            suffix="coords.shape.gii",
+        ),
+        coords_pd=lambda wildcards: get_srcsink_qc_surf_inputs(
+            wildcards,
+            datatype="metric",
+            dir="PD",
+            desc="laplace",
+            suffix="coords.shape.gii",
+        ),
+    output:
+        html=bids(
+            root=root,
+            datatype="qc",
+            desc="srcsink",
+            suffix="qc.html",
+            **inputs.subj_wildcards,
+        ),
+    log:
+        bids_log("qc_report_srcsink", **inputs.subj_wildcards),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
+    script:
+        "../scripts/qc_report_srcsink.py"
+
+
+rule qc_verify:
+    """Fails if any error-severity QC check failed (after the report is made)"""
+    input:
+        metrics=lambda wildcards: qc_metrics_inputs[wildcards.qc](
+            {k: v for k, v in wildcards.items() if k != "qc"}
+        ),
+        report=bids(
+            root=root,
+            datatype="qc",
+            desc="{qc}",
+            suffix="qc.html",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        tsv=bids(
+            root=root,
+            datatype="qc",
+            desc="{qc}",
+            suffix="qcchecks.tsv",
+            **inputs.subj_wildcards,
+        ),
+    log:
+        bids_log("qc_verify", desc="{qc}", **inputs.subj_wildcards),
+    wildcard_constraints:
+        qc="|".join(qc_metrics_inputs),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
+    params:
+        warn_only=config.get("qc_warn_only", False),
+    script:
+        "../scripts/qc_verify.py"
