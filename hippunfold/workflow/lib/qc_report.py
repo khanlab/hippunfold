@@ -242,6 +242,65 @@ class Section:
             + "</tbody></table></div>"
         )
 
+    def add_comparison(self, stages, names=None):
+        """
+        Checks and metrics side by side for several stages of processing
+        (or runs), with the change from the first to the last. stages is a
+        list of (label, result); names limits the metrics shown.
+        """
+        labels = [html.escape(label) for label, _ in stages]
+        results = [r for _, r in stages]
+        head = "".join(f'<th class="num">{label}</th>' for label in labels)
+
+        def check_status(result, name):
+            check = next((c for c in result.checks if c["name"] == name), None)
+            if check is None:
+                return '<span class="muted">–</span>'
+            if check["passed"]:
+                return status_chip("pass")
+            return status_chip("fail" if check["severity"] == "error" else "warn")
+
+        check_names = list(dict.fromkeys(c["name"] for r in results for c in r.checks))
+        check_rows = "".join(
+            f'<tr><td><span class="check-name">{html.escape(n)}</span></td>'
+            + "".join(f'<td class="num">{check_status(r, n)}</td>' for r in results)
+            + "<td></td></tr>"
+            for n in check_names
+        )
+
+        names = names or list(dict.fromkeys(k for r in results for k in r.metrics))
+        metric_rows = ""
+        for n in names:
+            values = [r.metrics.get(n, {}).get("value") for r in results]
+            if all(v is None for v in values):
+                continue
+            desc = next(
+                r.metrics[n].get("description", "") for r in results if n in r.metrics
+            )
+            cells = "".join(
+                f'<td class="num">{"–" if v is None else html.escape(_format_value(v))}</td>'
+                for v in values
+            )
+            first, last = values[0], values[-1]
+            delta = ""
+            if isinstance(first, (int, float)) and isinstance(last, (int, float)):
+                if isinstance(first, bool) or first == last:
+                    delta = '<span class="muted">0</span>' if first == last else ""
+                else:
+                    diff = last - first
+                    delta = f"{diff:+.3g}" if isinstance(diff, float) else f"{diff:+d}"
+            metric_rows += (
+                f"<tr><td>{html.escape(n)}"
+                f'<span class="desc">{html.escape(desc)}</span></td>{cells}'
+                f'<td class="num">{delta}</td></tr>'
+            )
+        self.parts.append(
+            '<div class="table-wrap"><table class="comparison"><thead><tr><th>Check</th>'
+            f'{head}<th class="num">Change</th></tr></thead><tbody>{check_rows}</tbody>'
+            f'<thead><tr><th>Metric</th>{head}<th class="num">Change</th></tr></thead>'
+            f"<tbody>{metric_rows}</tbody></table></div>"
+        )
+
     def add_metrics(self, result, names=None):
         names = names or list(result.metrics)
         rows = "".join(
@@ -489,6 +548,8 @@ figcaption { color: var(--text-muted); font-size: 12px; margin-top: 6px; max-wid
 code { font-size: 12px; background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
 footer { margin-top: 32px; font-size: 12px; }
 .summary-table { min-width: 620px; }
+table.comparison { min-width: 560px; }
+table.comparison thead:not(:first-child) th { padding-top: 18px; }
 @media (max-width: 640px) {
   .card { padding: 14px; }
   table.checks thead { display: none; }

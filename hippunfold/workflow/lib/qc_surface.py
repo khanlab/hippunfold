@@ -15,6 +15,9 @@ outer surfaces, and the unfolded (AP, PD) mapping is checked for flipped
 triangles and areal distortion.
 """
 
+import html
+from collections import Counter
+
 import numpy as np
 from lib.qc import ERROR, WARNING, QCResult
 from scipy import sparse
@@ -117,11 +120,11 @@ def orientation(faces, edges, inverse, directed, edge_counts):
     return orientable, int(np.sum(same_dir)), misoriented
 
 
-def nonmanifold_vertices(faces, inverse, edge_counts):
+def corner_groups(faces, inverse, edge_counts):
     """
-    Vertices whose incident faces do not form a single fan (e.g. two sheets
-    touching at a vertex). Face corners of a vertex are linked across manifold
-    edges containing that vertex; more than one group means non-manifold.
+    Group label of each face corner (corner c = 3*f + k is vertex faces[f, k]).
+    Corners of a vertex are linked across manifold edges containing that
+    vertex, so each group is one fan of faces around the vertex.
     """
     n_faces = len(faces)
     corners = faces.ravel()  # corner c = 3*f + k is vertex faces[f, k]
@@ -141,7 +144,16 @@ def nonmanifold_vertices(faces, inverse, edge_counts):
             i.append(ca[same])
             j.append(cb[same])
     _, comp = _components(3 * n_faces, np.concatenate(i), np.concatenate(j))
-    groups = np.unique(np.c_[corners, comp], axis=0)
+    return comp
+
+
+def nonmanifold_vertices(faces, inverse, edge_counts):
+    """
+    Vertices whose incident faces do not form a single fan (e.g. two sheets
+    touching at a vertex), i.e. with more than one corner group.
+    """
+    comp = corner_groups(faces, inverse, edge_counts)
+    groups = np.unique(np.c_[faces.ravel(), comp], axis=0)
     verts, n_groups = np.unique(groups[:, 0], return_counts=True)
     return verts[n_groups > 1]
 
@@ -337,6 +349,10 @@ def face_clusters(faces, face_ids, n_vertices):
     return sorted(clusters, key=len, reverse=True)
 
 
+def _round_or_none(value, ndigits=3):
+    return None if np.isnan(value) else round(float(value), ndigits)
+
+
 def _vertex_faces(faces, vertices):
     return np.flatnonzero(np.isin(faces, vertices).any(axis=1))
 
@@ -376,8 +392,8 @@ class DefectList:
                 "n_vertices": len(verts),
                 "location": np.round(self.points[fv].mean(axis=0), 2),
                 "location_face": int(at),
-                "ap": round(float(self.ap[fv].mean()), 3),
-                "pd": round(float(self.pd[fv].mean()), 3),
+                "ap": _round_or_none(self.ap[fv].mean()),
+                "pd": _round_or_none(self.pd[fv].mean()),
                 "at_boundary": bool(self.boundary[verts].any()),
                 "detail": d,
                 "faces": _cap(cluster),
@@ -390,9 +406,9 @@ class DefectList:
         defects = sorted(
             self.defects, key=lambda d: (order.index(d["type"]), -d["n_faces"])
         )
-        for i, d in enumerate(defects[:MAX_DEFECTS]):
+        for i, d in enumerate(defects):
             d["id"] = i + 1
-        return defects[:MAX_DEFECTS]
+        return defects
 
 
 # --- QC ---
@@ -424,7 +440,9 @@ def compute_qc(surfaces, coords_ap, coords_pd, entities, thresholds):
     mapping.
 
     surfaces maps a surface name (midthickness first, then e.g. inner, outer,
-    with the same vertices and faces) to (points, faces). Returns a QCResult.
+    with the same vertices and faces) to (points, faces). Without coords (None),
+    e.g. for a surface before the Laplace-Beltrami solve, the unfolded mapping
+    is not checked. Returns a QCResult.
     """
     th = {**DEFAULT_THRESHOLDS, **(thresholds or {})}
     result = QCResult(QC_NAME, entities)
@@ -432,8 +450,12 @@ def compute_qc(surfaces, coords_ap, coords_pd, entities, thresholds):
     points, faces = surfaces[names[0]]
     points = np.asarray(points, dtype=float)
     faces = np.asarray(faces, dtype=np.int64)
-    coords_ap = np.asarray(coords_ap, dtype=float)
-    coords_pd = np.asarray(coords_pd, dtype=float)
+    has_coords = coords_ap is not None and coords_pd is not None
+    if has_coords:
+        coords_ap = np.asarray(coords_ap, dtype=float)
+        coords_pd = np.asarray(coords_pd, dtype=float)
+    else:
+        coords_ap = coords_pd = np.full(len(points), np.nan)
 
     # --- topology ---
     topo = compute_topology(points, faces)
@@ -648,80 +670,84 @@ def compute_qc(surfaces, coords_ap, coords_pd, entities, thresholds):
     )
 
     # --- unfolded mapping ---
-    _, collapsed, flipped, log_ratio = unfold_distortion(
-        points, faces, coords_ap, coords_pd
-    )
-    finite = log_ratio[np.isfinite(log_ratio)]
-    distorted = np.abs(finite) > th["distortion_log2"]
-    result.add_metric(
-        "unfold_collapsed_faces", len(collapsed), "Faces with zero unfolded area"
-    )
-    result.add_metric("unfold_flipped_faces", len(flipped), "Flipped unfolded faces")
-    q25, q75 = np.percentile(finite, [25, 75])
-    result.add_metric(
-        "unfold_log2_distortion_iqr",
-        float(q75 - q25),
-        "IQR of log2 areal distortion, unfolded vs native",
-    )
-    result.add_metric(
-        "unfold_distorted_fraction",
-        float(distorted.mean()),
-        f"Fraction of faces with |log2 areal distortion| > {th['distortion_log2']:g}",
-    )
-    in_band = sum(
-        bool(_band(coords_ap[faces[i]], coords_pd[faces[i]])) for i in collapsed
-    )
-    result.add_check(
-        "unfold_flipped",
-        len(flipped) <= th["max_flipped_faces"],
-        f"{len(flipped)} faces ({len(flipped) / len(faces):.2%}) folded over in the "
-        "unfolded (AP, PD) mapping",
-        severity=WARNING,
-        description="The unfolded mapping does not fold over itself",
-    )
-    result.add_check(
-        "unfold_collapsed",
-        len(collapsed) <= th["max_collapsed_faces"],
-        f"{len(collapsed)} faces ({len(collapsed) / len(faces):.2%}) have zero "
-        f"unfolded area, {in_band} of them with all vertices in one terminal band",
-        severity=WARNING,
-        description="No faces collapse to zero area in the unfolded mapping (they "
-        "do when all three vertices are in a terminal band, where a coordinate is "
-        "fixed)",
-    )
-    result.add_check(
-        "unfold_distortion",
-        distorted.mean() <= th["max_distorted_fraction"],
-        f"{distorted.mean():.1%} of faces change area share by more than "
-        f"{2 ** th['distortion_log2']:g}× (max {th['max_distorted_fraction']:.0%})",
-        severity=WARNING,
-        description="Areal distortion between native and unfolded space is moderate",
-    )
-    misoriented = set(topo["misoriented_faces"].tolist())
-    defects.add(
-        "unfold_flipped",
-        "unfold",
-        flipped,
-        lambda cl: (
-            f"{sum(f in misoriented for f in cl.tolist())} of these faces are "
-            "misoriented (winding, not mapping)"
-            if misoriented.intersection(cl.tolist())
-            else ""
-        ),
-    )
-    defects.add(
-        "unfold_collapsed",
-        "unfold",
-        collapsed,
-        lambda cl: (
-            _band(coords_ap[faces[cl]].ravel(), coords_pd[faces[cl]].ravel())
-            and f"in {_band(coords_ap[faces[cl]].ravel(), coords_pd[faces[cl]].ravel())} band"
-        ),
-    )
+    if has_coords:
+        _, collapsed, flipped, log_ratio = unfold_distortion(
+            points, faces, coords_ap, coords_pd
+        )
+        finite = log_ratio[np.isfinite(log_ratio)]
+        distorted = np.abs(finite) > th["distortion_log2"]
+        result.add_metric(
+            "unfold_collapsed_faces", len(collapsed), "Faces with zero unfolded area"
+        )
+        result.add_metric(
+            "unfold_flipped_faces", len(flipped), "Flipped unfolded faces"
+        )
+        q25, q75 = np.percentile(finite, [25, 75])
+        result.add_metric(
+            "unfold_log2_distortion_iqr",
+            float(q75 - q25),
+            "IQR of log2 areal distortion, unfolded vs native",
+        )
+        result.add_metric(
+            "unfold_distorted_fraction",
+            float(distorted.mean()),
+            f"Fraction of faces with |log2 areal distortion| > {th['distortion_log2']:g}",
+        )
+        in_band = sum(
+            bool(_band(coords_ap[faces[i]], coords_pd[faces[i]])) for i in collapsed
+        )
+        result.add_check(
+            "unfold_flipped",
+            len(flipped) <= th["max_flipped_faces"],
+            f"{len(flipped)} faces ({len(flipped) / len(faces):.2%}) folded over in the "
+            "unfolded (AP, PD) mapping",
+            severity=WARNING,
+            description="The unfolded mapping does not fold over itself",
+        )
+        result.add_check(
+            "unfold_collapsed",
+            len(collapsed) <= th["max_collapsed_faces"],
+            f"{len(collapsed)} faces ({len(collapsed) / len(faces):.2%}) have zero "
+            f"unfolded area, {in_band} of them with all vertices in one terminal band",
+            severity=WARNING,
+            description="No faces collapse to zero area in the unfolded mapping (they "
+            "do when all three vertices are in a terminal band, where a coordinate is "
+            "fixed)",
+        )
+        result.add_check(
+            "unfold_distortion",
+            distorted.mean() <= th["max_distorted_fraction"],
+            f"{distorted.mean():.1%} of faces change area share by more than "
+            f"{2 ** th['distortion_log2']:g}× (max {th['max_distorted_fraction']:.0%})",
+            severity=WARNING,
+            description="Areal distortion between native and unfolded space is moderate",
+        )
+        misoriented = set(topo["misoriented_faces"].tolist())
+        defects.add(
+            "unfold_flipped",
+            "unfold",
+            flipped,
+            lambda cl: (
+                f"{sum(f in misoriented for f in cl.tolist())} of these faces are "
+                "misoriented (winding, not mapping)"
+                if misoriented.intersection(cl.tolist())
+                else ""
+            ),
+        )
+        defects.add(
+            "unfold_collapsed",
+            "unfold",
+            collapsed,
+            lambda cl: (
+                _band(coords_ap[faces[cl]].ravel(), coords_pd[faces[cl]].ravel())
+                and f"in {_band(coords_ap[faces[cl]].ravel(), coords_pd[faces[cl]].ravel())} band"
+            ),
+        )
 
     defect_list = defects.to_list()
     result.add_metric("defects", len(defect_list), "Defects (connected clusters) found")
-    result.add_data("defects", defect_list)
+    # topological defects come first, so only e.g. slivers are left out
+    result.add_data("defects", defect_list[:MAX_DEFECTS])
     result.add_data("loops", [np.asarray(loop) for loop in loops])
     result.add_data("surfaces", names)
     return result
@@ -796,9 +822,16 @@ def plot_defects(result, points, faces):
     if loops:
         _mark(ax, p2d[np.asarray(loops[0], dtype=int)], INK["text_secondary"], 1, False)
     centroid = p2d[faces].mean(axis=1)
+    # with many defects (e.g. slivers of a raw isosurface), draw quality
+    # defects as small dots without numbers, so the others stay readable
+    crowded = len(defects) > 100
     for d in defects:
         color = SERIES[DEFECT_CATEGORIES[d["category"]]]
-        _mark(ax, centroid[[d["location_face"]]], color, 45, labels=[str(d["id"])])
+        at = centroid[[d["location_face"]]]
+        if crowded and d["category"] == "quality":
+            _mark(ax, at, color, 4, ring=False)
+        else:
+            _mark(ax, at, color, 45, labels=[str(d["id"])])
     return fig
 
 
@@ -876,3 +909,92 @@ def plot_histograms(min_angles, log_ratio, sliver_angle, distortion_log2):
         ax2.grid(axis="x", visible=False)
         fig.subplots_adjust(wspace=0.25)
     return fig
+
+
+# --- report helpers ---
+
+# labels for the intermediate stages of processing, see surface_qc_stages
+STAGE_LABELS = {"isosurf": "Isosurface", "final": "Final"}
+STAGE_DESCS = {"isosurf": "raw isosurface, before repair"}
+# metrics compared between stages
+COMPARE_METRICS = [
+    "V",
+    "F",
+    "chi",
+    "components",
+    "boundary_loops",
+    "genus",
+    "nonmanifold_edges",
+    "nonmanifold_vertices",
+    "misoriented_faces",
+    "unreferenced_vertices",
+    "degenerate_faces",
+    "duplicate_faces",
+    "sliver_faces",
+    "min_angle_p1",
+    "self_intersecting_faces",
+    "surface_area",
+    "edge_length_median",
+    "defects",
+]
+
+
+def fmt_coords(d):
+    if d["ap"] is None:
+        return "–"
+    return f"{d['ap']:.2f}, {d['pd']:.2f}"
+
+
+def defect_table(defects, total=None):
+    """HTML table of defects; total is the number found, if more are listed"""
+    if not defects:
+        return '<p class="muted">No defects found.</p>'
+    rows = []
+    for d in defects:
+        series = DEFECT_CATEGORIES[d["category"]] + 1
+        x, y, z = d["location"]
+        rows.append(
+            f'<tr><td class="num">{d["id"]}</td>'
+            f'<td><span class="key"><span class="swatch" style="background:'
+            f'var(--series-{series})"></span>{html.escape(d["type"])}</span></td>'
+            f"<td>{html.escape(d['surface'])}</td>"
+            f'<td class="num">{d["n_faces"]}</td>'
+            f'<td class="num">{x:.1f}, {y:.1f}, {z:.1f}</td>'
+            f'<td class="num">{fmt_coords(d)}</td>'
+            f"<td>{'yes' if d['at_boundary'] else ''}</td>"
+            f"<td>{html.escape(d['detail'] or '')}</td></tr>"
+        )
+    counts = Counter(d["type"] for d in defects)
+    summary = ", ".join(f"{n} {t}" for t, n in counts.items())
+    if total is not None and total > len(defects):
+        summary += f" (first {len(defects)} of {total} listed)"
+    return (
+        f'<p class="muted" style="font-size:12px">{len(defects)} defects: {summary}.</p>'
+        '<div class="table-wrap" style="max-height:440px;overflow:auto">'
+        '<table><thead><tr><th class="num">#</th><th>Type</th><th>Surface</th>'
+        '<th class="num">Faces</th><th class="num">Location (mm)</th>'
+        '<th class="num">AP, PD</th><th>Outer boundary</th><th>Detail</th></tr></thead>'
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
+    )
+
+
+def defect_panel(title, result, points, faces):
+    """Report panel with the defect map of a surface."""
+    from lib.qc_report import fig_to_png, legend
+
+    key = legend([(cat, i) for cat, i in DEFECT_CATEGORIES.items()])
+    img = fig_to_png(plot_defects(result, points, faces))
+    return (
+        f'<div class="panel"><h4>{html.escape(title)}</h4>{key}'
+        f'<img src="{img}" alt="Defect locations, {html.escape(title)}"></div>'
+    )
+
+
+DEFECT_MAP_CAPTION = (
+    '<p class="muted" style="font-size:12px">Midthickness, face-on. Faces of each '
+    "defect are coloured by category, and numbered as in the tables (defects on the "
+    "inner or outer surface are shown at the same vertices of the midthickness). The "
+    "outer boundary is outlined. Location is the centroid of the defect's central "
+    "face, in the surface's space (corobl, mm); face and vertex ids of each defect "
+    "are in the qcmetrics JSON.</p>"
+)

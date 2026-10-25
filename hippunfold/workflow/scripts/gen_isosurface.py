@@ -73,16 +73,8 @@ logger.info("Extracting largest connected component")
 surface = surface.extract_largest()
 logger.info(surface)
 
-logger.info(f"Filling holes up to radius {snakemake.params.hole_fill_radius}")
-surface = surface.fill_holes(snakemake.params.hole_fill_radius)
-logger.info(surface)
-
-# reduce # of vertices with decimation
-logger.info(f"Decimating surface with {snakemake.params.decimate_opts}")
-surface = surface.decimate(snakemake.params.decimate_opts)
-logger.info(surface)
-
-
+# holes are filled, the surface decimated and repaired in repair_native_mesh,
+# so this raw isosurface can be checked before repair
 logger.info("final surface clean to remove overlapping vertices, etc.")
 surface = surface.clean()
 
