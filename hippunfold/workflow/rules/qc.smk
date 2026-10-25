@@ -394,6 +394,7 @@ surface_qc_thresholds = {
 # midthickness; the report compares each with the final surface
 surface_qc_stages = {
     "isosurf": "isosurf",  # raw isosurface, before repair_native_mesh
+    "repaired": "repaired",  # before improve_native_mesh_quality
 }
 
 
