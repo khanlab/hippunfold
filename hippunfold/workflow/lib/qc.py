@@ -114,13 +114,17 @@ class QCResult:
             json.dump(_to_builtin(self.to_dict()), f, indent=1)
 
     @classmethod
-    def load(cls, path):
+    def load(cls, path, warn_checks=()):
+        """Load a QC result, reporting the checks named in warn_checks as warnings."""
         with open(path) as f:
             d = json.load(f)
         result = cls(d["qc"], d.get("entities"))
         result.metrics = d.get("metrics", {})
         result.checks = d.get("checks", [])
         result.data = d.get("data", {})
+        for check in result.checks:
+            if check["name"] in warn_checks:
+                check["severity"] = WARNING
         return result
 
 
@@ -167,6 +171,7 @@ def verify(results, warn_only=False, logger=None, report=None):
             f"{len(errors)} QC check(s) failed:\n  "
             + "\n  ".join(errors)
             + where
-            + "\nTo continue anyway, re-run with --qc_warn_only."
+            + "\nTo continue anyway, re-run with --qc_warn_only, or with "
+            + "--qc_warn_checks <check name> to report only those checks as warnings."
         )
     return rows

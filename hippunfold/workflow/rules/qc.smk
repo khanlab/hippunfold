@@ -544,6 +544,8 @@ rule qc_report_srcsink:
     resources:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(5),
+    params:
+        warn_checks=config.get("qc_warn_checks") or [],
     script:
         "../scripts/qc_report_srcsink.py"
 
@@ -613,6 +615,7 @@ rule qc_report_surface:
         runtime=scale_by_attempt(10),
     params:
         stages=list(surface_qc_stages),
+        warn_checks=config.get("qc_warn_checks") or [],
     script:
         "../scripts/qc_report_surface.py"
 
@@ -649,5 +652,6 @@ rule qc_verify:
         runtime=scale_by_attempt(1),
     params:
         warn_only=config.get("qc_warn_only", False),
+        warn_checks=config.get("qc_warn_checks") or [],
     script:
         "../scripts/qc_verify.py"

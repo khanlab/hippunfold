@@ -51,6 +51,18 @@ def test_verify_raises_on_error_only():
     assert [r["passed"] for r in rows] == [False, True]
 
 
+def test_load_warn_checks(tmp_path):
+    path = tmp_path / "qc.json"
+    make_result(passed_error=False).save(path)
+
+    assert QCResult.load(path).status == "fail"
+    loaded = QCResult.load(path, warn_checks=["err"])
+    assert loaded.status == "warn"
+    rows = verify([loaded])
+    assert [r["severity"] for r in rows] == [WARNING, WARNING]
+    assert QCResult.load(path, warn_checks=["other"]).status == "fail"
+
+
 def test_report_renders(tmp_path):
     results = [make_result(), make_result(passed_error=False)]
     report = QCReport("Demo", entities={"subject": "001"})

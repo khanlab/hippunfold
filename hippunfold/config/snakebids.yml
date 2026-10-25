@@ -276,6 +276,11 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --qc_warn_checks:
+    help: 'Report only these QC checks as warnings instead of errors, by name as given in the QC reports and qcchecks.tsv files, e.g. terminal_order_hemisphere for inputs whose orientation does not match the expected hemisphere. (default: %(default)s)'
+    default: null
+    nargs: '+'
+
   --enable-bids-validation:
     help: |
       Enable validation of BIDS dataset. BIDS validation would be performed

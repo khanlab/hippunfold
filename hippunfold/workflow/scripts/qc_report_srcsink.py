@@ -23,7 +23,10 @@ def find(paths, entities):
     return matches[0]
 
 
-results = [QCResult.load(path) for path in snakemake.input.metrics]
+results = [
+    QCResult.load(path, warn_checks=snakemake.params.warn_checks)
+    for path in snakemake.input.metrics
+]
 
 subj_entities = {
     k: v for k, v in snakemake.wildcards.items() if k in ("subject", "session")
