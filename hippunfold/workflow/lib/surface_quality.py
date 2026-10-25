@@ -249,11 +249,18 @@ class SurfaceProjector:
         return q[np.arange(len(p)), best]
 
 
-def relax_vertices(points, faces, project, iterations=3, step=0.5):
+def _worse_faces(points, faces, normals, min_angle):
+    """Faces flipped relative to normals, or with an angle below min_angle."""
+    flipped = np.sum(_face_normals(points, faces) * normals, axis=1) <= 0
+    return flipped | (face_geometry(points, faces)[1] < min_angle)
+
+
+def relax_vertices(points, faces, project, iterations=3, step=0.5, min_angle=10.0):
     """
     Tangential relaxation of interior vertices towards the area-weighted
     centroid of their faces, projected back onto the reference surface.
-    Moves that would flip a face are undone.
+    Moves that would flip a face, or make its smallest angle drop below both
+    its current value and min_angle (degrees), are undone.
     """
     points = np.asarray(points, dtype=float).copy()
     n = len(points)
@@ -296,12 +303,15 @@ def relax_vertices(points, faces, project, iterations=3, step=0.5):
         new = points.copy()
         new[interior] = project(points[interior] + step * move[interior])
 
-        # undo moves around faces that would flip
-        flipped = np.sum(_face_normals(new, faces) * fn, axis=1) <= 0
-        while flipped.any():
-            revert = np.unique(faces[flipped])
+        # undo moves around faces that would flip, or whose smallest angle
+        # would drop below both its current value and min_angle (e.g. a vertex
+        # next to the boundary projected onto a boundary edge)
+        floor = np.minimum(face_geometry(points, faces)[1], min_angle)
+        bad = _worse_faces(new, faces, fn, floor)
+        while bad.any():
+            revert = np.unique(faces[bad])
             new[revert] = points[revert]
-            flipped = np.sum(_face_normals(new, faces) * fn, axis=1) <= 0
+            bad = _worse_faces(new, faces, fn, floor)
         points = new
     return points
 

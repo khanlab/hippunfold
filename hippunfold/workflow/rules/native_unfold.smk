@@ -268,6 +268,8 @@ rule laplace_beltrami:
     resources:
         mem_mb=scale_by_attempt(4000),  # large ex vivo scans can need ~36000, depends on decimation too
         runtime=scale_by_attempt(10),
+    params:
+        clamp_negative_weights=True,  # avoids folds where cotangent weights < 0
     script:
         "../scripts/laplace_beltrami.py"
 
