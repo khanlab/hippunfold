@@ -55,10 +55,13 @@ def topology_banner(result):
     )
 
 
-results = [QCResult.load(path) for path in snakemake.input.metrics]
+warn_checks = snakemake.params.warn_checks
+results = [
+    QCResult.load(path, warn_checks=warn_checks) for path in snakemake.input.metrics
+]
 stage_results = {}
 for path in snakemake.input.stage_metrics:
-    r = QCResult.load(path)
+    r = QCResult.load(path, warn_checks=warn_checks)
     stage_results[(r.data["stage"], r.label)] = r
 stages = list(snakemake.params.stages)
 

@@ -6,7 +6,10 @@ from lib.utils import setup_logger
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
-results = [QCResult.load(path) for path in snakemake.input.metrics]
+results = [
+    QCResult.load(path, warn_checks=snakemake.params.warn_checks)
+    for path in snakemake.input.metrics
+]
 rows = verify(
     results,
     warn_only=snakemake.params.warn_only,
