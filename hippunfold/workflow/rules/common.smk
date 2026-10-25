@@ -414,6 +414,19 @@ def get_final_qc():
                     allow_missing=True,
                 )
             )
+    qc.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="qc",
+                desc="{qc}",
+                suffix="qcchecks.tsv",
+                **inputs.subj_wildcards,
+            ),
+            qc=["srcsink"],
+            allow_missing=True,
+        )
+    )
     return qc
 
 
