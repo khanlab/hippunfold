@@ -424,12 +424,12 @@ def monotone_free_arcs(loop, values, src, sink, eps=1e-9):
         loop (np.ndarray): boundary loop vertices, in order.
         values (np.ndarray): coordinate at each mesh vertex.
         src, sink (np.ndarray): boolean masks of the src and sink vertices.
-        eps (float): step added between tied values, to make them strictly
-            monotone.
+        eps (float): step between values pooled by the isotonic fit, to make
+            them strictly monotone.
 
     Returns:
         loop_values (np.ndarray): corrected values at the loop vertices.
-        n_changed (int): number of loop vertices changed by more than eps.
+        n_changed (int): number of loop vertices changed (pooled) by the fit.
     """
     loop = np.asarray(loop)
     loop_values = np.asarray(values, dtype=float)[loop].copy()
@@ -461,8 +461,12 @@ def monotone_free_arcs(loop, values, src, sink, eps=1e-9):
             continue  # both ends on the same terminal: no expected direction
         y = loop_values[arc]
         fit = sign * isotonic_increasing(sign * y)
-        fit += sign * eps * np.arange(len(fit))
-        fit = np.clip(fit, eps, 1 - eps)
-        n_changed += int(np.sum(np.abs(fit - y) > eps * len(fit)))
-        loop_values[arc] = fit
+        # break the ties of pooled blocks, so the arc is strictly monotone
+        starts = np.flatnonzero(np.r_[True, fit[1:] != fit[:-1]])
+        ends = np.r_[starts[1:], len(fit)]
+        for a, b in zip(starts, ends):
+            if b - a > 1:
+                fit[a:b] += sign * eps * (np.arange(b - a) - (b - a - 1) / 2)
+                n_changed += b - a
+        loop_values[arc] = np.clip(fit, eps, 1 - eps)
     return loop_values, n_changed
