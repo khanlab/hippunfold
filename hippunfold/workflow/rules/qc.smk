@@ -374,6 +374,98 @@ def get_native_laplace_coords(direction):
     )
 
 
+surface_qc_thresholds = {
+    "max_genus": 0,
+    "max_holes": 0,  # boundary loops in addition to the outer one
+    "max_nonmanifold": 0,  # non-manifold edges + vertices
+    "max_misoriented_faces": 0,
+    "max_degenerate_faces": 0,  # zero-area or duplicate, per surface
+    "max_self_intersecting_faces": 0,  # per surface
+    "sliver_angle": 5.0,  # degrees
+    "max_sliver_faces": 0,  # per surface
+    "max_flipped_faces": 0,  # in the unfolded mapping
+    "max_collapsed_faces": 0,  # zero area in the unfolded mapping
+    "distortion_log2": 2.0,  # |log2 areal ratio| that counts as distorted
+    "max_distorted_fraction": 0.05,
+}
+
+# intermediate stages of surface processing whose surfaces are also checked,
+# in processing order, mapped to the desc of their (native, corobl)
+# midthickness; the report compares each with the final surface
+surface_qc_stages = {
+    "isosurf": "isosurf",  # raw isosurface, before repair_native_mesh
+}
+
+
+def get_surface_qc_stage_metrics(wildcards):
+    return (
+        inputs[config["modality"]]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=root,
+                datatype="qc",
+                suffix="qcmetrics.json",
+                desc="surface",
+                stage="{stage}",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            stage=list(surface_qc_stages),
+            hemi=config["hemi"],
+            label=config["autotop_labels"],
+        )
+    )
+
+
+rule qc_metrics_surface_stage:
+    """Topology, mesh quality and self-intersections of the midthickness at an
+    intermediate stage of processing (e.g. before repair), for comparison"""
+    input:
+        midthickness=lambda wildcards: bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            den="native",
+            desc=surface_qc_stages[wildcards.stage],
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        qc=bids(
+            root=root,
+            datatype="qc",
+            suffix="qcmetrics.json",
+            desc="surface",
+            stage="{stage}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    log:
+        bids_log(
+            "qc_metrics_surface_stage",
+            stage="{stage}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    wildcard_constraints:
+        stage="|".join(surface_qc_stages),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(5),
+    params:
+        qc_thresholds=surface_qc_thresholds,
+    script:
+        "../scripts/qc_metrics_surface.py"
+
+
 rule qc_metrics_surface:
     """Topology (Euler characteristic, genus, boundary loops), mesh quality,
     self-intersections and unfolded mapping of the native surfaces, with every
@@ -407,20 +499,7 @@ rule qc_metrics_surface:
         mem_mb=scale_by_attempt(4000),
         runtime=scale_by_attempt(5),
     params:
-        qc_thresholds={
-            "max_genus": 0,
-            "max_holes": 0,  # boundary loops in addition to the outer one
-            "max_nonmanifold": 0,  # non-manifold edges + vertices
-            "max_misoriented_faces": 0,
-            "max_degenerate_faces": 0,  # zero-area or duplicate, per surface
-            "max_self_intersecting_faces": 0,  # per surface
-            "sliver_angle": 5.0,  # degrees
-            "max_sliver_faces": 0,  # per surface
-            "max_flipped_faces": 0,  # in the unfolded mapping
-            "max_collapsed_faces": 0,  # zero area in the unfolded mapping
-            "distortion_log2": 2.0,  # |log2 areal ratio| that counts as distorted
-            "max_distorted_fraction": 0.05,
-        },
+        qc_thresholds=surface_qc_thresholds,
     script:
         "../scripts/qc_metrics_surface.py"
 
@@ -472,6 +551,18 @@ rule qc_report_surface:
     """HTML report of the topology and quality of each surface, listing defects"""
     input:
         metrics=get_surface_qc_metrics,
+        stage_metrics=get_surface_qc_stage_metrics,
+        stage_surf=lambda wildcards: [
+            path
+            for desc in surface_qc_stages.values()
+            for path in get_qc_surf_inputs(
+                wildcards,
+                datatype="surf",
+                space="corobl",
+                desc=desc,
+                suffix="midthickness.surf.gii",
+            )
+        ],
         surf=lambda wildcards: get_qc_surf_inputs(
             wildcards,
             datatype="surf",
@@ -519,6 +610,8 @@ rule qc_report_surface:
     resources:
         mem_mb=scale_by_attempt(4000),
         runtime=scale_by_attempt(10),
+    params:
+        stages=list(surface_qc_stages),
     script:
         "../scripts/qc_report_surface.py"
 

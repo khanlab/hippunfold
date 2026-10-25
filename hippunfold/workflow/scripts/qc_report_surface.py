@@ -1,17 +1,19 @@
-import html
 import re
-from collections import Counter
 
 import nibabel as nib
 import numpy as np
 from lib.qc import QCResult
-from lib.qc_report import QCReport, fig_to_png, legend
+from lib.qc_report import QCReport, fig_to_png
 from lib.qc_surface import (
+    COMPARE_METRICS,
     DEFAULT_THRESHOLDS,
-    DEFECT_CATEGORIES,
+    DEFECT_MAP_CAPTION,
     DEFECT_TYPES,
+    STAGE_DESCS,
+    STAGE_LABELS,
+    defect_panel,
+    defect_table,
     face_geometry,
-    plot_defects,
     plot_distortion,
     plot_histograms,
     unfold_distortion,
@@ -53,37 +55,30 @@ def topology_banner(result):
     )
 
 
-def defect_table(defects):
-    if not defects:
-        return '<p class="muted">No defects found.</p>'
-    rows = []
-    for d in defects:
-        series = DEFECT_CATEGORIES[d["category"]] + 1
-        x, y, z = d["location"]
-        rows.append(
-            f'<tr><td class="num">{d["id"]}</td>'
-            f'<td><span class="key"><span class="swatch" style="background:'
-            f'var(--series-{series})"></span>{html.escape(d["type"])}</span></td>'
-            f"<td>{html.escape(d['surface'])}</td>"
-            f'<td class="num">{d["n_faces"]}</td>'
-            f'<td class="num">{x:.1f}, {y:.1f}, {z:.1f}</td>'
-            f'<td class="num">{d["ap"]:.2f}, {d["pd"]:.2f}</td>'
-            f"<td>{'yes' if d['at_boundary'] else ''}</td>"
-            f"<td>{html.escape(d['detail'] or '')}</td></tr>"
-        )
-    counts = Counter(d["type"] for d in defects)
-    summary = ", ".join(f"{n} {t}" for t, n in counts.items())
-    return (
-        f'<p class="muted" style="font-size:12px">{len(defects)} defects: {summary}.</p>'
-        '<div class="table-wrap" style="max-height:440px;overflow:auto">'
-        '<table><thead><tr><th class="num">#</th><th>Type</th><th>Surface</th>'
-        '<th class="num">Faces</th><th class="num">Location (mm)</th>'
-        '<th class="num">AP, PD</th><th>Outer boundary</th><th>Detail</th></tr></thead>'
-        f"<tbody>{''.join(rows)}</tbody></table></div>"
-    )
-
-
 results = [QCResult.load(path) for path in snakemake.input.metrics]
+stage_results = {}
+for path in snakemake.input.stage_metrics:
+    r = QCResult.load(path)
+    stage_results[(r.data["stage"], r.label)] = r
+stages = list(snakemake.params.stages)
+
+
+def stages_of(result):
+    """(stage, result) for each intermediate stage of a final result, then final"""
+    found = [
+        (s, stage_results[(s, result.label)])
+        for s in stages
+        if (s, result.label) in stage_results
+    ]
+    return found + [("final", result)]
+
+
+def stage_surface(stage, entities):
+    if stage == "final":
+        return find(snakemake.input.surf, entities)
+    paths = [p for p in snakemake.input.stage_surf if f"desc-{stage}_" in p]
+    return find(paths, entities)
+
 
 subj_entities = {
     k: v for k, v in snakemake.wildcards.items() if k in ("subject", "session")
@@ -97,7 +92,8 @@ report = QCReport(
         "and one boundary loop, so χ = V − E + F = 1. Checks below flag handles, "
         "holes, non-manifold or misoriented elements, self-intersections, poor "
         "triangles, and folded-over or collapsed faces in the unfolded (AP, PD) "
-        "mapping. Every defect found is listed, located on the surface."
+        "mapping. Every defect found is listed, located on the surface, and the "
+        "surface is compared before and after processing steps such as repair."
     ),
 )
 
@@ -114,7 +110,9 @@ report.add_summary(
     results,
     extra_columns={
         "χ / g / b": fmt_topology,
-        "Defects": lambda r: r.metrics["defects"]["value"],
+        "Defects": lambda r: " → ".join(
+            str(sr.metrics["defects"]["value"]) for _, sr in stages_of(r)
+        ),
         "Self-intersecting": lambda r: sum(
             v["value"]
             for k, v in r.metrics.items()
@@ -124,7 +122,6 @@ report.add_summary(
     },
 )
 
-category_legend = legend([(cat, i) for cat, i in DEFECT_CATEGORIES.items()])
 
 for result in results:
     logger.info(f"Adding section for {result.label}")
@@ -141,18 +138,41 @@ for result in results:
     coords_pd = nib.load(find(snakemake.input.coords_pd, result.entities)).agg_data()
     defects = result.data["defects"]
 
+    staged = stages_of(result)
+    if len(staged) > 1:
+        section.add_heading("Before and after surface processing")
+        section.add_html(
+            '<p class="muted" style="font-size:12px">'
+            + "; ".join(
+                f"<b>{STAGE_LABELS.get(s, s)}</b>: {STAGE_DESCS[s]}"
+                for s, _ in staged[:-1]
+            )
+            + ". Unfolded-mapping checks need the final surface, so are only run "
+            "there.</p>"
+        )
+        section.add_comparison(
+            [(STAGE_LABELS.get(s, s), r) for s, r in staged], names=COMPARE_METRICS
+        )
+
     section.add_heading("Defects")
-    section.add_html(
-        '<div class="panels"><div class="panel"><h4>Defect locations (midthickness, '
-        f'face-on)</h4>{category_legend}<img src="{fig_to_png(plot_defects(result, points, faces))}" '
-        'alt="Defect locations"></div></div><p class="muted" style="font-size:12px">'
-        "Faces of each defect are coloured by category, and numbered as in the table "
-        "below (defects on the inner or outer surface are shown at the same vertices "
-        "of the midthickness). The outer boundary is outlined. Location is the "
-        "centroid of the defect's central face, in the surface's space (corobl, mm); "
-        "face and vertex ids of each defect are in the qcmetrics JSON.</p>"
-    )
-    section.add_html(defect_table(defects))
+    panels = ""
+    for stage, stage_result in staged:
+        if stage == "final":
+            p, f = points, faces
+        else:
+            p, f = nib.load(stage_surface(stage, result.entities)).agg_data()
+        n = stage_result.metrics["defects"]["value"]
+        panels += defect_panel(
+            f"{STAGE_LABELS.get(stage, stage)}: {n} defects", stage_result, p, f
+        )
+    section.add_html(f'<div class="panels">{panels}</div>{DEFECT_MAP_CAPTION}')
+    section.add_html(defect_table(defects, result.metrics["defects"]["value"]))
+    for stage, stage_result in staged[:-1]:
+        section.add_html(
+            f'<details class="metrics"><summary>{STAGE_LABELS.get(stage, stage)} '
+            f"defects ({stage_result.metrics['defects']['value']})</summary>"
+            f"{defect_table(stage_result.data['defects'], stage_result.metrics['defects']['value'])}</details>"
+        )
 
     _, _, flipped, log_ratio = unfold_distortion(points, faces, coords_ap, coords_pd)
     figs = plot_distortion(points, faces, coords_ap, coords_pd, flipped, log_ratio)
