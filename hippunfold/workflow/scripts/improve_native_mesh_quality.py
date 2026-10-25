@@ -1,6 +1,11 @@
 import nibabel as nib
 import numpy as np
-from lib.qc_surface import compute_topology, face_geometry, self_intersecting_faces
+from lib.qc_surface import (
+    boundary_chords,
+    compute_topology,
+    face_geometry,
+    self_intersecting_faces,
+)
 from lib.surface import write_points_faces_to_gifti
 from lib.surface_quality import improve_quality
 from lib.utils import setup_logger
@@ -8,14 +13,18 @@ from lib.utils import setup_logger
 log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
-TOPOLOGY_KEYS = ("V", "F", "chi", "components", "boundary_loops", "genus")
+# boundary chords are split, adding vertices and faces, so V and F can change
+TOPOLOGY_KEYS = ("chi", "components", "boundary_loops", "genus")
 
 
 def summary(points, faces):
     t = compute_topology(points, faces)
     min_angle = face_geometry(points, faces)[1]
     return {
+        "V": t["V"],
+        "F": t["F"],
         **{k: t[k] for k in TOPOLOGY_KEYS},
+        "boundary_chords": len(boundary_chords(faces)),
         "misoriented": len(t["misoriented_faces"]),
         "nonmanifold": len(t["nonmanifold_edges"]) + len(t["nonmanifold_vertices"]),
         "self_intersecting": len(self_intersecting_faces(points, faces)),
@@ -41,6 +50,8 @@ new_points, new_faces, info = improve_quality(
 after = summary(new_points, new_faces)
 logger.info(f"after: {after}")
 logger.info(
+    f"boundary chords: {info['boundary_chords_flipped']} flipped, "
+    f"{info['boundary_chords_split']} split; "
     f"{info['edge_flips']} edge flips; vertices moved (along the surface) "
     f"max {info['max_vertex_move']:.3f} mm, mean {info['mean_vertex_move']:.3f} mm; "
     f"distance between the surfaces max {info['max_surface_distance']:.3f} mm, "

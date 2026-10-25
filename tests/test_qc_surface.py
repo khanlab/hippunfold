@@ -54,9 +54,11 @@ def test_disk_topology():
     assert t["orientable"] and len(t["misoriented_faces"]) == 0
     assert len(t["nonmanifold_edges"]) == 0 and len(t["nonmanifold_vertices"]) == 0
 
+    # the grid diagonals make ears at two corners: the only defects
     result = qc(points, faces, u, v)
-    assert result.status == "pass"
-    assert result.data["defects"] == []
+    assert [c["name"] for c in result.failed()] == ["boundary_chords"]
+    assert {d["type"] for d in result.data["defects"]} == {"boundary_chord"}
+    assert result.metrics["boundary_chords"]["value"] == 2
 
 
 def test_hole():

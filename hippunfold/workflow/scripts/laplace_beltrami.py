@@ -9,40 +9,34 @@ log_file = snakemake.log[0] if snakemake.log else None
 logger = setup_logger(log_file)
 
 
-def cotangent_laplacian(vertices, faces):
+def cotangent_laplacian(vertices, faces, clamp_negative=True):
+    """
+    Cotangent Laplacian. Each edge weight is half the sum of the cotangents of
+    the angles opposite it. Obtuse angles make weights negative, which can fold
+    the solution over (non-monotonic coordinates); clamp_negative sets negative
+    edge weights to zero.
+    """
     n_vertices = vertices.shape[0]
-    # Step 1: Compute cotangent weights
+    rows, cols, vals = [], [], []
+    for k in range(3):
+        # edge (i, j) opposite corner o
+        i, j, o = faces[:, (k + 1) % 3], faces[:, (k + 2) % 3], faces[:, k]
+        u, w = vertices[i] - vertices[o], vertices[j] - vertices[o]
+        cross = np.linalg.norm(np.cross(u, w), axis=1)
+        safe = cross > 1e-12
+        cot = np.zeros(len(faces))
+        cot[safe] = np.einsum("ij,ij->i", u[safe], w[safe]) / cross[safe]
+        rows += [i, j]
+        cols += [j, i]
+        vals += [cot / 2, cot / 2]
     weights = coo_matrix(
-        (n_vertices, n_vertices), dtype=np.float64
-    ).tocsr()  # Initialize sparse matrix.
-
-    for tri in faces:
-        v0, v1, v2 = vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]
-        e0 = v1 - v2
-        e1 = v2 - v0
-        e2 = v0 - v1
-
-        # Compute cross products and norms
-        cross0 = np.cross(e1, -e2)
-        cross1 = np.cross(e2, -e0)
-        cross2 = np.cross(e0, -e1)
-
-        norm0 = np.linalg.norm(cross0)
-        norm1 = np.linalg.norm(cross1)
-        norm2 = np.linalg.norm(cross2)
-
-        # Compute cotangent weights safely
-        cot0 = np.dot(e1, -e2) / norm0 if norm0 > 1e-12 else 0.0
-        cot1 = np.dot(e2, -e0) / norm1 if norm1 > 1e-12 else 0.0
-        cot2 = np.dot(e0, -e1) / norm2 if norm2 > 1e-12 else 0.0
-        weights[tri[0], tri[1]] += cot2 / 2
-        weights[tri[1], tri[0]] += cot2 / 2
-        weights[tri[1], tri[2]] += cot0 / 2
-        weights[tri[2], tri[1]] += cot0 / 2
-        weights[tri[2], tri[0]] += cot1 / 2
-        weights[tri[0], tri[2]] += cot1 / 2
-    logger.info("weights.tocsr()")
-    weights = weights.tocsr()
+        (np.concatenate(vals), (np.concatenate(rows), np.concatenate(cols))),
+        shape=(n_vertices, n_vertices),
+    ).tocsr()  # duplicate entries (an edge's two faces) are summed
+    if clamp_negative:
+        n_negative = int(np.sum(weights.data < 0)) // 2
+        logger.info(f"Clamping {n_negative} negative edge weights to zero")
+        weights.data = np.maximum(weights.data, 0)
     diagonal = weights.sum(axis=1).A1
     # Ensure no zero entries in diagonal to avoid singular matrix issues
     diagonal[diagonal < 1e-12] = 1e-12
@@ -50,7 +44,9 @@ def cotangent_laplacian(vertices, faces):
     return laplacian
 
 
-def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
+def solve_laplace_beltrami_open_mesh(
+    vertices, faces, boundary_conditions=None, clamp_negative_weights=True
+):
     """
     Solve the Laplace-Beltrami equation on a 3D open-faced surface mesh. No islands please!
 
@@ -64,7 +60,7 @@ def solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions=None):
     """
     n_vertices = vertices.shape[0]
     logger.info("solve_laplace_beltrami_open_mesh")
-    laplacian = cotangent_laplacian(vertices, faces)
+    laplacian = cotangent_laplacian(vertices, faces, clamp_negative_weights)
 
     # Step 2: Handle boundaries for open meshes
     logger.info("Handle boundaries for open meshes")
@@ -134,7 +130,12 @@ boundary_conditions = dict(
 )
 
 
-coords = solve_laplace_beltrami_open_mesh(vertices, faces, boundary_conditions)
+coords = solve_laplace_beltrami_open_mesh(
+    vertices,
+    faces,
+    boundary_conditions,
+    clamp_negative_weights=snakemake.params.clamp_negative_weights,
+)
 
 # make fully uniform distribution
 domain = np.setdiff1d(

@@ -1,6 +1,6 @@
 """
-Triangle-quality improvement of a surface mesh, keeping its topology,
-vertex count and shape.
+Triangle-quality improvement of a surface mesh, keeping its topology and
+shape.
 
 - flip_edges: flips interior edges where that raises the smallest angle of
   the two adjoining triangles, if the quad they form is nearly flat (so the
@@ -10,11 +10,19 @@ vertex count and shape.
   of their faces, within the tangent plane, then back onto the original
   surface. Boundary vertices are fixed.
 
-improve_quality alternates the two, and reports how far vertices moved.
+- boundary chords, interior edges that join two boundary vertices (e.g.
+  the inner edge of an ear, a face with two boundary edges), are flipped
+  where possible, and otherwise split at their midpoint by
+  split_boundary_chords. Otherwise a face with all three vertices on one
+  terminal arc of the boundary has a fixed coordinate at every vertex, and
+  collapses to zero area in the unfolded space.
+
+improve_quality removes boundary chords (by flips, or else splits), then
+alternates flips and relaxation, and reports how far vertices moved.
 """
 
 import numpy as np
-from lib.qc_surface import face_geometry, unique_edges
+from lib.qc_surface import boundary_chords, face_geometry, unique_edges
 from scipy.spatial import cKDTree
 
 
@@ -36,14 +44,18 @@ def _min_angle(a, b, c):
     return np.min(angles, axis=0)
 
 
-def flip_edges(points, faces, max_flip_dist, min_gain=1.0, max_passes=20):
+def flip_edges(
+    points, faces, max_flip_dist, min_gain=1.0, min_chord_angle=10.0, max_passes=20
+):
     """
     Flip interior edges that raise the smallest angle of their two triangles
-    by at least min_gain degrees. A flip is allowed only if the quad is nearly
-    flat (the two diagonals are at most max_flip_dist apart), both new faces
-    keep the orientation of the old ones, the new edge does not exist yet,
-    and no vertex is left with fewer than 3 edges (2 on the boundary).
-    Returns the new faces and the number of flips.
+    by at least min_gain degrees, and boundary chords (interior edges joining
+    two boundary vertices), first and whenever the new triangles' smallest
+    angle is at least min_chord_angle. A flip is allowed only if the quad is
+    nearly flat (the two diagonals are at most max_flip_dist apart), both new
+    faces keep the orientation of the old ones, the new edge does not exist
+    yet and is not a chord, and no vertex is left with fewer than 3 edges (2
+    on the boundary). Returns the new faces and the number of flips.
     """
     faces = np.asarray(faces, dtype=np.int64).copy()
     n_points = len(points)
@@ -85,9 +97,17 @@ def flip_edges(points, faces, max_flip_dist, min_gain=1.0, max_passes=20):
         min_degree = np.where(boundary, 2, 3)
         ok_degree = (degree[a] - 1 >= min_degree[a]) & (degree[b] - 1 >= min_degree[b])
 
+        # never join two boundary vertices by an interior edge (a chord), but
+        # remove chords where possible
+        no_chord = ~(boundary[c] & boundary[d])
+        is_chord = boundary[a] & boundary[b]
+        wanted = np.where(is_chord, after >= min_chord_angle, gain >= min_gain)
+        priority = np.where(is_chord, np.inf, gain)
+
         candidates = np.flatnonzero(
-            (gain >= min_gain)
+            wanted
             & consistent
+            & no_chord
             & keeps_orientation
             & (dist <= max_flip_dist)
             & ok_degree
@@ -97,7 +117,7 @@ def flip_edges(points, faces, max_flip_dist, min_gain=1.0, max_passes=20):
         existing = set((edges[:, 0] * n_points + edges[:, 1]).tolist())
         touched = np.zeros(len(faces), dtype=bool)
         n_flips = 0
-        for i in candidates[np.argsort(-gain[candidates])]:
+        for i in candidates[np.argsort(-priority[candidates], kind="stable")]:
             if touched[f1[i]] or touched[f2[i]]:
                 continue
             key = min(c[i], d[i]) * n_points + max(c[i], d[i])
@@ -114,8 +134,53 @@ def flip_edges(points, faces, max_flip_dist, min_gain=1.0, max_passes=20):
     return faces, total
 
 
+def split_boundary_chords(points, faces, max_passes=10):
+    """
+    Split interior edges joining two boundary vertices at their midpoint, so
+    every face has a vertex off the boundary. Each split replaces the two
+    faces of the edge by four, keeping their winding. Returns points, faces
+    and the number of splits.
+    """
+    points = np.asarray(points, dtype=float)
+    faces = np.asarray(faces, dtype=np.int64).copy()
+    total = 0
+    for _ in range(max_passes):
+        edges, inverse, directed = unique_edges(faces)
+        counts = np.bincount(inverse, minlength=len(edges))
+        boundary = np.zeros(len(points), dtype=bool)
+        boundary[edges[counts == 1].ravel()] = True
+        chord = (counts == 2) & boundary[edges[:, 0]] & boundary[edges[:, 1]]
+        if not chord.any():
+            break
+        face_edges = np.flatnonzero(chord[inverse])
+        touched = np.zeros(len(faces), dtype=bool)
+        new_points, replace, extra = [], {}, []
+        for e in np.unique(inverse[face_edges]):
+            fe1, fe2 = face_edges[inverse[face_edges] == e]
+            f1, f2 = fe1 // 3, fe2 // 3
+            if touched[f1] or touched[f2]:
+                continue  # a face with two chords: split the other next pass
+            a, b = directed[fe1]
+            c = faces[f1, (fe1 % 3 + 2) % 3]
+            d = faces[f2, (fe2 % 3 + 2) % 3]
+            m = len(points) + len(new_points)
+            new_points.append(0.5 * (points[a] + points[b]))
+            # (a, b, c) -> (a, m, c), (m, b, c); (b, a, d) -> (b, m, d), (m, a, d)
+            replace[f1] = (a, m, c)
+            replace[f2] = (b, m, d)
+            extra += [(m, b, c), (m, a, d)]
+            touched[[f1, f2]] = True
+        for f, tri in replace.items():
+            faces[f] = tri
+        points = np.vstack([points, new_points])
+        faces = np.vstack([faces, extra])
+        total += len(new_points)
+    return points, faces, total
+
+
 def closest_points_on_triangles(p, a, b, c):
     """Closest point to each p on triangle (a, b, c), vectorised (Ericson)."""
+    p, a, b, c = np.broadcast_arrays(p, a, b, c)
     ab, ac, ap = b - a, c - a, p - a
     d1, d2 = np.sum(ab * ap, -1), np.sum(ac * ap, -1)
     bp = p - b
@@ -129,7 +194,7 @@ def closest_points_on_triangles(p, a, b, c):
     with np.errstate(divide="ignore", invalid="ignore"):
         v = vb / denom
         w = vc / denom
-    result = a + ab * v[..., None] + ac * w[..., None]  # interior
+        result = a + ab * v[..., None] + ac * w[..., None]  # interior
 
     def where(mask, value):
         result[mask] = value[mask]
@@ -148,6 +213,20 @@ def closest_points_on_triangles(p, a, b, c):
         where((vc <= 0) & (d1 >= 0) & (d3 <= 0), a + ab * t_ab[..., None])
     where((d3 >= 0) & (d4 <= d3), b)
     where((d1 <= 0) & (d2 <= 0), a)
+    # degenerate (zero-area) triangles: the nearest vertex
+    bad = ~np.all(np.isfinite(result), axis=-1)
+    if bad.any():
+        corners = np.stack(np.broadcast_arrays(a, b, c), axis=-2)
+        nearest = np.argmin(
+            np.linalg.norm(
+                corners - np.broadcast_to(p, a.shape)[..., None, :], axis=-1
+            ),
+            axis=-1,
+        )
+        vertex = np.take_along_axis(corners, nearest[..., None, None], axis=-2)[
+            ..., 0, :
+        ]
+        result[bad] = vertex[bad]
     return result
 
 
@@ -170,11 +249,18 @@ class SurfaceProjector:
         return q[np.arange(len(p)), best]
 
 
-def relax_vertices(points, faces, project, iterations=3, step=0.5):
+def _worse_faces(points, faces, normals, min_angle):
+    """Faces flipped relative to normals, or with an angle below min_angle."""
+    flipped = np.sum(_face_normals(points, faces) * normals, axis=1) <= 0
+    return flipped | (face_geometry(points, faces)[1] < min_angle)
+
+
+def relax_vertices(points, faces, project, iterations=3, step=0.5, min_angle=10.0):
     """
     Tangential relaxation of interior vertices towards the area-weighted
     centroid of their faces, projected back onto the reference surface.
-    Moves that would flip a face are undone.
+    Moves that would flip a face, or make its smallest angle drop below both
+    its current value and min_angle (degrees), are undone.
     """
     points = np.asarray(points, dtype=float).copy()
     n = len(points)
@@ -217,12 +303,15 @@ def relax_vertices(points, faces, project, iterations=3, step=0.5):
         new = points.copy()
         new[interior] = project(points[interior] + step * move[interior])
 
-        # undo moves around faces that would flip
-        flipped = np.sum(_face_normals(new, faces) * fn, axis=1) <= 0
-        while flipped.any():
-            revert = np.unique(faces[flipped])
+        # undo moves around faces that would flip, or whose smallest angle
+        # would drop below both its current value and min_angle (e.g. a vertex
+        # next to the boundary projected onto a boundary edge)
+        floor = np.minimum(face_geometry(points, faces)[1], min_angle)
+        bad = _worse_faces(new, faces, fn, floor)
+        while bad.any():
+            revert = np.unique(faces[bad])
             new[revert] = points[revert]
-            flipped = np.sum(_face_normals(new, faces) * fn, axis=1) <= 0
+            bad = _worse_faces(new, faces, fn, floor)
         points = new
     return points
 
@@ -237,12 +326,19 @@ def improve_quality(
     """
     points = np.asarray(points, dtype=float)
     faces = np.asarray(faces, dtype=np.int64)
-    original = points.copy()
+    original_points = points.copy()
     project = SurfaceProjector(points, faces)
     median_edge = float(np.median(face_geometry(points, faces)[2]))
     max_flip_dist = flip_tolerance * median_edge
 
-    n_flips = 0
+    # remove boundary chords by flipping where possible, else by splitting
+    # (midpoints of split edges lie on the surface, so need no projection)
+    n_chords = len(boundary_chords(faces))
+    faces, n_flips = flip_edges(points, faces, max_flip_dist)
+    n_chords_flipped = n_chords - len(boundary_chords(faces))
+    points, faces, n_splits = split_boundary_chords(points, faces)
+    original = points.copy()
+
     for _ in range(rounds):
         faces, n = flip_edges(points, faces, max_flip_dist)
         n_flips += n
@@ -257,12 +353,14 @@ def improve_quality(
     centroids = tri.mean(axis=1)
     to_original = np.linalg.norm(project(centroids) - centroids, axis=1)
     to_new = np.linalg.norm(
-        SurfaceProjector(points, faces)(original) - original, axis=1
+        SurfaceProjector(points, faces)(original_points) - original_points, axis=1
     )
     return (
         points,
         faces,
         {
+            "boundary_chords_flipped": n_chords_flipped,
+            "boundary_chords_split": n_splits,
             "edge_flips": n_flips,
             "max_vertex_move": float(moved.max()),
             "mean_vertex_move": float(moved.mean()),
