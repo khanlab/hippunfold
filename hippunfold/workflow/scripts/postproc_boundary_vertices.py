@@ -64,14 +64,29 @@ for check in qc.failed():
 qc.save(snakemake.output.qc)
 
 
+# vertices fixed by the Laplace-Beltrami boundary conditions: the terminal arcs
+# of the boundary loop, or (as before) the whole boundary band, which makes
+# faces with all their vertices in the band collapse in the unfolded space
+if snakemake.params.dirichlet_on == "loop":
+    fixed_vertices = np.asarray(info["loop"])
+    fixed_labels = np.asarray(info["loop_labels"])
+elif snakemake.params.dirichlet_on == "band":
+    fixed_vertices = boundary_vertices
+    fixed_labels = labels
+else:
+    raise ValueError(f"Unknown dirichlet_on: {snakemake.params.dirichlet_on}")
+logger.info(
+    f"Boundary conditions on the {snakemake.params.dirichlet_on}: "
+    f"{len(fixed_vertices)} of {len(boundary_vertices)} boundary vertices"
+)
+
 ap_srcsink = np.zeros((len(edges)), dtype=np.int32)
-idx_edges = np.where(edges == 1)[0]
-ap_srcsink[idx_edges[labels == 0]] = 1
-ap_srcsink[idx_edges[labels == 1]] = 2
+ap_srcsink[fixed_vertices[fixed_labels == 0]] = 1
+ap_srcsink[fixed_vertices[fixed_labels == 1]] = 2
 
 pd_srcsink = np.zeros((len(edges)), dtype=np.int32)
-pd_srcsink[idx_edges[labels == 2]] = 1
-pd_srcsink[idx_edges[labels == 3]] = 2
+pd_srcsink[fixed_vertices[fixed_labels == 2]] = 1
+pd_srcsink[fixed_vertices[fixed_labels == 3]] = 2
 
 
 # save to gifti:

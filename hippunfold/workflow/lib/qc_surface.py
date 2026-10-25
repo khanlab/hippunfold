@@ -37,6 +37,7 @@ DEFAULT_THRESHOLDS = {
     "max_self_intersecting_faces": 0,  # per surface
     "sliver_angle": 5.0,  # degrees, min triangle angle below this is a sliver
     "max_sliver_faces": 0,  # per surface
+    "max_boundary_chords": 0,  # interior edges joining two boundary vertices
     "max_flipped_faces": 0,  # in the unfolded mapping
     "max_collapsed_faces": 0,  # zero area in the unfolded mapping
     "distortion_log2": 2.0,  # |log2 areal ratio| above this is distorted (4x)
@@ -241,6 +242,22 @@ def max_angles(points, faces):
     return np.max(angles, axis=0)
 
 
+def boundary_chords(faces, return_faces=False):
+    """
+    Interior edges (as vertex pairs) joining two boundary vertices, and
+    optionally the faces they belong to.
+    """
+    faces = np.asarray(faces, dtype=np.int64)
+    edges, inverse, _ = unique_edges(faces)
+    counts = np.bincount(inverse, minlength=len(edges))
+    boundary = np.zeros(faces.max() + 1, dtype=bool)
+    boundary[edges[counts == 1].ravel()] = True
+    chord = (counts == 2) & boundary[edges[:, 0]] & boundary[edges[:, 1]]
+    if not return_faces:
+        return edges[chord]
+    return edges[chord], np.unique(np.flatnonzero(chord[inverse]) // 3)
+
+
 def duplicate_faces(faces):
     _, counts = np.unique(np.sort(faces, axis=1), axis=0, return_counts=True)
     return int(np.sum(counts - 1))
@@ -342,6 +359,13 @@ DEFECT_TYPES = {
     "self_intersection": ("intersection", "Faces crossing other faces"),
     "degenerate": ("quality", "Zero-area or duplicate faces"),
     "sliver": ("quality", "Triangles with a very small angle"),
+    "boundary_chord": (
+        "quality",
+        (
+            "Interior edges joining two boundary vertices (faces with all "
+            "vertices on one terminal arc collapse in the unfolded space)"
+        ),
+    ),
     "unfold_flipped": ("unfold", "Faces folded over in the unfolded mapping"),
     "unfold_collapsed": ("unfold", "Faces with zero area in the unfolded mapping"),
 }
@@ -597,6 +621,22 @@ def compute_qc(surfaces, coords_ap, coords_pd, entities, thresholds):
             + (", …" if len(cl) > 6 else "")
         ),
     )
+
+    chords, chord_faces = boundary_chords(faces, return_faces=True)
+    result.add_metric(
+        "boundary_chords",
+        len(chords),
+        "Interior edges joining two boundary vertices",
+    )
+    result.add_check(
+        "boundary_chords",
+        len(chords) <= th["max_boundary_chords"],
+        f"{len(chords)} interior edges join two boundary vertices",
+        severity=WARNING,
+        description="Every face has a vertex off the boundary, so none collapses "
+        "when the terminal arcs of the boundary are fixed",
+    )
+    defects.add("boundary_chord", names[0], chord_faces)
 
     # --- mesh quality and self-intersections, per surface ---
     counts = {"degenerate": {}, "sliver": {}, "self_intersection": {}}
@@ -960,6 +1000,7 @@ COMPARE_METRICS = [
     "degenerate_faces",
     "duplicate_faces",
     "sliver_faces",
+    "boundary_chords",
     "min_angle_p1",
     "obtuse_fraction",
     "max_angle_p99",

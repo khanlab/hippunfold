@@ -89,7 +89,9 @@ rule map_src_sink_sdt_to_surf:
 rule postproc_boundary_vertices:
     """ensures non-overlapping and full labelling of AP/PD edges, fitting the
     src/sink terminals as contiguous arcs of the boundary loop, in alternating
-    AP/PD order (AP src and sink opposite, PD src and sink opposite)"""
+    AP/PD order (AP src and sink opposite, PD src and sink opposite). The
+    src/sink masks for the Laplace-Beltrami solve hold the terminal arcs of the
+    loop only (dirichlet_on="loop"), so no faces collapse in unfolded space"""
     input:
         ap_src=bids(
             root=root,
@@ -205,6 +207,7 @@ rule postproc_boundary_vertices:
     params:
         min_terminal_vertices=5,  # min number of boundary loop vertices per src/sink
         ap_length_penalty=0.0,  # per-vertex cost (mm) of AP src/sink, >0 shortens them
+        dirichlet_on="loop",  # vertices fixed in the Laplace-Beltrami solve: loop or band
         qc_thresholds={
             "max_relabelled_fraction": 0.1,  # of loop changed from nearest terminal
             "max_ap_fraction": 0.25,  # of loop in each AP terminal
