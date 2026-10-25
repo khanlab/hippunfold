@@ -255,12 +255,13 @@ def _worse_faces(points, faces, normals, min_angle):
     return flipped | (face_geometry(points, faces)[1] < min_angle)
 
 
-def relax_vertices(points, faces, project, iterations=3, step=0.5, min_angle=10.0):
+def relax_vertices(points, faces, project, iterations=3, step=0.5, min_angle=5.0):
     """
     Tangential relaxation of interior vertices towards the area-weighted
     centroid of their faces, projected back onto the reference surface.
     Moves that would flip a face, or make its smallest angle drop below both
-    its current value and min_angle (degrees), are undone.
+    its current value and min_angle (degrees, the sliver threshold of the QC),
+    are undone.
     """
     points = np.asarray(points, dtype=float).copy()
     n = len(points)
@@ -346,7 +347,7 @@ def improve_quality(
     faces, n = flip_edges(points, faces, max_flip_dist)
     n_flips += n
 
-    moved = np.linalg.norm(points - original, axis=1)
+    moved = np.linalg.norm(points[: len(original)] - original, axis=1)
     # vertices stay on the original surface; faces are chords of it, so measure
     # how far face centroids, and original vertices, are from the other surface
     tri = points[faces]

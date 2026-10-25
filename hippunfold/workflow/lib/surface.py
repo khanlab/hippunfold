@@ -394,3 +394,79 @@ def assign_boundary_terminals(
         "n_unreached": int(np.sum(unreached)),
     }
     return labels, info
+
+
+def isotonic_increasing(y):
+    """Least-squares non-decreasing fit to y (pool adjacent violators)."""
+    values, weights = [], []
+    for yi in np.asarray(y, dtype=float):
+        values.append(yi)
+        weights.append(1)
+        while len(values) > 1 and values[-2] > values[-1]:
+            w = weights[-2] + weights[-1]
+            v = (values[-2] * weights[-2] + values[-1] * weights[-1]) / w
+            values[-2:] = [v]
+            weights[-2:] = [w]
+    return np.repeat(values, weights)
+
+
+def monotone_free_arcs(loop, values, src, sink, eps=1e-9):
+    """
+    Values along the boundary loop, made strictly monotone on each free arc
+    (the vertices between the src and sink arcs, which are not fixed in the
+    Laplace-Beltrami solve), increasing from the src end to the sink end.
+
+    With non-negative weights, the unfolded (AP, PD) map cannot fold if the
+    whole boundary maps monotonically onto the boundary of the unit square;
+    the free arcs of each coordinate are where it can fail to.
+
+    Parameters:
+        loop (np.ndarray): boundary loop vertices, in order.
+        values (np.ndarray): coordinate at each mesh vertex.
+        src, sink (np.ndarray): boolean masks of the src and sink vertices.
+        eps (float): step between values pooled by the isotonic fit, to make
+            them strictly monotone.
+
+    Returns:
+        loop_values (np.ndarray): corrected values at the loop vertices.
+        n_changed (int): number of loop vertices changed (pooled) by the fit.
+    """
+    loop = np.asarray(loop)
+    loop_values = np.asarray(values, dtype=float)[loop].copy()
+    fixed = src[loop] | sink[loop]
+    if fixed.all() or not fixed.any():
+        return loop_values, 0
+    m = len(loop)
+    # walk the loop from just after a fixed vertex, collecting free arcs
+    start = int(np.flatnonzero(fixed & ~np.roll(fixed, -1))[0]) + 1
+    arcs, arc = [], []
+    for i in np.roll(np.arange(m), -start):
+        if fixed[i]:
+            if arc:
+                arcs.append(arc)
+            arc = []
+        else:
+            arc.append(i)
+    if arc:
+        arcs.append(arc)
+
+    n_changed = 0
+    for arc in arcs:
+        before, after = loop[(arc[0] - 1) % m], loop[(arc[-1] + 1) % m]
+        if src[before] and sink[after]:
+            sign = 1.0
+        elif sink[before] and src[after]:
+            sign = -1.0
+        else:
+            continue  # both ends on the same terminal: no expected direction
+        y = loop_values[arc]
+        fit = sign * isotonic_increasing(sign * y)
+        # break the ties of pooled blocks, so the arc is strictly monotone
+        starts = np.flatnonzero(np.r_[True, fit[1:] != fit[:-1]])
+        ends = np.r_[starts[1:], len(fit)]
+        for a, b in zip(starts, ends):
+            if b - a > 1:
+                fit[a:b] += sign * eps * (np.arange(b - a) - (b - a - 1) / 2)
+                n_changed += b - a
+        loop_values[arc] = np.clip(fit, eps, 1 - eps)
+    return loop_values, n_changed

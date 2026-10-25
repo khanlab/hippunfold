@@ -270,6 +270,7 @@ rule laplace_beltrami:
         runtime=scale_by_attempt(10),
     params:
         clamp_negative_weights=True,  # avoids folds where cotangent weights < 0
+        monotone_boundary=True,  # re-solve with monotone values on the free arcs
     script:
         "../scripts/laplace_beltrami.py"
 
