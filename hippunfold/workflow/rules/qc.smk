@@ -302,7 +302,7 @@ def get_srcsink_qc_metrics(wildcards):
     )
 
 
-def get_srcsink_qc_surf_inputs(wildcards, **kwargs):
+def get_qc_surf_inputs(wildcards, **kwargs):
     return (
         inputs[config["modality"]]
         .filter(**wildcards)
@@ -321,29 +321,128 @@ def get_srcsink_qc_surf_inputs(wildcards, **kwargs):
     )
 
 
+def get_surface_qc_metrics(wildcards):
+    return (
+        inputs[config["modality"]]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=root,
+                datatype="qc",
+                suffix="qcmetrics.json",
+                desc="surface",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            hemi=config["hemi"],
+            label=config["autotop_labels"],
+        )
+    )
+
+
 qc_metrics_inputs = {
     "srcsink": get_srcsink_qc_metrics,
+    "surface": get_surface_qc_metrics,
 }
+
+
+def get_native_surf(surfname):
+    return bids(
+        root=root,
+        datatype="surf",
+        suffix=f"{surfname}.surf.gii",
+        space="corobl",
+        den="native",
+        hemi="{hemi}",
+        label="{label}",
+        **inputs.subj_wildcards,
+    )
+
+
+def get_native_laplace_coords(direction):
+    return bids(
+        root=root,
+        datatype="metric",
+        dir=direction,
+        label="{label}",
+        suffix="coords.shape.gii",
+        desc="laplace",
+        den="native",
+        hemi="{hemi}",
+        **inputs.subj_wildcards,
+    )
+
+
+rule qc_metrics_surface:
+    """Topology (Euler characteristic, genus, boundary loops), mesh quality,
+    self-intersections and unfolded mapping of the native surfaces, with every
+    defect located"""
+    input:
+        midthickness=get_native_surf("midthickness"),
+        inner=get_native_surf("inner"),
+        outer=get_native_surf("outer"),
+        coords_ap=get_native_laplace_coords("AP"),
+        coords_pd=get_native_laplace_coords("PD"),
+    output:
+        qc=bids(
+            root=root,
+            datatype="qc",
+            suffix="qcmetrics.json",
+            desc="surface",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    log:
+        bids_log(
+            "qc_metrics_surface",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(5),
+    params:
+        qc_thresholds={
+            "max_genus": 0,
+            "max_holes": 0,  # boundary loops in addition to the outer one
+            "max_nonmanifold": 0,  # non-manifold edges + vertices
+            "max_misoriented_faces": 0,
+            "max_degenerate_faces": 0,  # zero-area or duplicate, per surface
+            "max_self_intersecting_faces": 0,  # per surface
+            "sliver_angle": 5.0,  # degrees
+            "max_sliver_faces": 0,  # per surface
+            "max_flipped_faces": 0,  # in the unfolded mapping
+            "max_collapsed_faces": 0,  # zero area in the unfolded mapping
+            "distortion_log2": 2.0,  # |log2 areal ratio| that counts as distorted
+            "max_distorted_fraction": 0.05,
+        },
+    script:
+        "../scripts/qc_metrics_surface.py"
 
 
 rule qc_report_srcsink:
     """HTML report of the AP/PD src/sink terminals on the boundary of each surface"""
     input:
         metrics=get_srcsink_qc_metrics,
-        surf=lambda wildcards: get_srcsink_qc_surf_inputs(
+        surf=lambda wildcards: get_qc_surf_inputs(
             wildcards,
             datatype="surf",
             space="corobl",
             suffix="midthickness.surf.gii",
         ),
-        coords_ap=lambda wildcards: get_srcsink_qc_surf_inputs(
+        coords_ap=lambda wildcards: get_qc_surf_inputs(
             wildcards,
             datatype="metric",
             dir="AP",
             desc="laplace",
             suffix="coords.shape.gii",
         ),
-        coords_pd=lambda wildcards: get_srcsink_qc_surf_inputs(
+        coords_pd=lambda wildcards: get_qc_surf_inputs(
             wildcards,
             datatype="metric",
             dir="PD",
@@ -367,6 +466,61 @@ rule qc_report_srcsink:
         runtime=scale_by_attempt(5),
     script:
         "../scripts/qc_report_srcsink.py"
+
+
+rule qc_report_surface:
+    """HTML report of the topology and quality of each surface, listing defects"""
+    input:
+        metrics=get_surface_qc_metrics,
+        surf=lambda wildcards: get_qc_surf_inputs(
+            wildcards,
+            datatype="surf",
+            space="corobl",
+            suffix="midthickness.surf.gii",
+        ),
+        inner=lambda wildcards: get_qc_surf_inputs(
+            wildcards,
+            datatype="surf",
+            space="corobl",
+            suffix="inner.surf.gii",
+        ),
+        outer=lambda wildcards: get_qc_surf_inputs(
+            wildcards,
+            datatype="surf",
+            space="corobl",
+            suffix="outer.surf.gii",
+        ),
+        coords_ap=lambda wildcards: get_qc_surf_inputs(
+            wildcards,
+            datatype="metric",
+            dir="AP",
+            desc="laplace",
+            suffix="coords.shape.gii",
+        ),
+        coords_pd=lambda wildcards: get_qc_surf_inputs(
+            wildcards,
+            datatype="metric",
+            dir="PD",
+            desc="laplace",
+            suffix="coords.shape.gii",
+        ),
+    output:
+        html=bids(
+            root=root,
+            datatype="qc",
+            desc="surface",
+            suffix="qc.html",
+            **inputs.subj_wildcards,
+        ),
+    log:
+        bids_log("qc_report_surface", **inputs.subj_wildcards),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(10),
+    script:
+        "../scripts/qc_report_surface.py"
 
 
 rule qc_verify:

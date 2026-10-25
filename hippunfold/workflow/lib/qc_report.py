@@ -24,6 +24,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Colours used when drawing figures (light theme), and the CSS variable each
 # maps to in inline SVG, so figures follow the page theme.
@@ -41,6 +42,8 @@ SERIES_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500"]
 # sequential ramps (light -> dark) for continuous values on surfaces
 BLUE_RAMP = ["#cde2fb", "#86b6ef", "#3987e5", "#256abf", "#184f95", "#0d366b"]
 ORANGE_RAMP = ["#fde0d2", "#f6b293", "#eb6834", "#c4521f", "#963c14", "#6b2a0c"]
+# diverging ramp (blue -> neutral -> orange) for signed values centred on 0
+DIVERGING_RAMP = BLUE_RAMP[4:0:-1] + ["#e6e5e0"] + ORANGE_RAMP[1:5]
 
 _SVG_COLOR_VARS = {
     INK["text_primary"]: "var(--text-primary)",
@@ -125,6 +128,62 @@ def legend(items):
         for label, i in items
     )
     return f'<div class="legend">{keys}</div>'
+
+
+def hex_rgb(colors):
+    """Hex colours as an (N, 3) array of RGB in [0, 1]."""
+    return np.array([[int(c[i : i + 2], 16) / 255 for i in (1, 3, 5)] for c in colors])
+
+
+def ramp_rgb(values, ramp, vmin=0.0, vmax=1.0):
+    """Map values linearly onto a colour ramp, as an (N, 3) RGB array."""
+    ramp = hex_rgb(ramp)
+    t = np.clip((np.asarray(values, dtype=float) - vmin) / (vmax - vmin), 0, 1)
+    pos = np.nan_to_num(t) * (len(ramp) - 1)
+    lo = np.floor(pos).astype(int).clip(0, len(ramp) - 2)
+    frac = (pos - lo)[:, None]
+    return ramp[lo] * (1 - frac) + ramp[lo + 1] * frac
+
+
+def view_frame(points):
+    """Rotate points to their principal axes, viewing along the smallest."""
+    centred = points - points.mean(axis=0)
+    _, _, vt = np.linalg.svd(centred, full_matrices=False)
+    return centred @ vt.T
+
+
+def face_normals_z(points, faces):
+    """z component of the unit face normals (for shading a view along z)."""
+    tri = points[faces]
+    normals = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+    normals /= np.linalg.norm(normals, axis=1, keepdims=True) + 1e-12
+    return normals[:, 2]
+
+
+def render_faces(points2d, depth, faces, face_rgb, normals_z, ax=None, figsize=(4, 4)):
+    """Draw faces back to front with simple shading, no axes."""
+    from matplotlib.collections import PolyCollection
+
+    shade = 0.55 + 0.45 * np.abs(normals_z)
+    colors = np.clip(face_rgb * shade[:, None], 0, 1)
+    order = np.argsort(depth[faces].mean(axis=1))
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+    else:
+        fig = ax.figure
+    ax.add_collection(
+        PolyCollection(
+            points2d[faces[order]],
+            facecolors=colors[order],
+            edgecolors="none",
+            antialiased=False,
+        )
+    )
+    ax.set_xlim(points2d[:, 0].min(), points2d[:, 0].max())
+    ax.set_ylim(points2d[:, 1].min(), points2d[:, 1].max())
+    ax.set_aspect("equal")
+    ax.axis("off")
+    return fig
 
 
 def _format_value(value):
@@ -421,6 +480,9 @@ figcaption { color: var(--text-muted); font-size: 12px; margin-top: 6px; max-wid
     + """); }
 .ramp-pd { background: linear-gradient(90deg, """
     + ", ".join(ORANGE_RAMP)
+    + """); }
+.ramp-div { background: linear-gradient(90deg, """
+    + ", ".join(DIVERGING_RAMP)
     + """); }
 .ramp-labels { display: flex; justify-content: space-between; font-size: 11px;
   color: var(--text-muted); }

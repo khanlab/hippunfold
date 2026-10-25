@@ -219,60 +219,32 @@ def plot_loop(result):
     return fig
 
 
-def _view_frame(points):
-    """Rotate points to their principal axes, viewing along the smallest."""
-    centred = points - points.mean(axis=0)
-    _, _, vt = np.linalg.svd(centred, full_matrices=False)
-    return centred @ vt.T
-
-
-def _render_faces(points2d, depth, faces, face_rgb, normals_z):
-    """Draw faces back to front with simple shading, no axes."""
-    import matplotlib.pyplot as plt
-    from matplotlib.collections import PolyCollection
-
-    shade = 0.55 + 0.45 * np.abs(normals_z)
-    colors = np.clip(face_rgb * shade[:, None], 0, 1)
-    order = np.argsort(depth[faces].mean(axis=1))
-    fig, ax = plt.subplots(figsize=(4, 4))
-    ax.add_collection(
-        PolyCollection(
-            points2d[faces[order]],
-            facecolors=colors[order],
-            edgecolors="none",
-            antialiased=False,
-        )
-    )
-    ax.set_xlim(points2d[:, 0].min(), points2d[:, 0].max())
-    ax.set_ylim(points2d[:, 1].min(), points2d[:, 1].max())
-    ax.set_aspect("equal")
-    ax.axis("off")
-    return fig
-
-
-def _hex_rgb(colors):
-    return np.array([[int(c[i : i + 2], 16) / 255 for i in (1, 3, 5)] for c in colors])
-
-
 def plot_surfaces(result, points, faces, coords_ap, coords_pd):
     """
     Figures of the surface (viewed face-on): terminal labels on the boundary,
     and the AP and PD Laplace coordinates. Returns a list of figures.
     """
-    from lib.qc_report import BLUE_RAMP, ORANGE_RAMP, SERIES
+    from lib.qc_report import (
+        BLUE_RAMP,
+        ORANGE_RAMP,
+        SERIES,
+        face_normals_z,
+        hex_rgb,
+        ramp_rgb,
+        render_faces,
+        view_frame,
+    )
 
-    p = _view_frame(np.asarray(points, dtype=float))
+    p = view_frame(np.asarray(points, dtype=float))
     faces = np.asarray(faces)
-    tri = p[faces]
-    normals = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
-    normals /= np.linalg.norm(normals, axis=1, keepdims=True) + 1e-12
+    normals_z = face_normals_z(p, faces)
     p2d, depth = p[:, :2], p[:, 2]
 
     # terminals: faces touching band vertices take the majority band label
     vertex_labels = np.full(len(p), -1)
     vertex_labels[np.asarray(result.data["boundary_vertices"])] = result.data["labels"]
     base = np.array([0.80, 0.80, 0.78])
-    series = _hex_rgb(SERIES)
+    series = hex_rgb(SERIES)
     face_labels = vertex_labels[faces]
     face_rgb = np.tile(base, (len(faces), 1))
     in_band = (face_labels >= 0).any(axis=1)
@@ -280,14 +252,9 @@ def plot_surfaces(result, points, faces, coords_ap, coords_pd):
         [np.bincount(fl[fl >= 0], minlength=4).argmax() for fl in face_labels[in_band]]
     )
     face_rgb[in_band] = series[majority]
-    figs = [_render_faces(p2d, depth, faces, face_rgb, normals[:, 2])]
+    figs = [render_faces(p2d, depth, faces, face_rgb, normals_z)]
 
     for coords, ramp in ((coords_ap, BLUE_RAMP), (coords_pd, ORANGE_RAMP)):
-        ramp_rgb = _hex_rgb(ramp)
-        value = np.clip(np.asarray(coords)[faces].mean(axis=1), 0, 1)
-        pos = value * (len(ramp) - 1)
-        lo = np.floor(pos).astype(int).clip(0, len(ramp) - 2)
-        t = (pos - lo)[:, None]
-        rgb = ramp_rgb[lo] * (1 - t) + ramp_rgb[lo + 1] * t
-        figs.append(_render_faces(p2d, depth, faces, rgb, normals[:, 2]))
+        rgb = ramp_rgb(np.asarray(coords)[faces].mean(axis=1), ramp)
+        figs.append(render_faces(p2d, depth, faces, rgb, normals_z))
     return figs
