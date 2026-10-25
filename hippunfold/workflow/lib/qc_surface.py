@@ -227,6 +227,20 @@ def face_geometry(points, faces):
     return area, np.min(angles, axis=0), lengths
 
 
+def max_angles(points, faces):
+    """Largest angle (degrees) of each face."""
+    tri = points[faces]
+    angles = []
+    for k in range(3):
+        u = tri[:, (k + 1) % 3] - tri[:, k]
+        v = tri[:, (k + 2) % 3] - tri[:, k]
+        cos = np.einsum("ij,ij->i", u, v) / (
+            np.linalg.norm(u, axis=1) * np.linalg.norm(v, axis=1) + 1e-20
+        )
+        angles.append(np.degrees(np.arccos(np.clip(cos, -1, 1))))
+    return np.max(angles, axis=0)
+
+
 def duplicate_faces(faces):
     _, counts = np.unique(np.sort(faces, axis=1), axis=0, return_counts=True)
     return int(np.sum(counts - 1))
@@ -609,6 +623,18 @@ def compute_qc(surfaces, coords_ap, coords_pd, entities, thresholds):
             float(np.percentile(min_angle, 1)),
             f"1st percentile of triangle min angle (°), {label}",
         )
+        max_angle = max_angles(p, f)
+        result.add_metric(
+            f"obtuse_fraction{suffix}",
+            float(np.mean(max_angle > 90)),
+            f"Fraction of faces with an angle > 90° (negative cotangent weight), "
+            f"{label}",
+        )
+        result.add_metric(
+            f"max_angle_p99{suffix}",
+            float(np.percentile(max_angle, 99)),
+            f"99th percentile of triangle max angle (°), {label}",
+        )
 
         repeated = (f[:, 0] == f[:, 1]) | (f[:, 1] == f[:, 2]) | (f[:, 0] == f[:, 2])
         degenerate = np.flatnonzero((area <= 1e-6 * np.median(area)) | repeated)
@@ -914,8 +940,11 @@ def plot_histograms(min_angles, log_ratio, sliver_angle, distortion_log2):
 # --- report helpers ---
 
 # labels for the intermediate stages of processing, see surface_qc_stages
-STAGE_LABELS = {"isosurf": "Isosurface", "final": "Final"}
-STAGE_DESCS = {"isosurf": "raw isosurface, before repair"}
+STAGE_LABELS = {"isosurf": "Isosurface", "repaired": "Repaired", "final": "Final"}
+STAGE_DESCS = {
+    "isosurf": "raw isosurface, before repair",
+    "repaired": "after repair and decimation, before triangle-quality improvement",
+}
 # metrics compared between stages
 COMPARE_METRICS = [
     "V",
@@ -932,6 +961,8 @@ COMPARE_METRICS = [
     "duplicate_faces",
     "sliver_faces",
     "min_angle_p1",
+    "obtuse_fraction",
+    "max_angle_p99",
     "self_intersecting_faces",
     "surface_area",
     "edge_length_median",

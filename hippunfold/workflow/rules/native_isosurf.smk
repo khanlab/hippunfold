@@ -115,7 +115,7 @@ rule repair_native_mesh:
                 suffix="{surfname,midthickness}.surf.gii",
                 den="native",
                 space="corobl",
-                desc="nostruct",
+                desc="repaired",
                 hemi="{hemi}",
                 label="{label}",
                 **inputs.subj_wildcards,
@@ -139,6 +139,58 @@ rule repair_native_mesh:
         hole_fill_radius=10.0,  # voxels of the coords image
     script:
         "../scripts/repair_native_mesh.py"
+
+
+rule improve_native_mesh_quality:
+    """improves triangle quality (removes slivers and obtuse triangles) with
+    edge flips and tangential relaxation, keeping vertices on the surface, the
+    boundary fixed, and the topology unchanged"""
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            den="native",
+            space="corobl",
+            desc="repaired",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname,midthickness}.surf.gii",
+                den="native",
+                space="corobl",
+                desc="nostruct",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    log:
+        bids_log(
+            "improve_native_mesh_quality",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            desc="{surfname}",
+        ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
+    params:
+        rounds=3,  # rounds of edge flips and relaxation
+        relax_iterations=3,  # relaxation steps per round
+        relax_step=0.5,  # fraction of the move towards the centroid
+        flip_tolerance=0.1,  # max non-planarity of a flipped quad, x median edge
+    script:
+        "../scripts/improve_native_mesh_quality.py"
 
 
 rule update_native_mesh_structure:
