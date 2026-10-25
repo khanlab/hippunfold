@@ -1,16 +1,9 @@
 
-rule extract_unfold_ref_slice:
-    """This gets the central-most slice of the unfold volume, for obtaining a 2D slice"""
-    input:
-        ref_3d_nii=bids(
-            root=root,
-            datatype="warps",
-            hemi="{hemi}",
-            suffix="refvol.nii.gz",
-            space="unfold",
-            label="{label}",
-            **inputs.subj_wildcards,
-        ),
+rule create_unfold_ref_slice:
+    """Creates a single-slice 2D unfold ref at the midthickness z-level, with the same
+    in-plane geometry as the 3D unfold ref. This is created directly rather than taking
+    the 50% slice of the 3D ref, since that slice is offset by half a voxel from the
+    midthickness plane, which made sampling of the 2D warps at the surface fail"""
     output:
         ref_2d_nii=temp(
             bids(
@@ -29,8 +22,25 @@ rule extract_unfold_ref_slice:
     resources:
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(1),
+    params:
+        dims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["dims"][:2]
+        )
+        + "x1",
+        voxdims=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["voxdims"]
+        ),
+        origin=lambda wildcards: "x".join(
+            config["unfold_vol_ref"][wildcards.label]["origin"][:2]
+        )
+        + "x"
+        + str(-1.0 * get_unfold_midthickness_z(wildcards.label)),
+        orient=lambda wildcards: config["unfold_vol_ref"][wildcards.label]["orient"],
+        flip_per_hemi=lambda wildcards: config["unfold_vol_ref"][wildcards.label][
+            "flip_per_hemi"
+        ][wildcards.hemi],
     shell:
-        "c3d {input.ref_3d_nii} -slice z 50% -o {output.ref_2d_nii}"
+        "c3d -create {params.dims} {params.voxdims}mm -origin {params.origin}mm -orient {params.orient} {params.flip_per_hemi} -o {output.ref_2d_nii}"
 
 
 rule native_metric_to_unfold_nii:
