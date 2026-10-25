@@ -7,8 +7,11 @@ A complex pipeline can have multiple points of failure, so its imprtant to check
         └── qc
             ├── sub-001_desc-srcsink_qc.html
             ├── sub-001_desc-srcsink_qcchecks.tsv
+            ├── sub-001_desc-surface_qc.html
+            ├── sub-001_desc-surface_qcchecks.tsv
             ├── sub-001_from-T1w_to-CITI168_regqc.png
             ├── sub-001_hemi-L_label-hipp_desc-srcsink_qcmetrics.json
+            ├── sub-001_hemi-L_label-hipp_desc-surface_qcmetrics.json
             ├── sub-001_hemi-L_desc-unetf3d_dice.tsv
             ├── sub-001_hemi-L_space-cropT1w_desc-subfields_atlas-histologyReference2023_dseg.png
             ├── sub-001_hemi-L_space-T1w_den-0p5mm_label-dentate_desc-subfields_midthickness.surf.png
@@ -29,6 +32,7 @@ Checks have a severity of either *warning* or *error*. Failed warnings are highl
 Currently this includes:
 
 - `desc-srcsink`: the anterior-posterior (AP) and proximal-distal (PD) source/sink terminals, which set the boundary conditions for the Laplace-Beltrami coordinates of each surface. They are fit to the outer boundary of the surface as four contiguous arcs, alternating AP and PD, so that each source is opposite its sink. The report shows the terminals along the boundary and on the surface, and the resulting AP and PD coordinates. It is an *error* if the terminals are in the wrong order for the hemisphere (swapped terminals or a flipped surface), and a *warning* if the terminals from the segmentation are fragmented, had to be changed substantially, or are far from the surface boundary.
+- `desc-surface`: the topology and mesh quality of each native surface. The hippocampal (and dentate) surface should be topologically a disk: one connected, orientable piece with genus *g* = 0 (no handles) and *b* = 1 boundary loop, so its Euler characteristic is χ = V − E + F = 2 − 2*g* − *b* = 1. The report gives χ, *g* and *b* for each surface, and lists every defect found, numbered and located on the surface (position in mm, and AP/PD coordinates): holes, non-manifold or misoriented elements, self-intersections of the midthickness, inner or outer surfaces, degenerate or sliver triangles, and faces that are folded over or collapsed to zero area in the unfolded (AP, PD) mapping. The face and vertex indices of each defect are in the `*_qcmetrics.json` files. It is an *error* if a surface has more than one connected component, no boundary, or is non-orientable; all other defects are *warnings*, reported whenever there are any (the thresholds can be changed in the `qc_metrics_surface` rule).
 
 To better understand some common points of failure, let's walk through the other files contained here:
 

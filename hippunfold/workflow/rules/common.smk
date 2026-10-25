@@ -423,7 +423,7 @@ def get_final_qc():
                 suffix="qcchecks.tsv",
                 **inputs.subj_wildcards,
             ),
-            qc=["srcsink"],
+            qc=["srcsink", "surface"],
             allow_missing=True,
         )
     )
