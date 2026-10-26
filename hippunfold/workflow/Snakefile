@@ -67,9 +67,26 @@ else:
 
 model_dict = config["nnunet_models"].get(model_name, None)
 
-# models that already produce topologically-correct labels don't need template shape injection
-if model_dict is not None and not model_dict.get("shape_inject", True):
-    config["skip_inject_template_labels"] = True
+# template shape injection: CLI flags override the model default (shape_inject in nnunet_models, on if unset)
+force_shape_inject = config.get("force_shape_inject", False)
+force_no_shape_inject = config.get("no_shape_inject", False) or config.get(
+    "skip_inject_template_labels", False
+)
+if force_shape_inject and force_no_shape_inject:
+    raise ValueError(
+        "--force_shape_inject and --no_shape_inject are mutually exclusive"
+    )
+if force_shape_inject:
+    do_shape_inject, shape_inject_source = True, "--force_shape_inject"
+elif force_no_shape_inject:
+    do_shape_inject, shape_inject_source = False, "--no_shape_inject"
+else:
+    do_shape_inject = model_dict.get("shape_inject", True) if model_dict else True
+    shape_inject_source = "model default"
+config["skip_inject_template_labels"] = not do_shape_inject
+print(
+    f"Template shape injection: {'ON' if do_shape_inject else 'OFF'} ({shape_inject_source})"
+)
 
 
 limit_to_list.add(config["modality"])

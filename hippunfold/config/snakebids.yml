@@ -135,8 +135,18 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --force_shape_inject:
+    help: 'Force post-processing template shape injection into CNN segmentation on, overriding the model default (set by shape_inject in nnunet_models; on if unset). (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
+  --no_shape_inject:
+    help: 'Force post-processing template shape injection into CNN segmentation off, overriding the model default. Note that for models without dentate src/sink labels this will disable generation of DG surfaces. (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
   --skip_inject_template_labels:
-    help: 'Set this flag to skip post-processing template injection into CNN segmentation. Injection is always skipped for models that set shape_inject: false (e.g. hippls_synthtopo). Note that for models without dentate src/sink labels this will disable generation of DG surfaces. (default: %(default)s)'
+    help: 'Deprecated alias for --no_shape_inject. (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -255,8 +265,8 @@ parse_args:
       - neonateT12w_v2
       - ADNI_T1w_v1
       - maguire_T2w
-      - hippneo_synthtopo
-      - hippls_synthtopo
+      - synthtopo_neonate
+      - synthtopo_lifespan
 
   --inner_outer_reg_method:
     help: |
@@ -401,8 +411,7 @@ template_files:
 tissue_atlas_mapping:
   tissue:
     dg: 8
-    srlm:
-      - 2
+    srlm: 2
     cyst: 7
   magdeburg:
     dg: 3
@@ -506,7 +515,7 @@ nnunet_models:
     plans: nnUNetPlans
     checkpoint: checkpoint_best.pth
 
-  hippneo_synthtopo:
+  synthtopo_neonate:
     url: "https://zenodo.org/records/20582534/files/hippneo_synthtopo.zip"
     arch_version: synthtopo
     nb_classes: 11
@@ -514,14 +523,14 @@ nnunet_models:
     seg_features: [16, 32, 64, 128, 256, 512]
     checkpoint: epoch=2172-step=71709.ckpt
 
-  hippls_synthtopo:
+  synthtopo_lifespan:
     url: "https://zenodo.org/records/21112080/files/hippls_synthtopo_alveus.zip"
     arch_version: synthtopo
     nb_classes: 12
     seg_nb_levels: 6
     seg_features: [16, 32, 64, 128, 256, 512]
     checkpoint: epoch=823-step=438800.ckpt
-    # shape_inject: false
+    shape_inject: true
 
   maguire_T2w:
     url: https://zenodo.org/records/18432751/files/Dataset001_HippUnfoldMag.nnUNetTrainer__nnUNetPlans__3d_fullres.tar.gz
