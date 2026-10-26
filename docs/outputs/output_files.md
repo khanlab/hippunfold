@@ -93,13 +93,27 @@ These files, along with the below metric and cifti files are packaged together f
 In addition to the geometry files, surface-based shape metrics are
 provided in `.shape.gii` format. The thickness, curvature and surface
 area are computed using methods analogous to those used for cortical surfaces, based on
-the surface geometry files, and are applicable to surfaces of the same density in any space.  The gyrification metric is the ratio of native to unfolded surface area, or
-equivalently, the scaling or distortion factor when unfolding:
+the surface geometry files, and are applicable to surfaces of the same density in any space.
+
+The gyrification metric is the smoothing-based gyrification index (sGI): the
+local ratio of the midthickness surface area to the area of a copy of the same
+surface smoothed by heat diffusion along the surface (boundary held fixed), at a
+scale of `--gyrification_scale` mm (default 1.5). Folds up to about that size,
+such as the digitations, add area that the smoothed copy lacks; a flat sheet
+gives exactly 1. All smoothing is along the surface (cotangent finite elements),
+so the index does not depend on the triangulation and does not mix parts of the
+sheet that are close in space but far apart along it. The scale is stored in
+each file's GIFTI metadata (`GyrificationScale`).
+
+The previous gyrification metric, the ratio of native to unfolded surface area
+(equivalently, the scaling or distortion factor when unfolding), is still
+provided as `legacygyrification`, and is the one used by unfolded-space
+registration with atlases built before the sGI was introduced:
 
     sub-{subject}
      └── metric
-         └── sub-001_hemi-{L,R}_den-8k_label-hipp_{thickness,curvature,gyrification}.shape.gii
-         └── sub-001_hemi-{L,R}_den-8k_label-dentate_{curvature,gyrification}.shape.gii
+         └── sub-001_hemi-{L,R}_den-8k_label-hipp_{thickness,curvature,gyrification,legacygyrification}.shape.gii
+         └── sub-001_hemi-{L,R}_den-8k_label-dentate_{curvature,gyrification,legacygyrification}.shape.gii
 
 These metrics are shown in both anatomical and unfolded space in the images
 below. Note that these results are from group-averaged data and so
@@ -151,7 +165,7 @@ file using the corresponding CIFTI formats, `.dscalar.nii` and `.dlabel.nii`.
 
     sub-{subject}
      └── surf
-         ├── sub-001_den-8k_label-{hipp,dentate}_{thickness,curvature,gyrification}.dscalar.nii
+         ├── sub-001_den-8k_label-{hipp,dentate}_{thickness,curvature,gyrification,legacygyrification}.dscalar.nii
          └── sub-001_den-0p5mm_label-hipp_atlas-multihist7_subfields.dlabel.nii
 **TODO** update this figure
 

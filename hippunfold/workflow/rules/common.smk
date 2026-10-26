@@ -381,6 +381,20 @@ def get_final_qc():
             allow_missing=True,
         )
     )
+    qc.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="qc",
+                den="{density}",
+                desc="surfaces",
+                suffix="viewer.html",
+                **inputs.subj_wildcards,
+            ),
+            density=config["output_density"],
+            allow_missing=True,
+        )
+    )
     if len(config["hemi"]) == 2:
         qc.extend(
             inputs[config["modality"]].expand(
@@ -445,14 +459,14 @@ if "corobl" in ref_spaces:
 
 
 def get_cifti_metric_types(label):
-    types_list = config["cifti_metric_types"][label]
+    types_list = list(config["cifti_metric_types"][label])
     if config["generate_myelin_map"]:
         types_list.append("myelin.dscalar")
     return types_list
 
 
 def get_gifti_metric_types(label):
-    types_list = config["gifti_metric_types"][label]
+    types_list = list(config["gifti_metric_types"][label])
     if config["generate_myelin_map"]:
         types_list.append("myelin.shape")
     return types_list

@@ -271,6 +271,11 @@ parse_args:
       For SyN, the value is passed as the updateFieldVariance in `antsRegistration --transform SyN[...]`.
     default: 3.0
 
+  --gyrification_scale:
+    help: 'Scale (mm) of the smoothing-based gyrification index: the midthickness is compared with a copy of itself heat-smoothed at this scale, so folds up to about this size count. (default: %(default)s)'
+    default: 1.5
+    type: float
+
   --qc_warn_only:
     help: 'Report failed QC checks (see the qc/*_qc.html reports) as warnings instead of errors, so processing can complete. (default: %(default)s)'
     default: False
@@ -298,6 +303,8 @@ parse_args:
 
 # --- surface specific configuration -- 
 
+gyrification_pooling_sigma: 1.5  # mm, surface smoothing of the sGI area ratio
+
 autotop_labels:
   - 'hipp'
   - 'dentate'
@@ -314,21 +321,25 @@ surf_types:
 
 gifti_metric_types:
   hipp:
-    - gyrification.shape 
+    - gyrification.shape
+    - legacygyrification.shape
     - curvature.shape
     - thickness.shape
   dentate:
-    - gyrification.shape 
+    - gyrification.shape
+    - legacygyrification.shape
     - curvature.shape
     - thickness.shape
   
 cifti_metric_types: 
   hipp:
     - gyrification.dscalar
+    - legacygyrification.dscalar
     - curvature.dscalar
     - thickness.dscalar
   dentate:
     - gyrification.dscalar
+    - legacygyrification.dscalar
     - curvature.dscalar
     - thickness.dscalar
 

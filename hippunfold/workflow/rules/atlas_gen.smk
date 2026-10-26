@@ -1071,6 +1071,8 @@ rule write_template_json:
         template_description={
             "Identifier": config["new_atlas_name"],
             "metric_wildcards": config["new_atlas_metrics"],
+            # tells unfoldreg that gyrification here is the smoothing-based index
+            "gyrification_definition": "sgi",
             "label_wildcards": config["autotop_labels"],
             "hemi_wildcards": config["hemi"],
             "density_wildcards": config["density_choices"],

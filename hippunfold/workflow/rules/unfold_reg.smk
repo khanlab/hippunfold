@@ -268,8 +268,23 @@ rule slice_3d_to_2d_atlas:
         "../scripts/slice_3d_to_2d.py"
 
 
+def subject_unfoldreg_metric(metric, atlas):
+    """Atlases written before the smoothing-based gyrification index store the
+    legacy area ratio as gyrification, so the subject's legacy map is the one
+    to register against them."""
+    if (
+        metric == "gyrification"
+        and config["atlas_metadata"][atlas].get("gyrification_definition") != "sgi"
+    ):
+        return "legacygyrification"
+    return metric
+
+
 def get_fixed_images_unfoldreg(wildcards):
-    unfoldreg_metrics = config["atlas_metadata"][wildcards.atlas]["metric_wildcards"]
+    unfoldreg_metrics = [
+        subject_unfoldreg_metric(metric, wildcards.atlas)
+        for metric in config["atlas_metadata"][wildcards.atlas]["metric_wildcards"]
+    ]
 
     return expand(
         bids(
