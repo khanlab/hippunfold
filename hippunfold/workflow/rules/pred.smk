@@ -238,6 +238,48 @@ elif model_dict["arch_version"] == "nnunet_v2":
 
 elif model_dict["arch_version"] == "synthtopo":
 
+    def get_synthtopo_checkpoint():
+        archive_name = re.sub(
+            r"\.(zip|tar\.gz|tgz|tar)$", "", Path(get_model_tar()).name
+        )
+        return str(
+            Path(download_dir)
+            / "model"
+            / "synthtopo"
+            / archive_name
+            / model_dict["checkpoint"]
+        )
+
+    localrules:
+        extract_synthtopo_checkpoint,
+
+    rule extract_synthtopo_checkpoint:
+        """Extract only the checkpoint file from the synthtopo model archive"""
+        input:
+            model_tar=get_model_tar(),
+        output:
+            checkpoint=get_synthtopo_checkpoint(),
+        shadow:
+            "minimal"
+        resources:
+            mem_mb=scale_by_attempt(4000),
+            runtime=scale_by_attempt(10),
+        params:
+            model_dir="tempmodel",
+            checkpoint_name=model_dict["checkpoint"],
+            extract_cmd=lambda wildcards, input: (
+                "unzip -q" if input.model_tar.endswith(".zip") else "tar -xf"
+            ),
+            extract_dest_opt=lambda wildcards, input: (
+                "-d" if input.model_tar.endswith(".zip") else "-C"
+            ),
+        shell:
+            "mkdir -p {params.model_dir} && "
+            '{params.extract_cmd} "{input.model_tar}" {params.extract_dest_opt} "{params.model_dir}" && '
+            'CHKPT="$(find "{params.model_dir}" -type f -name "{params.checkpoint_name}" -print -quit)" && '
+            'if [ -z "$CHKPT" ]; then echo "ERROR: checkpoint not found: {params.checkpoint_name}" 1>&2; exit 1; fi && '
+            'mv "$CHKPT" "{output.checkpoint}"'
+
     rule flip_synthseg_input:
         input:
             nii=bids(
@@ -270,14 +312,14 @@ elif model_dict["arch_version"] == "synthtopo":
             "c3d {input} -flip x {output}"
 
     rule run_inference_synthtopo:
-        """SynthTopo inference with checkpoint extraction in shadow directory.
+        """SynthTopo inference.
 
         For left hemisphere: input is pre-flipped, output will be unflipped in next rule.
         For right hemisphere: input and output are used as-is.
         """
         input:
             in_img=get_nnunet_input,
-            model_tar=get_model_tar(),
+            checkpoint=get_synthtopo_checkpoint(),
         output:
             synthseg_seg=temp(
                 bids(
@@ -296,8 +338,6 @@ elif model_dict["arch_version"] == "synthtopo":
                 **inputs.subj_wildcards,
                 hemi="{hemi}",
             ),
-        shadow:
-            "minimal"
         conda:
             "../envs/synthtopo.yaml"
         threads: 8
@@ -306,8 +346,6 @@ elif model_dict["arch_version"] == "synthtopo":
             mem_mb=scale_by_attempt(16000),
             runtime=scale_by_attempt(15 if config["use_gpu"] else 60),
         params:
-            model_dir="tempmodel",
-            checkpoint_name=model_dict["checkpoint"],
             nb_classes=model_dict.get("nb_classes", 9),
             seg_nb_levels=model_dict.get("seg_nb_levels", 6),
             seg_features=" ".join(
@@ -316,16 +354,9 @@ elif model_dict["arch_version"] == "synthtopo":
             ),
             device="cuda" if config["use_gpu"] else "cpu",
         shell:
-            "mkdir -p {params.model_dir} && "
-            'case "{input.model_tar}" in '
-            '  *.zip) unzip -q "{input.model_tar}" -d "{params.model_dir}" ;; '
-            '  *) tar -xf "{input.model_tar}" -C "{params.model_dir}" ;; '
-            "esac && "
-            'CHKPT="$(find "{params.model_dir}" -type f -name "{params.checkpoint_name}" -print -quit)" && '
-            'if [ -z "$CHKPT" ]; then echo "ERROR: checkpoint not found: {params.checkpoint_name}" 1>&2; exit 1; fi && '
             "python {workflow.basedir}/scripts/synthtopo.py "
             "{input.in_img} "
-            '"$CHKPT" '
+            '"{input.checkpoint}" '
             "--output {output.synthseg_seg} "
             "--device {params.device} "
             "--nb-classes {params.nb_classes} "
