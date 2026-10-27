@@ -10,3 +10,4 @@ index	name	abbreviation	description	laplace_role
 8	dentate gyrus	DG	Dentate gyrus grey matter (granule cell and molecular layers), the domain of the dentate Laplace coordinates.	dentate domain (AP, PD, IO); part of the hipp domain (with 1); hipp PD sink
 9	dentate gyrus PD source	DGsrc	Exposed free edge of the dentate gyrus at the surface of the hippocampus (margo denticulatus), bordering the outside of the hippocampus (label 0) and hippocampal grey matter.	dentate PD src; hipp and dentate IO sink
 10	dentate gyrus PD sink	DGsink	Buried end of the dentate gyrus inside the hilus, enclosed by CA4 grey matter (label 1) and the SRLM (label 2).	dentate PD sink; hipp IO src; dentate IO sink
+11	alveus	Alv	White matter covering the outer (ventricular) surface of the hippocampus, carrying hippocampal efferents to the fimbria. Not labelled in all templates and segmentation models; where absent, the hippocampus borders background (label 0) there.	hipp and dentate IO sink
