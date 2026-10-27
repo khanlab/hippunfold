@@ -87,7 +87,11 @@ rule map_src_sink_sdt_to_surf:
 
 
 rule postproc_boundary_vertices:
-    """ensures non-overlapping and full labelling of AP/PD edges"""
+    """ensures non-overlapping and full labelling of AP/PD edges, fitting the
+    src/sink terminals as contiguous arcs of the boundary loop, in alternating
+    AP/PD order (AP src and sink opposite, PD src and sink opposite). The
+    src/sink masks for the Laplace-Beltrami solve hold the terminal arcs of the
+    loop only (dirichlet_on="loop"), so no faces collapse in unfolded space"""
     input:
         ap_src=bids(
             root=root,
@@ -179,6 +183,15 @@ rule postproc_boundary_vertices:
                 **inputs.subj_wildcards,
             )
         ),
+        qc=bids(
+            root=root,
+            datatype="qc",
+            suffix="qcmetrics.json",
+            desc="srcsink",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
     log:
         bids_log(
             "postproc_boundary_verticies",
@@ -192,9 +205,14 @@ rule postproc_boundary_vertices:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(2),
     params:
-        min_terminal_vertices=5,  # min number of vertices per src/sink
-        max_iterations=100,
-        shifting_epsilon=0.1,  #could be proportional to voxel spacing
+        min_terminal_vertices=5,  # min number of boundary loop vertices per src/sink
+        ap_length_penalty=0.0,  # per-vertex cost (mm) of AP src/sink, >0 shortens them
+        dirichlet_on="loop",  # vertices fixed in the Laplace-Beltrami solve: loop or band
+        qc_thresholds={
+            "max_relabelled_fraction": 0.1,  # of loop changed from nearest terminal
+            "max_ap_fraction": 0.25,  # of loop in each AP terminal
+            "max_terminal_distance": 3.0,  # mm, median from arc to its terminal
+        },
     script:
         "../scripts/postproc_boundary_vertices.py"
 
@@ -250,6 +268,9 @@ rule laplace_beltrami:
     resources:
         mem_mb=scale_by_attempt(4000),  # large ex vivo scans can need ~36000, depends on decimation too
         runtime=scale_by_attempt(10),
+    params:
+        clamp_negative_weights=True,  # avoids folds where cotangent weights < 0
+        monotone_boundary=True,  # re-solve with monotone values on the free arcs
     script:
         "../scripts/laplace_beltrami.py"
 

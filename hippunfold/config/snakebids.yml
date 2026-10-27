@@ -283,6 +283,16 @@ parse_args:
       For SyN, the value is passed as the updateFieldVariance in `antsRegistration --transform SyN[...]`.
     default: 3.0
 
+  --qc_warn_only:
+    help: 'Report failed QC checks (see the qc/*_qc.html reports) as warnings instead of errors, so processing can complete. (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
+  --qc_warn_checks:
+    help: 'Report only these QC checks as warnings instead of errors, by name as given in the QC reports and qcchecks.tsv files, e.g. terminal_order_hemisphere for inputs whose orientation does not match the expected hemisphere. (default: %(default)s)'
+    default: null
+    nargs: '+'
+
   --enable-bids-validation:
     help: |
       Enable validation of BIDS dataset. BIDS validation would be performed

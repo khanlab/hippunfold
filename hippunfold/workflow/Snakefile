@@ -9,6 +9,16 @@ from tempfile import mkdtemp
 configfile: "config/snakebids.yml"
 
 
+# Workaround for snakemake/snakemake#4362: --notemp is not forwarded to remote
+# (e.g. SLURM) group jobs, which then delete temp files used only within the group.
+# The snakemake args are saved in the config that remote jobs read, so apply
+# --notemp by making temp() a no-op. Remove once fixed upstream.
+if {"--notemp", "--no-temp", "--nt"} & set(config.get("snakemake_args") or []):
+
+    def temp(value, *args, **kwargs):
+        return value
+
+
 set_bids_spec("v0_0_0")
 
 # consider moving this logic to another smk file to clean-up

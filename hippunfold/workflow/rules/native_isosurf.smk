@@ -54,7 +54,7 @@ rule gen_native_mesh:
                     suffix="{surfname,midthickness}.surf.gii",
                     den="native",
                     space="corobl",
-                    desc="nostruct",
+                    desc="isosurf",
                     hemi="{hemi}",
                     label="{label}",
                     **inputs.subj_wildcards,
@@ -76,10 +76,121 @@ rule gen_native_mesh:
         runtime=scale_by_attempt(2),
     params:
         threshold=lambda wildcards: config["surf_thresholds"][wildcards.surfname],
-        decimate_opts=0.75,
-        hole_fill_radius=10.0,
     script:
         "../scripts/gen_isosurface.py"
+
+
+rule repair_native_mesh:
+    """fills holes (except the outer boundary), decimates, and removes
+    topological defects (misoriented faces, non-manifold elements, duplicate
+    faces, small components) from the raw isosurface"""
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            den="native",
+            space="corobl",
+            desc="isosurf",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        coords=lambda wildcards: bids(
+            root=root,
+            datatype="coords",
+            dir="IO",
+            label="{label}",
+            suffix="coords.nii.gz",
+            desc=config["laminar_coords_method"],
+            space="corobl",
+            hemi="{hemi}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname,midthickness}.surf.gii",
+                den="native",
+                space="corobl",
+                desc="repaired",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    log:
+        bids_log(
+            "repair_native_mesh",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            desc="{surfname}",
+        ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(2),
+    params:
+        decimate_opts=0.75,
+        hole_fill_radius=10.0,  # voxels of the coords image
+    script:
+        "../scripts/repair_native_mesh.py"
+
+
+rule improve_native_mesh_quality:
+    """improves triangle quality (removes slivers and obtuse triangles) with
+    edge flips and tangential relaxation, keeping vertices on the surface, the
+    boundary fixed, and the topology unchanged"""
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="{surfname}.surf.gii",
+            den="native",
+            space="corobl",
+            desc="repaired",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        surf_gii=temp(
+            bids(
+                root=root,
+                datatype="surf",
+                suffix="{surfname,midthickness}.surf.gii",
+                den="native",
+                space="corobl",
+                desc="nostruct",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    log:
+        bids_log(
+            "improve_native_mesh_quality",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+            desc="{surfname}",
+        ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
+    params:
+        rounds=3,  # rounds of edge flips and relaxation
+        relax_iterations=3,  # relaxation steps per round
+        relax_step=0.5,  # fraction of the move towards the centroid
+        flip_tolerance=0.1,  # max non-planarity of a flipped quad, x median edge
+    script:
+        "../scripts/improve_native_mesh_quality.py"
 
 
 rule update_native_mesh_structure:
