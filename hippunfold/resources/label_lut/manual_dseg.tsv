@@ -1,9 +1,12 @@
-index	name	abbreviation
-1	hippocampal grey matter	GM
-2	SRLM or 'dark band'	SRLM
-3	neocortex (entorhinal or parahippocampal)	MTLC
-4	pial surface	Pial
-5	hippocampal-amygdalar transition area	HATA
-6	indusium griseum	IndGris
-7	cysts	Cyst
-8   dentate gyrus	DG
+index	name	abbreviation	description	laplace_role
+0	background	BG	Everything outside the labelled tissue.	hipp and dentate IO sink
+1	hippocampal grey matter	GM	Grey matter of the subiculum and CA1-CA4 (cornu Ammonis), the domain of the hipp Laplace coordinates.	hipp domain (AP, PD, IO); dentate IO src
+2	SRLM or 'dark band'	SRLM	Stratum radiatum, lacunosum and moleculare with the vestigial hippocampal sulcus: the hypointense band separating hippocampal grey matter from the dentate gyrus.	hipp IO src (inner surface); dentate IO sink
+3	neocortex (entorhinal or parahippocampal)	MTLC	Medial temporal lobe cortex adjoining the subiculum.	hipp PD src; dentate IO src
+4	pial surface	Pial	Pial surface of the hippocampus.	hipp IO src; dentate IO sink
+5	hippocampal-amygdalar transition area	HATA	Anterior (head) end of the hippocampus, where it meets the amygdala.	hipp and dentate AP src
+6	indusium griseum	IndGris	Posterior (tail) end of the hippocampus, continuing as the indusium griseum.	hipp and dentate AP sink
+7	cysts	Cyst	Cysts, typically remnants of the hippocampal sulcus, treated like SRLM.	hipp IO src; dentate IO sink
+8	dentate gyrus	DG	Dentate gyrus grey matter (granule cell and molecular layers), the domain of the dentate Laplace coordinates.	dentate domain (AP, PD, IO); part of the hipp domain (with 1); hipp PD sink
+9	dentate gyrus PD source	DGsrc	Exposed free edge of the dentate gyrus at the surface of the hippocampus (margo denticulatus), bordering the outside of the hippocampus (label 0) and hippocampal grey matter.	dentate PD src; hipp and dentate IO sink
+10	dentate gyrus PD sink	DGsink	Buried end of the dentate gyrus inside the hilus, enclosed by CA4 grey matter (label 1) and the SRLM (label 2).	dentate PD sink; hipp IO src; dentate IO sink

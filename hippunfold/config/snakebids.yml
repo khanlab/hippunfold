@@ -182,6 +182,11 @@ parse_args:
     help: 'Resample the manual segmentation (for --modality dsegtissue), keeping the bounding box the same, but changing the number of voxels in the image. This can be specified as voxels ("300x300x300"), or a percentage ("20%%") or percentage in each direction ("20x20x40%%"). Note: the segmentation will always be subsequently cropped around the segmentation, with a padding of 5 voxels.  (default: %(default)s)'
     default: null
 
+  --swap_dentate_pd_labels:
+    help: 'Swap the dentate PD src and sink labels (9 and 10) of the manual segmentation (for --modality dsegtissue). Use this for segmentations that place the PD src (9) next to CA3 and the sink (10) in the hilus, the reverse of the template convention, which otherwise mirrors the unfolded dentate (and fails the dentate terminal_order_hemisphere QC check). (default: %(default)s)'
+    action: 'store_true'
+    default: False
+
   --laminar_coords_res_hipp:
     help: 'Set the resolution that the laminar (IO) coords will be computed with for hippocampus. This is implemented by resampling the segmentation to this resolution prior to generating the coords. (default: %(default)s)'
     default: '0.3x0.3x0.3mm'

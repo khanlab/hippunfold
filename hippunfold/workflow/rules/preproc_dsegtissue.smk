@@ -25,5 +25,6 @@ rule import_dseg_tissue:
             else "-resample {res}".format(res=config["resample_dsegtissue"])
         ),
         crop_cmd="-trim 5vox",  #leave 5 voxel padding
+        swap_cmd="-replace 9 10 10 9" if config["swap_dentate_pd_labels"] else "",
     shell:
-        "c3d {input} -int 0 {params.resample_cmd} {params.crop_cmd} -o {output}"
+        "c3d {input} -int 0 {params.swap_cmd} {params.resample_cmd} {params.crop_cmd} -o {output}"
