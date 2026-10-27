@@ -159,6 +159,10 @@ greedyreg = { workspace = true }
 convert3d = { workspace = true }
 snakemake-executor-plugin-slurm = { workspace = true }
 
+# not on conda-forge; handles zenodo.org URLs (rate limits, retries, checksums)
+[tool.pixi.feature.runtime.pypi-dependencies]
+snakemake-storage-plugin-cached-http = ">=0.3,<0.4"
+
 
 # ----------------------------------------------------------------------
 # Development dependencies
