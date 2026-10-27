@@ -33,6 +33,8 @@ for smk in glob("../workflow/rules/*.smk"):
 
 
 in_dag = sys.stdin.read()
+# drop any log lines printed before the graph itself
+in_dag = in_dag[in_dag.find("digraph") :]
 out_prefix = Path(sys.argv[1])
 
 # make the folder

@@ -1,0 +1,323 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_resampling
+		];
+		4	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		96	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		97	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		98	[color="0.46 0.6 0.85",
+			label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+		99	[color="0.46 0.6 0.85",
+			label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+		100	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		101	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		103	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		105	[color="0.12 0.6 0.85",
+			label="cp_atlas_unfold\nsubject: 001"];
+		107	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		196	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		198	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		200	[color="0.11 0.6 0.85",
+			label="cp_atlas_subfields_label_gii\nsubject: 001"];
+		202	[color="0.11 0.6 0.85",
+			label="cp_atlas_subfields_label_gii\nsubject: 001"];
+		205	[color="0.46 0.6 0.85",
+			label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+		206	[color="0.46 0.6 0.85",
+			label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+		207	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		208	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		210	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		212	[color="0.12 0.6 0.85",
+			label="cp_atlas_unfold\nsubject: 001"];
+		215	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		297	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		298	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		299	[color="0.46 0.6 0.85",
+			label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+		300	[color="0.46 0.6 0.85",
+			label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+		301	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		302	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		304	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		306	[color="0.12 0.6 0.85",
+			label="cp_atlas_unfold\nsubject: 001"];
+		308	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		391	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		393	[color="0.46 0.6 0.85",
+			label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+		395	[color="0.46 0.6 0.85",
+			label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+		396	[color="0.46 0.6 0.85",
+			label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+		397	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		398	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		400	[color="0.47 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		402	[color="0.12 0.6 0.85",
+			label="cp_atlas_unfold\nsubject: 001"];
+		407	[color="0.44 0.6 0.85",
+			label=resample_atlas_subfields_to_native_surf];
+		413	[color="0.44 0.6 0.85",
+			label=resample_atlas_subfields_to_native_surf];
+	}
+	5	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: gyrification"];
+	5 -> 4;
+	8	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	34	[color="0.30 0.6 0.85",
+		label="laplace_beltrami\ndir: AP"];
+	8 -> 34;
+	49	[color="0.30 0.6 0.85",
+		label="laplace_beltrami\ndir: PD"];
+	8 -> 49;
+	8 -> 100;
+	34 -> 98;
+	49 -> 99;
+	50	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: midthickness"];
+	50 -> 4;
+	50 -> 96;
+	50 -> 97;
+	50 -> 98;
+	50 -> 99;
+	50 -> 100;
+	50 -> 105;
+	52	[color="0.66 0.6 0.85",
+		label=warp_unfold_native_to_unfoldreg];
+	52 -> 4;
+	52 -> 96;
+	52 -> 97;
+	52 -> 98;
+	52 -> 99;
+	52 -> 100;
+	52 -> 101;
+	52 -> 103;
+	52 -> 407;
+	58	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: curvature"];
+	58 -> 96;
+	71	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: thickness"];
+	71 -> 97;
+	73	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	73 -> 101;
+	79	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	79 -> 103;
+	87	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: midthickness"];
+	87 -> 407;
+	102	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: inner"];
+	102 -> 101;
+	104	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: outer"];
+	104 -> 103;
+	108	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: gyrification"];
+	108 -> 107;
+	111	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	134	[color="0.30 0.6 0.85",
+		label="laplace_beltrami\ndir: AP"];
+	111 -> 134;
+	149	[color="0.30 0.6 0.85",
+		label="laplace_beltrami\ndir: PD"];
+	111 -> 149;
+	111 -> 207;
+	134 -> 205;
+	149 -> 206;
+	150	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness"];
+	150 -> 107;
+	150 -> 196;
+	150 -> 198;
+	150 -> 205;
+	150 -> 206;
+	150 -> 207;
+	150 -> 212;
+	151	[color="0.66 0.6 0.85",
+		label=warp_unfold_native_to_unfoldreg];
+	151 -> 107;
+	151 -> 196;
+	151 -> 198;
+	151 -> 205;
+	151 -> 206;
+	151 -> 207;
+	151 -> 208;
+	151 -> 210;
+	151 -> 413;
+	157	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: curvature"];
+	157 -> 196;
+	170	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: thickness"];
+	170 -> 198;
+	172	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	172 -> 208;
+	178	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	178 -> 210;
+	186	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness"];
+	186 -> 413;
+	201	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nmetricname: dseg\nmetrictype: label"];
+	201 -> 200;
+	203	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nmetricname: dseg\nmetrictype: label"];
+	203 -> 202;
+	209	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: inner"];
+	209 -> 208;
+	211	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: outer"];
+	211 -> 210;
+	216	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: gyrification"];
+	216 -> 215;
+	219	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	236	[color="0.30 0.6 0.85",
+		label="laplace_beltrami\ndir: AP"];
+	219 -> 236;
+	251	[color="0.30 0.6 0.85",
+		label="laplace_beltrami\ndir: PD"];
+	219 -> 251;
+	219 -> 301;
+	236 -> 299;
+	251 -> 300;
+	252	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: midthickness"];
+	252 -> 215;
+	252 -> 297;
+	252 -> 298;
+	252 -> 299;
+	252 -> 300;
+	252 -> 301;
+	252 -> 306;
+	253	[color="0.66 0.6 0.85",
+		label=warp_unfold_native_to_unfoldreg];
+	253 -> 215;
+	253 -> 297;
+	253 -> 298;
+	253 -> 299;
+	253 -> 300;
+	253 -> 301;
+	253 -> 302;
+	253 -> 304;
+	259	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: curvature"];
+	259 -> 297;
+	272	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: thickness"];
+	272 -> 298;
+	274	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	274 -> 302;
+	280	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	280 -> 304;
+	303	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: inner"];
+	303 -> 302;
+	305	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: outer"];
+	305 -> 304;
+	309	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: gyrification"];
+	309 -> 308;
+	312	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	329	[color="0.30 0.6 0.85",
+		label="laplace_beltrami\ndir: AP"];
+	312 -> 329;
+	344	[color="0.30 0.6 0.85",
+		label="laplace_beltrami\ndir: PD"];
+	312 -> 344;
+	312 -> 397;
+	329 -> 395;
+	344 -> 396;
+	345	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: midthickness"];
+	345 -> 308;
+	345 -> 391;
+	345 -> 393;
+	345 -> 395;
+	345 -> 396;
+	345 -> 397;
+	345 -> 402;
+	346	[color="0.66 0.6 0.85",
+		label=warp_unfold_native_to_unfoldreg];
+	346 -> 308;
+	346 -> 391;
+	346 -> 393;
+	346 -> 395;
+	346 -> 396;
+	346 -> 397;
+	346 -> 398;
+	346 -> 400;
+	352	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: curvature"];
+	352 -> 391;
+	365	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: thickness"];
+	365 -> 393;
+	367	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	367 -> 398;
+	373	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	373 -> 400;
+	399	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: inner"];
+	399 -> 398;
+	401	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: outer"];
+	401 -> 400;
+	408	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: dseg\nmetrictype: label"];
+	408 -> 407;
+	414	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: dseg\nmetrictype: label"];
+	414 -> 413;
+}

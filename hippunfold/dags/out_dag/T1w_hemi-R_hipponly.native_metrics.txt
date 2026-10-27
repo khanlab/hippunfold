@@ -1,0 +1,79 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_metrics
+		];
+		5	[color="0.57 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: gyrification",
+			style=""];
+		6	[color="0.05 0.6 0.85",
+			label=calculate_gyrification,
+			style=""];
+		6 -> 5;
+		7	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl",
+			style=""];
+		7 -> 6;
+		34	[color="0.05 0.6 0.85",
+			label=calculate_surface_area,
+			style=""];
+		34 -> 7;
+		35	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth",
+			style=""];
+		35 -> 6;
+		36	[color="0.05 0.6 0.85",
+			label="calculate_surface_area\nspace: unfoldspringmodelsmooth",
+			style=""];
+		36 -> 35;
+		64	[color="0.57 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: curvature",
+			style=""];
+		65	[color="0.04 0.6 0.85",
+			label=calculate_curvature,
+			style=""];
+		65 -> 64;
+		77	[color="0.57 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: thickness",
+			style=""];
+		78	[color="0.06 0.6 0.85",
+			label=calculate_thickness,
+			style=""];
+		78 -> 77;
+	}
+	8	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	8 -> 7;
+	8 -> 34;
+	8 -> 35;
+	66	[color="0.57 0.6 0.85",
+		label=smooth_surface,
+		style=""];
+	8 -> 66;
+	37	[color="0.61 0.6 0.85",
+		label=unfold_surface_smoothing,
+		style=""];
+	37 -> 36;
+	66 -> 65;
+	79	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	79 -> 78;
+	85	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	85 -> 78;
+}

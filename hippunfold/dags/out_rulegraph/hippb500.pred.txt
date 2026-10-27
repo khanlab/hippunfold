@@ -1,0 +1,30 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=pred
+		];
+		17	[color="0.54 0.6 0.85",
+			label=run_inference_nnunet_v1];
+		19	[color="0.63 0.6 0.85",
+			label=unpack_tissuepred_model];
+		19 -> 17;
+		20	[color="0.20 0.6 0.85",
+			label=download_tissuepred_model];
+		20 -> 19;
+	}
+	18	[color="0.45 0.6 0.85",
+		label=resample_hippdwi_to_template];
+	18 -> 17;
+}

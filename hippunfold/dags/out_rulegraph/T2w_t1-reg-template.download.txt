@@ -1,0 +1,35 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=download
+		];
+		14	[color="0.27 0.6 0.85",
+			label=import_template_dseg];
+		15	[color="0.17 0.6 0.85",
+			label=download_extract_template];
+		15 -> 14;
+		76	[color="0.27 0.6 0.85",
+			label=import_template_dseg_dentate];
+		15 -> 76;
+		46	[color="0.12 0.6 0.85",
+			label=cp_atlas_surf_gii];
+		47	[color="0.18 0.6 0.85",
+			label=download_surf_template_atlas];
+		47 -> 46;
+		67	[color="0.11 0.6 0.85",
+			label=cp_atlas_metric_gii];
+		47 -> 67;
+	}
+}

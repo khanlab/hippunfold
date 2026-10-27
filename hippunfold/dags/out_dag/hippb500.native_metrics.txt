@@ -1,0 +1,199 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_metrics
+		];
+		5	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: gyrification"];
+		6	[color="0.05 0.6 0.85",
+			label=calculate_gyrification];
+		6 -> 5;
+		7	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl"];
+		7 -> 6;
+		28	[color="0.05 0.6 0.85",
+			label=calculate_surface_area];
+		28 -> 7;
+		29	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth"];
+		29 -> 6;
+		30	[color="0.05 0.6 0.85",
+			label="calculate_surface_area\nspace: unfoldspringmodelsmooth"];
+		30 -> 29;
+		58	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: curvature"];
+		59	[color="0.04 0.6 0.85",
+			label=calculate_curvature];
+		59 -> 58;
+		71	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: thickness"];
+		72	[color="0.06 0.6 0.85",
+			label=calculate_thickness];
+		72 -> 71;
+		108	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: gyrification"];
+		109	[color="0.05 0.6 0.85",
+			label=calculate_gyrification];
+		109 -> 108;
+		110	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl"];
+		110 -> 109;
+		128	[color="0.05 0.6 0.85",
+			label=calculate_surface_area];
+		128 -> 110;
+		129	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth"];
+		129 -> 109;
+		130	[color="0.05 0.6 0.85",
+			label="calculate_surface_area\nspace: unfoldspringmodelsmooth"];
+		130 -> 129;
+		157	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: curvature"];
+		158	[color="0.04 0.6 0.85",
+			label=calculate_curvature];
+		158 -> 157;
+		170	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: thickness"];
+		171	[color="0.06 0.6 0.85",
+			label=calculate_thickness];
+		171 -> 170;
+		216	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: gyrification"];
+		217	[color="0.05 0.6 0.85",
+			label=calculate_gyrification];
+		217 -> 216;
+		218	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl"];
+		218 -> 217;
+		230	[color="0.05 0.6 0.85",
+			label=calculate_surface_area];
+		230 -> 218;
+		231	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth"];
+		231 -> 217;
+		232	[color="0.05 0.6 0.85",
+			label="calculate_surface_area\nspace: unfoldspringmodelsmooth"];
+		232 -> 231;
+		259	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: curvature"];
+		260	[color="0.04 0.6 0.85",
+			label=calculate_curvature];
+		260 -> 259;
+		272	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: thickness"];
+		273	[color="0.06 0.6 0.85",
+			label=calculate_thickness];
+		273 -> 272;
+		309	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: gyrification"];
+		310	[color="0.05 0.6 0.85",
+			label=calculate_gyrification];
+		310 -> 309;
+		311	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl"];
+		311 -> 310;
+		323	[color="0.05 0.6 0.85",
+			label=calculate_surface_area];
+		323 -> 311;
+		324	[color="0.34 0.6 0.85",
+			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth"];
+		324 -> 310;
+		325	[color="0.05 0.6 0.85",
+			label="calculate_surface_area\nspace: unfoldspringmodelsmooth"];
+		325 -> 324;
+		352	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: curvature"];
+		353	[color="0.04 0.6 0.85",
+			label=calculate_curvature];
+		353 -> 352;
+		365	[color="0.58 0.6 0.85",
+			label="soft_tanh_normalization\nmetric: thickness"];
+		366	[color="0.06 0.6 0.85",
+			label=calculate_thickness];
+		366 -> 365;
+	}
+	8	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	8 -> 7;
+	8 -> 28;
+	8 -> 29;
+	60	[color="0.57 0.6 0.85",
+		label=smooth_surface];
+	8 -> 60;
+	31	[color="0.61 0.6 0.85",
+		label=unfold_surface_smoothing];
+	31 -> 30;
+	60 -> 59;
+	73	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	73 -> 72;
+	79	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	79 -> 72;
+	111	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	111 -> 110;
+	111 -> 128;
+	111 -> 129;
+	159	[color="0.57 0.6 0.85",
+		label=smooth_surface];
+	111 -> 159;
+	131	[color="0.61 0.6 0.85",
+		label=unfold_surface_smoothing];
+	131 -> 130;
+	159 -> 158;
+	172	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	172 -> 171;
+	178	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	178 -> 171;
+	219	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	219 -> 218;
+	219 -> 230;
+	219 -> 231;
+	261	[color="0.57 0.6 0.85",
+		label=smooth_surface];
+	219 -> 261;
+	233	[color="0.61 0.6 0.85",
+		label=unfold_surface_smoothing];
+	233 -> 232;
+	261 -> 260;
+	274	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	274 -> 273;
+	280	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	280 -> 273;
+	312	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	312 -> 311;
+	312 -> 323;
+	312 -> 324;
+	354	[color="0.57 0.6 0.85",
+		label=smooth_surface];
+	312 -> 354;
+	326	[color="0.61 0.6 0.85",
+		label=unfold_surface_smoothing];
+	326 -> 325;
+	354 -> 353;
+	367	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	367 -> 366;
+	373	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl"];
+	373 -> 366;
+}

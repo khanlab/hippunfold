@@ -1,4 +1,4 @@
-strict digraph "" {
+digraph snakemake_dag {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,32 +15,34 @@ strict digraph "" {
 		graph [color=blue,
 			label=shape_inject
 		];
-		13	[color="0.01 0.6 0.85",
+		12	[color="0.45 0.6 0.85",
 			label=reinsert_subject_labels];
-		47	[color="0.34 0.6 0.85",
-			label=unflip_postproc];
-		13 -> 47;
-		14	[color="0.26 0.6 0.85",
+		13	[color="0.59 0.6 0.85",
 			label=template_shape_inject];
-		14 -> 13;
-		15	[color="0.43 0.6 0.85",
-			label=import_template_shape];
-		15 -> 14;
-		27	[color="0.45 0.6 0.85",
-			label=prep_segs_for_greedy];
-		15 -> 27;
-		26	[color="0.29 0.6 0.85",
+		13 -> 12;
+		28	[color="0.60 0.6 0.85",
 			label=template_shape_reg];
-		26 -> 14;
-		28	[color="0.18 0.6 0.85",
-			label=inject_init_laplace_coords];
-		26 -> 28;
-		27 -> 26;
+		28 -> 13;
+		29	[color="0.38 0.6 0.85",
+			label=prep_segs_for_greedy];
+		29 -> 28;
+		30	[color="0.52 0.6 0.85",
+			label=resample_template_dseg_tissue_for_reg];
+		30 -> 29;
 	}
-	16	[color="0.19 0.6 0.85",
-		label=run_inference];
+	14	[color="0.27 0.6 0.85",
+		label=import_template_dseg];
+	14 -> 13;
+	14 -> 30;
+	16	[color="0.16 0.6 0.85",
+		label=create_upsampled_coords_ref];
 	16 -> 13;
-	16 -> 14;
-	16 -> 27;
-	16 -> 28;
+	17	[color="0.54 0.6 0.85",
+		label=run_inference_nnunet_v1];
+	17 -> 12;
+	17 -> 16;
+	17 -> 29;
+	72	[color="0.27 0.6 0.85",
+		label=import_template_dseg_dentate];
+	72 -> 13;
 }

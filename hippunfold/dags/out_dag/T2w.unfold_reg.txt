@@ -1,0 +1,555 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=unfold_reg
+		];
+		59	[color="0.66 0.6 0.85",
+			label=warp_unfold_native_to_unfoldreg,
+			style=""];
+		61	[color="0.54 0.6 0.85",
+			label="reset_header_2d_warp_unfoldreg\ndesc: SyN\nfrom: multihist7\nspace: unfold\nto: native",
+			style=""];
+		61 -> 59;
+		62	[color="0.62 0.6 0.85",
+			label=unfoldreg_antsquick,
+			style=""];
+		62 -> 61;
+		63	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		63 -> 62;
+		64	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		64 -> 63;
+		72	[color="0.20 0.6 0.85",
+			label=extract_unfold_ref_slice,
+			style=""];
+		72 -> 61;
+		72 -> 64;
+		75	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		72 -> 75;
+		77	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		72 -> 77;
+		92	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: curvature",
+			style=""];
+		72 -> 92;
+		98	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: gyrification",
+			style=""];
+		72 -> 98;
+		101	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: thickness",
+			style=""];
+		72 -> 101;
+		74	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		74 -> 62;
+		75 -> 74;
+		76	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		76 -> 62;
+		77 -> 76;
+		91	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		91 -> 62;
+		92 -> 91;
+		97	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		97 -> 62;
+		98 -> 97;
+		100	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		100 -> 62;
+		101 -> 100;
+		162	[color="0.66 0.6 0.85",
+			label=warp_unfold_native_to_unfoldreg,
+			style=""];
+		164	[color="0.54 0.6 0.85",
+			label="reset_header_2d_warp_unfoldreg\ndesc: SyN\nfrom: multihist7\nspace: unfold\nto: native",
+			style=""];
+		164 -> 162;
+		165	[color="0.62 0.6 0.85",
+			label=unfoldreg_antsquick,
+			style=""];
+		165 -> 164;
+		166	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		166 -> 165;
+		167	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		167 -> 166;
+		175	[color="0.20 0.6 0.85",
+			label=extract_unfold_ref_slice,
+			style=""];
+		175 -> 164;
+		175 -> 167;
+		178	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		175 -> 178;
+		180	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		175 -> 180;
+		195	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: curvature",
+			style=""];
+		175 -> 195;
+		201	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: gyrification",
+			style=""];
+		175 -> 201;
+		204	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: thickness",
+			style=""];
+		175 -> 204;
+		177	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		177 -> 165;
+		178 -> 177;
+		179	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		179 -> 165;
+		180 -> 179;
+		194	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		194 -> 165;
+		195 -> 194;
+		200	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		200 -> 165;
+		201 -> 200;
+		203	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		203 -> 165;
+		204 -> 203;
+		267	[color="0.66 0.6 0.85",
+			label=warp_unfold_native_to_unfoldreg,
+			style=""];
+		269	[color="0.54 0.6 0.85",
+			label="reset_header_2d_warp_unfoldreg\ndesc: SyN\nfrom: multihist7\nspace: unfold\nto: native",
+			style=""];
+		269 -> 267;
+		270	[color="0.62 0.6 0.85",
+			label=unfoldreg_antsquick,
+			style=""];
+		270 -> 269;
+		271	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		271 -> 270;
+		272	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		272 -> 271;
+		280	[color="0.20 0.6 0.85",
+			label=extract_unfold_ref_slice,
+			style=""];
+		280 -> 269;
+		280 -> 272;
+		283	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		280 -> 283;
+		285	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		280 -> 285;
+		300	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: curvature",
+			style=""];
+		280 -> 300;
+		306	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: gyrification",
+			style=""];
+		280 -> 306;
+		309	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: thickness",
+			style=""];
+		280 -> 309;
+		282	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		282 -> 270;
+		283 -> 282;
+		284	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		284 -> 270;
+		285 -> 284;
+		299	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		299 -> 270;
+		300 -> 299;
+		305	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		305 -> 270;
+		306 -> 305;
+		308	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		308 -> 270;
+		309 -> 308;
+		363	[color="0.66 0.6 0.85",
+			label=warp_unfold_native_to_unfoldreg,
+			style=""];
+		365	[color="0.54 0.6 0.85",
+			label="reset_header_2d_warp_unfoldreg\ndesc: SyN\nfrom: multihist7\nspace: unfold\nto: native",
+			style=""];
+		365 -> 363;
+		366	[color="0.62 0.6 0.85",
+			label=unfoldreg_antsquick,
+			style=""];
+		366 -> 365;
+		367	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		367 -> 366;
+		368	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		368 -> 367;
+		376	[color="0.20 0.6 0.85",
+			label=extract_unfold_ref_slice,
+			style=""];
+		376 -> 365;
+		376 -> 368;
+		379	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		376 -> 379;
+		381	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii,
+			style=""];
+		376 -> 381;
+		396	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: curvature",
+			style=""];
+		376 -> 396;
+		402	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: gyrification",
+			style=""];
+		376 -> 402;
+		405	[color="0.03 0.6 0.85",
+			label="atlas_metric_to_unfold_nii\nmetric: thickness",
+			style=""];
+		376 -> 405;
+		378	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		378 -> 366;
+		379 -> 378;
+		380	[color="0.57 0.6 0.85",
+			label="slice_3d_to_2d_subject\nunfold: unfold",
+			style=""];
+		380 -> 366;
+		381 -> 380;
+		395	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		395 -> 366;
+		396 -> 395;
+		401	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		401 -> 366;
+		402 -> 401;
+		404	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas,
+			style=""];
+		404 -> 366;
+		405 -> 404;
+	}
+	5	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: gyrification",
+		style=""];
+	5 -> 75;
+	60	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	60 -> 59;
+	60 -> 64;
+	60 -> 75;
+	60 -> 77;
+	65	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: curvature",
+		style=""];
+	65 -> 64;
+	68	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	68 -> 64;
+	68 -> 75;
+	68 -> 77;
+	70	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	70 -> 64;
+	70 -> 75;
+	70 -> 77;
+	73	[color="0.16 0.6 0.85",
+		label="create_unfold_ref\nhemi: L\nlabel: hipp\nsubject: 001",
+		style=""];
+	73 -> 72;
+	78	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: thickness",
+		style=""];
+	78 -> 77;
+	93	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: curvature\nmetrictype: shape",
+		style=""];
+	93 -> 92;
+	94	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
+		style=""];
+	94 -> 92;
+	94 -> 98;
+	94 -> 101;
+	95	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: inner",
+		style=""];
+	95 -> 92;
+	95 -> 98;
+	95 -> 101;
+	96	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: outer",
+		style=""];
+	96 -> 92;
+	96 -> 98;
+	96 -> 101;
+	99	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: gyrification\nmetrictype: shape",
+		style=""];
+	99 -> 98;
+	102	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: thickness\nmetrictype: shape",
+		style=""];
+	102 -> 101;
+	119	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: gyrification",
+		style=""];
+	119 -> 178;
+	163	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	163 -> 162;
+	163 -> 167;
+	163 -> 178;
+	163 -> 180;
+	168	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: curvature",
+		style=""];
+	168 -> 167;
+	171	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	171 -> 167;
+	171 -> 178;
+	171 -> 180;
+	173	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	173 -> 167;
+	173 -> 178;
+	173 -> 180;
+	176	[color="0.16 0.6 0.85",
+		label="create_unfold_ref\nhemi: R\nlabel: hipp\nsubject: 001",
+		style=""];
+	176 -> 175;
+	181	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: thickness",
+		style=""];
+	181 -> 180;
+	196	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: curvature\nmetrictype: shape",
+		style=""];
+	196 -> 195;
+	197	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
+		style=""];
+	197 -> 195;
+	197 -> 201;
+	197 -> 204;
+	198	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: inner",
+		style=""];
+	198 -> 195;
+	198 -> 201;
+	198 -> 204;
+	199	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: outer",
+		style=""];
+	199 -> 195;
+	199 -> 201;
+	199 -> 204;
+	202	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: gyrification\nmetrictype: shape",
+		style=""];
+	202 -> 201;
+	205	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: thickness\nmetrictype: shape",
+		style=""];
+	205 -> 204;
+	230	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: gyrification",
+		style=""];
+	230 -> 283;
+	268	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	268 -> 267;
+	268 -> 272;
+	268 -> 283;
+	268 -> 285;
+	273	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: curvature",
+		style=""];
+	273 -> 272;
+	276	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	276 -> 272;
+	276 -> 283;
+	276 -> 285;
+	278	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	278 -> 272;
+	278 -> 283;
+	278 -> 285;
+	281	[color="0.16 0.6 0.85",
+		label="create_unfold_ref\nhemi: L\nlabel: dentate\nsubject: 001",
+		style=""];
+	281 -> 280;
+	286	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: thickness",
+		style=""];
+	286 -> 285;
+	301	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: curvature\nmetrictype: shape",
+		style=""];
+	301 -> 300;
+	302	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
+		style=""];
+	302 -> 300;
+	302 -> 306;
+	302 -> 309;
+	303	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: inner",
+		style=""];
+	303 -> 300;
+	303 -> 306;
+	303 -> 309;
+	304	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: outer",
+		style=""];
+	304 -> 300;
+	304 -> 306;
+	304 -> 309;
+	307	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: gyrification\nmetrictype: shape",
+		style=""];
+	307 -> 306;
+	310	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: thickness\nmetrictype: shape",
+		style=""];
+	310 -> 309;
+	326	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: gyrification",
+		style=""];
+	326 -> 379;
+	364	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	364 -> 363;
+	364 -> 368;
+	364 -> 379;
+	364 -> 381;
+	369	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: curvature",
+		style=""];
+	369 -> 368;
+	372	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	372 -> 368;
+	372 -> 379;
+	372 -> 381;
+	374	[color="0.64 0.6 0.85",
+		label="update_native_mesh_structure_unfold\nspace: unfold",
+		style=""];
+	374 -> 368;
+	374 -> 379;
+	374 -> 381;
+	377	[color="0.16 0.6 0.85",
+		label="create_unfold_ref\nhemi: R\nlabel: dentate\nsubject: 001",
+		style=""];
+	377 -> 376;
+	382	[color="0.58 0.6 0.85",
+		label="soft_tanh_normalization\nmetric: thickness",
+		style=""];
+	382 -> 381;
+	397	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: curvature\nmetrictype: shape",
+		style=""];
+	397 -> 396;
+	398	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
+		style=""];
+	398 -> 396;
+	398 -> 402;
+	398 -> 405;
+	399	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: inner",
+		style=""];
+	399 -> 396;
+	399 -> 402;
+	399 -> 405;
+	400	[color="0.12 0.6 0.85",
+		label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: outer",
+		style=""];
+	400 -> 396;
+	400 -> 402;
+	400 -> 405;
+	403	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: gyrification\nmetrictype: shape",
+		style=""];
+	403 -> 402;
+	406	[color="0.11 0.6 0.85",
+		label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: thickness\nmetrictype: shape",
+		style=""];
+	406 -> 405;
+}

@@ -1,0 +1,60 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=unfold_reg
+		];
+		44	[color="0.66 0.6 0.85",
+			label=warp_unfold_native_to_unfoldreg];
+		46	[color="0.54 0.6 0.85",
+			label=reset_header_2d_warp_unfoldreg];
+		46 -> 44;
+		47	[color="0.62 0.6 0.85",
+			label=unfoldreg_antsquick];
+		47 -> 46;
+		48	[color="0.57 0.6 0.85",
+			label=slice_3d_to_2d_subject];
+		48 -> 47;
+		49	[color="0.35 0.6 0.85",
+			label=native_metric_to_unfold_nii];
+		49 -> 48;
+		53	[color="0.20 0.6 0.85",
+			label=extract_unfold_ref_slice];
+		53 -> 46;
+		53 -> 49;
+		62	[color="0.03 0.6 0.85",
+			label=atlas_metric_to_unfold_nii];
+		53 -> 62;
+		61	[color="0.56 0.6 0.85",
+			label=slice_3d_to_2d_atlas];
+		61 -> 47;
+		62 -> 61;
+	}
+	5	[color="0.58 0.6 0.85",
+		label=soft_tanh_normalization];
+	5 -> 49;
+	42	[color="0.12 0.6 0.85",
+		label=cp_atlas_surf_gii];
+	42 -> 62;
+	45	[color="0.64 0.6 0.85",
+		label=update_native_mesh_structure_unfold];
+	45 -> 44;
+	45 -> 49;
+	54	[color="0.16 0.6 0.85",
+		label=create_unfold_ref];
+	54 -> 53;
+	63	[color="0.11 0.6 0.85",
+		label=cp_atlas_metric_gii];
+	63 -> 62;
+}

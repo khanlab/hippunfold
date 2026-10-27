@@ -1,0 +1,49 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=pred
+		];
+		17	[color="0.54 0.6 0.85",
+			label=run_inference_nnunet_v1,
+			style=""];
+		136	[color="0.41 0.6 0.85",
+			label=qc_tissuepred_f3d,
+			style=""];
+		17 -> 136;
+		25	[color="0.63 0.6 0.85",
+			label=unpack_tissuepred_model,
+			style=""];
+		25 -> 17;
+		26	[color="0.19 0.6 0.85",
+			label=download_tissuepred_model,
+			style=""];
+		26 -> 25;
+		135	[color="0.41 0.6 0.85",
+			label=qc_tissuepred_dice,
+			style=""];
+		136 -> 135;
+	}
+	18	[color="0.65 0.6 0.85",
+		label="warp_t1_to_corobl_crop\nhemi: R",
+		style=""];
+	18 -> 17;
+	18 -> 136;
+	24	[color="0.18 0.6 0.85",
+		label="download_extract_template\ntemplate: CITI168",
+		style="rounded,dashed"];
+	24 -> 18;
+	24 -> 135;
+	24 -> 136;
+}

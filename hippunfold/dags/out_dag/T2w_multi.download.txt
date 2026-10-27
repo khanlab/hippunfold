@@ -1,0 +1,204 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=download
+		];
+		14	[color="0.27 0.6 0.85",
+			label="import_template_dseg\nhemi: L\nsubject: 001",
+			style=""];
+		15	[color="0.18 0.6 0.85",
+			label="download_extract_template\ntemplate: upenn",
+			style=""];
+		15 -> 14;
+		134	[color="0.27 0.6 0.85",
+			label="import_template_dseg\nhemi: R\nsubject: 001",
+			style=""];
+		15 -> 134;
+		245	[color="0.27 0.6 0.85",
+			label="import_template_dseg_dentate\nhemi: L\nsubject: 001",
+			style=""];
+		15 -> 245;
+		341	[color="0.27 0.6 0.85",
+			label="import_template_dseg_dentate\nhemi: R\nsubject: 001",
+			style=""];
+		15 -> 341;
+		31	[color="0.18 0.6 0.85",
+			label="download_extract_template\ntemplate: CITI168",
+			style="rounded,dashed"];
+		63	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		64	[color="0.18 0.6 0.85",
+			label="download_surf_template_atlas\natlas: multihist7",
+			style=""];
+		64 -> 63;
+		99	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: curvature\nmetrictype: shape",
+			style=""];
+		64 -> 99;
+		100	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		64 -> 100;
+		101	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: inner",
+			style=""];
+		64 -> 101;
+		102	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: outer",
+			style=""];
+		64 -> 102;
+		105	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: gyrification\nmetrictype: shape",
+			style=""];
+		64 -> 105;
+		108	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: thickness\nmetrictype: shape",
+			style=""];
+		64 -> 108;
+		118	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: inner",
+			style=""];
+		64 -> 118;
+		121	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: outer",
+			style=""];
+		64 -> 121;
+		167	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		64 -> 167;
+		202	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: curvature\nmetrictype: shape",
+			style=""];
+		64 -> 202;
+		203	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		64 -> 203;
+		204	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: inner",
+			style=""];
+		64 -> 204;
+		205	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: outer",
+			style=""];
+		64 -> 205;
+		208	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: gyrification\nmetrictype: shape",
+			style=""];
+		64 -> 208;
+		211	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: thickness\nmetrictype: shape",
+			style=""];
+		64 -> 211;
+		218	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
+			style=""];
+		64 -> 218;
+		220	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
+			style=""];
+		64 -> 220;
+		228	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: inner",
+			style=""];
+		64 -> 228;
+		231	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: outer",
+			style=""];
+		64 -> 231;
+		272	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		64 -> 272;
+		307	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: curvature\nmetrictype: shape",
+			style=""];
+		64 -> 307;
+		308	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		64 -> 308;
+		309	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: inner",
+			style=""];
+		64 -> 309;
+		310	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: outer",
+			style=""];
+		64 -> 310;
+		313	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: gyrification\nmetrictype: shape",
+			style=""];
+		64 -> 313;
+		316	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: thickness\nmetrictype: shape",
+			style=""];
+		64 -> 316;
+		325	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: inner",
+			style=""];
+		64 -> 325;
+		328	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: outer",
+			style=""];
+		64 -> 328;
+		368	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		64 -> 368;
+		403	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: curvature\nmetrictype: shape",
+			style=""];
+		64 -> 403;
+		404	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		64 -> 404;
+		405	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: inner",
+			style=""];
+		64 -> 405;
+		406	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: outer",
+			style=""];
+		64 -> 406;
+		409	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: gyrification\nmetrictype: shape",
+			style=""];
+		64 -> 409;
+		412	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: thickness\nmetrictype: shape",
+			style=""];
+		64 -> 412;
+		424	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: inner",
+			style=""];
+		64 -> 424;
+		427	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: outer",
+			style=""];
+		64 -> 427;
+		435	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
+			style=""];
+		64 -> 435;
+		444	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
+			style=""];
+		64 -> 444;
+	}
+}

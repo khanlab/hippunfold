@@ -117,7 +117,7 @@ parse_args:
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv3 (marmoset) or CIVM (macaque) template. (default: %(default)s)'
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* the U-Net tissuepred model and shape injection. This is only to be used if tissuepred models are not trained for the data you are using, e.g. for non-human primate data with the MBMv3 (marmoset) or CIVM (macaque) template. (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -136,7 +136,7 @@ parse_args:
     action: 'store_true'
 
   --force_shape_inject:
-    help: 'Force post-processing template shape injection into CNN segmentation on, overriding the model default (set by shape_inject in nnunet_models; on if unset). (default: %(default)s)'
+    help: 'Force post-processing template shape injection into CNN segmentation on, overriding the model default (set by shape_inject in tissuepred_models; on if unset). (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -152,7 +152,7 @@ parse_args:
 
   
   --inject_template_smoothing_factor: 
-    help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
+    help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if tissuepred segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
     default: 1.0
 
   --rigid_reg_template:
@@ -206,7 +206,7 @@ parse_args:
     action: 'store_true'
 
   --nnunet_enable_tta:
-    help: 'Enable test-time augmentation for nnU-net inference, slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
+    help: 'Enable test-time augmentation for nnU-Net inference (nnU-Net tissuepred models only), slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -246,8 +246,8 @@ parse_args:
     nargs: '+'
     help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
 
-  --force_nnunet_model:
-    help: 'Force nnunet model to use (expert option). (default: %(default)s)'
+  --force_tissuepred_model:
+    help: 'Force tissue segmentation (tissuepred) model to use (expert option). (default: %(default)s)'
     default: False
     choices:
       - T1w
@@ -428,7 +428,7 @@ tissue_atlas_mapping:
    
 
 
-nnunet_models:
+tissuepred_models:
   T1w:
     url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
     arch_version: nnunet_v1

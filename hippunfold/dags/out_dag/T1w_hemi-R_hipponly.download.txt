@@ -1,0 +1,76 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=download
+		];
+		14	[color="0.27 0.6 0.85",
+			label="import_template_dseg\nhemi: R\nsubject: 001",
+			style=""];
+		15	[color="0.18 0.6 0.85",
+			label="download_extract_template\ntemplate: upenn",
+			style=""];
+		15 -> 14;
+		24	[color="0.18 0.6 0.85",
+			label="download_extract_template\ntemplate: CITI168",
+			style="rounded,dashed"];
+		56	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		57	[color="0.18 0.6 0.85",
+			label="download_surf_template_atlas\natlas: multihist7",
+			style=""];
+		57 -> 56;
+		92	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: curvature\nmetrictype: shape",
+			style=""];
+		57 -> 92;
+		93	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
+			style=""];
+		57 -> 93;
+		94	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: inner",
+			style=""];
+		57 -> 94;
+		95	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: outer",
+			style=""];
+		57 -> 95;
+		98	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: gyrification\nmetrictype: shape",
+			style=""];
+		57 -> 98;
+		101	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: thickness\nmetrictype: shape",
+			style=""];
+		57 -> 101;
+		111	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: inner",
+			style=""];
+		57 -> 111;
+		114	[color="0.12 0.6 0.85",
+			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: outer",
+			style=""];
+		57 -> 114;
+		121	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
+			style=""];
+		57 -> 121;
+		128	[color="0.11 0.6 0.85",
+			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
+			style=""];
+		57 -> 128;
+	}
+}

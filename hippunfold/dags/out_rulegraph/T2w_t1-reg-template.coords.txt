@@ -1,0 +1,45 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=coords
+		];
+		10	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist];
+		11	[color="0.37 0.6 0.85",
+			label=prep_dseg_for_laynii];
+		11 -> 10;
+		16	[color="0.16 0.6 0.85",
+			label=create_upsampled_coords_ref];
+		35	[color="0.21 0.6 0.85",
+			label=get_nan_mask];
+		36	[color="0.22 0.6 0.85",
+			label=get_src_sink_mask];
+		44	[color="0.22 0.6 0.85",
+			label=get_src_sink_sdt];
+		36 -> 44;
+		64	[color="0.21 0.6 0.85",
+			label=get_label_mask];
+	}
+	12	[color="0.45 0.6 0.85",
+		label=reinsert_subject_labels];
+	12 -> 11;
+	12 -> 35;
+	12 -> 36;
+	12 -> 64;
+	17	[color="0.54 0.6 0.85",
+		label=run_inference_nnunet_v1];
+	17 -> 12;
+	17 -> 16;
+}

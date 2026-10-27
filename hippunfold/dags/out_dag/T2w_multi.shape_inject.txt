@@ -1,4 +1,4 @@
-strict digraph "" {
+digraph snakemake_dag {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,97 +15,117 @@ strict digraph "" {
 		graph [color=blue,
 			label=shape_inject
 		];
-		13	[color="0.18 0.6 0.85",
-			label=reinsert_subject_labels];
-		146	[color="0.35 0.6 0.85",
-			label="unflip_postproc\nhemi: L"];
-		13 -> 146;
-		14	[color="0.30 0.6 0.85",
-			label=template_shape_inject];
-		14 -> 13;
-		15	[color="0.54 0.6 0.85",
-			label="import_template_shape\nsubject: 001"];
-		15 -> 14;
-		32	[color="0.53 0.6 0.85",
-			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_space-template_desc-hipptissue"];
-		15 -> 32;
-		69	[color="0.30 0.6 0.85",
-			label=template_shape_inject];
-		15 -> 69;
-		31	[color="0.52 0.6 0.85",
-			label="template_shape_reg\nhemi: Lflip\nsubject: 001"];
-		31 -> 14;
-		34	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
-		31 -> 34;
-		37	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
-		31 -> 37;
-		112	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: dentate\ndir: AP"];
-		31 -> 112;
-		115	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: dentate\ndir: PD"];
-		31 -> 115;
-		118	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: dentate\ndir: IO"];
-		31 -> 118;
-		166	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
-		31 -> 166;
-		32 -> 31;
-		72	[color="0.52 0.6 0.85",
-			label="template_shape_reg\nhemi: R\nsubject: 001"];
-		32 -> 72;
-		33	[color="0.53 0.6 0.85",
-			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_hemi-Lflip_space-corobl_desc-nnunet"];
-		33 -> 31;
-		68	[color="0.18 0.6 0.85",
-			label=reinsert_subject_labels];
-		69 -> 68;
-		72 -> 69;
-		74	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
-		72 -> 74;
-		76	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
-		72 -> 76;
-		132	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: dentate\ndir: AP"];
-		72 -> 132;
-		134	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: dentate\ndir: PD"];
-		72 -> 134;
-		136	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: dentate\ndir: IO"];
-		72 -> 136;
-		169	[color="0.65 0.6 0.85",
-			label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
-		72 -> 169;
-		73	[color="0.53 0.6 0.85",
-			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_hemi-R_space-corobl_desc-nnunet"];
-		73 -> 72;
+		12	[color="0.45 0.6 0.85",
+			label=reinsert_subject_labels,
+			style=""];
+		13	[color="0.59 0.6 0.85",
+			label=template_shape_inject,
+			style=""];
+		13 -> 12;
+		34	[color="0.60 0.6 0.85",
+			label="template_shape_reg\nhemi: L\nsubject: 001",
+			style=""];
+		34 -> 13;
+		244	[color="0.59 0.6 0.85",
+			label=template_shape_inject,
+			style=""];
+		34 -> 244;
+		35	[color="0.38 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: sub-001/anat/sub-001_hemi-L_space-template_desc-hipptissueresampled",
+			style=""];
+		35 -> 34;
+		36	[color="0.52 0.6 0.85",
+			label=resample_template_dseg_tissue_for_reg,
+			style=""];
+		36 -> 35;
+		37	[color="0.38 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: sub-001/anat/sub-001_hemi-L_space-corobl_desc-pred",
+			style=""];
+		37 -> 34;
+		132	[color="0.45 0.6 0.85",
+			label=reinsert_subject_labels,
+			style=""];
+		133	[color="0.59 0.6 0.85",
+			label=template_shape_inject,
+			style=""];
+		133 -> 132;
+		138	[color="0.60 0.6 0.85",
+			label="template_shape_reg\nhemi: R\nsubject: 001",
+			style=""];
+		138 -> 133;
+		340	[color="0.59 0.6 0.85",
+			label=template_shape_inject,
+			style=""];
+		138 -> 340;
+		139	[color="0.38 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: sub-001/anat/sub-001_hemi-R_space-template_desc-hipptissueresampled",
+			style=""];
+		139 -> 138;
+		140	[color="0.52 0.6 0.85",
+			label=resample_template_dseg_tissue_for_reg,
+			style=""];
+		140 -> 139;
+		141	[color="0.38 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: sub-001/anat/sub-001_hemi-R_space-corobl_desc-pred",
+			style=""];
+		141 -> 138;
+		243	[color="0.45 0.6 0.85",
+			label=reinsert_subject_labels,
+			style=""];
+		244 -> 243;
+		339	[color="0.45 0.6 0.85",
+			label=reinsert_subject_labels,
+			style=""];
+		340 -> 339;
 	}
-	16	[color="0.57 0.6 0.85",
-		label="run_inference\nhemi: Lflip"];
+	14	[color="0.27 0.6 0.85",
+		label="import_template_dseg\nhemi: L\nsubject: 001",
+		style=""];
+	14 -> 13;
+	14 -> 36;
+	16	[color="0.16 0.6 0.85",
+		label="create_upsampled_coords_ref\nlabel: hipp",
+		style=""];
 	16 -> 13;
-	16 -> 14;
-	16 -> 33;
-	16 -> 34;
-	16 -> 37;
-	16 -> 112;
-	16 -> 115;
-	16 -> 118;
-	16 -> 166;
-	70	[color="0.57 0.6 0.85",
-		label=run_inference];
-	70 -> 68;
-	70 -> 69;
-	70 -> 73;
-	70 -> 74;
-	70 -> 76;
-	70 -> 132;
-	70 -> 134;
-	70 -> 136;
-	70 -> 169;
+	17	[color="0.54 0.6 0.85",
+		label=run_inference_nnunet_v1,
+		style=""];
+	17 -> 12;
+	17 -> 16;
+	17 -> 37;
+	17 -> 243;
+	246	[color="0.16 0.6 0.85",
+		label="create_upsampled_coords_ref\nlabel: dentate",
+		style=""];
+	17 -> 246;
+	134	[color="0.27 0.6 0.85",
+		label="import_template_dseg\nhemi: R\nsubject: 001",
+		style=""];
+	134 -> 133;
+	134 -> 140;
+	135	[color="0.16 0.6 0.85",
+		label="create_upsampled_coords_ref\nlabel: hipp",
+		style=""];
+	135 -> 133;
+	136	[color="0.54 0.6 0.85",
+		label=run_inference_nnunet_v1,
+		style=""];
+	136 -> 132;
+	136 -> 135;
+	136 -> 141;
+	136 -> 339;
+	342	[color="0.16 0.6 0.85",
+		label="create_upsampled_coords_ref\nlabel: dentate",
+		style=""];
+	136 -> 342;
+	245	[color="0.27 0.6 0.85",
+		label="import_template_dseg_dentate\nhemi: L\nsubject: 001",
+		style=""];
+	245 -> 244;
+	246 -> 244;
+	341	[color="0.27 0.6 0.85",
+		label="import_template_dseg_dentate\nhemi: R\nsubject: 001",
+		style=""];
+	341 -> 340;
+	342 -> 340;
 }

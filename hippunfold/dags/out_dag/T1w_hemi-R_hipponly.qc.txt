@@ -1,4 +1,4 @@
-strict digraph "" {
+digraph snakemake_dag {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,23 +15,35 @@ strict digraph "" {
 		graph [color=blue,
 			label=qc
 		];
-		65	[color="0.16 0.6 0.85",
-			label="qc_reg_to_template\nnative_modality: T1w"];
-		66	[color="0.25 0.6 0.85",
-			label="qc_subfield\nspace: cropT1w"];
-		67	[color="0.51 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T1w"];
+		132	[color="0.39 0.6 0.85",
+			label=qc_reg_to_template,
+			style=""];
+		133	[color="0.40 0.6 0.85",
+			label="qc_subfield\nspace: cropT1w",
+			style=""];
+		134	[color="0.40 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T1w",
+			style=""];
 	}
-	4	[color="0.41 0.6 0.85",
-		label=warp_gii_to_native];
-	4 -> 67;
-	20	[color="0.36 0.6 0.85",
-		label=reg_to_template];
-	20 -> 65;
-	51	[color="0.29 0.6 0.85",
-		label=resample_subfields_native_crop];
-	51 -> 66;
-	64	[color="0.40 0.6 0.85",
-		label=resample_native_to_crop];
-	64 -> 66;
+	23	[color="0.42 0.6 0.85",
+		label="reg_to_template\nmodality: T1w",
+		style=""];
+	23 -> 132;
+	24	[color="0.18 0.6 0.85",
+		label="download_extract_template\ntemplate: CITI168",
+		style="rounded,dashed"];
+	24 -> 23;
+	24 -> 132;
+	106	[color="0.00 0.6 0.85",
+		label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
+		style=""];
+	106 -> 134;
+	122	[color="0.48 0.6 0.85",
+		label=resample_subfields_crop,
+		style=""];
+	122 -> 133;
+	131	[color="0.51 0.6 0.85",
+		label=resample_to_crop,
+		style=""];
+	131 -> 133;
 }

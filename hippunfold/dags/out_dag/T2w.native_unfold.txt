@@ -1,0 +1,343 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_unfold
+		];
+		38	[color="0.61 0.6 0.85",
+			label=unfold_surface_smoothing,
+			style=""];
+		39	[color="0.58 0.6 0.85",
+			label=space_unfold_vertices,
+			style=""];
+		39 -> 38;
+		40	[color="0.65 0.6 0.85",
+			label=warp_native_mesh_to_unfold,
+			style=""];
+		40 -> 39;
+		69	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: inner",
+			style=""];
+		40 -> 69;
+		71	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: outer",
+			style=""];
+		40 -> 71;
+		41	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: AP",
+			style=""];
+		41 -> 40;
+		42	[color="0.36 0.6 0.85",
+			label=postproc_boundary_vertices,
+			style=""];
+		42 -> 41;
+		56	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: PD",
+			style=""];
+		42 -> 56;
+		43	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		43 -> 42;
+		46	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		46 -> 42;
+		49	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		49 -> 42;
+		52	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		52 -> 42;
+		55	[color="0.21 0.6 0.85",
+			label=get_boundary_vertices,
+			style=""];
+		55 -> 42;
+		56 -> 40;
+		142	[color="0.61 0.6 0.85",
+			label=unfold_surface_smoothing,
+			style=""];
+		143	[color="0.58 0.6 0.85",
+			label=space_unfold_vertices,
+			style=""];
+		143 -> 142;
+		144	[color="0.65 0.6 0.85",
+			label=warp_native_mesh_to_unfold,
+			style=""];
+		144 -> 143;
+		172	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: inner",
+			style=""];
+		144 -> 172;
+		174	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: outer",
+			style=""];
+		144 -> 174;
+		145	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: AP",
+			style=""];
+		145 -> 144;
+		146	[color="0.36 0.6 0.85",
+			label=postproc_boundary_vertices,
+			style=""];
+		146 -> 145;
+		160	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: PD",
+			style=""];
+		146 -> 160;
+		147	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		147 -> 146;
+		150	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		150 -> 146;
+		153	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		153 -> 146;
+		156	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		156 -> 146;
+		159	[color="0.21 0.6 0.85",
+			label=get_boundary_vertices,
+			style=""];
+		159 -> 146;
+		160 -> 144;
+		247	[color="0.61 0.6 0.85",
+			label=unfold_surface_smoothing,
+			style=""];
+		248	[color="0.58 0.6 0.85",
+			label=space_unfold_vertices,
+			style=""];
+		248 -> 247;
+		249	[color="0.65 0.6 0.85",
+			label=warp_native_mesh_to_unfold,
+			style=""];
+		249 -> 248;
+		277	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: inner",
+			style=""];
+		249 -> 277;
+		279	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: outer",
+			style=""];
+		249 -> 279;
+		250	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: AP",
+			style=""];
+		250 -> 249;
+		251	[color="0.36 0.6 0.85",
+			label=postproc_boundary_vertices,
+			style=""];
+		251 -> 250;
+		265	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: PD",
+			style=""];
+		251 -> 265;
+		252	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		252 -> 251;
+		255	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		255 -> 251;
+		258	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		258 -> 251;
+		261	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		261 -> 251;
+		264	[color="0.21 0.6 0.85",
+			label=get_boundary_vertices,
+			style=""];
+		264 -> 251;
+		265 -> 249;
+		343	[color="0.61 0.6 0.85",
+			label=unfold_surface_smoothing,
+			style=""];
+		344	[color="0.58 0.6 0.85",
+			label=space_unfold_vertices,
+			style=""];
+		344 -> 343;
+		345	[color="0.65 0.6 0.85",
+			label=warp_native_mesh_to_unfold,
+			style=""];
+		345 -> 344;
+		373	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: inner",
+			style=""];
+		345 -> 373;
+		375	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: outer",
+			style=""];
+		345 -> 375;
+		346	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: AP",
+			style=""];
+		346 -> 345;
+		347	[color="0.36 0.6 0.85",
+			label=postproc_boundary_vertices,
+			style=""];
+		347 -> 346;
+		361	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: PD",
+			style=""];
+		347 -> 361;
+		348	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		348 -> 347;
+		351	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		351 -> 347;
+		354	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		354 -> 347;
+		357	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		357 -> 347;
+		360	[color="0.21 0.6 0.85",
+			label=get_boundary_vertices,
+			style=""];
+		360 -> 347;
+		361 -> 345;
+	}
+	8	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	8 -> 39;
+	8 -> 40;
+	8 -> 41;
+	8 -> 42;
+	8 -> 43;
+	8 -> 46;
+	8 -> 49;
+	8 -> 52;
+	8 -> 55;
+	8 -> 56;
+	44	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	44 -> 43;
+	47	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	47 -> 46;
+	50	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	50 -> 49;
+	53	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	53 -> 52;
+	122	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	122 -> 143;
+	122 -> 144;
+	122 -> 145;
+	122 -> 146;
+	122 -> 147;
+	122 -> 150;
+	122 -> 153;
+	122 -> 156;
+	122 -> 159;
+	122 -> 160;
+	148	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	148 -> 147;
+	151	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	151 -> 150;
+	154	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	154 -> 153;
+	157	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	157 -> 156;
+	233	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	233 -> 248;
+	233 -> 249;
+	233 -> 250;
+	233 -> 251;
+	233 -> 252;
+	233 -> 255;
+	233 -> 258;
+	233 -> 261;
+	233 -> 264;
+	233 -> 265;
+	253	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	253 -> 252;
+	256	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	256 -> 255;
+	259	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	259 -> 258;
+	262	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	262 -> 261;
+	329	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	329 -> 344;
+	329 -> 345;
+	329 -> 346;
+	329 -> 347;
+	329 -> 348;
+	329 -> 351;
+	329 -> 354;
+	329 -> 357;
+	329 -> 360;
+	329 -> 361;
+	349	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	349 -> 348;
+	352	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	352 -> 351;
+	355	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	355 -> 354;
+	358	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	358 -> 357;
+}

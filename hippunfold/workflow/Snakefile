@@ -1,5 +1,6 @@
 # ---- snakebids boilerplate
 
+import sys
 import snakebids
 from snakebids import bids, set_bids_spec
 from tempfile import mkdtemp
@@ -59,15 +60,15 @@ if config["analysis_level"] == "group_create_atlas":
     if config["new_atlas_subfields_from"] == "native":
         limit_to_list.add("dsegsubfields")
 
-# setup global vars for nnunet model
-if config["force_nnunet_model"]:
-    model_name = config["force_nnunet_model"]
+# setup global vars for tissue segmentation (tissuepred) model
+if config["force_tissuepred_model"]:
+    model_name = config["force_tissuepred_model"]
 else:
     model_name = config["modality"]
 
-model_dict = config["nnunet_models"].get(model_name, None)
+model_dict = config["tissuepred_models"].get(model_name, None)
 
-# template shape injection: CLI flags override the model default (shape_inject in nnunet_models, on if unset)
+# template shape injection: CLI flags override the model default (shape_inject in tissuepred_models, on if unset)
 force_shape_inject = config.get("force_shape_inject", False)
 force_no_shape_inject = config.get("no_shape_inject", False) or config.get(
     "skip_inject_template_labels", False
@@ -85,7 +86,8 @@ else:
     shape_inject_source = "model default"
 config["skip_inject_template_labels"] = not do_shape_inject
 print(
-    f"Template shape injection: {'ON' if do_shape_inject else 'OFF'} ({shape_inject_source})"
+    f"Template shape injection: {'ON' if do_shape_inject else 'OFF'} ({shape_inject_source})",
+    file=sys.stderr,
 )
 
 

@@ -1,0 +1,86 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_isosurf
+		];
+		8	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		66	[color="0.57 0.6 0.85",
+			label=smooth_surface,
+			style=""];
+		8 -> 66;
+		9	[color="0.20 0.6 0.85",
+			label="gen_native_mesh\nsurfname: midthickness",
+			style=""];
+		9 -> 8;
+		59	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		67	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		69	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		79	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		85	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+	}
+	39	[color="0.65 0.6 0.85",
+		label=warp_native_mesh_to_unfold,
+		style=""];
+	8 -> 39;
+	80	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: inner",
+		style=""];
+	8 -> 80;
+	86	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: outer",
+		style=""];
+	8 -> 86;
+	10	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	10 -> 9;
+	31	[color="0.22 0.6 0.85",
+		label="get_nan_mask\ndir: IO",
+		style=""];
+	31 -> 9;
+	32	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+		style=""];
+	32 -> 9;
+	33	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+		style=""];
+	33 -> 9;
+	39 -> 59;
+	68	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: inner",
+		style=""];
+	39 -> 68;
+	70	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: outer",
+		style=""];
+	39 -> 70;
+	68 -> 67;
+	70 -> 69;
+	80 -> 79;
+	86 -> 85;
+}

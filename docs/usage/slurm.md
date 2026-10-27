@@ -4,7 +4,7 @@
 New in v2.2.0: HippUnfold includes resource specifications for every rule and groups short-running jobs together, so it can be run directly on a SLURM cluster with Snakemake's SLURM executor ([#574](https://github.com/khanlab/hippunfold/pull/574)).
 ```
 
-HippUnfold is a [Snakemake](https://snakemake.readthedocs.io/) workflow, so it can submit its jobs to a SLURM scheduler instead of running them all on one machine. This is the recommended way to run HippUnfold on a cluster: you run `hippunfold` once for your whole dataset, and Snakemake submits each step as a SLURM job with appropriate memory, runtime and CPU requests, waits for them to finish, and submits the next steps as their inputs become available. Steps that need internet access (downloading the nnU-net model, templates and atlases) are run by the main `hippunfold` process itself rather than submitted, so they work even if your compute nodes have no internet access.
+HippUnfold is a [Snakemake](https://snakemake.readthedocs.io/) workflow, so it can submit its jobs to a SLURM scheduler instead of running them all on one machine. This is the recommended way to run HippUnfold on a cluster: you run `hippunfold` once for your whole dataset, and Snakemake submits each step as a SLURM job with appropriate memory, runtime and CPU requests, waits for them to finish, and submits the next steps as their inputs become available. Steps that need internet access (downloading the tissuepred model, templates and atlases) are run by the main `hippunfold` process itself rather than submitted, so they work even if your compute nodes have no internet access.
 
 The [SLURM executor plugin](https://snakemake.github.io/snakemake-plugin-catalog/plugins/executor/slurm.html) (`snakemake-executor-plugin-slurm`) is installed with HippUnfold, so no additional installation is needed.[^executors]
 
@@ -67,13 +67,13 @@ Each HippUnfold rule specifies its memory (`mem_mb`), runtime and number of thre
 | Group | Contents | Jobs per subject |
 |---|---|---|
 | `preproc` | Import, bias correction, registration to template, cropping to coronal-oblique space | 1 |
-| `run_inference_*` | nnU-net segmentation (not grouped; the largest job, ~32 GB memory) | 1 per hemisphere |
-| `qc_nnunet` | QC of the nnU-net segmentation | 1 per hemisphere |
+| `run_inference_*` | U-Net tissue segmentation (tissuepred) (not grouped; the largest job, ~32 GB memory) | 1 per hemisphere |
+| `qc_tissuepred` | QC of the tissuepred segmentation | 1 per hemisphere |
 | `shapeinject` | Template shape injection | 1 per hemisphere |
 | `surf` | Laplace coordinates, surfaces, metrics, unfolded registration, subfields and QC | 1 per hemisphere and label (hipp, dentate) |
 | `subj` | CIFTI and spec files combining both hemispheres, and subfield volumes | 1–2 |
 
-For a typical T1w subject this is about 13 SLURM jobs. With the nnU-net inference on CPU, a subject takes roughly 15 minutes from start to finish when jobs start right away. Jobs for different subjects run in parallel, up to `--jobs` at a time.
+For a typical T1w subject this is about 13 SLURM jobs. With the tissuepred inference on CPU, a subject takes roughly 15 minutes from start to finish when jobs start right away. Jobs for different subjects run in parallel, up to `--jobs` at a time.
 
 The runtime requested for a group job is the sum of its steps' runtimes, so it is longer than the group actually takes (e.g. the `surf` groups request about an hour but usually finish in a few minutes).
 

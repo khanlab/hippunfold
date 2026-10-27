@@ -1,0 +1,287 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_isosurf
+		];
+		8	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		73	[color="0.57 0.6 0.85",
+			label=smooth_surface,
+			style=""];
+		8 -> 73;
+		9	[color="0.20 0.6 0.85",
+			label="gen_native_mesh\nsurfname: midthickness",
+			style=""];
+		9 -> 8;
+		66	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		74	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		76	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		86	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		92	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		128	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		176	[color="0.57 0.6 0.85",
+			label=smooth_surface,
+			style=""];
+		128 -> 176;
+		129	[color="0.20 0.6 0.85",
+			label="gen_native_mesh\nsurfname: midthickness",
+			style=""];
+		129 -> 128;
+		169	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		177	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		179	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		189	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		195	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		239	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		281	[color="0.57 0.6 0.85",
+			label=smooth_surface,
+			style=""];
+		239 -> 281;
+		240	[color="0.20 0.6 0.85",
+			label="gen_native_mesh\nsurfname: midthickness",
+			style=""];
+		240 -> 239;
+		274	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		282	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		284	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		294	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		300	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		335	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		377	[color="0.57 0.6 0.85",
+			label=smooth_surface,
+			style=""];
+		335 -> 377;
+		336	[color="0.20 0.6 0.85",
+			label="gen_native_mesh\nsurfname: midthickness",
+			style=""];
+		336 -> 335;
+		370	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		378	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		380	[color="0.64 0.6 0.85",
+			label="update_native_mesh_structure_unfold\nspace: unfold",
+			style=""];
+		390	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+		396	[color="0.63 0.6 0.85",
+			label="update_native_mesh_structure\nspace: corobl",
+			style=""];
+	}
+	46	[color="0.65 0.6 0.85",
+		label=warp_native_mesh_to_unfold,
+		style=""];
+	8 -> 46;
+	87	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: inner",
+		style=""];
+	8 -> 87;
+	93	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: outer",
+		style=""];
+	8 -> 93;
+	10	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	10 -> 9;
+	38	[color="0.22 0.6 0.85",
+		label="get_nan_mask\ndir: IO",
+		style=""];
+	38 -> 9;
+	39	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+		style=""];
+	39 -> 9;
+	40	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+		style=""];
+	40 -> 9;
+	46 -> 66;
+	75	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: inner",
+		style=""];
+	46 -> 75;
+	77	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: outer",
+		style=""];
+	46 -> 77;
+	75 -> 74;
+	77 -> 76;
+	87 -> 86;
+	93 -> 92;
+	150	[color="0.65 0.6 0.85",
+		label=warp_native_mesh_to_unfold,
+		style=""];
+	128 -> 150;
+	190	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: inner",
+		style=""];
+	128 -> 190;
+	196	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: outer",
+		style=""];
+	128 -> 196;
+	130	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	130 -> 129;
+	142	[color="0.22 0.6 0.85",
+		label="get_nan_mask\ndir: IO",
+		style=""];
+	142 -> 129;
+	143	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+		style=""];
+	143 -> 129;
+	144	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+		style=""];
+	144 -> 129;
+	150 -> 169;
+	178	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: inner",
+		style=""];
+	150 -> 178;
+	180	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: outer",
+		style=""];
+	150 -> 180;
+	178 -> 177;
+	180 -> 179;
+	190 -> 189;
+	196 -> 195;
+	255	[color="0.65 0.6 0.85",
+		label=warp_native_mesh_to_unfold,
+		style=""];
+	239 -> 255;
+	295	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: inner",
+		style=""];
+	239 -> 295;
+	301	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: outer",
+		style=""];
+	239 -> 301;
+	241	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	241 -> 240;
+	247	[color="0.22 0.6 0.85",
+		label="get_nan_mask\ndir: IO",
+		style=""];
+	247 -> 240;
+	248	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+		style=""];
+	248 -> 240;
+	249	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+		style=""];
+	249 -> 240;
+	255 -> 274;
+	283	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: inner",
+		style=""];
+	255 -> 283;
+	285	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: outer",
+		style=""];
+	255 -> 285;
+	283 -> 282;
+	285 -> 284;
+	295 -> 294;
+	301 -> 300;
+	351	[color="0.65 0.6 0.85",
+		label=warp_native_mesh_to_unfold,
+		style=""];
+	335 -> 351;
+	391	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: inner",
+		style=""];
+	335 -> 391;
+	397	[color="0.64 0.6 0.85",
+		label="warp_midthickness_to_inout\nsurfname: outer",
+		style=""];
+	335 -> 397;
+	337	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	337 -> 336;
+	343	[color="0.22 0.6 0.85",
+		label="get_nan_mask\ndir: IO",
+		style=""];
+	343 -> 336;
+	344	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+		style=""];
+	344 -> 336;
+	345	[color="0.22 0.6 0.85",
+		label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+		style=""];
+	345 -> 336;
+	351 -> 370;
+	379	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: inner",
+		style=""];
+	351 -> 379;
+	381	[color="0.55 0.6 0.85",
+		label="set_surface_z_level\nsurfname: outer",
+		style=""];
+	351 -> 381;
+	379 -> 378;
+	381 -> 380;
+	391 -> 390;
+	397 -> 396;
+}

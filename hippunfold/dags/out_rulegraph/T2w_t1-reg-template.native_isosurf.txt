@@ -1,0 +1,50 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_isosurf
+		];
+		8	[color="0.63 0.6 0.85",
+			label=update_native_mesh_structure];
+		55	[color="0.57 0.6 0.85",
+			label=smooth_surface];
+		8 -> 55;
+		9	[color="0.20 0.6 0.85",
+			label=gen_native_mesh];
+		9 -> 8;
+		49	[color="0.63 0.6 0.85",
+			label=update_native_mesh_structure_unfold];
+	}
+	40	[color="0.64 0.6 0.85",
+		label=warp_native_mesh_to_unfold];
+	8 -> 40;
+	60	[color="0.64 0.6 0.85",
+		label=warp_midthickness_to_inout];
+	8 -> 60;
+	10	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist];
+	10 -> 9;
+	35	[color="0.21 0.6 0.85",
+		label=get_nan_mask];
+	35 -> 9;
+	36	[color="0.22 0.6 0.85",
+		label=get_src_sink_mask];
+	36 -> 9;
+	40 -> 49;
+	56	[color="0.55 0.6 0.85",
+		label=set_surface_z_level];
+	40 -> 56;
+	56 -> 49;
+	60 -> 8;
+}

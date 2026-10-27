@@ -1,0 +1,53 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_unfold
+		];
+		34	[color="0.61 0.6 0.85",
+			label=unfold_surface_smoothing];
+		35	[color="0.58 0.6 0.85",
+			label=space_unfold_vertices];
+		35 -> 34;
+		36	[color="0.65 0.6 0.85",
+			label=warp_native_mesh_to_unfold];
+		36 -> 35;
+		52	[color="0.55 0.6 0.85",
+			label=set_surface_z_level];
+		36 -> 52;
+		37	[color="0.29 0.6 0.85",
+			label=laplace_beltrami];
+		37 -> 36;
+		38	[color="0.36 0.6 0.85",
+			label=postproc_boundary_vertices];
+		38 -> 37;
+		39	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf];
+		39 -> 38;
+		41	[color="0.21 0.6 0.85",
+			label=get_boundary_vertices];
+		41 -> 38;
+	}
+	8	[color="0.63 0.6 0.85",
+		label=update_native_mesh_structure];
+	8 -> 35;
+	8 -> 36;
+	8 -> 37;
+	8 -> 38;
+	8 -> 39;
+	8 -> 41;
+	40	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt];
+	40 -> 39;
+}

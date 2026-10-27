@@ -1,0 +1,100 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_unfold
+		];
+		37	[color="0.61 0.6 0.85",
+			label=unfold_surface_smoothing,
+			style=""];
+		38	[color="0.58 0.6 0.85",
+			label=space_unfold_vertices,
+			style=""];
+		38 -> 37;
+		39	[color="0.65 0.6 0.85",
+			label=warp_native_mesh_to_unfold,
+			style=""];
+		39 -> 38;
+		68	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: inner",
+			style=""];
+		39 -> 68;
+		70	[color="0.55 0.6 0.85",
+			label="set_surface_z_level\nsurfname: outer",
+			style=""];
+		39 -> 70;
+		40	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: AP",
+			style=""];
+		40 -> 39;
+		41	[color="0.37 0.6 0.85",
+			label=postproc_boundary_vertices,
+			style=""];
+		41 -> 40;
+		55	[color="0.29 0.6 0.85",
+			label="laplace_beltrami\ndir: PD",
+			style=""];
+		41 -> 55;
+		42	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		42 -> 41;
+		45	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		45 -> 41;
+		48	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		48 -> 41;
+		51	[color="0.31 0.6 0.85",
+			label=map_src_sink_sdt_to_surf,
+			style=""];
+		51 -> 41;
+		54	[color="0.21 0.6 0.85",
+			label=get_boundary_vertices,
+			style=""];
+		54 -> 41;
+		55 -> 39;
+	}
+	8	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	8 -> 38;
+	8 -> 39;
+	8 -> 40;
+	8 -> 41;
+	8 -> 42;
+	8 -> 45;
+	8 -> 48;
+	8 -> 51;
+	8 -> 54;
+	8 -> 55;
+	43	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	43 -> 42;
+	46	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	46 -> 45;
+	49	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	49 -> 48;
+	52	[color="0.23 0.6 0.85",
+		label=get_src_sink_sdt,
+		style=""];
+	52 -> 51;
+}

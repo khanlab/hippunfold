@@ -1,0 +1,207 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=inner_outer_surf
+		];
+		86	[color="0.64 0.6 0.85",
+			label="warp_midthickness_to_inout\nsurfname: inner",
+			style=""];
+		87	[color="0.10 0.6 0.85",
+			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
+			style=""];
+		87 -> 86;
+		88	[color="0.44 0.6 0.85",
+			label=register_midthickness_greedy,
+			style=""];
+		88 -> 87;
+		89	[color="0.09 0.6 0.85",
+			label="compute_halfthick_mask\ninout: inner",
+			style=""];
+		89 -> 88;
+		92	[color="0.64 0.6 0.85",
+			label="warp_midthickness_to_inout\nsurfname: outer",
+			style=""];
+		93	[color="0.10 0.6 0.85",
+			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
+			style=""];
+		93 -> 92;
+		94	[color="0.44 0.6 0.85",
+			label=register_midthickness_greedy,
+			style=""];
+		94 -> 93;
+		95	[color="0.09 0.6 0.85",
+			label="compute_halfthick_mask\ninout: outer",
+			style=""];
+		95 -> 94;
+		189	[color="0.64 0.6 0.85",
+			label="warp_midthickness_to_inout\nsurfname: inner",
+			style=""];
+		190	[color="0.10 0.6 0.85",
+			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
+			style=""];
+		190 -> 189;
+		191	[color="0.44 0.6 0.85",
+			label=register_midthickness_greedy,
+			style=""];
+		191 -> 190;
+		192	[color="0.09 0.6 0.85",
+			label="compute_halfthick_mask\ninout: inner",
+			style=""];
+		192 -> 191;
+		195	[color="0.64 0.6 0.85",
+			label="warp_midthickness_to_inout\nsurfname: outer",
+			style=""];
+		196	[color="0.10 0.6 0.85",
+			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
+			style=""];
+		196 -> 195;
+		197	[color="0.44 0.6 0.85",
+			label=register_midthickness_greedy,
+			style=""];
+		197 -> 196;
+		198	[color="0.09 0.6 0.85",
+			label="compute_halfthick_mask\ninout: outer",
+			style=""];
+		198 -> 197;
+		294	[color="0.64 0.6 0.85",
+			label="warp_midthickness_to_inout\nsurfname: inner",
+			style=""];
+		295	[color="0.10 0.6 0.85",
+			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
+			style=""];
+		295 -> 294;
+		296	[color="0.44 0.6 0.85",
+			label=register_midthickness_greedy,
+			style=""];
+		296 -> 295;
+		297	[color="0.09 0.6 0.85",
+			label="compute_halfthick_mask\ninout: inner",
+			style=""];
+		297 -> 296;
+		300	[color="0.64 0.6 0.85",
+			label="warp_midthickness_to_inout\nsurfname: outer",
+			style=""];
+		301	[color="0.10 0.6 0.85",
+			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
+			style=""];
+		301 -> 300;
+		302	[color="0.44 0.6 0.85",
+			label=register_midthickness_greedy,
+			style=""];
+		302 -> 301;
+		303	[color="0.09 0.6 0.85",
+			label="compute_halfthick_mask\ninout: outer",
+			style=""];
+		303 -> 302;
+		390	[color="0.64 0.6 0.85",
+			label="warp_midthickness_to_inout\nsurfname: inner",
+			style=""];
+		391	[color="0.10 0.6 0.85",
+			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
+			style=""];
+		391 -> 390;
+		392	[color="0.44 0.6 0.85",
+			label=register_midthickness_greedy,
+			style=""];
+		392 -> 391;
+		393	[color="0.09 0.6 0.85",
+			label="compute_halfthick_mask\ninout: inner",
+			style=""];
+		393 -> 392;
+		396	[color="0.64 0.6 0.85",
+			label="warp_midthickness_to_inout\nsurfname: outer",
+			style=""];
+		397	[color="0.10 0.6 0.85",
+			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
+			style=""];
+		397 -> 396;
+		398	[color="0.44 0.6 0.85",
+			label=register_midthickness_greedy,
+			style=""];
+		398 -> 397;
+		399	[color="0.09 0.6 0.85",
+			label="compute_halfthick_mask\ninout: outer",
+			style=""];
+		399 -> 398;
+	}
+	8	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	8 -> 86;
+	8 -> 92;
+	10	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	10 -> 89;
+	10 -> 95;
+	90	[color="0.21 0.6 0.85",
+		label=get_label_mask,
+		style=""];
+	90 -> 88;
+	90 -> 89;
+	90 -> 94;
+	90 -> 95;
+	127	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	127 -> 189;
+	127 -> 195;
+	129	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	129 -> 192;
+	129 -> 198;
+	193	[color="0.21 0.6 0.85",
+		label=get_label_mask,
+		style=""];
+	193 -> 191;
+	193 -> 192;
+	193 -> 197;
+	193 -> 198;
+	238	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	238 -> 294;
+	238 -> 300;
+	240	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	240 -> 297;
+	240 -> 303;
+	298	[color="0.21 0.6 0.85",
+		label=get_label_mask,
+		style=""];
+	298 -> 296;
+	298 -> 297;
+	298 -> 302;
+	298 -> 303;
+	334	[color="0.63 0.6 0.85",
+		label="update_native_mesh_structure\nspace: corobl",
+		style=""];
+	334 -> 390;
+	334 -> 396;
+	336	[color="0.30 0.6 0.85",
+		label=laynii_layers_equidist,
+		style=""];
+	336 -> 393;
+	336 -> 399;
+	394	[color="0.21 0.6 0.85",
+		label=get_label_mask,
+		style=""];
+	394 -> 392;
+	394 -> 393;
+	394 -> 398;
+	394 -> 399;
+}

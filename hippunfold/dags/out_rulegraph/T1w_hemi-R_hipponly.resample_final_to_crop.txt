@@ -1,0 +1,42 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=resample_final_to_crop
+		];
+		70	[color="0.48 0.6 0.85",
+			label=resample_subfields_crop];
+		76	[color="0.13 0.6 0.85",
+			label=create_crop_ref];
+		76 -> 70;
+		78	[color="0.51 0.6 0.85",
+			label=resample_to_crop];
+		76 -> 78;
+	}
+	19	[color="0.34 0.6 0.85",
+		label=n4_t1];
+	77	[color="0.49 0.6 0.85",
+		label=resample_subfields_to_orig];
+	19 -> 77;
+	19 -> 78;
+	21	[color="0.08 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	21 -> 70;
+	21 -> 77;
+	71	[color="0.07 0.6 0.85",
+		label=combine_tissue_subfield_labels_corobl];
+	71 -> 70;
+	71 -> 77;
+	77 -> 76;
+}

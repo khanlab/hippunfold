@@ -1,0 +1,64 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=native_resampling
+		];
+		4	[color="0.47 0.6 0.85",
+			label=resample_native_metric_to_atlas_density];
+		68	[color="0.46 0.6 0.85",
+			label=resample_native_coords_to_atlas_density];
+		69	[color="0.00 0.6 0.85",
+			label=affine_gii_corobl_to_orig];
+		70	[color="0.48 0.6 0.85",
+			label=resample_native_surf_to_atlas_density];
+		70 -> 69;
+		72	[color="0.13 0.6 0.85",
+			label=cp_atlas_unfold];
+		75	[color="0.11 0.6 0.85",
+			label=cp_atlas_subfields_label_gii];
+		82	[color="0.45 0.6 0.85",
+			label=resample_atlas_subfields_to_native_surf];
+	}
+	5	[color="0.57 0.6 0.85",
+		label=soft_tanh_normalization];
+	5 -> 4;
+	8	[color="0.63 0.6 0.85",
+		label=update_native_mesh_structure];
+	41	[color="0.29 0.6 0.85",
+		label=laplace_beltrami];
+	8 -> 41;
+	8 -> 70;
+	41 -> 68;
+	46	[color="0.12 0.6 0.85",
+		label=cp_atlas_surf_gii];
+	46 -> 4;
+	46 -> 68;
+	46 -> 70;
+	46 -> 72;
+	46 -> 82;
+	48	[color="0.66 0.6 0.85",
+		label=warp_unfold_native_to_unfoldreg];
+	48 -> 4;
+	48 -> 68;
+	48 -> 70;
+	48 -> 82;
+	67	[color="0.11 0.6 0.85",
+		label=cp_atlas_metric_gii];
+	67 -> 75;
+	67 -> 82;
+	71	[color="0.60 0.6 0.85",
+		label=template_xfm_itk2ras];
+	71 -> 69;
+}

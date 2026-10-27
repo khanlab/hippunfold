@@ -1,0 +1,90 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=cifti
+		];
+		1	[color="0.32 0.6 0.85",
+			label=merge_hipp_dentate_spec_file,
+			style=""];
+		2	[color="0.33 0.6 0.85",
+			label="merge_lr_spec_file\nsurfdir: surf",
+			style=""];
+		2 -> 1;
+		3	[color="0.15 0.6 0.85",
+			label=create_spec_file,
+			style=""];
+		3 -> 2;
+		116	[color="0.14 0.6 0.85",
+			label=create_dscalar_metric_cifti,
+			style=""];
+		116 -> 3;
+		117	[color="0.14 0.6 0.85",
+			label=create_dscalar_metric_cifti,
+			style=""];
+		117 -> 3;
+		118	[color="0.14 0.6 0.85",
+			label=create_dscalar_metric_cifti,
+			style=""];
+		118 -> 3;
+		119	[color="0.14 0.6 0.85",
+			label=create_dlabel_cifti_subfields,
+			style=""];
+		119 -> 3;
+	}
+	4	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape",
+		style=""];
+	4 -> 3;
+	4 -> 116;
+	102	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape",
+		style=""];
+	102 -> 3;
+	102 -> 117;
+	103	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape",
+		style=""];
+	103 -> 3;
+	103 -> 118;
+	104	[color="0.45 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace",
+		style=""];
+	104 -> 3;
+	105	[color="0.45 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace",
+		style=""];
+	105 -> 3;
+	106	[color="0.00 0.6 0.85",
+		label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
+		style=""];
+	106 -> 3;
+	109	[color="0.00 0.6 0.85",
+		label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: inner",
+		style=""];
+	109 -> 3;
+	112	[color="0.00 0.6 0.85",
+		label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: outer",
+		style=""];
+	112 -> 3;
+	115	[color="0.12 0.6 0.85",
+		label="cp_atlas_unfold\nsubject: 001",
+		style=""];
+	115 -> 3;
+	120	[color="0.11 0.6 0.85",
+		label="cp_atlas_subfields_label_gii\nsubject: 001",
+		style=""];
+	120 -> 3;
+	120 -> 119;
+}

@@ -1,0 +1,215 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=coords
+		];
+		10	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist];
+		11	[color="0.37 0.6 0.85",
+			label="prep_dseg_for_laynii\ndir: IO"];
+		11 -> 10;
+		16	[color="0.17 0.6 0.85",
+			label="create_upsampled_coords_ref\nlabel: hipp"];
+		25	[color="0.23 0.6 0.85",
+			label="get_nan_mask\ndir: IO"];
+		26	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: sink"];
+		27	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: src"];
+		37	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		38	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: src"];
+		38 -> 37;
+		40	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		41	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: sink"];
+		41 -> 40;
+		43	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		44	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: src"];
+		44 -> 43;
+		46	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		47	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: sink"];
+		47 -> 46;
+		78	[color="0.22 0.6 0.85",
+			label=get_label_mask];
+		113	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist];
+		114	[color="0.37 0.6 0.85",
+			label="prep_dseg_for_laynii\ndir: IO"];
+		114 -> 113;
+		118	[color="0.17 0.6 0.85",
+			label="create_upsampled_coords_ref\nlabel: hipp"];
+		125	[color="0.23 0.6 0.85",
+			label="get_nan_mask\ndir: IO"];
+		126	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: sink"];
+		127	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: src"];
+		137	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		138	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: src"];
+		138 -> 137;
+		140	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		141	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: sink"];
+		141 -> 140;
+		143	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		144	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: src"];
+		144 -> 143;
+		146	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		147	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: sink"];
+		147 -> 146;
+		177	[color="0.22 0.6 0.85",
+			label=get_label_mask];
+		221	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist];
+		222	[color="0.37 0.6 0.85",
+			label="prep_dseg_for_laynii\ndir: IO"];
+		222 -> 221;
+		226	[color="0.17 0.6 0.85",
+			label="create_upsampled_coords_ref\nlabel: dentate"];
+		227	[color="0.23 0.6 0.85",
+			label="get_nan_mask\ndir: IO"];
+		228	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: sink"];
+		229	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: src"];
+		239	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		240	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: src"];
+		240 -> 239;
+		242	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		243	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: sink"];
+		243 -> 242;
+		245	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		246	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: src"];
+		246 -> 245;
+		248	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		249	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: sink"];
+		249 -> 248;
+		279	[color="0.22 0.6 0.85",
+			label=get_label_mask];
+		314	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist];
+		315	[color="0.37 0.6 0.85",
+			label="prep_dseg_for_laynii\ndir: IO"];
+		315 -> 314;
+		319	[color="0.17 0.6 0.85",
+			label="create_upsampled_coords_ref\nlabel: dentate"];
+		320	[color="0.23 0.6 0.85",
+			label="get_nan_mask\ndir: IO"];
+		321	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: sink"];
+		322	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: src"];
+		332	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		333	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: src"];
+		333 -> 332;
+		335	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		336	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: sink"];
+		336 -> 335;
+		338	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		339	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: src"];
+		339 -> 338;
+		341	[color="0.24 0.6 0.85",
+			label=get_src_sink_sdt];
+		342	[color="0.23 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: sink"];
+		342 -> 341;
+		372	[color="0.22 0.6 0.85",
+			label=get_label_mask];
+	}
+	12	[color="0.43 0.6 0.85",
+		label=reinsert_subject_labels];
+	12 -> 11;
+	12 -> 25;
+	12 -> 26;
+	12 -> 27;
+	12 -> 38;
+	12 -> 41;
+	12 -> 44;
+	12 -> 47;
+	12 -> 78;
+	17	[color="0.54 0.6 0.85",
+		label=run_inference_nnunet_v1];
+	17 -> 12;
+	17 -> 16;
+	223	[color="0.43 0.6 0.85",
+		label=reinsert_subject_labels];
+	17 -> 223;
+	17 -> 226;
+	115	[color="0.43 0.6 0.85",
+		label=reinsert_subject_labels];
+	115 -> 114;
+	115 -> 125;
+	115 -> 126;
+	115 -> 127;
+	115 -> 138;
+	115 -> 141;
+	115 -> 144;
+	115 -> 147;
+	115 -> 177;
+	119	[color="0.54 0.6 0.85",
+		label=run_inference_nnunet_v1];
+	119 -> 115;
+	119 -> 118;
+	316	[color="0.43 0.6 0.85",
+		label=reinsert_subject_labels];
+	119 -> 316;
+	119 -> 319;
+	223 -> 222;
+	223 -> 227;
+	223 -> 228;
+	223 -> 229;
+	223 -> 240;
+	223 -> 243;
+	223 -> 246;
+	223 -> 249;
+	223 -> 279;
+	316 -> 315;
+	316 -> 320;
+	316 -> 321;
+	316 -> 322;
+	316 -> 333;
+	316 -> 336;
+	316 -> 339;
+	316 -> 342;
+	316 -> 372;
+}

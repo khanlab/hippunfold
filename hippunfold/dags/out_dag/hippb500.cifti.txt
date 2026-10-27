@@ -1,0 +1,195 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=cifti
+		];
+		1	[color="0.33 0.6 0.85",
+			label=merge_hipp_dentate_spec_file];
+		2	[color="0.33 0.6 0.85",
+			label="merge_lr_spec_file\nsurfdir: surf"];
+		2 -> 1;
+		3	[color="0.15 0.6 0.85",
+			label=create_spec_file];
+		3 -> 2;
+		106	[color="0.15 0.6 0.85",
+			label=create_dscalar_metric_cifti];
+		106 -> 3;
+		204	[color="0.15 0.6 0.85",
+			label=create_spec_file];
+		106 -> 204;
+		195	[color="0.15 0.6 0.85",
+			label=create_dscalar_metric_cifti];
+		195 -> 3;
+		195 -> 204;
+		197	[color="0.15 0.6 0.85",
+			label=create_dscalar_metric_cifti];
+		197 -> 3;
+		197 -> 204;
+		199	[color="0.14 0.6 0.85",
+			label=create_dlabel_cifti_subfields];
+		199 -> 3;
+		199 -> 204;
+		204 -> 2;
+		213	[color="0.33 0.6 0.85",
+			label="merge_lr_spec_file\nsurfdir: surf"];
+		213 -> 1;
+		214	[color="0.15 0.6 0.85",
+			label=create_spec_file];
+		214 -> 213;
+		307	[color="0.15 0.6 0.85",
+			label=create_dscalar_metric_cifti];
+		307 -> 214;
+		394	[color="0.15 0.6 0.85",
+			label=create_spec_file];
+		307 -> 394;
+		390	[color="0.15 0.6 0.85",
+			label=create_dscalar_metric_cifti];
+		390 -> 214;
+		390 -> 394;
+		392	[color="0.15 0.6 0.85",
+			label=create_dscalar_metric_cifti];
+		392 -> 214;
+		392 -> 394;
+		394 -> 213;
+	}
+	4	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	4 -> 3;
+	4 -> 106;
+	96	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	96 -> 3;
+	96 -> 195;
+	97	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	97 -> 3;
+	97 -> 197;
+	98	[color="0.46 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+	98 -> 3;
+	99	[color="0.46 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+	99 -> 3;
+	100	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	100 -> 3;
+	101	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	101 -> 3;
+	103	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	103 -> 3;
+	105	[color="0.12 0.6 0.85",
+		label="cp_atlas_unfold\nsubject: 001"];
+	105 -> 3;
+	107	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	107 -> 106;
+	107 -> 204;
+	196	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	196 -> 195;
+	196 -> 204;
+	198	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	198 -> 197;
+	198 -> 204;
+	200	[color="0.11 0.6 0.85",
+		label="cp_atlas_subfields_label_gii\nsubject: 001"];
+	200 -> 3;
+	200 -> 199;
+	202	[color="0.11 0.6 0.85",
+		label="cp_atlas_subfields_label_gii\nsubject: 001"];
+	202 -> 199;
+	202 -> 204;
+	205	[color="0.46 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+	205 -> 204;
+	206	[color="0.46 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+	206 -> 204;
+	207	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	207 -> 204;
+	208	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	208 -> 204;
+	210	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	210 -> 204;
+	212	[color="0.12 0.6 0.85",
+		label="cp_atlas_unfold\nsubject: 001"];
+	212 -> 204;
+	215	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	215 -> 214;
+	215 -> 307;
+	297	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	297 -> 214;
+	297 -> 390;
+	298	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	298 -> 214;
+	298 -> 392;
+	299	[color="0.46 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+	299 -> 214;
+	300	[color="0.46 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+	300 -> 214;
+	301	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	301 -> 214;
+	302	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	302 -> 214;
+	304	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	304 -> 214;
+	306	[color="0.12 0.6 0.85",
+		label="cp_atlas_unfold\nsubject: 001"];
+	306 -> 214;
+	308	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	308 -> 307;
+	308 -> 394;
+	391	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	391 -> 390;
+	391 -> 394;
+	393	[color="0.46 0.6 0.85",
+		label="resample_native_metric_to_atlas_density\nmetrictype: shape"];
+	393 -> 392;
+	393 -> 394;
+	395	[color="0.46 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+	395 -> 394;
+	396	[color="0.46 0.6 0.85",
+		label="resample_native_coords_to_atlas_density\ndesc: laplace"];
+	396 -> 394;
+	397	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	397 -> 394;
+	398	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	398 -> 394;
+	400	[color="0.47 0.6 0.85",
+		label=resample_native_surf_to_atlas_density];
+	400 -> 394;
+	402	[color="0.12 0.6 0.85",
+		label="cp_atlas_unfold\nsubject: 001"];
+	402 -> 394;
+}

@@ -1,0 +1,281 @@
+digraph snakemake_dag {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=coords
+		];
+		10	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist,
+			style=""];
+		11	[color="0.36 0.6 0.85",
+			label="prep_dseg_for_laynii\ndir: IO",
+			style=""];
+		11 -> 10;
+		16	[color="0.16 0.6 0.85",
+			label="create_upsampled_coords_ref\nlabel: hipp",
+			style=""];
+		38	[color="0.22 0.6 0.85",
+			label="get_nan_mask\ndir: IO",
+			style=""];
+		39	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+			style=""];
+		40	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+			style=""];
+		50	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		51	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: src",
+			style=""];
+		51 -> 50;
+		53	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		54	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: sink",
+			style=""];
+		54 -> 53;
+		56	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		57	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: src",
+			style=""];
+		57 -> 56;
+		59	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		60	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: sink",
+			style=""];
+		60 -> 59;
+		91	[color="0.21 0.6 0.85",
+			label=get_label_mask,
+			style=""];
+		130	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist,
+			style=""];
+		131	[color="0.36 0.6 0.85",
+			label="prep_dseg_for_laynii\ndir: IO",
+			style=""];
+		131 -> 130;
+		135	[color="0.16 0.6 0.85",
+			label="create_upsampled_coords_ref\nlabel: hipp",
+			style=""];
+		142	[color="0.22 0.6 0.85",
+			label="get_nan_mask\ndir: IO",
+			style=""];
+		143	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+			style=""];
+		144	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+			style=""];
+		154	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		155	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: src",
+			style=""];
+		155 -> 154;
+		157	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		158	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: sink",
+			style=""];
+		158 -> 157;
+		160	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		161	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: src",
+			style=""];
+		161 -> 160;
+		163	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		164	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: sink",
+			style=""];
+		164 -> 163;
+		194	[color="0.21 0.6 0.85",
+			label=get_label_mask,
+			style=""];
+		241	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist,
+			style=""];
+		242	[color="0.36 0.6 0.85",
+			label="prep_dseg_for_laynii\ndir: IO",
+			style=""];
+		242 -> 241;
+		246	[color="0.16 0.6 0.85",
+			label="create_upsampled_coords_ref\nlabel: dentate",
+			style=""];
+		247	[color="0.22 0.6 0.85",
+			label="get_nan_mask\ndir: IO",
+			style=""];
+		248	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+			style=""];
+		249	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+			style=""];
+		259	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		260	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: src",
+			style=""];
+		260 -> 259;
+		262	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		263	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: sink",
+			style=""];
+		263 -> 262;
+		265	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		266	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: src",
+			style=""];
+		266 -> 265;
+		268	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		269	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: sink",
+			style=""];
+		269 -> 268;
+		299	[color="0.21 0.6 0.85",
+			label=get_label_mask,
+			style=""];
+		337	[color="0.30 0.6 0.85",
+			label=laynii_layers_equidist,
+			style=""];
+		338	[color="0.36 0.6 0.85",
+			label="prep_dseg_for_laynii\ndir: IO",
+			style=""];
+		338 -> 337;
+		342	[color="0.16 0.6 0.85",
+			label="create_upsampled_coords_ref\nlabel: dentate",
+			style=""];
+		343	[color="0.22 0.6 0.85",
+			label="get_nan_mask\ndir: IO",
+			style=""];
+		344	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
+			style=""];
+		345	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: IO\nsrcsink: src",
+			style=""];
+		355	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		356	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: src",
+			style=""];
+		356 -> 355;
+		358	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		359	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: AP\nsrcsink: sink",
+			style=""];
+		359 -> 358;
+		361	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		362	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: src",
+			style=""];
+		362 -> 361;
+		364	[color="0.23 0.6 0.85",
+			label=get_src_sink_sdt,
+			style=""];
+		365	[color="0.22 0.6 0.85",
+			label="get_src_sink_mask\ndir: PD\nsrcsink: sink",
+			style=""];
+		365 -> 364;
+		395	[color="0.21 0.6 0.85",
+			label=get_label_mask,
+			style=""];
+	}
+	12	[color="0.45 0.6 0.85",
+		label=reinsert_subject_labels,
+		style=""];
+	12 -> 11;
+	12 -> 38;
+	12 -> 39;
+	12 -> 40;
+	12 -> 51;
+	12 -> 54;
+	12 -> 57;
+	12 -> 60;
+	12 -> 91;
+	17	[color="0.54 0.6 0.85",
+		label=run_inference_nnunet_v1,
+		style=""];
+	17 -> 12;
+	17 -> 16;
+	243	[color="0.45 0.6 0.85",
+		label=reinsert_subject_labels,
+		style=""];
+	17 -> 243;
+	17 -> 246;
+	132	[color="0.45 0.6 0.85",
+		label=reinsert_subject_labels,
+		style=""];
+	132 -> 131;
+	132 -> 142;
+	132 -> 143;
+	132 -> 144;
+	132 -> 155;
+	132 -> 158;
+	132 -> 161;
+	132 -> 164;
+	132 -> 194;
+	136	[color="0.54 0.6 0.85",
+		label=run_inference_nnunet_v1,
+		style=""];
+	136 -> 132;
+	136 -> 135;
+	339	[color="0.45 0.6 0.85",
+		label=reinsert_subject_labels,
+		style=""];
+	136 -> 339;
+	136 -> 342;
+	243 -> 242;
+	243 -> 247;
+	243 -> 248;
+	243 -> 249;
+	243 -> 260;
+	243 -> 263;
+	243 -> 266;
+	243 -> 269;
+	243 -> 299;
+	339 -> 338;
+	339 -> 343;
+	339 -> 344;
+	339 -> 345;
+	339 -> 356;
+	339 -> 359;
+	339 -> 362;
+	339 -> 365;
+	339 -> 395;
+}
