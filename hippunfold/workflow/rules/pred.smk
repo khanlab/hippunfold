@@ -1,7 +1,7 @@
 import re
 
 
-def get_nnunet_input(wildcards):
+def get_tissuepred_input(wildcards):
     T1w_nii = bids(
         root=root,
         datatype="anat",
@@ -21,7 +21,7 @@ def get_nnunet_input(wildcards):
         **inputs.subj_wildcards,
     )
     if (config["modality"] == "T1w" or config["modality"] == "T2w") and config[
-        "force_nnunet_model"
+        "force_tissuepred_model"
     ] == "T1T2w":
         return (T1w_nii, T2w_nii)
 
@@ -39,20 +39,20 @@ def get_nnunet_input(wildcards):
             **inputs.subj_wildcards,
         )
     else:
-        raise ValueError("modality not supported for nnunet!")
+        raise ValueError("modality not supported for tissuepred model!")
 
 
 def get_model_tar():
-    model_cfg = config["nnunet_models"].get(model_name, None)
+    model_cfg = config["tissuepred_models"].get(model_name, None)
     if model_cfg is None:
         raise KeyError(
-            f"Model '{model_name}' does not exist in 'nnunet_models' in the config file"
+            f"Model '{model_name}' does not exist in 'tissuepred_models' in the config file"
         )
 
     url = model_cfg.get("url")
     if not url:
         raise ValueError(
-            f"Model '{model_name}' in 'nnunet_models' is missing a valid 'url' entry"
+            f"Model '{model_name}' in 'tissuepred_models' is missing a valid 'url' entry"
         )
 
     tarfile = str((Path(download_dir) / "model" / Path(url).name).absolute())
@@ -65,11 +65,10 @@ def get_model_dir():
 
 # run on the host (not submitted to a cluster), since compute nodes may lack internet access
 localrules:
-    download_nnunet_model,
-    unpack_nnunet_model,
+    download_tissuepred_model,
 
 
-rule download_nnunet_model:
+rule download_tissuepred_model:
     input:
         url=storage(model_dict["url"]),
     output:
@@ -94,19 +93,27 @@ def get_cmd_copy_inputs(wildcards, input):
         return " && ".join(cmd)
 
 
-rule unpack_nnunet_model:
-    """Unpack nnunet model tar to temp folder to check contents"""
-    input:
-        tar=get_model_tar(),
-    output:
-        directory(get_model_dir()),
-    resources:
-        mem_mb=scale_by_attempt(4000),
-        runtime=scale_by_attempt(10),
-    params:
-        tar_opts=lambda wildcards, input: "-xzf" if input.tar[-2:] == "gz" else "-xf",
-    shell:
-        "mkdir -p {output} && tar {params.tar_opts} {input} -C {output}"
+# only for nnUNet tar archives (synthtopo uses extract_synthtopo_checkpoint instead)
+if model_dict["arch_version"] in ("nnunet_v1", "nnunet_v2"):
+
+    localrules:
+        unpack_tissuepred_model,
+
+    rule unpack_tissuepred_model:
+        """Unpack nnUNet model tar to temp folder to check contents"""
+        input:
+            tar=get_model_tar(),
+        output:
+            directory(get_model_dir()),
+        resources:
+            mem_mb=scale_by_attempt(4000),
+            runtime=scale_by_attempt(10),
+        params:
+            tar_opts=lambda wildcards, input: (
+                "-xzf" if input.tar[-2:] == "gz" else "-xf"
+            ),
+        shell:
+            "mkdir -p {output} && tar {params.tar_opts} {input} -C {output}"
 
 
 if model_dict["arch_version"] == "nnunet_v1":
@@ -116,10 +123,10 @@ if model_dict["arch_version"] == "nnunet_v1":
         It also runs in an isolated folder (shadow), with symlinks to inputs in that folder, copying over outputs once complete, so temp files are not retained
         """
         input:
-            in_img=get_nnunet_input,
+            in_img=get_tissuepred_input,
             model_dir=get_model_dir(),
         output:
-            nnunet_seg=temp(
+            tissuepred_seg=temp(
                 bids(
                     root=root,
                     datatype="anat",
@@ -161,17 +168,17 @@ if model_dict["arch_version"] == "nnunet_v1":
             "export RESULTS_FOLDER={input.model_dir} && "
             "export nnUNet_n_proc_DA={threads} && "
             "{params.cuda_visible_devices} nnUNet_predict -i {params.in_folder} -o {params.out_folder} -t {params.task} -chk {params.chkpnt} -tr {params.trainer} {params.tta} &> {log} && "
-            "cp {params.temp_lbl} {output.nnunet_seg}"
+            "cp {params.temp_lbl} {output.tissuepred_seg}"
 
 elif model_dict["arch_version"] == "nnunet_v2":
 
     rule run_inference_nnunet_v2:
         """nnUNet v2 inference with tar extraction in shadow directory"""
         input:
-            in_img=get_nnunet_input,
+            in_img=get_tissuepred_input,
             model_tar=get_model_tar(),
         output:
-            nnunet_seg=temp(
+            tissuepred_seg=temp(
                 bids(
                     root=root,
                     datatype="anat",
@@ -234,7 +241,7 @@ elif model_dict["arch_version"] == "nnunet_v2":
             "-device {params.device} "
             "{params.tta} "
             "&> {log} && "
-            "cp {params.temp_lbl} {output.nnunet_seg}"
+            "cp {params.temp_lbl} {output.tissuepred_seg}"
 
 elif model_dict["arch_version"] == "synthtopo":
 
@@ -318,7 +325,7 @@ elif model_dict["arch_version"] == "synthtopo":
         For right hemisphere: input and output are used as-is.
         """
         input:
-            in_img=get_nnunet_input,
+            in_img=get_tissuepred_input,
             checkpoint=get_synthtopo_checkpoint(),
         output:
             synthseg_seg=temp(
@@ -406,7 +413,7 @@ def get_f3d_ref(wildcards, input):
             "crop_refT1w"
         ].format(**wildcards)
     else:
-        raise ValueError("modality not supported for nnunet!")
+        raise ValueError("modality not supported for tissuepred model!")
     return nii
 
 
@@ -422,7 +429,7 @@ def get_mask_crop_ref(wildcards, input):
     return Path(input.template_dir) / mask_tpl.format(**wildcards)
 
 
-rule qc_nnunet_f3d:
+rule qc_tissuepred_f3d:
     input:
         img=(
             bids(
@@ -481,12 +488,12 @@ rule qc_nnunet_f3d:
         ),
     log:
         bids_log(
-            "qc_nnunet_f3d",
+            "qc_tissuepred_f3d",
             **inputs.subj_wildcards,
             hemi="{hemi}",
         ),
     group:
-        "qc_nnunet"
+        "qc_tissuepred"
     resources:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(10),
@@ -497,7 +504,7 @@ rule qc_nnunet_f3d:
         "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {params.ref} -res {output.res_mask} -inter 0 &> {log}"
 
 
-rule qc_nnunet_dice:
+rule qc_tissuepred_dice:
     input:
         res_mask=bids(
             root=root,
@@ -519,11 +526,11 @@ rule qc_nnunet_dice:
                 hemi="{hemi}",
                 **inputs.subj_wildcards,
             ),
-            caption="../report/nnunet_qc.rst",
+            caption="../report/tissuepred_qc.rst",
             category="Segmentation QC",
         ),
     group:
-        "qc_nnunet"
+        "qc_tissuepred"
     resources:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(1),

@@ -73,17 +73,17 @@ a within-subject registration of the T2w to the T1w, concatenating all the trans
 
 Note that these are not the only workflow configurations possible, several other variants exist by using the command-line flags. For example, if you have T1w and T2w images that are already pre-processed and co-registered (e.g. HCP processed data), then you should use the `--skip-preproc` and `--skip-coreg` options to skip N4 and T1w/T2w co-registration.
 
-## U-net segmentation
+## Tissue segmentation (tissuepred)
 
-The U-net segmentation is performed on the cropped, `space-corobl` images, producing tissue segmentations (gray matter, SRLM, and anatomical landmarks for unfolding). This step is done in a single rule, which runs inference on the image using the corresponding
-nnU-net model based on the `modality` chosen. This is done on the `R` and `Lflip` hippocampus images, and the `Lflip` is subsequently unflipped. 
+The tissue segmentation is performed on the cropped, `space-corobl` images, producing tissue segmentations (gray matter, SRLM, and anatomical landmarks for unfolding). This step is done in a single rule, which runs inference on the image using the corresponding
+tissuepred model, a U-Net (nnU-Net or SynthTopo), based on the `modality` chosen (or `--force_tissuepred_model`). This is done on the `R` and `Lflip` hippocampus images, and the `Lflip` is subsequently unflipped. 
 
-![U-net workflow](../../hippunfold/dags/out_dag/T1w.nnunet.png)
+![Tissuepred workflow](../../hippunfold/dags/out_dag/T1w.pred.png)
 
 
 ## Template-based shape injection
 
-Since the nnU-net segmentation may possibly contain topological errors that can cause issues when the Laplace-based coordinates, we perform an additional registration-based correction step, a shape injection, where we perform non-linear registration of a template hippocampus segmentation and the U-net segmentation, to warp the template shape. Regularization from the registration ensures topology from the template is preserved while it is warped to match the subject hippocampus. In addition to the segmentation, we also propagate Laplace coordinates to serve as an initialization to the next step.
+Since the tissuepred segmentation may possibly contain topological errors that can cause issues when the Laplace-based coordinates, we perform an additional registration-based correction step, a shape injection, where we perform non-linear registration of a template hippocampus segmentation and the tissuepred segmentation, to warp the template shape. Regularization from the registration ensures topology from the template is preserved while it is warped to match the subject hippocampus. In addition to the segmentation, we also propagate Laplace coordinates to serve as an initialization to the next step.
 
 The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
 
@@ -96,7 +96,7 @@ The basis of the hippocampal unfolding is the definition of the Laplace coordina
 
 The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
 
-![Laplace coordinates](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.autotop.png)
+![Laplace coordinates](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.coords.png)
 
 ## Subfields processing
 
@@ -121,7 +121,7 @@ Using the warps, we transform standard template unfolded meshes to each subject 
 
 The following diagram shows the workflow, but simplified to contain one hemisphere (`--hemi R`), and excluding the dentate gyrus.
 
-![Surface processing](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.gifti.png)
+![Surface processing](../../hippunfold/dags/out_dag/T1w_hemi-R_hipponly.native_isosurf.png)
 
 
 ## Additional steps

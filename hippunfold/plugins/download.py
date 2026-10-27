@@ -8,7 +8,7 @@ from snakebids.plugins.base import PluginBase
 
 # last rules in each chain that populates the cache dir (HIPPUNFOLD_CACHE_DIR);
 # their upstream download rules (download_surf_template_atlas,
-# download_nnunet_model) are pulled in as dependencies. Only list the last rule of
+# download_tissuepred_model) are pulled in as dependencies. Only list the last rule of
 # each chain: passing both a rule and its upstream rule to --until makes snakemake
 # stop after the first job (snakemake/snakemake#823).
 DOWNLOAD_RULES = [
@@ -17,10 +17,13 @@ DOWNLOAD_RULES = [
     "cp_atlas_metric_gii",
 ]
 
-# only defined when nnunet.smk is included (i.e. modality is not dsegtissue)
-NNUNET_DOWNLOAD_RULES = [
-    "unpack_nnunet_model",
-]
+# last rule that prepares the tissuepred model in the cache dir, per arch_version;
+# only defined when pred.smk is included (i.e. modality is not dsegtissue)
+TISSUEPRED_DOWNLOAD_RULES = {
+    "nnunet_v1": "unpack_tissuepred_model",
+    "nnunet_v2": "unpack_tissuepred_model",
+    "synthtopo": "extract_synthtopo_checkpoint",
+}
 
 
 @attrs.define
@@ -40,7 +43,10 @@ class DownloadConfig(PluginBase):
 
         until = list(DOWNLOAD_RULES)
         if config.get("modality") != "dsegtissue":
-            until.extend(NNUNET_DOWNLOAD_RULES)
+            model_name = config.get("force_tissuepred_model") or config.get("modality")
+            model_dict = config.get("tissuepred_models", {}).get(model_name)
+            if model_dict is not None:
+                until.append(TISSUEPRED_DOWNLOAD_RULES[model_dict["arch_version"]])
 
         config["snakemake_args"] = [
             *config.get("snakemake_args", []),

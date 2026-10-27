@@ -591,6 +591,11 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/akhanf/khanlab/linux-64/convert3d-1.4.2-libitk547_0.conda
       - pypi: ./
+      - pypi: https://files.pythonhosted.org/packages/28/90/a4a3652e832667917383f8d34112bdb37b78a6d14efc049e22a2c8192524/snakemake_interface_common-1.23.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/31/dc/cc50210e11e465c975462439a492516a73300ab8caa8f5e0902544fd748b/zstandard-0.25.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/3e/24/303708f276f2a81bd0551f5e93b5dd51201ca0d73aed0dc50be6976a3443/tqdm_loggable-0.4.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/47/71/2574d1fab3581458d6def5e796ede5cdd29b13d8520e917780b87a2a96ee/snakemake_storage_plugin_cached_http-0.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/66/11/e295e07d4ae500144177f875a8de11daa4d86b8246ab41c76a98ce9280ca/reretry-0.11.8-py2.py3-none-any.whl
   dev:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -1200,6 +1205,11 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://prefix.dev/akhanf/khanlab/linux-64/convert3d-1.4.2-libitk547_0.conda
       - pypi: ./
+      - pypi: https://files.pythonhosted.org/packages/28/90/a4a3652e832667917383f8d34112bdb37b78a6d14efc049e22a2c8192524/snakemake_interface_common-1.23.0-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/31/dc/cc50210e11e465c975462439a492516a73300ab8caa8f5e0902544fd748b/zstandard-0.25.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+      - pypi: https://files.pythonhosted.org/packages/3e/24/303708f276f2a81bd0551f5e93b5dd51201ca0d73aed0dc50be6976a3443/tqdm_loggable-0.4.1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/47/71/2574d1fab3581458d6def5e796ede5cdd29b13d8520e917780b87a2a96ee/snakemake_storage_plugin_cached_http-0.3-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/66/11/e295e07d4ae500144177f875a8de11daa4d86b8246ab41c76a98ce9280ca/reretry-0.11.8-py2.py3-none-any.whl
   dev-only:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
@@ -11146,3 +11156,49 @@ packages:
 - pypi: ./
   name: hippunfold
   requires_python: '>=3.12,<3.15'
+- pypi: https://files.pythonhosted.org/packages/28/90/a4a3652e832667917383f8d34112bdb37b78a6d14efc049e22a2c8192524/snakemake_interface_common-1.23.0-py3-none-any.whl
+  name: snakemake-interface-common
+  version: 1.23.0
+  sha256: 43bb10102d07149f27787dfc65a7342b86ff772973e7f9ca4940c89cb412a11e
+  requires_dist:
+  - argparse-dataclass>=2.0.0
+  - configargparse>=1.7
+  - packaging>=24.0,<26.0
+  requires_python: '>=3.8'
+- pypi: https://files.pythonhosted.org/packages/31/dc/cc50210e11e465c975462439a492516a73300ab8caa8f5e0902544fd748b/zstandard-0.25.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl
+  name: zstandard
+  version: 0.25.0
+  sha256: e09bb6252b6476d8d56100e8147b803befa9a12cea144bbe629dd508800d1ad0
+  requires_dist:
+  - cffi~=1.17 ; python_full_version < '3.14' and platform_python_implementation != 'PyPy' and extra == 'cffi'
+  - cffi>=2.0.0b0 ; python_full_version >= '3.14' and platform_python_implementation != 'PyPy' and extra == 'cffi'
+  requires_python: '>=3.9'
+- pypi: https://files.pythonhosted.org/packages/3e/24/303708f276f2a81bd0551f5e93b5dd51201ca0d73aed0dc50be6976a3443/tqdm_loggable-0.4.1-py3-none-any.whl
+  name: tqdm-loggable
+  version: 0.4.1
+  sha256: e3b394a6fc85a1b1b0dad52a63ac926ecb3b478acf4f4bae570d9189f00ab91d
+  requires_dist:
+  - tqdm>4.64
+  requires_python: '>=3.10'
+- pypi: https://files.pythonhosted.org/packages/47/71/2574d1fab3581458d6def5e796ede5cdd29b13d8520e917780b87a2a96ee/snakemake_storage_plugin_cached_http-0.3-py3-none-any.whl
+  name: snakemake-storage-plugin-cached-http
+  version: '0.3'
+  sha256: dcd6e3266e2ab2bc42bc3ef8041ea57ca2fda9b5f9628ee61e4772ecfb6c32db
+  requires_dist:
+  - httpx~=0.27
+  - platformdirs~=4.0
+  - reretry~=0.11
+  - snakemake-interface-common~=1.14
+  - snakemake-interface-storage-plugins>=4.2,<5.0
+  - snakemake-storage-plugin-http~=0.3
+  - tqdm-loggable~=0.2
+  - typing-extensions~=4.15
+  - zstandard~=0.25.0
+  - pytest>=7.0 ; extra == 'dev'
+  - pytest-asyncio>=0.21 ; extra == 'dev'
+  requires_python: '>=3.11'
+- pypi: https://files.pythonhosted.org/packages/66/11/e295e07d4ae500144177f875a8de11daa4d86b8246ab41c76a98ce9280ca/reretry-0.11.8-py2.py3-none-any.whl
+  name: reretry
+  version: 0.11.8
+  sha256: 5ec1084cd9644271ee386d34cd5dd24bdb3e91d55961b076d1a31d585ad68a79
+  requires_python: '>=3.7'
