@@ -117,7 +117,7 @@ parse_args:
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* nnUnet and shape injection. This is only to be used if nnUnet models are not trained for the data you are using, e.g. for non-human primate data with the MBMv3 (marmoset) or CIVM (macaque) template. (default: %(default)s)'
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* the tissuepred model and shape injection. This is only to be used if tissuepred models are not trained for the data you are using, e.g. for non-human primate data with the MBMv3 (marmoset) or CIVM (macaque) template. (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -135,14 +135,24 @@ parse_args:
     default: False
     action: 'store_true'
 
+  --force_shape_inject:
+    help: 'Force post-processing template shape injection into CNN segmentation on, overriding the model default (set by shape_inject in tissuepred_models; on if unset). (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
+  --no_shape_inject:
+    help: 'Force post-processing template shape injection into CNN segmentation off, overriding the model default. Note that for models without dentate src/sink labels this will disable generation of DG surfaces. (default: %(default)s)'
+    default: False
+    action: 'store_true'
+
   --skip_inject_template_labels:
-    help: 'Set this flag to skip post-processing template injection into CNN segmentation. Note this will disable generation of DG surfaces. (default: %(default)s)'
+    help: 'Deprecated alias for --no_shape_inject. (default: %(default)s)'
     default: False
     action: 'store_true'
 
   
   --inject_template_smoothing_factor: 
-    help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if nnunet segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
+    help: 'Scales the default smoothing sigma for gradient and warp in template shape injection. Using a value higher than 1 will use result in a smoother warp, and greater capacity to patch larger holes in segmentations. Try setting to 2 if tissuepred segmentations have large holes. Note: the better solution is to re-train network on the data you are using (default: %(default)s)'
     default: 1.0
 
   --rigid_reg_template:
@@ -196,7 +206,7 @@ parse_args:
     action: 'store_true'
 
   --nnunet_enable_tta:
-    help: 'Enable test-time augmentation for nnU-net inference, slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
+    help: 'Enable test-time augmentation for tissuepred inference (nnU-Net models only), slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -236,8 +246,8 @@ parse_args:
     nargs: '+'
     help: 'Run hipp (CA + subiculum) alone or include dentate (default: %(default)s)'
 
-  --force_nnunet_model:
-    help: 'Force nnunet model to use (expert option). (default: %(default)s)'
+  --force_tissuepred_model:
+    help: 'Force tissue segmentation (tissuepred) model to use (expert option). (default: %(default)s)'
     default: False
     choices:
       - T1w
@@ -246,6 +256,7 @@ parse_args:
       - b1000
       - trimodal
       - hippb500
+      - neonateT1w_v1
       - neonateT1w
       - synthseg_v0.1
       - synthseg_v0.2
@@ -253,8 +264,9 @@ parse_args:
       - neonateT2w_v2
       - neonateT12w_v2
       - ADNI_T1w_v1
-      - neonate_synthseg
       - maguire_T2w
+      - synthtopo_neonate
+      - synthtopo_lifespan
 
   --inner_outer_reg_method:
     help: |
@@ -404,7 +416,6 @@ template_files:
       - L
       - R
 
-
 #values to use for re-mapping tissue labels when combining with subfields.
 # set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
 tissue_atlas_mapping:
@@ -427,61 +438,61 @@ tissue_atlas_mapping:
    
 
 
-nnunet_models:
+tissuepred_models:
   T1w:
-    url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
+    url: 'https://zenodo.org/records/4508747/files/trained_model.3d_fullres.Task101_hcp1200_T1w.nnUNetTrainerV2.model_best.tar'
     arch_version: nnunet_v1
     task: Task101_hcp1200_T1w
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
   T2w:
-    url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar'
+    url: 'https://zenodo.org/records/4508747/files/trained_model.3d_fullres.Task102_hcp1200_T2w.nnUNetTrainerV2.model_best.tar'
     arch_version: nnunet_v1
     task: Task102_hcp1200_T2w
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
   hippb500: 
-    url: 'https://zenodo.org/record/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
+    url: 'https://zenodo.org/records/5732291/files/trained_model.3d_fullres.Task110_hcp1200_b1000crop.nnUNetTrainerV2.model_best.tar'
     arch_version: nnunet_v1
     task: Task110_hcp1200_b1000crop
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
-#  neonateT1w:
-#    url: 'https://zenodo.org/record/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
-#    arch_version: nnunet_v1
-#    task: Task205_hcp1200_b1000_finetuneround2_dhcp_T1w
-#    checkpoint:  model_best
-#    trainer: nnUNetTrainerV2
+  neonateT1w_v1:
+   url: 'https://zenodo.org/records/5733556/files/trained_model.3d_fullres.Task205_hcp1200_b1000_finetuneround2_dhcp_T1w.nnUNetTrainerV2.model_best.tar'
+   arch_version: nnunet_v1
+   task: Task205_hcp1200_b1000_finetuneround2_dhcp_T1w
+   checkpoint:  model_best
+   trainer: nnUNetTrainerV2
   neonateT1w: 
-    url: 'https://zenodo.org/record/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
+    url: 'https://zenodo.org/records/8209029/files/trained_model.3d_fullres.Task301_dhcp_T1w_synthseg_manuallycorrected.nnUNetTrainer.model_best.tar'
     arch_version: nnunet_v1
     task: Task301_dhcp_T1w_synthseg_manuallycorrected
     checkpoint:  model_best
-    trainer: nnUNetTrainerV2
+    trainer: nnUNetTrainer
 
   T1T2w:
-    url: 'https://zenodo.org/record/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
+    url: 'https://zenodo.org/records/4508747/files/trained_model.3d_fullres.Task103_hcp1200_T1T2w.nnUNetTrainerV2.model_best.tar'
     arch_version: nnunet_v1
     task: Task103_hcp1200_T1T2w
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
 
   synthseg_v0.1: 
-    url: 'https://zenodo.org/record/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
+    url: 'https://zenodo.org/records/8184230/files/trained_model.3d_fullres.Task102_synsegGenDetailed.nnUNetTrainerV2.model_best.tar'
     arch_version: nnunet_v1
     task: Task102_synsegGenDetailed
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
 
   synthseg_v0.2:
-    url: 'https://zenodo.org/record/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
+    url: 'https://zenodo.org/records/8184230/files/trained_model.3d_fullres.Task203_synthseg.nnUNetTrainerV2.model_best.tar'
     arch_version: nnunet_v1
     task: Task203_synthseg
     checkpoint:  model_best
     trainer: nnUNetTrainerV2
 
   ADNI_T1w_v1:
-    url: 'https://zenodo.org/record/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
+    url: 'https://zenodo.org/records/15297857/files/trained_model.3d_fullres.Task301_ADNI_T1w_successful.nnUNetTrainer.tar'
     arch_version: nnunet_v1
     task: Task301_ADNI_T1w_successful
     checkpoint:  nnUNetTrainer
@@ -514,10 +525,22 @@ nnunet_models:
     plans: nnUNetPlans
     checkpoint: checkpoint_best.pth
 
-  neonate_synthseg:
-    url: 'https://zenodo.org/records/17742012/files/synthseg.tar.xz'
-    arch_version: synthseg_v2
-    checkpoint: last.ckpt
+  synthtopo_neonate:
+    url: "https://zenodo.org/records/20582534/files/hippneo_synthtopo.zip"
+    arch_version: synthtopo
+    nb_classes: 11
+    seg_nb_levels: 6
+    seg_features: [16, 32, 64, 128, 256, 512]
+    checkpoint: epoch=2172-step=71709.ckpt
+
+  synthtopo_lifespan:
+    url: "https://zenodo.org/records/21112080/files/hippls_synthtopo_alveus.zip"
+    arch_version: synthtopo
+    nb_classes: 12
+    seg_nb_levels: 6
+    seg_features: [16, 32, 64, 128, 256, 512]
+    checkpoint: epoch=823-step=438800.ckpt
+    shape_inject: true
 
   maguire_T2w:
     url: https://zenodo.org/records/18432751/files/Dataset001_HippUnfoldMag.nnUNetTrainer__nnUNetPlans__3d_fullres.tar.gz
@@ -527,6 +550,7 @@ nnunet_models:
     trainer: nnUNetTrainer
     plans: nnUNetPlans
     checkpoint: checkpoint_best.pth
+
 
 #these will be downloaded to ~/.cache/hippunfold
 resource_urls:
@@ -611,7 +635,13 @@ shape_inject:
   labels_overwrite:
     - 2  
   label_smoothing_stdev: '0.5x0.5x0.5mm'
+  # ideally for this UNet model we would merge label 2&10 and label 0&9, but this will require anadditional snake rule. can skip for now
 
+
+#without template shape injection, the dentate PD src voxels become background for hipp,
+# except where they fill a concavity of the hipp tissue (closing radius in mm, so the number
+# of voxels scales with the resolution of the segmentation)
+dentate_pd_src_closing_radius_mm: 0.6
 
 laplace_labels:
   hipp:
@@ -639,10 +669,11 @@ laplace_labels:
         - 2
         - 4
         - 7
-        - 9
+        - 10
       sink:
         - 0 
-        - 10
+        - 9
+        - 11
   dentate:
     AP:
       gm:
@@ -670,6 +701,7 @@ laplace_labels:
         - 7
         - 9
         - 10
+        - 11
         - 0
 
       

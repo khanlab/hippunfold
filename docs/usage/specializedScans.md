@@ -43,7 +43,7 @@ This can be unfolded with the command:
 
     hippunfold . PATH_TO_OUTPUT_DIR participant --modality dsegtissue \
     --path_dsegtissue exvivo/sub-{subject}/sub-{subject}_hemi-{hemi}_desc-hippo_dseg.nii.gz \
-    --hemi R --skip_inject_template_labels
+    --hemi R --no_shape_inject
 
 Explanation: `--modality dsegtissue` informs HippUnfold that the input
 manual segmentation should not be resampled and UNet does not need to be
@@ -57,7 +57,7 @@ this space. We need the `--hemi R` to prevent HippUnfold looking for
 both hemispheres. Finally, because this segmentation was performed
 manually on very high resolution data, we can optionally consider
 skipping the template shape injection step with
-`--skip_inject_template_labels`. Template shape injection can fix minor
+`--no_shape_inject`. Template shape injection can fix minor
 errors in segmentation from UNet or from an imperfect manual rater, at
 the cost of smoothing out some details of the hippocampus due to the
 fact that it uses deformable registration with inherent smoothness

@@ -3,7 +3,7 @@
 Fully isolated SynthSeg inference script for hippocampus segmentation.
 This script contains all necessary code and does not require local imports.
 
-Author: Mahmoud Yaser (mahmoud1yaser)
+Author: Mahmoud Salman (mahmoud1yaser)
 """
 
 import argparse
@@ -575,7 +575,7 @@ def save_nifti(pred, output_path, reference_path):
 def main():
     start_total_time = time.time()
     parser = argparse.ArgumentParser(
-        description="SynthSeg hippocampus segmentation inference"
+        description="SynthTopo hippocampus segmentation inference"
     )
     parser.add_argument("input", help="Input NIfTI file (.nii or .nii.gz)")
     parser.add_argument("checkpoint", help="Model checkpoint (.ckpt file)")
@@ -583,6 +583,25 @@ def main():
         "-o", "--output", required=True, help="Output segmentation file"
     )
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
+    parser.add_argument(
+        "--nb-classes",
+        type=int,
+        default=9,
+        help="Number of output classes (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--seg-nb-levels",
+        type=int,
+        default=6,
+        help="Number of UNet levels (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--seg-features",
+        type=int,
+        nargs="+",
+        default=[16, 24, 32, 48, 64, 96],
+        help="UNet feature sizes per level, space-separated (default: %(default)s)",
+    )
     args = parser.parse_args()
     if not os.path.exists(args.input):
         raise FileNotFoundError(f"Input file not found: {args.input}")
@@ -598,7 +617,11 @@ def main():
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
     print("Loading original model...")
-    model = Model()
+    model = Model(
+        nb_classes=args.nb_classes,
+        seg_nb_levels=args.seg_nb_levels,
+        seg_features=tuple(args.seg_features),
+    )
     # patch synth like original inference
     if hasattr(model.network, "synth"):
         model.network.synth = Real(getattr(model.network, "synth", None))
@@ -619,6 +642,16 @@ def main():
         img = img.unsqueeze(0)  # (1,1,D,H,W)
     else:
         raise ValueError(f"Unexpected input shape {img.shape}")
+
+    # Normalize input intensities to [0, 1] for stable model input scale.
+    img_min = img.amin()
+    img_max = img.amax()
+    img_range = img_max - img_min
+    if img_range > 0:
+        img = (img - img_min) / img_range
+    else:
+        img = torch.zeros_like(img)
+
     start_inference_time = time.time()
     with torch.no_grad():
         pred_logits = model(img)

@@ -54,7 +54,7 @@ python = ">=3.12,<3.15"
 snakebids = ">=0.14.0,<0.15"
 appdirs = ">=1.4.4,<2.0.0"
 conda = ">=26,<27"
-snakemake-storage-plugin-http = ">=0.3.0,<0.4"
+snakemake-storage-plugin-cached-http = ">=0.3,<0.4"
 unzip = ">=6,<7"
 laynii = ">=2.7.0,<3"
 nilearn = ">=0.13.1,<0.15"
@@ -104,7 +104,7 @@ python = { workspace = true }
 snakebids = { workspace = true }
 appdirs = { workspace = true }
 conda = { workspace = true }
-snakemake-storage-plugin-http = { workspace = true }
+snakemake-storage-plugin-cached-http = { workspace = true }
 unzip = { workspace = true }
 laynii = { workspace = true }
 nilearn = { workspace = true }
@@ -138,7 +138,7 @@ python = { workspace = true }
 snakebids = { workspace = true }
 appdirs = { workspace = true }
 conda = { workspace = true }
-snakemake-storage-plugin-http = { workspace = true }
+snakemake-storage-plugin-cached-http = { workspace = true }
 unzip = { workspace = true }
 laynii = { workspace = true }
 nilearn = { workspace = true }

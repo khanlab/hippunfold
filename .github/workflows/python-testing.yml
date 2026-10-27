@@ -120,7 +120,7 @@ jobs:
         run: |
           ./hippunfold/run.py test_data/bids_singleT2w test_out download -np --modality T2w
 
-      - name: Test download analysis level, manualseg (no nnunet model)
+      - name: Test download analysis level, manualseg (no tissuepred model)
         run: |
           ./hippunfold/run.py test_data/bids_dsegtissue test_out download -np --modality dsegtissue --derivatives test_data/bids_dsegtissue
 
