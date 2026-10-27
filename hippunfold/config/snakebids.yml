@@ -117,7 +117,7 @@ parse_args:
     help: 'Set the template to use for shape injection. (default: %(default)s)'
 
   --use_template_seg:
-    help: 'Use template-based segmentation for hippocampal tissue *instead of* the U-Net tissuepred model and shape injection. This is only to be used if tissuepred models are not trained for the data you are using, e.g. for non-human primate data with the MBMv3 (marmoset) or CIVM (macaque) template. (default: %(default)s)'
+    help: 'Use template-based segmentation for hippocampal tissue *instead of* the tissuepred model and shape injection. This is only to be used if tissuepred models are not trained for the data you are using, e.g. for non-human primate data with the MBMv3 (marmoset) or CIVM (macaque) template. (default: %(default)s)'
     default: False
     action: 'store_true'
 
@@ -206,7 +206,7 @@ parse_args:
     action: 'store_true'
 
   --nnunet_enable_tta:
-    help: 'Enable test-time augmentation for nnU-Net inference (nnU-Net tissuepred models only), slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
+    help: 'Enable test-time augmentation for tissuepred inference (nnU-Net models only), slows down inference by 8x, but potentially increases accuracy (default: %(default)s)'
     default: False
     action: 'store_true'
 

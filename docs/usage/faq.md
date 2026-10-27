@@ -54,7 +54,7 @@ models in the container itself. This drops the container size significantly (<4G
 (model-files)=
 ## Why do I end up with large files in `~/.cache/hippunfold` after running HippUnfold? 
 
-This folder is where the tissue segmentation (tissuepred) U-Net model parameters are stored by default. You can override the location with the `HIPPUNFOLD_CACHE_DIR` environment variable.
+This folder is where the tissue segmentation (tissuepred) model parameters are stored by default. You can override the location with the `HIPPUNFOLD_CACHE_DIR` environment variable.
 
 
 (download-first)=

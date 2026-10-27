@@ -67,7 +67,7 @@ Each HippUnfold rule specifies its memory (`mem_mb`), runtime and number of thre
 | Group | Contents | Jobs per subject |
 |---|---|---|
 | `preproc` | Import, bias correction, registration to template, cropping to coronal-oblique space | 1 |
-| `run_inference_*` | U-Net tissue segmentation (tissuepred) (not grouped; the largest job, ~32 GB memory) | 1 per hemisphere |
+| `run_inference_*` | Tissue segmentation (tissuepred) inference (not grouped; the largest job, ~32 GB memory) | 1 per hemisphere |
 | `qc_tissuepred` | QC of the tissuepred segmentation | 1 per hemisphere |
 | `shapeinject` | Template shape injection | 1 per hemisphere |
 | `surf` | Laplace coordinates, surfaces, metrics, unfolded registration, subfields and QC | 1 per hemisphere and label (hipp, dentate) |
