@@ -1,4 +1,4 @@
-digraph snakemake_dag {
+strict digraph "" {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -13,2438 +13,871 @@ digraph snakemake_dag {
 	];
 	subgraph cluster_0 {
 		graph [color=blue,
-			label=preproc_t2
+			label=preproc_hippb500
 		];
-		18	[color="0.66 0.6 0.85",
-			label="warp_t2_to_corobl_crop\nhemi: L",
-			style=""];
-		19	[color="0.04 0.6 0.85",
-			label=avg_aligned_or_cp_t2,
-			style=""];
-		19 -> 18;
-		24	[color="0.42 0.6 0.85",
-			label=reg_t2_to_t1_part1,
-			style=""];
-		19 -> 24;
-		136	[color="0.66 0.6 0.85",
-			label="warp_t2_to_corobl_crop\nhemi: R",
-			style=""];
-		19 -> 136;
-		20	[color="0.34 0.6 0.85",
-			label=n4_t2,
-			style=""];
-		20 -> 19;
-		21	[color="0.25 0.6 0.85",
-			label="import_t2\nsubject: 001",
-			style=""];
-		21 -> 20;
-		22	[color="0.08 0.6 0.85",
-			label=compose_t2_xfm_corobl,
-			style=""];
-		22 -> 18;
-		22 -> 136;
-		23	[color="0.43 0.6 0.85",
-			label=reg_t2_to_t1_part2,
-			style=""];
-		23 -> 22;
-		24 -> 23;
 	}
 	subgraph cluster_1 {
 		graph [color=blue,
-			label=common
+			label=preproc_t1
 		];
+		22	[color="0.60 0.6 0.85",
+			label=n4_t1];
+		26	[color="0.30 0.6 0.85",
+			label=reg_to_template];
+		22 -> 26;
+		23	[color="0.64 0.6 0.85",
+			label="import_t1\nsubject: 001"];
+		23 -> 22;
+		24	[color="0.45 0.6 0.85",
+			label=compose_template_xfm_corobl];
+		25	[color="0.61 0.6 0.85",
+			label="convert_template_xfm_ras2itk\nreg_suffix: T1w"];
+		25 -> 24;
+		26 -> 25;
+		42	[color="0.24 0.6 0.85",
+			label="template_xfm_itk2ras\nnative_modality: T2w"];
 	}
 	subgraph cluster_2 {
 		graph [color=blue,
 			label=warps
 		];
-		27	[color="0.08 0.6 0.85",
-			label=compose_template_xfm_corobl,
-			style=""];
-		28	[color="0.10 0.6 0.85",
-			label="convert_template_xfm_ras2itk\nreg_suffix: T1w",
-			style=""];
-		28 -> 27;
-		29	[color="0.43 0.6 0.85",
-			label="reg_to_template\nmodality: T1w",
-			style=""];
-		29 -> 28;
-		78	[color="0.15 0.6 0.85",
-			label="create_unfold_ref\nhemi: L\nlabel: hipp\nsubject: 001",
-			style=""];
-		114	[color="0.60 0.6 0.85",
-			label="template_xfm_itk2ras\nmodality: T2w",
-			style=""];
-		181	[color="0.15 0.6 0.85",
-			label="create_unfold_ref\nhemi: R\nlabel: hipp\nsubject: 001",
-			style=""];
-		286	[color="0.15 0.6 0.85",
-			label="create_unfold_ref\nhemi: L\nlabel: dentate\nsubject: 001",
-			style=""];
-		382	[color="0.15 0.6 0.85",
-			label="create_unfold_ref\nhemi: R\nlabel: dentate\nsubject: 001",
-			style=""];
-	}
-	subgraph cluster_3 {
-		graph [color=blue,
-			label=unfold_reg
-		];
-		64	[color="0.66 0.6 0.85",
-			label=warp_unfold_native_to_unfoldreg,
-			style=""];
-		66	[color="0.54 0.6 0.85",
-			label="reset_header_2d_warp_unfoldreg\ndesc: SyN\nfrom: multihist7\nspace: unfold\nto: native",
-			style=""];
-		66 -> 64;
-		67	[color="0.61 0.6 0.85",
-			label=unfoldreg_antsquick,
-			style=""];
-		67 -> 66;
-		68	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		68 -> 67;
-		69	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		69 -> 68;
-		77	[color="0.19 0.6 0.85",
-			label=extract_unfold_ref_slice,
-			style=""];
-		77 -> 66;
-		77 -> 69;
-		80	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		77 -> 80;
-		82	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		77 -> 82;
-		97	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: curvature",
-			style=""];
-		77 -> 97;
-		103	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: gyrification",
-			style=""];
-		77 -> 103;
-		106	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: thickness",
-			style=""];
-		77 -> 106;
-		79	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		79 -> 67;
-		80 -> 79;
-		81	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		81 -> 67;
-		82 -> 81;
-		96	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		96 -> 67;
-		97 -> 96;
-		102	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		102 -> 67;
-		103 -> 102;
-		105	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		105 -> 67;
-		106 -> 105;
-		167	[color="0.66 0.6 0.85",
-			label=warp_unfold_native_to_unfoldreg,
-			style=""];
-		169	[color="0.54 0.6 0.85",
-			label="reset_header_2d_warp_unfoldreg\ndesc: SyN\nfrom: multihist7\nspace: unfold\nto: native",
-			style=""];
-		169 -> 167;
-		170	[color="0.61 0.6 0.85",
-			label=unfoldreg_antsquick,
-			style=""];
-		170 -> 169;
-		171	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		171 -> 170;
-		172	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		172 -> 171;
-		180	[color="0.19 0.6 0.85",
-			label=extract_unfold_ref_slice,
-			style=""];
-		180 -> 169;
-		180 -> 172;
-		183	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		180 -> 183;
-		185	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		180 -> 185;
-		200	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: curvature",
-			style=""];
-		180 -> 200;
-		206	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: gyrification",
-			style=""];
-		180 -> 206;
-		209	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: thickness",
-			style=""];
-		180 -> 209;
-		182	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		182 -> 170;
-		183 -> 182;
-		184	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		184 -> 170;
-		185 -> 184;
-		199	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		199 -> 170;
-		200 -> 199;
-		205	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		205 -> 170;
-		206 -> 205;
-		208	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		208 -> 170;
-		209 -> 208;
-		272	[color="0.66 0.6 0.85",
-			label=warp_unfold_native_to_unfoldreg,
-			style=""];
-		274	[color="0.54 0.6 0.85",
-			label="reset_header_2d_warp_unfoldreg\ndesc: SyN\nfrom: multihist7\nspace: unfold\nto: native",
-			style=""];
-		274 -> 272;
-		275	[color="0.61 0.6 0.85",
-			label=unfoldreg_antsquick,
-			style=""];
-		275 -> 274;
-		276	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		276 -> 275;
-		277	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		277 -> 276;
-		285	[color="0.19 0.6 0.85",
-			label=extract_unfold_ref_slice,
-			style=""];
-		285 -> 274;
-		285 -> 277;
-		288	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		285 -> 288;
-		290	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		285 -> 290;
-		305	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: curvature",
-			style=""];
-		285 -> 305;
-		311	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: gyrification",
-			style=""];
-		285 -> 311;
-		314	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: thickness",
-			style=""];
-		285 -> 314;
-		287	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		287 -> 275;
-		288 -> 287;
-		289	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		289 -> 275;
-		290 -> 289;
-		304	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		304 -> 275;
-		305 -> 304;
-		310	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		310 -> 275;
-		311 -> 310;
-		313	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		313 -> 275;
-		314 -> 313;
-		368	[color="0.66 0.6 0.85",
-			label=warp_unfold_native_to_unfoldreg,
-			style=""];
-		370	[color="0.54 0.6 0.85",
-			label="reset_header_2d_warp_unfoldreg\ndesc: SyN\nfrom: multihist7\nspace: unfold\nto: native",
-			style=""];
-		370 -> 368;
-		371	[color="0.61 0.6 0.85",
-			label=unfoldreg_antsquick,
-			style=""];
-		371 -> 370;
-		372	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		372 -> 371;
-		373	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		373 -> 372;
-		381	[color="0.19 0.6 0.85",
-			label=extract_unfold_ref_slice,
-			style=""];
-		381 -> 370;
-		381 -> 373;
-		384	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		381 -> 384;
-		386	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii,
-			style=""];
-		381 -> 386;
-		401	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: curvature",
-			style=""];
-		381 -> 401;
-		407	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: gyrification",
-			style=""];
-		381 -> 407;
-		410	[color="0.03 0.6 0.85",
-			label="atlas_metric_to_unfold_nii\nmetric: thickness",
-			style=""];
-		381 -> 410;
-		383	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		383 -> 371;
-		384 -> 383;
-		385	[color="0.56 0.6 0.85",
-			label="slice_3d_to_2d_subject\nunfold: unfold",
-			style=""];
-		385 -> 371;
-		386 -> 385;
-		400	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		400 -> 371;
-		401 -> 400;
-		406	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		406 -> 371;
-		407 -> 406;
-		409	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_atlas,
-			style=""];
-		409 -> 371;
-		410 -> 409;
-	}
-	subgraph cluster_4 {
-		graph [color=blue,
-			label=native_isosurf
-		];
-		8	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		72	[color="0.57 0.6 0.85",
-			label=smooth_surface,
-			style=""];
-		8 -> 72;
-		9	[color="0.20 0.6 0.85",
-			label="gen_native_mesh\nsurfname: midthickness",
-			style=""];
+		8	[color="0.19 0.6 0.85",
+			label=create_warps_hipp];
+		172	[color="0.02 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T2w"];
+		8 -> 172;
+		176	[color="0.04 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		8 -> 176;
+		9	[color="0.24 0.6 0.85",
+			label="create_unfold_ref\nautotop: hipp\nsubject: 001"];
 		9 -> 8;
-		65	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		73	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		75	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		85	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		91	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		127	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		175	[color="0.57 0.6 0.85",
-			label=smooth_surface,
-			style=""];
-		127 -> 175;
+		10	[color="0.16 0.6 0.85",
+			label=create_unfold_coord_map];
+		9 -> 10;
+		64	[color="0.19 0.6 0.85",
+			label=create_warps_hipp];
+		9 -> 64;
+		9 -> 172;
+		173	[color="0.02 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T2w"];
+		9 -> 173;
+		9 -> 176;
+		177	[color="0.04 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		9 -> 177;
+		10 -> 8;
+		10 -> 64;
+		39	[color="0.51 0.6 0.85",
+			label=create_native_coord_ref];
+		39 -> 8;
+		64 -> 173;
+		64 -> 177;
+		77	[color="0.51 0.6 0.85",
+			label="create_native_coord_ref\nautotop: hipp"];
+		77 -> 64;
+		105	[color="0.20 0.6 0.85",
+			label=create_warps_dentate];
+		174	[color="0.02 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T2w"];
+		105 -> 174;
+		178	[color="0.04 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		105 -> 178;
+		106	[color="0.24 0.6 0.85",
+			label="create_unfold_ref\nautotop: dentate\nsubject: 001"];
+		106 -> 105;
+		107	[color="0.16 0.6 0.85",
+			label=create_unfold_coord_map];
+		106 -> 107;
 		128	[color="0.20 0.6 0.85",
-			label="gen_native_mesh\nsurfname: midthickness",
-			style=""];
-		128 -> 127;
-		168	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		176	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		178	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		188	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		194	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		238	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		280	[color="0.57 0.6 0.85",
-			label=smooth_surface,
-			style=""];
-		238 -> 280;
-		239	[color="0.20 0.6 0.85",
-			label="gen_native_mesh\nsurfname: midthickness",
-			style=""];
-		239 -> 238;
-		273	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		281	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		283	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		293	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		299	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		334	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		376	[color="0.57 0.6 0.85",
-			label=smooth_surface,
-			style=""];
-		334 -> 376;
-		335	[color="0.20 0.6 0.85",
-			label="gen_native_mesh\nsurfname: midthickness",
-			style=""];
-		335 -> 334;
-		369	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		377	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		379	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure_unfold\nspace: unfold",
-			style=""];
-		389	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
-		395	[color="0.63 0.6 0.85",
-			label="update_native_mesh_structure\nspace: corobl",
-			style=""];
+			label=create_warps_dentate];
+		106 -> 128;
+		106 -> 174;
+		175	[color="0.02 0.6 0.85",
+			label="compose_warps_native_to_unfold\nnative_modality: T2w"];
+		106 -> 175;
+		106 -> 178;
+		179	[color="0.04 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		106 -> 179;
+		107 -> 105;
+		107 -> 128;
+		117	[color="0.51 0.6 0.85",
+			label=create_native_coord_ref];
+		117 -> 105;
+		128 -> 175;
+		128 -> 179;
+		135	[color="0.51 0.6 0.85",
+			label="create_native_coord_ref\nautotop: dentate"];
+		135 -> 128;
 	}
 	subgraph cluster_5 {
 		graph [color=blue,
-			label=subfields
+			label=autotop
 		];
-		429	[color="0.07 0.6 0.85",
-			label=combine_tissue_subfield_labels_corobl,
-			style=""];
-		436	[color="0.50 0.6 0.85",
-			label="resample_subfields_to_orig\nmodality: T2w",
-			style=""];
-		429 -> 436;
-		430	[color="0.28 0.6 0.85",
-			label=label_gm_with_nearest_subfields,
-			style=""];
-		430 -> 429;
-		431	[color="0.07 0.6 0.85",
-			label=combine_dentate_subfield_labels_corobl,
-			style=""];
-		431 -> 430;
-		432	[color="0.31 0.6 0.85",
-			label=map_surf_subfields_to_volume,
-			style=""];
-		432 -> 431;
-		438	[color="0.07 0.6 0.85",
-			label=combine_tissue_subfield_labels_corobl,
-			style=""];
-		445	[color="0.50 0.6 0.85",
-			label="resample_subfields_to_orig\nmodality: T2w",
-			style=""];
-		438 -> 445;
-		439	[color="0.28 0.6 0.85",
-			label=label_gm_with_nearest_subfields,
-			style=""];
-		439 -> 438;
-		440	[color="0.07 0.6 0.85",
-			label=combine_dentate_subfield_labels_corobl,
-			style=""];
-		440 -> 439;
-		441	[color="0.31 0.6 0.85",
-			label=map_surf_subfields_to_volume,
-			style=""];
-		441 -> 440;
+		11	[color="0.10 0.6 0.85",
+			label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+		12	[color="0.42 0.6 0.85",
+			label=laplace_coords_hipp];
+		12 -> 11;
+		33	[color="0.10 0.6 0.85",
+			label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+		34	[color="0.42 0.6 0.85",
+			label=laplace_coords_hipp];
+		34 -> 33;
+		36	[color="0.38 0.6 0.85",
+			label="unflip_coords_equivol\ndesc: equivol\nhemi: L"];
+		37	[color="0.20 0.6 0.85",
+			label=equivolume_coords];
+		37 -> 36;
+		38	[color="0.56 0.6 0.85",
+			label="prep_equivolume_coords\ndir: IO"];
+		38 -> 37;
+		65	[color="0.42 0.6 0.85",
+			label=laplace_coords_hipp];
+		73	[color="0.42 0.6 0.85",
+			label=laplace_coords_hipp];
+		75	[color="0.20 0.6 0.85",
+			label=equivolume_coords];
+		76	[color="0.56 0.6 0.85",
+			label="prep_equivolume_coords\ndir: IO"];
+		76 -> 75;
+		108	[color="0.10 0.6 0.85",
+			label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+		109	[color="0.42 0.6 0.85",
+			label=laplace_coords_dentate];
+		109 -> 108;
+		111	[color="0.10 0.6 0.85",
+			label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+		112	[color="0.42 0.6 0.85",
+			label=laplace_coords_dentate];
+		112 -> 111;
+		114	[color="0.10 0.6 0.85",
+			label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+		115	[color="0.42 0.6 0.85",
+			label=laplace_coords_dentate];
+		115 -> 114;
+		129	[color="0.42 0.6 0.85",
+			label=laplace_coords_dentate];
+		131	[color="0.42 0.6 0.85",
+			label=laplace_coords_dentate];
+		133	[color="0.42 0.6 0.85",
+			label=laplace_coords_dentate];
+		162	[color="0.10 0.6 0.85",
+			label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+		163	[color="0.42 0.6 0.85",
+			label=laplace_coords_hipp];
+		163 -> 162;
+		166	[color="0.42 0.6 0.85",
+			label=laplace_coords_hipp];
+	}
+	subgraph cluster_3 {
+		graph [color=blue,
+			label=qc
+		];
+		182	[color="0.14 0.6 0.85",
+			label="qc_reg_to_template\nnative_modality: T1w"];
+		183	[color="0.15 0.6 0.85",
+			label="qc_subfield\nspace: cropT2w"];
+		184	[color="0.15 0.6 0.85",
+			label="qc_subfield\nspace: cropT2w"];
+		185	[color="0.39 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T2w"];
+		186	[color="0.39 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T2w"];
+		187	[color="0.39 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T2w"];
+		188	[color="0.39 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T2w"];
+		189	[color="0.63 0.6 0.85",
+			label=plot_subj_subfields];
+		190	[color="0.43 0.6 0.85",
+			label="get_subfield_vols_subj\ncrop_ref_spaces: cropT2w"];
+		190 -> 189;
 	}
 	subgraph cluster_6 {
-		graph [color=blue,
-			label=pred
-		];
-		17	[color="0.54 0.6 0.85",
-			label=run_inference_nnunet_v1,
-			style=""];
-		458	[color="0.40 0.6 0.85",
-			label=qc_tissuepred_f3d,
-			style=""];
-		17 -> 458;
-		31	[color="0.62 0.6 0.85",
-			label=unpack_tissuepred_model,
-			style=""];
-		31 -> 17;
-		135	[color="0.54 0.6 0.85",
-			label=run_inference_nnunet_v1,
-			style=""];
-		31 -> 135;
-		32	[color="0.19 0.6 0.85",
-			label=download_tissuepred_model,
-			style=""];
-		32 -> 31;
-		460	[color="0.40 0.6 0.85",
-			label=qc_tissuepred_f3d,
-			style=""];
-		135 -> 460;
-		457	[color="0.40 0.6 0.85",
-			label=qc_tissuepred_dice,
-			style=""];
-		458 -> 457;
-		459	[color="0.40 0.6 0.85",
-			label=qc_tissuepred_dice,
-			style=""];
-		460 -> 459;
-	}
-	subgraph cluster_7 {
 		graph [color=blue,
 			label=myelin_map
 		];
 	}
+	subgraph cluster_4 {
+		graph [color=blue,
+			label=preproc_cropseg
+		];
+	}
+	subgraph cluster_7 {
+		graph [color=blue,
+			label=preproc_seg
+		];
+	}
 	subgraph cluster_8 {
 		graph [color=blue,
-			label=native_resampling
+			label=preproc_t2
 		];
-		4	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		108	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		109	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		110	[color="0.46 0.6 0.85",
-			label="resample_native_coords_to_atlas_density\ndesc: laplace",
-			style=""];
-		111	[color="0.46 0.6 0.85",
-			label="resample_native_coords_to_atlas_density\ndesc: laplace",
-			style=""];
-		112	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
-			style=""];
-		113	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		113 -> 112;
-		115	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: inner",
-			style=""];
-		116	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		116 -> 115;
-		118	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: outer",
-			style=""];
-		119	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		119 -> 118;
-		121	[color="0.13 0.6 0.85",
-			label="cp_atlas_unfold\nsubject: 001",
-			style=""];
-		123	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		212	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		214	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		216	[color="0.11 0.6 0.85",
-			label="cp_atlas_subfields_label_gii\nsubject: 001",
-			style=""];
-		218	[color="0.11 0.6 0.85",
-			label="cp_atlas_subfields_label_gii\nsubject: 001",
-			style=""];
-		221	[color="0.46 0.6 0.85",
-			label="resample_native_coords_to_atlas_density\ndesc: laplace",
-			style=""];
-		222	[color="0.46 0.6 0.85",
-			label="resample_native_coords_to_atlas_density\ndesc: laplace",
-			style=""];
-		223	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
-			style=""];
-		224	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		224 -> 223;
-		225	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: inner",
-			style=""];
-		226	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		226 -> 225;
-		228	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: outer",
-			style=""];
-		229	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		229 -> 228;
-		231	[color="0.13 0.6 0.85",
-			label="cp_atlas_unfold\nsubject: 001",
-			style=""];
-		234	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		316	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		317	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		318	[color="0.46 0.6 0.85",
-			label="resample_native_coords_to_atlas_density\ndesc: laplace",
-			style=""];
-		319	[color="0.46 0.6 0.85",
-			label="resample_native_coords_to_atlas_density\ndesc: laplace",
-			style=""];
-		320	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
-			style=""];
-		321	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		321 -> 320;
-		322	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: inner",
-			style=""];
-		323	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		323 -> 322;
-		325	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: outer",
-			style=""];
-		326	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		326 -> 325;
-		328	[color="0.13 0.6 0.85",
-			label="cp_atlas_unfold\nsubject: 001",
-			style=""];
-		330	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		413	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		415	[color="0.47 0.6 0.85",
-			label="resample_native_metric_to_atlas_density\nmetrictype: shape",
-			style=""];
-		417	[color="0.46 0.6 0.85",
-			label="resample_native_coords_to_atlas_density\ndesc: laplace",
-			style=""];
-		418	[color="0.46 0.6 0.85",
-			label="resample_native_coords_to_atlas_density\ndesc: laplace",
-			style=""];
-		419	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
-			style=""];
-		420	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		420 -> 419;
-		421	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: inner",
-			style=""];
-		422	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		422 -> 421;
-		424	[color="0.00 0.6 0.85",
-			label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: outer",
-			style=""];
-		425	[color="0.48 0.6 0.85",
-			label=resample_native_surf_to_atlas_density,
-			style=""];
-		425 -> 424;
-		427	[color="0.13 0.6 0.85",
-			label="cp_atlas_unfold\nsubject: 001",
-			style=""];
-		433	[color="0.45 0.6 0.85",
-			label=resample_atlas_subfields_to_native_surf,
-			style=""];
-		442	[color="0.45 0.6 0.85",
-			label=resample_atlas_subfields_to_native_surf,
-			style=""];
-	}
-	subgraph cluster_9 {
-		graph [color=blue,
-			label=preproc_hippb500
-		];
-	}
-	subgraph cluster_10 {
-		graph [color=blue,
-			label=resample_final_to_crop
-		];
-		428	[color="0.49 0.6 0.85",
-			label=resample_subfields_crop,
-			style=""];
-		435	[color="0.13 0.6 0.85",
-			label=create_crop_ref,
-			style=""];
-		435 -> 428;
-		446	[color="0.52 0.6 0.85",
-			label=resample_to_crop,
-			style=""];
-		435 -> 446;
-		437	[color="0.49 0.6 0.85",
-			label=resample_subfields_crop,
-			style=""];
-		444	[color="0.13 0.6 0.85",
-			label=create_crop_ref,
-			style=""];
-		444 -> 437;
-		447	[color="0.52 0.6 0.85",
-			label=resample_to_crop,
-			style=""];
-		444 -> 447;
+		17	[color="0.66 0.6 0.85",
+			label=avg_aligned_or_cp_t2];
+		21	[color="0.62 0.6 0.85",
+			label=reg_t2_to_t1];
+		17 -> 21;
+		28	[color="0.40 0.6 0.85",
+			label="warp_t2_to_corobl_crop\nhemi: L"];
+		17 -> 28;
+		69	[color="0.40 0.6 0.85",
+			label="warp_t2_to_corobl_crop\nhemi: R"];
+		17 -> 69;
+		18	[color="0.05 0.6 0.85",
+			label=n4_t2];
+		18 -> 17;
+		19	[color="0.07 0.6 0.85",
+			label="import_t2\nsubject: 001"];
+		19 -> 18;
+		20	[color="0.50 0.6 0.85",
+			label=compose_t2_xfm_corobl];
+		20 -> 28;
+		20 -> 69;
+		21 -> 20;
+		27	[color="0.00 0.6 0.85",
+			label="lr_flip_t2\ndesc: preproc"];
+		28 -> 27;
 	}
 	subgraph cluster_11 {
 		graph [color=blue,
-			label=preproc_dsegtissue
+			label=subfields
 		];
+		143	[color="0.23 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		147	[color="0.26 0.6 0.85",
+			label="resample_subfields_to_native\nnative_modality: T2w"];
+		143 -> 147;
+		145	[color="0.02 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		145 -> 143;
+		149	[color="0.23 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		152	[color="0.26 0.6 0.85",
+			label="resample_subfields_to_native\nnative_modality: T2w"];
+		149 -> 152;
+		150	[color="0.02 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		150 -> 149;
 	}
-	subgraph cluster_12 {
-		graph [color=blue,
-			label=inner_outer_surf
-		];
-		86	[color="0.64 0.6 0.85",
-			label="warp_midthickness_to_inout\nsurfname: inner",
-			style=""];
-		87	[color="0.10 0.6 0.85",
-			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
-			style=""];
-		87 -> 86;
-		88	[color="0.44 0.6 0.85",
-			label=register_midthickness_greedy,
-			style=""];
-		88 -> 87;
-		89	[color="0.09 0.6 0.85",
-			label="compute_halfthick_mask\ninout: inner",
-			style=""];
-		89 -> 88;
-		92	[color="0.64 0.6 0.85",
-			label="warp_midthickness_to_inout\nsurfname: outer",
-			style=""];
-		93	[color="0.10 0.6 0.85",
-			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
-			style=""];
-		93 -> 92;
-		94	[color="0.44 0.6 0.85",
-			label=register_midthickness_greedy,
-			style=""];
-		94 -> 93;
-		95	[color="0.09 0.6 0.85",
-			label="compute_halfthick_mask\ninout: outer",
-			style=""];
-		95 -> 94;
-		189	[color="0.64 0.6 0.85",
-			label="warp_midthickness_to_inout\nsurfname: inner",
-			style=""];
-		190	[color="0.10 0.6 0.85",
-			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
-			style=""];
-		190 -> 189;
-		191	[color="0.44 0.6 0.85",
-			label=register_midthickness_greedy,
-			style=""];
-		191 -> 190;
-		192	[color="0.09 0.6 0.85",
-			label="compute_halfthick_mask\ninout: inner",
-			style=""];
-		192 -> 191;
-		195	[color="0.64 0.6 0.85",
-			label="warp_midthickness_to_inout\nsurfname: outer",
-			style=""];
-		196	[color="0.10 0.6 0.85",
-			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
-			style=""];
-		196 -> 195;
-		197	[color="0.44 0.6 0.85",
-			label=register_midthickness_greedy,
-			style=""];
-		197 -> 196;
-		198	[color="0.09 0.6 0.85",
-			label="compute_halfthick_mask\ninout: outer",
-			style=""];
-		198 -> 197;
-		294	[color="0.64 0.6 0.85",
-			label="warp_midthickness_to_inout\nsurfname: inner",
-			style=""];
-		295	[color="0.10 0.6 0.85",
-			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
-			style=""];
-		295 -> 294;
-		296	[color="0.44 0.6 0.85",
-			label=register_midthickness_greedy,
-			style=""];
-		296 -> 295;
-		297	[color="0.09 0.6 0.85",
-			label="compute_halfthick_mask\ninout: inner",
-			style=""];
-		297 -> 296;
-		300	[color="0.64 0.6 0.85",
-			label="warp_midthickness_to_inout\nsurfname: outer",
-			style=""];
-		301	[color="0.10 0.6 0.85",
-			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
-			style=""];
-		301 -> 300;
-		302	[color="0.44 0.6 0.85",
-			label=register_midthickness_greedy,
-			style=""];
-		302 -> 301;
-		303	[color="0.09 0.6 0.85",
-			label="compute_halfthick_mask\ninout: outer",
-			style=""];
-		303 -> 302;
-		390	[color="0.64 0.6 0.85",
-			label="warp_midthickness_to_inout\nsurfname: inner",
-			style=""];
-		391	[color="0.10 0.6 0.85",
-			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
-			style=""];
-		391 -> 390;
-		392	[color="0.44 0.6 0.85",
-			label=register_midthickness_greedy,
-			style=""];
-		392 -> 391;
-		393	[color="0.09 0.6 0.85",
-			label="compute_halfthick_mask\ninout: inner",
-			style=""];
-		393 -> 392;
-		396	[color="0.64 0.6 0.85",
-			label="warp_midthickness_to_inout\nsurfname: outer",
-			style=""];
-		397	[color="0.10 0.6 0.85",
-			label="convert_inout_warp_from_itk_to_world\ndesc: greedy",
-			style=""];
-		397 -> 396;
-		398	[color="0.44 0.6 0.85",
-			label=register_midthickness_greedy,
-			style=""];
-		398 -> 397;
-		399	[color="0.09 0.6 0.85",
-			label="compute_halfthick_mask\ninout: outer",
-			style=""];
-		399 -> 398;
-	}
-	subgraph cluster_13 {
-		graph [color=blue,
-			label=qc
-		];
-		448	[color="0.38 0.6 0.85",
-			label=qc_reg_to_template,
-			style=""];
-		449	[color="0.39 0.6 0.85",
-			label="qc_subfield\nspace: cropT2w",
-			style=""];
-		450	[color="0.39 0.6 0.85",
-			label="qc_subfield\nspace: cropT2w",
-			style=""];
-		451	[color="0.39 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T2w",
-			style=""];
-		452	[color="0.39 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T2w",
-			style=""];
-		453	[color="0.39 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T2w",
-			style=""];
-		454	[color="0.39 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T2w",
-			style=""];
-		455	[color="0.36 0.6 0.85",
-			label=plot_subj_subfields,
-			style=""];
-		456	[color="0.23 0.6 0.85",
-			label="get_subfield_vols_subj\ncrop_ref_spaces: cropT2w",
-			style=""];
-		456 -> 455;
-	}
-	subgraph cluster_14 {
-		graph [color=blue,
-			label=cifti
-		];
-		1	[color="0.32 0.6 0.85",
-			label=merge_hipp_dentate_spec_file,
-			style=""];
-		2	[color="0.32 0.6 0.85",
-			label="merge_lr_spec_file\nsurfdir: surf",
-			style=""];
-		2 -> 1;
-		3	[color="0.15 0.6 0.85",
-			label=create_spec_file,
-			style=""];
-		3 -> 2;
-		122	[color="0.14 0.6 0.85",
-			label=create_dscalar_metric_cifti,
-			style=""];
-		122 -> 3;
-		220	[color="0.15 0.6 0.85",
-			label=create_spec_file,
-			style=""];
-		122 -> 220;
-		211	[color="0.14 0.6 0.85",
-			label=create_dscalar_metric_cifti,
-			style=""];
-		211 -> 3;
-		211 -> 220;
-		213	[color="0.14 0.6 0.85",
-			label=create_dscalar_metric_cifti,
-			style=""];
-		213 -> 3;
-		213 -> 220;
-		215	[color="0.14 0.6 0.85",
-			label=create_dlabel_cifti_subfields,
-			style=""];
-		215 -> 3;
-		215 -> 220;
-		220 -> 2;
-		232	[color="0.32 0.6 0.85",
-			label="merge_lr_spec_file\nsurfdir: surf",
-			style=""];
-		232 -> 1;
-		233	[color="0.15 0.6 0.85",
-			label=create_spec_file,
-			style=""];
-		233 -> 232;
-		329	[color="0.14 0.6 0.85",
-			label=create_dscalar_metric_cifti,
-			style=""];
-		329 -> 233;
-		416	[color="0.15 0.6 0.85",
-			label=create_spec_file,
-			style=""];
-		329 -> 416;
-		412	[color="0.14 0.6 0.85",
-			label=create_dscalar_metric_cifti,
-			style=""];
-		412 -> 233;
-		412 -> 416;
-		414	[color="0.14 0.6 0.85",
-			label=create_dscalar_metric_cifti,
-			style=""];
-		414 -> 233;
-		414 -> 416;
-		416 -> 232;
-	}
-	subgraph cluster_15 {
+	subgraph cluster_10 {
 		graph [color=blue,
 			label=shape_inject
 		];
-		12	[color="0.45 0.6 0.85",
-			label=reinsert_subject_labels,
-			style=""];
-		13	[color="0.59 0.6 0.85",
-			label=template_shape_inject,
-			style=""];
-		13 -> 12;
-		33	[color="0.60 0.6 0.85",
-			label="template_shape_reg\nhemi: L\nsubject: 001",
-			style=""];
-		33 -> 13;
-		243	[color="0.59 0.6 0.85",
-			label=template_shape_inject,
-			style=""];
-		33 -> 243;
-		34	[color="0.38 0.6 0.85",
-			label="prep_segs_for_greedy\nprefix: sub-001/anat/sub-001_hemi-L_space-template_desc-hipptissueresampled",
-			style=""];
-		34 -> 33;
-		35	[color="0.51 0.6 0.85",
-			label=resample_template_dseg_tissue_for_reg,
-			style=""];
-		35 -> 34;
-		36	[color="0.38 0.6 0.85",
-			label="prep_segs_for_greedy\nprefix: sub-001/anat/sub-001_hemi-L_space-corobl_desc-pred",
-			style=""];
-		36 -> 33;
-		131	[color="0.45 0.6 0.85",
-			label=reinsert_subject_labels,
-			style=""];
-		132	[color="0.59 0.6 0.85",
-			label=template_shape_inject,
-			style=""];
-		132 -> 131;
-		137	[color="0.60 0.6 0.85",
-			label="template_shape_reg\nhemi: R\nsubject: 001",
-			style=""];
-		137 -> 132;
-		339	[color="0.59 0.6 0.85",
-			label=template_shape_inject,
-			style=""];
-		137 -> 339;
-		138	[color="0.38 0.6 0.85",
-			label="prep_segs_for_greedy\nprefix: sub-001/anat/sub-001_hemi-R_space-template_desc-hipptissueresampled",
-			style=""];
-		138 -> 137;
-		139	[color="0.51 0.6 0.85",
-			label=resample_template_dseg_tissue_for_reg,
-			style=""];
-		139 -> 138;
-		140	[color="0.38 0.6 0.85",
-			label="prep_segs_for_greedy\nprefix: sub-001/anat/sub-001_hemi-R_space-corobl_desc-pred",
-			style=""];
-		140 -> 137;
-		242	[color="0.45 0.6 0.85",
-			label=reinsert_subject_labels,
-			style=""];
-		243 -> 242;
-		338	[color="0.45 0.6 0.85",
-			label=reinsert_subject_labels,
-			style=""];
-		339 -> 338;
-	}
-	subgraph cluster_16 {
-		graph [color=blue,
-			label=native_unfold
-		];
-		43	[color="0.61 0.6 0.85",
-			label=unfold_surface_smoothing,
-			style=""];
-		44	[color="0.58 0.6 0.85",
-			label=space_unfold_vertices,
-			style=""];
-		44 -> 43;
-		45	[color="0.64 0.6 0.85",
-			label=warp_native_mesh_to_unfold,
-			style=""];
-		45 -> 44;
-		74	[color="0.55 0.6 0.85",
-			label="set_surface_z_level\nsurfname: inner",
-			style=""];
-		45 -> 74;
-		76	[color="0.55 0.6 0.85",
-			label="set_surface_z_level\nsurfname: outer",
-			style=""];
-		45 -> 76;
-		46	[color="0.29 0.6 0.85",
-			label="laplace_beltrami\ndir: AP",
-			style=""];
-		46 -> 45;
-		47	[color="0.36 0.6 0.85",
-			label=postproc_boundary_vertices,
-			style=""];
-		47 -> 46;
-		61	[color="0.29 0.6 0.85",
-			label="laplace_beltrami\ndir: PD",
-			style=""];
-		47 -> 61;
-		48	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		48 -> 47;
-		51	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		51 -> 47;
-		54	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		54 -> 47;
-		57	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		57 -> 47;
-		60	[color="0.20 0.6 0.85",
-			label=get_boundary_vertices,
-			style=""];
-		60 -> 47;
-		61 -> 45;
-		147	[color="0.61 0.6 0.85",
-			label=unfold_surface_smoothing,
-			style=""];
-		148	[color="0.58 0.6 0.85",
-			label=space_unfold_vertices,
-			style=""];
-		148 -> 147;
-		149	[color="0.64 0.6 0.85",
-			label=warp_native_mesh_to_unfold,
-			style=""];
-		149 -> 148;
-		177	[color="0.55 0.6 0.85",
-			label="set_surface_z_level\nsurfname: inner",
-			style=""];
-		149 -> 177;
-		179	[color="0.55 0.6 0.85",
-			label="set_surface_z_level\nsurfname: outer",
-			style=""];
-		149 -> 179;
-		150	[color="0.29 0.6 0.85",
-			label="laplace_beltrami\ndir: AP",
-			style=""];
-		150 -> 149;
-		151	[color="0.36 0.6 0.85",
-			label=postproc_boundary_vertices,
-			style=""];
-		151 -> 150;
-		165	[color="0.29 0.6 0.85",
-			label="laplace_beltrami\ndir: PD",
-			style=""];
-		151 -> 165;
-		152	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		152 -> 151;
-		155	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		155 -> 151;
-		158	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		158 -> 151;
-		161	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		161 -> 151;
-		164	[color="0.20 0.6 0.85",
-			label=get_boundary_vertices,
-			style=""];
-		164 -> 151;
-		165 -> 149;
-		252	[color="0.61 0.6 0.85",
-			label=unfold_surface_smoothing,
-			style=""];
-		253	[color="0.58 0.6 0.85",
-			label=space_unfold_vertices,
-			style=""];
-		253 -> 252;
-		254	[color="0.64 0.6 0.85",
-			label=warp_native_mesh_to_unfold,
-			style=""];
-		254 -> 253;
-		282	[color="0.55 0.6 0.85",
-			label="set_surface_z_level\nsurfname: inner",
-			style=""];
-		254 -> 282;
-		284	[color="0.55 0.6 0.85",
-			label="set_surface_z_level\nsurfname: outer",
-			style=""];
-		254 -> 284;
-		255	[color="0.29 0.6 0.85",
-			label="laplace_beltrami\ndir: AP",
-			style=""];
-		255 -> 254;
-		256	[color="0.36 0.6 0.85",
-			label=postproc_boundary_vertices,
-			style=""];
-		256 -> 255;
-		270	[color="0.29 0.6 0.85",
-			label="laplace_beltrami\ndir: PD",
-			style=""];
-		256 -> 270;
-		257	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		257 -> 256;
-		260	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		260 -> 256;
-		263	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		263 -> 256;
-		266	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		266 -> 256;
-		269	[color="0.20 0.6 0.85",
-			label=get_boundary_vertices,
-			style=""];
-		269 -> 256;
-		270 -> 254;
-		348	[color="0.61 0.6 0.85",
-			label=unfold_surface_smoothing,
-			style=""];
-		349	[color="0.58 0.6 0.85",
-			label=space_unfold_vertices,
-			style=""];
-		349 -> 348;
-		350	[color="0.64 0.6 0.85",
-			label=warp_native_mesh_to_unfold,
-			style=""];
-		350 -> 349;
-		378	[color="0.55 0.6 0.85",
-			label="set_surface_z_level\nsurfname: inner",
-			style=""];
-		350 -> 378;
-		380	[color="0.55 0.6 0.85",
-			label="set_surface_z_level\nsurfname: outer",
-			style=""];
-		350 -> 380;
-		351	[color="0.29 0.6 0.85",
-			label="laplace_beltrami\ndir: AP",
-			style=""];
-		351 -> 350;
-		352	[color="0.36 0.6 0.85",
-			label=postproc_boundary_vertices,
-			style=""];
-		352 -> 351;
-		366	[color="0.29 0.6 0.85",
-			label="laplace_beltrami\ndir: PD",
-			style=""];
-		352 -> 366;
-		353	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		353 -> 352;
-		356	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		356 -> 352;
-		359	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		359 -> 352;
-		362	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf,
-			style=""];
-		362 -> 352;
-		365	[color="0.20 0.6 0.85",
-			label=get_boundary_vertices,
-			style=""];
-		365 -> 352;
-		366 -> 350;
-	}
-	subgraph cluster_17 {
-		graph [color=blue,
-			label=preproc_t1
-		];
-		25	[color="0.33 0.6 0.85",
-			label=n4_t1,
-			style=""];
-		26	[color="0.24 0.6 0.85",
-			label="import_t1\nsubject: 001",
-			style=""];
-		26 -> 25;
-	}
-	subgraph cluster_18 {
-		graph [color=blue,
-			label=native_metrics
-		];
-		5	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: gyrification",
-			style=""];
-		6	[color="0.05 0.6 0.85",
-			label=calculate_gyrification,
-			style=""];
-		6 -> 5;
-		7	[color="0.33 0.6 0.85",
-			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl",
-			style=""];
-		7 -> 6;
-		40	[color="0.05 0.6 0.85",
-			label=calculate_surface_area,
-			style=""];
-		40 -> 7;
-		41	[color="0.33 0.6 0.85",
-			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth",
-			style=""];
-		41 -> 6;
-		42	[color="0.05 0.6 0.85",
-			label="calculate_surface_area\nspace: unfoldspringmodelsmooth",
-			style=""];
-		42 -> 41;
-		70	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: curvature",
-			style=""];
-		71	[color="0.04 0.6 0.85",
-			label=calculate_curvature,
-			style=""];
-		71 -> 70;
-		83	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: thickness",
-			style=""];
-		84	[color="0.06 0.6 0.85",
-			label=calculate_thickness,
-			style=""];
-		84 -> 83;
-		124	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: gyrification",
-			style=""];
-		125	[color="0.05 0.6 0.85",
-			label=calculate_gyrification,
-			style=""];
-		125 -> 124;
-		126	[color="0.33 0.6 0.85",
-			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl",
-			style=""];
-		126 -> 125;
-		144	[color="0.05 0.6 0.85",
-			label=calculate_surface_area,
-			style=""];
-		144 -> 126;
-		145	[color="0.33 0.6 0.85",
-			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth",
-			style=""];
-		145 -> 125;
-		146	[color="0.05 0.6 0.85",
-			label="calculate_surface_area\nspace: unfoldspringmodelsmooth",
-			style=""];
-		146 -> 145;
-		173	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: curvature",
-			style=""];
-		174	[color="0.04 0.6 0.85",
-			label=calculate_curvature,
-			style=""];
-		174 -> 173;
-		186	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: thickness",
-			style=""];
-		187	[color="0.06 0.6 0.85",
-			label=calculate_thickness,
-			style=""];
-		187 -> 186;
-		235	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: gyrification",
-			style=""];
-		236	[color="0.05 0.6 0.85",
-			label=calculate_gyrification,
-			style=""];
-		236 -> 235;
-		237	[color="0.33 0.6 0.85",
-			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl",
-			style=""];
-		237 -> 236;
-		249	[color="0.05 0.6 0.85",
-			label=calculate_surface_area,
-			style=""];
-		249 -> 237;
-		250	[color="0.33 0.6 0.85",
-			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth",
-			style=""];
-		250 -> 236;
-		251	[color="0.05 0.6 0.85",
-			label="calculate_surface_area\nspace: unfoldspringmodelsmooth",
-			style=""];
-		251 -> 250;
-		278	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: curvature",
-			style=""];
-		279	[color="0.04 0.6 0.85",
-			label=calculate_curvature,
-			style=""];
-		279 -> 278;
-		291	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: thickness",
-			style=""];
-		292	[color="0.06 0.6 0.85",
-			label=calculate_thickness,
-			style=""];
-		292 -> 291;
-		331	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: gyrification",
-			style=""];
-		332	[color="0.05 0.6 0.85",
-			label=calculate_gyrification,
-			style=""];
-		332 -> 331;
-		333	[color="0.33 0.6 0.85",
-			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareacorobl",
-			style=""];
-		333 -> 332;
-		345	[color="0.05 0.6 0.85",
-			label=calculate_surface_area,
-			style=""];
-		345 -> 333;
-		346	[color="0.33 0.6 0.85",
-			label="metric_smoothing\ndensity: native\nfwhm: 1\nmetric: surfareaunfoldspringmodelsmooth",
-			style=""];
-		346 -> 332;
-		347	[color="0.05 0.6 0.85",
-			label="calculate_surface_area\nspace: unfoldspringmodelsmooth",
-			style=""];
-		347 -> 346;
-		374	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: curvature",
-			style=""];
-		375	[color="0.04 0.6 0.85",
-			label=calculate_curvature,
-			style=""];
-		375 -> 374;
-		387	[color="0.57 0.6 0.85",
-			label="soft_tanh_normalization\nmetric: thickness",
-			style=""];
-		388	[color="0.06 0.6 0.85",
-			label=calculate_thickness,
-			style=""];
-		388 -> 387;
-	}
-	subgraph cluster_19 {
-		graph [color=blue,
-			label=templateseg
-		];
-	}
-	subgraph cluster_20 {
-		graph [color=blue,
-			label=download
-		];
-		14	[color="0.27 0.6 0.85",
-			label="import_template_dseg\nhemi: L\nsubject: 001",
-			style=""];
-		15	[color="0.17 0.6 0.85",
-			label="download_extract_template\ntemplate: upenn",
-			style=""];
+		13	[color="0.55 0.6 0.85",
+			label=reinsert_subject_labels];
+		144	[color="0.49 0.6 0.85",
+			label="unflip_postproc\nhemi: L"];
+		13 -> 144;
+		14	[color="0.64 0.6 0.85",
+			label=template_shape_inject];
+		14 -> 13;
+		15	[color="0.21 0.6 0.85",
+			label="import_template_shape\nsubject: 001"];
 		15 -> 14;
-		133	[color="0.27 0.6 0.85",
-			label="import_template_dseg\nhemi: R\nsubject: 001",
-			style=""];
-		15 -> 133;
-		244	[color="0.27 0.6 0.85",
-			label="import_template_dseg_dentate\nhemi: L\nsubject: 001",
-			style=""];
-		15 -> 244;
-		340	[color="0.27 0.6 0.85",
-			label="import_template_dseg_dentate\nhemi: R\nsubject: 001",
-			style=""];
-		15 -> 340;
-		30	[color="0.17 0.6 0.85",
-			label="download_extract_template\ntemplate: CITI168",
-			style="rounded,dashed"];
-		62	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
-			style=""];
-		63	[color="0.18 0.6 0.85",
-			label="download_surf_template_atlas\natlas: multihist7",
-			style=""];
-		63 -> 62;
-		98	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: curvature\nmetrictype: shape",
-			style=""];
-		63 -> 98;
-		99	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
-			style=""];
-		63 -> 99;
-		100	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: inner",
-			style=""];
-		63 -> 100;
-		101	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: outer",
-			style=""];
-		63 -> 101;
-		104	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: gyrification\nmetrictype: shape",
-			style=""];
-		63 -> 104;
-		107	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: thickness\nmetrictype: shape",
-			style=""];
-		63 -> 107;
-		117	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: inner",
-			style=""];
-		63 -> 117;
-		120	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nspace: unfold\nsurf_name: outer",
-			style=""];
-		63 -> 120;
-		166	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
-			style=""];
-		63 -> 166;
-		201	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: curvature\nmetrictype: shape",
-			style=""];
-		63 -> 201;
-		202	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: midthickness",
-			style=""];
-		63 -> 202;
-		203	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: inner",
-			style=""];
-		63 -> 203;
-		204	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: outer",
-			style=""];
-		63 -> 204;
-		207	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: gyrification\nmetrictype: shape",
-			style=""];
-		63 -> 207;
-		210	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: thickness\nmetrictype: shape",
-			style=""];
-		63 -> 210;
-		217	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 8k\nhemi: L\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
-			style=""];
-		63 -> 217;
-		219	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
-			style=""];
-		63 -> 219;
-		227	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: inner",
-			style=""];
-		63 -> 227;
-		230	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: hipp\nspace: unfold\nsurf_name: outer",
-			style=""];
-		63 -> 230;
-		271	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
-			style=""];
-		63 -> 271;
-		306	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: curvature\nmetrictype: shape",
-			style=""];
-		63 -> 306;
-		307	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
-			style=""];
-		63 -> 307;
-		308	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: inner",
-			style=""];
-		63 -> 308;
-		309	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: outer",
-			style=""];
-		63 -> 309;
-		312	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: gyrification\nmetrictype: shape",
-			style=""];
-		63 -> 312;
-		315	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: dentate\nmetricname: thickness\nmetrictype: shape",
-			style=""];
-		63 -> 315;
-		324	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: inner",
-			style=""];
-		63 -> 324;
-		327	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: L\nlabel: dentate\nspace: unfold\nsurf_name: outer",
-			style=""];
-		63 -> 327;
-		367	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
-			style=""];
-		63 -> 367;
-		402	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: curvature\nmetrictype: shape",
-			style=""];
-		63 -> 402;
-		403	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: midthickness",
-			style=""];
-		63 -> 403;
-		404	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: inner",
-			style=""];
-		63 -> 404;
-		405	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: outer",
-			style=""];
-		63 -> 405;
-		408	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: gyrification\nmetrictype: shape",
-			style=""];
-		63 -> 408;
-		411	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: dentate\nmetricname: thickness\nmetrictype: shape",
-			style=""];
-		63 -> 411;
-		423	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: inner",
-			style=""];
-		63 -> 423;
-		426	[color="0.12 0.6 0.85",
-			label="cp_atlas_surf_gii\ndensity: 8k\nhemi: R\nlabel: dentate\nspace: unfold\nsurf_name: outer",
-			style=""];
-		63 -> 426;
-		434	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: L\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
-			style=""];
-		63 -> 434;
-		443	[color="0.11 0.6 0.85",
-			label="cp_atlas_metric_gii\ndensity: 18k\nhemi: R\nlabel: hipp\nmetricname: dseg\nmetrictype: label",
-			style=""];
-		63 -> 443;
+		30	[color="0.45 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_space-template_desc-hipptissue"];
+		15 -> 30;
+		67	[color="0.64 0.6 0.85",
+			label=template_shape_inject];
+		15 -> 67;
+		29	[color="0.35 0.6 0.85",
+			label="template_shape_reg\nhemi: Lflip\nsubject: 001"];
+		29 -> 14;
+		32	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
+		29 -> 32;
+		35	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
+		29 -> 35;
+		110	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: AP"];
+		29 -> 110;
+		113	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: PD"];
+		29 -> 113;
+		116	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: IO"];
+		29 -> 116;
+		164	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
+		29 -> 164;
+		30 -> 29;
+		70	[color="0.35 0.6 0.85",
+			label="template_shape_reg\nhemi: R\nsubject: 001"];
+		30 -> 70;
+		31	[color="0.45 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_hemi-Lflip_space-corobl_desc-nnunet"];
+		31 -> 29;
+		66	[color="0.55 0.6 0.85",
+			label=reinsert_subject_labels];
+		67 -> 66;
+		70 -> 67;
+		72	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: AP"];
+		70 -> 72;
+		74	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: PD"];
+		70 -> 74;
+		130	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: AP"];
+		70 -> 130;
+		132	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: PD"];
+		70 -> 132;
+		134	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: dentate\ndir: IO"];
+		70 -> 134;
+		167	[color="0.27 0.6 0.85",
+			label="inject_init_laplace_coords\nautotop: hipp\ndir: IO"];
+		70 -> 167;
+		71	[color="0.45 0.6 0.85",
+			label="prep_segs_for_greedy\nprefix: work/sub-001/anat/sub-001_hemi-R_space-corobl_desc-nnunet"];
+		71 -> 70;
 	}
-	subgraph cluster_21 {
+	subgraph cluster_9 {
 		graph [color=blue,
-			label=atlas_gen
+			label=gifti
 		];
-	}
-	subgraph cluster_22 {
-		graph [color=blue,
-			label=coords
-		];
-		10	[color="0.30 0.6 0.85",
-			label=laynii_layers_equidist,
-			style=""];
-		11	[color="0.37 0.6 0.85",
-			label="prep_dseg_for_laynii\ndir: IO",
-			style=""];
-		11 -> 10;
-		16	[color="0.16 0.6 0.85",
-			label="create_upsampled_coords_ref\nlabel: hipp",
-			style=""];
-		37	[color="0.21 0.6 0.85",
-			label="get_nan_mask\ndir: IO",
-			style=""];
-		38	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
-			style=""];
-		39	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: IO\nsrcsink: src",
-			style=""];
+		1	[color="0.34 0.6 0.85",
+			label="merge_lr_spec_file\nautotop: hipp"];
+		2	[color="0.31 0.6 0.85",
+			label="create_spec_file_hipp\nlabel: hipp"];
+		2 -> 1;
+		3	[color="0.37 0.6 0.85",
+			label=calculate_gyrification];
+		3 -> 2;
+		58	[color="0.52 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: gyrification"];
+		3 -> 58;
+		4	[color="0.13 0.6 0.85",
+			label="calculate_surface_area\nspace: T2w"];
+		4 -> 3;
+		5	[color="0.53 0.6 0.85",
+			label=warp_gii_to_native];
+		5 -> 2;
+		5 -> 4;
+		44	[color="0.27 0.6 0.85",
+			label="smooth_surface\nspace: T2w"];
+		5 -> 44;
+		6	[color="0.48 0.6 0.85",
+			label=correct_nan_vertices];
+		6 -> 5;
+		7	[color="0.29 0.6 0.85",
+			label=warp_gii_unfold2native];
+		7 -> 6;
+		40	[color="0.22 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		40 -> 7;
+		41	[color="0.13 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: L\nsubject: 001\nsurfname: midthickness"];
+		41 -> 2;
+		41 -> 40;
+		43	[color="0.47 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		43 -> 2;
+		80	[color="0.52 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: curvature"];
+		43 -> 80;
+		44 -> 43;
+		45	[color="0.44 0.6 0.85",
+			label="calculate_thickness_from_surface\nspace: T2w"];
+		45 -> 2;
+		83	[color="0.52 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: thickness"];
+		45 -> 83;
+		46	[color="0.53 0.6 0.85",
+			label=warp_gii_to_native];
+		46 -> 45;
+		47	[color="0.48 0.6 0.85",
+			label=correct_nan_vertices];
+		47 -> 46;
+		48	[color="0.29 0.6 0.85",
+			label=warp_gii_unfold2native];
+		48 -> 47;
 		49	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		50	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: AP\nsrcsink: src",
-			style=""];
+			label=constrain_surf_to_bbox];
+		49 -> 48;
+		50	[color="0.13 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: L\nsubject: 001\nsurfname: inner"];
 		50 -> 49;
-		52	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		53	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: AP\nsrcsink: sink",
-			style=""];
+		51	[color="0.53 0.6 0.85",
+			label=warp_gii_to_native];
+		51 -> 45;
+		52	[color="0.48 0.6 0.85",
+			label=correct_nan_vertices];
+		52 -> 51;
+		53	[color="0.29 0.6 0.85",
+			label=warp_gii_unfold2native];
 		53 -> 52;
-		55	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		56	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: PD\nsrcsink: src",
-			style=""];
-		56 -> 55;
-		58	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		59	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: PD\nsrcsink: sink",
-			style=""];
+		54	[color="0.22 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		54 -> 53;
+		55	[color="0.13 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: L\nsubject: 001\nsurfname: outer"];
+		55 -> 54;
+		56	[color="0.59 0.6 0.85",
+			label="nii_to_label_gii\ndensity: 0p5mm\nspace: T2w"];
+		56 -> 2;
+		57	[color="0.53 0.6 0.85",
+			label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: L"];
+		57 -> 56;
+		58 -> 2;
+		95	[color="0.31 0.6 0.85",
+			label="create_spec_file_hipp\nlabel: hipp"];
+		58 -> 95;
+		59	[color="0.37 0.6 0.85",
+			label=calculate_gyrification];
 		59 -> 58;
-		90	[color="0.21 0.6 0.85",
-			label=get_label_mask,
-			style=""];
-		129	[color="0.30 0.6 0.85",
-			label=laynii_layers_equidist,
-			style=""];
-		130	[color="0.37 0.6 0.85",
-			label="prep_dseg_for_laynii\ndir: IO",
-			style=""];
-		130 -> 129;
-		134	[color="0.16 0.6 0.85",
-			label="create_upsampled_coords_ref\nlabel: hipp",
-			style=""];
-		141	[color="0.21 0.6 0.85",
-			label="get_nan_mask\ndir: IO",
-			style=""];
-		142	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
-			style=""];
-		143	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: IO\nsrcsink: src",
-			style=""];
-		153	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		154	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: AP\nsrcsink: src",
-			style=""];
-		154 -> 153;
-		156	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		157	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: AP\nsrcsink: sink",
-			style=""];
-		157 -> 156;
-		159	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		160	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: PD\nsrcsink: src",
-			style=""];
-		160 -> 159;
-		162	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		163	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: PD\nsrcsink: sink",
-			style=""];
-		163 -> 162;
-		193	[color="0.21 0.6 0.85",
-			label=get_label_mask,
-			style=""];
-		240	[color="0.30 0.6 0.85",
-			label=laynii_layers_equidist,
-			style=""];
-		241	[color="0.37 0.6 0.85",
-			label="prep_dseg_for_laynii\ndir: IO",
-			style=""];
-		241 -> 240;
-		245	[color="0.16 0.6 0.85",
-			label="create_upsampled_coords_ref\nlabel: dentate",
-			style=""];
-		246	[color="0.21 0.6 0.85",
-			label="get_nan_mask\ndir: IO",
-			style=""];
-		247	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
-			style=""];
-		248	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: IO\nsrcsink: src",
-			style=""];
-		258	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		259	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: AP\nsrcsink: src",
-			style=""];
-		259 -> 258;
-		261	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		262	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: AP\nsrcsink: sink",
-			style=""];
-		262 -> 261;
-		264	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		265	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: PD\nsrcsink: src",
-			style=""];
-		265 -> 264;
-		267	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		268	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: PD\nsrcsink: sink",
-			style=""];
-		268 -> 267;
-		298	[color="0.21 0.6 0.85",
-			label=get_label_mask,
-			style=""];
-		336	[color="0.30 0.6 0.85",
-			label=laynii_layers_equidist,
-			style=""];
-		337	[color="0.37 0.6 0.85",
-			label="prep_dseg_for_laynii\ndir: IO",
-			style=""];
-		337 -> 336;
-		341	[color="0.16 0.6 0.85",
-			label="create_upsampled_coords_ref\nlabel: dentate",
-			style=""];
-		342	[color="0.21 0.6 0.85",
-			label="get_nan_mask\ndir: IO",
-			style=""];
-		343	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: IO\nsrcsink: sink",
-			style=""];
-		344	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: IO\nsrcsink: src",
-			style=""];
-		354	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		355	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: AP\nsrcsink: src",
-			style=""];
-		355 -> 354;
-		357	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		358	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: AP\nsrcsink: sink",
-			style=""];
-		358 -> 357;
-		360	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		361	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: PD\nsrcsink: src",
-			style=""];
-		361 -> 360;
-		363	[color="0.22 0.6 0.85",
-			label=get_src_sink_sdt,
-			style=""];
-		364	[color="0.22 0.6 0.85",
-			label="get_src_sink_mask\ndir: PD\nsrcsink: sink",
-			style=""];
-		364 -> 363;
-		394	[color="0.21 0.6 0.85",
-			label=get_label_mask,
-			style=""];
+		59 -> 95;
+		60	[color="0.13 0.6 0.85",
+			label="calculate_surface_area\nspace: T2w"];
+		60 -> 59;
+		61	[color="0.53 0.6 0.85",
+			label=warp_gii_to_native];
+		61 -> 60;
+		82	[color="0.27 0.6 0.85",
+			label="smooth_surface\nspace: T2w"];
+		61 -> 82;
+		61 -> 95;
+		62	[color="0.48 0.6 0.85",
+			label=correct_nan_vertices];
+		62 -> 61;
+		63	[color="0.29 0.6 0.85",
+			label=warp_gii_unfold2native];
+		63 -> 62;
+		78	[color="0.22 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		78 -> 63;
+		79	[color="0.13 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: R\nsubject: 001\nsurfname: midthickness"];
+		79 -> 78;
+		79 -> 95;
+		80 -> 2;
+		80 -> 95;
+		81	[color="0.47 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		81 -> 80;
+		81 -> 95;
+		82 -> 81;
+		83 -> 2;
+		83 -> 95;
+		84	[color="0.44 0.6 0.85",
+			label="calculate_thickness_from_surface\nspace: T2w"];
+		84 -> 83;
+		84 -> 95;
+		85	[color="0.53 0.6 0.85",
+			label=warp_gii_to_native];
+		85 -> 84;
+		86	[color="0.48 0.6 0.85",
+			label=correct_nan_vertices];
+		86 -> 85;
+		87	[color="0.29 0.6 0.85",
+			label=warp_gii_unfold2native];
+		87 -> 86;
+		88	[color="0.22 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		88 -> 87;
+		89	[color="0.13 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: R\nsubject: 001\nsurfname: inner"];
+		89 -> 88;
+		90	[color="0.53 0.6 0.85",
+			label=warp_gii_to_native];
+		90 -> 84;
+		91	[color="0.48 0.6 0.85",
+			label=correct_nan_vertices];
+		91 -> 90;
+		92	[color="0.29 0.6 0.85",
+			label=warp_gii_unfold2native];
+		92 -> 91;
+		93	[color="0.22 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		93 -> 92;
+		94	[color="0.13 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: hipp\ndensity: 0p5mm\nhemi: R\nsubject: 001\nsurfname: outer"];
+		94 -> 93;
+		95 -> 1;
+		96	[color="0.59 0.6 0.85",
+			label="nii_to_label_gii\ndensity: 0p5mm\nspace: T2w"];
+		96 -> 95;
+		97	[color="0.53 0.6 0.85",
+			label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: R"];
+		97 -> 96;
+		98	[color="0.34 0.6 0.85",
+			label="merge_lr_spec_file\nautotop: dentate"];
+		99	[color="0.08 0.6 0.85",
+			label="create_spec_file_dentate\nlabel: dentate"];
+		99 -> 98;
+		100	[color="0.37 0.6 0.85",
+			label=calculate_gyrification];
+		100 -> 99;
+		122	[color="0.52 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: gyrification"];
+		100 -> 122;
+		101	[color="0.13 0.6 0.85",
+			label="calculate_surface_area\nspace: T2w"];
+		101 -> 100;
+		102	[color="0.53 0.6 0.85",
+			label=warp_gii_to_native];
+		102 -> 99;
+		102 -> 101;
+		121	[color="0.27 0.6 0.85",
+			label="smooth_surface\nspace: T2w"];
+		102 -> 121;
+		103	[color="0.48 0.6 0.85",
+			label=correct_nan_vertices];
+		103 -> 102;
+		104	[color="0.29 0.6 0.85",
+			label=warp_gii_unfold2native];
+		104 -> 103;
+		118	[color="0.22 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		118 -> 104;
+		119	[color="0.13 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: dentate\ndensity: 0p5mm\nhemi: L\nsubject: 001\nsurfname: midthickness"];
+		119 -> 99;
+		119 -> 118;
+		120	[color="0.47 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		120 -> 99;
+		138	[color="0.52 0.6 0.85",
+			label="create_dscalar_metric_cifti\nmetric: curvature"];
+		120 -> 138;
+		121 -> 120;
+		122 -> 99;
+		141	[color="0.08 0.6 0.85",
+			label="create_spec_file_dentate\nlabel: dentate"];
+		122 -> 141;
+		123	[color="0.37 0.6 0.85",
+			label=calculate_gyrification];
+		123 -> 122;
+		123 -> 141;
+		124	[color="0.13 0.6 0.85",
+			label="calculate_surface_area\nspace: T2w"];
+		124 -> 123;
+		125	[color="0.53 0.6 0.85",
+			label=warp_gii_to_native];
+		125 -> 124;
+		140	[color="0.27 0.6 0.85",
+			label="smooth_surface\nspace: T2w"];
+		125 -> 140;
+		125 -> 141;
+		126	[color="0.48 0.6 0.85",
+			label=correct_nan_vertices];
+		126 -> 125;
+		127	[color="0.29 0.6 0.85",
+			label=warp_gii_unfold2native];
+		127 -> 126;
+		136	[color="0.22 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		136 -> 127;
+		137	[color="0.13 0.6 0.85",
+			label="cp_template_to_unfold\nautotop: dentate\ndensity: 0p5mm\nhemi: R\nsubject: 001\nsurfname: midthickness"];
+		137 -> 136;
+		137 -> 141;
+		138 -> 99;
+		138 -> 141;
+		139	[color="0.47 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		139 -> 138;
+		139 -> 141;
+		140 -> 139;
+		141 -> 98;
 	}
-	0	[color="0.01 0.6 0.85",
-		label=all,
-		style=""];
+	subgraph cluster_12 {
+		graph [color=blue,
+			label=nnunet
+		];
+		16	[color="0.65 0.6 0.85",
+			label="run_inference\nhemi: Lflip"];
+		193	[color="0.35 0.6 0.85",
+			label="unflip_nnunet_nii\nhemi: L"];
+		16 -> 193;
+		68	[color="0.65 0.6 0.85",
+			label=run_inference];
+		195	[color="0.60 0.6 0.85",
+			label=qc_nnunet_f3d];
+		68 -> 195;
+		191	[color="0.05 0.6 0.85",
+			label=qc_nnunet_dice];
+		192	[color="0.60 0.6 0.85",
+			label=qc_nnunet_f3d];
+		192 -> 191;
+		193 -> 192;
+		194	[color="0.05 0.6 0.85",
+			label=qc_nnunet_dice];
+		195 -> 194;
+	}
+	subgraph cluster_14 {
+		graph [color=blue,
+			label=common
+		];
+	}
+	subgraph cluster_13 {
+		graph [color=blue,
+			label=resample_final_to_crop_native
+		];
+		142	[color="0.25 0.6 0.85",
+			label=resample_subfields_native_crop];
+		146	[color="0.31 0.6 0.85",
+			label=create_native_crop_ref];
+		146 -> 142;
+		153	[color="0.38 0.6 0.85",
+			label=resample_coords_native_crop];
+		146 -> 153;
+		155	[color="0.38 0.6 0.85",
+			label=resample_coords_native_crop];
+		146 -> 155;
+		157	[color="0.38 0.6 0.85",
+			label=resample_coords_native_crop];
+		146 -> 157;
+		159	[color="0.38 0.6 0.85",
+			label=resample_coords_native_crop];
+		146 -> 159;
+		161	[color="0.38 0.6 0.85",
+			label=resample_coords_native_crop];
+		146 -> 161;
+		168	[color="0.38 0.6 0.85",
+			label=resample_coords_native_crop];
+		146 -> 168;
+		170	[color="0.38 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp"];
+		146 -> 170;
+		180	[color="0.57 0.6 0.85",
+			label=resample_native_to_crop];
+		146 -> 180;
+		148	[color="0.25 0.6 0.85",
+			label=resample_subfields_native_crop];
+		151	[color="0.31 0.6 0.85",
+			label=create_native_crop_ref];
+		151 -> 148;
+		154	[color="0.38 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		151 -> 154;
+		156	[color="0.38 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		151 -> 156;
+		158	[color="0.38 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		151 -> 158;
+		160	[color="0.38 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		151 -> 160;
+		165	[color="0.38 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		151 -> 165;
+		169	[color="0.38 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		151 -> 169;
+		171	[color="0.38 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: equivol"];
+		151 -> 171;
+		181	[color="0.57 0.6 0.85",
+			label=resample_native_to_crop];
+		151 -> 181;
+	}
+	0	[color="0.41 0.6 0.85",
+		label=all];
 	1 -> 0;
-	4 -> 0;
-	4 -> 3;
-	4 -> 122;
-	5 -> 4;
-	5 -> 80;
+	5 -> 185;
 	8 -> 7;
-	8 -> 40;
-	8 -> 41;
-	8 -> 44;
-	8 -> 45;
-	8 -> 46;
-	8 -> 47;
 	8 -> 48;
-	8 -> 51;
-	8 -> 54;
-	8 -> 57;
-	8 -> 60;
-	8 -> 61;
-	8 -> 86;
-	8 -> 92;
-	8 -> 113;
-	8 -> 432;
-	10 -> 9;
-	10 -> 89;
-	10 -> 95;
-	12 -> 11;
-	12 -> 37;
-	12 -> 38;
-	12 -> 39;
-	12 -> 50;
-	12 -> 53;
-	12 -> 56;
-	12 -> 59;
-	12 -> 90;
-	12 -> 429;
-	12 -> 431;
-	12 -> 432;
-	14 -> 13;
-	14 -> 35;
+	8 -> 53;
+	9 -> 0;
+	9 -> 40;
+	9 -> 49;
+	9 -> 54;
+	9 -> 57;
+	9 -> 78;
+	9 -> 88;
+	9 -> 93;
+	9 -> 97;
+	11 -> 8;
+	11 -> 39;
+	11 -> 145;
+	11 -> 153;
+	13 -> 12;
+	13 -> 34;
+	13 -> 38;
+	13 -> 163;
 	16 -> 13;
-	17 -> 12;
-	17 -> 16;
-	17 -> 36;
-	17 -> 242;
-	17 -> 245;
-	18 -> 17;
-	18 -> 458;
-	19 -> 436;
-	19 -> 445;
-	19 -> 446;
-	19 -> 447;
-	22 -> 114;
-	22 -> 428;
-	22 -> 436;
-	22 -> 437;
-	22 -> 445;
-	25 -> 24;
-	25 -> 29;
-	27 -> 22;
-	29 -> 448;
-	30 -> 18;
-	30 -> 27;
-	30 -> 29;
-	30 -> 136;
-	30 -> 448;
-	30 -> 457;
-	30 -> 458;
-	30 -> 459;
-	30 -> 460;
-	37 -> 9;
-	38 -> 9;
-	39 -> 9;
-	43 -> 42;
-	45 -> 65;
-	46 -> 110;
-	49 -> 48;
-	52 -> 51;
-	55 -> 54;
-	58 -> 57;
-	61 -> 111;
-	62 -> 4;
-	62 -> 108;
-	62 -> 109;
-	62 -> 110;
-	62 -> 111;
-	62 -> 113;
-	62 -> 121;
-	64 -> 4;
-	64 -> 108;
-	64 -> 109;
-	64 -> 110;
-	64 -> 111;
-	64 -> 113;
-	64 -> 116;
-	64 -> 119;
-	64 -> 433;
+	16 -> 14;
+	16 -> 31;
+	16 -> 32;
+	16 -> 35;
+	16 -> 110;
+	16 -> 113;
+	16 -> 116;
+	16 -> 164;
+	17 -> 147;
+	17 -> 152;
+	17 -> 180;
+	17 -> 181;
+	20 -> 42;
+	20 -> 142;
+	20 -> 147;
+	20 -> 148;
+	20 -> 152;
+	20 -> 153;
+	20 -> 154;
+	20 -> 155;
+	20 -> 156;
+	20 -> 157;
+	20 -> 158;
+	20 -> 159;
+	20 -> 160;
+	20 -> 161;
+	20 -> 165;
+	20 -> 168;
+	20 -> 169;
+	20 -> 170;
+	20 -> 171;
+	20 -> 172;
+	20 -> 173;
+	20 -> 174;
+	20 -> 175;
+	20 -> 176;
+	20 -> 177;
+	20 -> 178;
+	20 -> 179;
+	22 -> 21;
+	24 -> 20;
+	26 -> 182;
+	27 -> 16;
+	28 -> 192;
+	32 -> 12;
+	33 -> 8;
+	33 -> 145;
+	33 -> 157;
+	35 -> 34;
+	36 -> 8;
+	36 -> 145;
+	36 -> 170;
+	42 -> 5;
+	42 -> 46;
+	42 -> 51;
+	42 -> 61;
+	42 -> 85;
+	42 -> 90;
+	42 -> 102;
+	42 -> 125;
+	57 -> 145;
+	61 -> 187;
+	64 -> 63;
+	64 -> 87;
+	64 -> 92;
 	65 -> 64;
-	65 -> 69;
-	65 -> 80;
-	65 -> 82;
-	70 -> 69;
-	70 -> 108;
-	72 -> 71;
-	73 -> 69;
-	73 -> 80;
-	73 -> 82;
+	65 -> 77;
+	65 -> 150;
+	65 -> 154;
+	66 -> 65;
+	66 -> 73;
+	66 -> 76;
+	66 -> 149;
+	66 -> 166;
+	68 -> 66;
+	68 -> 67;
+	68 -> 71;
+	68 -> 72;
+	68 -> 74;
+	68 -> 130;
+	68 -> 132;
+	68 -> 134;
+	68 -> 167;
+	69 -> 68;
+	69 -> 195;
+	72 -> 65;
+	73 -> 64;
+	73 -> 150;
+	73 -> 158;
 	74 -> 73;
-	75 -> 69;
-	75 -> 80;
-	75 -> 82;
-	76 -> 75;
-	78 -> 77;
-	83 -> 82;
-	83 -> 109;
-	85 -> 84;
-	85 -> 116;
-	85 -> 432;
-	86 -> 85;
-	90 -> 88;
-	90 -> 89;
-	90 -> 94;
-	90 -> 95;
-	90 -> 430;
-	91 -> 84;
-	91 -> 119;
-	91 -> 432;
-	92 -> 91;
-	98 -> 97;
-	99 -> 97;
-	99 -> 103;
-	99 -> 106;
-	99 -> 433;
-	100 -> 97;
-	100 -> 103;
-	100 -> 106;
-	101 -> 97;
-	101 -> 103;
-	101 -> 106;
-	104 -> 103;
-	107 -> 106;
-	108 -> 0;
-	108 -> 3;
-	108 -> 211;
-	109 -> 0;
-	109 -> 3;
-	109 -> 213;
-	110 -> 0;
-	110 -> 3;
-	111 -> 0;
-	111 -> 3;
-	112 -> 0;
-	112 -> 3;
-	112 -> 451;
-	114 -> 112;
-	114 -> 115;
-	114 -> 118;
-	114 -> 223;
-	114 -> 225;
-	114 -> 228;
-	114 -> 320;
-	114 -> 322;
-	114 -> 325;
-	114 -> 419;
-	114 -> 421;
-	114 -> 424;
-	115 -> 0;
-	115 -> 3;
-	117 -> 116;
-	118 -> 0;
-	118 -> 3;
-	120 -> 119;
-	121 -> 0;
-	121 -> 3;
-	122 -> 0;
-	123 -> 0;
-	123 -> 122;
-	123 -> 220;
-	124 -> 123;
-	124 -> 183;
-	127 -> 126;
-	127 -> 144;
-	127 -> 145;
-	127 -> 148;
-	127 -> 149;
-	127 -> 150;
-	127 -> 151;
-	127 -> 152;
-	127 -> 155;
-	127 -> 158;
-	127 -> 161;
-	127 -> 164;
-	127 -> 165;
-	127 -> 189;
-	127 -> 195;
-	127 -> 224;
-	127 -> 441;
+	75 -> 64;
+	75 -> 150;
+	75 -> 171;
+	97 -> 150;
+	98 -> 0;
+	102 -> 186;
+	105 -> 104;
+	106 -> 0;
+	106 -> 118;
+	106 -> 136;
+	108 -> 105;
+	108 -> 117;
+	108 -> 155;
+	110 -> 109;
+	111 -> 105;
+	111 -> 159;
+	113 -> 112;
+	114 -> 105;
+	114 -> 168;
+	116 -> 115;
+	125 -> 188;
+	128 -> 127;
 	129 -> 128;
-	129 -> 192;
-	129 -> 198;
-	131 -> 130;
-	131 -> 141;
-	131 -> 142;
-	131 -> 143;
-	131 -> 154;
-	131 -> 157;
+	129 -> 135;
+	129 -> 156;
+	130 -> 129;
+	131 -> 128;
 	131 -> 160;
-	131 -> 163;
-	131 -> 193;
-	131 -> 438;
-	131 -> 440;
-	131 -> 441;
-	133 -> 132;
-	133 -> 139;
-	134 -> 132;
-	135 -> 131;
-	135 -> 134;
-	135 -> 140;
-	135 -> 338;
-	135 -> 341;
-	136 -> 135;
-	136 -> 460;
-	141 -> 128;
-	142 -> 128;
-	143 -> 128;
+	132 -> 131;
+	133 -> 128;
+	133 -> 169;
+	134 -> 133;
+	142 -> 0;
+	142 -> 183;
+	142 -> 190;
+	143 -> 142;
+	144 -> 143;
+	146 -> 176;
+	146 -> 178;
 	147 -> 146;
-	149 -> 168;
-	150 -> 221;
-	153 -> 152;
-	156 -> 155;
-	159 -> 158;
+	148 -> 0;
+	148 -> 184;
+	148 -> 190;
+	149 -> 148;
+	151 -> 177;
+	151 -> 179;
+	152 -> 151;
+	153 -> 0;
+	154 -> 0;
+	155 -> 0;
+	156 -> 0;
+	157 -> 0;
+	158 -> 0;
+	159 -> 0;
+	160 -> 0;
+	161 -> 0;
 	162 -> 161;
-	165 -> 222;
-	166 -> 123;
-	166 -> 212;
-	166 -> 214;
-	166 -> 221;
-	166 -> 222;
-	166 -> 224;
-	166 -> 231;
-	167 -> 123;
-	167 -> 212;
-	167 -> 214;
-	167 -> 221;
-	167 -> 222;
-	167 -> 224;
-	167 -> 226;
-	167 -> 229;
-	167 -> 442;
-	168 -> 167;
-	168 -> 172;
-	168 -> 183;
-	168 -> 185;
-	173 -> 172;
-	173 -> 212;
-	175 -> 174;
-	176 -> 172;
-	176 -> 183;
-	176 -> 185;
-	177 -> 176;
-	178 -> 172;
-	178 -> 183;
-	178 -> 185;
-	179 -> 178;
-	181 -> 180;
-	186 -> 185;
-	186 -> 214;
-	188 -> 187;
-	188 -> 226;
-	188 -> 441;
-	189 -> 188;
-	193 -> 191;
-	193 -> 192;
-	193 -> 197;
-	193 -> 198;
-	193 -> 439;
-	194 -> 187;
-	194 -> 229;
-	194 -> 441;
-	195 -> 194;
-	201 -> 200;
-	202 -> 200;
-	202 -> 206;
-	202 -> 209;
-	202 -> 442;
-	203 -> 200;
-	203 -> 206;
-	203 -> 209;
-	204 -> 200;
-	204 -> 206;
-	204 -> 209;
-	207 -> 206;
-	210 -> 209;
-	211 -> 0;
-	212 -> 0;
-	212 -> 211;
-	212 -> 220;
-	213 -> 0;
-	214 -> 0;
-	214 -> 213;
-	214 -> 220;
-	215 -> 0;
-	216 -> 0;
-	216 -> 3;
-	216 -> 215;
-	217 -> 216;
-	218 -> 0;
-	218 -> 215;
-	218 -> 220;
-	219 -> 218;
-	221 -> 0;
-	221 -> 220;
-	222 -> 0;
-	222 -> 220;
-	223 -> 0;
-	223 -> 220;
-	223 -> 453;
-	225 -> 0;
-	225 -> 220;
-	227 -> 226;
-	228 -> 0;
-	228 -> 220;
-	230 -> 229;
-	231 -> 0;
-	231 -> 220;
-	234 -> 0;
-	234 -> 233;
-	234 -> 329;
-	235 -> 234;
-	235 -> 288;
-	238 -> 237;
-	238 -> 249;
-	238 -> 250;
-	238 -> 253;
-	238 -> 254;
-	238 -> 255;
-	238 -> 256;
-	238 -> 257;
-	238 -> 260;
-	238 -> 263;
-	238 -> 266;
-	238 -> 269;
-	238 -> 270;
-	238 -> 294;
-	238 -> 300;
-	238 -> 321;
-	240 -> 239;
-	240 -> 297;
-	240 -> 303;
-	242 -> 241;
-	242 -> 246;
-	242 -> 247;
-	242 -> 248;
-	242 -> 259;
-	242 -> 262;
-	242 -> 265;
-	242 -> 268;
-	242 -> 298;
-	244 -> 243;
-	245 -> 243;
-	246 -> 239;
-	247 -> 239;
-	248 -> 239;
-	252 -> 251;
-	254 -> 273;
-	255 -> 318;
-	258 -> 257;
-	261 -> 260;
-	264 -> 263;
-	267 -> 266;
-	270 -> 319;
-	271 -> 234;
-	271 -> 316;
-	271 -> 317;
-	271 -> 318;
-	271 -> 319;
-	271 -> 321;
-	271 -> 328;
-	272 -> 234;
-	272 -> 316;
-	272 -> 317;
-	272 -> 318;
-	272 -> 319;
-	272 -> 321;
-	272 -> 323;
-	272 -> 326;
-	273 -> 272;
-	273 -> 277;
-	273 -> 288;
-	273 -> 290;
-	278 -> 277;
-	278 -> 316;
-	280 -> 279;
-	281 -> 277;
-	281 -> 288;
-	281 -> 290;
-	282 -> 281;
-	283 -> 277;
-	283 -> 288;
-	283 -> 290;
-	284 -> 283;
-	286 -> 285;
-	291 -> 290;
-	291 -> 317;
-	293 -> 292;
-	293 -> 323;
-	294 -> 293;
-	298 -> 296;
-	298 -> 297;
-	298 -> 302;
-	298 -> 303;
-	299 -> 292;
-	299 -> 326;
-	300 -> 299;
-	306 -> 305;
-	307 -> 305;
-	307 -> 311;
-	307 -> 314;
-	308 -> 305;
-	308 -> 311;
-	308 -> 314;
-	309 -> 305;
-	309 -> 311;
-	309 -> 314;
-	312 -> 311;
-	315 -> 314;
-	316 -> 0;
-	316 -> 233;
-	316 -> 412;
-	317 -> 0;
-	317 -> 233;
-	317 -> 414;
-	318 -> 0;
-	318 -> 233;
-	319 -> 0;
-	319 -> 233;
-	320 -> 0;
-	320 -> 233;
-	320 -> 452;
-	322 -> 0;
-	322 -> 233;
-	324 -> 323;
-	325 -> 0;
-	325 -> 233;
-	327 -> 326;
-	328 -> 0;
-	328 -> 233;
-	329 -> 0;
-	330 -> 0;
-	330 -> 329;
-	330 -> 416;
-	331 -> 330;
-	331 -> 384;
-	334 -> 333;
-	334 -> 345;
-	334 -> 346;
-	334 -> 349;
-	334 -> 350;
-	334 -> 351;
-	334 -> 352;
-	334 -> 353;
-	334 -> 356;
-	334 -> 359;
-	334 -> 362;
-	334 -> 365;
-	334 -> 366;
-	334 -> 390;
-	334 -> 396;
-	334 -> 420;
-	336 -> 335;
-	336 -> 393;
-	336 -> 399;
-	338 -> 337;
-	338 -> 342;
-	338 -> 343;
-	338 -> 344;
-	338 -> 355;
-	338 -> 358;
-	338 -> 361;
-	338 -> 364;
-	338 -> 394;
-	340 -> 339;
-	341 -> 339;
-	342 -> 335;
-	343 -> 335;
-	344 -> 335;
-	348 -> 347;
-	350 -> 369;
-	351 -> 417;
-	354 -> 353;
-	357 -> 356;
-	360 -> 359;
-	363 -> 362;
-	366 -> 418;
-	367 -> 330;
-	367 -> 413;
-	367 -> 415;
-	367 -> 417;
-	367 -> 418;
-	367 -> 420;
-	367 -> 427;
-	368 -> 330;
-	368 -> 413;
-	368 -> 415;
-	368 -> 417;
-	368 -> 418;
-	368 -> 420;
-	368 -> 422;
-	368 -> 425;
-	369 -> 368;
-	369 -> 373;
-	369 -> 384;
-	369 -> 386;
-	374 -> 373;
-	374 -> 413;
-	376 -> 375;
-	377 -> 373;
-	377 -> 384;
-	377 -> 386;
-	378 -> 377;
-	379 -> 373;
-	379 -> 384;
-	379 -> 386;
-	380 -> 379;
-	382 -> 381;
-	387 -> 386;
-	387 -> 415;
-	389 -> 388;
-	389 -> 422;
-	390 -> 389;
-	394 -> 392;
-	394 -> 393;
-	394 -> 398;
-	394 -> 399;
-	395 -> 388;
-	395 -> 425;
-	396 -> 395;
-	402 -> 401;
-	403 -> 401;
-	403 -> 407;
-	403 -> 410;
-	404 -> 401;
-	404 -> 407;
-	404 -> 410;
-	405 -> 401;
-	405 -> 407;
-	405 -> 410;
-	408 -> 407;
-	411 -> 410;
-	412 -> 0;
-	413 -> 0;
-	413 -> 412;
-	413 -> 416;
-	414 -> 0;
-	415 -> 0;
-	415 -> 414;
-	415 -> 416;
-	417 -> 0;
-	417 -> 416;
-	418 -> 0;
-	418 -> 416;
-	419 -> 0;
-	419 -> 416;
-	419 -> 454;
-	421 -> 0;
-	421 -> 416;
-	423 -> 422;
-	424 -> 0;
-	424 -> 416;
-	426 -> 425;
-	427 -> 0;
-	427 -> 416;
-	428 -> 0;
-	428 -> 449;
-	428 -> 456;
-	429 -> 428;
-	433 -> 432;
-	434 -> 433;
-	436 -> 435;
-	437 -> 0;
-	437 -> 450;
-	437 -> 456;
-	438 -> 437;
-	442 -> 441;
-	443 -> 442;
-	445 -> 444;
-	446 -> 0;
-	446 -> 449;
-	447 -> 0;
-	447 -> 450;
-	448 -> 0;
-	449 -> 0;
-	450 -> 0;
-	451 -> 0;
-	452 -> 0;
-	453 -> 0;
-	454 -> 0;
-	455 -> 0;
-	457 -> 0;
-	459 -> 0;
+	164 -> 163;
+	165 -> 0;
+	166 -> 165;
+	167 -> 166;
+	168 -> 0;
+	169 -> 0;
+	170 -> 0;
+	171 -> 0;
+	172 -> 0;
+	173 -> 0;
+	174 -> 0;
+	175 -> 0;
+	176 -> 0;
+	177 -> 0;
+	178 -> 0;
+	179 -> 0;
+	180 -> 0;
+	180 -> 183;
+	181 -> 0;
+	181 -> 184;
+	182 -> 0;
+	183 -> 0;
+	184 -> 0;
+	185 -> 0;
+	186 -> 0;
+	187 -> 0;
+	188 -> 0;
+	189 -> 0;
+	191 -> 0;
+	194 -> 0;
 }

@@ -1,0 +1,31 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=nnunet
+		];
+		14	[color="0.57 0.6 0.85",
+			label=run_inference];
+		69	[color="0.10 0.6 0.85",
+			label=qc_nnunet_f3d];
+		14 -> 69;
+		68	[color="0.05 0.6 0.85",
+			label=qc_nnunet_dice];
+		69 -> 68;
+	}
+	15	[color="0.64 0.6 0.85",
+		label="warp_t1_to_corobl_crop\nhemi: R"];
+	15 -> 14;
+	15 -> 69;
+}

@@ -1,4 +1,4 @@
-digraph snakemake_dag {
+strict digraph "" {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,40 +15,44 @@ digraph snakemake_dag {
 		graph [color=blue,
 			label=subfields
 		];
-		73	[color="0.07 0.6 0.85",
+		45	[color="0.15 0.6 0.85",
 			label=combine_tissue_subfield_labels_corobl];
-		79	[color="0.50 0.6 0.85",
-			label=resample_subfields_to_orig];
-		73 -> 79;
-		74	[color="0.29 0.6 0.85",
-			label=label_gm_with_nearest_subfields];
-		74 -> 73;
-		75	[color="0.07 0.6 0.85",
-			label=combine_dentate_subfield_labels_corobl];
-		75 -> 74;
-		76	[color="0.31 0.6 0.85",
-			label=map_surf_subfields_to_volume];
-		76 -> 75;
+		49	[color="0.48 0.6 0.85",
+			label=resample_subfields_to_native];
+		45 -> 49;
+		47	[color="0.32 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		47 -> 45;
 	}
-	8	[color="0.63 0.6 0.85",
-		label=update_native_mesh_structure];
-	8 -> 76;
-	12	[color="0.45 0.6 0.85",
+	11	[color="0.61 0.6 0.85",
+		label=unflip_coords];
+	11 -> 47;
+	12	[color="0.02 0.6 0.85",
+		label=laplace_coords_hipp];
+	12 -> 11;
+	12 -> 47;
+	13	[color="0.04 0.6 0.85",
 		label=reinsert_subject_labels];
-	59	[color="0.21 0.6 0.85",
-		label=get_label_mask];
-	12 -> 59;
-	12 -> 73;
-	12 -> 75;
-	12 -> 76;
-	19	[color="0.04 0.6 0.85",
+	13 -> 12;
+	13 -> 45;
+	46	[color="0.24 0.6 0.85",
+		label=unflip_postproc];
+	13 -> 46;
+	19	[color="0.18 0.6 0.85",
 		label=avg_aligned_or_cp_t2];
-	19 -> 79;
-	22	[color="0.08 0.6 0.85",
+	19 -> 49;
+	22	[color="0.31 0.6 0.85",
 		label=compose_t2_xfm_corobl];
-	22 -> 79;
-	59 -> 74;
-	77	[color="0.45 0.6 0.85",
-		label=resample_atlas_subfields_to_native_surf];
-	77 -> 76;
+	22 -> 49;
+	28	[color="0.39 0.6 0.85",
+		label=unflip_coords_equivol];
+	28 -> 47;
+	29	[color="0.19 0.6 0.85",
+		label=equivolume_coords];
+	29 -> 28;
+	29 -> 47;
+	39	[color="0.59 0.6 0.85",
+		label=resample_atlas_to_refvol];
+	39 -> 47;
+	46 -> 45;
 }

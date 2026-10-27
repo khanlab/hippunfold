@@ -1,4 +1,4 @@
-digraph snakemake_dag {
+strict digraph "" {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -13,440 +13,273 @@ digraph snakemake_dag {
 	];
 	subgraph cluster_0 {
 		graph [color=blue,
-			label=preproc_t2
+			label=preproc_hippb500
+		];
+	}
+	subgraph cluster_4 {
+		graph [color=blue,
+			label=preproc_cropseg
 		];
 	}
 	subgraph cluster_1 {
 		graph [color=blue,
-			label=common
+			label=preproc_t1
 		];
+		15	[color="0.20 0.6 0.85",
+			label=warp_t1_to_corobl_crop];
+		16	[color="0.26 0.6 0.85",
+			label=n4_t1];
+		16 -> 15;
+		20	[color="0.25 0.6 0.85",
+			label=reg_to_template];
+		16 -> 20;
+		17	[color="0.54 0.6 0.85",
+			label=import_t1];
+		17 -> 16;
+		18	[color="0.00 0.6 0.85",
+			label=compose_template_xfm_corobl];
+		18 -> 15;
+		29	[color="0.38 0.6 0.85",
+			label=template_xfm_itk2ras];
+		18 -> 29;
+		19	[color="0.64 0.6 0.85",
+			label=convert_template_xfm_ras2itk];
+		19 -> 18;
+		20 -> 19;
 	}
 	subgraph cluster_2 {
 		graph [color=blue,
 			label=warps
 		];
-		21	[color="0.08 0.6 0.85",
-			label=compose_template_xfm_corobl];
-		65	[color="0.60 0.6 0.85",
-			label=template_xfm_itk2ras];
-		21 -> 65;
-		22	[color="0.10 0.6 0.85",
-			label=convert_template_xfm_ras2itk];
-		22 -> 21;
-		23	[color="0.42 0.6 0.85",
-			label=reg_to_template];
-		23 -> 22;
-		52	[color="0.15 0.6 0.85",
+		7	[color="0.57 0.6 0.85",
+			label=create_warps_hipp];
+		42	[color="0.49 0.6 0.85",
+			label=compose_warps_native_to_unfold];
+		7 -> 42;
+		43	[color="0.18 0.6 0.85",
+			label=compose_warps_unfold_to_crop_native];
+		7 -> 43;
+		8	[color="0.23 0.6 0.85",
 			label=create_unfold_ref];
+		8 -> 7;
+		9	[color="0.14 0.6 0.85",
+			label=create_unfold_coord_map];
+		8 -> 9;
+		8 -> 42;
+		8 -> 43;
+		9 -> 7;
+		26	[color="0.51 0.6 0.85",
+			label=create_native_coord_ref];
+		26 -> 7;
 	}
 	subgraph cluster_3 {
 		graph [color=blue,
-			label=unfold_reg
+			label=qc
 		];
-		42	[color="0.66 0.6 0.85",
-			label=warp_unfold_native_to_unfoldreg];
-		44	[color="0.53 0.6 0.85",
-			label=reset_header_2d_warp_unfoldreg];
-		44 -> 42;
-		45	[color="0.61 0.6 0.85",
-			label=unfoldreg_antsquick];
-		45 -> 44;
-		46	[color="0.56 0.6 0.85",
-			label=slice_3d_to_2d_subject];
-		46 -> 45;
-		47	[color="0.35 0.6 0.85",
-			label=native_metric_to_unfold_nii];
-		47 -> 46;
-		51	[color="0.19 0.6 0.85",
-			label=extract_unfold_ref_slice];
-		51 -> 44;
-		51 -> 47;
-		60	[color="0.04 0.6 0.85",
-			label=atlas_metric_to_unfold_nii];
-		51 -> 60;
-		59	[color="0.55 0.6 0.85",
-			label=slice_3d_to_2d_atlas];
-		59 -> 45;
-		60 -> 59;
+		45	[color="0.44 0.6 0.85",
+			label=qc_reg_to_template];
+		46	[color="0.16 0.6 0.85",
+			label=qc_subfield];
+		47	[color="0.41 0.6 0.85",
+			label=qc_subfield_surf];
 	}
-	subgraph cluster_4 {
+	subgraph cluster_8 {
 		graph [color=blue,
-			label=native_isosurf
+			label=preproc_t2
 		];
-		8	[color="0.63 0.6 0.85",
-			label=update_native_mesh_structure];
-		49	[color="0.57 0.6 0.85",
-			label=smooth_surface];
-		8 -> 49;
-		9	[color="0.20 0.6 0.85",
-			label=gen_native_mesh];
-		9 -> 8;
-		43	[color="0.64 0.6 0.85",
-			label=update_native_mesh_structure_unfold];
-	}
-	subgraph cluster_5 {
-		graph [color=blue,
-			label=subfields
-		];
-		71	[color="0.07 0.6 0.85",
-			label=combine_tissue_subfield_labels_corobl];
-		77	[color="0.49 0.6 0.85",
-			label=resample_subfields_to_orig];
-		71 -> 77;
-		72	[color="0.29 0.6 0.85",
-			label=label_gm_with_nearest_subfields];
-		72 -> 71;
-		73	[color="0.06 0.6 0.85",
-			label=combine_dentate_subfield_labels_corobl];
-		73 -> 72;
-		74	[color="0.32 0.6 0.85",
-			label=map_surf_subfields_to_volume];
-		74 -> 73;
 	}
 	subgraph cluster_6 {
-		graph [color=blue,
-			label=pred
-		];
-		17	[color="0.54 0.6 0.85",
-			label=run_inference_nnunet_v1];
-		83	[color="0.41 0.6 0.85",
-			label=qc_tissuepred_f3d];
-		17 -> 83;
-		24	[color="0.63 0.6 0.85",
-			label=unpack_tissuepred_model];
-		24 -> 17;
-		25	[color="0.19 0.6 0.85",
-			label=download_tissuepred_model];
-		25 -> 24;
-		82	[color="0.41 0.6 0.85",
-			label=qc_tissuepred_dice];
-		83 -> 82;
-	}
-	subgraph cluster_7 {
 		graph [color=blue,
 			label=myelin_map
 		];
 	}
-	subgraph cluster_8 {
+	subgraph cluster_5 {
 		graph [color=blue,
-			label=native_resampling
+			label=autotop
 		];
-		4	[color="0.46 0.6 0.85",
-			label=resample_native_metric_to_atlas_density];
-		62	[color="0.45 0.6 0.85",
-			label=resample_native_coords_to_atlas_density];
-		63	[color="0.00 0.6 0.85",
-			label=affine_gii_corobl_to_orig];
-		64	[color="0.47 0.6 0.85",
-			label=resample_native_surf_to_atlas_density];
-		64 -> 63;
-		66	[color="0.12 0.6 0.85",
-			label=cp_atlas_unfold];
-		69	[color="0.11 0.6 0.85",
-			label=cp_atlas_subfields_label_gii];
-		75	[color="0.44 0.6 0.85",
-			label=resample_atlas_subfields_to_native_surf];
-	}
-	subgraph cluster_9 {
-		graph [color=blue,
-			label=preproc_hippb500
-		];
-	}
-	subgraph cluster_10 {
-		graph [color=blue,
-			label=resample_final_to_crop
-		];
-		70	[color="0.48 0.6 0.85",
-			label=resample_subfields_crop];
-		76	[color="0.13 0.6 0.85",
-			label=create_crop_ref];
-		76 -> 70;
-		78	[color="0.51 0.6 0.85",
-			label=resample_to_crop];
-		76 -> 78;
-	}
-	subgraph cluster_11 {
-		graph [color=blue,
-			label=preproc_dsegtissue
-		];
+		10	[color="0.32 0.6 0.85",
+			label=laplace_coords_hipp];
+		24	[color="0.19 0.6 0.85",
+			label=equivolume_coords];
+		25	[color="0.40 0.6 0.85",
+			label=prep_equivolume_coords];
+		25 -> 24;
 	}
 	subgraph cluster_12 {
 		graph [color=blue,
-			label=inner_outer_surf
+			label=nnunet
 		];
-		54	[color="0.64 0.6 0.85",
-			label=warp_midthickness_to_inout];
-		55	[color="0.09 0.6 0.85",
-			label=convert_inout_warp_from_itk_to_world];
-		55 -> 54;
-		56	[color="0.42 0.6 0.85",
-			label=register_midthickness_greedy];
-		56 -> 55;
-		57	[color="0.08 0.6 0.85",
-			label=compute_halfthick_mask];
-		57 -> 56;
+		14	[color="0.24 0.6 0.85",
+			label=run_inference];
+		49	[color="0.12 0.6 0.85",
+			label=qc_nnunet_f3d];
+		14 -> 49;
+		48	[color="0.55 0.6 0.85",
+			label=qc_nnunet_dice];
+		49 -> 48;
+	}
+	subgraph cluster_7 {
+		graph [color=blue,
+			label=preproc_seg
+		];
+	}
+	subgraph cluster_9 {
+		graph [color=blue,
+			label=gifti
+		];
+		1	[color="0.10 0.6 0.85",
+			label=create_spec_file_hipp];
+		2	[color="0.39 0.6 0.85",
+			label=calculate_gyrification];
+		2 -> 1;
+		35	[color="0.61 0.6 0.85",
+			label=create_dscalar_metric_cifti];
+		2 -> 35;
+		3	[color="0.29 0.6 0.85",
+			label=calculate_surface_area];
+		3 -> 2;
+		4	[color="0.43 0.6 0.85",
+			label=warp_gii_to_native];
+		4 -> 1;
+		4 -> 3;
+		31	[color="0.61 0.6 0.85",
+			label=smooth_surface];
+		4 -> 31;
+		32	[color="0.18 0.6 0.85",
+			label=calculate_thickness_from_surface];
+		4 -> 32;
+		5	[color="0.39 0.6 0.85",
+			label=correct_nan_vertices];
+		5 -> 4;
+		6	[color="0.33 0.6 0.85",
+			label=warp_gii_unfold2native];
+		6 -> 5;
+		27	[color="0.07 0.6 0.85",
+			label=constrain_surf_to_bbox];
+		27 -> 6;
+		28	[color="0.11 0.6 0.85",
+			label=cp_template_to_unfold];
+		28 -> 1;
+		28 -> 27;
+		30	[color="0.30 0.6 0.85",
+			label=calculate_curvature_from_surface];
+		30 -> 1;
+		30 -> 35;
+		31 -> 30;
+		32 -> 1;
+		32 -> 35;
+		33	[color="0.62 0.6 0.85",
+			label=nii_to_label_gii];
+		33 -> 1;
+		34	[color="0.15 0.6 0.85",
+			label=resample_atlas_to_refvol];
+		34 -> 33;
+		35 -> 1;
 	}
 	subgraph cluster_13 {
 		graph [color=blue,
-			label=qc
+			label=resample_final_to_crop_native
 		];
-		79	[color="0.39 0.6 0.85",
-			label=qc_reg_to_template];
-		80	[color="0.40 0.6 0.85",
-			label=qc_subfield];
-		81	[color="0.40 0.6 0.85",
-			label=qc_subfield_surf];
+		36	[color="0.56 0.6 0.85",
+			label=resample_subfields_native_crop];
+		39	[color="0.59 0.6 0.85",
+			label=create_native_crop_ref];
+		39 -> 36;
+		41	[color="0.27 0.6 0.85",
+			label=resample_coords_native_crop];
+		39 -> 41;
+		44	[color="0.28 0.6 0.85",
+			label=resample_native_to_crop];
+		39 -> 44;
 	}
-	subgraph cluster_14 {
-		graph [color=blue,
-			label=cifti
-		];
-		1	[color="0.32 0.6 0.85",
-			label=merge_hipp_dentate_spec_file];
-		2	[color="0.33 0.6 0.85",
-			label=merge_lr_spec_file];
-		2 -> 1;
-		3	[color="0.15 0.6 0.85",
-			label=create_spec_file];
-		3 -> 2;
-		67	[color="0.14 0.6 0.85",
-			label=create_dscalar_metric_cifti];
-		67 -> 3;
-		68	[color="0.14 0.6 0.85",
-			label=create_dlabel_cifti_subfields];
-		68 -> 3;
-	}
-	subgraph cluster_15 {
+	subgraph cluster_10 {
 		graph [color=blue,
 			label=shape_inject
 		];
-		12	[color="0.44 0.6 0.85",
+		11	[color="0.13 0.6 0.85",
 			label=reinsert_subject_labels];
-		13	[color="0.59 0.6 0.85",
+		12	[color="0.66 0.6 0.85",
 			label=template_shape_inject];
+		12 -> 11;
+		13	[color="0.42 0.6 0.85",
+			label=import_template_shape];
 		13 -> 12;
-		26	[color="0.60 0.6 0.85",
-			label=template_shape_reg];
-		26 -> 13;
-		27	[color="0.38 0.6 0.85",
+		22	[color="0.02 0.6 0.85",
 			label=prep_segs_for_greedy];
-		27 -> 26;
-		28	[color="0.51 0.6 0.85",
-			label=resample_template_dseg_tissue_for_reg];
-		28 -> 27;
+		13 -> 22;
+		21	[color="0.25 0.6 0.85",
+			label=template_shape_reg];
+		21 -> 12;
+		23	[color="0.04 0.6 0.85",
+			label=inject_init_laplace_coords];
+		21 -> 23;
+		22 -> 21;
 	}
-	subgraph cluster_16 {
+	subgraph cluster_11 {
 		graph [color=blue,
-			label=native_unfold
+			label=subfields
 		];
-		32	[color="0.61 0.6 0.85",
-			label=unfold_surface_smoothing];
-		33	[color="0.58 0.6 0.85",
-			label=space_unfold_vertices];
-		33 -> 32;
-		34	[color="0.65 0.6 0.85",
-			label=warp_native_mesh_to_unfold];
-		34 -> 33;
-		50	[color="0.55 0.6 0.85",
-			label=set_surface_z_level];
-		34 -> 50;
-		35	[color="0.29 0.6 0.85",
-			label=laplace_beltrami];
-		35 -> 34;
-		36	[color="0.37 0.6 0.85",
-			label=postproc_boundary_vertices];
-		36 -> 35;
-		37	[color="0.31 0.6 0.85",
-			label=map_src_sink_sdt_to_surf];
-		37 -> 36;
-		39	[color="0.21 0.6 0.85",
-			label=get_boundary_vertices];
-		39 -> 36;
+		37	[color="0.32 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		40	[color="0.46 0.6 0.85",
+			label=resample_subfields_to_native];
+		37 -> 40;
+		38	[color="0.04 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		38 -> 37;
 	}
-	subgraph cluster_17 {
+	subgraph cluster_14 {
 		graph [color=blue,
-			label=preproc_t1
-		];
-		18	[color="0.65 0.6 0.85",
-			label=warp_t1_to_corobl_crop];
-		19	[color="0.34 0.6 0.85",
-			label=n4_t1];
-		19 -> 18;
-		20	[color="0.25 0.6 0.85",
-			label=import_t1];
-		20 -> 19;
-	}
-	subgraph cluster_18 {
-		graph [color=blue,
-			label=native_metrics
-		];
-		5	[color="0.57 0.6 0.85",
-			label=soft_tanh_normalization];
-		6	[color="0.05 0.6 0.85",
-			label=calculate_gyrification];
-		6 -> 5;
-		7	[color="0.34 0.6 0.85",
-			label=metric_smoothing];
-		7 -> 6;
-		31	[color="0.05 0.6 0.85",
-			label=calculate_surface_area];
-		31 -> 7;
-		48	[color="0.04 0.6 0.85",
-			label=calculate_curvature];
-		48 -> 5;
-		53	[color="0.06 0.6 0.85",
-			label=calculate_thickness];
-		53 -> 5;
-	}
-	subgraph cluster_19 {
-		graph [color=blue,
-			label=templateseg
+			label=common
 		];
 	}
-	subgraph cluster_20 {
-		graph [color=blue,
-			label=download
-		];
-		14	[color="0.27 0.6 0.85",
-			label=import_template_dseg];
-		15	[color="0.18 0.6 0.85",
-			label=download_extract_template];
-		15 -> 14;
-		40	[color="0.12 0.6 0.85",
-			label=cp_atlas_surf_gii];
-		41	[color="0.18 0.6 0.85",
-			label=download_surf_template_atlas];
-		41 -> 40;
-		61	[color="0.11 0.6 0.85",
-			label=cp_atlas_metric_gii];
-		41 -> 61;
-	}
-	subgraph cluster_21 {
-		graph [color=blue,
-			label=atlas_gen
-		];
-	}
-	subgraph cluster_22 {
-		graph [color=blue,
-			label=coords
-		];
-		10	[color="0.30 0.6 0.85",
-			label=laynii_layers_equidist];
-		11	[color="0.37 0.6 0.85",
-			label=prep_dseg_for_laynii];
-		11 -> 10;
-		16	[color="0.16 0.6 0.85",
-			label=create_upsampled_coords_ref];
-		29	[color="0.22 0.6 0.85",
-			label=get_nan_mask];
-		30	[color="0.22 0.6 0.85",
-			label=get_src_sink_mask];
-		38	[color="0.23 0.6 0.85",
-			label=get_src_sink_sdt];
-		30 -> 38;
-		58	[color="0.21 0.6 0.85",
-			label=get_label_mask];
-	}
-	0	[color="0.01 0.6 0.85",
+	0	[color="0.50 0.6 0.85",
 		label=all];
 	1 -> 0;
-	4 -> 0;
-	4 -> 3;
-	4 -> 67;
-	5 -> 4;
-	5 -> 47;
-	8 -> 7;
-	8 -> 31;
-	8 -> 33;
+	4 -> 47;
+	7 -> 6;
+	8 -> 0;
+	8 -> 27;
 	8 -> 34;
-	8 -> 35;
-	8 -> 36;
-	8 -> 37;
-	8 -> 39;
-	8 -> 53;
-	8 -> 54;
-	8 -> 64;
-	8 -> 74;
-	10 -> 9;
-	10 -> 57;
-	12 -> 11;
-	12 -> 29;
-	12 -> 30;
-	12 -> 58;
-	12 -> 71;
-	12 -> 73;
-	12 -> 74;
-	14 -> 13;
-	14 -> 28;
-	15 -> 18;
-	15 -> 21;
-	15 -> 23;
-	15 -> 79;
-	15 -> 82;
-	15 -> 83;
-	16 -> 13;
-	17 -> 12;
-	17 -> 16;
-	17 -> 27;
-	18 -> 17;
-	18 -> 83;
-	19 -> 23;
-	19 -> 77;
-	19 -> 78;
-	21 -> 18;
-	21 -> 70;
-	21 -> 77;
-	23 -> 79;
-	29 -> 9;
-	30 -> 9;
-	32 -> 31;
-	34 -> 43;
-	35 -> 62;
-	38 -> 37;
-	40 -> 4;
-	40 -> 60;
-	40 -> 62;
-	40 -> 64;
-	40 -> 66;
-	40 -> 75;
-	42 -> 4;
-	42 -> 62;
-	42 -> 64;
-	42 -> 75;
-	43 -> 42;
-	43 -> 47;
-	49 -> 48;
-	50 -> 43;
-	52 -> 51;
-	54 -> 8;
-	58 -> 56;
-	58 -> 57;
-	58 -> 72;
-	61 -> 60;
-	61 -> 69;
-	61 -> 75;
-	62 -> 0;
-	62 -> 3;
-	63 -> 0;
-	63 -> 3;
-	63 -> 81;
-	65 -> 63;
-	66 -> 0;
-	66 -> 3;
-	67 -> 0;
-	68 -> 0;
-	69 -> 0;
-	69 -> 3;
-	69 -> 68;
-	70 -> 0;
-	70 -> 80;
-	71 -> 70;
-	75 -> 74;
-	77 -> 76;
-	78 -> 0;
-	78 -> 80;
-	79 -> 0;
-	80 -> 0;
-	81 -> 0;
-	82 -> 0;
+	10 -> 7;
+	10 -> 26;
+	10 -> 38;
+	10 -> 41;
+	11 -> 10;
+	11 -> 25;
+	11 -> 37;
+	14 -> 11;
+	14 -> 12;
+	14 -> 22;
+	14 -> 23;
+	15 -> 14;
+	15 -> 49;
+	16 -> 40;
+	16 -> 44;
+	18 -> 36;
+	18 -> 40;
+	18 -> 41;
+	18 -> 42;
+	18 -> 43;
+	20 -> 45;
+	23 -> 10;
+	24 -> 7;
+	24 -> 38;
+	24 -> 41;
+	29 -> 4;
+	34 -> 38;
+	36 -> 0;
+	36 -> 46;
+	37 -> 36;
+	39 -> 43;
+	40 -> 39;
+	41 -> 0;
+	42 -> 0;
+	43 -> 0;
+	44 -> 0;
+	44 -> 46;
+	45 -> 0;
+	46 -> 0;
+	47 -> 0;
+	48 -> 0;
 }

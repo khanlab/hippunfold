@@ -1,4 +1,4 @@
-digraph snakemake_dag {
+strict digraph "" {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,15 +15,18 @@ digraph snakemake_dag {
 		graph [color=blue,
 			label=preproc_hippb500
 		];
-		18	[color="0.45 0.6 0.85",
+		16	[color="0.41 0.6 0.85",
+			label=lr_flip_b500];
+		17	[color="0.36 0.6 0.85",
 			label="resample_hippdwi_to_template\nhemi: L\nsubject: 001"];
-		416	[color="0.13 0.6 0.85",
+		17 -> 16;
+		158	[color="0.50 0.6 0.85",
 			label=cp_b500_to_anat_dir];
-		18 -> 416;
-		120	[color="0.45 0.6 0.85",
+		17 -> 158;
+		54	[color="0.36 0.6 0.85",
 			label="resample_hippdwi_to_template\nhemi: R\nsubject: 001"];
-		418	[color="0.13 0.6 0.85",
+		160	[color="0.50 0.6 0.85",
 			label=cp_b500_to_anat_dir];
-		120 -> 418;
+		54 -> 160;
 	}
 }

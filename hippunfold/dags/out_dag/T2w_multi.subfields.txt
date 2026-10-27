@@ -1,4 +1,4 @@
-digraph snakemake_dag {
+strict digraph "" {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,107 +15,61 @@ digraph snakemake_dag {
 		graph [color=blue,
 			label=subfields
 		];
-		430	[color="0.07 0.6 0.85",
-			label=combine_tissue_subfield_labels_corobl,
-			style=""];
-		437	[color="0.50 0.6 0.85",
-			label="resample_subfields_to_orig\nmodality: T2w",
-			style=""];
-		430 -> 437;
-		431	[color="0.29 0.6 0.85",
-			label=label_gm_with_nearest_subfields,
-			style=""];
-		431 -> 430;
-		432	[color="0.07 0.6 0.85",
-			label=combine_dentate_subfield_labels_corobl,
-			style=""];
-		432 -> 431;
-		433	[color="0.31 0.6 0.85",
-			label=map_surf_subfields_to_volume,
-			style=""];
-		433 -> 432;
-		439	[color="0.07 0.6 0.85",
-			label=combine_tissue_subfield_labels_corobl,
-			style=""];
-		446	[color="0.50 0.6 0.85",
-			label="resample_subfields_to_orig\nmodality: T2w",
-			style=""];
-		439 -> 446;
-		440	[color="0.29 0.6 0.85",
-			label=label_gm_with_nearest_subfields,
-			style=""];
-		440 -> 439;
-		441	[color="0.07 0.6 0.85",
-			label=combine_dentate_subfield_labels_corobl,
-			style=""];
-		441 -> 440;
-		442	[color="0.31 0.6 0.85",
-			label=map_surf_subfields_to_volume,
-			style=""];
-		442 -> 441;
+		145	[color="0.48 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		149	[color="0.64 0.6 0.85",
+			label="resample_subfields_to_native\nnative_modality: T2w"];
+		145 -> 149;
+		147	[color="0.19 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		147 -> 145;
+		151	[color="0.48 0.6 0.85",
+			label=combine_tissue_subfield_labels_corobl];
+		154	[color="0.64 0.6 0.85",
+			label="resample_subfields_to_native\nnative_modality: T2w"];
+		151 -> 154;
+		152	[color="0.19 0.6 0.85",
+			label=label_subfields_from_vol_coords_corobl];
+		152 -> 151;
 	}
-	8	[color="0.63 0.6 0.85",
-		label="update_native_mesh_structure\nspace: corobl",
-		style=""];
-	8 -> 433;
-	12	[color="0.45 0.6 0.85",
-		label=reinsert_subject_labels,
-		style=""];
-	91	[color="0.21 0.6 0.85",
-		label=get_label_mask,
-		style=""];
-	12 -> 91;
-	12 -> 430;
-	12 -> 432;
-	12 -> 433;
-	19	[color="0.04 0.6 0.85",
-		label=avg_aligned_or_cp_t2,
-		style=""];
-	19 -> 437;
-	19 -> 446;
-	28	[color="0.08 0.6 0.85",
-		label=compose_t2_xfm_corobl,
-		style=""];
-	28 -> 437;
-	28 -> 446;
-	86	[color="0.63 0.6 0.85",
-		label="update_native_mesh_structure\nspace: corobl",
-		style=""];
-	86 -> 433;
-	91 -> 431;
-	92	[color="0.63 0.6 0.85",
-		label="update_native_mesh_structure\nspace: corobl",
-		style=""];
-	92 -> 433;
-	128	[color="0.63 0.6 0.85",
-		label="update_native_mesh_structure\nspace: corobl",
-		style=""];
-	128 -> 442;
-	132	[color="0.45 0.6 0.85",
-		label=reinsert_subject_labels,
-		style=""];
-	194	[color="0.21 0.6 0.85",
-		label=get_label_mask,
-		style=""];
-	132 -> 194;
-	132 -> 439;
-	132 -> 441;
-	132 -> 442;
-	189	[color="0.63 0.6 0.85",
-		label="update_native_mesh_structure\nspace: corobl",
-		style=""];
-	189 -> 442;
-	194 -> 440;
-	195	[color="0.63 0.6 0.85",
-		label="update_native_mesh_structure\nspace: corobl",
-		style=""];
-	195 -> 442;
-	434	[color="0.45 0.6 0.85",
-		label=resample_atlas_subfields_to_native_surf,
-		style=""];
-	434 -> 433;
-	443	[color="0.45 0.6 0.85",
-		label=resample_atlas_subfields_to_native_surf,
-		style=""];
-	443 -> 442;
+	11	[color="0.24 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	11 -> 147;
+	19	[color="0.59 0.6 0.85",
+		label=avg_aligned_or_cp_t2];
+	19 -> 149;
+	19 -> 154;
+	28	[color="0.00 0.6 0.85",
+		label=compose_t2_xfm_corobl];
+	28 -> 149;
+	28 -> 154;
+	35	[color="0.24 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	35 -> 147;
+	38	[color="0.47 0.6 0.85",
+		label="unflip_coords_equivol\ndesc: equivol\nhemi: L"];
+	38 -> 147;
+	59	[color="0.51 0.6 0.85",
+		label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: L"];
+	59 -> 147;
+	67	[color="0.38 0.6 0.85",
+		label=laplace_coords_hipp];
+	67 -> 152;
+	68	[color="0.18 0.6 0.85",
+		label=reinsert_subject_labels];
+	68 -> 67;
+	75	[color="0.38 0.6 0.85",
+		label=laplace_coords_hipp];
+	68 -> 75;
+	68 -> 151;
+	75 -> 152;
+	77	[color="0.05 0.6 0.85",
+		label=equivolume_coords];
+	77 -> 152;
+	99	[color="0.51 0.6 0.85",
+		label="resample_atlas_to_refvol\natlas: bigbrain\nhemi: R"];
+	99 -> 152;
+	146	[color="0.35 0.6 0.85",
+		label="unflip_postproc\nhemi: L"];
+	146 -> 145;
 }

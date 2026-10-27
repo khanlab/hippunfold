@@ -1,4 +1,4 @@
-digraph snakemake_dag {
+strict digraph "" {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,33 +15,29 @@ digraph snakemake_dag {
 		graph [color=blue,
 			label=qc
 		];
-		81	[color="0.38 0.6 0.85",
+		54	[color="0.57 0.6 0.85",
 			label=qc_reg_to_template];
-		82	[color="0.39 0.6 0.85",
+		55	[color="0.06 0.6 0.85",
 			label=qc_subfield];
-		83	[color="0.39 0.6 0.85",
+		56	[color="0.36 0.6 0.85",
 			label=qc_subfield_surf];
-		84	[color="0.35 0.6 0.85",
+		57	[color="0.10 0.6 0.85",
 			label=plot_subj_subfields];
-		85	[color="0.24 0.6 0.85",
+		58	[color="0.05 0.6 0.85",
 			label=get_subfield_vols_subj];
-		85 -> 84;
+		58 -> 57;
 	}
-	15	[color="0.18 0.6 0.85",
-		label=download_extract_template];
-	24	[color="0.43 0.6 0.85",
-		label=reg_to_template];
-	15 -> 24;
-	15 -> 81;
-	24 -> 81;
-	64	[color="0.00 0.6 0.85",
-		label=affine_gii_corobl_to_orig];
-	64 -> 83;
-	72	[color="0.49 0.6 0.85",
-		label=resample_subfields_crop];
-	72 -> 82;
-	72 -> 85;
-	80	[color="0.52 0.6 0.85",
-		label=resample_to_crop];
-	80 -> 82;
+	5	[color="0.42 0.6 0.85",
+		label=warp_gii_to_native];
+	5 -> 56;
+	24	[color="0.03 0.6 0.85",
+		label=reg_t2_to_template];
+	24 -> 54;
+	44	[color="0.25 0.6 0.85",
+		label=resample_subfields_native_crop];
+	44 -> 55;
+	44 -> 58;
+	53	[color="0.52 0.6 0.85",
+		label=resample_native_to_crop];
+	53 -> 55;
 }

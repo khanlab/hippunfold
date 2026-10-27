@@ -1,0 +1,33 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=autotop
+		];
+		10	[color="0.32 0.6 0.85",
+			label=laplace_coords_hipp];
+		24	[color="0.19 0.6 0.85",
+			label=equivolume_coords];
+		25	[color="0.40 0.6 0.85",
+			label=prep_equivolume_coords];
+		25 -> 24;
+	}
+	11	[color="0.13 0.6 0.85",
+		label=reinsert_subject_labels];
+	11 -> 10;
+	11 -> 25;
+	23	[color="0.04 0.6 0.85",
+		label=inject_init_laplace_coords];
+	23 -> 10;
+}

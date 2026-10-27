@@ -1,4 +1,4 @@
-digraph snakemake_dag {
+strict digraph "" {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,76 +15,53 @@ digraph snakemake_dag {
 		graph [color=blue,
 			label=qc
 		];
-		442	[color="0.39 0.6 0.85",
-			label=qc_reg_to_template,
-			style=""];
-		443	[color="0.40 0.6 0.85",
-			label="qc_subfield\nspace: cropT1w",
-			style=""];
-		444	[color="0.40 0.6 0.85",
-			label="qc_subfield\nspace: cropT1w",
-			style=""];
-		445	[color="0.40 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T1w",
-			style=""];
-		446	[color="0.40 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T1w",
-			style=""];
-		447	[color="0.40 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T1w",
-			style=""];
-		448	[color="0.40 0.6 0.85",
-			label="qc_subfield_surf\nref_spaces: T1w",
-			style=""];
-		449	[color="0.36 0.6 0.85",
-			label=plot_subj_subfields,
-			style=""];
-		450	[color="0.24 0.6 0.85",
-			label="get_subfield_vols_subj\ncrop_ref_spaces: cropT1w",
-			style=""];
-		450 -> 449;
+		177	[color="0.43 0.6 0.85",
+			label="qc_reg_to_template\nnative_modality: T1w"];
+		178	[color="0.07 0.6 0.85",
+			label="qc_subfield\nspace: cropT1w"];
+		179	[color="0.07 0.6 0.85",
+			label="qc_subfield\nspace: cropT1w"];
+		180	[color="0.50 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T1w"];
+		181	[color="0.50 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T1w"];
+		182	[color="0.50 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T1w"];
+		183	[color="0.50 0.6 0.85",
+			label="qc_subfield_surf\nref_spaces: T1w"];
+		184	[color="0.37 0.6 0.85",
+			label=plot_subj_subfields];
+		185	[color="0.36 0.6 0.85",
+			label="get_subfield_vols_subj\ncrop_ref_spaces: cropT1w"];
+		185 -> 184;
 	}
-	23	[color="0.42 0.6 0.85",
-		label="reg_to_template\nmodality: T1w",
-		style=""];
-	23 -> 442;
-	24	[color="0.18 0.6 0.85",
-		label="download_extract_template\ntemplate: CITI168",
-		style="rounded,dashed"];
-	24 -> 23;
-	24 -> 442;
-	106	[color="0.00 0.6 0.85",
-		label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
-		style=""];
-	106 -> 445;
-	217	[color="0.00 0.6 0.85",
-		label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
-		style=""];
-	217 -> 447;
-	314	[color="0.00 0.6 0.85",
-		label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
-		style=""];
-	314 -> 446;
-	413	[color="0.00 0.6 0.85",
-		label="affine_gii_corobl_to_orig\nsurfdir: surf\nsurfname: midthickness",
-		style=""];
-	413 -> 448;
-	422	[color="0.48 0.6 0.85",
-		label=resample_subfields_crop,
-		style=""];
-	422 -> 443;
-	422 -> 450;
-	431	[color="0.48 0.6 0.85",
-		label=resample_subfields_crop,
-		style=""];
-	431 -> 444;
-	431 -> 450;
-	440	[color="0.51 0.6 0.85",
-		label=resample_to_crop,
-		style=""];
-	440 -> 443;
-	441	[color="0.51 0.6 0.85",
-		label=resample_to_crop,
-		style=""];
-	441 -> 444;
+	5	[color="0.38 0.6 0.85",
+		label=warp_gii_to_native];
+	5 -> 180;
+	23	[color="0.26 0.6 0.85",
+		label=reg_to_template];
+	23 -> 177;
+	56	[color="0.38 0.6 0.85",
+		label=warp_gii_to_native];
+	56 -> 182;
+	97	[color="0.38 0.6 0.85",
+		label=warp_gii_to_native];
+	97 -> 181;
+	120	[color="0.38 0.6 0.85",
+		label=warp_gii_to_native];
+	120 -> 183;
+	137	[color="0.58 0.6 0.85",
+		label=resample_subfields_native_crop];
+	137 -> 178;
+	137 -> 185;
+	143	[color="0.58 0.6 0.85",
+		label=resample_subfields_native_crop];
+	143 -> 179;
+	143 -> 185;
+	175	[color="0.46 0.6 0.85",
+		label=resample_native_to_crop];
+	175 -> 178;
+	176	[color="0.46 0.6 0.85",
+		label=resample_native_to_crop];
+	176 -> 179;
 }

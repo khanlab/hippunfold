@@ -1,0 +1,58 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=common
+		];
+		36	[color="0.53 0.6 0.85",
+			label=copy_subfields_to_results];
+		40	[color="0.13 0.6 0.85",
+			label=copy_coords_to_results];
+		41	[color="0.37 0.6 0.85",
+			label=copy_xfm_to_results];
+	}
+	7	[color="0.59 0.6 0.85",
+		label=create_warps_hipp];
+	7 -> 41;
+	10	[color="0.24 0.6 0.85",
+		label=unflip_coords];
+	10 -> 7;
+	34	[color="0.21 0.6 0.85",
+		label=create_warps_dentate];
+	10 -> 34;
+	10 -> 40;
+	11	[color="0.34 0.6 0.85",
+		label=laplace_coords_hipp];
+	11 -> 7;
+	11 -> 10;
+	11 -> 40;
+	21	[color="0.66 0.6 0.85",
+		label=unflip_coords_equivol];
+	21 -> 7;
+	21 -> 40;
+	22	[color="0.36 0.6 0.85",
+		label=equivolume_coords];
+	22 -> 7;
+	22 -> 21;
+	22 -> 40;
+	34 -> 41;
+	35	[color="0.35 0.6 0.85",
+		label=laplace_coords_dentate];
+	35 -> 10;
+	35 -> 34;
+	35 -> 40;
+	37	[color="0.00 0.6 0.85",
+		label=combine_tissue_subfield_labels_corobl];
+	37 -> 36;
+}

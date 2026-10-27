@@ -1,4 +1,4 @@
-digraph snakemake_dag {
+strict digraph "" {
 	graph [bgcolor=white,
 		margin=0
 	];
@@ -15,27 +15,23 @@ digraph snakemake_dag {
 		graph [color=blue,
 			label=qc
 		];
-		79	[color="0.39 0.6 0.85",
+		45	[color="0.44 0.6 0.85",
 			label=qc_reg_to_template];
-		80	[color="0.40 0.6 0.85",
+		46	[color="0.16 0.6 0.85",
 			label=qc_subfield];
-		81	[color="0.40 0.6 0.85",
+		47	[color="0.41 0.6 0.85",
 			label=qc_subfield_surf];
 	}
-	15	[color="0.18 0.6 0.85",
-		label=download_extract_template];
-	23	[color="0.42 0.6 0.85",
+	4	[color="0.43 0.6 0.85",
+		label=warp_gii_to_native];
+	4 -> 47;
+	20	[color="0.25 0.6 0.85",
 		label=reg_to_template];
-	15 -> 23;
-	15 -> 79;
-	23 -> 79;
-	63	[color="0.00 0.6 0.85",
-		label=affine_gii_corobl_to_orig];
-	63 -> 81;
-	70	[color="0.48 0.6 0.85",
-		label=resample_subfields_crop];
-	70 -> 80;
-	78	[color="0.51 0.6 0.85",
-		label=resample_to_crop];
-	78 -> 80;
+	20 -> 45;
+	36	[color="0.56 0.6 0.85",
+		label=resample_subfields_native_crop];
+	36 -> 46;
+	44	[color="0.28 0.6 0.85",
+		label=resample_native_to_crop];
+	44 -> 46;
 }

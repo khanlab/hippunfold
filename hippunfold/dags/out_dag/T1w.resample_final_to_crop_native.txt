@@ -1,0 +1,159 @@
+strict digraph "" {
+	graph [bgcolor=white,
+		margin=0
+	];
+	node [fontname=sans,
+		fontsize=10,
+		penwidth=2,
+		shape=box,
+		style=rounded
+	];
+	edge [color=grey,
+		penwidth=2
+	];
+	subgraph cluster_0 {
+		graph [color=blue,
+			label=resample_final_to_crop_native
+		];
+		137	[color="0.58 0.6 0.85",
+			label=resample_subfields_native_crop];
+		141	[color="0.61 0.6 0.85",
+			label=create_native_crop_ref];
+		141 -> 137;
+		148	[color="0.42 0.6 0.85",
+			label=resample_coords_native_crop];
+		141 -> 148;
+		150	[color="0.42 0.6 0.85",
+			label=resample_coords_native_crop];
+		141 -> 150;
+		152	[color="0.42 0.6 0.85",
+			label=resample_coords_native_crop];
+		141 -> 152;
+		154	[color="0.42 0.6 0.85",
+			label=resample_coords_native_crop];
+		141 -> 154;
+		156	[color="0.42 0.6 0.85",
+			label=resample_coords_native_crop];
+		141 -> 156;
+		163	[color="0.42 0.6 0.85",
+			label=resample_coords_native_crop];
+		141 -> 163;
+		165	[color="0.42 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp"];
+		141 -> 165;
+		175	[color="0.46 0.6 0.85",
+			label=resample_native_to_crop];
+		141 -> 175;
+		143	[color="0.58 0.6 0.85",
+			label=resample_subfields_native_crop];
+		146	[color="0.61 0.6 0.85",
+			label=create_native_crop_ref];
+		146 -> 143;
+		149	[color="0.42 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		146 -> 149;
+		151	[color="0.42 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		146 -> 151;
+		153	[color="0.42 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		146 -> 153;
+		155	[color="0.42 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		146 -> 155;
+		160	[color="0.42 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: laplace"];
+		146 -> 160;
+		164	[color="0.42 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: dentate\ndesc: laplace"];
+		146 -> 164;
+		166	[color="0.42 0.6 0.85",
+			label="resample_coords_native_crop\nautotop: hipp\ndesc: equivol"];
+		146 -> 166;
+		176	[color="0.46 0.6 0.85",
+			label=resample_native_to_crop];
+		146 -> 176;
+	}
+	11	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	11 -> 148;
+	19	[color="0.16 0.6 0.85",
+		label=n4_t1];
+	142	[color="0.25 0.6 0.85",
+		label="resample_subfields_to_native\nnative_modality: T1w"];
+	19 -> 142;
+	147	[color="0.25 0.6 0.85",
+		label="resample_subfields_to_native\nnative_modality: T1w"];
+	19 -> 147;
+	19 -> 175;
+	19 -> 176;
+	21	[color="0.18 0.6 0.85",
+		label=compose_template_xfm_corobl];
+	21 -> 137;
+	21 -> 142;
+	21 -> 143;
+	21 -> 147;
+	21 -> 148;
+	21 -> 149;
+	21 -> 150;
+	21 -> 151;
+	21 -> 152;
+	21 -> 153;
+	21 -> 154;
+	21 -> 155;
+	21 -> 156;
+	21 -> 160;
+	21 -> 163;
+	21 -> 164;
+	21 -> 165;
+	21 -> 166;
+	28	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	28 -> 152;
+	31	[color="0.04 0.6 0.85",
+		label="unflip_coords_equivol\ndesc: equivol\nhemi: L"];
+	31 -> 165;
+	60	[color="0.59 0.6 0.85",
+		label=laplace_coords_hipp];
+	60 -> 149;
+	68	[color="0.59 0.6 0.85",
+		label=laplace_coords_hipp];
+	68 -> 153;
+	70	[color="0.00 0.6 0.85",
+		label=equivolume_coords];
+	70 -> 166;
+	103	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	103 -> 150;
+	106	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	106 -> 154;
+	109	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: dentate\ndesc: laplace\nhemi: L"];
+	109 -> 163;
+	124	[color="0.25 0.6 0.85",
+		label=laplace_coords_dentate];
+	124 -> 151;
+	126	[color="0.25 0.6 0.85",
+		label=laplace_coords_dentate];
+	126 -> 155;
+	128	[color="0.25 0.6 0.85",
+		label=laplace_coords_dentate];
+	128 -> 164;
+	138	[color="0.61 0.6 0.85",
+		label=combine_tissue_subfield_labels_corobl];
+	138 -> 137;
+	138 -> 142;
+	142 -> 141;
+	144	[color="0.61 0.6 0.85",
+		label=combine_tissue_subfield_labels_corobl];
+	144 -> 143;
+	144 -> 147;
+	147 -> 146;
+	157	[color="0.22 0.6 0.85",
+		label="unflip_coords\nautotop: hipp\ndesc: laplace\nhemi: L"];
+	157 -> 156;
+	161	[color="0.59 0.6 0.85",
+		label=laplace_coords_hipp];
+	161 -> 160;
+}
