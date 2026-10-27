@@ -4,8 +4,9 @@ import nibabel as nib
 import numpy as np
 import pyvista as pv
 from lib.surface import (
+    orient_faces_up_gradient,
     remove_nan_vertices,
-    write_surface_to_gifti,
+    write_points_faces_to_gifti,
 )
 from lib.utils import setup_logger
 from scipy.spatial import cKDTree
@@ -81,5 +82,13 @@ surface = surface.clean()
 # apply affine to go from matrix to image space
 surface = surface.transform(affine, inplace=False)
 
+# the contour's winding depends on the handedness of the affine (and of the
+# contouring), so orient normals toward increasing coords (inner to outer)
+points = surface.points
+faces, flipped = orient_faces_up_gradient(
+    points, surface.faces.reshape((-1, 4))[:, 1:4], coords, affine
+)
+logger.info(f"normals point toward increasing coords{' after flipping' * flipped}")
+
 # Save the final mesh
-write_surface_to_gifti(surface, snakemake.output.surf_gii)
+write_points_faces_to_gifti(points, faces, snakemake.output.surf_gii)

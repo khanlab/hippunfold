@@ -133,6 +133,49 @@ def apply_affine_transform(mesh, affine_matrix, inverse=False):
     return transformed_mesh
 
 
+def vertex_normals(points, faces):
+    """area-weighted vertex normals from the face winding (not normalised)"""
+    face_normals = np.cross(
+        points[faces[:, 1]] - points[faces[:, 0]],
+        points[faces[:, 2]] - points[faces[:, 0]],
+    )
+    normals = np.zeros(points.shape)
+    for k in range(3):
+        np.add.at(normals, faces[:, k], face_normals)
+    return normals
+
+
+def orient_faces_up_gradient(points, faces, volume, affine, step=None):
+    """
+    Reverse the winding of all faces if the vertex normals mostly point toward
+    lower values of volume, so that normals point toward increasing values.
+
+    points are in world coordinates, and volume is sampled through affine, so
+    the result does not depend on the handedness of affine (a negative
+    determinant mirrors the mesh, which reverses the normals of a mesh
+    contoured in voxel space). step is the distance (mm) sampled either side
+    of each vertex; by default the mean voxel size. Returns (faces, flipped).
+    """
+    if step is None:
+        step = np.mean(np.linalg.norm(affine[:3, :3], axis=0))
+    normals = vertex_normals(points, faces)
+    normals /= np.linalg.norm(normals, axis=1, keepdims=True) + 1e-12
+    to_voxel = np.linalg.inv(affine)
+
+    def sample(p):
+        ijk = np.floor(p @ to_voxel[:3, :3].T + to_voxel[:3, 3]).astype(int)
+        inside = np.all((ijk >= 0) & (ijk < volume.shape), axis=1)
+        values = np.full(len(p), np.nan)
+        values[inside] = volume[tuple(ijk[inside].T)]
+        return values
+
+    diff = sample(points + step * normals) - sample(points - step * normals)
+    flipped = bool(np.sum(diff < 0) > np.sum(diff > 0))
+    if flipped:
+        faces = faces[:, ::-1]
+    return faces, flipped
+
+
 def remove_nan_vertices(mesh):
     """
     Removes NaN vertices from a PyVista mesh and updates faces accordingly.
