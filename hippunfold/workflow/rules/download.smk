@@ -4,6 +4,13 @@ from lib import utils as utils
 download_dir = utils.get_download_dir()
 
 
+# zenodo.org URLs are handled by the cached-http plugin (rate limits, retries,
+# checksums); keep its cache inside HIPPUNFOLD_CACHE_DIR instead of ~/.cache
+storage cached_http:
+    provider="cached-http",
+    cache=str(Path(download_dir) / "http_cache"),
+
+
 # run on the host (not submitted to a cluster), since compute nodes may lack internet access
 localrules:
     download_extract_template,

@@ -1,0 +1,17 @@
+{
+    "index": {
+        "Description": "Label value in the tissue segmentation (input to --modality dsegtissue, and the labels HippUnfold's tissue models and templates use)."
+    },
+    "name": {
+        "Description": "Name of the tissue or landmark."
+    },
+    "abbreviation": {
+        "Description": "Short name of the tissue or landmark."
+    },
+    "description": {
+        "Description": "Anatomical definition of the label, for manual segmentation."
+    },
+    "laplace_role": {
+        "Description": "How the label enters the Laplace coordinates (config laplace_labels): the domain, or a source (src, value 0) or sink (value 1) boundary of the AP, PD or IO coordinate, for the hipp and dentate surfaces. Swapping a src and sink label reverses that coordinate and mirrors the unfolded space."
+    }
+}
