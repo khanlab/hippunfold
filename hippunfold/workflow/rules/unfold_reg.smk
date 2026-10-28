@@ -220,7 +220,7 @@ rule slice_3d_to_2d_subject:
         "surf"
     resources:
         mem_mb=scale_by_attempt(2000),
-        runtime=scale_by_attempt(1),
+        runtime=scale_by_attempt(5),
     params:
         clip_min=-5.0,
         clip_max=+5.0,
