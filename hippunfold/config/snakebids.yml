@@ -567,6 +567,7 @@ tissuepred_models:
 resource_urls:
   atlas: 
     multihist7: 'https://zenodo.org/records/18451323/files/tpl-multihist7_flatdir.zip'
+    multihist7sgi: 'https://zenodo.org/records/18451323/files/tpl-multihist7_flatdir.zip'
   template:
     CITI168: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
     dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='

@@ -23,8 +23,8 @@ except ImportError:
 # This section is edited by hand:
 # ------------------------------------------------------------------------------------
 
-ATLASES = ["multihist7"]
-DEFAULT_ATLAS = "multihist7"
+ATLASES = ["multihist7","multihist7sgi"]
+DEFAULT_ATLAS = "multihist7sgi"
 
 ATLAS_METADATA = {
     "multihist7": {
