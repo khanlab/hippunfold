@@ -24,12 +24,17 @@ except ImportError:
 # ------------------------------------------------------------------------------------
 
 ATLASES = ["multihist7","multihist7sgi"]
-DEFAULT_ATLAS = "multihist7sgi"
+DEFAULT_ATLAS = "multihist7"
 
 ATLAS_METADATA = {
     "multihist7": {
         "metric_wildcards": ["curvature", "gyrification", "thickness"],
         "label_wildcards": ["hipp", "dentate"],
+    },
+    "multihist7sgi": {
+        "metric_wildcards": ["curvature", "gyrification", "thickness"],
+        "label_wildcards": ["hipp", "dentate"],
+        "gyrification_definition": "sgi",
     }
 }
 
@@ -252,3 +257,4 @@ class AtlasConfig(PluginBase):
 
         config["atlas_metadata"] = ATLAS_METADATA
         config["atlas_metadata"].update(self.atlas_config)
+
