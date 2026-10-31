@@ -182,6 +182,15 @@ def get_ants_template_params(overrides={}):
     return {key: str(params[key]) for key in TUNE_KEYS}
 
 
+def get_hippunfold_version():
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        return version("hippunfold")
+    except PackageNotFoundError:
+        return "unknown"
+
+
 def get_ants_template_opts(params, num_modalities):
     """command-line options for antsMultivariateTemplateConstruction2.sh"""
     if len(params["wt"].split("x")) != num_modalities:
@@ -1374,6 +1383,27 @@ rule write_template_json:
             "RRID": "",
             "ReferencesAndLinks": [""],
             "TemplateFlowVersion": "",
+            "GeneratedBy": [
+                {
+                    "Name": "hippunfold",
+                    "Version": get_hippunfold_version(),
+                    "CodeURL": "https://github.com/khanlab/hippunfold",
+                }
+            ],
+            # provenance of the template construction (gen_atlas_reg_ants) and subfield fusion
+            "AtlasCreation": {
+                "modality": config["modality"],
+                "metrics": config["new_atlas_metrics"],
+                "subfields_from": config["new_atlas_subfields_from"],
+                "label_smoothing_sigma_mm": config.get(
+                    "new_atlas_label_smoothing_sigma_mm", 0.3125
+                ),
+                "ants_template_params": get_ants_template_params(),
+                "ants_template_command": "antsMultivariateTemplateConstruction2.sh -d 2 -n 0 -l 0 -b 1 "
+                + get_ants_template_opts(
+                    get_ants_template_params(), len(config["new_atlas_metrics"])
+                ),
+            },
         },
     script:
         "../scripts/write_template_json.py"
