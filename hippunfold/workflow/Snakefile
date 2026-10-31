@@ -170,6 +170,7 @@ include: "rules/cifti.smk"
 include: "rules/subfields.smk"
 include: "rules/resample_final_to_crop.smk"
 include: "rules/qc.smk"
+include: "rules/surface_viewer.smk"
 include: "rules/myelin_map.smk"
 include: "rules/native_isosurf.smk"
 include: "rules/inner_outer_surf.smk"
@@ -216,6 +217,16 @@ rule all_create_atlas:
 
 rule all_group_tsv:
     input:
+        viewer=expand(
+            bids(
+                root=root,
+                prefix="group",
+                den="{density}",
+                desc="surfaces",
+                suffix="viewer.html",
+            ),
+            density=config["output_density"],
+        ),
         tsv=expand(
             bids(
                 root=root,

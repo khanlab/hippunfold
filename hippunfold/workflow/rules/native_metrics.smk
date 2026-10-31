@@ -77,7 +77,10 @@ rule metric_smoothing:
         "wb_command -metric-smoothing {input.surface} {input.metric} {params.fwhm} {output.metric} -fwhm"
 
 
-rule calculate_gyrification:
+rule calculate_legacy_gyrification:
+    """Ratio of native to unfolded (spring model) vertex area, each smoothed
+    at 1 mm FWHM. Superseded by the smoothing-based gyrification index; kept
+    because existing unfoldreg atlases were built with it."""
     input:
         native_surfarea=bids(
             root=root,
@@ -104,7 +107,7 @@ rule calculate_gyrification:
             bids(
                 root=root,
                 datatype="metric",
-                suffix="gyrification.shape.gii",
+                suffix="legacygyrification.shape.gii",
                 desc="unnorm",
                 den="native",
                 hemi="{hemi}",
@@ -120,6 +123,54 @@ rule calculate_gyrification:
     shell:
         'wb_command -metric-math "nativearea/unfoldarea" {output.gii}'
         " -var nativearea {input.native_surfarea} -var unfoldarea {input.unfold_surfarea}"
+
+
+rule calculate_gyrification:
+    """Smoothing-based gyrification index (sGI): the midthickness area over
+    the area of a heat-smoothed copy of itself (boundary pinned), pooled on
+    the surface. Folds narrower than about the scale count; see
+    lib/gyrification.py."""
+    input:
+        surf_gii=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            space="corobl",
+            den="native",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+    output:
+        gii=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                suffix="gyrification.shape.gii",
+                desc="unnorm",
+                den="native",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    log:
+        bids_log(
+            "calculate_gyrification",
+            **inputs.subj_wildcards,
+            hemi="{hemi}",
+            label="{label}",
+        ),
+    group:
+        "surf"
+    resources:
+        mem_mb=scale_by_attempt(4000),
+        runtime=scale_by_attempt(5),
+    params:
+        scale=config["gyrification_scale"],
+        sigma=config["gyrification_pooling_sigma"],
+    script:
+        "../scripts/calculate_gyrification.py"
 
 
 rule calculate_curvature:
@@ -202,7 +253,7 @@ rule calculate_thickness:
 
 
 rule soft_tanh_normalization:
-    """Normalize the surface shape metrics (thick, curv, gyr) to smoothly
+    """Normalize the surface shape metrics (thick, curv, gyr, legacy gyr) to smoothly
     reject outliers that can cause issues with registration"""
     input:
         gii=bids(
@@ -220,7 +271,7 @@ rule soft_tanh_normalization:
             bids(
                 root=root,
                 datatype="metric",
-                suffix="{metric,thickness|curvature|gyrification}.shape.gii",
+                suffix="{metric,thickness|curvature|gyrification|legacygyrification}.shape.gii",
                 den="native",
                 hemi="{hemi}",
                 label="{label}",
