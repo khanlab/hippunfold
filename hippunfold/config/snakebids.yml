@@ -793,6 +793,20 @@ tight_crop_labels: #defines what labels to use for tight cropping (for upsampled
 resample_dseg_for_templatereg: 0.3x0.3x0.3mm
 unfoldreg_padding: 0x0x0vox
 
+# antsRegistration SyN stage for the unfolded registration of a subject to the atlas (unfoldreg),
+# same keys and meaning as new_atlas_ants, and the same defaults as were used to create the atlas,
+# so the subject is registered the way the atlas inputs were registered to the template
+unfoldreg_ants:
+  sim: MI          # similarity metric: MI, MSQ, DEMONS, CC, or CC<radius>
+  tx: SyN          # SyN or BSplineSyN
+  step: 0.1        # SyN gradient step
+  updvar: 1.5      # SyN: update field variance (vox); BSplineSyN: update field mesh spacing (mm)
+  totvar: 0.5      # SyN: total field variance (vox); BSplineSyN: total field mesh spacing (mm)
+  q: 100x100x70x20 # max iterations per level
+  f: 6x4x2x1       # shrink factors per level
+  s: 3x2x1x0       # smoothing sigmas (vox) per level
+  wt: null         # metric weights, e.g. 1x0.5x1 (null: all 1)
+
 surf_thresholds:
   inner: 0
   outer: 1

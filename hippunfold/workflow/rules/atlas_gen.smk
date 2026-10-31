@@ -197,22 +197,9 @@ def get_ants_template_opts(params, num_modalities):
         raise ValueError(
             f"modality weights {params['wt']} must have {num_modalities} components"
         )
-    if not (
-        len(params["q"].split("x"))
-        == len(params["f"].split("x"))
-        == len(params["s"].split("x"))
-    ):
-        raise ValueError(
-            f"q, f, s must have the same number of levels: {params['q']}, {params['f']}, {params['s']}"
-        )
+    check_ants_levels(params)
     sim = re.sub(r"^CC(\d+)$", r"CC[\1]", params["sim"])
-    regularization = f"{params['step']},{params['updvar']},{params['totvar']}"
-    if params["tx"] == "SyN":
-        transform = f"SyN[{regularization}]"
-    elif params["tx"] == "BSplineSyN":
-        transform = f"BSplineSyN[{regularization},3]"
-    else:
-        raise ValueError(f"unsupported transform {params['tx']}, use SyN or BSplineSyN")
+    transform = get_ants_syn_transform(params)
     return (
         f"-k {num_modalities} -m '{sim}' -t '{transform}' -g {params['tplstep']} "
         f"-i {params['iters']} -q {params['q']} -f {params['f']} -s {params['s']} "
