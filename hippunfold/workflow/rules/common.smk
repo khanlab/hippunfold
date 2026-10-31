@@ -477,6 +477,11 @@ def get_gifti_metric_types(label):
 
 
 def get_create_atlas_output():
+    if (
+        config.get("new_atlas_tune_enabled", False)
+        and config["analysis_level"] == "group_create_atlas"
+    ):
+        return get_tune_report()
     files = str(
         Path(
             bids(

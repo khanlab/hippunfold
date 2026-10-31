@@ -585,6 +585,72 @@ hippdwi_opts:
     R: '224 351'
   bbox_y: '198 453'
 
+# gaussian sigma (mm) for multi-label smoothing fusion of subfields in group_create_atlas
+new_atlas_label_smoothing_sigma_mm: 0.3125
+
+# antsMultivariateTemplateConstruction2.sh options for gen_atlas_reg_ants (group_create_atlas)
+# the same keys are the wildcards of gen_atlas_reg_ants_tune
+# defaults are the best of the --new_atlas_tune runs on multihist7 (hipp, curvature+gyrification+
+# thickness): leave-one-out subfield Dice 0.813 (min 0.790), vs 0.769 unwarped, no folding
+new_atlas_ants:
+  sim: MI          # -m similarity metric: MI, MSQ, DEMONS, CC, or CC<radius> (e.g. CC4 -> CC[4])
+  tx: SyN          # -t transform: SyN or BSplineSyN
+  step: 0.1        # SyN gradient step
+  updvar: 1.5      # SyN: update field variance (vox); BSplineSyN: update field mesh spacing (mm)
+  totvar: 0.5      # SyN: total field variance (vox); BSplineSyN: total field mesh spacing (mm)
+  tplstep: 0.25    # -g template shape update gradient step
+  iters: 10        # -i template construction iterations
+  q: 100x100x70x20 # -q max iterations per level
+  f: 6x4x2x1       # -f shrink factors per level
+  s: 3x2x1x0       # -s smoothing sigmas (vox) per level
+  wt: null         # -w modality weights, e.g. 1x0.5x1 (null: all 1)
+  sharpen: 0       # -A template sharpening: 0 none, 1 laplacian, 2 unsharp mask
+
+# grid for hyperparameter tuning of the template construction (group_create_atlas --new_atlas_tune)
+# every combination of the lists below is run, except levels, whose q/f/s are varied together;
+# keys left out take their value from new_atlas_ants (and mets from --new_atlas_metrics)
+# mets: metrics used to build the template, as concatenated codes:
+#   curv (curvature), gyr (gyrification), lgyr (legacygyrification), thick (thickness), myelin
+# the default grid compares metric sets, similarity metrics, SyN params and coarse vs full-res
+# levels around the best params from earlier tuning rounds (176 runs)
+new_atlas_tune:
+  labels:
+    - hipp
+  grid:
+    mets:
+      # all three
+      - curvgyrthick
+      - curvlgyrthick
+      # pairs
+      - curvgyr
+      - curvlgyr
+      - curvthick
+      - gyrthick
+      - lgyrthick
+      # single metrics
+      - curv
+      - gyr
+      - lgyr
+      - thick
+    sim:
+      - MI
+      - CC
+    step:
+      - 0.1
+      - 0.2
+    updvar:
+      - 1.5
+    totvar:
+      - 0.5
+      - 1
+  levels:
+    - q: 20x20
+      f: 6x4
+      s: 3x2
+    - q: 100x100x70x20
+      f: 6x4x2x1
+      s: 3x2x1x0
+
 unfold_vol_ref:
   hipp:
     dims:
