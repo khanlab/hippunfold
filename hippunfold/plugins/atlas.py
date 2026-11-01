@@ -23,14 +23,19 @@ except ImportError:
 # This section is edited by hand:
 # ------------------------------------------------------------------------------------
 
-ATLASES = ["multihist7"]
-DEFAULT_ATLAS = "multihist7"
+ATLASES = ["multihist7","multihist7sgi"]
+DEFAULT_ATLAS = "multihist7sgi"
 
 ATLAS_METADATA = {
     "multihist7": {
         "metric_wildcards": ["curvature", "gyrification", "thickness"],
         "label_wildcards": ["hipp", "dentate"],
-    }
+    },
+    "multihist7sgi": {
+        "metric_wildcards": ["curvature", "gyrification", "thickness"],
+        "label_wildcards": ["hipp", "dentate"],
+        "gyrification_definition": "sgi",
+    },
 }
 
 
@@ -203,7 +208,13 @@ class AtlasConfig(PluginBase):
             group,
             "--new-atlas-metrics",
             "--new_atlas_metrics",
-            choices=["curvature", "gyrification", "thickness", "myelin"],
+            choices=[
+                "curvature",
+                "gyrification",
+                "legacygyrification",
+                "thickness",
+                "myelin",
+            ],
             action="store",
             type=str,
             dest="new_atlas_metrics",
@@ -214,12 +225,37 @@ class AtlasConfig(PluginBase):
             ),
         )
 
+        self.try_add_argument(
+            group,
+            "--new_atlas_tune",
+            "--new-atlas-tune",
+            nargs="?",
+            const="config",
+            default=None,
+            metavar="GRID_YAML",
+            dest="new_atlas_tune",
+            help=(
+                "With group_create_atlas, instead of creating the atlas, run the template "
+                "construction for a grid of antsMultivariateTemplateConstruction2.sh parameters "
+                "and write a report comparing them. The grid is new_atlas_tune in the config, "
+                "or the optional YAML file given here (same format as new_atlas_tune)."
+            ),
+        )
+
     @bidsapp.hookimpl
     def update_cli_namespace(self, namespace: dict[str, Any], config: dict[str, Any]):
         """Add atlas to config."""
         atlas = self.pop(namespace, "atlas")
         new_atlas_name = self.pop(namespace, "new_atlas_name")
         new_atlas_subfields_from = self.pop(namespace, "new_atlas_subfields_from")
+        new_atlas_tune = self.pop(namespace, "new_atlas_tune")
+
+        config["new_atlas_tune_enabled"] = new_atlas_tune is not None
+        if new_atlas_tune not in (None, "config"):
+            import yaml
+
+            with open(new_atlas_tune) as f:
+                config["new_atlas_tune"] = yaml.safe_load(f)
         output_density = self.pop(namespace, "output_density")
 
         if namespace["analysis_level"] == "group_create_atlas":

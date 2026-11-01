@@ -9,6 +9,7 @@ A complex pipeline can have multiple points of failure, so its imprtant to check
             ├── sub-001_desc-srcsink_qcchecks.tsv
             ├── sub-001_desc-surface_qc.html
             ├── sub-001_desc-surface_qcchecks.tsv
+            ├── sub-001_den-8k_desc-surfaces_viewer.html
             ├── sub-001_from-T1w_to-CITI168_regqc.png
             ├── sub-001_hemi-L_label-hipp_desc-srcsink_qcmetrics.json
             ├── sub-001_hemi-L_label-hipp_desc-surface_qcmetrics.json
@@ -41,6 +42,12 @@ To compare the QC of two runs, e.g. before and after a change to the workflow, u
     python hippunfold/workflow/scripts/qc_compare_runs.py <before_dir> <after_dir> --qc surface --labels before after -o comparison.html
 
 Defect maps are included when the native surfaces were kept (with `--notemp`).
+
+### Surface viewers
+
+`sub-001_den-8k_desc-surfaces_viewer.html` is an interactive view of the subject's surfaces: each hemisphere and label in anatomical (`corobl`) and unfolded space side by side, coloured by any shape metric (gyrification, thickness, curvature, ...) or by subfield, with the value under the cursor shown for both views. It is a single self-contained file that opens offline in a web browser.
+
+The `group` analysis level writes the same viewer for all subjects, `group_den-8k_desc-surfaces_viewer.html` in the output directory. It adds a grid of every subject's unfolded map for the chosen metric, on colour limits shared across subjects, which makes outliers and failed surfaces easy to spot; selecting a subject shows it in the views above.
 
 To better understand some common points of failure, let's walk through the other files contained here:
 

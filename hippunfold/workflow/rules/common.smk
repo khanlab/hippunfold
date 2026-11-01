@@ -1,5 +1,6 @@
 from snakebids.paths import bids_factory, specs
 from functools import partial
+import re
 from lib import utils as utils
 
 
@@ -45,6 +46,43 @@ def scale_by_attempt(base, factor=2):
         return int(base * factor ** (attempt - 1))
 
     return _scaled
+
+
+def get_ants_syn_transform(params):
+    """SyN stage transform, shared by the atlas template construction (new_atlas_ants)
+    and the unfolded registration (unfoldreg_ants)"""
+    regularization = f"{params['step']},{params['updvar']},{params['totvar']}"
+    if params["tx"] == "SyN":
+        return f"SyN[{regularization}]"
+    elif params["tx"] == "BSplineSyN":
+        return f"BSplineSyN[{regularization},3]"
+    raise ValueError(f"unsupported transform {params['tx']}, use SyN or BSplineSyN")
+
+
+def get_ants_syn_metric(sim, fixed, moving, weight):
+    """antsRegistration metric for the sim names of antsMultivariateTemplateConstruction2.sh
+    (MI, MSQ, DEMONS, CC or CC<radius>), with the same parameters as that script"""
+    if sim == "MI":
+        return f"MI[{fixed},{moving},{weight},32]"
+    if sim == "MSQ":
+        return f"MeanSquares[{fixed},{moving},{weight},0]"
+    if sim == "DEMONS":
+        return f"Demons[{fixed},{moving},{weight},4]"
+    cc = re.fullmatch(r"CC\[?(\d*)\]?", sim)
+    if cc:
+        return f"CC[{fixed},{moving},{weight},{cc.group(1) or 4}]"
+    raise ValueError(f"unsupported similarity metric {sim}")
+
+
+def check_ants_levels(params):
+    if not (
+        len(str(params["q"]).split("x"))
+        == len(str(params["f"]).split("x"))
+        == len(str(params["s"]).split("x"))
+    ):
+        raise ValueError(
+            f"q, f, s must have the same number of levels: {params['q']}, {params['f']}, {params['s']}"
+        )
 
 
 def get_atlas_dir():
@@ -381,6 +419,20 @@ def get_final_qc():
             allow_missing=True,
         )
     )
+    qc.extend(
+        inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="qc",
+                den="{density}",
+                desc="surfaces",
+                suffix="viewer.html",
+                **inputs.subj_wildcards,
+            ),
+            density=config["output_density"],
+            allow_missing=True,
+        )
+    )
     if len(config["hemi"]) == 2:
         qc.extend(
             inputs[config["modality"]].expand(
@@ -449,20 +501,25 @@ if "corobl" in ref_spaces:
 
 
 def get_cifti_metric_types(label):
-    types_list = config["cifti_metric_types"][label]
+    types_list = list(config["cifti_metric_types"][label])
     if config["generate_myelin_map"]:
         types_list.append("myelin.dscalar")
     return types_list
 
 
 def get_gifti_metric_types(label):
-    types_list = config["gifti_metric_types"][label]
+    types_list = list(config["gifti_metric_types"][label])
     if config["generate_myelin_map"]:
         types_list.append("myelin.shape")
     return types_list
 
 
 def get_create_atlas_output():
+    if (
+        config.get("new_atlas_tune_enabled", False)
+        and config["analysis_level"] == "group_create_atlas"
+    ):
+        return get_tune_report()
     files = str(
         Path(
             bids(

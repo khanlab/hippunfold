@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<style>{{css}}
+main { max-width: 1320px; }
+.controls { display: grid; gap: 10px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.row > .eyebrow { min-width: 88px; }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg button, .nav button, select {
+  font: 500 13px var(--font); color: var(--text-primary); background: var(--surface-1);
+  border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.seg button:hover, .nav button:hover { border-color: var(--link); }
+.seg button[aria-pressed="true"] { background: var(--link); border-color: var(--link); color: var(--surface-1); }
+.seg button:disabled { opacity: .35; cursor: not-allowed; }
+.seg button:focus-visible, .nav button:focus-visible, select:focus-visible, canvas:focus-visible,
+.thumbs figure:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.nav { display: flex; gap: 6px; align-items: center; }
+select { min-width: 12ch; max-width: 100%; }
+.note { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: flex-start; }
+.note p { margin: 0; color: var(--text-secondary); font-size: 13px; flex: 1 1 320px; min-width: 0; max-width: 72ch; }
+.cbar { display: grid; gap: 2px; flex: 0 1 300px; min-width: 200px; }
+.cbar canvas { width: 100%; height: 10px; border-radius: 3px; display: block; }
+.cbar .ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; }
+.views { display: grid; grid-template-columns: 3fr 2fr; gap: 12px; margin-top: 16px; }
+.view { position: relative; background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; height: min(66vh, 620px); min-height: 340px; }
+.view canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.view .tag, .view .hint { position: absolute; font-size: 11px; color: var(--text-muted); pointer-events: none; }
+.view .tag { left: 12px; top: 8px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+.view .hint { right: 12px; bottom: 8px; }
+.readout { min-height: 1.5em; color: var(--text-secondary); font-variant-numeric: tabular-nums; margin-top: 8px; }
+.readout b { color: var(--text-primary); font-weight: 600; }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.thumbs.metrics { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+.thumbs figure { margin: 0; display: grid; gap: 4px; cursor: pointer; padding: 6px; border-radius: 8px;
+  border: 1px solid transparent; }
+.thumbs figure:hover { border-color: var(--border); }
+.thumbs figure[aria-current="true"] { border-color: var(--link); background: var(--surface-2); }
+.thumbs .pair { display: flex; gap: 4px; justify-content: center; align-items: flex-end; }
+.thumbs canvas { display: block; max-width: 100%; height: auto; }
+.thumbs figcaption { margin: 0; text-align: center; font-size: 12px; color: var(--text-secondary);
+  overflow-wrap: anywhere; }
+.legend-labels { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--text-secondary); }
+@media (max-width: 760px) {
+  .views { grid-template-columns: 1fr; }
+  .view { height: 50vh; min-height: 280px; }
+}
+</style>
+</head>
+<body><main>
+<header class="page-head">
+  <p class="eyebrow">HippUnfold surfaces</p>
+  <h1>{{heading}}</h1>
+  <p class="muted">{{entities}}{{n_subjects}} subject(s) · generated {{generated}}</p>
+  {{description}}
+</header>
+
+<div class="card controls" role="group" aria-label="Viewer controls">
+  <div class="row" id="row-subject"><span class="eyebrow">Subject</span>
+    <div class="nav"><button type="button" id="prev" aria-label="Previous subject">‹</button>
+      <select id="subject" aria-label="Subject"></select>
+      <button type="button" id="next" aria-label="Next subject">›</button></div></div>
+  <div class="row"><span class="eyebrow">Hemisphere</span><div class="seg" id="seg-hemi"></div></div>
+  <div class="row"><span class="eyebrow">Label</span><div class="seg" id="seg-label"></div></div>
+  <div class="row"><span class="eyebrow">Colour by</span><div class="seg" id="seg-color"></div></div>
+  <div class="row"><span class="eyebrow">Limits</span><div class="seg" id="seg-limits"></div></div>
+  <div class="note"><p id="desc"></p>
+    <div class="cbar" id="cbar"><canvas id="cbar-canvas" width="300" height="10" aria-hidden="true"></canvas>
+      <div class="ticks"><span id="cb-lo"></span><span id="cb-mid"></span><span id="cb-hi"></span></div></div>
+    <div class="legend-labels" id="legend-labels" hidden></div></div>
+</div>
+
+<div class="views">
+  <div class="view" id="v-native"><canvas tabindex="0" aria-label="Surface in anatomical space"></canvas>
+    <span class="tag">Anatomical · corobl</span><span class="hint">drag rotate · shift-drag pan · wheel zoom · double-click reset</span></div>
+  <div class="view" id="v-flat"><canvas tabindex="0" aria-label="Surface in unfolded space"></canvas>
+    <span class="tag">Unfolded</span><span class="hint">drag pan · wheel zoom · double-click reset</span></div>
+</div>
+<div class="readout" id="readout">Hover a surface to read its value.</div>
+
+<section class="card">
+  <h2>Every map for this surface</h2>
+  <p class="muted">Unfolded, each on the limits chosen above. Select one to show it in the views.</p>
+  <div class="thumbs metrics" id="thumbs-metrics"></div>
+</section>
+
+<section class="card" id="group" hidden>
+  <h2>All subjects</h2>
+  <p class="muted" id="group-desc"></p>
+  <div class="thumbs" id="thumbs-group"></div>
+</section>
+</main>
+
+<script id="data" type="application/json">{{data}}</script>
+<script>
+(function () {
+  "use strict";
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const R = D.records;
+  const subjects = [...new Set(R.map(r => r.subject))];
+  const labels = [...new Set(R.map(r => r.label))];
+  const hemis = [...new Set(R.map(r => r.hemi))].sort();
+
+  // ---- data decoding ----
+  const blobCache = new Map();
+  function blob(key, T) {
+    const k = key + T.name;
+    if (!blobCache.has(k)) {
+      const s = atob(D.blobs[key]), u = new Uint8Array(s.length);
+      for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+      blobCache.set(k, new T(u.buffer));
+    }
+    return blobCache.get(k);
+  }
+  const geomCache = new Map();
+  function geometry(r) {
+    if (geomCache.has(r)) return geomCache.get(r);
+    const q = blob(r.points, Uint16Array), pos = new Float32Array(r.nv * 3);
+    for (let i = 0; i < r.nv; i++) for (let k = 0; k < 3; k++) pos[3 * i + k] = r.origin[k] + (q[3 * i + k] / 65535) * r.span[k];
+    const f2 = blob(r.flat, Float32Array), flat = new Float32Array(r.nv * 3);
+    for (let i = 0; i < r.nv; i++) { flat[3 * i] = f2[2 * i]; flat[3 * i + 1] = f2[2 * i + 1]; }
+    const g = { pos, flat, faces: r.u32 ? blob(r.faces, Uint32Array) : blob(r.faces, Uint16Array), values: {} };
+    geomCache.set(r, g);
+    return g;
+  }
+  function values(r, name) {
+    const g = geometry(r);
+    if (!g.values[name]) {
+      const m = r.metrics[name], q = blob(m.q, Uint8Array), v = new Float32Array(r.nv);
+      for (let i = 0; i < r.nv; i++) v[i] = q[i] === 255 ? NaN : m.qlo + (q[i] / 254) * (m.qhi - m.qlo);
+      g.values[name] = v;
+    }
+    return g.values[name];
+  }
+
+  // ---- colour ----
+  const lut = {};
+  for (const [k, hexes] of Object.entries(D.cmaps)) lut[k] = hexes.map(h => [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255));
+  function cmap(name, t) {
+    const L = lut[name], x = Math.min(Math.max(t, 0), 1) * (L.length - 1), i = Math.floor(x), f = x - i;
+    const a = L[i], b = L[Math.min(i + 1, L.length - 1)];
+    return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
+  const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
+  const MISSING = [0.6, 0.6, 0.6];
+  function limitsFor(r, name) {
+    return state.limits === "shared" ? D.shared[`${r.label}|${name}`] : r.metrics[name].own;
+  }
+  function colorsFor(r, color) {
+    const out = new Float32Array(r.nv * 3);
+    if (color === "subfields") {
+      const keys = blob(r.subfields.q, Uint8Array), tbl = {};
+      for (const [k, [, hex]] of Object.entries(r.subfields.table)) tbl[k] = hexRgb(hex);
+      for (let i = 0; i < r.nv; i++) out.set(keys[i] && tbl[keys[i]] ? tbl[keys[i]] : MISSING, 3 * i);
+      return out;
+    }
+    const v = values(r, color), st = D.styles[color], [lo, hi] = limitsFor(r, color);
+    for (let i = 0; i < r.nv; i++) out.set(Number.isFinite(v[i]) ? cmap(st.cmap, (v[i] - lo) / (hi - lo)) : MISSING, 3 * i);
+    return out;
+  }
+
+  // ---- minimal WebGL renderer ----
+  const VS = `attribute vec3 pos; attribute vec3 col; attribute vec3 nrm;
+    uniform mat4 mvp; uniform mat3 rot; uniform float lit; varying vec3 vCol;
+    void main() { gl_Position = mvp * vec4(pos, 1.0);
+      float s = lit > 0.5 ? 0.35 + 0.65 * abs(normalize(rot * nrm).z) : 1.0; vCol = col * s; }`;
+  const FS = `precision mediump float; varying vec3 vCol; void main() { gl_FragColor = vec4(vCol, 1.0); }`;
+  const PICK_VS = `attribute vec3 pos; attribute vec3 col; uniform mat4 mvp; varying vec3 vCol;
+    void main() { gl_Position = mvp * vec4(pos, 1.0); vCol = col; }`;
+  const PICK_FS = FS;
+  const DOT_VS = `attribute vec3 pos; uniform mat4 mvp; void main() { gl_Position = mvp * vec4(pos, 1.0);
+    gl_Position.z = -1.0 * gl_Position.w; gl_PointSize = 9.0; }`;
+  const DOT_FS = `precision mediump float; void main() { vec2 d = gl_PointCoord - 0.5; if (dot(d, d) > 0.25) discard;
+    gl_FragColor = vec4(1.0, 0.18, 0.33, 1.0); }`;
+
+  function program(gl, vs, fs) {
+    const p = gl.createProgram();
+    for (const [type, src] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) {
+      const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+      gl.attachShader(p, s);
+    }
+    gl.linkProgram(p);
+    return p;
+  }
+  function quatMul(a, b) {
+    return [a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1], a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0],
+      a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3], a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2]];
+  }
+  function quatMat(q) {  // row-major 3x3
+    const [x, y, z, w] = q;
+    return [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w),
+      2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w),
+      2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)];
+  }
+
+  class GLView {
+    constructor(canvas, mode, opts = {}) {
+      this.canvas = canvas; this.mode = mode; this.fixed = !!opts.fixed;
+      const gl = this.gl = canvas.getContext("webgl", { antialias: true, preserveDrawingBuffer: !!opts.preserve });
+      if (!gl) throw new Error("WebGL is not available");
+      this.u32 = gl.getExtension("OES_element_index_uint");
+      this.prog = program(gl, VS, FS); this.pickProg = program(gl, PICK_VS, PICK_FS); this.dotProg = program(gl, DOT_VS, DOT_FS);
+      this.buf = { pos: gl.createBuffer(), col: gl.createBuffer(), nrm: gl.createBuffer(), idx: gl.createBuffer(),
+        ppos: gl.createBuffer(), pcol: gl.createBuffer(), dot: gl.createBuffer() };
+      this.q = [0, 0, 0, 1]; this.zoom = 1; this.pan = [0, 0]; this.dot = null; this.key = null;
+    }
+    setMesh(key, pos, faces) {
+      const gl = this.gl;
+      if (this.key === key) return;
+      this.key = key; this.pos = pos; this.faces = faces; this.nIdx = faces.length; this.pickReady = false;
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buf.pos); gl.bufferData(gl.ARRAY_BUFFER, pos, gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buf.idx); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, faces, gl.STATIC_DRAW);
+      this.idxType = faces instanceof Uint32Array ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT;
+      if (this.mode === "3d") {
+        const n = new Float32Array(pos.length);
+        for (let t = 0; t < faces.length; t += 3) {
+          const a = 3 * faces[t], b = 3 * faces[t + 1], c = 3 * faces[t + 2];
+          const ux = pos[b] - pos[a], uy = pos[b + 1] - pos[a + 1], uz = pos[b + 2] - pos[a + 2];
+          const vx = pos[c] - pos[a], vy = pos[c + 1] - pos[a + 1], vz = pos[c + 2] - pos[a + 2];
+          const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+          for (const i of [a, b, c]) { n[i] += nx; n[i + 1] += ny; n[i + 2] += nz; }
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buf.nrm); gl.bufferData(gl.ARRAY_BUFFER, n, gl.STATIC_DRAW);
+      }
+      const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+      for (let i = 0; i < pos.length; i += 3) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], pos[i + k]); hi[k] = Math.max(hi[k], pos[i + k]); }
+      this.center = lo.map((l, k) => (l + hi[k]) / 2);
+      this.half = lo.map((l, k) => Math.max((hi[k] - l) / 2, 1e-6));
+      let r = 0;
+      for (let i = 0; i < pos.length; i += 3) r = Math.max(r, Math.hypot(pos[i] - this.center[0], pos[i + 1] - this.center[1], pos[i + 2] - this.center[2]));
+      this.radius = r || 1;
+    }
+    setColors(colors) {
+      const gl = this.gl; gl.bindBuffer(gl.ARRAY_BUFFER, this.buf.col); gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
+    }
+    reset() { this.q = [0, 0, 0, 1]; this.zoom = 1; this.pan = [0, 0]; }
+    resize() {
+      if (this.fixed) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.max(1, Math.round(this.canvas.clientWidth * dpr)), h = Math.max(1, Math.round(this.canvas.clientHeight * dpr));
+      if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; this.fbo = null; }
+    }
+    matrices() {
+      const w = this.canvas.width, h = this.canvas.height, aspect = w / h;
+      const ax = aspect >= 1 ? aspect : 1, ay = aspect >= 1 ? 1 : 1 / aspect;
+      const A = this.mode === "3d" ? quatMat(this.q) : [1, 0, 0, 0, 1, 0, 0, 0, 1];
+      const s = this.zoom * 0.9 * (this.mode === "3d" ? 1 / this.radius : Math.min(ax / this.half[0], ay / this.half[1]));
+      const c = this.center, b = [0, 1, 2].map(i => -(A[3 * i] * c[0] + A[3 * i + 1] * c[1] + A[3 * i + 2] * c[2]));
+      const rows = [
+        [0, 1, 2].map(j => (s / ax) * A[j]).concat((s * b[0] + this.pan[0]) / ax),
+        [0, 1, 2].map(j => (s / ay) * A[3 + j]).concat((s * b[1] + this.pan[1]) / ay),
+        [0, 1, 2].map(j => (-0.9 / this.radius) * A[6 + j]).concat((-0.9 / this.radius) * b[2]),
+        [0, 0, 0, 1]];
+      const mvp = new Float32Array(16);
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) mvp[4 * j + i] = rows[i][j];  // column-major
+      const rot = new Float32Array([A[0], A[3], A[6], A[1], A[4], A[7], A[2], A[5], A[8]]);
+      return { mvp, rot, s, ax, ay };
+    }
+    use(prog) {  // only the new program's attributes may stay enabled
+      const gl = this.gl, n = gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+      for (let i = 0; i < n; i++) gl.disableVertexAttribArray(i);
+      gl.useProgram(prog);
+    }
+    attrib(prog, name, buffer, size, type = this.gl.FLOAT, normalized = false) {
+      const gl = this.gl, loc = gl.getAttribLocation(prog, name);
+      if (loc < 0) return;
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, type, normalized, 0, 0);
+    }
+    draw() {
+      const gl = this.gl;
+      this.resize();
+      gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      if (!this.key) return;
+      gl.enable(gl.DEPTH_TEST);
+      const m = this.matrices();
+      this.use(this.prog);
+      this.attrib(this.prog, "pos", this.buf.pos, 3); this.attrib(this.prog, "col", this.buf.col, 3);
+      if (this.mode === "3d") this.attrib(this.prog, "nrm", this.buf.nrm, 3);
+      else gl.vertexAttrib3f(gl.getAttribLocation(this.prog, "nrm"), 0, 0, 1);
+      gl.uniformMatrix4fv(gl.getUniformLocation(this.prog, "mvp"), false, m.mvp);
+      gl.uniformMatrix3fv(gl.getUniformLocation(this.prog, "rot"), false, m.rot);
+      gl.uniform1f(gl.getUniformLocation(this.prog, "lit"), this.mode === "3d" ? 1 : 0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buf.idx);
+      gl.drawElements(gl.TRIANGLES, this.nIdx, this.idxType, 0);
+      if (this.dot !== null) {
+        this.use(this.dotProg);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buf.dot);
+        gl.bufferData(gl.ARRAY_BUFFER, this.pos.subarray(3 * this.dot, 3 * this.dot + 3), gl.DYNAMIC_DRAW);
+        this.attrib(this.dotProg, "pos", this.buf.dot, 3);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.dotProg, "mvp"), false, m.mvp);
+        gl.drawArrays(gl.POINTS, 0, 1);
+      }
+    }
+    // vertex under a canvas pixel: render face ids offscreen, then the face's nearest corner
+    pick(px, py) {
+      const gl = this.gl;
+      if (!this.key) return -1;
+      if (!this.pickReady) {
+        const nf = this.faces.length / 3, p = new Float32Array(nf * 9), c = new Uint8Array(nf * 9);
+        for (let t = 0; t < nf; t++) {
+          const id = t + 1;
+          for (let k = 0; k < 3; k++) {
+            p.set(this.pos.subarray(3 * this.faces[3 * t + k], 3 * this.faces[3 * t + k] + 3), 9 * t + 3 * k);
+            c.set([id & 255, (id >> 8) & 255, (id >> 16) & 255], 9 * t + 3 * k);
+          }
+        }
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buf.ppos); gl.bufferData(gl.ARRAY_BUFFER, p, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buf.pcol); gl.bufferData(gl.ARRAY_BUFFER, c, gl.STATIC_DRAW);
+        this.pickReady = true;
+      }
+      const w = this.canvas.width, h = this.canvas.height;
+      if (!this.fbo) {
+        this.fbo = gl.createFramebuffer();
+        const tex = gl.createTexture(), depth = gl.createRenderbuffer();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, depth); gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, w, h);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth);
+      }
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+      gl.viewport(0, 0, w, h); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      gl.disable(gl.BLEND); gl.enable(gl.DEPTH_TEST);
+      const m = this.matrices();
+      this.use(this.pickProg);
+      this.attrib(this.pickProg, "pos", this.buf.ppos, 3);
+      this.attrib(this.pickProg, "col", this.buf.pcol, 3, gl.UNSIGNED_BYTE, true);
+      gl.uniformMatrix4fv(gl.getUniformLocation(this.pickProg, "mvp"), false, m.mvp);
+      gl.drawArrays(gl.TRIANGLES, 0, this.faces.length);
+      const px8 = new Uint8Array(4);
+      gl.readPixels(Math.round(px), Math.round(h - py), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px8);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      const id = px8[0] + (px8[1] << 8) + (px8[2] << 16);
+      if (!id) return -1;
+      const t = id - 1;
+      let best = -1, bd = Infinity;
+      for (let k = 0; k < 3; k++) {
+        const v = this.faces[3 * t + k], P = this.pos;
+        const x = m.mvp[0] * P[3 * v] + m.mvp[4] * P[3 * v + 1] + m.mvp[8] * P[3 * v + 2] + m.mvp[12];
+        const y = m.mvp[1] * P[3 * v] + m.mvp[5] * P[3 * v + 1] + m.mvp[9] * P[3 * v + 2] + m.mvp[13];
+        const d = ((x + 1) / 2 * w - px) ** 2 + ((1 - y) / 2 * h - py) ** 2;
+        if (d < bd) { bd = d; best = v; }
+      }
+      return best;
+    }
+  }
+
+  // ---- state and controls ----
+  let state = { subject: subjects[0], hemi: hemis[0], label: labels[0], color: D.metrics.includes("gyrification") ? "gyrification" : D.metrics[0], limits: "shared" };
+  try { const s = JSON.parse(localStorage.getItem("hippunfold-surface-viewer") || "null"); if (s) for (const k of Object.keys(state)) if (k in s) state[k] = s[k]; } catch (e) {}
+  if (!subjects.includes(state.subject)) state.subject = subjects[0];
+  const save = () => { try { localStorage.setItem("hippunfold-surface-viewer", JSON.stringify(state)); } catch (e) {} };
+  const find = (s = state) => R.find(r => r.subject === s.subject && r.hemi === s.hemi && r.label === s.label);
+  const colorName = c => (c === "subfields" ? "subfields" : D.styles[c].name);
+
+  const sel = document.getElementById("subject");
+  for (const s of subjects) { const o = document.createElement("option"); o.value = s; o.textContent = s; sel.appendChild(o); }
+  sel.addEventListener("change", () => set({ subject: sel.value }));
+  const step = d => set({ subject: subjects[(subjects.indexOf(state.subject) + d + subjects.length) % subjects.length] });
+  document.getElementById("prev").addEventListener("click", () => step(-1));
+  document.getElementById("next").addEventListener("click", () => step(1));
+  if (subjects.length < 2) document.getElementById("row-subject").hidden = true;
+
+  function seg(id, items, key, text) {
+    const el = document.getElementById(id); el.innerHTML = "";
+    for (const it of items) {
+      const b = document.createElement("button"); b.type = "button"; b.dataset.value = it; b.textContent = text ? text(it) : it;
+      b.addEventListener("click", () => set({ [key]: it })); el.appendChild(b);
+    }
+  }
+  seg("seg-hemi", hemis, "hemi");
+  seg("seg-label", labels, "label");
+  seg("seg-color", [...D.metrics, ...(R.some(r => r.subfields) ? ["subfields"] : [])], "color", colorName);
+  seg("seg-limits", ["shared", "own"], "limits", v => (v === "shared" ? (subjects.length > 1 ? "shared across subjects" : "shared across hemispheres") : "this surface"));
+
+  function sync() {
+    sel.value = state.subject;
+    const pressed = { "seg-hemi": "hemi", "seg-label": "label", "seg-color": "color", "seg-limits": "limits" };
+    for (const [id, key] of Object.entries(pressed)) document.querySelectorAll(`#${id} button`).forEach(b => b.setAttribute("aria-pressed", String(b.dataset.value === state[key])));
+    document.querySelectorAll("#seg-hemi button").forEach(b => (b.disabled = !find({ ...state, hemi: b.dataset.value })));
+    document.querySelectorAll("#seg-label button").forEach(b => (b.disabled = !find({ ...state, label: b.dataset.value })));
+    const r = find();
+    document.querySelectorAll("#seg-color button").forEach(b => (b.disabled = !r || (b.dataset.value === "subfields" ? !r.subfields : !(b.dataset.value in r.metrics))));
+    document.querySelectorAll("#seg-limits button").forEach(b => (b.disabled = state.color === "subfields"));
+  }
+  function set(patch) {
+    state = { ...state, ...patch };
+    // fall back to an available surface and colouring
+    if (!find()) { const r = R.find(r => r.subject === state.subject && r.label === state.label) || R.find(r => r.subject === state.subject); state.hemi = r.hemi; state.label = r.label; }
+    const r = find();
+    if (state.color === "subfields" ? !r.subfields : !(state.color in r.metrics)) state.color = Object.keys(r.metrics)[0];
+    save(); sync(); show();
+  }
+
+  // ---- views ----
+  let native, flat, thumbGL;
+  try {
+    native = new GLView(document.querySelector("#v-native canvas"), "3d");
+    flat = new GLView(document.querySelector("#v-flat canvas"), "2d");
+    thumbGL = new GLView(document.createElement("canvas"), "2d", { preserve: true, fixed: true });
+  } catch (e) {
+    document.querySelector(".views").innerHTML = `<p class="muted">This browser cannot show the surfaces (WebGL unavailable: ${e.message}).</p>`;
+    return;
+  }
+  let cur = null, curValues = null, raf = 0;
+  const render = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; native.draw(); flat.draw(); }); };
+
+  function show() {
+    const r = find(), g = geometry(r);
+    const keyChanged = !cur || cur.label !== r.label;
+    native.setMesh(r, g.pos, g.faces); flat.setMesh(`${r.label}|${r.hemi}|${r.flat}|${r.faces}`, g.flat, g.faces);
+    if (keyChanged) { native.reset(); flat.reset(); }
+    cur = r;
+    const colors = colorsFor(r, state.color);
+    native.setColors(colors); flat.setColors(colors);
+    curValues = state.color === "subfields" ? null : values(r, state.color);
+    native.dot = flat.dot = null;
+    document.getElementById("readout").textContent = "Hover a surface to read its value.";
+    legend(r);
+    drawMetricThumbs(r);
+    drawGroupThumbs();
+    render();
+  }
+
+  function fmt(v) { const a = Math.abs(v); return a >= 100 ? v.toFixed(0) : a >= 10 ? v.toFixed(1) : a >= 1 ? v.toFixed(2) : v.toFixed(3); }
+  function legend(r) {
+    const desc = document.getElementById("desc"), cbar = document.getElementById("cbar"), labs = document.getElementById("legend-labels");
+    if (state.color === "subfields") {
+      desc.textContent = "Subfield labels, mapped from the atlas.";
+      cbar.hidden = true; labs.hidden = false;
+      labs.innerHTML = Object.entries(r.subfields.table).filter(([k]) => +k > 0)
+        .map(([, [name, hex]]) => `<span class="key"><span class="swatch" style="background:${hex}"></span>${name}</span>`).join("");
+      return;
+    }
+    const st = D.styles[state.color], [lo, hi] = limitsFor(r, state.color), m = r.metrics[state.color];
+    desc.textContent = st.desc || ""; cbar.hidden = false; labs.hidden = true;
+    const cv = document.getElementById("cbar-canvas"), ctx = cv.getContext("2d");
+    for (let x = 0; x < cv.width; x++) { const c = cmap(st.cmap, x / (cv.width - 1)); ctx.fillStyle = `rgb(${c.map(v => Math.round(v * 255))})`; ctx.fillRect(x, 0, 1, cv.height); }
+    const unit = st.unit ? ` ${st.unit}` : "";
+    document.getElementById("cb-lo").textContent = fmt(lo) + unit;
+    document.getElementById("cb-mid").textContent = m.median === null ? "" : `median ${fmt(m.median)}${unit}`;
+    document.getElementById("cb-hi").textContent = fmt(hi) + unit;
+  }
+
+  // ---- thumbnails (unfolded maps), drawn with one offscreen WebGL canvas ----
+  function thumb(r, color, height) {
+    const g = geometry(r);
+    thumbGL.setMesh(`${r.label}|${r.hemi}|${r.flat}|${r.faces}`, g.flat, g.faces);
+    const w = Math.max(8, Math.round(height * thumbGL.half[0] / thumbGL.half[1]));
+    thumbGL.canvas.width = w * 2; thumbGL.canvas.height = height * 2;
+    thumbGL.setColors(colorsFor(r, color)); thumbGL.reset(); thumbGL.draw();
+    const out = document.createElement("canvas"); out.width = w * 2; out.height = height * 2; out.style.width = w + "px";
+    out.getContext("2d").drawImage(thumbGL.canvas, 0, 0);
+    return out;
+  }
+  function figure(caption, canvases, current, onPick) {
+    const fig = document.createElement("figure"); fig.tabIndex = 0; fig.setAttribute("role", "button");
+    fig.setAttribute("aria-current", String(current)); fig.setAttribute("aria-label", caption);
+    const pair = document.createElement("div"); pair.className = "pair"; pair.append(...canvases);
+    const cap = document.createElement("figcaption"); cap.textContent = caption;
+    fig.append(pair, cap);
+    fig.addEventListener("click", onPick);
+    fig.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } });
+    return fig;
+  }
+  function drawMetricThumbs(r) {
+    const el = document.getElementById("thumbs-metrics"); el.innerHTML = "";
+    const colors = [...Object.keys(r.metrics), ...(r.subfields ? ["subfields"] : [])];
+    for (const c of colors) el.appendChild(figure(colorName(c), [thumb(r, c, 150)], c === state.color, () => set({ color: c })));
+  }
+  let groupJob = 0;
+  function drawGroupThumbs() {
+    if (subjects.length < 2) return;
+    const sec = document.getElementById("group"); sec.hidden = false;
+    document.getElementById("group-desc").textContent = `Unfolded ${state.label} ${colorName(state.color)}, ` +
+      (state.color === "subfields" ? "" : state.limits === "shared" ? "on limits shared by all subjects, " : "each on its own limits, ") +
+      "left and right hemispheres. Select a subject to show it above.";
+    const el = document.getElementById("thumbs-group"); el.innerHTML = "";
+    const job = ++groupJob, todo = subjects.slice();
+    (function next() {  // in chunks, so a large group does not block the page
+      if (job !== groupJob) return;
+      for (const s of todo.splice(0, 8)) {
+        const rs = hemis.map(h => R.find(r => r.subject === s && r.hemi === h && r.label === state.label)).filter(Boolean)
+          .filter(r => state.color === "subfields" ? r.subfields : state.color in r.metrics);
+        if (!rs.length) continue;
+        el.appendChild(figure(s, rs.map(r => thumb(r, state.color, 110)), s === state.subject, () => { set({ subject: s }); window.scrollTo({ top: 0, behavior: "smooth" }); }));
+      }
+      if (todo.length) setTimeout(next, 0);
+    })();
+  }
+
+  // ---- interaction ----
+  function interact(view) {
+    const c = view.canvas; let drag = null;
+    c.addEventListener("contextmenu", e => e.preventDefault());
+    c.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, pan: view.mode === "2d" || e.shiftKey || e.button === 2 }; c.setPointerCapture(e.pointerId); });
+    c.addEventListener("pointerup", () => (drag = null));
+    c.addEventListener("pointermove", e => {
+      if (drag) {
+        const dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
+        if (drag.pan) {
+          const k = 2 / Math.min(c.clientWidth, c.clientHeight);
+          view.pan[0] += dx * k; view.pan[1] -= dy * k;
+        } else {
+          const ang = Math.hypot(dx, dy) * 0.01;
+          if (ang > 0) { const ax = [dy, dx, 0].map(v => v / Math.hypot(dx, dy)), s = Math.sin(ang / 2);
+            view.q = quatMul([ax[0] * s, ax[1] * s, 0, Math.cos(ang / 2)], view.q); }
+        }
+        render(); return;
+      }
+      hover(view, e);
+    });
+    c.addEventListener("pointerleave", () => { native.dot = flat.dot = null; document.getElementById("readout").textContent = "Hover a surface to read its value."; render(); });
+    c.addEventListener("wheel", e => { e.preventDefault(); view.zoom *= Math.exp(-e.deltaY * 0.0015); view.zoom = Math.min(Math.max(view.zoom, 0.2), 40); render(); }, { passive: false });
+    c.addEventListener("dblclick", () => { view.reset(); render(); });
+  }
+  let hoverPending = null;
+  function hover(view, e) {
+    hoverPending = { view, e };
+    requestAnimationFrame(() => {
+      if (!hoverPending) return;
+      const { view, e } = hoverPending; hoverPending = null;
+      const rect = view.canvas.getBoundingClientRect(), k = view.canvas.width / rect.width;
+      const i = view.pick((e.clientX - rect.left) * k, (e.clientY - rect.top) * k);
+      native.dot = flat.dot = i < 0 ? null : i;
+      const ro = document.getElementById("readout");
+      if (i < 0) ro.textContent = "Hover a surface to read its value.";
+      else {
+        let val;
+        if (state.color === "subfields") { const key = blob(cur.subfields.q, Uint8Array)[i]; val = (cur.subfields.table[key] || ["none"])[0]; }
+        else { const v = curValues[i], st = D.styles[state.color]; val = Number.isFinite(v) ? fmt(v) + (st.unit ? " " + st.unit : "") : "n/a"; }
+        ro.innerHTML = `${cur.subject} · hemi-${cur.hemi} · ${cur.label} · vertex ${i} · ${colorName(state.color)} <b>${val}</b>`;
+      }
+      render();
+    });
+  }
+  interact(native); interact(flat);
+  new ResizeObserver(render).observe(native.canvas);
+  new ResizeObserver(render).observe(flat.canvas);
+  document.addEventListener("keydown", e => {
+    if (e.target.closest && e.target.closest("select")) return;
+    if (e.key === "ArrowRight" && subjects.length > 1) step(1);
+    if (e.key === "ArrowLeft" && subjects.length > 1) step(-1);
+  });
+  set({});
+})();
+</script>
+</body>
+</html>
