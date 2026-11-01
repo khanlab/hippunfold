@@ -269,6 +269,175 @@ rule concat_subj_vols_tsv:
         "../scripts/concat_tsv.py"
 
 
+# --- surface metric summaries ---
+#
+# Area-weighted mean and SD of each surface metric over each subfield (and over
+# the whole dentate, which has no subfield labels), per hemi and label, then
+# concatenated per subject:
+#   sub-*/metric/sub-*_space-{space}_den-{density}_desc-subfields_atlas-{atlas}_surfmetrics.tsv
+# and over subjects at the group level. See lib/surface_stats.py.
+
+
+def get_surface_metrics_for_tsv(label):
+    """Metric names, e.g. thickness, without repeats (get_gifti_metric_types
+    appends myelin to the config list each time it is called)"""
+    return list(
+        dict.fromkeys(
+            metric.removesuffix(".shape") for metric in get_gifti_metric_types(label)
+        )
+    )
+
+
+def get_subfields_for_surface_metrics_tsv(wildcards):
+    if wildcards.label != "hipp":
+        return {}
+    return {
+        "subfields": bids(
+            root=root,
+            datatype="metric",
+            den="{density}",
+            atlas="{atlas}",
+            suffix="subfields.label.gii",
+            hemi="{hemi}",
+            label="hipp",
+            **inputs.subj_wildcards,
+        )
+    }
+
+
+rule gen_surface_metrics_tsv:
+    """Area-weighted summary of the surface metrics over each subfield, for one
+    hemi and label (areas from the midthickness in the given space)"""
+    input:
+        unpack(get_subfields_for_surface_metrics_tsv),
+        surf=bids(
+            root=root,
+            datatype="surf",
+            suffix="midthickness.surf.gii",
+            den="{density}",
+            space="{space}",
+            hemi="{hemi}",
+            label="{label}",
+            **inputs.subj_wildcards,
+        ),
+        metrics=lambda wildcards: expand(
+            bids(
+                root=root,
+                datatype="metric",
+                den="{density}",
+                suffix="{metric}.shape.gii",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            metric=get_surface_metrics_for_tsv(wildcards.label),
+            allow_missing=True,
+        ),
+    output:
+        tsv=temp(
+            bids(
+                root=root,
+                datatype="metric",
+                space="{space}",
+                den="{density}",
+                atlas="{atlas}",
+                desc="subfields",
+                suffix="surfmetrics.tsv",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            )
+        ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
+    params:
+        metrics=lambda wildcards: get_surface_metrics_for_tsv(wildcards.label),
+        subfield="DG",  # name of the whole surface, if no subfield labels (dentate)
+    script:
+        "../scripts/gen_surface_metrics_tsv.py"
+
+
+rule concat_surface_metrics_tsv_subj:
+    """Concatenate the surface metric summaries of all hemis and labels of a subject"""
+    input:
+        tsv=lambda wildcards: inputs[config["modality"]]
+        .filter(**wildcards)
+        .expand(
+            bids(
+                root=root,
+                datatype="metric",
+                space="{space}",
+                den="{density}",
+                atlas="{atlas}",
+                desc="subfields",
+                suffix="surfmetrics.tsv",
+                hemi="{hemi}",
+                label="{label}",
+                **inputs.subj_wildcards,
+            ),
+            label=config["autotop_labels"],
+            **expand_hemi(),
+            allow_missing=True,
+        ),
+    output:
+        tsv=bids(
+            root=root,
+            datatype="metric",
+            space="{space}",
+            den="{density}",
+            atlas="{atlas}",
+            desc="subfields",
+            suffix="surfmetrics.tsv",
+            **inputs.subj_wildcards,
+        ),
+    group:
+        "subj"
+    resources:
+        mem_mb=scale_by_attempt(1000),
+        runtime=scale_by_attempt(1),
+    script:
+        "../scripts/concat_tsv.py"
+
+
+rule concat_surface_metrics_tsv:
+    """Concatenate the surface metric summaries of all subjects into a single tsv"""
+    input:
+        tsv=lambda wildcards: inputs[config["modality"]].expand(
+            bids(
+                root=root,
+                datatype="metric",
+                space="{space}",
+                den="{density}",
+                atlas="{atlas}",
+                desc="subfields",
+                suffix="surfmetrics.tsv",
+                **inputs.subj_wildcards,
+            ),
+            space=wildcards.space,
+            density=wildcards.density,
+            atlas=wildcards.atlas,
+        ),
+    output:
+        tsv=bids(
+            root=root,
+            prefix="group",
+            space="{space}",
+            den="{density}",
+            atlas="{atlas}",
+            from_="{modality}",
+            desc="subfields",
+            suffix="surfmetrics.tsv",
+        ),
+    resources:
+        mem_mb=scale_by_attempt(2000),
+        runtime=scale_by_attempt(5),
+    script:
+        "../scripts/concat_tsv.py"
+
+
 # --- QC checks and reports ---
 #
 # Each QC step (e.g. srcsink) writes QC metrics JSON files (see lib/qc.py),

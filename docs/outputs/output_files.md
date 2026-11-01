@@ -142,6 +142,35 @@ the name of the atlas (default: `multihist7`) is in the file name.
      └── surf
          └── sub-001_hemi-{L,R}_den-8k_label-hipp_atlas-multihist7_subfields.label.gii
 
+### surface metrics by subfield
+
+The surface metrics are also summarized over each subfield, in a table for
+each output density and space:
+
+    sub-{subject}
+     └── metric
+         └── sub-001_space-T1w_den-8k_desc-subfields_atlas-multihist7_surfmetrics.tsv
+
+Each row is for one hemisphere (`hemi`), surface (`label`), subfield and
+metric, and gives the `mean` and standard deviation (`std`) of the metric over
+the subfield, with each vertex weighted by its surface area, and the `area`
+(mm²) and number of vertices (`nvertices`) they were computed over. The `hipp`
+surface is summarized over the subfields of the atlas, named as in its
+`label.gii`, and the `dentate` surface, which has no subfield labels, as a
+whole (`DG`). Vertices with no subfield label (label 0), or with a missing
+(NaN) or infinite value of a metric, are left out.
+
+Weighting by area estimates the average of the metric over the surface of
+the subfield, so that it does not depend on how densely each part of it is
+sampled by vertices (the vertices of the `den-8k` surfaces are evenly spaced
+in the unfolded space, not in the native space). The vertex areas are those of
+the `midthickness` surface in the space in the file name, which is also the
+space of `area`. To average over several subfields, weight their means by
+`area`.
+
+The `group` analysis level concatenates these tables over subjects, into
+`group_space-T1w_den-8k_desc-subfields_atlas-multihist7_from-T1w_surfmetrics.tsv`.
+
 
 ## cifti
 

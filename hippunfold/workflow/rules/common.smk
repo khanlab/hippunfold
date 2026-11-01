@@ -434,12 +434,32 @@ def get_final_qc():
     return qc
 
 
+def get_final_surface_metrics_tsv():
+    return inputs[config["modality"]].expand(
+        bids(
+            root=root,
+            datatype="metric",
+            space="{space}",
+            den="{density}",
+            atlas="{atlas}",
+            desc="subfields",
+            suffix="surfmetrics.tsv",
+            **inputs.subj_wildcards,
+        ),
+        space=ref_spaces,
+        density=config["output_density"],
+        atlas=config["atlas"],
+        allow_missing=True,
+    )
+
+
 def get_final_output():
     subj_output = []
     subj_output.extend(get_final_spec())
     subj_output.extend(get_final_subfields())
     subj_output.extend(get_final_anat())
     subj_output.extend(get_final_qc())
+    subj_output.extend(get_final_surface_metrics_tsv())
     return subj_output
 
 
