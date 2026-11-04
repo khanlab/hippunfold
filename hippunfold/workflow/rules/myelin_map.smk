@@ -36,8 +36,8 @@ rule divide_t1_by_t2:
     resources:
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(1),
-    shell:
-        "c3d {input.t2} {input.t1} -divide -replace inf 1000 -inf -1000 NaN 0 -o {output}"
+    script:
+        "../scripts/divide_t1_by_t2.py"
 
 
 # sample on hipp & dg midthickness surfaces
