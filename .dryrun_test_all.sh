@@ -8,6 +8,8 @@ set -euxo pipefail
 ./hippunfold/run.py test_data/bids_T1w test_out participant -np --modality T1w 
 ./hippunfold/run.py test_data/bids_T1w_multisubj test_out participant -np --modality T1w 
 ./hippunfold/run.py test_data/bids_hippb500 test_out participant -np --modality hippb500 
+./hippunfold/run.py test_data/bids_hippb500 test_out group -np --modality hippb500
+./hippunfold/run.py test_data/bids_T1w_multisubj test_out group -np --modality T1w
 ./hippunfold/run.py test_data/bids_T1w_longitudinal test_out participant -np --modality T1w 
 ./hippunfold/run.py test_data/bids_singleT2w_longitudinal test_out participant -np --modality T2w 
 ./hippunfold/run.py test_data/bids_dsegtissue test_out participant -np --modality dsegtissue --derivatives test_data/bids_dsegtissue 

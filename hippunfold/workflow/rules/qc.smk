@@ -237,7 +237,7 @@ rule qc_subfield_surf:
 rule concat_subj_vols_tsv:
     """Concatenate all subject tsv files into a single tsv"""
     input:
-        tsv=lambda wildcards: inputs[get_modality_suffix(config["modality"])].expand(
+        tsv=lambda wildcards: inputs[config["modality"]].expand(
             bids(
                 root=root,
                 datatype="anat",
