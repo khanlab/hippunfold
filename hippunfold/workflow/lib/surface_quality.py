@@ -249,10 +249,16 @@ class SurfaceProjector:
         return q[np.arange(len(p)), best]
 
 
-def _worse_faces(points, faces, normals, min_angle):
-    """Faces flipped relative to normals, or with an angle below min_angle."""
+def _worse_faces(points, old_points, faces, normals, min_angle):
+    """
+    Faces with a vertex moved from old_points that are flipped relative to
+    normals, or have an angle below min_angle. Unmoved faces never count: one
+    can still fail the tests (a degenerate face has a zero normal), and would
+    keep the rollback in relax_vertices from terminating.
+    """
+    moved = np.any(points != old_points, axis=1)[faces].any(axis=1)
     flipped = np.sum(_face_normals(points, faces) * normals, axis=1) <= 0
-    return flipped | (face_geometry(points, faces)[1] < min_angle)
+    return moved & (flipped | (face_geometry(points, faces)[1] < min_angle))
 
 
 def relax_vertices(points, faces, project, iterations=3, step=0.5, min_angle=5.0):
@@ -306,13 +312,14 @@ def relax_vertices(points, faces, project, iterations=3, step=0.5, min_angle=5.0
 
         # undo moves around faces that would flip, or whose smallest angle
         # would drop below both its current value and min_angle (e.g. a vertex
-        # next to the boundary projected onto a boundary edge)
+        # next to the boundary projected onto a boundary edge). Each pass
+        # reverts at least one moved vertex, so the loop terminates.
         floor = np.minimum(face_geometry(points, faces)[1], min_angle)
-        bad = _worse_faces(new, faces, fn, floor)
+        bad = _worse_faces(new, points, faces, fn, floor)
         while bad.any():
             revert = np.unique(faces[bad])
             new[revert] = points[revert]
-            bad = _worse_faces(new, faces, fn, floor)
+            bad = _worse_faces(new, points, faces, fn, floor)
         points = new
     return points
 

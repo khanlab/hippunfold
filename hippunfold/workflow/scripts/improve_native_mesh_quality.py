@@ -7,7 +7,7 @@ from lib.qc_surface import (
     self_intersecting_faces,
 )
 from lib.surface import write_points_faces_to_gifti
-from lib.surface_quality import improve_quality
+from lib.surface_quality import improve_quality, split_boundary_chords
 from lib.utils import setup_logger
 
 log_file = snakemake.log[0] if snakemake.log else None
@@ -39,24 +39,31 @@ faces = np.asarray(faces, dtype=np.int64)
 before = summary(points, faces)
 logger.info(f"before: {before}")
 
-new_points, new_faces, info = improve_quality(
-    points,
-    faces,
-    rounds=snakemake.params.rounds,
-    relax_iterations=snakemake.params.relax_iterations,
-    step=snakemake.params.relax_step,
-    flip_tolerance=snakemake.params.flip_tolerance,
-)
+if snakemake.params.enabled:
+    new_points, new_faces, info = improve_quality(
+        points,
+        faces,
+        rounds=snakemake.params.rounds,
+        relax_iterations=snakemake.params.relax_iterations,
+        step=snakemake.params.relax_step,
+        flip_tolerance=snakemake.params.flip_tolerance,
+    )
+    msg = (
+        f"boundary chords: {info['boundary_chords_flipped']} flipped, "
+        f"{info['boundary_chords_split']} split; "
+        f"{info['edge_flips']} edge flips; vertices moved (along the surface) "
+        f"max {info['max_vertex_move']:.3f} mm, mean {info['mean_vertex_move']:.3f} mm; "
+        f"distance between the surfaces max {info['max_surface_distance']:.3f} mm, "
+        f"mean {info['mean_surface_distance']:.4f} mm"
+    )
+else:
+    # triangle-quality improvement off (--no_improve_mesh_quality); still
+    # split boundary chords, which the unfolding's boundary conditions need
+    new_points, new_faces, n_splits = split_boundary_chords(points, faces)
+    msg = f"triangle-quality improvement off; boundary chords: {n_splits} split"
 after = summary(new_points, new_faces)
 logger.info(f"after: {after}")
-logger.info(
-    f"boundary chords: {info['boundary_chords_flipped']} flipped, "
-    f"{info['boundary_chords_split']} split; "
-    f"{info['edge_flips']} edge flips; vertices moved (along the surface) "
-    f"max {info['max_vertex_move']:.3f} mm, mean {info['mean_vertex_move']:.3f} mm; "
-    f"distance between the surfaces max {info['max_surface_distance']:.3f} mm, "
-    f"mean {info['mean_surface_distance']:.4f} mm"
-)
+logger.info(msg)
 
 # keep the input if anything got worse that this step must not change
 problems = [

@@ -5,6 +5,7 @@ from lib.surface_quality import (
     closest_points_on_triangles,
     flip_edges,
     improve_quality,
+    relax_vertices,
     split_boundary_chords,
 )
 from test_qc_surface import disk, grid
@@ -170,3 +171,33 @@ def test_closest_points_degenerate_triangle():
     assert np.all(np.isfinite(q))
     assert np.allclose(q[1], 0)
     assert np.linalg.norm(q[0] - p[0]) <= np.linalg.norm(c[0] - p[0]) + 1e-12
+
+
+def test_relax_with_degenerate_face_terminates():
+    """Issue #603: a collinear face (zero normal) after decimation made the
+    rollback loop in relax_vertices spin forever."""
+    import signal
+
+    points = np.array(
+        [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0.4, 0.6, 0], [0.5, 0, 0]],
+        dtype=float,
+    )
+    # (0, 1, 5) is collinear; vertex 5 is interior, vertex 4 is off-centre
+    faces = np.array(
+        [[0, 5, 4], [5, 1, 4], [1, 2, 4], [2, 3, 4], [3, 0, 4], [0, 1, 5]]
+    )
+
+    def timeout(signum, frame):
+        raise TimeoutError("relax_vertices did not terminate")
+
+    old = signal.signal(signal.SIGALRM, timeout)
+    signal.alarm(10)
+    try:
+        new = relax_vertices(points, faces, lambda p: p)
+        _, _, info = improve_quality(points, faces)
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old)
+    assert np.all(np.isfinite(new))
+    assert np.allclose(new[:4], points[:4])  # boundary fixed
+    assert np.isfinite(info["max_vertex_move"])

@@ -144,7 +144,8 @@ rule repair_native_mesh:
 rule improve_native_mesh_quality:
     """improves triangle quality (removes slivers and obtuse triangles) with
     edge flips and tangential relaxation, keeping vertices on the surface, the
-    boundary fixed, and the topology unchanged"""
+    boundary fixed, and the topology unchanged. With --no_improve_mesh_quality,
+    only boundary chords are split"""
     input:
         surf_gii=bids(
             root=root,
@@ -185,6 +186,7 @@ rule improve_native_mesh_quality:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(5),
     params:
+        enabled=not config["no_improve_mesh_quality"],
         rounds=3,  # rounds of edge flips and relaxation
         relax_iterations=3,  # relaxation steps per round
         relax_step=0.5,  # fraction of the move towards the centroid
