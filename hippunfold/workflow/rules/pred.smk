@@ -70,7 +70,7 @@ localrules:
 
 rule download_tissuepred_model:
     input:
-        url=storage(model_dict["url"]),
+        url=storage.cached_http(model_dict["url"]),
     output:
         model_tar=temp(get_model_tar()),
     resources:
@@ -403,30 +403,16 @@ elif model_dict["arch_version"] == "synthtopo":
             "c3d {input} -flip x {output}"
 
 
-def get_f3d_ref(wildcards, input):
+def get_f3d_ref(wildcards):
     if config["modality"] == "T2w":
-        nii = Path(input.template_dir) / config["template_files"][config["template"]][
-            "crop_ref"
-        ].format(**wildcards)
+        suffix = crop_ref_suffix(config["template"])
     elif config["modality"] == "T1w":
-        nii = Path(input.template_dir) / config["template_files"][config["template"]][
-            "crop_refT1w"
-        ].format(**wildcards)
+        suffix = "T1w"
     else:
         raise ValueError("modality not supported for tissuepred model!")
-    return nii
-
-
-def get_mask_crop_ref(wildcards, input):
-    template_name = config.get("template")
-    template_cfg = config.get("template_files", {}).get(template_name, {})
-    mask_tpl = template_cfg.get("Mask_crop")
-    if not mask_tpl:
-        raise ValueError(
-            f"Dice QC requires template_files.{template_name}.Mask_crop to be set; "
-            "either add it to the config or omit the unetf3d dice QC output."
-        )
-    return Path(input.template_dir) / mask_tpl.format(**wildcards)
+    return imported_template_file(
+        "template3d_crop", tpl=config["template"], suffix=suffix
+    )(wildcards)
 
 
 rule qc_tissuepred_f3d:
@@ -451,7 +437,7 @@ rule qc_tissuepred_f3d:
             space="corobl",
             hemi="{hemi}",
         ),
-        template_dir=Path(download_dir) / "template" / config["template"],
+        ref=get_f3d_ref,
     output:
         cpp=temp(
             bids(
@@ -497,11 +483,9 @@ rule qc_tissuepred_f3d:
     resources:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(10),
-    params:
-        ref=get_f3d_ref,
     shell:
-        "reg_f3d -flo {input.img} -ref {params.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
-        "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {params.ref} -res {output.res_mask} -inter 0 &> {log}"
+        "reg_f3d -flo {input.img} -ref {input.ref} -res {output.res} -cpp {output.cpp} &> {log} && "
+        "reg_resample -flo {input.seg} -cpp {output.cpp} -ref {input.ref} -res {output.res_mask} -inter 0 &> {log}"
 
 
 rule qc_tissuepred_dice:
@@ -515,7 +499,7 @@ rule qc_tissuepred_dice:
             space="template",
             hemi="{hemi}",
         ),
-        template_dir=Path(download_dir) / "template" / config["template"],
+        ref=imported_template_file("template3d_mask", tpl=config["template"]),
     output:
         dice=report(
             bids(
@@ -536,6 +520,6 @@ rule qc_tissuepred_dice:
         runtime=scale_by_attempt(1),
     params:
         hipp_lbls=[1, 2, 7, 8],
-        ref=get_mask_crop_ref,
+        ref=lambda wildcards, input: input.ref,
     script:
         "../scripts/dice.py"

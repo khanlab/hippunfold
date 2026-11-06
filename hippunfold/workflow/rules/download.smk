@@ -1,5 +1,6 @@
 # populate the HIPPUNFOLD_CACHE_DIR folder as needed
 from lib import utils as utils
+from snakebids_templates import generate_templates
 
 download_dir = utils.get_download_dir()
 
@@ -11,102 +12,122 @@ storage cached_http:
     cache=str(Path(download_dir) / "http_cache"),
 
 
+storage http:
+    provider="http",
+
+
+def template_storage(url):
+    """cached-http only handles zenodo.org, so fetch other URLs (e.g. OSF) with http"""
+    if "zenodo.org" in url:
+        return storage.cached_http(url)
+    return storage.http(url)
+
+
+# 3D templates, 3D atlases, 2D templates and 2D atlases (see templates in the config)
+templates = generate_templates(config["templates"], workflow.basedir)
+
+COMPONENTS_3D = [c for c in templates if c.startswith(("template3d", "atlas3d"))]
+COMPONENTS_2D = [c for c in templates if c.startswith(("template2d", "atlas2d"))]
+
+# 3D files are imported here; 2D files into the atlas dir, alongside atlases created
+# with group_create_atlas
+template_dir = Path(download_dir) / "templates"
+
+
 # run on the host (not submitted to a cluster), since compute nodes may lack internet access
 localrules:
-    download_extract_template,
-    download_surf_template_atlas,
-    cp_atlas_surf_gii,
-    cp_atlas_metric_gii,
+    import_template_file,
+    import_atlas_file,
 
 
-rule download_extract_template:
-    output:
-        unzip_dir=directory(Path(download_dir) / "template" / "{template}"),
-    shadow:
-        "minimal"
-    resources:
-        mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(10),
-    params:
-        url=lambda wildcards: config["resource_urls"]["template"][wildcards.template],
-    script:
-        "../scripts/download.py"
-
-
-rule download_surf_template_atlas:
+rule import_template_file:
+    """copy a 3D template or atlas file into the cache dir, with its canonical name"""
     input:
-        zip_file=lambda wildcards: storage(
-            config["resource_urls"]["atlas"][wildcards.atlas]
-        ),
+        templates.import_input(template_storage, COMPONENTS_3D),
     output:
-        unzip_dir=temp(directory(Path(download_dir) / "atlases_dl" / "tpl-{atlas}")),
+        template_dir / "{relpath}",
     wildcard_constraints:
-        atlas="|".join(config["builtin_atlases"]),
-    shadow:
-        "minimal"
+        relpath=templates.import_constraint(COMPONENTS_3D),
     resources:
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(10),
-    shell:
-        "unzip {input} -d {output}"
+    run:
+        templates.import_file(input[0], output[0], wildcards.relpath)
 
 
-rule cp_atlas_surf_gii:
+rule import_atlas_file:
+    """extract a 2D template or atlas file into the atlas dir"""
     input:
-        unzip_dir=Path(download_dir) / "atlases_dl" / "tpl-{atlas}",
+        templates.import_input(template_storage, COMPONENTS_2D),
     output:
-        atlas_file=bids_atlas(
-            root=get_atlas_dir(),
-            template="{atlas}",
-            hemi="{hemi}",
-            label="{label}",
-            den="{density}",
-            space="{space}",
-            suffix="{surf_name}.surf.gii",
-        ),
+        get_atlas_dir() / "{relpath}",
+    wildcard_constraints:
+        relpath=templates.import_constraint(COMPONENTS_2D),
     resources:
         mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
-    params:
-        path=lambda wildcards, input: bids_atlas(
-            root=Path(input.unzip_dir).parent,
-            template=wildcards.atlas,
-            hemi=wildcards.hemi,
-            label=wildcards.label,
-            den=wildcards.density,
-            space=wildcards.space,
-            suffix=f"{wildcards.surf_name}.surf.gii",
-        ),
-    shell:
-        "cp {params.path} {output}"
+        runtime=scale_by_attempt(10),
+    run:
+        templates.import_file(input[0], output[0], wildcards.relpath)
 
 
-rule cp_atlas_metric_gii:
-    input:
-        unzip_dir=Path(download_dir) / "atlases_dl" / "tpl-{atlas}",
-    output:
-        atlas_file=bids_atlas(
-            root=get_atlas_dir(),
-            template="{atlas}",
-            hemi="{hemi}",
-            label="{label}",
-            den="{density}",
-            suffix="{metricname}.{metrictype}.gii",
-        ),
-    resources:
-        mem_mb=scale_by_attempt(1000),
-        runtime=scale_by_attempt(1),
-    params:
-        path=lambda wildcards, input: bids_atlas(
-            root=Path(input.unzip_dir).parent,
-            template=wildcards.atlas,
-            hemi=wildcards.hemi,
-            label=wildcards.label,
-            den=wildcards.density,
-            suffix=f"{wildcards.metricname}.{wildcards.metrictype}.gii",
-        ),
-    shell:
-        "cp {params.path} {output}"
+def template_file(component, **entities):
+    """path of an imported 3D template file with the given (fixed) entities"""
+    return str(template_dir / templates[component].relpath(**entities))
+
+
+def has_template_file(component, **entities):
+    return len(templates[component].filter(**entities)) > 0
+
+
+def _template_hemis(component, wildcards, entities):
+    """hemispheres of the template file matching the entities and rule wildcards
+
+    For files without a hemi entity (e.g. whole-head images), these are the
+    hemispheres of the template's 3D atlas."""
+    comp = templates[component]
+    if "hemi" not in comp.wildcards:
+        return templates["atlas3d_dseg"].filter(tpl=entities["tpl"]).entities["hemi"]
+    query = {
+        w: entities[w] if w in entities else wildcards[w]
+        for w in comp.wildcards
+        if w != "hemi" and (w in entities or w in wildcards.keys())
+    }
+    return comp.filter(**query).entities.get("hemi", [])
+
+
+def template_hemi(component, **entities):
+    """the rule's hemi if the template has it, otherwise the other hemi (to flip)
+
+    Templates may have only a single hemisphere, or be missing files for one."""
+
+    def get(wildcards):
+        hemis = _template_hemis(component, wildcards, entities)
+        if wildcards.hemi in hemis:
+            return wildcards.hemi
+        if hemis:
+            return hemis[0]
+        raise ValueError(f"No {component} file in the template for {entities}")
+
+    return get
+
+
+def imported_template_file(component, **entities):
+    """input function for an imported 3D template file, flipped from the other
+    hemisphere if needed"""
+    if "hemi" in templates[component].wildcards:
+        entities.setdefault("hemi", template_hemi(component, **entities))
+    return templates[component].imported(template_dir, **entities)
+
+
+def copy_or_flip(component, **entities):
+    """params function: copy the template file, or flip it if it is from the other hemi"""
+
+    def get(wildcards, input, output):
+        if wildcards.hemi in _template_hemis(component, wildcards, entities):
+            return f"cp {input} {output}"
+        return f"c3d {input} -flip x -o {output}"
+
+    return get
 
 
 ## unpack template
@@ -115,20 +136,18 @@ rule cp_atlas_metric_gii:
 # by flipping it
 
 
-def copy_or_flip(wildcards, file_to_process):
-    if (
-        wildcards.hemi
-        in config["template_files"][config["inject_template"]]["hemi_wildcards"]
-    ):
-        cmd = f"cp {file_to_process}"
-    else:
-        cmd = f"c3d {file_to_process} -flip x -o"
-    return cmd
+def crop_ref_suffix(template):
+    """contrast of the template's corobl crop reference: T2w if available"""
+    if has_template_file("template3d_crop", tpl=template, suffix="T2w"):
+        return "T2w"
+    return "T1w"
 
 
 rule import_template_dseg:
     input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
+        imported_template_file(
+            "atlas3d_dseg", tpl=config["inject_template"], desc="hipptissue"
+        ),
     output:
         template_seg=temp(
             bids(
@@ -147,28 +166,18 @@ rule import_template_dseg:
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(1),
     params:
-        template_seg=lambda wildcards: Path(download_dir)
-        / "template"
-        / config["inject_template"]
-        / config["template_files"][config["inject_template"]]["dseg"].format(
-            **wildcards
-        ),
-        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
-            wildcards,
-            Path(download_dir)
-            / "template"
-            / config["inject_template"]
-            / config["template_files"][config["inject_template"]]["dseg"].format(
-                **wildcards
-            ),
+        cmd=copy_or_flip(
+            "atlas3d_dseg", tpl=config["inject_template"], desc="hipptissue"
         ),
     shell:
-        "{params.copy_or_flip_cmd} {output.template_seg}"
+        "{params.cmd}"
 
 
 rule import_template_dseg_dentate:
     input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
+        imported_template_file(
+            "atlas3d_dseg", tpl=config["inject_template"], desc="dentatetissue"
+        ),
     output:
         template_seg=temp(
             bids(
@@ -187,28 +196,16 @@ rule import_template_dseg_dentate:
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(1),
     params:
-        template_seg=lambda wildcards: Path(download_dir)
-        / "template"
-        / config["inject_template"]
-        / config["template_files"][config["inject_template"]]["dseg_dentate"].format(
-            **wildcards
-        ),
-        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
-            wildcards,
-            Path(download_dir)
-            / "template"
-            / config["inject_template"]
-            / config["template_files"][config["inject_template"]][
-                "dseg_dentate"
-            ].format(**wildcards),
+        cmd=copy_or_flip(
+            "atlas3d_dseg", tpl=config["inject_template"], desc="dentatetissue"
         ),
     shell:
-        "{params.copy_or_flip_cmd} {output.template_seg}"
+        "{params.cmd}"
 
 
 rule import_template_coords:
     input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
+        imported_template_file("atlas3d_coords", tpl=config["inject_template"]),
     output:
         template_coords=temp(
             bids(
@@ -229,28 +226,18 @@ rule import_template_coords:
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(1),
     params:
-        template_coords=lambda wildcards: Path(download_dir)
-        / "template"
-        / config["inject_template"]
-        / config["template_files"][config["inject_template"]]["coords"].format(
-            **wildcards
-        ),
-        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
-            wildcards,
-            Path(download_dir)
-            / "template"
-            / config["inject_template"]
-            / config["template_files"][config["inject_template"]]["coords"].format(
-                **wildcards
-            ),
-        ),
+        cmd=copy_or_flip("atlas3d_coords", tpl=config["inject_template"]),
     shell:
-        "{params.copy_or_flip_cmd} {output.template_coords}"
+        "{params.cmd}"
 
 
 rule import_template_anat:
     input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
+        imported_template_file(
+            "template3d",
+            tpl=config["inject_template"],
+            suffix=get_modality_suffix(config["modality"]),
+        ),
     output:
         template_anat=temp(
             bids(
@@ -270,28 +257,22 @@ rule import_template_anat:
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(1),
     params:
-        template_anat=lambda wildcards: Path(download_dir)
-        / "template"
-        / config["inject_template"]
-        / config["template_files"][config["inject_template"]][
-            get_modality_suffix(config["modality"])
-        ].format(**wildcards),
-        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
-            wildcards,
-            Path(download_dir)
-            / "template"
-            / config["inject_template"]
-            / config["template_files"][config["inject_template"]][
-                get_modality_suffix(config["modality"])
-            ].format(**wildcards),
+        cmd=copy_or_flip(
+            "template3d",
+            tpl=config["inject_template"],
+            suffix=get_modality_suffix(config["modality"]),
         ),
     shell:
-        "{params.copy_or_flip_cmd} {output.template_anat}"
+        "{params.cmd}"
 
 
 rule import_template_anat_crop:  # used only in templateseg workflow
     input:
-        template_dir=Path(download_dir) / "template" / config["inject_template"],
+        imported_template_file(
+            "template3d_crop",
+            tpl=config["inject_template"],
+            suffix=crop_ref_suffix(config["inject_template"]),
+        ),
     output:
         template_anat=temp(
             bids(
@@ -312,20 +293,10 @@ rule import_template_anat_crop:  # used only in templateseg workflow
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(1),
     params:
-        template_anat=lambda wildcards: Path(download_dir)
-        / "template"
-        / config["inject_template"]
-        / config["template_files"][config["inject_template"]]["crop_ref"].format(
-            **wildcards
-        ),
-        copy_or_flip_cmd=lambda wildcards: copy_or_flip(
-            wildcards,
-            Path(download_dir)
-            / "template"
-            / config["inject_template"]
-            / config["template_files"][config["inject_template"]]["crop_ref"].format(
-                **wildcards
-            ),
+        cmd=copy_or_flip(
+            "template3d_crop",
+            tpl=config["inject_template"],
+            suffix=crop_ref_suffix(config["inject_template"]),
         ),
     shell:
-        "{params.copy_or_flip_cmd} {output.template_anat}"
+        "{params.cmd}"

@@ -7,14 +7,14 @@ from snakebids import bidsapp
 from snakebids.plugins.base import PluginBase
 
 # last rules in each chain that populates the cache dir (HIPPUNFOLD_CACHE_DIR);
-# their upstream download rules (download_surf_template_atlas,
-# download_tissuepred_model) are pulled in as dependencies. Only list the last rule of
-# each chain: passing both a rule and its upstream rule to --until makes snakemake
-# stop after the first job (snakemake/snakemake#823).
+# their upstream download rules (e.g. download_tissuepred_model) are pulled in as
+# dependencies. Only list the last rule of each chain: passing both a rule and its
+# upstream rule to --until makes snakemake stop after the first job
+# (snakemake/snakemake#823). Template and atlas files are fetched by the import rules
+# themselves, through Snakemake storage.
 DOWNLOAD_RULES = [
-    "download_extract_template",
-    "cp_atlas_surf_gii",
-    "cp_atlas_metric_gii",
+    "import_template_file",
+    "import_atlas_file",
 ]
 
 # last rule that prepares the tissuepred model in the cache dir, per arch_version;

@@ -354,8 +354,8 @@ def get_inputs_compose_t2_xfm_corobl(wildcards):
         )
 
         # xfm1: template to corobl
-        template_dir = Path(download_dir) / "template" / config["template"]
-        return {"t2_to_std": t2_to_std, "template_dir": template_dir}
+        std_to_cor = template_file("template3d_xfm", tpl=config["template"])
+        return {"t2_to_std": t2_to_std, "std_to_cor": std_to_cor}
 
 
 def get_cmd_compose_t2_xfm_corobl(wildcards, input, output):
@@ -368,9 +368,7 @@ def get_cmd_compose_t2_xfm_corobl(wildcards, input, output):
         # xfm0: t2 to template
         xfm0 = input.t2_to_std
         # xfm1: template to corobl
-        xfm1 = Path(input.template_dir) / config["template_files"][config["template"]][
-            "xfm_corobl"
-        ].format(**wildcards)
+        xfm1 = input.std_to_cor
 
     return f"c3d_affine_tool -itk {xfm0} -itk {xfm1} -mult -oitk {output}"
 
@@ -448,7 +446,11 @@ rule warp_t2_to_corobl_crop:
             desc="preproc",
         ),
         xfm=get_xfm_to_corobl(),
-        template_dir=Path(download_dir) / "template" / config["template"],
+        ref=imported_template_file(
+            "template3d_crop",
+            tpl=config["template"],
+            suffix=crop_ref_suffix(config["template"]),
+        ),
     output:
         nii=temp(
             bids(
@@ -466,9 +468,6 @@ rule warp_t2_to_corobl_crop:
     resources:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(5),
-    params:
-        ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"].format(**wildcards),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
-        "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {params.ref}  -t {input.xfm}"
+        "antsApplyTransforms -d 3 --interpolation Linear -i {input.nii} -o {output.nii} -r {input.ref}  -t {input.xfm}"

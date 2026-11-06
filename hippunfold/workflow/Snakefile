@@ -181,9 +181,8 @@ include: "rules/unfold_reg.smk"
 
 
 if config["use_template_seg"]:
-    if (
-        "dseg" in config["template_files"][config["template"]]
-        and "coords" in config["template_files"][config["template"]]
+    if has_template_file("atlas3d_dseg", tpl=config["template"]) and has_template_file(
+        "atlas3d_coords", tpl=config["template"]
     ):
 
         include: "rules/templateseg.smk"

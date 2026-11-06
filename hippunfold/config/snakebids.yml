@@ -365,72 +365,108 @@ cifti_metric_types:
 xfm_identity: resources/etc/identity_xfm.txt
 xfm_identity_itk: resources/etc/identity_xfm_itk.txt
 
-template_files:
-  CITI168:
-    T1w: T1w_head_700um.nii.gz
-    T2w: T2w_head_700um.nii.gz
-    xfm_corobl: CoronalOblique_rigid.txt
-    crop_ref: T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    crop_refT1w: T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
-    Mask_crop: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
-    dseg:  sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz 
-    coords: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{label}_desc-laplace_coords.nii.gz 
-    hemi_wildcards:
-      - L
-      - R
-  dHCP:
-    T1w: tpl-dHCP_cohort-1_res-1_T1w.nii.gz
-    T2w: tpl-dHCP_cohort-1_res-1_T2w.nii.gz
-    xfm_corobl: tpl-dHCP_cohort-1_to-corobl_affine.txt
-    crop_ref: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
-    crop_refT1w: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
-    Mask_crop: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
-    dseg: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
-    dseg_dentate: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissueDGmanualseg_dseg.nii.gz
-    coords: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - L
-      - R
-  MBMv3:
-    T1w: tpl-MBMv3_T1w.nii.gz
-    T2w: tpl-MBMv3_T2w.nii.gz
-    xfm_corobl: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-MBMv3_hemi-{hemi}_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissue_dseg.nii.gz
-    dseg_dentate: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissueDG_dseg.nii.gz
-    coords: tpl-MBMv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - L
-      - R
-  CIVM:
-    T1w: tpl-CIVM_T1w.nii.gz
-    xfm_corobl: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-CIVM_hemi-{hemi}_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
-    dseg: tpl-CIVM_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    coords: tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - L
-      - R
-  upenn:
-    T1w: tpl-upenn_desc-hipptissue_dseg.nii.gz
-    dseg: tpl-upenn_desc-hipptissue_dseg.nii.gz
-    dseg_dentate: tpl-upenn_desc-hippdentate_dseg.nii.gz # hack: separate files for DG
-    coords: tpl-upenn_dir-{dir}_label-{label}_coords.nii.gz
-    hemi_wildcards:
-      - R
-  ABAv3:
-    T1w: tpl-ABAv3_T1w.nii.gz
-    xfm_corobl: tpl-ABAv3_from-native_to-corobl_type-itk_affine.txt
-    crop_ref: tpl-ABAv3_hemi-{hemi}_space-corobl_T1w.nii.gz
-    Mask_crop: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    dseg: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
-    dseg_dentate: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissueDGmanual_dseg.nii.gz
-    coords: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
-    hemi_wildcards:
-      - L
-      - R
+# Templates, atlases and related files, located by entity with snakebids-templates.
+# Every source lists its files as tpl-X/tpl-X_*.ext paths; files with other names are
+# given canonical names with rename (new name: name in the source). Files are imported
+# into the cache dir (HIPPUNFOLD_CACHE_DIR) by the import_template_file and
+# import_atlas_file rules, so 'hippunfold ... download' pre-fetches them.
+#
+#   3D templates: images for registration (whole-head, and cropped coronal-oblique)
+#   3D atlases:   labels on 3D templates (hippocampal/dentate tissue dseg, coords)
+#   2D templates: unfolded surfaces and surface metrics (curvature, gyrification, thickness)
+#   2D atlases:   unfolded subfield labels
+templates:
+  sources:
+    multihist7: {type: archive, url: 'https://zenodo.org/records/18451323/files/tpl-multihist7_flatdir.zip', tpl: multihist7}
+    multihist7sgi: {type: archive, url: 'https://zenodo.org/records/23843485/files/tpl-multihist7sgi_flatdir_20261031.zip', tpl: multihist7sgi}
+    CITI168:
+      type: osf
+      url: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/'
+      tpl: CITI168
+      rename:
+        tpl-CITI168_T1w.nii.gz: T1w_head_700um.nii.gz
+        tpl-CITI168_T2w.nii.gz: T2w_head_700um.nii.gz
+        tpl-CITI168_from-native_to-corobl_xfm.txt: CoronalOblique_rigid.txt
+        tpl-CITI168_hemi-{hemi}_space-corobl_T2w.nii.gz: T2w_300umCoronalOblique_hemi-{hemi}.nii.gz
+        tpl-CITI168_hemi-{hemi}_space-corobl_T1w.nii.gz: T1w_300umCoronalOblique_hemi-{hemi}.nii.gz
+        tpl-CITI168_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz: Mask_300umCoronalOblique_hemi-{hemi}.nii.gz
+        tpl-CITI168_hemi-{hemi}_space-corobl_desc-hipptissue_dseg.nii.gz: sub-CITI168_hemi-{hemi}_space-cropT1w_desc-postproc_dseg.nii.gz
+        tpl-CITI168_hemi-{hemi}_space-corobl_dir-{dir}_label-{label}_desc-laplace_coords.nii.gz: sub-CITI168_dir-{dir}_hemi-{hemi}_space-cropT1w_label-{label}_desc-laplace_coords.nii.gz
+    dHCP:
+      type: osf
+      url: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/'
+      tpl: dHCP
+      rename:
+        tpl-dHCP_T1w.nii.gz: tpl-dHCP_cohort-1_res-1_T1w.nii.gz
+        tpl-dHCP_T2w.nii.gz: tpl-dHCP_cohort-1_res-1_T2w.nii.gz
+        tpl-dHCP_from-native_to-corobl_xfm.txt: tpl-dHCP_cohort-1_to-corobl_affine.txt
+        tpl-dHCP_hemi-{hemi}_space-corobl_T2w.nii.gz: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T2w.nii.gz
+        tpl-dHCP_hemi-{hemi}_space-corobl_T1w.nii.gz: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_T1w.nii.gz
+        tpl-dHCP_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz: tpl-dHCP_cohort-1_res-1_space-corobl_hemi-{hemi}_desc-hipp_mask.nii.gz
+        tpl-dHCP_hemi-{hemi}_space-corobl_desc-hipptissue_dseg.nii.gz: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissuemanualseg_dseg.nii.gz
+        tpl-dHCP_hemi-{hemi}_space-corobl_desc-dentatetissue_dseg.nii.gz: tpl-dHCP_space-corobl_hemi-{hemi}_desc-tissueDGmanualseg_dseg.nii.gz
+        tpl-dHCP_hemi-{hemi}_space-corobl_dir-{dir}_label-{label}_desc-laplace_coords.nii.gz: tpl-dHCP_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
+    MBMv3:
+      type: osf
+      url: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/'
+      tpl: MBMv3
+      rename:
+        tpl-MBMv3_from-native_to-corobl_xfm.txt: tpl-MBMv3_from-native_to-corobl_type-itk_affine.txt
+        tpl-MBMv3_hemi-{hemi}_space-corobl_desc-hipptissue_dseg.nii.gz: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissue_dseg.nii.gz
+        tpl-MBMv3_hemi-{hemi}_space-corobl_desc-dentatetissue_dseg.nii.gz: tpl-MBMv3_hemi-{hemi}_space-corobl_desc-tissueDG_dseg.nii.gz
+        tpl-MBMv3_hemi-{hemi}_space-corobl_dir-{dir}_label-{label}_desc-laplace_coords.nii.gz: tpl-MBMv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
+    upenn:
+      type: osf
+      url: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/'
+      tpl: upenn
+      rename:
+        tpl-upenn_T1w.nii.gz: tpl-upenn_desc-hipptissue_dseg.nii.gz
+        tpl-upenn_hemi-R_space-corobl_desc-hipptissue_dseg.nii.gz: tpl-upenn_desc-hipptissue_dseg.nii.gz
+        tpl-upenn_hemi-R_space-corobl_desc-dentatetissue_dseg.nii.gz: tpl-upenn_desc-hippdentate_dseg.nii.gz
+        tpl-upenn_hemi-R_space-corobl_dir-{dir}_label-{label}_desc-laplace_coords.nii.gz: tpl-upenn_dir-{dir}_label-{label}_coords.nii.gz
+    CIVM:
+      type: osf
+      url: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/'
+      tpl: CIVM
+      rename:
+        tpl-CIVM_from-native_to-corobl_xfm.txt: tpl-CIVM_from-native_to-corobl_type-itk_affine.txt
+        tpl-CIVM_hemi-{hemi}_space-corobl_desc-hipptissue_dseg.nii.gz: tpl-CIVM_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+        tpl-CIVM_hemi-{hemi}_space-corobl_dir-{dir}_label-{label}_desc-laplace_coords.nii.gz: tpl-CIVM_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
+    ABAv3:
+      type: osf
+      url: 'https://files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/'
+      tpl: ABAv3
+      rename:
+        tpl-ABAv3_from-native_to-corobl_xfm.txt: tpl-ABAv3_from-native_to-corobl_type-itk_affine.txt
+        tpl-ABAv3_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+        tpl-ABAv3_hemi-{hemi}_space-corobl_desc-hipptissue_dseg.nii.gz: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissuemanual_dseg.nii.gz
+        tpl-ABAv3_hemi-{hemi}_space-corobl_desc-dentatetissue_dseg.nii.gz: tpl-ABAv3_hemi-{hemi}_space-corobl_desc-tissueDGmanual_dseg.nii.gz
+        tpl-ABAv3_hemi-{hemi}_space-corobl_dir-{dir}_label-{label}_desc-laplace_coords.nii.gz: tpl-ABAv3_dir-{dir}_hemi-{hemi}_space-corobl_label-{label}_desc-laplace_coords.nii.gz
+
+  components:
+    # 3D templates
+    template3d:  # whole-head T1w/T2w, for affine registration
+      path: tpl-{tpl}/tpl-{tpl}_{suffix}.nii.gz
+    template3d_crop:  # coronal-oblique crop, defining the corobl space grid
+      path: tpl-{tpl}/tpl-{tpl}_hemi-{hemi}_space-corobl_{suffix}.nii.gz
+    template3d_mask:
+      path: tpl-{tpl}/tpl-{tpl}_hemi-{hemi}_space-corobl_desc-hipp_mask.nii.gz
+    template3d_xfm:  # template to corobl
+      path: tpl-{tpl}/tpl-{tpl}_from-native_to-corobl_xfm.txt
+    # 3D atlases
+    atlas3d_dseg:
+      path: tpl-{tpl}/tpl-{tpl}_hemi-{hemi}_space-corobl_desc-{desc}_dseg.nii.gz
+      filters: {desc: [hipptissue, dentatetissue]}
+    atlas3d_coords:
+      path: tpl-{tpl}/tpl-{tpl}_hemi-{hemi}_space-corobl_dir-{dir}_label-{label}_desc-laplace_coords.nii.gz
+    # 2D templates
+    template2d_surf:
+      path: tpl-{tpl}/tpl-{tpl}_hemi-{hemi}_space-{space}_den-{den}_label-{label}_{surf}.surf.gii
+    template2d_metric:
+      path: tpl-{tpl}/tpl-{tpl}_hemi-{hemi}_den-{den}_label-{label}_{metric}.shape.gii
+    # 2D atlases
+    atlas2d_dseg:
+      path: tpl-{tpl}/tpl-{tpl}_hemi-{hemi}_den-{den}_label-{label}_dseg.label.gii
 
 #values to use for re-mapping tissue labels when combining with subfields.
 # set the SRLM and Cyst labels to always be higher than any label in the atlas (so they override)
@@ -566,21 +602,6 @@ tissuepred_models:
     trainer: nnUNetTrainer
     plans: nnUNetPlans
     checkpoint: checkpoint_best.pth
-
-
-#these will be downloaded to ~/.cache/hippunfold
-resource_urls:
-  atlas: 
-    multihist7: 'https://zenodo.org/records/18451323/files/tpl-multihist7_flatdir.zip'
-    multihist7sgi: 'https://zenodo.org/records/23843485/files/tpl-multihist7sgi_flatdir_20261031.zip'
-  template:
-    CITI168: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf0282745121fb86a93/?zip='
-    dHCP: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bff13d27b123094c9b4/?zip='
-    MBMv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c0e8a28b11240ffc6e9/?zip='
-    upenn: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395c1613d27b122a94ca09/?zip='
-    CIVM: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/65395bf62827451220b86e24/?zip='
-    ABAv3: 'files.ca-1.osf.io/v1/resources/v8acf/providers/osfstorage/6668855b6b6c8e2cc704ca97/?zip='
-#to get hash, see https://github.com/CenterForOpenScience/osf.io/issues/8256#issuecomment-379833911
 
 
 hippdwi_opts:

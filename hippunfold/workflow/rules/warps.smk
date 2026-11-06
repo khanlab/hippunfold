@@ -1,10 +1,5 @@
 def reg_to_template_cmd(wildcards, input, output):
-    ref = str(
-        Path(input.template_dir)
-        / config["template_files"][config["template"]][wildcards.modality].format(
-            **wildcards
-        ),
-    )
+    ref = input.ref
     if config["no_reg_template"]:
         cmd = f"reg_resample -flo {input.flo} -ref {ref} -res {output.warped_subj} -aff {input.xfm_identity}; cp {input.xfm_identity} {output.xfm_ras}"
     elif config["rigid_reg_template"]:
@@ -25,7 +20,9 @@ rule reg_to_template:
             suffix="{modality}.nii.gz",
         ),
         xfm_identity=os.path.join(workflow.basedir, "..", config["xfm_identity"]),
-        template_dir=Path(download_dir) / "template" / config["template"],
+        ref=imported_template_file(
+            "template3d", tpl=config["template"], suffix="{modality}"
+        ),
     output:
         warped_subj=temp(
             bids(
@@ -114,7 +111,7 @@ rule compose_template_xfm_corobl:
             desc="affine",
             type_="itk",
         ),
-        template_dir=Path(download_dir) / "template" / config["template"],
+        std_to_cor=template_file("template3d_xfm", tpl=config["template"]),
     output:
         sub_to_cor=temp(
             bids(
@@ -133,13 +130,8 @@ rule compose_template_xfm_corobl:
     resources:
         mem_mb=scale_by_attempt(1000),
         runtime=scale_by_attempt(1),
-    params:
-        std_to_cor=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["xfm_corobl"].format(
-            **wildcards
-        ),
     shell:
-        "c3d_affine_tool -itk {input.sub_to_std} -itk {params.std_to_cor} -mult -oitk {output}"
+        "c3d_affine_tool -itk {input.sub_to_std} -itk {input.std_to_cor} -mult -oitk {output}"
 
 
 rule invert_template_xfm_itk2ras:

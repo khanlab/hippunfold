@@ -31,7 +31,6 @@ rule template_reg:
             hemi="{hemi}",
             **inputs.subj_wildcards,
         ),
-        template_dir=Path(download_dir) / "template" / config["template"],
     output:
         warp=temp(
             bids(

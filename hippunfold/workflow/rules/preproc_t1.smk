@@ -92,7 +92,11 @@ rule warp_t1_to_corobl_crop:
             desc="affine",
             type_="itk",
         ),
-        template_dir=Path(download_dir) / "template" / config["template"],
+        ref=imported_template_file(
+            "template3d_crop",
+            tpl=config["template"],
+            suffix=crop_ref_suffix(config["template"]),
+        ),
     output:
         t1=temp(
             bids(
@@ -110,11 +114,6 @@ rule warp_t1_to_corobl_crop:
     resources:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(5),
-    params:
-        ref=lambda wildcards, input: Path(input.template_dir)
-        / config["template_files"][config["template"]]["crop_ref"].format(
-            **wildcards, modality="T1w"
-        ),
     shell:
         "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={threads} "
-        "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {params.ref}  -t {input.xfm}"
+        "antsApplyTransforms -d 3 --interpolation Linear -i {input.t1} -o {output.t1} -r {input.ref}  -t {input.xfm}"

@@ -452,10 +452,7 @@ def get_final_qc():
         )
     if (config["modality"] == "T1w") or (config["modality"] == "T2w"):
         if not config["use_template_seg"]:
-            template_cfg = config.get("template_files", {}).get(
-                config.get("template"), {}
-            )
-            if "Mask_crop" in template_cfg:
+            if has_template_file("template3d_mask", tpl=config["template"]):
                 qc.extend(
                     inputs[config["modality"]].expand(
                         bids(

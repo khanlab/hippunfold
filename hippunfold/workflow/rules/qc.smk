@@ -8,7 +8,9 @@ rule qc_reg_to_template:
             space=config["template"],
             desc="affine",
         ),
-        template_dir=Path(download_dir) / "template" / config["template"],
+        ref=imported_template_file(
+            "template3d", tpl=config["template"], suffix="{modality}"
+        ),
     output:
         png=report(
             bids(
@@ -28,12 +30,7 @@ rule qc_reg_to_template:
         mem_mb=scale_by_attempt(2000),
         runtime=scale_by_attempt(5),
     params:
-        ref=lambda wildcards, input: str(
-            Path(input.template_dir)
-            / config["template_files"][config["template"]][wildcards.modality].format(
-                **wildcards
-            )
-        ),
+        ref=lambda wildcards, input: input.ref,
     script:
         "../scripts/vis_regqc.py"
 
